@@ -1,0 +1,80 @@
+<?php
+$db = null;
+
+
+include 'kara_config.php';
+
+
+$l_filename=$_POST['filename'];
+$l_singer=$_POST['singer'];
+$l_freesinger=$_POST['freesinger'];
+$l_comment=$_POST['comment'];
+$l_kind=$_POST['kind'];
+
+if(!empty($l_freesinger)){
+$l_singer=$l_freesinger;
+}
+
+// print("${l_singer} さんの ${l_filename} を追加する予定。<br>");
+?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<META http-equiv="refresh" content="1; url=request.php">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>DB登録中</title>
+</head>
+<body>
+
+
+<?php
+
+try {
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind) VALUES (:fn, :sing, :comment, :kind )";
+    $stmt = $db->prepare($sql);
+} catch (PDOException $e) {
+	echo 'Connection failed: ' . $e->getMessage();
+}
+	if ($stmt === false ){
+		print("INSERT　 prepare 失敗しました。<br>");
+	}
+
+$arg = array(
+	':fn' => $l_filename,
+	':sing' => $l_singer,
+	':comment' => $l_comment,
+	':kind' => $l_kind);
+$ret = $stmt->execute($arg);
+if (! $ret ) {
+	print("${l_filename} を追加にしっぱいしました。");
+	die();
+}
+
+print("${l_filename} を追加しました。<br>");
+
+print("1秒後に登録ページに移動します<br>");
+
+?>
+
+<a href="request.php" > リクエストページに戻る <a><br>
+
+現在の登録状況<br>
+
+<?php
+$sql = "SELECT * FROM requesttable ORDER BY id DESC";
+try{
+    $select = $db->query($sql);
+
+    while($row = $select->fetch(PDO::FETCH_ASSOC)){
+	    echo implode("|", $row) . "\n<br>";
+    }
+
+    $db = null;
+
+}catch(PDOException $e) {
+		printf("Error: %s\n", $e->getMessage());
+		die();
+} 
+?>
+</body>
+</html>
+
