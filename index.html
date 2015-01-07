@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Karaokerequestorweb : 持ち込みカラオケを行う際に、カラオケ動画をブラウザ上でリクエストをするシステム。">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Karaokerequestorweb</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/bee7813993/KaraokeRequestorWeb">View on GitHub</a>
+
+          <h1 id="project_title">Karaokerequestorweb</h1>
+          <h2 id="project_tagline">持ち込みカラオケを行う際に、カラオケ動画をブラウザ上でリクエストをするシステム。</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/bee7813993/KaraokeRequestorWeb/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/bee7813993/KaraokeRequestorWeb/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="karaokerequestorweb" class="anchor" href="#karaokerequestorweb" aria-hidden="true"><span class="octicon octicon-link"></span></a>KaraokeRequestorWeb</h1>
+
+<p>持ち込みカラオケを行う際に、カラオケ動画をブラウザ上でリクエストをするシステム。</p>
+
+<h2>
+<a id="目的" class="anchor" href="#%E7%9B%AE%E7%9A%84" aria-hidden="true"><span class="octicon octicon-link"></span></a>目的</h2>
+
+<p>持ち込みカラオケを行う際に動画ファイルを入れたディスクを持ち寄ってカラオケ動画再生用PCに接続。
+参加者が手持ちの端末のブラウザから動画ファイルを検索しリクエストとして登録する。
+機材係がリクエストされた内容を確認できるようにする。</p>
+
+<h2>
+<a id="必要な環境" class="anchor" href="#%E5%BF%85%E8%A6%81%E3%81%AA%E7%92%B0%E5%A2%83" aria-hidden="true"><span class="octicon octicon-link"></span></a>必要な環境</h2>
+
+<ul>
+<li>Everything Search Engine ( <a href="http://www.voidtools.com/">http://www.voidtools.com/</a> )</li>
+<li>Web Server (nginx <a href="http://nginx.org/en/index.html">http://nginx.org/en/index.html</a> 等)</li>
+<li>PHP実行環境 ( <a href="http://php.net/">http://php.net/</a> )</li>
+</ul>
+
+<h2>
+<a id="使用するための準備機材係編" class="anchor" href="#%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B%E3%81%9F%E3%82%81%E3%81%AE%E6%BA%96%E5%82%99%E6%A9%9F%E6%9D%90%E4%BF%82%E7%B7%A8" aria-hidden="true"><span class="octicon octicon-link"></span></a>使用するための準備(機材係編)</h2>
+
+<ol>
+<li>「Everything Serach Engine」をセットアップ。
+対象となる動画ファイルだけを検索できるようにしておく。
+　　「検索データ-&gt;フォルダ」に対象となるドライブorフォルダ名を登録。(途中でディスクを追加した時もここに登録する)
+　　「検索データ-&gt;除外」の「検索対象を以下のファイルのみに制限する(I)」に動画ファイルの拡張子を登録して
+　　　動画ファイルのみが検索結果に表示されるようにする。
+　　　　設定例）*.mp4; *.avi; *.mkv; *.flv; *.mpg
+HTTPサーバ「HTTPサーバを有効」にチェック。
+HTTPサーバポート(H) に[81]をしてする。、</li>
+<li>PHPが動作するWebサーバーをセットアップする。
+　windows用nginxとWindows用phpを使用する場合。
+Point 
+  php.ini 内の extension=php_pdo_sqlite.dll のコメントを外す。
+　　nginx.conf内に以下の設定をする。
+---- ( start ) -----
+    location ~ .php$ {
+        fastcgi_pass   127.0.0.1:9123;
+        fastcgi_index  index.php;
+        fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        include        fastcgi_params;
+    }　　　
+---- ( end ) -----
+　以下のようなbatファイルで起動する。
+---- ( start ) -----
+cd php\
+start /b php-cgi.exe -b 127.0.0.1:9123 -c php.ini
+cd ..\nginx\
+start nginx.exe
+---- ( end ) -----</li>
+<li>本プロジェクトのphpファイルなど一式をhtmlルートに設置する。</li>
+<li>会場ではモバイルルータなどのネットワークをプライバシーセパレーターOFFの状態で公開し、
+　 参加者の端末と同じネットワークに接続する。</li>
+</ol>
+
+<p>1～3まで設定済みのものを</p>
+
+<h2>
+<a id="使用方法参加者編" class="anchor" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95%E5%8F%82%E5%8A%A0%E8%80%85%E7%B7%A8" aria-hidden="true"><span class="octicon octicon-link"></span></a>使用方法(参加者編)</h2>
+
+<p>手持ちの端末(WindowsでもAndoroidでもiPhoneでもOK)から、
+http://&lt;機材PCのIP&gt;/request.php
+にアクセスして使用する。</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Karaokerequestorweb maintained by <a href="https://github.com/bee7813993">bee7813993</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
