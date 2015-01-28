@@ -62,6 +62,9 @@ function formatBytes($bytes, $precision = 2, array $units = null)
   <input type="submit" value="検索">
   </form>
   and検索は+区切りでいけるっぽい。<br>
+  全件検索は*(半角)でいけるっぽい。<br><br>
+  歌手名とかゲーム名では見つからないことが多いので曲名での検索推奨<br>
+  曲名の検索は<a href="http://eroge.no-ip.org/search.html" TARGET="_blank"> Banditさんのページ </a>を使うと便利
 
   <?php
   	if ( empty ($word)){
@@ -87,15 +90,15 @@ print "<tbody>\n";
     		echo "<td>";
     		echo "<form action=\"request.php\" method=\"post\" >";
     		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
-    		echo "<input type=\"hidden\" name=\"fullpath\" id=\"fullpath\" value=\"". $v['path'] . "\\" . $v['name'] . "\" />";
     		echo "<input type=\"submit\" value=\"リクエスト\" />";
     		echo "</form>";
     		echo "</td>";
     		echo "<td>";
-        $previewpath = "http://" . $_SERVER["HTTP_HOST"] . ":81/" . $v['path'] . "/" . $v['name'];
-    		echo "<A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
     		echo $v['name'];
-    		echo " </A>";
+        $previewpath = "http://" . $_SERVER["HTTP_HOST"] . ":81/" . $v['path'] . "/" . $v['name'];
+    		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
+    		echo "プレビュー";
+    		echo " </A></Div>";
     		echo "</td>";
     		echo "<td>";
     		echo formatBytes($v['size']);
@@ -116,7 +119,15 @@ print "</tbody>\n";
 
   	}
   	?>
+<hr>
+歌手名やゲーム名から曲名を検索(banditさんのページ)<br>
+見つけた曲名を上の検索テキストボッスに移して検索してみてね。
 
+<iframe src="http://eroge.no-ip.org/search.html" width="95%" height="800">
+ブラウザが対応してないかもです。
+<a href="http://eroge.no-ip.org/search.html" TARGET="_blank" > こちら </a> のリンク先で検索できます。
+
+</iframe>
 
 </body>
 </html>
