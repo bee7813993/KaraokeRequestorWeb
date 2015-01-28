@@ -1,8 +1,15 @@
 <?php
 
 if(array_key_exists("filename", $_REQUEST)) {
-    $word = $_REQUEST["filename"];
+    $filename = $_REQUEST["filename"];
 }
+
+$fullpath = "";
+if(array_key_exists("fullpath", $_REQUEST)) {
+    $fullpath = $_REQUEST["fullpath"];
+}
+    
+
 
 include 'kara_config.php';
 ?>
@@ -91,10 +98,10 @@ function preventDefault(event)
     <div id="drop_area">ここにカラオケ動画ファイルをドロップしてファイル名を自動入力することができます。</div>
     <div id="disp_area">
     <?php
-    if (empty($word)){
+    if (empty($filename)){
       echo "ファイル名";
     }else{
-      echo $word;
+      echo $filename;
     }
     ?></div>
 </section>
@@ -124,11 +131,13 @@ output.push(escape(f.name));
 <tr>
 <td><input type="text" name="filename" id="filename" style="width:100%" value=
     <?php
-    if (empty($word)){
+    if (empty($filename)){
       echo "曲名";
     }else{
-      echo "\"$word\"";
-    } ?> /> </td>
+      echo "\"$filename\"";
+    } ?> /> 
+    <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo $fullpath; ?> />
+    </td>
 
 <?php
 $sql = "SELECT COUNT(DISTINCT singer) FROM requesttable ORDER BY id DESC";
@@ -209,7 +218,7 @@ print "<table border=\"2\">\n";
 print "<caption> 現在の登録状況 </caption>\n";
 print "<thead>\n";
 print "<tr>\n";
-print "<th>No. </th>\n";
+print "<th>再生状況 </th>\n";
 print "<th>ファイル名 </th>\n";
 print "<th>登録者 </th>\n";
 print "<th>コメント </th>\n";
@@ -221,7 +230,7 @@ print "<tbody>\n";
 while($row = $select->fetch(PDO::FETCH_ASSOC)){
 print "<tr>\n";
 print "<td>";
-print $row['id'];
+print $row['nowplaying'];
 print "</td>\n";
 print "<td>";
 print $row['songfile'];

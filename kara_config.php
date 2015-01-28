@@ -30,7 +30,9 @@ $sql = "create table IF NOT EXISTS requesttable (
  singer varchar(512), 
  comment text, 
  kind text,
- reqorder INTEGER
+ reqorder INTEGER,
+ fullpath text,
+ nowplaying text
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){

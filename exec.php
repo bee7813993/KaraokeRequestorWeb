@@ -10,6 +10,10 @@ $l_singer=$_POST['singer'];
 $l_freesinger=$_POST['freesinger'];
 $l_comment=$_POST['comment'];
 $l_kind=$_POST['kind'];
+$l_fullpath= "";
+if(array_key_exists("fullpath", $_REQUEST)) {
+    $l_fullpath = $_REQUEST["fullpath"];
+}
 
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
@@ -19,7 +23,7 @@ $l_singer=$l_freesinger;
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<META http-equiv="refresh" content="1; url=request.php">
+<!--- <META http-equiv="refresh" content="1; url=request.php"> --->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>DB登録中</title>
 </head>
@@ -29,7 +33,7 @@ $l_singer=$l_freesinger;
 <?php
 
 try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind) VALUES (:fn, :sing, :comment, :kind )";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying) VALUES (:fn, :sing, :comment, :kind, :fp, :np )";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -42,7 +46,10 @@ $arg = array(
 	':fn' => $l_filename,
 	':sing' => $l_singer,
 	':comment' => $l_comment,
-	':kind' => $l_kind);
+	':kind' => $l_kind,
+	':fp' => $l_fullpath,
+	':np' => "未再生"
+	);
 $ret = $stmt->execute($arg);
 if (! $ret ) {
 	print("${l_filename} を追加にしっぱいしました。");
