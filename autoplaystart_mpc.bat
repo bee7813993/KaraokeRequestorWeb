@@ -1,0 +1,1 @@
+..\..\php\php.exe -f manage-mpc.php
