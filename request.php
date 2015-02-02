@@ -20,11 +20,13 @@ include 'kara_config.php';
 <title>カラオケ動画リクエスト</title>
 <!-- <script type='text/javascript' src='jwplayer/jwplayer.js'></script> -->
 
+<script type="text/javascript" src="mpcctrl.js"></script>
+
 <style type="text/css">
 
 // script from http://proto.sabi-an.com/18/
 body { background-image: url(http://sabi-an.com/img/kamon.png); background-repeat: no-repeat; background-position: right top; }
-#drop_area { height:150px; padding:10px; border:3px solid; margin: 30px; }
+#drop_area { height:10px; padding:10px; border:3px solid; margin: 30px; font-size: small; }
 #disp_area { padding:10px; border:3px solid; margin: 30px; }
 .thumb { height: 75px; border: 1px solid #000; margin: 10px 5px 0 0; }
 </style>
@@ -92,7 +94,32 @@ function preventDefault(event)
 </head>
 <body>
 
+<div align="center" >
 <a href="search.php"> ファイル検索画面 </a>
+</div>
+<br />
+
+<div align="center" >
+現在の動作モード
+<?php
+     if($playmode == 1){
+     print ("自動再生開始モード: 自動で次の曲の再生を開始します。");
+     }elseif ($playmode == 2){
+     print ("手動再生開始モード: 再生開始を押すと、次の曲が始まります。(歌う人が押してね)");
+     }else{
+     print ("手動プレイリスト登録モード: 機材係が手動でプレイリストに登録しています。");
+     }
+?>
+</div>
+<br />
+
+<div align="center" >
+プレイヤーコントローラー
+<iframe src="mpcctrl.php" width="95%" height="100">
+ブラウザが対応してないかもです。
+
+</iframe>
+</div>
 
 <section>
     <div id="drop_area">ここにカラオケ動画ファイルをドロップしてファイル名を自動入力することができます。</div>
@@ -218,7 +245,14 @@ print "<table border=\"2\">\n";
 print "<caption> 現在の登録状況 </caption>\n";
 print "<thead>\n";
 print "<tr>\n";
-print "<th>再生状況 </th>\n";
+     if($playmode == 1){
+     print "<th>再生状況 </th>\n";
+     }elseif ($playmode == 2){
+     print "<th>再生状況 </th>\n";
+     }else{
+     print "<th>番号 </th>\n";
+     }
+
 print "<th>ファイル名 </th>\n";
 print "<th>登録者 </th>\n";
 print "<th>コメント </th>\n";
@@ -230,7 +264,40 @@ print "<tbody>\n";
 while($row = $select->fetch(PDO::FETCH_ASSOC)){
 print "<tr>\n";
 print "<td>";
-print $row['nowplaying'];
+     if($playmode == 1){
+     print $row['nowplaying']."<br />";
+print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
+print "<input type=\"hidden\" name=\"id\" value=\"";
+print $row['id'];
+print "\" />";
+print "<input type=\"hidden\" name=\"songfile\" value=\"";
+print $row['songfile'];
+print "\" />";
+print "<select name=\"nowplaying\">";
+print " <option value=\"未再生\" selected >未再生 </option>";
+print " <option value=\"再生済\">再生済 </option>";
+print "</select>";
+print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
+print "</form>";
+     }elseif ($playmode == 2){
+     print $row['nowplaying']."<br />";
+print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
+print "<input type=\"hidden\" name=\"id\" value=\"";
+print $row['id'];
+print "\" />";
+print "<input type=\"hidden\" name=\"songfile\" value=\"";
+print $row['songfile'];
+print "\" />";
+print "<select name=\"nowplaying\">";
+print " <option value=\"未再生\" selected >未再生 </option>";
+print " <option value=\"再生済\">再生済 </option>";
+print "</select>";
+print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
+print "</form>";
+     }else{
+     print $row['id'];
+     }
+
 print "</td>\n";
 print "<td>";
 print $row['songfile'];
@@ -249,6 +316,9 @@ print "<td>";
 print "<input type=\"hidden\" name=\"id\" value=\"";
 print $row['id'];
 print "\" />";
+print "<input type=\"hidden\" name=\"songfile\" value=\"";
+print $row['songfile'];
+print "\" />";
 print "<input type=\"submit\" name=\"delete\" value=\"削除\"/>";
 print "<input type=\"submit\" name=\"up\"     value=\"上へ\"/>";
 print "<input type=\"submit\" name=\"down\"   value=\"下へ\"/>";
@@ -265,7 +335,7 @@ $db = null;
 
 
 <form method="post" action="init.php">
-<input type="submit" value="初期化" />
+<input type="submit" value="設定" />
 </form>
 
 </body>

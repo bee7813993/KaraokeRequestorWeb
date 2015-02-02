@@ -15,7 +15,15 @@ while(1){
      $decode = json_decode($json, true);
      $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
      $filepath = mb_convert_encoding($filepath,"SJIS");
-     $execcmd="\"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+     if($playmode == 1){
+     $execcmd="start /w \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+     }elseif ($playmode == 2){
+     $execcmd="start /w \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+     }else{
+         print(" Debug : now auto play is off : $playmode\n");
+         sleep(30);
+         continue;
+     }
      print(" Debug : execcmd : $execcmd\n");
      $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
      $ret = $db->query($sql);

@@ -4,6 +4,7 @@ $configfile = 'config.ini';
 if(file_exists($configfile)){
     $config_ini = parse_ini_file($configfile);
     $dbname = $config_ini["dbname"];
+    $playmode = $config_ini["playmode"];
 } else {
     $fp = fopen($configfile, 'w');
     fclose($fp);
@@ -17,10 +18,18 @@ if(empty($dbname)){
     fclose($fp);
 }
 
+if(empty($playmode)){
+    $playmode = 3;
+    $config_ini = array_merge($config_ini,array("playmode" => $playmode));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+}
+
 try {
 	$db = new PDO('sqlite:'. $dbname);
 } catch(PDOException $e) {
-	printf("Error: %s\n", $e->getMessage());
+	printf("new PDO Error: %s\n", $e->getMessage());
 	die();
 } 
 
