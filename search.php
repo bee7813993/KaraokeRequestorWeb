@@ -66,6 +66,32 @@ function formatBytes($bytes, $precision = 2, array $units = null)
   歌手名とかゲーム名では見つからないことが多いので曲名での検索推奨<br>
   曲名の検索は<a href="http://eroge.no-ip.org/search.html" TARGET="_blank"> Banditさんのページ </a>を使うと便利
 
+  banditの隠れ家連携検索モード
+  (キーワードでbanditの隠れ家のサイトから曲名を検索し、その曲名でローカルにファイルがあるかを検索、網羅されてない新しい曲とか、特殊文字（★とか）が曲名に入っていると見つからない可能性があるので改めてファイル名検索してみて)
+  <br>
+  歌手名検索 
+  <form action="searchbandit.php" method="post" style="display: inline" />
+  <input type="text" name="searchword">
+  <input type="hidden" name="column" value="2" />
+  <input type="submit" value="検索">
+  </form>
+  <br />
+  ゲームタイトル検索 
+  <form action="searchbandit.php" method="post" style="display: inline"/>
+  <input type="text" name="searchword">
+  <input type="hidden" name="column" value="3" />
+  <input type="submit" value="検索">
+  </form>
+  <br />
+  ゲームブランド検索 
+  <form action="searchbandit.php" method="post" style="display: inline" />
+  <input type="text" name="searchword">
+  <input type="hidden" name="column" value="1" />
+  <input type="submit" value="検索">
+  </form>
+  <br />
+  
+
   <?php
   	if ( empty ($word)){
   		
