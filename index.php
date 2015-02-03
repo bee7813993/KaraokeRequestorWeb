@@ -1,3 +1,4 @@
 <?php
-  http_redirect("request.php");
+ header('location: request.php');
+ exit();
 ?>
