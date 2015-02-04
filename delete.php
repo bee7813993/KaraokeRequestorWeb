@@ -23,32 +23,41 @@ $tmpid=9999;
 function dbup($id, $db)
 {
 	global $tmpid;
- $nextid = $id + 1 ;
- $sql = "SELECT * FROM requesttable where id = $nextid ";
+// 対象のreqorderを取得
+$sql = "SELECT * FROM requesttable where id = $id ";
+$select = $db->query($sql);
+$row = $select->fetch(PDO::FETCH_ASSOC);
+$targetorder = $row['reqorder'];
+
+ $nextorder = $targetorder + 1 ;
+ 
+ 
+ $sql = "SELECT * FROM requesttable where reqorder = $nextorder ";
  $select = $db->query($sql);
  $row = $select->fetch(PDO::FETCH_ASSOC);
 
  if(  $row !== false ){
- $sql = "UPDATE requesttable set id = $tmpid WHERE id = $nextid ";
+ // 移動先のreqorder値の項目があったら
+ $sql = "UPDATE requesttable set reqorder = $tmpid WHERE reqorder = $nextorder ";
  $ret = $db->query($sql);
  if (! $ret ) {
-	print("${nextid} から 0 への移動にしっぱいしました。<br>");
+	print("$nextorder から $tmpid への移動にしっぱいしました。<br>");
 	die();
  }
- $sql = "UPDATE requesttable set id = $nextid WHERE id = $id ";
+ $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
  $ret = $db->query($sql);
  if (! $ret ) {
-	print("${id} から ${nextid} への移動にしっぱいしました。<br>");
+	print("${id} の $nextorder への移動にしっぱいしました。<br>");
 	die();
  }
- $sql = "UPDATE requesttable set id = $id WHERE id = $tmpid ";
+ $sql = "UPDATE requesttable set reqorder = $targetorder WHERE reqorder = $tmpid ";
  $ret = $db->query($sql);
  if (! $ret ) {
-	print("0 から ${id} への移動にしっぱいしました。<br>");
+	print("$tmpid から $targetorder への移動にしっぱいしました。<br>");
 	die();
  }
  }else{
- $sql = "UPDATE requesttable set id = $nextid WHERE id = $id ";
+ $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("${id} から $nextid への移動にしっぱいしました。<br>");
@@ -65,40 +74,51 @@ function dbup($id, $db)
 function dbdown($id, $db)
 {
 	global $tmpid;
- if ($id <= 1 ){
+
+
+// 対象のreqorderを取得
+$sql = "SELECT * FROM requesttable where id = $id ";
+$select = $db->query($sql);
+$row = $select->fetch(PDO::FETCH_ASSOC);
+$targetorder = $row['reqorder'];
+
+ $nextorder = $targetorder - 1 ;
+
+ if ($targetorder <= 1 ){
     print("すでに一番下<br>");
  }else{
+
  
- $nextid = $id - 1 ;
- $sql = "SELECT * FROM requesttable where id = $nextid ";
+ $sql = "SELECT * FROM requesttable where reqorder = $nextorder ";
  $select = $db->query($sql);
  $row = $select->fetch(PDO::FETCH_ASSOC);
 // var_dump($row);
  if(  $row !== false ){
- $sql = "UPDATE requesttable set id = $tmpid WHERE id = $nextid ";
+ // 移動先のreqorder値の項目があったら
+ $sql = "UPDATE requesttable set reqorder = $tmpid WHERE reqorder = $nextorder ";
  $ret = $db->query($sql);
  if (! $ret ) {
-	print("${nextid} から 0 への移動にしっぱいしました。<br>");
+	print("$targetorder から $tmpid  への移動にしっぱいしました。<br>");
 	die();
  }
- $sql = "UPDATE requesttable set id = $nextid WHERE id = $id ";
+ $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
  $ret = $db->query($sql);
  if (! $ret ) {
-	print("${id} から ${nextid} への移動にしっぱいしました。<br>");
+	print("${id} の $nextorder への移動にしっぱいしました。<br>");
 	die();
  }
- $sql = "UPDATE requesttable set id = $id WHERE id = $tmpid ";
+ $sql = "UPDATE requesttable set reqorder = $targetorder WHERE reqorder = $tmpid ";
  $ret = $db->query($sql);
  if (! $ret ) {
-	print("0 から ${id} への移動にしっぱいしました。<br>");
+	print("$tmpid から $targetorder への移動にしっぱいしました。<br>");
 	die();
  }
  }else{
- $sql = "UPDATE requesttable set id = $nextid WHERE id = $id ";
+ $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
  $stmt = $db->prepare($sql);
  $ret = $db->query($sql);
  if (! $ret ) {
-	print("${id} から $nextid への移動にしっぱいしました。<br>");
+	print("${id} の  $nextorder への移動にしっぱいしました。<br>");
 	die();
  }
  }

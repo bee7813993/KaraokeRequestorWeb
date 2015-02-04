@@ -8,6 +8,40 @@
 &nbsp; 
 <a href="request.php" >トップに戻る </a>
 <br />
+
+  <h3>banditの隠れ家連携検索モード </h3>
+  (キーワードでbanditの隠れ家のサイトから曲名を検索し、その曲名でローカルにファイルがあるかを検索)<br>
+  (banditさんに登録されてない曲は見つけられません。[新しめのマイナーな曲とか])<br>
+  (曲名の一部を含む別の曲とかも検索結果に出ちゃいます。ありがちな1単語の曲名だとたくさん結果に出てきてしまうので注意してね)<br>
+  (網羅されてない新しい曲とか、特殊文字（★とか）が曲名に入っていると見つからない可能性があるので改めてファイル名検索してみて)
+  
+  <br>
+  歌手名検索 
+  <form action="searchbandit.php" method="post" style="display: inline" />
+  <input type="text" name="searchword">
+  <input type="hidden" name="column" value="2" />
+  <input type="submit" value="検索">
+  </form>
+  <br />
+  ゲームタイトル検索 
+  <form action="searchbandit.php" method="post" style="display: inline"/>
+  <input type="text" name="searchword">
+  <input type="hidden" name="column" value="3" />
+  <input type="submit" value="検索">
+  </form>
+  <br />
+  ゲームブランド検索 
+  <form action="searchbandit.php" method="post" style="display: inline" />
+  <input type="text" name="searchword">
+  <input type="hidden" name="column" value="1" />
+  <input type="submit" value="検索">
+  </form>
+  <br />
+
+<hr />
+  <h3>検索結果 </h3>
+
+
 <?php
 
 if(array_key_exists("searchword", $_REQUEST)) {
@@ -20,6 +54,36 @@ if(array_key_exists("column", $_REQUEST)) {
 
 $everythinghost = $_SERVER["SERVER_NAME"];
 $everythinghost = 'localhost';
+
+/** あいまいな文字を+に置換する
+*/
+function replace_obscure_words($word)
+{
+  // 括弧削除 "/[ ]*\(.*?\)[ ]*/u";
+  $resultwords = preg_replace("/[ ]*\(.*?\)[ ]*/u",' ',$word);
+  // あいまい単語リスト
+  $obscure_list = array(
+                     "★",
+                     "☆",
+                     "？",
+                     "?",
+                     "×"
+                     );
+  // あいまい単語置換(スペースに)
+  $resultwords = str_replace($obscure_list,' ',$resultwords);
+
+  // 最後がスペースだったら取り除き
+  $resultwords = rtrim($resultwords);
+
+  // 単語が6文字以下の場合クォーテーションをつける
+  if(strlen($word) <= 6){
+      $resultwords = '"'.$resultwords.'"';
+  }
+  return $resultwords;
+  
+}
+
+
 
 /**
  * バイト数をフォーマットする
@@ -112,7 +176,7 @@ print "</tbody>\n";
 }
 
 
-// 歌手検索
+// bandit検索
 $arr = array('column' => $l_column ,  // 歌手
              'keyword' => utf8_encode($l_searchword) , 
              'method' => '1', // AND 
@@ -146,15 +210,17 @@ $songlist = json_decode($contents,true,4096);
 //var_dump($songlist["result"]);
 
 //echo $contents;
-
+$songnum = 0;
 foreach($songlist["result"] as $value){
-  echo $value["title"]."の検索結果 : ";
-  searchlocalfilename($value["title"],$result_a);
+  $songtitle = replace_obscure_words($value["title"]);
+  echo "<a name=\"song_".(string)$songnum."\">「".$songtitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
+  searchlocalfilename($songtitle,$result_a);
   echo $result_a["totalResults"]."件<br />";
-  if( $result_a["totalResults"] > 1) {
+  if( $result_a["totalResults"] >= 1) {
     printsonglists($result_a);
   }
 //  var_dump($result_a);
+  $songnum = $songnum + 1;
 }
 
 

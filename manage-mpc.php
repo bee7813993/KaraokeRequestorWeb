@@ -10,11 +10,21 @@ while(1){
     while($row = $select->fetch(PDO::FETCH_ASSOC)){
      $word=$row['songfile'];
      $l_id=$row['id'];
-     $jsonurl = "http://" . "localhost" . ":81/?search=" . $word . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-     $json = file_get_contents($jsonurl);
-     $decode = json_decode($json, true);
-     $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-     $filepath = mb_convert_encoding($filepath,"SJIS");
+     $l_fullpath=$row['fullpath'];
+print "Debug l_fullpath: $l_fullpath\r\n";
+     $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
+     if(file_exists($winfillpath )){
+         $filepath = $winfillpath;
+     }else{
+print "Debug word: $word\r\n";
+         $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+         print $jsonurl;
+         $json = file_get_contents($jsonurl);
+         $decode = json_decode($json, true);
+         $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+         $filepath = mb_convert_encoding($filepath,"SJIS");
+     }
+print "Debug filepath: $filepath\r\n";
      if($playmode == 1){
      $execcmd="start /w \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
      }elseif ($playmode == 2){

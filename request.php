@@ -163,7 +163,7 @@ output.push(escape(f.name));
     }else{
       echo "\"$filename\"";
     } ?> /> 
-    <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo $fullpath; ?> />
+    <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
     </td>
 
 <?php
@@ -235,7 +235,7 @@ print('<span style="visibility:hidden;">');
 
 print "<div align=\"center\">";
 
-$sql = "SELECT * FROM requesttable ORDER BY id DESC";
+$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
 $select = $db->query($sql);
 
 if($select !== false ){
@@ -258,6 +258,7 @@ print "<th>登録者 </th>\n";
 print "<th>コメント </th>\n";
 print "<th>再生方法 </th>\n";
 print "<th>アクション </th>\n";
+print "<th>変更 </th>\n";
 print "</tr>\n";
 print "<tbody>\n";
 
@@ -322,6 +323,17 @@ print "\" />";
 print "<input type=\"submit\" name=\"delete\" value=\"削除\"/>";
 print "<input type=\"submit\" name=\"up\"     value=\"上へ\"/>";
 print "<input type=\"submit\" name=\"down\"   value=\"下へ\"/>";
+print "</td>\n";
+print "</form>";
+print "<td>";
+print "<form method=\"post\" action=\"change.php\">";
+print "<input type=\"hidden\" name=\"id\" value=\"";
+print $row['id'];
+print "\" />";
+print "<input type=\"hidden\" name=\"songfile\" value=\"";
+print $row['songfile'];
+print "\" />";
+print "<input type=\"submit\" name=\"変更\"   value=\"変更\"/>";
 print "</td>\n";
 print "</form>";
 print "</tr>\n";

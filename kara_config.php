@@ -41,7 +41,8 @@ $sql = "create table IF NOT EXISTS requesttable (
  kind text,
  reqorder INTEGER,
  fullpath text,
- nowplaying text
+ nowplaying text,
+ status text
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){
