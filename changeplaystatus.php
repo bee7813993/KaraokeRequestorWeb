@@ -27,7 +27,7 @@ $db = null;
 include 'kara_config.php';
 
 
-$sql = "UPDATE requesttable set nowplaying = \"$l_nowplaying\" WHERE id = $l_id AND songfile = \"$l_songfile\"";
+$sql = "UPDATE requesttable set nowplaying = \"$l_nowplaying\" WHERE id = $l_id ";
 print $sql;
  $stmt = $db->prepare($sql);
  $ret = $db->query($sql);

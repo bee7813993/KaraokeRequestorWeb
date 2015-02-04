@@ -117,7 +117,7 @@ function preventDefault(event)
 プレイヤーコントローラー
 <iframe src="mpcctrl.php" width="95%" height="100">
 ブラウザが対応してないかもです。
-
+<a href="mpcctrl.php" >こちらのリンク先</a>を使ってみてください。
 </iframe>
 </div>
 
@@ -250,7 +250,7 @@ print "<tr>\n";
      }elseif ($playmode == 2){
      print "<th>再生状況 </th>\n";
      }else{
-     print "<th>番号 </th>\n";
+     print "<th>順番 </th>\n";
      }
 
 print "<th>ファイル名 </th>\n";
@@ -296,7 +296,7 @@ print "</select>";
 print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
 print "</form>";
      }else{
-     print $row['id'];
+     print $row['reqorder'];
      }
 
 print "</td>\n";
