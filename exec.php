@@ -33,7 +33,7 @@ $l_singer=$l_freesinger;
 <?php
 
 try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying) VALUES (:fn, :sing, :comment, :kind, :fp, :np )";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status )";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -48,13 +48,30 @@ $arg = array(
 	':comment' => $l_comment,
 	':kind' => $l_kind,
 	':fp' => $l_fullpath,
-	':np' => "未再生"
+	':np' => "未再生",
+	':status' => 'new'
 	);
 $ret = $stmt->execute($arg);
 if (! $ret ) {
 	print("${l_filename} を追加にしっぱいしました。");
 	die();
 }
+
+$sql = "SELECT * FROM requesttable where status = 'new' ORDER BY id DESC";
+try {
+    print $sql.'<br />';
+    $select = $db->query($sql);
+    while($row = $select->fetch(PDO::FETCH_ASSOC)){
+    $newid=$row['id'];
+    $sql_u = 'UPDATE requesttable set reqorder = '. $newid . ', status = \'OK\' WHERE id = '. $newid;
+    print $sql_u.'<br />';
+    $ret = $db->query($sql_u);
+    }
+
+} catch (PDOException $e) {
+	echo 'Connection failed: ' . $e->getMessage();
+}
+
 
 print("${l_filename} を追加しました。<br>");
 
