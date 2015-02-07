@@ -26,13 +26,16 @@ if(empty($playmode)){
     fclose($fp);
 }
 
+
+function initdb(&$db,$dbname)
+{
+
 try {
 	$db = new PDO('sqlite:'. $dbname);
 } catch(PDOException $e) {
 	printf("new PDO Error: %s\n", $e->getMessage());
 	die();
 } 
-
 $sql = "create table IF NOT EXISTS requesttable (
  id INTEGER PRIMARY KEY AUTOINCREMENT, 
  songfile  varchar(1024), 
@@ -49,5 +52,11 @@ if ($stmt === false ){
 	print("Create table é∏îsÇµÇ‹ÇµÇΩÅB<br>");
 	die();
 }
+ return($db);
+
+}
+
+initdb($db,$dbname);
+
 ?>
 

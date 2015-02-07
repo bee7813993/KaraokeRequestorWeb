@@ -1,6 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<META http-equiv="refresh" content="60"; url=request.php">
+<META http-equiv="refresh" content="1; url=request.php">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>1項目移動・削除</title>
 </head>

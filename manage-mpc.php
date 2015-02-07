@@ -3,7 +3,46 @@ include 'kara_config.php';
 
 $MPCPATH="C:\Program Files (x86)\MPC-BE\mpc-be.exe";
 
+$MPCSTATURL='http://localhost:13579/info.html';
+
+function runningcheck(){
+
+   global $MPCSTATURL;
+   // get MPC status
+   $exit = 1;
+   while($exit == 1)
+   {
+       $mpcstat = file_get_contents($MPCSTATURL);
+       if( $mpcstat === FALSE) {
+           print("maybe stop player\n");
+           break;
+       }   
+       $mpsctat_array = explode('&bull', $mpcstat );
+       // var_dump($mpsctat_array);
+       $etime_a =  explode('/', trim($mpsctat_array[2], ' ;') );
+       // var_dump($etime_a);
+       $playtime_a =  explode(':', $etime_a[0] );
+       $totaltime_a =  explode(':', $etime_a[1] );
+       $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
+       $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
+       if($playtime > ($totaltime - 2) )
+         break;
+       print $mpsctat_array[2];
+       echo ', ';
+       print $playtime;
+       echo ':';
+       print $totaltime;
+       echo "\n";
+
+       sleep(2);
+   }
+}
+
+
 while(1){
+    
+    $played = 5;  // 5:no next song wait sec. 1: played and next song wait sec.
+    
     $sql = "SELECT * FROM requesttable  WHERE nowplaying = '未再生' ORDER BY id ASC ";
     $select = $db->query($sql);
     
@@ -11,6 +50,7 @@ while(1){
      $word=$row['songfile'];
      $l_id=$row['id'];
      $l_fullpath=$row['fullpath'];
+     $select->closeCursor();
 print "Debug l_fullpath: $l_fullpath\r\n";
      $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
      if(file_exists($winfillpath )){
@@ -26,7 +66,7 @@ print "Debug word: $word\r\n";
      }
 print "Debug filepath: $filepath\r\n";
      if($playmode == 1){
-     $execcmd="start /w \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+     $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
      }elseif ($playmode == 2){
      $execcmd="start /w \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
      }else{
@@ -35,15 +75,26 @@ print "Debug filepath: $filepath\r\n";
          continue;
      }
      print(" Debug : execcmd : $execcmd\n");
+
+//     initdb($db,$dbname);
+     
+     $db->beginTransaction();
      $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
-     $ret = $db->query($sql);
+     $ret = $db->exec($sql);
 if (! $ret ) {
 	print("再生中 への変更にしっぱいしました。<br>");
 }
+     $db->commit();
+//     $db=null;
+     sleep(1);
      exec($execcmd);
+     runningcheck();
+     
+//     initdb($db,$dbname);
+     
      $sql = "UPDATE requesttable set nowplaying = \"再生済\" WHERE nowplaying = \"再生中\" AND songfile = '$word' ";
 //     $sql = "UPDATE requesttable set nowplaying = \"未再生\" WHERE nowplaying = \"再生中\" AND songfile = '$word' ";
-     $ret = $db->query($sql);
+     $ret = $db->exec($sql);
  if (! $ret ) {
 	print("再生済への変更にしっぱいしました。<br>");
  }
@@ -52,12 +103,17 @@ if (! $ret ) {
 if (! $ret ) {
 	print("再生済？ への変更にしっぱいしました。<br>");
 }
+//     $db=null;
+//     sleep(1);
+    $played=1;
+
      break;
     }
     
+    if( $played === 5)
+    print("no next song, waiting...<br>\n");
 
-
-    sleep(5);
+    sleep($played);
 //     break;
 
 }
