@@ -53,7 +53,7 @@ if(array_key_exists("column", $_REQUEST)) {
 }
 
 $everythinghost = $_SERVER["SERVER_NAME"];
-$everythinghost = 'localhost';
+//$everythinghost = 'localhost';
 
 /** あいまいな文字を+に置換する
 */

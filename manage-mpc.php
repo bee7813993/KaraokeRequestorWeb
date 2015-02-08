@@ -12,11 +12,20 @@ function runningcheck(){
    $exit = 1;
    while($exit == 1)
    {
+       // MPCの状態取得3回チャレンジする
+       for($loopcount = 0 ; $loopcount < 3 ; $loopcount ++){
        $mpcstat = file_get_contents($MPCSTATURL);
        if( $mpcstat === FALSE) {
+           sleep(1);
+           continue;
+       }else{
+           break;
+       }
+       }
+       if($loopcount === 3){
            print("maybe stop player\n");
            break;
-       }   
+       }
        $mpsctat_array = explode('&bull', $mpcstat );
        // var_dump($mpsctat_array);
        $etime_a =  explode('/', trim($mpsctat_array[2], ' ;') );
@@ -25,7 +34,7 @@ function runningcheck(){
        $totaltime_a =  explode(':', $etime_a[1] );
        $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
-       if($playtime > ($totaltime - 2) )
+       if($playtime > ($totaltime - 4) )
          break;
        print $mpsctat_array[2];
        echo ', ';
@@ -43,7 +52,7 @@ while(1){
     
     $played = 5;  // 5:no next song wait sec. 1: played and next song wait sec.
     
-    $sql = "SELECT * FROM requesttable  WHERE nowplaying = '未再生' ORDER BY id ASC ";
+    $sql = "SELECT * FROM requesttable  WHERE nowplaying = '未再生' ORDER BY reqorder ASC ";
     $select = $db->query($sql);
     
     while($row = $select->fetch(PDO::FETCH_ASSOC)){
