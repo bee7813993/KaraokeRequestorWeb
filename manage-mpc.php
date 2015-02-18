@@ -1,7 +1,12 @@
 <?php
 include 'kara_config.php';
 
-$MPCPATH="C:\Program Files (x86)\MPC-BE\mpc-be.exe";
+
+if(empty($playerpath)){
+    $MPCPATH="C:\Program Files (x86)\MPC-BE\mpc-be.exe";
+}else{
+    $MPCPATH=$playerpath;
+}
 
 $MPCSTATURL='http://localhost:13579/info.html';
 
@@ -12,6 +17,7 @@ function runningcheck(){
    $exit = 1;
    while($exit == 1)
    {
+       
        // MPCの状態取得3回チャレンジする
        for($loopcount = 0 ; $loopcount < 3 ; $loopcount ++){
        $org_timeout = ini_get('default_socket_timeout');
@@ -77,6 +83,14 @@ print "Debug word: $word\r\n";
          $filepath = mb_convert_encoding($filepath,"SJIS");
      }
 print "Debug filepath: $filepath\r\n";
+       //config 再読込
+       readconfig($dbname,$playmode,$playerpath);
+       if(! empty($playerpath)){
+          $MPCPATH = $playerpath;
+       }
+       
+
+
      if($playmode == 1){
      $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
      }elseif ($playmode == 2){
@@ -88,16 +102,14 @@ print "Debug filepath: $filepath\r\n";
      }
      print(" Debug : execcmd : $execcmd\n");
 
-//     initdb($db,$dbname);
      
      $db->beginTransaction();
      $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
      $ret = $db->exec($sql);
-if (! $ret ) {
-	print("再生中 への変更にしっぱいしました。<br>");
-}
+     if (! $ret ) {
+     	print("再生中 への変更にしっぱいしました。<br>");
+     }
      $db->commit();
-//     $db=null;
      sleep(1);
      exec($execcmd);
      sleep(2); // Player 起動待ち

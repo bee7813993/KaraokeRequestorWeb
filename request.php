@@ -352,6 +352,7 @@ $db = null;
 
 <form method="post" action="init.php">
 <input type="submit" value="設定" />
+<a href="/toolinfo.php" > 接続情報表示 </a>
 </form>
 
 </body>

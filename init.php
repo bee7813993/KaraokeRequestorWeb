@@ -8,6 +8,15 @@ if(array_key_exists("playmode", $_REQUEST)) {
     $newplaymode = $_REQUEST["playmode"];
 }
 
+if(array_key_exists("playerpath_any", $_REQUEST)) {
+    $newplayerpath = $_REQUEST["playerpath_any"];
+    echo "set newplayerpath from any".$newplayerpath."\n";
+    if(empty($newplayerpath)){
+        $newplayerpath = $_REQUEST["playerpath"];
+        echo "set newplayerpath from tmpl".$newplayerpath."\n";
+    }    
+}
+
 include 'kara_config.php';
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -40,6 +49,15 @@ if (! empty($newplaymode)){
     print "動作モードを".$playmode."に変更しました。<br><br>";
 }
 
+if (! empty($newplayerpath)){
+    $playerpath = $newplayerpath;
+    $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "MPCのPATHを".$playerpath."に変更しました。<br><br>";
+}
+
 ?>
  
 現在のDBファイル名 : 
@@ -50,6 +68,11 @@ print $dbname;
 現在の動作モード(1: 自動再生開始モード, 2: 手動再生開始モード, 3: 手動プレイリスト登録モード ) : 
 <?php
 print $playmode;
+?>
+<br>
+現在のMediaPlayerClassic PATH :
+<?php
+print $playerpath;
 ?>
 
 <br>
@@ -69,6 +92,20 @@ print $playmode;
 </select>
 <input type="submit" value="OK" />
 </form>
+
+MediaPlayerClassic PATH設定　
+<form method="post" action="init.php">
+<select name="playerpath" id="playerpath" >  
+<option value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
+<option value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
+</select>
+任意のPATH選択 :
+<input type="text" name="playerpath_any" size="100" class="playerpath_any" />
+<input type="submit" value="OK" />
+</form>
+
+
+
 <a href="request.php" > リクエスト画面に戻る　</a>
 
 </body>

@@ -1,31 +1,49 @@
 <?php
 $configfile = 'config.ini';
+$config_ini = array ();
 
-if(file_exists($configfile)){
-    $config_ini = parse_ini_file($configfile);
-    $dbname = $config_ini["dbname"];
-    $playmode = $config_ini["playmode"];
-} else {
-    $fp = fopen($configfile, 'w');
-    fclose($fp);
+function readconfig(&$dbname,&$playmode,&$playerpath){
+
+    global $configfile;
+    global $config_ini;
+
+    if(file_exists($configfile)){
+        $config_ini = parse_ini_file($configfile);
+    //    var_dump($config_ini);
+        $dbname = $config_ini["dbname"];
+        $playmode = $config_ini["playmode"];
+        $playerpath = urldecode($config_ini["playerpath"]);
+    } else {
+        $fp = fopen($configfile, 'w');
+        fclose($fp);
+    }
+
+    if(empty($dbname)){
+        $dbname = 'request.db';
+        $config_ini = array_merge($config_ini,array("dbname" => $dbname));
+        $fp = fopen($configfile, 'w');
+        foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+        fclose($fp);
+    }
+
+    if(empty($playmode)){
+        $playmode = 3;
+        $config_ini = array_merge($config_ini,array("playmode" => $playmode));
+        $fp = fopen($configfile, 'w');
+        foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+        fclose($fp);
+    }
+
+    if(empty($playerpath)){
+        $playerpath = 'C:\Program Files (x86)\MPC-BE\mpc-be.exe';
+        $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
+        $fp = fopen($configfile, 'w');
+        foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+        fclose($fp);
+    }
+//    $playerpath = "'".$playerpath."'";
+    //var_dump($config_ini);
 }
-
-if(empty($dbname)){
-    $dbname = 'request.db';
-    $config_ini = array_merge($config_ini,array("dbname" => $dbname));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
-}
-
-if(empty($playmode)){
-    $playmode = 3;
-    $config_ini = array_merge($config_ini,array("playmode" => $playmode));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
-}
-
 
 function initdb(&$db,$dbname)
 {
@@ -56,6 +74,7 @@ if ($stmt === false ){
 
 }
 
+readconfig($dbname,$playmode,$playerpath);
 initdb($db,$dbname);
 
 ?>

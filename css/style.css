@@ -1,4 +1,10 @@
 body	{
 	background-color:lightblue;
 }
+input.toolinfo {
+	font-size: xx-large;
+}
+div.toolinfo {
+	font-size: xx-large;
+}
 
