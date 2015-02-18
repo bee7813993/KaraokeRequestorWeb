@@ -1,7 +1,10 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
 <title>bandit検索モード検索結果</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 <a href="search.php" >通常検索に戻る </a>

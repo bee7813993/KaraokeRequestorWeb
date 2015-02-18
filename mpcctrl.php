@@ -1,7 +1,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
 <title>MediaPlayerClassic コントローラー</title>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
 <script type="text/javascript" src="mpcctrl.js"></script>
 </head>
 <body>

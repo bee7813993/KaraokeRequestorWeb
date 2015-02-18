@@ -7,12 +7,15 @@ if(array_key_exists("searchword", $_REQUEST)) {
 ?>
 <html>
 <head>
-  <script type="text/javascript" src="path/to/jquery.js"></script>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
   <script type="text/javascript">
 
-  ?>
     // ここに処理を記述します。
   </script>
+  <title>動画検索TOP</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
