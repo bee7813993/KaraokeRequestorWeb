@@ -94,7 +94,7 @@ print "Debug filepath: $filepath\r\n";
      if($playmode == 1){
      $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
      }elseif ($playmode == 2){
-     $execcmd="start /w \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+     $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
      }else{
          print(" Debug : now auto play is off : $playmode\n");
          sleep(30);

@@ -119,7 +119,7 @@ function preventDefault(event)
 
 <div align="center" >
 プレイヤーコントローラー
-<iframe src="mpcctrl.php" width="95%" height="100">
+<iframe src="mpcctrl.php"  class="pcarea" >
 ブラウザが対応してないかもです。
 <a href="mpcctrl.php" >こちらのリンク先</a>を使ってみてください。
 </iframe>

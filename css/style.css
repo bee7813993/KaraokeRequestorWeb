@@ -7,4 +7,17 @@ input.toolinfo {
 div.toolinfo {
 	font-size: xx-large;
 }
+.playstart {
+	width: 80%;
+	height: 40px;
+}
 
+.pcbuttom {
+	height: 30px;
+}
+
+
+.pcarea {
+    width: 95%;
+    height: 220px;
+}
