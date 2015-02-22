@@ -98,9 +98,9 @@ MediaPlayerClassic PATH設定　
 <select name="playerpath" id="playerpath" >  
 <option value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
 <option value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
-</select>
+</select><br />
 任意のPATH選択 :
-<input type="text" name="playerpath_any" size="100" class="playerpath_any" />
+<input type="text" name="playerpath_any" size="100" class="playerpath_any" /><br />
 <input type="submit" value="OK" />
 </form>
 
