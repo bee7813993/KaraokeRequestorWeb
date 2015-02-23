@@ -4,6 +4,13 @@ if(array_key_exists("searchword", $_REQUEST)) {
     $word = $_REQUEST["searchword"];
 }
 
+
+if(array_key_exists("order", $_REQUEST)) {
+    $l_order = $_REQUEST["order"];
+}else{
+    $l_order = 'sort=size&ascending=0';
+}
+
 ?>
 <html>
 <head>
@@ -61,8 +68,35 @@ function formatBytes($bytes, $precision = 2, array $units = null)
 ?>
 
   <form action="search.php" method="post">
-  <input type="text" name="searchword">
+  <table>
+  <tr>
+  <td> 検索ワード(ファイル名)</td>
+  <td> 結果表示順</td>
+  </tr>
+  <tr>
+  <td>
+  <input type="text" name="searchword"
+  <?php
+     if(!empty ($word)){
+     print 'value="' . $word . '"';
+     }
+  ?>
+  >
+  <td>
+  <select name="order">
+  <option value="sort=size&ascending=0" selected >サイズ順(大きい順)</option>
+  <option value="sort=path&ascending=1">フォルダ名(昇順)</option>
+  <option value="sort=path&ascending=0">フォルダ名(降順)</option>
+  <option value="sort=name&ascending=1">ファイル名(昇順)</option>
+  <option value="sort=name&ascending=0">ファイル名(降順)</option>
+  <option value="sort=date_modified&ascending=1">日付(昇順)</option>
+  <option value="sort=date_modified&ascending=0">日付(降順)</option>
+  </select>
+  </td>
+  </tr>
   <input type="submit" value="検索">
+  </table>
+
   </form>
   and検索は スペース 区切りでいけるっぽい。<br>
   全件検索は*(半角)でいけるっぽい。<br><br>
@@ -72,7 +106,7 @@ function formatBytes($bytes, $precision = 2, array $units = null)
   	if ( empty ($word)){
   		
   	}else {
-  		$jsonurl = "http://" . $_SERVER["SERVER_NAME"] . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+  		$jsonurl = "http://" . $_SERVER["SERVER_NAME"] . ":81/?search=" . urlencode($word) . "&" . $l_order . "&path=1&path_column=3&size_column=4&json=1";
   		// echo $jsonurl;
   		$json = file_get_contents($jsonurl);
   		$decode = json_decode($json, true);
