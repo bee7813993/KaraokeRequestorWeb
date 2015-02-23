@@ -94,8 +94,8 @@ function formatBytes($bytes, $precision = 2, array $units = null)
   </select>
   </td>
   </tr>
-  <input type="submit" value="検索">
   </table>
+  <input type="submit" value="検索">
 
   </form>
   and検索は スペース 区切りでいけるっぽい。<br>
