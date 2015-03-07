@@ -132,6 +132,31 @@ try{
         echo '</td>';
         echo '</tr>';
         
+
+        echo '<tr>';
+        echo '<td>';
+        echo 'IP';
+        echo '</td>';
+        echo '<td>';
+        echo '<input type="text" name="status" id="status" value="';
+        echo $row['clientip'];
+        echo '" />';
+        echo '</td>';
+        echo '</tr>';
+
+        echo '<tr>';
+        echo '<td>';
+        echo 'UserAgent';
+        echo '</td>';
+        echo '<td>';
+        echo '<input type="text" name="status" id="status" value="';
+        echo $row['clientua'];
+        echo '" />';
+        echo '</td>';
+        echo '</tr>';
+
+
+
         echo '</table>';
         print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
         echo '</form>';
