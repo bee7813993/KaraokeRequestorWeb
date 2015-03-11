@@ -74,7 +74,7 @@ request.send("");
 //On/Off Subtitle 955
 function song_subtitleonnoff(){
 var request = createXMLHttpRequest();
-url=playerurl + "?wm_command=955";
+url=playerurl + "?wm_command=956";
 request.open("GET", url, true);
 request.send("");
 }
@@ -95,12 +95,30 @@ request.open("GET", url, true);
 request.send("");
 }
 
+function song_audiodelay_m100(){
+var request = createXMLHttpRequest();
+url=playerurl + "?wm_command=906";
+for(i = 0; i < 10; i = i + 1) {
+  request.open("GET", url, true);
+  request.send("");
+}
+}
+
 // Audio Delay +10ms 905
 function song_audiodelay_p10(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=905";
 request.open("GET", url, true);
 request.send("");
+}
+
+function song_audiodelay_p100(){
+var request = createXMLHttpRequest();
+url=playerurl + "?wm_command=905";
+for(i = 0; i < 10; i = i + 1) {
+  request.open("GET", url, true);
+  request.send("");
+}
 }
 
 

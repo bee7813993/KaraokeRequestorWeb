@@ -49,7 +49,7 @@ $arg = array(
 	':kind' => $l_kind,
 	':fp' => $l_fullpath,
 	':np' => "未再生",
-	':status' => 'new' ,
+	':status' => 'new',
 	':ip' => $_SERVER['REMOTE_ADDR'],
 	':ua' => $_SERVER['HTTP_USER_AGENT']
 	);

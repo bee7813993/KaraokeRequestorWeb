@@ -10,13 +10,22 @@ if(empty($playerpath)){
 
 $MPCSTATURL='http://localhost:13579/info.html';
 
-function runningcheck(){
+function runningcheck($db,$id){
 
    global $MPCSTATURL;
    // get MPC status
    $exit = 1;
    while($exit == 1)
    {
+       // db statusを確認
+       $sql = "SELECT nowplaying FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+       $select = $db->query($sql);
+       $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
+       $select->closeCursor();
+       //var_dump($currentstatus);
+       if( $currentstatus[0]['nowplaying'] === '停止中' ){
+           break;
+       }
        
        // MPCの状態取得3回チャレンジする
        for($loopcount = 0 ; $loopcount < 3 ; $loopcount ++){
@@ -113,11 +122,11 @@ print "Debug filepath: $filepath\r\n";
      sleep(1);
      exec($execcmd);
      sleep(2); // Player 起動待ち
-     runningcheck();
+     runningcheck($db,$l_id);
      
 //     initdb($db,$dbname);
      
-     $sql = "UPDATE requesttable set nowplaying = \"再生済\" WHERE nowplaying = \"再生中\" AND songfile = '$word' ";
+     $sql = "UPDATE requesttable set nowplaying = \"再生済\" WHERE id = $l_id ";
 //     $sql = "UPDATE requesttable set nowplaying = \"未再生\" WHERE nowplaying = \"再生中\" AND songfile = '$word' ";
      $ret = $db->exec($sql);
  if (! $ret ) {

@@ -12,6 +12,12 @@ if(array_key_exists("fullpath", $_REQUEST)) {
 
 
 include 'kara_config.php';
+
+$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
+$select = $db->query($sql);
+$allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+$select->closeCursor();
+
 ?>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -98,6 +104,7 @@ function preventDefault(event)
 </head>
 <body>
 
+
 <div align="center" >
 <a href="search.php"> ファイル検索画面 </a>
 </div>
@@ -171,38 +178,70 @@ output.push(escape(f.name));
     </td>
 
 <?php
-$sql = "SELECT COUNT(DISTINCT singer) FROM requesttable ORDER BY id DESC";
-$select = $db->query($sql);
-if( $select !== false ){
-$num_all=$select->fetchColumn();
-}else{
-print ("SELECT COUNT FAILED" );
+function pickupsinger($rt)
+{
+   $singerlist = array();
+   foreach($rt as $row)
+   {
+       $foundflg = 0;
+       foreach($singerlist as $esinger ){
+           if( $esinger === $row['singer']){
+               $foundflg = 1;
+               break;
+           }
+       }
+       if($foundflg === 0){
+           $singerlist[] = $row['singer'];
+       }
+   }
+   
+   return $singerlist;
 }
+
+function selectedcheck($rt,$singer){
+    $rt_i = array_reverse($rt);
+    foreach($rt_i as $row){
+        if($row['singer'] === $singer){
+          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
+            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
+                return TRUE;
+            }
+          }
+        }
+    }
+    
+//    $singerlist = pickupsinger($rt);
+//    if ($singerlist[count($singerlist) - 1] === $singer )
+//        return TRUE;
+    return FALSE;
+}
+
+
 ?>
 
 <td Align="right">
 
 <select name="singer" onchange="check(this.form)" onfocus="check(this.form)" id="singer">
-<option value="0">新規入力⇒
+<option value="0">新規入力⇒</option>
 
 <?php
-$sql = "SELECT DISTINCT singer FROM requesttable ORDER BY id DESC";
-$select = $db->query($sql);
 $num = 1;
-if( $select !== false ){
-while($row = $select->fetch(PDO::FETCH_ASSOC))
+
+$selectedcounter = 0;
+$singerlist = pickupsinger($allrequest);
+foreach($singerlist as $singer){
 {
   print "<option value=\"";
-  print $row['singer'];
+  print $singer;
   print "\"";
-  if( $num == $num_all) 
+  if( selectedcheck($allrequest,$singer) && $selectedcounter === 0 ) 
   {
       print " selected ";
+      $selectedcounter = $selectedcounter + 1 ;
   }
   print "> ";
-  print $row['singer'];
-  print "\n";
-  $num = $num + 1;
+  print $singer;
+  print "</option>";
 }
 }
 
@@ -212,7 +251,7 @@ while($row = $select->fetch(PDO::FETCH_ASSOC))
 </td>
 <td>
 <?php
-if($num_all == 0){
+if($selectedcounter === 0){
 print('<span style="visibility:visible;">');
 }else{
 print('<span style="visibility:hidden;">');
@@ -239,10 +278,8 @@ print('<span style="visibility:hidden;">');
 
 print "<div align=\"center\">";
 
-$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
-$select = $db->query($sql);
 
-if($select !== false ){
+if(!count($allrequest) == 0 ){
 
 
 print "<table border=\"2\">\n";
@@ -266,7 +303,7 @@ print "<th>変更 </th>\n";
 print "</tr>\n";
 print "<tbody>\n";
 
-while($row = $select->fetch(PDO::FETCH_ASSOC)){
+foreach($allrequest as  $row) {
 print "<tr>\n";
 print "<td>";
      if($playmode == 1){
