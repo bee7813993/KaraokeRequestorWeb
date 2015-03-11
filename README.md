@@ -18,3 +18,7 @@ KaraokeRequestorWeb
 http://bee7813993.github.io/KaraokeRequestorWeb/
 を参照
 
+最初のセットアップがそこそこ面倒なことが分かったので、
+簡単にセットアップツールができるまで、Windowsのリモートアシスタンスでセットアップのお手伝いをしようと思います。
+何らかの方法(twitter,mixi,facebookなど)で私に連絡を取ってもらえればお手伝いしますのでご連絡お待ちしています。
+
