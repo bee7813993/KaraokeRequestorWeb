@@ -100,7 +100,7 @@ var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=906";
 for(i = 0; i < 10; i = i + 1) {
   request.open("GET", url, true);
-  request.send("");
+  sleep(100, song_audiodelay_m10());
 }
 }
 
@@ -117,7 +117,7 @@ var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=905";
 for(i = 0; i < 10; i = i + 1) {
   request.open("GET", url, true);
-  request.send("");
+  sleep(100, song_audiodelay_p10);
 }
 }
 

@@ -1,14 +1,16 @@
 <?php
+//setlocale(LC_ALL, 'ja_JP.Shift_JIS');
+date_default_timezone_set('Asia/Tokyo');
 include 'kara_config.php';
 require_once("getid3/getid3.php");
 
 if(empty($playerpath)){
-    $MPCPATH="C:\Program Files (x86)\MPC-BE\mpc-be.exe";
+    $MPCPATH='C:\Program Files (x86)\MPC-BE\mpc-be.exe';
 }else{
     $MPCPATH=$playerpath;
 }
 
-$FOOBARPATH="C:\Program Files (x86)\foobar2000\foobar2000.exe";
+$FOOBARPATH='C:\Program Files (x86)\foobar2000\foobar2000.exe';
 
 $MPCSTATURL='http://localhost:13579/info.html';
 $MPCCMDURL='http://localhost:13579/command.html';
@@ -33,6 +35,7 @@ function runningcheck_audio($db,$id,$playlength){
           print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
           break;
        }
+       //print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
        sleep(2);
    }
 }
@@ -116,7 +119,7 @@ print "Debug word: $word\r\n";
          $json = file_get_contents($jsonurl);
          $decode = json_decode($json, true);
          $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-         $filepath = mb_convert_encoding($filepath,"SJIS");
+         $filepath = mb_convert_encoding($filepath,"cp932");
      }
 print "Debug filepath: $filepath\r\n";
        //config 再読込
@@ -134,9 +137,9 @@ print "Debug filepath: $filepath\r\n";
            // audio file
            
            if($playmode == 1){
-           $execcmd="start  \"\" \"".$FOOBARPATH."\"" . " \"$filepath\"\n";
+           $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
            }elseif ($playmode == 2){
-           $execcmd="start  \"\" \"".$FOOBARPATH."\"" . " \"$filepath\"\n";
+           $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
            }else{
                print(" Debug : now auto play is off : $playmode\n");
                sleep(30);
@@ -144,9 +147,23 @@ print "Debug filepath: $filepath\r\n";
            }
            print(" Debug : execcmd : $execcmd\n");
            
+           try{
+           
+           $cmd = "copy /Y \"".$filepath."\" temp.".$extension;
+           echo $cmd."\n";
+           exec($cmd);
+           
+//           echo mb_ereg_replace("\\x5c","/",$filepath);
            $getID3 = new getID3();
-           $music_info = $getID3->analyze($filepath);
+           $music_info = $getID3->analyze("temp.".$extension);
            getid3_lib::CopyTagsToComments($music_info); 
+
+           }catch (Exception $e) {
+           echo 'error: '.$e->getMessage()."\n";
+           }
+           exec("del temp.".$extension);
+
+           // var_dump($music_info);
 
            
            $db->beginTransaction();
@@ -157,6 +174,7 @@ print "Debug filepath: $filepath\r\n";
            }
            $db->commit();
            // とりあえず動画Playerを終了する。
+           // tasklist /fi "imagename eq mpc-be.exe" でプロセスの有無が確認できる
             for($loopcount = 0 ; $loopcount < 3 ; $loopcount ++){
                $org_timeout = ini_get('default_socket_timeout');
                ini_set('default_socket_timeout', 2);
