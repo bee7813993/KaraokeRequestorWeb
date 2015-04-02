@@ -12,11 +12,13 @@ if(array_key_exists("order", $_REQUEST)) {
 }
 
 ?>
-<html>
+<!doctype html>
+<html lang="ja">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
   <script type="text/javascript">
 
     // ここに処理を記述します。
@@ -25,6 +27,7 @@ if(array_key_exists("order", $_REQUEST)) {
   <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+<a href="request.php" >トップに戻る </a>
 
 <?php
 /**
@@ -111,7 +114,8 @@ function formatBytes($bytes, $precision = 2, array $units = null)
   		$json = file_get_contents($jsonurl);
   		$decode = json_decode($json, true);
         echo "<hr />";
-  		echo "<table>";
+  		echo "<table id=\"searchresult\">";
+print "<thead>\n";
 print "<tr>\n";
 print "<th>No. </th>\n";
 print "<th>リクエスト </th>\n";
@@ -119,29 +123,31 @@ print "<th>ファイル名(プレビューリンク) </th>\n";
 print "<th>サイズ </th>\n";
 print "<th>パス </th>\n";
 print "</tr>\n";
+print "</thead>\n";
 print "<tbody>\n";
 		foreach($decode["results"] as $k=>$v)
 		{
+		if($v['size'] <= 1 ) continue;
 //			foreach($decode2 as $k=>$v)
-    		echo "<tr><td>$k</td>";
-    		echo "<td>";
-    		echo "<form action=\"request.php\" method=\"post\" >";
+    		echo "<tr><td class=\"no\" >$k</td>";
+    		echo "<td class=\"reqbtn\">";
+    		echo "<form action=\"request_confirm.php\" method=\"post\" >";
     		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
     		echo "<input type=\"hidden\" name=\"fullpath\" id=\"fullpath\" value=\"". $v['path'] . "\\" . $v['name'] . "\" />";
     		echo "<input type=\"submit\" value=\"リクエスト\" />";
     		echo "</form>";
     		echo "</td>";
-    		echo "<td>";
+    		echo "<td class=\"filename\">";
     		echo $v['name'];
         $previewpath = "http://" . $_SERVER["HTTP_HOST"] . ":81/" . $v['path'] . "/" . $v['name'];
     		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
     		echo "プレビュー";
     		echo " </A></Div>";
     		echo "</td>";
-    		echo "<td>";
+    		echo "<td class=\"filesize\">";
     		echo formatBytes($v['size']);
     		echo "</td>";
-    		echo "<td>";
+    		echo "<td class=\"filepath\">";
     		echo $v['path'];
     		echo "</td>";
     		echo "</tr>";
@@ -199,6 +205,7 @@ print "</tbody>\n";
 <a href="http://eroge.no-ip.org/search.html" TARGET="_blank" > こちら </a> のリンク先で検索できます。
 
 </iframe>
+<a href="request.php" >トップに戻る </a>
 
 </body>
 </html>

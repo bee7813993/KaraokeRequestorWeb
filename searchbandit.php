@@ -1,8 +1,11 @@
-<html>
+<!doctype html>
+<html lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
+
 <title>bandit検索モード検索結果</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
@@ -138,7 +141,8 @@ function printsonglists($result_array)
 {
 		global $everythinghost;
 		
-  		echo "<table>";
+  		echo "<table id=\"searchresult\">";
+print "<thead>\n";
 print "<tr>\n";
 print "<th>No. </th>\n";
 print "<th>リクエスト </th>\n";
@@ -146,27 +150,29 @@ print "<th>ファイル名(プレビューリンク) </th>\n";
 print "<th>サイズ </th>\n";
 print "<th>パス </th>\n";
 print "</tr>\n";
+print "</thead>\n";
 print "<tbody>\n";
 		foreach($result_array["results"] as $k=>$v)
 		{
-    		echo "<tr><td>$k</td>";
-    		echo "<td>";
+		if($v['size'] <= 1 ) continue;
+    		echo "<tr><td class=\"no\">$k</td>";
+    		echo "<td class=\"reqbtn\">";
     		echo "<form action=\"request.php\" method=\"post\" >";
     		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
     		echo "<input type=\"submit\" value=\"リクエスト\" />";
     		echo "</form>";
     		echo "</td>";
-    		echo "<td>";
+    		echo "<td class=\"filename\">";
     		echo $v['name'];
         $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
     		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
     		echo "プレビュー";
     		echo " </A></Div>";
     		echo "</td>";
-    		echo "<td>";
+    		echo "<td class=\"filesize\">";
     		echo formatBytes($v['size']);
     		echo "</td>";
-    		echo "<td>";
+    		echo "<td class=\"filepath\">";
     		echo $v['path'];
     		echo "</td>";
     		echo "</tr>";

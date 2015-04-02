@@ -20,11 +20,13 @@ $select->closeCursor();
 
 ?>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
 
 <title>カラオケ動画リクエスト</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
@@ -132,160 +134,25 @@ function preventDefault(event)
 </iframe>
 </div>
 
-<section>
-    <div id="drop_area">ここにカラオケ動画ファイルをドロップしてファイル名を自動入力することができます。</div>
-    <div id="disp_area">
-    <?php
-    if (empty($filename)){
-      echo "ファイル名";
-    }else{
-      echo $filename;
-    }
-    ?></div>
-</section>
-
-<script type="text/javascript">
-var output = [];
-output.push(escape(f.name));
-</script>
-
-<form method="post" action="exec.php">
-<table border="0" width="95%">
-<tr>
-<td>曲名(ファイル名)</td>
-
-<td width="150" Align="right" >リクエスト者</td>
-
-<td width="150">
-<span style="visibility:hidden;">
-新規メンバー
-</span>
-</td>
-<td>コメント</td>
-<td width="100">再生方法</td>
-</select>
-<td>ボタン</td>
-</tr>
-<tr>
-<td><input type="text" name="filename" id="filename" style="width:100%" value=
-    <?php
-    if (empty($filename)){
-      echo "曲名";
-    }else{
-      echo "\"$filename\"";
-    } ?> /> 
-    <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
-    </td>
-
-<?php
-function pickupsinger($rt)
-{
-   $singerlist = array();
-   foreach($rt as $row)
-   {
-       $foundflg = 0;
-       foreach($singerlist as $esinger ){
-           if( $esinger === $row['singer']){
-               $foundflg = 1;
-               break;
-           }
-       }
-       if($foundflg === 0){
-           $singerlist[] = $row['singer'];
-       }
-   }
-   
-   return $singerlist;
-}
-
-function selectedcheck($rt,$singer){
-    $rt_i = array_reverse($rt);
-    foreach($rt_i as $row){
-        if($row['singer'] === $singer){
-          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
-            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
-                return TRUE;
-            }
-          }
-        }
-    }
-    
-//    $singerlist = pickupsinger($rt);
-//    if ($singerlist[count($singerlist) - 1] === $singer )
-//        return TRUE;
-    return FALSE;
-}
-
-
-?>
-
-<td Align="right">
-
-<select name="singer" onchange="check(this.form)" onfocus="check(this.form)" id="singer">
-<option value="0">新規入力⇒</option>
-
-<?php
-$num = 1;
-
-$selectedcounter = 0;
-$singerlist = pickupsinger($allrequest);
-foreach($singerlist as $singer){
-{
-  print "<option value=\"";
-  print $singer;
-  print "\"";
-  if( selectedcheck($allrequest,$singer) && $selectedcounter === 0 ) 
-  {
-      print " selected ";
-      $selectedcounter = $selectedcounter + 1 ;
-  }
-  print "> ";
-  print $singer;
-  print "</option>";
-}
-}
-
-?>
-
-</select>
-</td>
-<td>
-<?php
-if($selectedcounter === 0){
-print('<span style="visibility:visible;">');
-}else{
-print('<span style="visibility:hidden;">');
-}
-?>
-<input type="text" name="freesinger" id="freesinger" style="width:100%" >
-</span>
-</td>
-<td>
-<input type="text" name="comment" id="comment" style="width:100%">
-</td>
-<td><select name="kind">
- <option value="動画" selected >動画 </option>
- <option value="カラオケ配信">カラオケ配信 </option>
- </select>
-</td>
-<td><input type="submit" value="実行"/></td>
-</table>
-</form>
-
 
 
 <?php
 
-print "<div align=\"center\">";
+print "<div align=\"center\" id=\"content\" >";
 
 
 if(!count($allrequest) == 0 ){
 
 
-print "<table border=\"2\">\n";
+print "<table border=\"2\" id=\"table\">\n";
 print "<caption> 現在の登録状況 </caption>\n";
 print "<thead>\n";
 print "<tr>\n";
+print "<th>ファイル名 </th>\n";
+print "<th>登録者 </th>\n";
+print "<th>コメント </th>\n";
+print "<th>再生方法 </th>\n";
+
      if($playmode == 1){
      print "<th>再生状況 </th>\n";
      }elseif ($playmode == 2){
@@ -293,19 +160,30 @@ print "<tr>\n";
      }else{
      print "<th>順番 </th>\n";
      }
-
-print "<th>ファイル名 </th>\n";
-print "<th>登録者 </th>\n";
-print "<th>コメント </th>\n";
-print "<th>再生方法 </th>\n";
 print "<th>アクション </th>\n";
 print "<th>変更 </th>\n";
+
 print "</tr>\n";
 print "<tbody>\n";
 
 foreach($allrequest as  $row) {
 print "<tr>\n";
-print "<td>";
+print "<th class=\"filename\">";
+print nl2br(htmlspecialchars($row['songfile']));
+print "</th>\n";
+
+print "<td class=\"singer\">";
+print nl2br(htmlspecialchars($row['singer']));
+print "</td>\n";
+print "<td class=\"comment\">";
+print nl2br(htmlspecialchars($row['comment']));
+print "</td>\n";
+print "<td class=\"kind\">";
+print $row['kind'];
+print "</td>\n";
+
+print "<td class=\"nowplaying\">";
+print "<div>";
      if($playmode == 1){
      print $row['nowplaying']."<br />";
 print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
@@ -322,7 +200,7 @@ print "</select>";
 print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
 print "</form>";
      }elseif ($playmode == 2){
-     print $row['nowplaying']."<br />";
+     print $row['nowplaying'];
 print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
 print "<input type=\"hidden\" name=\"id\" value=\"";
 print $row['id'];
@@ -339,22 +217,12 @@ print "</form>";
      }else{
      print $row['reqorder'];
      }
+print "</div>";
 
 print "</td>\n";
-print "<td>";
-print $row['songfile'];
-print "</td>\n";
-print "<td>";
-print $row['singer'];
-print "</td>\n";
-print "<td>";
-print $row['comment'];
-print "</td>\n";
-print "<td>";
-print $row['kind'];
-print "</td>\n";
+
+print "<td class=\"action\">";
 print "<form method=\"post\" action=\"delete.php\">";
-print "<td>";
 print "<input type=\"hidden\" name=\"id\" value=\"";
 print $row['id'];
 print "\" />";
@@ -364,9 +232,9 @@ print "\" />";
 print "<input type=\"submit\" name=\"delete\" value=\"削除\"/>";
 print "<input type=\"submit\" name=\"up\"     value=\"上へ\"/>";
 print "<input type=\"submit\" name=\"down\"   value=\"下へ\"/>";
-print "</td>\n";
 print "</form>";
-print "<td>";
+print "</td>\n";
+print "<td class=\"change\">";
 print "<form method=\"post\" action=\"change.php\">";
 print "<input type=\"hidden\" name=\"id\" value=\"";
 print $row['id'];
@@ -375,8 +243,9 @@ print "<input type=\"hidden\" name=\"songfile\" value=\"";
 print $row['songfile'];
 print "\" />";
 print "<input type=\"submit\" name=\"変更\"   value=\"変更\"/>";
-print "</td>\n";
 print "</form>";
+print "</td>\n";
+
 print "</tr>\n";
 }
 }

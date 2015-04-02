@@ -19,5 +19,109 @@ div.toolinfo {
 
 .pcarea {
     width: 95%;
-    height: 220px;
+    height: 15em;
+}
+
+input[type="submit"] {
+    height: 30px;
+}
+
+#table tbody th.filename {
+width: 33%;
+}
+
+#table tbody td.comment {
+width: 25%;
+}
+
+@media only screen and (max-width: 500px){*/
+#table{
+display: block;
+}
+#table caption{
+display: block;
+}
+
+#table thead{
+display: none;
+}
+#table tbody{
+display: block;
+}
+			#table tbody tr{
+				display: block;
+				margin-bottom: 1.5em;
+			}
+			#table tbody th,
+			#table tbody td{
+				display: list-item;
+				border: none;
+			}
+#table tbody th{
+margin-bottom: 5px;
+list-style-type: none;
+color: #fff;
+background: #000;
+}
+#table tbody td{
+margin-left: 20px;
+padding: 0;
+}
+
+#table tbody th.filename {
+width: 100%;
+}
+
+#table tbody td.comment {
+width: 100%;
+}
+
+#table tbody td.singer:before { content: "[登録者] "; }
+#table tbody td.comment:before { content: "[コメント] "; }
+#table tbody td.kind:before { content: "[再生方法] "; }
+#table tbody td.nowplaying:before { content: "[再生状況] "; }
+#table tbody td.action { 
+		display: block;
+		float: left;
+		}
+#table tbody td.change { display: block; }
+#table tbody td.change:after { clear: both; }
+
+
+#searchresult{
+display: block;
+}
+#searchresult caption{
+display: block;
+}
+
+#searchresult thead{
+display: none;
+}
+#searchresult tbody{
+display: block;
+}
+			#searchresult tbody tr{
+				display: block;
+				margin-bottom: 1.5em;
+				border: 1px solid #000000;
+			}
+			#searchresult tbody th,
+			#searchresult tbody td{
+				display: block;
+				border: none;
+			}
+
+#searchresult tbody td.no { display: none; }
+
+#searchresult tbody td.filename { 
+font-weight:bold;
+margin-bottom: 5px;
+list-style-type: none;
+color: #fff;
+background: #000;
+ }
+#searchresult tbody td.filesize:before { content: "[サイズ] "; }
+#searchresult tbody td.filepath:before { content: "[パス] "; }
+
 }
