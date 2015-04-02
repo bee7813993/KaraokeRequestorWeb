@@ -17,6 +17,10 @@ if(array_key_exists("playerpath_any", $_REQUEST)) {
     }    
 }
 
+if(array_key_exists("foobarpath", $_REQUEST)) {
+    $newfoobarpath = $_REQUEST["foobarpath"];
+}
+
 include 'kara_config.php';
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -58,6 +62,15 @@ if (! empty($newplayerpath)){
     print "MPCのPATHを".$playerpath."に変更しました。<br><br>";
 }
 
+if (! empty($newfoobarpath)){
+    $foobarpath = $newfoobarpath;
+    $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "foobar2000のPATHを".$foobarpath."に変更しました。<br><br>";
+}
+
 ?>
  
 現在のDBファイル名 : 
@@ -74,8 +87,15 @@ print $playmode;
 <?php
 print $playerpath;
 ?>
+<br>
+現在のfoobar2000 PATH :
+<?php
+print $foobarpath;
+?>
 
 <br>
+
+<hr>
 
 新しいファイル名　
 <form method="post" action="init.php">
@@ -98,13 +118,18 @@ MediaPlayerClassic PATH設定　
 <select name="playerpath" id="playerpath" >  
 <option value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
 <option value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
-</select><br />
+</select>
 任意のPATH選択 :
-<input type="text" name="playerpath_any" size="100" class="playerpath_any" /><br />
+<input type="text" name="playerpath_any" size="100" class="playerpath_any" />
 <input type="submit" value="OK" />
 </form>
 
-
+foobar2000 PATH設定　
+<form method="post" action="init.php">
+任意のPATH選択 :
+<input type="text" name="foobarpath" size="100" class="foobarpath" value="<?php echo $foobarpath; ?>" />
+<input type="submit" value="OK" />
+</form>
 
 <a href="request.php" > リクエスト画面に戻る　</a>
 

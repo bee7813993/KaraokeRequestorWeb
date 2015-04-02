@@ -10,14 +10,15 @@ if(empty($playerpath)){
     $MPCPATH=$playerpath;
 }
 
-$FOOBARPATH='C:\Program Files (x86)\foobar2000\foobar2000.exe';
-
+if(empty($foobarpath)){
+    $FOOBARPATH='C:\Program Files (x86)\foobar2000\foobar2000.exe';
+}else{
+    $FOOBARPATH=$foobarpath;
+}
 $MPCSTATURL='http://localhost:13579/info.html';
 $MPCCMDURL='http://localhost:13579/command.html';
 
-function runningcheck_audio($db,$id,$playlength){
-
-   $endtime=time() + (int)$playlength + 2;
+function runningcheck_audio($db,$id,$endtime){
 
    $exit = 1;
    while($exit == 1)
@@ -82,14 +83,15 @@ function runningcheck($db,$id){
        $totaltime_a =  explode(':', $etime_a[1] );
        $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
-       if($playtime > ($totaltime - 4) )
-         break;
+       if($playtime > ($totaltime - 4) ){
        print $mpsctat_array[2];
-       echo ', ';
-       print $playtime;
-       echo ':';
-       print $totaltime;
-       echo "\n";
+           echo ', ';
+           print $playtime;
+           echo ':';
+           print $totaltime;
+           echo "\n";
+           break;
+       }
 
        sleep(2);
    }
@@ -123,7 +125,7 @@ print "Debug word: $word\r\n";
      }
 print "Debug filepath: $filepath\r\n";
        //config 再読込
-       readconfig($dbname,$playmode,$playerpath);
+       readconfig($dbname,$playmode,$playerpath,$fooobarpath);
        if(! empty($playerpath)){
           $MPCPATH = $playerpath;
        }
@@ -175,7 +177,7 @@ print "Debug filepath: $filepath\r\n";
            $db->commit();
            // とりあえず動画Playerを終了する。
            // tasklist /fi "imagename eq mpc-be.exe" でプロセスの有無が確認できる
-            for($loopcount = 0 ; $loopcount < 3 ; $loopcount ++){
+            for($loopcount = 0 ; $loopcount < 1 ; $loopcount ++){
                $org_timeout = ini_get('default_socket_timeout');
                ini_set('default_socket_timeout', 2);
                $mpcstat = file_get_contents($MPCCMDURL."?wm_command=816");
@@ -190,7 +192,9 @@ print "Debug filepath: $filepath\r\n";
            sleep(1);
            exec($execcmd);
            sleep(2); // Player 起動待ち
-           runningcheck_audio($db,$l_id,$music_info["playtime_seconds"]);
+           echo "song length: ".$music_info["playtime_seconds"]."\n";
+           $endtime=time() + (int)$music_info["playtime_seconds"] + 3;
+           runningcheck_audio($db,$l_id,$endtime);
            
        }else {
            // video file

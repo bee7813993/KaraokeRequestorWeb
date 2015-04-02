@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath){
 
     global $configfile;
     global $config_ini;
@@ -41,6 +41,15 @@ function readconfig(&$dbname,&$playmode,&$playerpath){
         foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
         fclose($fp);
     }
+
+    if(empty($foobarpath)){
+        $foobarpath = 'C:\Program Files (x86)\foobar2000\foobar2000.exe';
+        $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
+        $fp = fopen($configfile, 'w');
+        foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+        fclose($fp);
+    }
+
 //    $playerpath = "'".$playerpath."'";
     //var_dump($config_ini);
 }
@@ -76,7 +85,7 @@ if ($stmt === false ){
 
 }
 
-readconfig($dbname,$playmode,$playerpath);
+readconfig($dbname,$playmode,$playerpath,$foobarpath);
 initdb($db,$dbname);
 
 ?>
