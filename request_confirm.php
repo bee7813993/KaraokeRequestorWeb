@@ -8,6 +8,11 @@ $fullpath = "";
 if(array_key_exists("fullpath", $_REQUEST)) {
     $fullpath = $_REQUEST["fullpath"];
 }
+
+$shop_karaoke = 0;
+if(array_key_exists("shop_karaoke", $_REQUEST)) {
+    $shop_karaoke = $_REQUEST["shop_karaoke"];
+}
     
 
 
@@ -151,8 +156,8 @@ print('<span style="visibility:hidden;">');
 <div CLASS="method">
 再生方法<br>
 <select name="kind">
- <option value="動画" selected >動画 </option>
- <option value="カラオケ配信">カラオケ配信 </option>
+ <option value="動画" <?php if($shop_karaoke == 0) print 'selected';?> >動画 </option>
+ <option value="カラオケ配信" <?php if($shop_karaoke == 1) print 'selected';?> >カラオケ配信 </option>
  </select>
 </div>
 

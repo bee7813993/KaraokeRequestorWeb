@@ -18,6 +18,57 @@ if(empty($foobarpath)){
 $MPCSTATURL='http://localhost:13579/info.html';
 $MPCCMDURL='http://localhost:13579/command.html';
 
+function mpcstop(){
+   global $MPCCMDURL;
+   $pscheck_cmd='tasklist /fi "imagename eq mpc-be.exe"';
+   exec($pscheck_cmd, $psresult );
+   sleep(1);
+   
+   $process_found = 0;
+   
+   foreach( $psresult as $psline ){
+     $pos = strpos($psline,"mpc-be.exe");
+     if ( $pos !== FALSE) {
+        $process_found = 1;
+     }
+   }
+   
+   if($process_found == 1){
+       for($loopcount = 0 ; $loopcount < 2 ; $loopcount ++){
+          $org_timeout = ini_get('default_socket_timeout');
+          ini_set('default_socket_timeout', 2);
+          $mpcstat = file_get_contents($MPCCMDURL."?wm_command=816");
+          ini_set('default_socket_timeout', $org_timeout);
+          if( $mpcstat === FALSE) {
+              sleep(1);
+              continue;
+          }else{
+              break;
+          }
+       }
+   }
+}
+
+function runningcheck_shop_karaoke($db,$id){
+
+   $exit = 1;
+   while($exit == 1)
+   {
+       $sql = "SELECT nowplaying FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+       $select = $db->query($sql);
+       $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
+       $select->closeCursor();
+       //var_dump($currentstatus);
+       if( $currentstatus[0]['nowplaying'] === '停止中' || $currentstatus[0]['nowplaying'] === '再生済'){
+           print date()."Status is change to ".$currentstatus[0]['nowplaying']." at id: ".$id;
+           $exit = 0;
+           break;
+       }
+       //print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
+       sleep(2);
+   }
+}
+
 function runningcheck_audio($db,$id,$endtime){
 
    $exit = 1;
@@ -29,11 +80,13 @@ function runningcheck_audio($db,$id,$endtime){
        $select->closeCursor();
        //var_dump($currentstatus);
        if( $currentstatus[0]['nowplaying'] === '停止中' ){
+           $exit = 0;
            break;
        }
        
        if( time() > $endtime ){
           print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
+          $exit = 0;
           break;
        }
        //print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
@@ -41,7 +94,7 @@ function runningcheck_audio($db,$id,$endtime){
    }
 }
 
-function runningcheck($db,$id){
+function runningcheck_mpc($db,$id){
 
    global $MPCSTATURL;
    // get MPC status
@@ -109,6 +162,7 @@ while(1){
      $word=$row['songfile'];
      $l_id=$row['id'];
      $l_fullpath=$row['fullpath'];
+     $l_kind=$row['kind'];
      $select->closeCursor();
 print "Debug l_fullpath: $l_fullpath\r\n";
      $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
@@ -130,100 +184,103 @@ print "Debug filepath: $filepath\r\n";
           $MPCPATH = $playerpath;
        }
        
-       
-       // 拡張子をチェックしてPlayerを選択
-       $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-       if( strcasecmp($extension,"mp3") == 0 
-       || strcasecmp($extension,"m4a") == 0 
-       || strcasecmp($extension,"wav") == 0 ){
-           // audio file
+       if( strcmp ($l_kind , "カラオケ配信") === 0 )
+       {
+          $db->beginTransaction();
+          $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
+          $ret = $db->exec($sql);
+          if (! $ret ) {
+          	print("再生中 への変更にしっぱいしました。<br>");
+          }
+          $db->commit();         
+          // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
+          runningcheck_shop_karaoke($db,$l_id);
+       }else
+       {
            
-           if($playmode == 1){
-           $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
-           }elseif ($playmode == 2){
-           $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
-           }else{
-               print(" Debug : now auto play is off : $playmode\n");
-               sleep(30);
-               continue;
-           }
-           print(" Debug : execcmd : $execcmd\n");
-           
-           try{
-           
-           $cmd = "copy /Y \"".$filepath."\" temp.".$extension;
-           echo $cmd."\n";
-           exec($cmd);
-           
-//           echo mb_ereg_replace("\\x5c","/",$filepath);
-           $getID3 = new getID3();
-           $music_info = $getID3->analyze("temp.".$extension);
-           getid3_lib::CopyTagsToComments($music_info); 
-
-           }catch (Exception $e) {
-           echo 'error: '.$e->getMessage()."\n";
-           }
-           exec("del temp.".$extension);
-
-           // var_dump($music_info);
-
-           
-           $db->beginTransaction();
-           $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
-           $ret = $db->exec($sql);
-           if (! $ret ) {
-           	print("再生中 への変更にしっぱいしました。<br>");
-           }
-           $db->commit();
-           // とりあえず動画Playerを終了する。
-           // tasklist /fi "imagename eq mpc-be.exe" でプロセスの有無が確認できる
-            for($loopcount = 0 ; $loopcount < 1 ; $loopcount ++){
-               $org_timeout = ini_get('default_socket_timeout');
-               ini_set('default_socket_timeout', 2);
-               $mpcstat = file_get_contents($MPCCMDURL."?wm_command=816");
-               ini_set('default_socket_timeout', $org_timeout);
-               if( $mpcstat === FALSE) {
-                   sleep(1);
-                   continue;
+           // 拡張子をチェックしてPlayerを選択
+           $extension = pathinfo($filepath, PATHINFO_EXTENSION);
+           if( strcasecmp($extension,"mp3") == 0 
+           || strcasecmp($extension,"m4a") == 0 
+           || strcasecmp($extension,"wav") == 0 ){
+               // audio file
+               
+               if($playmode == 1){
+               $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
+               }elseif ($playmode == 2){
+               $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
                }else{
-                   break;
+                   print(" Debug : now auto play is off : $playmode\n");
+                   sleep(30);
+                   continue;
                }
-            }           
-           sleep(1);
-           exec($execcmd);
-           sleep(2); // Player 起動待ち
-           echo "song length: ".$music_info["playtime_seconds"]."\n";
-           $endtime=time() + (int)$music_info["playtime_seconds"] + 3;
-           runningcheck_audio($db,$l_id,$endtime);
-           
-       }else {
-           // video file
-           if($playmode == 1){
-           $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
-           }elseif ($playmode == 2){
-           $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
-           }else{
-               print(" Debug : now auto play is off : $playmode\n");
-               sleep(30);
-               continue;
-           }
-           print(" Debug : execcmd : $execcmd\n");
+               print(" Debug : execcmd : $execcmd\n");
+               
+               try{
+               
+               $cmd = "copy /Y \"".$filepath."\" temp.".$extension;
+               echo $cmd."\n";
+               exec($cmd);
+               
+    //           echo mb_ereg_replace("\\x5c","/",$filepath);
+               $getID3 = new getID3();
+               $music_info = $getID3->analyze("temp.".$extension);
+               getid3_lib::CopyTagsToComments($music_info); 
 
-           
-           $db->beginTransaction();
-           $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
-           $ret = $db->exec($sql);
-           if (! $ret ) {
-           	print("再生中 への変更にしっぱいしました。<br>");
+               }catch (Exception $e) {
+               echo 'error: '.$e->getMessage()."\n";
+               }
+               exec("del temp.".$extension);
+
+               // var_dump($music_info);
+
+               
+               $db->beginTransaction();
+               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
+               $ret = $db->exec($sql);
+               if (! $ret ) {
+               	print("再生中 への変更にしっぱいしました。<br>");
+               }
+               $db->commit();
+               // とりあえず動画Playerを終了する。
+               mpcstop();
+
+               sleep(1);
+               exec($execcmd);
+               sleep(2); // Player 起動待ち
+               echo "song length: ".$music_info["playtime_seconds"].$music_info["playtime_string"]."\n";
+               $endtime=time() + (int)$music_info["playtime_seconds"] + 3;
+               runningcheck_audio($db,$l_id,$endtime);
+               
+           }else {
+               // video file
+               if($playmode == 1){
+               $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+               }elseif ($playmode == 2){
+               $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+               }else{
+                   print(" Debug : now auto play is off : $playmode\n");
+                   sleep(30);
+                   continue;
+               }
+               print(" Debug : execcmd : $execcmd\n");
+
+               
+               $db->beginTransaction();
+               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
+               $ret = $db->exec($sql);
+               if (! $ret ) {
+               	print("再生中 への変更にしっぱいしました。<br>");
+               }
+               $db->commit();
+               sleep(1);
+               exec($execcmd);
+               sleep(2); // Player 起動待ち
+               runningcheck_mpc($db,$l_id);
+               
            }
-           $db->commit();
-           sleep(1);
-           exec($execcmd);
-           sleep(2); // Player 起動待ち
-           runningcheck($db,$l_id);
-           
-       }
        
+       }
 
 
 

@@ -107,8 +107,16 @@ function preventDefault(event)
 <body>
 
 
+<div  align="center" >
+<form method="GET" action="search.php" >
+<input type="submit" name="ファイル検索画面"   value="ファイル検索画面" class="topbtn"/>
+</form>
+</div>
 <div align="center" >
-<a href="search.php"> ファイル検索画面 </a>
+<form method="GET" action="request_confirm.php?shop_karaoke=1" >
+<input type="hidden" name="shop_karaoke" value="1" />
+<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn"/>
+</form>
 </div>
 <br />
 

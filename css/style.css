@@ -16,6 +16,10 @@ div.toolinfo {
 	height: 30px;
 }
 
+input.topbtn {
+width: 95%;
+height: 2em;
+}
 
 .pcarea {
     width: 95%;

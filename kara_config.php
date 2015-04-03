@@ -13,6 +13,7 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath){
         $dbname = $config_ini["dbname"];
         $playmode = $config_ini["playmode"];
         $playerpath = urldecode($config_ini["playerpath"]);
+        $foobarpath = urldecode($config_ini["foobarpath"]);
     } else {
         $fp = fopen($configfile, 'w');
         fclose($fp);
@@ -43,7 +44,7 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath){
     }
 
     if(empty($foobarpath)){
-        $foobarpath = 'C:\Program Files (x86)\foobar2000\foobar2000.exe';
+        $foobarpath = '..\..\foobar2000\foobar2000.exe';
         $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
         $fp = fopen($configfile, 'w');
         foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
