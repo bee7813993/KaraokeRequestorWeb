@@ -15,27 +15,32 @@ div.toolinfo {
 }
 input.playstart {
 	width: 90%;
+	height: 4em;
+}
+
+button.pcbuttom {
+	width: 30%;
 	height: 3em;
 }
 
 input.pcbuttom {
 	width: 30%;
-	height: 2em;
+	height: 3em;
 }
 
-input.pcvolume {
+button.pcvolume {
 	width: 45%;
-	height: 2em;
+	height: 3em;
 }
 
-input.pcmorefunc {
+button.pcmorefunc {
 	width: 30%;
-	height: 2em;
+	height: 3em;
 }
 
-input.pcdelay {
+button.pcdelay {
 	width: 22.2%;
-	height: 2em;
+	height: 3em;
 }
 
 
