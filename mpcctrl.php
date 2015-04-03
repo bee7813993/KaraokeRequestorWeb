@@ -30,18 +30,18 @@
 <input type="submit" value="曲終了" name="songnext" class="pcbuttom" onClick="song_next()" />
 </form>
 <br>
-<input type="submit" value="ボリュームUP" class="pcbuttom" onClick="song_vup()" />
-<input type="submit" value="ボリュームDOWN" class="pcbuttom" onClick="song_vdown()" />
+<input type="submit" value="ボリュームUP" class="pcvolume" onClick="song_vup()" />
+<input type="submit" value="ボリュームDOWN" class="pcvolume" onClick="song_vdown()" />
 <br>
-<input type="submit" value="音声トラック変更" class="pcbuttom" onClick="song_changeaudio()" />
-<input type="submit" value="字幕ONOFF(ソフトサブのみ)" class="pcbuttom" onClick="song_subtitleonnoff()" />
+<input type="submit" value="字幕ONOFF(ソフトサブのみ)" class="pcmorefunc" onClick="song_subtitleonnoff()" />
+<input type="submit" value="音声トラック変更" class="pcmorefunc" onClick="song_changeaudio()" />
+<input type="submit" value="フルスクリーンON/OFF" class="pcmorefunc" onClick="song_fullscreen()" />
 <br>
-<input type="submit" value="音ズレ修正(-100ms)" class="pcbuttom" onClick="song_audiodelay_m100()" />
-<input type="submit" value="音ズレ修正(-10ms)" class="pcbuttom" onClick="song_audiodelay_m10()" />
-<input type="submit" value="音ズレ修正(+10ms)" class="pcbuttom" onClick="song_audiodelay_p10()" />
-<input type="submit" value="音ズレ修正(+100ms)" class="pcbuttom" onClick="song_audiodelay_p100()" />
+<input type="submit" value="(-100ms)音ズレ修正" class="pcdelay" onClick="song_audiodelay_m100()" />
+<input type="submit" value="(-10ms)音ズレ修正" class="pcdelay" onClick="song_audiodelay_m10()" />
+<input type="submit" value="(+10ms)音ズレ修正" class="pcdelay" onClick="song_audiodelay_p10()" />
+<input type="submit" value="(+100ms)音ズレ修正" class="pcdelay" onClick="song_audiodelay_p100()" />
 <br>
-<input type="submit" value="フルスクリーンON/OFF" class="pcbuttom" onClick="song_fullscreen()" />
 
 </div>
 </body>

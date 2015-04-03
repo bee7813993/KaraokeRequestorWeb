@@ -60,7 +60,7 @@ function runningcheck_shop_karaoke($db,$id){
        $select->closeCursor();
        //var_dump($currentstatus);
        if( $currentstatus[0]['nowplaying'] === '停止中' || $currentstatus[0]['nowplaying'] === '再生済'){
-           print date()."Status is change to ".$currentstatus[0]['nowplaying']." at id: ".$id;
+           print date("H.i.s")."Status is change to ".mb_convert_encoding($currentstatus[0]['nowplaying'],"SJIS")." at id: ".$id."\n";
            $exit = 0;
            break;
        }
@@ -85,11 +85,11 @@ function runningcheck_audio($db,$id,$endtime){
        }
        
        if( time() > $endtime ){
-          print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
+          print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time())."\n";
           $exit = 0;
           break;
        }
-       //print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
+       //print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time())."\n";
        sleep(2);
    }
 }
@@ -164,25 +164,15 @@ while(1){
      $l_fullpath=$row['fullpath'];
      $l_kind=$row['kind'];
      $select->closeCursor();
-print "Debug l_fullpath: $l_fullpath\r\n";
-     $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
-     if(file_exists($winfillpath )){
-         $filepath = $winfillpath;
-     }else{
-print "Debug word: $word\r\n";
-         $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-         print $jsonurl;
-         $json = file_get_contents($jsonurl);
-         $decode = json_decode($json, true);
-         $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-         $filepath = mb_convert_encoding($filepath,"cp932");
+
+     //config 再読込
+     readconfig($dbname,$playmode,$playerpath,$fooobarpath);
+     if(! empty($playerpath)){
+        $MPCPATH = $playerpath;
      }
-print "Debug filepath: $filepath\r\n";
-       //config 再読込
-       readconfig($dbname,$playmode,$playerpath,$fooobarpath);
-       if(! empty($playerpath)){
-          $MPCPATH = $playerpath;
-       }
+
+
+
        
        if( strcmp ($l_kind , "カラオケ配信") === 0 )
        {
@@ -194,9 +184,25 @@ print "Debug filepath: $filepath\r\n";
           }
           $db->commit();         
           // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
+          print(mb_convert_encoding("カラオケ配信終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n","SJIS"));
           runningcheck_shop_karaoke($db,$l_id);
        }else
        {
+       // ファイル名のチェック
+//print "Debug l_fullpath: $l_fullpath\r\n";
+       $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
+       if(file_exists($winfillpath )){
+         $filepath = $winfillpath;
+       }else{
+//print "Debug word: $word\r\n";
+         $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+         print $jsonurl;
+         $json = file_get_contents($jsonurl);
+         $decode = json_decode($json, true);
+         $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+         $filepath = mb_convert_encoding($filepath,"cp932");
+       }
+//print "Debug filepath: $filepath\r\n";
            
            // 拡張子をチェックしてPlayerを選択
            $extension = pathinfo($filepath, PATHINFO_EXTENSION);
@@ -214,7 +220,7 @@ print "Debug filepath: $filepath\r\n";
                    sleep(30);
                    continue;
                }
-               print(" Debug : execcmd : $execcmd\n");
+//               print(" Debug : execcmd : $execcmd\n");
                
                try{
                
@@ -248,7 +254,7 @@ print "Debug filepath: $filepath\r\n";
                sleep(1);
                exec($execcmd);
                sleep(2); // Player 起動待ち
-               echo "song length: ".$music_info["playtime_seconds"].$music_info["playtime_string"]."\n";
+               echo "song length: ".$music_info["playtime_seconds"]." ".$music_info["playtime_string"]."\n";
                $endtime=time() + (int)$music_info["playtime_seconds"] + 3;
                runningcheck_audio($db,$l_id,$endtime);
                
@@ -263,7 +269,7 @@ print "Debug filepath: $filepath\r\n";
                    sleep(30);
                    continue;
                }
-               print(" Debug : execcmd : $execcmd\n");
+//               print(" Debug : execcmd : $execcmd\n");
 
                
                $db->beginTransaction();

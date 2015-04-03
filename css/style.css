@@ -1,34 +1,56 @@
 body	{
 	background-color:lightblue;
 }
+
+
+input[type="submit"] {
+    height: 30px;
+}
+
 input.toolinfo {
 	font-size: xx-large;
 }
 div.toolinfo {
 	font-size: xx-large;
 }
-.playstart {
-	width: 80%;
-	height: 40px;
+input.playstart {
+	width: 90%;
+	height: 3em;
 }
 
-.pcbuttom {
-	height: 30px;
+input.pcbuttom {
+	width: 30%;
+	height: 2em;
 }
+
+input.pcvolume {
+	width: 45%;
+	height: 2em;
+}
+
+input.pcmorefunc {
+	width: 30%;
+	height: 2em;
+}
+
+input.pcdelay {
+	width: 22.2%;
+	height: 2em;
+}
+
 
 input.topbtn {
 width: 95%;
 height: 2em;
 }
 
+
+
 .pcarea {
     width: 95%;
     height: 15em;
 }
 
-input[type="submit"] {
-    height: 30px;
-}
 
 #table tbody th.filename {
 width: 33%;
