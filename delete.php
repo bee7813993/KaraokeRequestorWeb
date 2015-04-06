@@ -125,30 +125,36 @@ $targetorder = $row['reqorder'];
  } 
 }
 
+if( !empty($_POST['resettsatus']) ){
+     $sql = "UPDATE requesttable set nowplaying = \"未再生\" ";
+     $ret = $db->query($sql);
 
-$l_id=$_POST['id'];
-$l_action='delete';
-if( !empty($_POST['up']) )
- {$l_action = 'up';}
-if( !empty($_POST['down']) )
- {$l_action = 'down';}
+}else{
 
-if ( $l_action === 'up' )
-{
-    dbup($l_id,$db);
-}elseif ( $l_action === 'down' )
-{
-    dbdown($l_id,$db);
-}else {
+    $l_id=$_POST['id'];
+    $l_action='delete';
+    if( !empty($_POST['up']) )
+     {$l_action = 'up';}
+    if( !empty($_POST['down']) )
+     {$l_action = 'down';}
 
-$sql = "DELETE FROM requesttable where id = $l_id";
-$ret = $db->query($sql);
-if (! $ret ) {
-	print("${l_id} を削除に失敗しました。<br>");
-	die();
-}
+    if ( $l_action === 'up' )
+    {
+        dbup($l_id,$db);
+    }elseif ( $l_action === 'down' )
+    {
+        dbdown($l_id,$db);
+    }else {
 
-print("${l_id} を削除しました。<br>");
+        $sql = "DELETE FROM requesttable where id = $l_id";
+        $ret = $db->query($sql);
+        if (! $ret ) {
+        	print("${l_id} を削除に失敗しました。<br>");
+        	die();
+        }
+
+        print("${l_id} を削除しました。<br>");
+    }
 }
 print("1秒後に登録ページに移動します<br>");
 
