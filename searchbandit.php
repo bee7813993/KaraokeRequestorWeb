@@ -220,17 +220,47 @@ $songlist = json_decode($contents,true,4096);
 
 //echo $contents;
 $songnum = 0;
-foreach($songlist["result"] as $value){
-  $songtitle = replace_obscure_words($value["title"]);
-  echo "<a name=\"song_".(string)$songnum."\">「".$songtitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-  searchlocalfilename($songtitle,$result_a);
-  echo $result_a["totalResults"]."件<br />";
-  if( $result_a["totalResults"] >= 1) {
-    printsonglists($result_a);
-  }
-//  var_dump($result_a);
-  $songnum = $songnum + 1;
-}
+    foreach($songlist["result"] as $value){
+        $songtitle = replace_obscure_words($value["title"]);
+        $songtitles = array();
+        $songtitles[] = $songtitle;
+
+        // 全部全角にしたときのチェック
+        $songtitle_tmp = mb_convert_kana($songtitle,"A");
+        $same = 0;
+        foreach($songtitles as $checktitle){
+          if(strcmp($checktitle ,$songtitle_tmp) == 0){
+            $same = 1;
+          }
+        }
+        if($same === 0) {
+           $songtitles[] = $songtitle_tmp;
+        }
+        // 全部半角にしたときのチェック
+        $songtitle_tmp = mb_convert_kana($songtitle,"a");
+        $same = 0;
+        foreach($songtitles as $checktitle){
+          if(strcmp($checktitle ,$songtitle_tmp) == 0){
+            $same = 1;
+          }
+        }
+        if($same === 0) {
+           $songtitles[] = $songtitle_tmp;
+        }
+        
+        foreach($songtitles as $checktitle){
+                  
+              echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
+              searchlocalfilename($checktitle,$result_a);
+              echo $result_a["totalResults"]."件<br />";
+              if( $result_a["totalResults"] >= 1) {
+                printsonglists($result_a);
+              }
+            //  var_dump($result_a);
+              $songnum = $songnum + 1;
+        }
+    }
+
 
 
 ?>
