@@ -157,7 +157,7 @@ print "<tbody>\n";
 		if($v['size'] <= 1 ) continue;
     		echo "<tr><td class=\"no\">$k</td>";
     		echo "<td class=\"reqbtn\">";
-    		echo "<form action=\"request.php\" method=\"post\" >";
+    		echo "<form action=\"request_confirm.php\" method=\"post\" >";
     		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
     		echo "<input type=\"submit\" value=\"リクエスト\" />";
     		echo "</form>";
