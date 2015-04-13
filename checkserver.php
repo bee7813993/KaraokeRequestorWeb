@@ -1,15 +1,12 @@
 <?php
 
+require_once 'commonfunc.php';
+
 function webcheck(){
     $WEBSTATURL = "http://localhost/check.html";
-    $org_timeout = ini_get('default_socket_timeout');
-    ini_set('default_socket_timeout', 2);
-    $webstat = file_get_contents($WEBSTATURL);
-    // retry once
-    if( $webstat === FALSE) {
-        $webstat = file_get_contents($WEBSTATURL);
-    }
-    ini_set('default_socket_timeout', $org_timeout);
+    
+    $webstat = file_get_html_with_retry($WEBSTATURL, 5);
+
     if( $webstat === FALSE) {
         return FALSE;
     }
@@ -22,14 +19,8 @@ function webcheck(){
 
 function phpcheck(){
     $PHPSTATURL = "http://localhost/phpinfo.php";
-    $org_timeout = ini_get('default_socket_timeout');
-    ini_set('default_socket_timeout', 2);
-    $webstat = file_get_contents($PHPSTATURL);
-    // retry once
-    if( $webstat === FALSE) {
-        $webstat = file_get_contents($PHPSTATURL);
-    }
-    ini_set('default_socket_timeout', $org_timeout);
+
+    $webstat = file_get_html_with_retry($PHPSTATURL, 5);
     if( $webstat === FALSE) {
         return FALSE;
     }

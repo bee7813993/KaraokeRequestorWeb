@@ -61,6 +61,8 @@ if(array_key_exists("column", $_REQUEST)) {
 $everythinghost = $_SERVER["SERVER_NAME"];
 //$everythinghost = 'localhost';
 
+require_once 'commonfunc.php';
+
 /** あいまいな文字を+に置換する
 */
 function replace_obscure_words($word)
@@ -131,7 +133,7 @@ function searchlocalfilename($kerwords, &$result_array)
 		global $everythinghost;
   		$jsonurl = "http://" . $everythinghost . ":81/?search=" . urlencode($kerwords) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
 //  		echo $jsonurl;
-  		$json = file_get_contents($jsonurl);
+  		$json = file_get_html_with_retry($jsonurl, 5);
 //  		echo $json;
   		$result_array = json_decode($json, true);
 

@@ -2,6 +2,7 @@
 //setlocale(LC_ALL, 'ja_JP.Shift_JIS');
 date_default_timezone_set('Asia/Tokyo');
 include 'kara_config.php';
+require_once 'commonfunc.php';
 require_once("getid3/getid3.php");
 
 if(empty($playerpath)){
@@ -35,10 +36,10 @@ function mpcstop(){
    
    if($process_found == 1){
        for($loopcount = 0 ; $loopcount < 2 ; $loopcount ++){
-          $org_timeout = ini_get('default_socket_timeout');
-          ini_set('default_socket_timeout', 2);
-          $mpcstat = file_get_contents($MPCCMDURL."?wm_command=816");
-          ini_set('default_socket_timeout', $org_timeout);
+//          $org_timeout = ini_get('default_socket_timeout');
+//          ini_set('default_socket_timeout', 2);
+          $mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=816", 5);
+//          ini_set('default_socket_timeout', $org_timeout);
           if( $mpcstat === FALSE) {
               sleep(1);
               continue;
@@ -113,10 +114,10 @@ function runningcheck_mpc($db,$id){
        
        // MPCの状態取得3回チャレンジする
        for($loopcount = 0 ; $loopcount < 3 ; $loopcount ++){
-          $org_timeout = ini_get('default_socket_timeout');
-          ini_set('default_socket_timeout', 5);
-          $mpcstat = file_get_contents($MPCSTATURL);
-          ini_set('default_socket_timeout', $org_timeout);
+//          $org_timeout = ini_get('default_socket_timeout');
+//          ini_set('default_socket_timeout', 5);
+          $mpcstat = file_get_html_with_retry($MPCSTATURL, 5);
+//          ini_set('default_socket_timeout', $org_timeout);
           if( $mpcstat === FALSE) {
               sleep(1);
               continue;
@@ -197,7 +198,7 @@ while(1){
 //print "Debug word: $word\r\n";
          $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
          print $jsonurl;
-         $json = file_get_contents($jsonurl);
+         $json = file_get_html_with_retry($jsonurl, 5);
          $decode = json_decode($json, true);
          $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
          $filepath = mb_convert_encoding($filepath,"cp932");

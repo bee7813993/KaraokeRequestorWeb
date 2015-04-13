@@ -11,6 +11,8 @@ if(array_key_exists("order", $_REQUEST)) {
     $l_order = 'sort=size&ascending=0';
 }
 
+require_once 'commonfunc.php';
+
 ?>
 <!doctype html>
 <html lang="ja">
@@ -112,7 +114,7 @@ function formatBytes($bytes, $precision = 2, array $units = null)
   	}else {
   		$jsonurl = "http://" . $_SERVER["SERVER_NAME"] . ":81/?search=" . urlencode($word) . "&" . $l_order . "&path=1&path_column=3&size_column=4&json=1";
   		// echo $jsonurl;
-  		$json = file_get_contents($jsonurl);
+  		$json = file_get_html_with_retry($jsonurl, 5);
   		$decode = json_decode($json, true);
         echo "<hr />";
   		echo "<table id=\"searchresult\">";
