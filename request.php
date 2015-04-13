@@ -267,7 +267,7 @@ $db = null;
 <form method="post" action="init.php">
 <input type="submit" value="設定" />
 </form>
-<a href="/toolinfo.php" > 接続情報表示 </a>
+<a href="toolinfo.php" > 接続情報表示 </a>
 <form method="post" action="delete.php">
 <input type="submit" name="resettsatus" value="全て未再生化" />
 </form>
