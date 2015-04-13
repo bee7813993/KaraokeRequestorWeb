@@ -20,6 +20,7 @@
 <br />
 <divclass="toolinfo" >
 接続先 URL : <input type="text" name="toolurl" class="toolinfo" size="100" value=<?php echo 'http://'.$_SERVER["HTTP_HOST"];?>/>
+<input type="text" name="toolurl" class="toolinfo" size="100" value="" />
 </div>
 
 <a href="/request.php" > リクエストTOPに戻る </a>

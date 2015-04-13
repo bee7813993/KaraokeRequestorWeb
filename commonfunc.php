@@ -10,6 +10,9 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1){
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko");
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeoutsec);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeoutsec);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        
         $contents = curl_exec($ch);
         
         if( $contents !== FALSE) {
@@ -17,6 +20,7 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1){
             break;
         }
         $errno = curl_errno($ch);
+        print $timeoutsec;
         curl_close($ch);
     }
     if ($loopcount === $retrytimes) {

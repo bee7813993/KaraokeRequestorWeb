@@ -133,6 +133,14 @@ foobar2000 PATH設定　
 
 <a href="request.php" > リクエスト画面に戻る　</a>
 
+<hr />
+<a href ="listexport.php" > リクエストリストのダウンロード </a>
+<form action="listinport.php" method="post" enctype="multipart/form-data">
+リクエストリストのインポート(csvより)
+<input type="file" name="dbcsv" accept="text/comma-separated-values" />
+<input type="submit" value="Send" />  
+</form>
+<a href ="listclear.php" > リクエストリストの全消去 </a>
 </body>
 </html>
 

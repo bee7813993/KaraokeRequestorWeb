@@ -21,6 +21,7 @@ function phpcheck(){
     $PHPSTATURL = "http://localhost/phpinfo.php";
 
     $webstat = file_get_html_with_retry($PHPSTATURL, 5);
+
     if( $webstat === FALSE) {
         return FALSE;
     }
