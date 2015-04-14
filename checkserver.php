@@ -5,7 +5,7 @@ require_once 'commonfunc.php';
 function webcheck(){
     $WEBSTATURL = "http://localhost/check.html";
     
-    $webstat = file_get_html_with_retry($WEBSTATURL, 5);
+    $webstat = file_get_html_with_retry($WEBSTATURL, 10);
 
     if( $webstat === FALSE) {
         return FALSE;
@@ -20,7 +20,7 @@ function webcheck(){
 function phpcheck(){
     $PHPSTATURL = "http://localhost/phpinfo.php";
 
-    $webstat = file_get_html_with_retry($PHPSTATURL, 5);
+    $webstat = file_get_html_with_retry($PHPSTATURL, 10);
 
     if( $webstat === FALSE) {
         return FALSE;

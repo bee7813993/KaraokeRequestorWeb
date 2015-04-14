@@ -1,6 +1,8 @@
 <?php
 // 変数チェック
 require_once 'modules/simple_html_dom.php';
+require_once 'search_anisoninfo_common.php';
+
 
 if(array_key_exists("m", $_REQUEST)) {
     $l_m = $_REQUEST["m"];
@@ -130,13 +132,6 @@ function ansoninfo_gettitlelist($url,$l_m){
     return $results;
 }
 
-// URLを叩いて曲名リストをarrayで返す。
-function ansoninfo_getsongtitles(){
-    $result = array();
-    
-    return $result;
-}
-
 ?>
 
 <!doctype html>
@@ -188,119 +183,10 @@ if(!isset($l_fullparam) && (!isset($l_m) || !isset($l_q))  ) {
     $list = ansoninfo_gettitlelist(ansoninfo_gettitlelisturl($l_m,$l_q,$l_fullparam),$l_m);
 
    //var_dump($list);
+   anisoninfo_display_middlelist($list,$l_m,$l_q);
 
-   if(strcmp ('pro',$l_m) == 0)
-   {    
-// 曲名からのファイル検索結果表示部分
-   $nexturlbase = 'http://anison.info/data/';
-    print "<p> $l_q の検索結果 </p>\n";
-    echo "<table id=\"searchlistresult\">";
-    print "<thead>\n";
-    print "<tr>\n";
-    print "<th>名前 </th>\n";
-    print "<th>ジャンル </th>\n";
-    print "<th>時期 </th>\n";
-    print "</tr>\n";
-    print "</thead>\n"; 
-    print "<tbody>\n";  
-   
-   foreach($list as $item){
-       if(!isset($item['word'])) continue;
-       print "<tr>\n";
-       echo '<td class="searchname" >'."\n";
-       echo '<a href="search_anisoninfo.php?url='.$item['link'].'&kind=program">'."\n";
-       echo $item['word']."\n";
-       echo '</a>'."\n";
-       echo "</td>"."\n";
-       echo '<td class="genre" >'."\n";
-       echo $item['genre']."\n";
-       echo "</td>"."\n";
-       echo '<td class="onair" >'."\n";
-       echo $item['onair']."\n";
-       echo "</td>"."\n";
-       print "</tr>\n";
-   }
-   print "</tbody>\n";
-   echo "</table>"."\n";
-        echo "<hr />\n";
-        if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
-            echo '前の50件';
-            echo '</a> &nbsp;';
-        }
-        if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
-            echo '次の50件';
-            echo '</a> &nbsp;';
-        }
-    }elseif(strcmp ('person',$l_m) == 0)
-    {
-        print "<p> $l_q の検索結果 </p>\n";
-        echo "<table id=\"searchlistresult\">";
-        print "<thead>\n";
-        print "<tr>\n";
-        print "<th>人物 </th>\n";
-        print "</tr>\n";
-        print "</thead>\n"; 
-        print "<tbody>\n";
-        foreach($list as $item){
-           if(!isset($item['word'])) continue;
-           print "<tr>\n";
-           echo '<td class="searchname" >'."\n";
-           echo '<a href="search_anisoninfo.php?url='.$item['link'].'&kind=artist" >'."\n";
-           echo $item['word']."\n";
-           echo '</a>'."\n";
-           echo "</td>"."\n";
-           print "</tr>\n";
-        }
-        print "</tbody>\n";
-        echo "</table>"."\n";
-        echo "<hr />\n";
-        if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
-            echo '前の50件';
-            echo '</a> &nbsp;';
-        }
-        if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
-            echo '次の50件';
-            echo '</a> &nbsp;';
-        }
-    } elseif(strcmp ('mkr',$l_m) == 0)
-    {
-        print "<p> $l_q の検索結果 </p>\n";
-        echo "<table id=\"searchlistresult\">";
-        print "<thead>\n";
-        print "<tr>\n";
-        print "<th>制作会社 </th>\n";
-        print "</tr>\n";
-        print "</thead>\n"; 
-        print "<tbody>\n";
-        foreach($list as $item){
-           if(!isset($item['word'])) continue;
-           print "<tr>\n";
-           echo '<td class="searchname" >'."\n";
-           echo '<a href="search_anisoninfo_mkr.php?url='.urlencode($item['link']).'">'."\n";
-           echo $item['word']."\n";
-           echo '</a>'."\n";
-           echo "</td>"."\n";
-           print "</tr>\n";
-        }
-        print "</tbody>\n";
-        echo "</table>"."\n";
-        echo "<hr />\n";
-        if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
-            echo '前の50件';
-            echo '</a> &nbsp;';
-        }
-        if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
-            echo '次の50件';
-            echo '</a> &nbsp;';
-        }
-    }
+
 }
-
-
 ?>
+</body>
+</html>

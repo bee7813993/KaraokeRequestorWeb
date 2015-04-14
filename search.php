@@ -31,42 +31,7 @@ require_once 'commonfunc.php';
 <body>
 <a href="request.php" >トップに戻る </a>
 
-<?php
-/**
- * バイト数をフォーマットする
- * @param integer $bytes
- * @param integer $precision
- * @param array $units
- */
-function formatBytes($bytes, $precision = 2, array $units = null)
-{
-    if ( abs($bytes) < 1024 )
-    {
-        $precision = 0;
-    }
 
-    if ( is_array($units) === false )
-    {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-    }
-
-    if ( $bytes < 0 )
-    {
-        $sign = '-';
-        $bytes = abs($bytes);
-    }
-    else
-    {
-        $sign = '';
-    }
-
-    $exp   = floor(log($bytes) / log(1024));
-    $unit  = $units[$exp];
-    $bytes = $bytes / pow(1024, floor($exp));
-    $bytes = sprintf('%.'.$precision.'f', $bytes);
-    return $sign.$bytes.' '.$unit;
-}
-?>
 
 <?php
 //echo $word;
@@ -106,63 +71,14 @@ function formatBytes($bytes, $precision = 2, array $units = null)
   </form>
   and検索は スペース 区切りでいけるっぽい。<br>
   全件検索は*(半角)でいけるっぽい。<br><br>
-  歌手名とかゲーム名では見つからないことが多いので曲名での検索推奨<br>
+  歌手名とかゲーム名では見つからないことが多いので曲名での検索推奨<br><br>
 
   <?php
   	if ( empty ($word)){
   		
   	}else {
-  		$jsonurl = "http://" . $_SERVER["SERVER_NAME"] . ":81/?search=" . urlencode($word) . "&" . $l_order . "&path=1&path_column=3&size_column=4&json=1";
-  		// echo $jsonurl;
-  		$json = file_get_html_with_retry($jsonurl, 5);
-  		$decode = json_decode($json, true);
-        echo "<hr />";
-  		echo "<table id=\"searchresult\">";
-print "<thead>\n";
-print "<tr>\n";
-print "<th>No. </th>\n";
-print "<th>リクエスト </th>\n";
-print "<th>ファイル名(プレビューリンク) </th>\n";
-print "<th>サイズ </th>\n";
-print "<th>パス </th>\n";
-print "</tr>\n";
-print "</thead>\n";
-print "<tbody>\n";
-		foreach($decode["results"] as $k=>$v)
-		{
-		if($v['size'] <= 1 ) continue;
-//			foreach($decode2 as $k=>$v)
-    		echo "<tr><td class=\"no\" >$k</td>";
-    		echo "<td class=\"reqbtn\">";
-    		echo "<form action=\"request_confirm.php\" method=\"post\" >";
-    		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
-    		echo "<input type=\"hidden\" name=\"fullpath\" id=\"fullpath\" value=\"". $v['path'] . "\\" . $v['name'] . "\" />";
-    		echo "<input type=\"submit\" value=\"リクエスト\" />";
-    		echo "</form>";
-    		echo "</td>";
-    		echo "<td class=\"filename\">";
-    		echo $v['name'];
-        $previewpath = "http://" . $_SERVER["HTTP_HOST"] . ":81/" . $v['path'] . "/" . $v['name'];
-    		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
-    		echo "プレビュー";
-    		echo " </A></Div>";
-    		echo "</td>";
-    		echo "<td class=\"filesize\">";
-    		echo formatBytes($v['size']);
-    		echo "</td>";
-    		echo "<td class=\"filepath\">";
-    		echo $v['path'];
-    		echo "</td>";
-    		echo "</tr>";
-    	}
-print "</tbody>\n";
-		echo "</table>";
-
-
-  	echo "\n\n";
-  	echo "<pre>";
-//  	var_dump($decode);
-  	echo "</pre>";
+  	    echo $word."の検索結果 : ";
+        PrintLocalFileListfromkeyword($word);
 
   	}
   	?>

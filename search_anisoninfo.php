@@ -1,6 +1,7 @@
 <?php
 // 変数チェック
 require_once 'modules/simple_html_dom.php';
+require_once 'commonfunc.php';
 
 $l_kind = null;
 if(array_key_exists("kind", $_REQUEST)) {
@@ -12,10 +13,8 @@ if(array_key_exists("url", $_REQUEST)) {
     $l_url = urldecode($_REQUEST["url"]);
 }
 
-require_once 'commonfunc.php';
 
-$everythinghost = $_SERVER["SERVER_NAME"];
-//$everythinghost = 'localhost';
+
 
 // URLを叩いて検索ワード候補リクエスト用URL生成
 function ansoninfo_gettitlelisturl($m,$q,$fullparam){
@@ -124,127 +123,6 @@ function ansoninfo_gettitlelist($url,$l_kind){
     return $results;
 }
 
-/** あいまいな文字を+に置換する
-*/
-function replace_obscure_words($word)
-{
-  // 括弧削除 "/[ ]*\(.*?\)[ ]*/u";
-  $resultwords = preg_replace("/[ ]*\(.*?\)[ ]*/u",' ',$word);
-  // あいまい単語リスト
-  $obscure_list = array(
-                     "★",
-                     "☆",
-                     "？",
-                     "?",
-                     "×"
-                     );
-  // あいまい単語置換(スペースに)
-  $resultwords = str_replace($obscure_list,' ',$resultwords);
-
-  // 最後がスペースだったら取り除き
-  $resultwords = rtrim($resultwords);
-
-  // 単語が6文字以下の場合クォーテーションをつける
-  if(strlen($word) <= 6){
-      $resultwords = '"'.$resultwords.'"';
-  }
-  return $resultwords;
-  
-}
-
-
-/**
- * バイト数をフォーマットする
- * @param integer $bytes
- * @param integer $precision
- * @param array $units
- */
-function formatBytes($bytes, $precision = 2, array $units = null)
-{
-    if ( abs($bytes) < 1024 )
-    {
-        $precision = 0;
-    }
-
-    if ( is_array($units) === false )
-    {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-    }
-
-    if ( $bytes < 0 )
-    {
-        $sign = '-';
-        $bytes = abs($bytes);
-    }
-    else
-    {
-        $sign = '';
-    }
-
-    $exp   = floor(log($bytes) / log(1024));
-    $unit  = $units[$exp];
-    $bytes = $bytes / pow(1024, floor($exp));
-    $bytes = sprintf('%.'.$precision.'f', $bytes);
-    return $sign.$bytes.' '.$unit;
-}
-
-function searchlocalfilename($kerwords, &$result_array)
-{
-		global $everythinghost;
-  		$jsonurl = "http://" . $everythinghost . ":81/?search=" . urlencode($kerwords) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-//  		echo $jsonurl;
-  		$json = file_get_html_with_retry($jsonurl, 5);
-//  		echo $json;
-  		$result_array = json_decode($json, true);
-
-}
-
-function printsonglists($result_array)
-{
-		global $everythinghost;
-		
-  		echo "<table id=\"searchresult\">";
-print "<thead>\n";
-print "<tr>\n";
-print "<th>No. </th>\n";
-print "<th>リクエスト </th>\n";
-print "<th>ファイル名(プレビューリンク) </th>\n";
-print "<th>サイズ </th>\n";
-print "<th>パス </th>\n";
-print "</tr>\n";
-print "</thead>\n";
-print "<tbody>\n";
-		foreach($result_array["results"] as $k=>$v)
-		{
-		if($v['size'] <= 1 ) continue;
-    		echo "<tr><td class=\"no\">$k</td>";
-    		echo "<td class=\"reqbtn\">";
-    		echo "<form action=\"request_confirm.php\" method=\"post\" >";
-    		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
-    		echo "<input type=\"submit\" value=\"リクエスト\" />";
-    		echo "</form>";
-    		echo "</td>";
-    		echo "<td class=\"filename\">";
-    		echo $v['name'];
-        $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
-    		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
-    		echo "プレビュー";
-    		echo " </A></Div>";
-    		echo "</td>";
-    		echo "<td class=\"filesize\">";
-    		echo formatBytes($v['size']);
-    		echo "</td>";
-    		echo "<td class=\"filepath\">";
-    		echo $v['path'];
-    		echo "</td>";
-    		echo "</tr>";
-    	}
-print "</tbody>\n";
-		echo "</table>";
-
-
-  	echo "\n\n";
-}
 
 ?>
 
@@ -330,12 +208,15 @@ if(!isset($l_url)  ) {
         
         foreach($songtitles as $checktitle){
             echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
+            PrintLocalFileListfromkeyword($checktitle);
+/*
             searchlocalfilename($checktitle,$result_a);
             echo $result_a["totalResults"]."件<br />";
             if( $result_a["totalResults"] >= 1) {
                 printsonglists($result_a);
             }
             //  var_dump($result_a);
+*/            
             $songnum = $songnum + 1;
         }
     }
