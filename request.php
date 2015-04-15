@@ -102,6 +102,28 @@ function preventDefault(event)
 {
   event.preventDefault();
 }
+
+// プレーヤーコントローラーの切り替え
+function selectPlayerctrl()
+{
+var nowplayingurl = "http://" + location.hostname + "/playingsong.php"
+
+var statusRequest = new XMLHttpRequest();
+statusRequest.open("GET", nowplayingurl);
+statusRequest.send();
+statusRequest.onload=function(ev){
+   stat = JSON.parse(statusRequest.responseText);
+   
+   if("foobar" == stat.player)
+   {
+        document.getElementById( 'parentplayerarea' ).src ="foobarctl.php";
+   }else {
+        document.getElementById( 'parentplayerarea' ).src ="mpcctrl.php";
+   }
+};
+
+}
+
 </script>
 </head>
 <body>
@@ -136,7 +158,7 @@ function preventDefault(event)
 
 <div align="center" >
 プレイヤーコントローラー
-<iframe src="mpcctrl.php"  class="pcarea" >
+<iframe src="mpcctrl.php"  class="pcarea"  id="parentplayerarea" onmouseover=selectPlayerctrl() >
 ブラウザが対応してないかもです。
 <a href="mpcctrl.php" >こちらのリンク先</a>を使ってみてください。
 </iframe>

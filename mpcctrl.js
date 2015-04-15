@@ -1,5 +1,15 @@
 var playerurl = "http://" + location.hostname + ":13579/command.html"
 
+//window.onload = function () {
+//    document.body.onclick  = setiframe();
+//    stop();
+//}
+
+function setiframe(){
+    var parentDocument = window.parent.document;
+    var myframe = parentDocument.getElementById( 'parentplayerarea' );
+    myframe.src ="foobarctl.php";
+}
 function sleep(time, callback){
   setTimeout(callback, time);
 }

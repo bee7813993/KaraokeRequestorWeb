@@ -1,5 +1,7 @@
 <?php
 
+require_once 'kara_config.php';
+
 if (isset($_SERVER) && isset($_SERVER["SERVER_NAME"]) ){
     //var_dump($_SERVER);
     $everythinghost = $_SERVER["SERVER_NAME"];
@@ -168,6 +170,34 @@ function PrintLocalFileListfromkeyword($word)
     if( $result_a["totalResults"] >= 1) {
         printsonglists($result_a);
     }
+}
+
+function selectplayerfromextension($filepath)
+{
+$extension = pathinfo($filepath, PATHINFO_EXTENSION);
+if( strcasecmp($extension,"mp3") == 0 
+    || strcasecmp($extension,"m4a") == 0 
+    || strcasecmp($extension,"wav") == 0 ){
+    $player="foobar";
+}else {
+    $player="mpc";
+}
+return $player;
+}
+
+function getcurrentplayer(){
+    global $db;
+    $sql = "SELECT * FROM requesttable  WHERE nowplaying = \"再生中\" ORDER BY reqorder ASC ";
+    $select = $db->query($sql);
+    $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+    //var_dump($currentsong);
+    if(count($currentsong) == 0){
+        return "none";
+    }else{
+        $player=selectplayerfromextension($currentsong[0]['songfile']);
+    }
+    return $player;
 }
 
 ?>

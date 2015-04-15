@@ -9,7 +9,7 @@
 </head>
 <?php
   if( !empty($_POST['songnext']) ){
-      include 'kara_config.php';
+      require_once 'kara_config.php';
       $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生中' ORDER BY reqorder ASC ";
       $select = $db->query($sql);
       $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
@@ -21,7 +21,7 @@
 ?>
 <body>
 
-<div align="center" class="playercontrol" >
+<div align="center" class="playercontrol" id="playercontrol">
 <input type="submit" value="再生開始" class="playstart" onClick="song_play()" />
 <br>
 <button type="submit" value="曲の最初から" class="pcbuttom" onClick="song_startfirst()" >曲の最初から</button>

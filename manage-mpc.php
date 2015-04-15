@@ -18,6 +18,7 @@ if(empty($foobarpath)){
 }
 $MPCSTATURL='http://localhost:13579/info.html';
 $MPCCMDURL='http://localhost:13579/command.html';
+$FOOBARSTATURL='http://localhost:82/karaokectrl/';
 
 function mpcstop(){
    global $MPCCMDURL;
@@ -85,11 +86,39 @@ function runningcheck_audio($db,$id,$endtime){
            break;
        }
        
+       global $FOOBARSTATURL;
+       $playerstat = file_get_html_with_retry($FOOBARSTATURL, 5);
+       if( $playerstat === FALSE) {
+           print("maybe stop player\n");
+           break;
+       }
+       //print $playerstat;
+       $statusarray = json_decode(mb_convert_encoding($playerstat,"UTF-8"),true,4096);
+       if( $statusarray === null ){
+        print json_last_error_msg();
+        break;
+       }
+       //var_dump($statusarray);
+       
+       
+       if($statusarray["IS_PLAYING"] == 0 && $statusarray["IS_PAUSED"] == 0 ){
+           //finish playing
+           //print "DEBUG: ".$statusarray["IS_PLAYING"]. ' '. $statusarray["IS_PAUSED"] . "\n";
+           break;
+           
+       }
+       if($statusarray["ITEM_PLAYING_POS"] >= ( $statusarray["ITEM_PLAYING_LEN"] - 2 )){
+           //finish playing
+           //print "DEBUG: ".$statusarray["ITEM_PLAYING_POS"]. '/'. $statusarray["ITEM_PLAYING_LEN"] . "\n";
+           break;
+       }
+/*       
        if( time() > $endtime ){
           print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time())."\n";
           $exit = 0;
           break;
        }
+*/
        //print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time())."\n";
        sleep(2);
    }
@@ -228,6 +257,7 @@ while(1){
                $cmd = "copy /Y \"".$filepath."\" temp.".$extension;
                echo $cmd."\n";
                exec($cmd);
+
                
     //           echo mb_ereg_replace("\\x5c","/",$filepath);
                $getID3 = new getID3();
@@ -254,6 +284,10 @@ while(1){
 
                sleep(1);
                exec($execcmd);
+               if ($playmode == 2){
+                  sleep(1);
+                  exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
+               }
                sleep(2); // Player 起動待ち
                echo "song length: ".$music_info["playtime_seconds"]." ".$music_info["playtime_string"]."\n";
                $endtime=time() + (int)$music_info["playtime_seconds"] + 3;
