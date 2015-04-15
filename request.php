@@ -157,8 +157,8 @@ statusRequest.onload=function(ev){
 <br />
 
 <div align="center" >
-プレイヤーコントローラー
-<iframe src="mpcctrl.php"  class="pcarea"  id="parentplayerarea" onmouseover=selectPlayerctrl() >
+<p onclick=selectPlayerctrl() > プレイヤーコントローラー </p>
+<iframe src="mpcctrl.php"  class="pcarea"  id="parentplayerarea" onmouseover=selectPlayerctrl() ontouchstart=selectPlayerctrl() >
 ブラウザが対応してないかもです。
 <a href="mpcctrl.php" >こちらのリンク先</a>を使ってみてください。
 </iframe>
