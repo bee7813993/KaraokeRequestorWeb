@@ -250,8 +250,10 @@ while(1){
                    sleep(30);
                    continue;
                }
-//               print(" Debug : execcmd : $execcmd\n");
+//             //  print(" Debug : execcmd : $execcmd\n");
                
+               // 再生長取得
+               /* foo_http_controlを使用するようにしたので無効化
                try{
                
                $cmd = "copy /Y \"".$filepath."\" temp.".$extension;
@@ -270,6 +272,7 @@ while(1){
                exec("del temp.".$extension);
 
                // var_dump($music_info);
+               */
 
                
                $db->beginTransaction();
