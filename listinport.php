@@ -22,7 +22,7 @@ if(empty($dbname)){
 }
 
     try {
-        $sql = "INSERT INTO requesttable  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+        $sql = "INSERT INTO requesttable  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?)";
         $stmt = $db->prepare($sql);
     } catch (PDOException $e) {
     	echo 'Connection failed: ' . $e->getMessage();

@@ -13,6 +13,7 @@ $retval = $db->exec($sql);
 if (! $retval ) {
         echo "\nPDO::errorInfo():\n";
         print_r($db->errorInfo());
+        print "<br>dbname : $dbname \n<br>";
 }
 
 
@@ -24,8 +25,11 @@ if (! $retval ) {
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
   <meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
-  <META http-equiv="refresh" content="1; url=request.php">
-  
+<?php
+if($retval){
+print '<META http-equiv="refresh" content="1; url=request.php">';
+}
+?>  
 
   <title>DB消去</title>
   <link type="text/css" rel="stylesheet" href="css/style.css" />

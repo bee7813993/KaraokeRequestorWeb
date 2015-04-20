@@ -153,6 +153,7 @@ color: #fff;
 background: #000;
  }
 #searchresult tbody td.filesize:before { content: "[サイズ] "; }
+#searchresult tbody td.length:before { content: "[再生時間] "; }
 #searchresult tbody td.filepath:before { content: "[パス] "; }
 
 }
