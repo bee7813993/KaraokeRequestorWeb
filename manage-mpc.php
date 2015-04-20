@@ -362,9 +362,9 @@ while(1){
 
                
     //           echo mb_ereg_replace("\\x5c","/",$filepath);
-               $getID3 = new getID3();
-               $music_info = $getID3->analyze("temp.".$extension);
-               getid3_lib::CopyTagsToComments($music_info); 
+//               $getID3 = new getID3();
+ //              $music_info = $getID3->analyze("temp.".$extension);
+ //              getid3_lib::CopyTagsToComments($music_info); 
 
                }catch (Exception $e) {
                echo 'error: '.$e->getMessage()."\n";

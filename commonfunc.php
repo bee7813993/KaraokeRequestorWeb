@@ -1,6 +1,9 @@
 <?php
 
 require_once 'kara_config.php';
+require_once("getid3/getid3.php");
+
+$showsonglengthflag = 0;
 
 if (isset($_SERVER) && isset($_SERVER["SERVER_NAME"]) ){
     //var_dump($_SERVER);
@@ -118,6 +121,9 @@ function searchlocalfilename($kerwords, &$result_array)
 function printsonglists($result_array)
 {
 		global $everythinghost;
+		global $showsonglengthflag;
+		$getID3 = new getID3();
+		$getID3->setOption(array('encoding' => 'UTF-8'));
 		
   		echo "<table id=\"searchresult\">";
 print "<thead>\n";
@@ -126,6 +132,9 @@ print "<th>No. </th>\n";
 print "<th>リクエスト </th>\n";
 print "<th>ファイル名(プレビューリンク) </th>\n";
 print "<th>サイズ </th>\n";
+if($showsonglengthflag == 1 ){
+	print "<th>再生時間 </th>\n";
+}
 print "<th>パス </th>\n";
 print "</tr>\n";
 print "</thead>\n";
@@ -133,6 +142,22 @@ print "<tbody>\n";
 		foreach($result_array["results"] as $k=>$v)
 		{
 		if($v['size'] <= 1 ) continue;
+		
+    	if($showsonglengthflag == 1 ){
+    	  try{
+    		$sjisfilename = addslashes(mb_convert_encoding($v['path'] . "\\" . $v['name'], "cp932", "utf-8"));
+    		//print $sjisfilename."\n";
+    		$music_info = $getID3->analyze($sjisfilename);
+    		getid3_lib::CopyTagsToComments($music_info); 
+    	  }catch (Exception $e) {
+    	    print $sjisfilename."\n";
+    	  }	
+			if(empty($music_info['playtime_string'])){
+			   $length_str = 'Unknown';
+			}else {
+			   $length_str = $music_info['playtime_string'];
+			}
+		}
     		echo "<tr><td class=\"no\">$k</td>";
     		echo "<td class=\"reqbtn\">";
     		echo "<form action=\"request_confirm.php\" method=\"post\" >";
@@ -151,6 +176,11 @@ print "<tbody>\n";
     		echo "<td class=\"filesize\">";
     		echo formatBytes($v['size']);
     		echo "</td>";
+			if($showsonglengthflag == 1 ){
+    			echo "<td class=\"length\">";
+    			echo $length_str;
+    			echo "</td>";
+    		}
     		echo "<td class=\"filepath\">";
     		echo $v['path'];
     		echo "</td>";
