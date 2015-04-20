@@ -210,7 +210,8 @@ while(1){
         if(count($allrequest) == 0 ){
             $nosong = 1;
         }else {
-            $playid = $ptarray[mt_rand(0, (count($allrequest)-1))]['id'];
+            $playid = $allrequest[mt_rand(0, (count($allrequest)))]['id'];
+            //print "DEBUG : id: $playid, cmd :[mt_rand(0, (".(count($allrequest)).")]['id']\n";
             $sql = "SELECT * FROM requesttable  WHERE id = $playid ORDER BY reqorder ASC ";
             $select = $db->query($sql);
         }
@@ -254,6 +255,12 @@ while(1){
                     $playid = $ptarray[mt_rand(0, (count($ptarray)-1))]['id'];
                     if(count($ptarray) == 1 && $playid == $lastplayid ){
                         $nosong = 1;
+                        $nextplayingtimes = minimum_playtimescheck_withoutme($allrequest,$playid) + 1;
+                        $sql = "UPDATE requesttable set  playtimes = $nextplayingtimes WHERE id = $playid ";
+                        $ret = $db->exec($sql);
+                        if (! $ret ) {
+                            print("id : $playid の再生回数 $nextplayingtimes への変更にしっぱいしました。<br>\n");
+                        }
                         break;
                     }
                     if($playid == $lastplayid && count($allrequest) != 1 ){
@@ -375,6 +382,7 @@ while(1){
                */
 
                $l_playtimes = $l_playtimes + 1 ;
+               
                $db->beginTransaction();
                $sql = "UPDATE requesttable set nowplaying = \"再生中\", playtimes = $l_playtimes WHERE id = $l_id ";
                $ret = $db->exec($sql);

@@ -140,7 +140,11 @@ statusRequest.onload=function(ev){
 <div align="center" >
 <form method="GET" action="request_confirm.php?shop_karaoke=1" >
 <input type="hidden" name="shop_karaoke" value="1" />
-<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn"/>
+<?php
+if ($playmode != 4 && $playmode != 5){
+print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn"/> ';
+}
+?>
 </form>
 </div>
 <br />

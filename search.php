@@ -84,11 +84,6 @@ require_once 'commonfunc.php';
   	?>
 <hr />
   <h2>外部データベース連携検索 </h2>
-  (キーワードでインターネット上のデータベースサイトから曲名を検索し、その曲名でローカルにファイルがあるかを検索)<br>
-  (登録されてない曲は見つけられません。)<br>
-  (曲名の一部を含む別の曲とかも検索結果に出ちゃいます。ありがちな1単語の曲名だとたくさん結果に出てきてしまうので注意してね)<br>
-  (網羅されてない新しい曲とか、特殊文字（★とか）が曲名に入っていると見つからない可能性があるので改めてファイル名検索してみて)
-<hr />
   <h3>anison.info連携検索モード </h3>
  
 <FORM name=f action=search_anisoninfo_list.php method=get>
@@ -110,10 +105,9 @@ require_once 'commonfunc.php';
 </span>
 
 </FORM>
-<hr />
   <h3>banditの隠れ家連携検索モード </h3>
   
-  <br>
+
   歌手名検索 
   <form action="searchbandit.php" method="post" style="display: inline" />
   <input type="text" name="searchword">
@@ -135,7 +129,12 @@ require_once 'commonfunc.php';
   <input type="submit" value="検索">
   </form>
   <br />
+
   
+  (キーワードでインターネット上のデータベースサイトから曲名を検索し、その曲名でローカルにファイルがあるかを検索)<br>
+  (登録されてない曲は見つけられません。)<br>
+  (曲名の一部を含む別の曲とかも検索結果に出ちゃいます。ありがちな1単語の曲名だとたくさん結果に出てきてしまうので注意してね)<br>
+  (網羅されてない新しい曲とか、特殊文字（★とか）が曲名に入っていると見つからない可能性があるので改めてファイル名検索してみて)
 
 
 <hr>
