@@ -147,7 +147,7 @@ print "<tbody>\n";
     	  try{
     		$sjisfilename = addslashes(mb_convert_encoding($v['path'] . "\\" . $v['name'], "cp932", "utf-8"));
     		//print $sjisfilename."\n";
-    		$music_info = $getID3->analyze($sjisfilename);
+    		$music_info = @$getID3->analyze($sjisfilename);
     		getid3_lib::CopyTagsToComments($music_info); 
     	  }catch (Exception $e) {
     	    print $sjisfilename."\n";
