@@ -110,6 +110,20 @@ print "DEBUG:".$sql_u.'<br />';
 
 }
 
+if(array_key_exists("playtimes", $_REQUEST)) {
+    $l_playtimes = $_REQUEST["playtimes"];
+
+    try{
+    $sql_u = 'UPDATE requesttable set playtimes = \''. $l_playtimes . '\' WHERE id = '. $l_id;
+print "DEBUG:".$sql_u.'<br />';
+    $ret = $db->query($sql_u);
+    }catch(PDOException $e) {
+		printf("Error: %s\n", $e->getMessage());
+		die();
+    }
+
+}
+
 print("現在の登録状況<br>");
 
 $sql = "SELECT * FROM requesttable ORDER BY id DESC";

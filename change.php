@@ -1,6 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
 <title>項目修正</title>
 </head>
 <body>
@@ -11,7 +12,8 @@
 <?php
 $db = null;
 
-include 'kara_config.php';
+//include 'kara_config.php';
+require_once 'commonfunc.php';
 
 if(array_key_exists("songfile", $_REQUEST)) {
     $l_songfile = $_REQUEST["songfile"];
@@ -20,6 +22,8 @@ if(array_key_exists("songfile", $_REQUEST)) {
 if(array_key_exists("id", $_REQUEST)) {
     $l_id = $_REQUEST["id"];
 }
+
+
 
 print("現在の登録状況<br>");
 try{
@@ -104,7 +108,16 @@ try{
         echo 'nowplaying';
         echo '</td>';
         echo '<td>';
-        echo '<input type="text" name="nowplaying" id="nowplaying" value="';
+        echo '<select  name="nowplaying" id="nowplaying" >';
+        $v='未再生';
+        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
+        $v='再生済';
+        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
+        $v='再生中';
+        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
+        $v='再生済？';
+        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
+//        echo '<input type="text" name="nowplaying" id="nowplaying" value="';
         echo $row['nowplaying'];
         echo '" />';
         echo '</td>';
@@ -155,7 +168,16 @@ try{
         echo '</td>';
         echo '</tr>';
 
-
+        echo '<tr>';
+        echo '<td>';
+        echo 'playtimes';
+        echo '</td>';
+        echo '<td>';
+        echo '<input type="text" name="playtimes" id="playtimes" value="';
+        echo $row['playtimes'];
+        echo '" />';
+        echo '</td>';
+        echo '</tr>';
 
         echo '</table>';
         print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";

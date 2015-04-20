@@ -28,6 +28,7 @@ include 'kara_config.php';
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
 <title>DBファイル名設定画面</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
@@ -78,7 +79,7 @@ if (! empty($newfoobarpath)){
 print $dbname;
 ?>
 <br>
-現在の動作モード(1: 自動再生開始モード, 2: 手動再生開始モード, 3: 手動プレイリスト登録モード ) : 
+現在の動作モード(1: 自動再生開始モード, 2: 手動再生開始モード, 3: 手動プレイリスト登録モード, 4: BGMモード(ジュークボックスモード), 5: BGMモード(フルランダムモード) ) : 
 <?php
 print $playmode;
 ?>
@@ -109,6 +110,8 @@ print $foobarpath;
 <option value="1" >自動再生開始モード</option>
 <option value="2" >手動再生開始モード</option>
 <option value="3" >手動プレイリスト登録モード</option>
+<option value="4" >BGMモード(ジュークボックスモード)</option>
+<option value="5" >BGMモード(フルランダムモード)</option>
 </select>
 <input type="submit" value="OK" />
 </form>
@@ -131,8 +134,6 @@ foobar2000 PATH設定　
 <input type="submit" value="OK" />
 </form>
 
-<a href="request.php" > リクエスト画面に戻る　</a>
-
 <hr />
 <a href ="listexport.php" > リクエストリストのダウンロード </a>
 <form action="listinport.php" method="post" enctype="multipart/form-data">
@@ -141,6 +142,21 @@ foobar2000 PATH設定　
 <input type="submit" value="Send" />  
 </form>
 <a href ="listclear.php" > リクエストリストの全消去 </a>
+
+<hr />
+<form method="post" action="delete.php">
+<input type="submit" name="resettsatus" value="全て未再生化" />
+</form>
+<hr />
+BGMモード用
+&nbsp;
+<a href ="listtimesclear.php?times=0" > 再生回数0クリア </a>
+&nbsp;
+<a href ="listtimesclear.php?times=1" > 再生回数1クリア </a>
+
+<hr />
+<a href="request.php" > リクエストTOP画面に戻る　</a>
+
 </body>
 </html>
 

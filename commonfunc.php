@@ -137,6 +137,7 @@ print "<tbody>\n";
     		echo "<td class=\"reqbtn\">";
     		echo "<form action=\"request_confirm.php\" method=\"post\" >";
     		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
+    		echo "<input type=\"hidden\" name=\"fullpath\" id=\"fullpath\" value=\"". $v['path'] . "\\" . $v['name'] . "\" />";
     		echo "<input type=\"submit\" value=\"リクエスト\" />";
     		echo "</form>";
     		echo "</td>";
@@ -198,6 +199,14 @@ function getcurrentplayer(){
         $player=selectplayerfromextension($currentsong[0]['songfile']);
     }
     return $player;
+}
+
+function selectedcheck($definevalue, $checkvalue){
+    if(strcmp($definevalue,$checkvalue) == 0) {
+        return 'selected';
+    }
+    return ' ';
+    
 }
 
 ?>

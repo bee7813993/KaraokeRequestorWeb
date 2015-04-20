@@ -149,6 +149,10 @@ statusRequest.onload=function(ev){
      print ("自動再生開始モード: 自動で次の曲の再生を開始します。");
      }elseif ($playmode == 2){
      print ("手動再生開始モード: 再生開始を押すと、次の曲が始まります。(歌う人が押してね)");
+     }elseif ($playmode == 4){
+     print ("BGMモード: 自動で次の曲の再生を開始します。すべての再生が終わると再生済みの曲をランダムに流します。");
+     }elseif ($playmode == 5){
+     print ("BGMモード(ランダムモード): 順番は関係なくリストの中からランダムで再生します。");
      }else{
      print ("手動プレイリスト登録モード: 機材係が手動でプレイリストに登録しています。");
      }
@@ -187,6 +191,8 @@ print "<th>再生方法 </th>\n";
      print "<th>再生状況 </th>\n";
      }elseif ($playmode == 2){
      print "<th>再生状況 </th>\n";
+     }elseif ($playmode == 4){
+     print "<th>再生回数 </th>\n";
      }else{
      print "<th>順番 </th>\n";
      }
@@ -214,7 +220,7 @@ print "</td>\n";
 
 print "<td class=\"nowplaying\">";
 print "<div>";
-     if($playmode == 1){
+     if($playmode == 1){  // 自動再生開始モード
      print $row['nowplaying']."<br />";
 print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
 print "<input type=\"hidden\" name=\"id\" value=\"";
@@ -229,7 +235,7 @@ print " <option value=\"再生済\">再生済 </option>";
 print "</select>";
 print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
 print "</form>";
-     }elseif ($playmode == 2){
+     }elseif ($playmode == 2){  // 手動再生開始モード
      print $row['nowplaying'];
 print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
 print "<input type=\"hidden\" name=\"id\" value=\"";
@@ -244,6 +250,8 @@ print " <option value=\"再生済\">再生済 </option>";
 print "</select>";
 print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
 print "</form>";
+     }elseif ($playmode == 4){ // BGMモード
+     print $row['playtimes'];
      }else{
      print $row['reqorder'];
      }
@@ -290,9 +298,7 @@ $db = null;
 <input type="submit" value="設定" />
 </form>
 <a href="toolinfo.php" > 接続情報表示 </a>
-<form method="post" action="delete.php">
-<input type="submit" name="resettsatus" value="全て未再生化" />
-</form>
+
 
 
 </body>

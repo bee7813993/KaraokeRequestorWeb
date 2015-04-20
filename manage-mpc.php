@@ -71,7 +71,7 @@ function runningcheck_shop_karaoke($db,$id){
    }
 }
 
-function runningcheck_audio($db,$id,$endtime){
+function runningcheck_audio($db,$id){
 
    $exit = 1;
    while($exit == 1)
@@ -112,16 +112,22 @@ function runningcheck_audio($db,$id,$endtime){
            //print "DEBUG: ".$statusarray["ITEM_PLAYING_POS"]. '/'. $statusarray["ITEM_PLAYING_LEN"] . "\n";
            break;
        }
-/*       
-       if( time() > $endtime ){
-          print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time())."\n";
-          $exit = 0;
-          break;
-       }
-*/
-       //print "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time())."\n";
+
        sleep(2);
    }
+}
+
+function minimum_playtimescheck_withoutme($all, $myid)
+{
+    $m_value = 4096; // max value of playtimes
+    for($i=0; $i<count($all); $i++) {
+        if($all[$i]['id'] == $myid )
+            continue;
+        $m_value = min($all[$i]['playtimes'], $m_value);
+        //print "debug : $m_value ". '=min' . $all[$i]['playtimes'] . ':' . $m_value . "\n";
+    }
+    // print $m_value;
+    return $m_value;
 }
 
 function runningcheck_mpc($db,$id){
@@ -182,17 +188,111 @@ function runningcheck_mpc($db,$id){
 
 
 while(1){
+
+     //config 再読込
+     readconfig($dbname,$playmode,$playerpath,$fooobarpath);
+     if(! empty($playerpath)){
+        $MPCPATH = $playerpath;
+     }
     
     $played = 5;  // 5:no next song wait sec. 1: played and next song wait sec.
     
-    $sql = "SELECT * FROM requesttable  WHERE nowplaying = '未再生' ORDER BY reqorder ASC ";
-    $select = $db->query($sql);
+    $nosong = 0;
+    $nextplayingtimes=0;
     
-    while($row = $select->fetch(PDO::FETCH_ASSOC)){
+    if( $playmode == 5 ){
+        $sql = "SELECT * FROM requesttable  WHERE NOT kind = 'カラオケ配信' ORDER BY reqorder ASC ";
+        $select = $db->query($sql);
+        $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+        $select->closeCursor();
+        $playid = -1;
+        
+        if(count($allrequest) == 0 ){
+            $nosong = 1;
+        }else {
+            $playid = $ptarray[mt_rand(0, (count($allrequest)-1))]['id'];
+            $sql = "SELECT * FROM requesttable  WHERE id = $playid ORDER BY reqorder ASC ";
+            $select = $db->query($sql);
+        }
+    }
+    elseif( $playmode == 4 ){
+        
+        $sql = "SELECT * FROM requesttable  WHERE NOT kind = 'カラオケ配信' ORDER BY reqorder ASC ";
+        $select = $db->query($sql);
+        $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+        $select->closeCursor();
+        $lastplayid = -1;
+        if(isset($playid)){
+            $lastplayid = $playid;
+        }
+        $playid = -1;
+        
+        if(count($allrequest) == 0 ){
+            $nosong = 1;
+        }else {
+            for($check_playtimes = 0; $check_playtimes<4096 ; $check_playtimes++ ){
+                $ptcounter = 0;
+                $ptarray = array();
+                for($i=0; $i<count($allrequest); $i++)
+                {
+                    $a=$allrequest[$i]['playtimes'];
+                     // print("DEBUG : i: $i, check_playtimes: $check_playtimes, row[pt]: $a, lastplayid: $lastplayid \n");
+                    if($allrequest[$i]['playtimes'] == $check_playtimes) {
+                        $ptarray[] = $allrequest[$i];
+                        //print('add ptarray\n');
+                        //var_dump($ptarray);
+                    }
+                }
+                if(count($ptarray) === 0) continue;
+                
+                if($check_playtimes === 0){
+                    // if playtimes is 0, use oldest request
+                    $playid = $ptarray[0]['id'];
+                    break;
+                }else {
+                    // if playtimes isnot 0, use random request
+                    $playid = $ptarray[mt_rand(0, (count($ptarray)-1))]['id'];
+                    if(count($ptarray) == 1 && $playid == $lastplayid ){
+                        $nosong = 1;
+                        break;
+                    }
+                    if($playid == $lastplayid && count($allrequest) != 1 ){
+                        $nextplayingtimes = minimum_playtimescheck_withoutme($allrequest,$playid) + 1;
+                        $sql = "UPDATE requesttable set  playtimes = $nextplayingtimes WHERE id = $playid ";
+                        $ret = $db->exec($sql);
+                        if (! $ret ) {
+                            print("id : $playid の再生回数 $nextplayingtimes への変更にしっぱいしました。<br>\n");
+                        }
+                        continue;
+                    }
+                    break;
+                }
+            }
+            if( $check_playtimes == 4096 ){
+                print(" internal error, check_playtimes becomes 4096 : $check_playtimes\n");
+                var_dump($allrequest);
+            }
+            if( $playid != -1){
+                $sql = "SELECT * FROM requesttable  WHERE id = $playid ORDER BY reqorder ASC ";
+                $select = $db->query($sql);
+            }
+        }
+        
+    }else {
+        $sql = "SELECT * FROM requesttable  WHERE nowplaying = '未再生' ORDER BY reqorder ASC ";
+        $select = $db->query($sql);
+    }
+    
+    while( $row = $select->fetch(PDO::FETCH_ASSOC)){
+    if ($nosong == 1 ) {
+        $select->closeCursor();
+        break;
+    }
      $word=$row['songfile'];
      $l_id=$row['id'];
      $l_fullpath=$row['fullpath'];
      $l_kind=$row['kind'];
+     $l_playtimes=$row['playtimes'];
      $select->closeCursor();
 
      //config 再読込
@@ -241,7 +341,7 @@ while(1){
            || strcasecmp($extension,"wav") == 0 ){
                // audio file
                
-               if($playmode == 1){
+               if($playmode == 1 || $playmode == 4 || $playmode == 5){
                $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
                }elseif ($playmode == 2){
                $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
@@ -274,9 +374,9 @@ while(1){
                // var_dump($music_info);
                */
 
-               
+               $l_playtimes = $l_playtimes + 1 ;
                $db->beginTransaction();
-               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
+               $sql = "UPDATE requesttable set nowplaying = \"再生中\", playtimes = $l_playtimes WHERE id = $l_id ";
                $ret = $db->exec($sql);
                if (! $ret ) {
                	print("再生中 への変更にしっぱいしました。<br>");
@@ -292,14 +392,12 @@ while(1){
                   exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
                }
                sleep(2); // Player 起動待ち
-               echo "song length: ".$music_info["playtime_seconds"]." ".$music_info["playtime_string"]."\n";
-               $endtime=time() + (int)$music_info["playtime_seconds"] + 3;
-               runningcheck_audio($db,$l_id,$endtime);
+               runningcheck_audio($db,$l_id);
                
            }else {
                // video file
-               if($playmode == 1){
-               $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+               if($playmode == 1 || $playmode == 4 || $playmode == 5){
+               $execcmd="start /b \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
                }elseif ($playmode == 2){
                $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
                }else{
@@ -309,9 +407,9 @@ while(1){
                }
 //               print(" Debug : execcmd : $execcmd\n");
 
-               
+               $l_playtimes = $l_playtimes + 1;
                $db->beginTransaction();
-               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
+               $sql = "UPDATE requesttable set nowplaying = \"再生中\", playtimes = $l_playtimes  WHERE id = $l_id ";
                $ret = $db->exec($sql);
                if (! $ret ) {
                	print("再生中 への変更にしっぱいしました。<br>");

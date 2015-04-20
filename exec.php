@@ -33,7 +33,7 @@ $l_singer=$l_freesinger;
 <?php
 
 try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua )";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 )";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
