@@ -237,7 +237,7 @@ while(1){
                 for($i=0; $i<count($allrequest); $i++)
                 {
                     $a=$allrequest[$i]['playtimes'];
-                     // print("DEBUG : i: $i, check_playtimes: $check_playtimes, row[pt]: $a, lastplayid: $lastplayid \n");
+                      //print("DEBUG : i: $i, check_playtimes: $check_playtimes, row[pt]: $a, lastplayid: $lastplayid \n");
                     if($allrequest[$i]['playtimes'] == $check_playtimes) {
                         $ptarray[] = $allrequest[$i];
                         //print('add ptarray\n');
@@ -253,7 +253,7 @@ while(1){
                 }else {
                     // if playtimes isnot 0, use random request
                     $playid = $ptarray[mt_rand(0, (count($ptarray)-1))]['id'];
-                    if(count($ptarray) == 1 && $playid == $lastplayid ){
+                    if(count($ptarray) == 1 && $playid == $lastplayid && count($ptarray) != 1 ){
                         $nosong = 1;
                         $nextplayingtimes = minimum_playtimescheck_withoutme($allrequest,$playid) + 1;
                         $sql = "UPDATE requesttable set  playtimes = $nextplayingtimes WHERE id = $playid ";
@@ -275,7 +275,7 @@ while(1){
                     break;
                 }
             }
-            if( $check_playtimes == 4096 ){
+            if( $check_playtimes >= 4096 ){
                 print(" internal error, check_playtimes becomes 4096 : $check_playtimes\n");
                 var_dump($allrequest);
             }
