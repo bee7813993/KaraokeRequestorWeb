@@ -1,4 +1,4 @@
-body	{
+﻿body	{
 	background-color:lightblue;
 }
 
@@ -54,7 +54,7 @@ button.pcdelay {
 input.topbtn {
 -webkit-appearance: button;
 width: 95%;
-height: 2em;
+height: 3em;
 }
 
 button.topbtn {
