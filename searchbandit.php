@@ -24,21 +24,21 @@
   <br>
   歌手名検索 
   <form action="searchbandit.php" method="post" style="display: inline" />
-  <input type="text" name="searchword">
+  <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="2" />
   <input type="submit" value="検索">
   </form>
   <br />
   ゲームタイトル検索 
   <form action="searchbandit.php" method="post" style="display: inline"/>
-  <input type="text" name="searchword">
+  <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="3" />
   <input type="submit" value="検索">
   </form>
   <br />
   ゲームブランド検索 
   <form action="searchbandit.php" method="post" style="display: inline" />
-  <input type="text" name="searchword">
+  <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="1" />
   <input type="submit" value="検索">
   </form>

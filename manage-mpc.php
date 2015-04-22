@@ -253,7 +253,23 @@ while(1){
                 }else {
                     // if playtimes isnot 0, use random request
                     $playid = $ptarray[mt_rand(0, (count($ptarray)-1))]['id'];
-                    if(count($ptarray) == 1 && $playid == $lastplayid && count($ptarray) != 1 ){
+                    if($playid == $lastplayid ){ // ランダムで選んだ結果前回と同じ曲だった
+                        if(count($allrequest) <= 1 ) break; // リストが1曲だけの場合同じ曲を繰り返す
+                        if(count($ptarray) > 1 ){  // 同一プレイ回数の曲がある場合
+                            $check_playtimes--;
+                            continue;  // もう一度ランダムに選択してみる
+                        }else {                    // 同一プレイ回数の曲がない場合
+                            // プレイ回数を更新して再チェック
+                            $nextplayingtimes = minimum_playtimescheck_withoutme($allrequest,$playid) + 1;
+                            $sql = "UPDATE requesttable set  playtimes = $nextplayingtimes WHERE id = $playid ";
+                            $ret = $db->exec($sql);
+                            if (! $ret ) {
+                                print("id : $playid の再生回数 $nextplayingtimes への変更にしっぱいしました。<br>\n");
+                            }
+                            continue;
+                        }
+                    }
+/*                    if(count($ptarray) == 1 && $playid == $lastplayid && count($ptarray) != 1 ){
                         $nosong = 1;
                         $nextplayingtimes = minimum_playtimescheck_withoutme($allrequest,$playid) + 1;
                         $sql = "UPDATE requesttable set  playtimes = $nextplayingtimes WHERE id = $playid ";
@@ -272,12 +288,13 @@ while(1){
                         }
                         continue;
                     }
+*/
                     break;
                 }
             }
             if( $check_playtimes >= 4096 ){
                 print(" internal error, check_playtimes becomes 4096 : $check_playtimes\n");
-                var_dump($allrequest);
+                var_dump($ptarray);
             }
             if( $playid != -1){
                 $sql = "SELECT * FROM requesttable  WHERE id = $playid ORDER BY reqorder ASC ";

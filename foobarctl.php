@@ -20,7 +20,7 @@
 
 ?>
 <body>
-
+<p align="center"> 音楽再生用(foobar2000) </p>
 <div align="center" class="playercontrol" >
 <input type="submit" value="再生開始" class="playstart" onClick="song_play()" />
 <br>

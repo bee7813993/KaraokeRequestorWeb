@@ -134,7 +134,7 @@ statusRequest.onload=function(ev){
 
 <div  align="center" >
 <form method="GET" action="search.php" >
-<input type="submit" name="ファイル検索画面"   value="ファイル検索画面" class="topbtn"/>
+<input type="submit" name="曲検索はこちら"   value="曲検索はこちら" class="topbtn"/>
 </form>
 </div>
 <div align="center" >
@@ -146,6 +146,7 @@ print '<input type="submit" name="配信"   value="カラオケ配信曲を歌�
 }
 ?>
 </form>
+
 </div>
 <br />
 
@@ -165,11 +166,10 @@ print '<input type="submit" name="配信"   value="カラオケ配信曲を歌�
      }
 ?>
 </div>
-<br />
 
 <div align="center" >
 <p onclick=selectPlayerctrl() > プレイヤーコントローラー </p>
-<iframe src="mpcctrl.php"  class="pcarea"  id="parentplayerarea" onmouseover=selectPlayerctrl() ontouchstart=selectPlayerctrl() >
+<iframe src="playerctrl_portal.php"  class="pcarea"  id="parentplayerarea"  onmouseover=selectPlayerctrl() ontouchstart=selectPlayerctrl() >
 ブラウザが対応してないかもです。
 <a href="mpcctrl.php" >こちらのリンク先</a>を使ってみてください。
 </iframe>
@@ -186,7 +186,7 @@ if(!count($allrequest) == 0 ){
 
 
 print "<table border=\"2\" id=\"table\">\n";
-print "<caption> 現在の登録状況 </caption>\n";
+print '<caption> 現在の登録状況 <button type="submit" value="" class="topbtn"  onclick=location.reload() >更新</button></caption>'."\n";
 print "<thead>\n";
 print "<tr>\n";
 print "<th>ファイル名 </th>\n";

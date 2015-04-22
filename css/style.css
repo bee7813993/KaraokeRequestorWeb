@@ -8,52 +8,69 @@ input[type="submit"] {
 }
 
 input.toolinfo {
+	width: 95%;
 	font-size: xx-large;
 }
 div.toolinfo {
 	font-size: xx-large;
 }
 input.playstart {
+-webkit-appearance: button;
 	width: 90%;
 	height: 4em;
 }
 
 button.pcbuttom {
+-webkit-appearance: button;
 	width: 30%;
 	height: 3em;
 }
 
 input.pcbuttom {
+-webkit-appearance: button;
 	width: 30%;
 	height: 3em;
 }
 
 button.pcvolume {
+-webkit-appearance: button;
 	width: 45%;
 	height: 3em;
 }
 
 button.pcmorefunc {
+-webkit-appearance: button;
 	width: 30%;
 	height: 3em;
 }
 
 button.pcdelay {
+-webkit-appearance: button;
 	width: 22.2%;
 	height: 3em;
 }
 
 
 input.topbtn {
+-webkit-appearance: button;
 width: 95%;
 height: 2em;
 }
 
+button.topbtn {
+-webkit-appearance: button;
+width: 10%;
+height: 2em;
+}
 
 
 .pcarea {
     width: 95%;
-    height: 15em;
+    height: 17em;
+}
+
+input.fullwidth{
+width: 95%;
 }
 
 
@@ -63,6 +80,14 @@ width: 33%;
 
 #table tbody td.comment {
 width: 25%;
+}
+
+div.searchtextbox {
+float : left;
+}
+
+div.clearleftfloat {
+clear: left; 
 }
 
 @media only screen and (max-width: 500px){*/
@@ -155,5 +180,19 @@ background: #000;
 #searchresult tbody td.filesize:before { content: "[サイズ] "; }
 #searchresult tbody td.length:before { content: "[再生時間] "; }
 #searchresult tbody td.filepath:before { content: "[パス] "; }
+
+input.searchtextbox {
+    width: 95%;
+    height: 2em;
+}
+
+select.searchtextbox {
+    width: 95%;
+    height: 2em;
+}
+
+div.searchtextbox {
+float : none;
+}
 
 }

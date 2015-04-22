@@ -39,40 +39,36 @@ require_once 'commonfunc.php';
 <hr />
 <h2>ファイル名検索 </h2>
   <form action="search.php" method="post">
-  <table>
-  <tr>
-  <td> 検索ワード(ファイル名)</td>
-  <td> 結果表示順</td>
-  </tr>
-  <tr>
-  <td>
-  <input type="text" name="searchword"
+
+  <div class="searchtextbox" >
+  検索ワード(ファイル名) <br>
+  <input type="text" name="searchword" class="searchtextbox" 
   <?php
      if(!empty ($word)){
      print 'value="' . $word . '"';
      }
   ?>
   >
-  <td>
-  <select name="order">
+  </div>
+  
+  <div> 結果表示順 <br>
+  <select name="order" class="searchtextbox" >
   <option value="sort=size&ascending=0" selected >サイズ順(大きい順)</option>
   <option value="sort=path&ascending=1">フォルダ名(昇順)</option>
   <option value="sort=path&ascending=0">フォルダ名(降順)</option>
   <option value="sort=name&ascending=1">ファイル名(昇順)</option>
   <option value="sort=name&ascending=0">ファイル名(降順)</option>
-  <option value="sort=date_modified&ascending=1">日付(昇順)</option>
-  <option value="sort=date_modified&ascending=0">日付(降順)</option>
+  <option value="sort=date_modified&ascending=1">日付(古い順)</option>
+  <option value="sort=date_modified&ascending=0">日付(新しい順)</option>
   </select>
-  </td>
-  </tr>
-  </table>
   <input type="submit" value="検索">
-
+  </div>
+  <div class="clearleftfloat"> 
   </form>
   and検索は スペース 区切りでいけるっぽい。<br>
   全件検索は*(半角)でいけるっぽい。<br><br>
   歌手名とかゲーム名では見つからないことが多いので曲名での検索推奨<br><br>
-
+  </div>
   <?php
   	if ( empty ($word)){
   		
@@ -98,7 +94,7 @@ require_once 'commonfunc.php';
 <INPUT type=radio value=pgrp name=m id="pgrp" onclick="dsp(6)"><label for="pgrp">関連情報</label>
 --->
 <BR>
-<INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?>>
+<INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">
@@ -110,21 +106,21 @@ require_once 'commonfunc.php';
 
   歌手名検索 
   <form action="searchbandit.php" method="post" style="display: inline" />
-  <input type="text" name="searchword">
+  <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="2" />
   <input type="submit" value="検索">
   </form>
   <br />
   ゲームタイトル検索 
   <form action="searchbandit.php" method="post" style="display: inline"/>
-  <input type="text" name="searchword">
+  <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="3" />
   <input type="submit" value="検索">
   </form>
   <br />
   ゲームブランド検索 
   <form action="searchbandit.php" method="post" style="display: inline" />
-  <input type="text" name="searchword">
+  <input type="text" name="searchword" class="searchtextbox">
   <input type="hidden" name="column" value="1" />
   <input type="submit" value="検索">
   </form>

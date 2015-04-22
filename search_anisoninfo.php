@@ -157,7 +157,7 @@ function ansoninfo_gettitlelist($url,$l_kind){
 <INPUT type=radio value=pgrp name=m id="pgrp" onclick="dsp(6)"><label for="pgrp">関連情報</label>
 --->
 <BR>
-<INPUT  name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?>>
+<INPUT  name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">
