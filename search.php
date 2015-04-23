@@ -40,9 +40,8 @@ require_once 'commonfunc.php';
 <h2>ファイル名検索 </h2>
   <form action="search.php" method="post">
 
-  <div class="searchtextbox" >
-  検索ワード(ファイル名) <br>
-  <input type="text" name="searchword" class="searchtextbox" 
+  <div class="searchtextbox" >  検索ワード(ファイル名) <br>
+  <input type="text" name="searchword" class="searchtextbox" placeholder="曲名の一部での検索推奨。それ以外は下の外部DB連携からどうぞ"
   <?php
      if(!empty ($word)){
      print 'value="' . $word . '"';

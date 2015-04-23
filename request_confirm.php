@@ -143,13 +143,13 @@ print('<span style="visibility:visible;">');
 print('<span style="visibility:hidden;">');
 }
 ?>
-<input type="text" name="freesinger" id="freesinger" style="width:100%" >
+<input type="text" name="freesinger" id="freesinger" style="width:100%" placeholder="名前を書いてね。２回目からは上のドロップダウンから選べるようになります。" >
 </span>
 </div>
 
 <div CLASS="comment">
 コメント<br>
-<textarea name="comment" id="comment" rows="4" wrap="soft" style="width:100%" >
+<textarea name="comment" id="comment" rows="4" wrap="soft" placeholder="雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも" style="width:100%" >
 </textarea>
 </div>
 
