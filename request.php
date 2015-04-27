@@ -8,7 +8,15 @@ $fullpath = "";
 if(array_key_exists("fullpath", $_REQUEST)) {
     $fullpath = $_REQUEST["fullpath"];
 }
-    
+
+$user='normal';
+
+if (isset($_SERVER['PHP_AUTH_USER'])){
+    if ($_SERVER['PHP_AUTH_USER'] === 'admin'){
+        print '管理者ログイン中<br>';
+        $user=$_SERVER['PHP_AUTH_USER'];
+    }
+}
 
 
 include 'kara_config.php';
@@ -204,8 +212,9 @@ print "<th>再生方法 </th>\n";
      print "<th>順番 </th>\n";
      }
 print "<th>アクション </th>\n";
+if($user === "admin"){
 print "<th>変更 </th>\n";
-
+}
 print "</tr>\n";
 print "<tbody>\n";
 
@@ -277,8 +286,10 @@ print "\" />";
 print "<input type=\"submit\" name=\"delete\" value=\"削除\"/>";
 print "<input type=\"submit\" name=\"up\"     value=\"上へ\"/>";
 print "<input type=\"submit\" name=\"down\"   value=\"下へ\"/>";
+print "<input type=\"submit\" name=\"warikomi\"   value=\"次に再生\"/>";
 print "</form>";
 print "</td>\n";
+if($user === "admin"){
 print "<td class=\"change\">";
 print "<form method=\"post\" action=\"change.php\">";
 print "<input type=\"hidden\" name=\"id\" value=\"";
@@ -290,6 +301,7 @@ print "\" />";
 print "<input type=\"submit\" name=\"変更\"   value=\"変更\"/>";
 print "</form>";
 print "</td>\n";
+}
 
 print "</tr>\n";
 }

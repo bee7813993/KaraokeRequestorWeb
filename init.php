@@ -1,5 +1,15 @@
 <?php
 
+if (!isset($_SERVER['PHP_AUTH_USER'])){
+    header('WWW-Authenticate: Basic realm="Private Page"');
+    die('このページを見るにはログインが必要です');
+}
+
+if ($_SERVER['PHP_AUTH_USER'] !== 'admin'){
+    header('WWW-Authenticate: Basic realm="Private Page"');
+    die('このページを見るにはログインが必要です');
+}
+
 require_once 'commonfunc.php';
 
 if(array_key_exists("filename", $_REQUEST)) {
@@ -25,6 +35,10 @@ if(array_key_exists("foobarpath", $_REQUEST)) {
 
 if(array_key_exists("requestcomment", $_REQUEST)) {
     $newrequestcomment = $_REQUEST["requestcomment"];
+}
+
+if(array_key_exists("clearauth", $_REQUEST)) {
+    header('HTTP/1.0 401 Unauthorized');
 }
 
 //include 'kara_config.php';
@@ -190,6 +204,11 @@ BGMモード用
 <a href ="listtimesclear.php?times=1" > 再生回数1クリア </a>
 
 <hr />
+
+<p>
+<a href ="init.php?clearauth=1" > ログイン情報クリア </a>
+</p>
+
 <a href="request.php" > リクエストTOP画面に戻る　</a>
 
 </body>
