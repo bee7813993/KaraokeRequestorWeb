@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment){
 
     global $configfile;
     global $config_ini;
@@ -10,10 +10,21 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath){
     if(file_exists($configfile)){
         $config_ini = parse_ini_file($configfile);
     //    var_dump($config_ini);
-        $dbname = $config_ini["dbname"];
-        $playmode = $config_ini["playmode"];
-        $playerpath = urldecode($config_ini["playerpath"]);
-        $foobarpath = urldecode($config_ini["foobarpath"]);
+        if(array_key_exists("dbname", $config_ini) ){
+            $dbname = $config_ini["dbname"];
+        }
+        if(array_key_exists("playmode", $config_ini) ){
+            $playmode = $config_ini["playmode"];
+        }
+        if(array_key_exists("playerpath", $config_ini) ){
+            $playerpath = urldecode($config_ini["playerpath"]);
+        }
+        if(array_key_exists("foobarpath", $config_ini) ){
+            $foobarpath = urldecode($config_ini["foobarpath"]);
+        }
+        if(array_key_exists("requestcomment", $config_ini) ){
+            $requestcomment = urldecode($config_ini["requestcomment"]);
+        }
     } else {
         $fp = fopen($configfile, 'w');
         fclose($fp);
@@ -51,6 +62,14 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath){
         fclose($fp);
     }
 
+    if(empty($requestcomment)){
+        $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
+        $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
+        $fp = fopen($configfile, 'w');
+        foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+        fclose($fp);
+    }
+
 //    $playerpath = "'".$playerpath."'";
     //var_dump($config_ini);
 }
@@ -80,14 +99,14 @@ $sql = "create table IF NOT EXISTS requesttable (
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){
-	print("Create table ���s���܂����B<br>");
+	print("Create table 失敗しました。<br>");
 	die();
 }
  return($db);
 
 }
 
-readconfig($dbname,$playmode,$playerpath,$foobarpath);
+readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment);
 initdb($db,$dbname);
 
 // cache control

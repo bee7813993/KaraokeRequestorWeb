@@ -127,7 +127,7 @@ foreach($singerlist as $singer){
       $selectedcounter = $selectedcounter + 1 ;
   }
   print "> ";
-  print $singer;
+  print htmlspecialchars($singer);
   print "</option>";
 }
 }
@@ -149,7 +149,7 @@ print('<span style="visibility:hidden;">');
 
 <div CLASS="comment">
 コメント<br>
-<textarea name="comment" id="comment" rows="4" wrap="soft" placeholder="雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも" style="width:100%" >
+<textarea name="comment" id="comment" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
 </textarea>
 </div>
 

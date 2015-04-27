@@ -27,14 +27,14 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
        echo '<td class="searchname" >'."\n";
        $l = str_replace('../',"",$item['link']);
        echo '<a href="search_anisoninfo.php?url='.$l.'&kind=program">'."\n";
-       echo $item['word']."\n";
+       echo htmlspecialchars($item['word'])."\n";
        echo '</a>'."\n";
        echo "</td>"."\n";
        echo '<td class="genre" >'."\n";
-       echo $item['genre']."\n";
+       echo htmlspecialchars($item['genre'])."\n";
        echo "</td>"."\n";
        echo '<td class="onair" >'."\n";
-       echo $item['onair']."\n";
+       echo htmlspecialchars($item['onair'])."\n";
        echo "</td>"."\n";
        print "</tr>\n";
    }
@@ -66,7 +66,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
            print "<tr>\n";
            echo '<td class="searchname" >'."\n";
            echo '<a href="search_anisoninfo.php?url='.$item['link'].'&kind=artist" >'."\n";
-           echo $item['word']."\n";
+           echo htmlspecialchars($item['word'])."\n";
            echo '</a>'."\n";
            echo "</td>"."\n";
            print "</tr>\n";
@@ -99,7 +99,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
            print "<tr>\n";
            echo '<td class="searchname" >'."\n";
            echo '<a href="search_anisoninfo_mkr.php?url='.urlencode($item['link']).'">'."\n";
-           echo $item['word']."\n";
+           echo htmlspecialchars($item['word'])."\n";
            echo '</a>'."\n";
            echo "</td>"."\n";
            print "</tr>\n";

@@ -167,7 +167,7 @@ print "<tbody>\n";
     		echo "</form>";
     		echo "</td>";
     		echo "<td class=\"filename\">";
-    		echo $v['name'];
+    		echo htmlspecialchars($v['name']);
         $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
     		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
     		echo "プレビュー";
@@ -182,7 +182,7 @@ print "<tbody>\n";
     			echo "</td>";
     		}
     		echo "<td class=\"filepath\">";
-    		echo $v['path'];
+    		echo htmlspecialchars($v['path']);
     		echo "</td>";
     		echo "</tr>";
     	}

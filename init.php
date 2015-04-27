@@ -1,5 +1,7 @@
 <?php
 
+require_once 'commonfunc.php';
+
 if(array_key_exists("filename", $_REQUEST)) {
     $newdb = $_REQUEST["filename"];
 }
@@ -21,7 +23,11 @@ if(array_key_exists("foobarpath", $_REQUEST)) {
     $newfoobarpath = $_REQUEST["foobarpath"];
 }
 
-include 'kara_config.php';
+if(array_key_exists("requestcomment", $_REQUEST)) {
+    $newrequestcomment = $_REQUEST["requestcomment"];
+}
+
+//include 'kara_config.php';
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -75,6 +81,18 @@ if (! empty($newfoobarpath)){
     print "foobar2000のPATHを".$foobarpath."に変更しました。<br><br>";
 }
 
+if (! empty($newrequestcomment)){
+    $requestcomment = $newrequestcomment;
+    $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "リクエスト画面のコメント欄の説明を変更しました。<br><br>";
+}else {
+    // $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
+}
+
+
 ?>
  
 現在のDBファイル名 : 
@@ -110,11 +128,11 @@ print $foobarpath;
 動作モード選択　
 <form method="post" action="init.php">
 <select name="playmode" id="playmode" >  
-<option value="1" >自動再生開始モード</option>
-<option value="2" >手動再生開始モード</option>
-<option value="3" >手動プレイリスト登録モード</option>
-<option value="4" >BGMモード(ジュークボックスモード)</option>
-<option value="5" >BGMモード(フルランダムモード)</option>
+<option value="1" <?php selectedcheck("1",$playmode); ?> >自動再生開始モード</option>
+<option value="2" <?php selectedcheck("1",$playmode); ?> >手動再生開始モード</option>
+<option value="3" <?php selectedcheck("1",$playmode); ?> >手動プレイリスト登録モード</option>
+<option value="4" <?php selectedcheck("1",$playmode); ?> >BGMモード(ジュークボックスモード)</option>
+<option value="5" <?php selectedcheck("1",$playmode); ?> >BGMモード(フルランダムモード)</option>
 </select>
 <input type="submit" value="OK" />
 </form>
@@ -134,6 +152,15 @@ foobar2000 PATH設定　
 <form method="post" action="init.php">
 任意のPATH選択 :
 <input type="text" name="foobarpath" size="100" class="foobarpath" value="<?php echo $foobarpath; ?>" />
+<input type="submit" value="OK" />
+</form>
+<hr />
+
+リクエスト画面の説明書き
+<form method="post" action="init.php">
+<textarea name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
+<?php print htmlspecialchars($requestcomment); ?>
+</textarea>
 <input type="submit" value="OK" />
 </form>
 
