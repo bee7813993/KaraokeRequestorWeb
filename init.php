@@ -1,12 +1,12 @@
 <?php
 
 if (!isset($_SERVER['PHP_AUTH_USER'])){
-    header('WWW-Authenticate: Basic realm="Private Page"');
+    header('WWW-Authenticate: Basic realm="Please use username admin to open Configuration page. "');
     die('このページを見るにはログインが必要です');
 }
 
 if ($_SERVER['PHP_AUTH_USER'] !== 'admin'){
-    header('WWW-Authenticate: Basic realm="Private Page"');
+    header('WWW-Authenticate: Basic realm="You can use username only admin."');
     die('このページを見るにはログインが必要です');
 }
 

@@ -283,10 +283,16 @@ print "\" />";
 print "<input type=\"hidden\" name=\"songfile\" value=\"";
 print $row['songfile'];
 print "\" />";
-print "<input type=\"submit\" name=\"delete\" value=\"削除\"/>";
+print '<div class="acition" >';
 print "<input type=\"submit\" name=\"up\"     value=\"上へ\"/>";
 print "<input type=\"submit\" name=\"down\"   value=\"下へ\"/>";
+print '</div>';
+print '<div class="acition2" >';
+print "<input type=\"submit\" name=\"delete\" value=\"削除\"/>";
 print "<input type=\"submit\" name=\"warikomi\"   value=\"次に再生\"/>";
+print '</div>';
+print '<div class="clear" >';
+print '</div>';
 print "</form>";
 print "</td>\n";
 if($user === "admin"){
