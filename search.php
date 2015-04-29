@@ -73,7 +73,7 @@ require_once 'commonfunc.php';
   		
   	}else {
   	    echo $word."の検索結果 : ";
-        PrintLocalFileListfromkeyword($word);
+        PrintLocalFileListfromkeyword($word,$l_order);
 
   	}
   	?>

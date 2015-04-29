@@ -106,10 +106,14 @@ function formatBytes($bytes, $precision = 2, array $units = null)
 }
 
 // 検索ワードから検索結果一覧を取得する処理
-function searchlocalfilename($kerwords, &$result_array)
+function searchlocalfilename($kerwords,$order, &$result_array)
 {
+
 		global $everythinghost;
-  		$jsonurl = "http://" . $everythinghost . ":81/?search=" . urlencode($kerwords) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+		if(empty($order)){
+		    $order = 'sort=size&ascending=0';
+		}
+  		$jsonurl = "http://" . $everythinghost . ":81/?search=" . urlencode($kerwords) . "&". $order . "&path=1&path_column=3&size_column=4&json=1";
 //  		echo $jsonurl;
   		$json = file_get_html_with_retry($jsonurl, 5, 30);
 //  		echo $json;
@@ -194,9 +198,9 @@ print "</tbody>\n";
 }
 
 // 検索ワードからファイル一覧を表示するまでの処理
-function PrintLocalFileListfromkeyword($word)
+function PrintLocalFileListfromkeyword($word,$order)
 {
-    searchlocalfilename($word,$result_a);
+    searchlocalfilename($word,$order,$result_a);
     echo $result_a["totalResults"]."件<br />";
     if( $result_a["totalResults"] >= 1) {
         printsonglists($result_a);

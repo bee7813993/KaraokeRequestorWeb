@@ -134,9 +134,9 @@ $songnum = 0;
         foreach($songtitles as $checktitle){
                   
               echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-              PrintLocalFileListfromkeyword($checktitle);
+              PrintLocalFileListfromkeyword($checktitle,'sort=size&ascending=0');
 /*
-              searchlocalfilename($checktitle,$result_a);
+              searchlocalfilename($checktitle,'sort=size&ascending=0',$result_a);
               echo $result_a["totalResults"]."件<br />";
               if( $result_a["totalResults"] >= 1) {
                 printsonglists($result_a);
