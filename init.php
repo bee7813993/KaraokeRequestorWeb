@@ -127,6 +127,9 @@ print $playerpath;
 現在のfoobar2000 PATH :
 <?php
 print $foobarpath;
+
+
+print $requestcomment;
 ?>
 
 <br>
@@ -142,11 +145,11 @@ print $foobarpath;
 動作モード選択　
 <form method="post" action="init.php">
 <select name="playmode" id="playmode" >  
-<option value="1" <?php selectedcheck("1",$playmode); ?> >自動再生開始モード</option>
-<option value="2" <?php selectedcheck("1",$playmode); ?> >手動再生開始モード</option>
-<option value="3" <?php selectedcheck("1",$playmode); ?> >手動プレイリスト登録モード</option>
-<option value="4" <?php selectedcheck("1",$playmode); ?> >BGMモード(ジュークボックスモード)</option>
-<option value="5" <?php selectedcheck("1",$playmode); ?> >BGMモード(フルランダムモード)</option>
+<option value="1" <?php print selectedcheck("1",$playmode); ?> >自動再生開始モード</option>
+<option value="2" <?php print selectedcheck("2",$playmode); ?> >手動再生開始モード</option>
+<option value="3" <?php print selectedcheck("3",$playmode); ?> >手動プレイリスト登録モード</option>
+<option value="4" <?php print selectedcheck("4",$playmode); ?> >BGMモード(ジュークボックスモード)</option>
+<option value="5" <?php print selectedcheck("5",$playmode); ?> >BGMモード(フルランダムモード)</option>
 </select>
 <input type="submit" value="OK" />
 </form>
@@ -154,10 +157,11 @@ print $foobarpath;
 MediaPlayerClassic PATH設定　
 <form method="post" action="init.php">
 <select name="playerpath" id="playerpath" >  
-<option value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
-<option value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
+<option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",$playerpath); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
+<option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",$playerpath); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
 </select>
-任意のPATH選択 :
+<br />
+&nbsp;(任意のPATH選択):
 <input type="text" name="playerpath_any" size="100" class="playerpath_any" />
 <input type="submit" value="OK" />
 </form>

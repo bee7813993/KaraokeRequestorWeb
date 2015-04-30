@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none'){
 
     global $configfile;
     global $config_ini;
@@ -22,8 +22,10 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         if(array_key_exists("foobarpath", $config_ini) ){
             $foobarpath = urldecode($config_ini["foobarpath"]);
         }
-        if(array_key_exists("requestcomment", $config_ini) ){
-            $requestcomment = urldecode($config_ini["requestcomment"]);
+        if(strcmp($requestcomment,'none') != 0){
+            if(array_key_exists("requestcomment", $config_ini) ){
+                $requestcomment = urldecode($config_ini["requestcomment"]);
+            }
         }
     } else {
         $fp = fopen($configfile, 'w');
@@ -62,12 +64,14 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         fclose($fp);
     }
 
-    if(empty($requestcomment)){
-        $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
-        $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
-        $fp = fopen($configfile, 'w');
-        foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-        fclose($fp);
+    if(! is_null($requestcomment)){
+        if(empty($requestcomment)){
+            $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
+            $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+            fclose($fp);
+        }
     }
 
 //    $playerpath = "'".$playerpath."'";

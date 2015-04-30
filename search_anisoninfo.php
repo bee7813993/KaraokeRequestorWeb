@@ -13,6 +13,10 @@ if(array_key_exists("url", $_REQUEST)) {
     $l_url = urldecode($_REQUEST["url"]);
 }
 
+$l_order = null;
+if(array_key_exists("order", $_REQUEST)) {
+    $l_order = urldecode($_REQUEST["order"]);
+}
 
 
 
@@ -158,6 +162,17 @@ function ansoninfo_gettitlelist($url,$l_kind){
 --->
 <BR>
 <INPUT  name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+  <div> 結果表示順(同じ検索ワード内) <br>
+  <select name="order" class="searchtextbox" >
+  <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
+  <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
+  <option value="sort=path&ascending=0" <?php print selectedcheck("sort=path&ascending=0",$l_order); ?> >フォルダ名(昇順 Z→A)</option>
+  <option value="sort=name&ascending=1" <?php print selectedcheck("sort=name&ascending=1",$l_order); ?> >ファイル名(降順 A→Z)</option>
+  <option value="sort=name&ascending=0" <?php print selectedcheck("sort=name&ascending=0",$l_order); ?> >ファイル名(昇順 Z→A)</option>
+  <option value="sort=date_modified&ascending=0" <?php print selectedcheck("sort=date_modified&ascending=0",$l_order); ?> >日付(新しい順)</option>
+  <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
+  </select>
+  </div>
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">
@@ -208,9 +223,9 @@ if(!isset($l_url)  ) {
         
         foreach($songtitles as $checktitle){
             echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-            PrintLocalFileListfromkeyword($checktitle,'sort=size&ascending=0');
+            PrintLocalFileListfromkeyword($checktitle,$l_order);
 /*
-            searchlocalfilename($checktitle,'sort=size&ascending=0',$result_a);
+            searchlocalfilename($checktitle,$l_order,$result_a);
             echo $result_a["totalResults"]."件<br />";
             if( $result_a["totalResults"] >= 1) {
                 printsonglists($result_a);

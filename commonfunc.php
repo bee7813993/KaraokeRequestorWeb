@@ -106,7 +106,7 @@ function formatBytes($bytes, $precision = 2, array $units = null)
 }
 
 // 検索ワードから検索結果一覧を取得する処理
-function searchlocalfilename($kerwords,$order, &$result_array)
+function searchlocalfilename($kerwords, &$result_array,$order = null)
 {
 
 		global $everythinghost;
@@ -198,9 +198,9 @@ print "</tbody>\n";
 }
 
 // 検索ワードからファイル一覧を表示するまでの処理
-function PrintLocalFileListfromkeyword($word,$order)
+function PrintLocalFileListfromkeyword($word,$order = null)
 {
-    searchlocalfilename($word,$order,$result_a);
+    searchlocalfilename($word,$result_a,$order);
     echo $result_a["totalResults"]."件<br />";
     if( $result_a["totalResults"] >= 1) {
         printsonglists($result_a);
@@ -240,7 +240,17 @@ function selectedcheck($definevalue, $checkvalue){
         return 'selected';
     }
     return ' ';
-    
+}
+
+function print_meta_header(){
+    print '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
+    print "\n";
+    print '<meta http-equiv="Content-Style-Type" content="text/css" />';
+    print "\n";
+    print '<meta http-equiv="Content-Script-Type" content="text/javascript" />';
+    print "\n";
+    print '<meta name="viewport" content="width=device-width,initial-scale=1.0" />';
+    print "\n";
 }
 
 ?>

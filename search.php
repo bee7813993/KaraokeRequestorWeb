@@ -17,10 +17,7 @@ require_once 'commonfunc.php';
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta http-equiv="Content-Script-Type" content="text/javascript" />
-  <meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
+<?php print_meta_header();?>
   <script type="text/javascript">
 
     // ここに処理を記述します。
@@ -52,13 +49,13 @@ require_once 'commonfunc.php';
   
   <div> 結果表示順 <br>
   <select name="order" class="searchtextbox" >
-  <option value="sort=size&ascending=0" selected >サイズ順(大きい順)</option>
-  <option value="sort=path&ascending=1">フォルダ名(昇順)</option>
-  <option value="sort=path&ascending=0">フォルダ名(降順)</option>
-  <option value="sort=name&ascending=1">ファイル名(昇順)</option>
-  <option value="sort=name&ascending=0">ファイル名(降順)</option>
-  <option value="sort=date_modified&ascending=1">日付(古い順)</option>
-  <option value="sort=date_modified&ascending=0">日付(新しい順)</option>
+  <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
+  <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
+  <option value="sort=path&ascending=0" <?php print selectedcheck("sort=path&ascending=0",$l_order); ?> >フォルダ名(昇順 Z→A)</option>
+  <option value="sort=name&ascending=1" <?php print selectedcheck("sort=name&ascending=1",$l_order); ?> >ファイル名(降順 A→Z)</option>
+  <option value="sort=name&ascending=0" <?php print selectedcheck("sort=name&ascending=0",$l_order); ?> >ファイル名(昇順 Z→A)</option>
+  <option value="sort=date_modified&ascending=0" <?php print selectedcheck("sort=date_modified&ascending=0",$l_order); ?> >日付(新しい順)</option>
+  <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
   </select>
   <input type="submit" value="検索">
   </div>
@@ -66,7 +63,6 @@ require_once 'commonfunc.php';
   </form>
   and検索は スペース 区切りでいけるっぽい。<br>
   全件検索は*(半角)でいけるっぽい。<br><br>
-  歌手名とかゲーム名では見つからないことが多いので曲名での検索推奨<br><br>
   </div>
   <?php
   	if ( empty ($word)){
@@ -94,6 +90,17 @@ require_once 'commonfunc.php';
 --->
 <BR>
 <INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+  <div> 結果表示順(同じ検索ワード内) <br>
+  <select name="order" class="searchtextbox" >
+  <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
+  <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
+  <option value="sort=path&ascending=0" <?php print selectedcheck("sort=path&ascending=0",$l_order); ?> >フォルダ名(昇順 Z→A)</option>
+  <option value="sort=name&ascending=1" <?php print selectedcheck("sort=name&ascending=1",$l_order); ?> >ファイル名(降順 A→Z)</option>
+  <option value="sort=name&ascending=0" <?php print selectedcheck("sort=name&ascending=0",$l_order); ?> >ファイル名(昇順 Z→A)</option>
+  <option value="sort=date_modified&ascending=0" <?php print selectedcheck("sort=date_modified&ascending=0",$l_order); ?> >日付(新しい順)</option>
+  <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
+  </select>
+  </div>
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">

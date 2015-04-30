@@ -2,6 +2,7 @@
 // 変数チェック
 require_once 'modules/simple_html_dom.php';
 require_once 'search_anisoninfo_common.php';
+require_once 'commonfunc.php';
 
 $l_m = 'pro';
 if(array_key_exists("m", $_REQUEST)) {
@@ -16,6 +17,10 @@ if(array_key_exists("url", $_REQUEST)) {
     $l_url = urldecode($_REQUEST["url"]);
 }
 
+$l_order = null;
+if(array_key_exists("order", $_REQUEST)) {
+    $l_order = urldecode($_REQUEST["order"]);
+}
 
 // 検索ワード候補表示画面
 
@@ -149,20 +154,30 @@ function ansoninfo_gettitlelist($url,$l_m){
 <hr />
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
-<INPUT type=radio checked value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
+<INPUT type=radio <?php print selすectedcheck("pro",$l_m)=='selected'?'checked':' '; ?> value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
 <!---
-<INPUT type=radio value=song name=m id="song" onclick="dsp(2)"><label for="song">曲</label>
+<INPUT type=radio <?php print selectedcheck("song",$l_m)=='selected'?'checked':' '; ?> value=song name=m id="song" onclick="dsp(2)"><label for="song">曲</label>
 --->
-<INPUT type=radio value=person name=m id="person" onclick="dsp(3)"><label for="person">人物</label>
-<INPUT type=radio value=mkr name=m id="mkr" onclick="dsp(5)"><label for="mkr">制作(ブランド)</label>
+<INPUT type=radio <?php print selectedcheck("person",$l_m)=='selected'?'checked':' '; ?> value=person name=m id="person" onclick="dsp(3)"><label for="person">人物</label>
+<INPUT type=radio <?php print selectedcheck("mkr",$l_m)=='selected'?'checked':' '; ?> value=mkr name=m id="mkr" onclick="dsp(5)"><label for="mkr">制作(ブランド)</label>
 <!---
 <INPUT type=radio value=rec name=m id="rec" onclick="dsp(4)"><label for="rec">音源</label>
 <INPUT type=radio value=pgrp name=m id="pgrp" onclick="dsp(6)"><label for="pgrp">関連情報</label>
 --->
 <BR>
 <INPUT  name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+  <div> 結果表示順(同じ検索ワード内) <br>
+  <select name="order" class="searchtextbox" >
+  <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
+  <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
+  <option value="sort=path&ascending=0" <?php print selectedcheck("sort=path&ascending=0",$l_order); ?> >フォルダ名(昇順 Z→A)</option>
+  <option value="sort=name&ascending=1" <?php print selectedcheck("sort=name&ascending=1",$l_order); ?> >ファイル名(降順 A→Z)</option>
+  <option value="sort=name&ascending=0" <?php print selectedcheck("sort=name&ascending=0",$l_order); ?> >ファイル名(昇順 Z→A)</option>
+  <option value="sort=date_modified&ascending=0" <?php print selectedcheck("sort=date_modified&ascending=0",$l_order); ?> >日付(新しい順)</option>
+  <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
+  </select>
+  </div>
 <INPUT type=submit value=検索><BR><BR>
-
 <span id="selectTag">
 </span>
 
@@ -179,7 +194,7 @@ if(!isset($l_url)  ) {
    $nexturlbase = 'http://anison.info/data/';
     $list = ansoninfo_gettitlelist($nexturlbase.$l_url,$l_m);
     
-    anisoninfo_display_middlelist($list,$l_m,$l_q);
+    anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order);
 
 
    //var_dump($list);

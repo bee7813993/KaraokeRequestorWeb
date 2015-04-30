@@ -1,6 +1,6 @@
 <?php
 
-function anisoninfo_display_middlelist($list,$l_m,$l_q)
+function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL)
 {
    if(strcmp ('pro',$l_m) == 0)
    {    
@@ -26,7 +26,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
        print "<tr>\n";
        echo '<td class="searchname" >'."\n";
        $l = str_replace('../',"",$item['link']);
-       echo '<a href="search_anisoninfo.php?url='.$l.'&kind=program">'."\n";
+       echo '<a href="search_anisoninfo.php?url='.$l.'&kind=program&order='.urlencode($l_order).'">'."\n";
        echo htmlspecialchars($item['word'])."\n";
        echo '</a>'."\n";
        echo "</td>"."\n";
@@ -42,12 +42,12 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
    echo "</table>"."\n";
         echo "<hr />\n";
         if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
             echo '前の50件';
             echo '</a> &nbsp;';
         }
         if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
             echo '次の50件';
             echo '</a> &nbsp;';
         }
@@ -65,7 +65,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
            if(!isset($item['word'])) continue;
            print "<tr>\n";
            echo '<td class="searchname" >'."\n";
-           echo '<a href="search_anisoninfo.php?url='.$item['link'].'&kind=artist" >'."\n";
+           echo '<a href="search_anisoninfo.php?url='.$item['link'].'&kind=artist&order='.urlencode($l_order).'" >'."\n";
            echo htmlspecialchars($item['word'])."\n";
            echo '</a>'."\n";
            echo "</td>"."\n";
@@ -75,12 +75,12 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
         echo "</table>"."\n";
         echo "<hr />\n";
         if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
             echo '前の50件';
             echo '</a> &nbsp;';
         }
         if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
             echo '次の50件';
             echo '</a> &nbsp;';
         }
@@ -98,7 +98,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
            if(!isset($item['word'])) continue;
            print "<tr>\n";
            echo '<td class="searchname" >'."\n";
-           echo '<a href="search_anisoninfo_mkr.php?url='.urlencode($item['link']).'">'."\n";
+           echo '<a href="search_anisoninfo_mkr.php?url='.urlencode($item['link']).'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
            echo htmlspecialchars($item['word'])."\n";
            echo '</a>'."\n";
            echo "</td>"."\n";
@@ -108,12 +108,12 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q)
         echo "</table>"."\n";
         echo "<hr />\n";
         if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
             echo '前の50件';
             echo '</a> &nbsp;';
         }
         if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
             echo '次の50件';
             echo '</a> &nbsp;';
         }

@@ -13,13 +13,13 @@ $user='normal';
 
 if (isset($_SERVER['PHP_AUTH_USER'])){
     if ($_SERVER['PHP_AUTH_USER'] === 'admin'){
-        print '管理者ログイン中<br>';
+        // print '管理者ログイン中<br>';
         $user=$_SERVER['PHP_AUTH_USER'];
     }
 }
 
 
-include 'kara_config.php';
+require_once 'commonfunc.php';
 
 $sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
 $select = $db->query($sql);
@@ -31,13 +31,10 @@ $select->closeCursor();
 <!doctype html>
 <html lang="ja">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="Content-Style-Type" content="text/css" />
-<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<?php print_meta_header();?>
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
-<meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
 
 <title>カラオケ動画リクエスト</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
@@ -138,8 +135,11 @@ statusRequest.onload=function(ev){
 </script>
 </head>
 <body>
-
-
+<?php
+if ($user === 'admin'){
+    print '管理者ログイン中<br>';
+}
+?>
 <div  align="center" >
 <form method="GET" action="search.php" >
 <input type="submit" name="曲検索はこちら"   value="曲検索はこちら" class="topbtn"/>
