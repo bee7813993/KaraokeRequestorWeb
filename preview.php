@@ -21,7 +21,7 @@ videojs.options.flash.swf = "video-js/video-js.swf";
 <br>
 もしかしたらプレビューできるかもしれない画面。<br>
 ブラウザがHTML5でその動画形式を再生できるか次第<br>
-<video id="preview_video" class="video-js vjs-default-skin" controls preload="none"  data-setup="{}" width="90%" height="90%" >
+<video id="preview_video" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}" width="90%" height="90%" >
     <source src="<?php echo $movie ?>"  />
 </video>
 
