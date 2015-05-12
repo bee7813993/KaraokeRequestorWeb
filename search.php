@@ -17,7 +17,9 @@ require_once 'commonfunc.php';
 <!doctype html>
 <html lang="ja">
 <head>
-<?php print_meta_header();?>
+<?php 
+//print_meta_header();
+?>
   <script type="text/javascript">
 
     // ここに処理を記述します。
@@ -35,7 +37,7 @@ require_once 'commonfunc.php';
 ?>
 <hr />
 <h2>ファイル名検索 </h2>
-  <form action="search.php" method="post">
+  <form action="search.php" method="GET">
 
   <div class="searchtextbox" >  検索ワード(ファイル名) <br>
   <input type="text" name="searchword" class="searchtextbox" placeholder="曲名の一部での検索推奨。それ以外は下の外部DB連携も使えます"
@@ -111,21 +113,21 @@ require_once 'commonfunc.php';
   
 
   歌手名検索 
-  <form action="searchbandit.php" method="post" style="display: inline" />
+  <form action="searchbandit.php" method="GET" style="display: inline" />
   <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="2" />
   <input type="submit" value="検索">
   </form>
   <br />
   ゲームタイトル検索 
-  <form action="searchbandit.php" method="post" style="display: inline"/>
+  <form action="searchbandit.php" method="GET" style="display: inline"/>
   <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="3" />
   <input type="submit" value="検索">
   </form>
   <br />
   ゲームブランド検索 
-  <form action="searchbandit.php" method="post" style="display: inline" />
+  <form action="searchbandit.php" method="GET" style="display: inline" />
   <input type="text" name="searchword" class="searchtextbox">
   <input type="hidden" name="column" value="1" />
   <input type="submit" value="検索">
