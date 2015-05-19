@@ -221,7 +221,11 @@ print "<tbody>\n";
 foreach($allrequest as  $row) {
 print "<tr>\n";
 print "<th class=\"filename\">";
+if( ($row['secret'] == 1 ) && strcmp($row['nowplaying'],'未再生') == 0){
+print '<b> ヒ・ミ・ツ♪(シークレット予約) </b>';
+}else{
 print nl2br(htmlspecialchars($row['songfile']));
+}
 print "</th>\n";
 
 print "<td class=\"singer\">";

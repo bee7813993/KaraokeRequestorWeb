@@ -30,8 +30,8 @@
 <input type="submit" value="曲終了" name="songnext" class="pcbuttom" onClick="song_next()" />
 </form>
 <br>
-<button type="submit" value="ボリュームUP" class="pcvolume" onClick="song_vup()" >ボリュームUP</button>
 <button type="submit" value="ボリュームDOWN" class="pcvolume" onClick="song_vdown()" >ボリュームDOWN</button>
+<button type="submit" value="ボリュームUP" class="pcvolume" onClick="song_vup()" >ボリュームUP</button>
 <br>
 <button type="submit" value="字幕ONOFF(ソフトサブのみ)" class="pcmorefunc" onClick="song_subtitleonnoff()" >字幕ONOFF(ソフトサブのみ)</button>
 <button type="submit" value="音声トラック変更" class="pcmorefunc" onClick="song_changeaudio()" >音声トラック変更</button>

@@ -147,7 +147,7 @@ width: 100%;
 #table tbody td.nowplaying:before { content: "[再生状況] "; }
 #table tbody td.action { 
 		display: block;
-		float: left;
+/* 		float: left; */
 		}
 #table tbody td.change { display: block; }
 #table tbody td.change:after { clear: both; }

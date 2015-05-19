@@ -99,7 +99,8 @@ $sql = "create table IF NOT EXISTS requesttable (
  status text,
  clientip text,
  clientua text,
- playtimes INTEGER
+ playtimes INTEGER,
+ secret INTEGER
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){

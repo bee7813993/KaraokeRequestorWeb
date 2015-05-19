@@ -28,8 +28,8 @@
 <button type="submit" value="一時停止"  class="pcbuttom" onClick="song_pause()" >一時停止</button>
 <button type="submit" value="曲終了" name="songnext" class="pcbuttom" onClick="song_next()" />曲終了</button>
 <br>
-<button type="submit" value="ボリュームUP" class="pcvolume" onClick="song_vup()" >ボリュームUP</button>
 <button type="submit" value="ボリュームDOWN" class="pcvolume" onClick="song_vdown()" >ボリュームDOWN</button>
+<button type="submit" value="ボリュームUP" class="pcvolume" onClick="song_vup()" >ボリュームUP</button>
 <br>
 
 </div>

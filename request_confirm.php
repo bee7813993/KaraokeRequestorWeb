@@ -160,7 +160,9 @@ print('<span style="visibility:hidden;">');
  <option value="カラオケ配信" <?php if($shop_karaoke == 1) print 'selected';?> >カラオケ配信 </option>
  </select>
 </div>
-
+<div>
+<input type="checkbox" name="secret" value="1" > シークレット予約(歌うまで曲名を表示しません)
+</div>
 <div CLASS="pushbtn">
 <input type="submit" value="実行"/>
 </div>

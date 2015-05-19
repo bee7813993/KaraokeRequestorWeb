@@ -1,9 +1,7 @@
 <?php
 $db = null;
 
-
-include 'kara_config.php';
-
+require_once 'commonfunc.php';
 
 $l_filename=$_POST['filename'];
 $l_singer=$_POST['singer'];
@@ -13,6 +11,10 @@ $l_kind=$_POST['kind'];
 $l_fullpath= "";
 if(array_key_exists("fullpath", $_REQUEST)) {
     $l_fullpath = $_REQUEST["fullpath"];
+}
+$l_secret = 0;
+if(array_key_exists("secret", $_REQUEST)) {
+    $l_secret = $_REQUEST["secret"];
 }
 
 if(!empty($l_freesinger)){
@@ -33,7 +35,7 @@ $l_singer=$l_freesinger;
 <?php
 
 try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 )";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret)";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -43,7 +45,7 @@ try {
 	}
 
 $arg = array(
-	':fn' => $l_filename,
+	':fn' => makesongnamefromfilename($l_filename),
 	':sing' => $l_singer,
 	':comment' => $l_comment,
 	':kind' => $l_kind,
@@ -51,7 +53,8 @@ $arg = array(
 	':np' => "未再生",
 	':status' => 'new',
 	':ip' => $_SERVER['REMOTE_ADDR'],
-	':ua' => $_SERVER['HTTP_USER_AGENT']
+	':ua' => $_SERVER['HTTP_USER_AGENT'],
+	':secret' => $l_secret
 	);
 $ret = $stmt->execute($arg);
 if (! $ret ) {

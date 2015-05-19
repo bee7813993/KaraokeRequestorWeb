@@ -253,4 +253,14 @@ function print_meta_header(){
     print "\n";
 }
 
+function makesongnamefromfilename($filename){
+   // 【ニコカラ* 】を外す
+   $patstr="\(ニコカラ.*?\)|（ニコカラ.*?）|【ニコカラ.*?】|\[ニコカラ.*?\]";
+   $repstr="";
+   $str=mb_ereg_replace($patstr, $repstr, $filename);
+   // 拡張子を外す
+   $patstr="/(.+)(\.[^.]+$)/";
+   return preg_replace($patstr, "$1", $str);
+}
+
 ?>
