@@ -28,7 +28,14 @@ require_once 'commonfunc.php';
   <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-<a href="request.php" >トップに戻る </a>
+<?php
+ if(isset($word) ) {
+ $nflink = "notfoundrequest/notfoundrequest.php?searchword=$word";
+ }else {
+ $nflink = "notfoundrequest/notfoundrequest.php";
+ }
+?>
+<a href="request.php" >トップに戻る </a> &nbsp; <a href="<?php echo $nflink; ?>" >探して見つからなかった曲があったら教えてください。 </a>
 
 
 

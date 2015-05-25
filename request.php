@@ -154,7 +154,9 @@ print '<input type="submit" name="配信"   value="カラオケ配信曲を歌�
 }
 ?>
 </form>
-
+<form method="GET" action="notfoundrequest/notfoundrequest.php" >
+<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn"/>
+</form>
 </div>
 <br />
 

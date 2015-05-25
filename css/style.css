@@ -63,6 +63,12 @@ width: 10%;
 height: 2em;
 }
 
+button.reloadbtn {
+-webkit-appearance: button;
+width: 4em;
+height: 2em;
+}
+
 
 .pcarea {
     width: 95%;
@@ -151,6 +157,56 @@ width: 100%;
 		}
 #table tbody td.change { display: block; }
 #table tbody td.change:after { clear: both; }
+
+#notfoundtable{
+display: block;
+}
+#notfoundtable caption{
+display: block;
+}
+
+#notfoundtable thead{
+display: none;
+}
+#notfoundtable tbody{
+display: block;
+}
+			#notfoundtable tbody tr{
+				display: block;
+				margin-bottom: 1.5em;
+			}
+			#notfoundtable tbody th,
+			#notfoundtable tbody td{
+				display: list-item;
+				border: none;
+			}
+#notfoundtable tbody th{
+margin-bottom: 5px;
+list-style-type: none;
+color: #fff;
+background: #000;
+}
+#notfoundtable tbody td{
+margin-left: 20px;
+padding: 0;
+}
+
+#notfoundtable tbody th.filename {
+width: 100%;
+}
+
+#notfoundtable tbody td.comment {
+width: 100%;
+}
+
+#notfoundtable tbody td.comment:before { content: "[コメント] "; }
+#notfoundtable tbody td.kind:before { content: "[状況] "; }
+#notfoundtable tbody td.link:before { content: "[リンク] "; }
+#notfoundtable tbody td.action { 
+		display: block;
+/* 		float: left; */
+		}
+
 
 
 #searchresult{
