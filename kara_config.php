@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none'){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none',&$usenfrequset = 'none',&$historylog = 'none'){
 
     global $configfile;
     global $config_ini;
@@ -25,6 +25,18 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         if(strcmp($requestcomment,'none') != 0){
             if(array_key_exists("requestcomment", $config_ini) ){
                 $requestcomment = urldecode($config_ini["requestcomment"]);
+            }else{
+                $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
+            }
+        }
+        if(strcmp($usenfrequset,'none') != 0){
+            if(array_key_exists("usenfrequset", $config_ini) ){
+                $usenfrequset = $config_ini["usenfrequset"];
+            }
+        }
+        if(strcmp($historylog,'none') != 0){
+            if(array_key_exists("historylog", $config_ini) ){
+                $historylog = $config_ini["historylog"];
             }
         }
     } else {
@@ -64,7 +76,7 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         fclose($fp);
     }
 
-    if(! is_null($requestcomment)){
+    if(!strcmp($requestcomment,'none')){
         if(empty($requestcomment)){
             $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
             $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
@@ -74,6 +86,25 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         }
     }
 
+    if(!strcmp($usenfrequset,'none')){
+        if(empty($usenfrequset)){
+            $usenfrequset = 0;
+            $config_ini = array_merge($config_ini,array("usenfrequset" => urlencode($usenfrequset)));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+            fclose($fp);
+        }
+    }
+
+    if(!strcmp($historylog,'none')){
+        if(empty($historylog)){
+            $historylog = 0;
+            $config_ini = array_merge($config_ini,array("historylog" => urlencode($historylog)));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+            fclose($fp);
+        }
+    }
 //    $playerpath = "'".$playerpath."'";
     //var_dump($config_ini);
 }
@@ -111,7 +142,7 @@ if ($stmt === false ){
 
 }
 
-readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment);
+readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog);
 initdb($db,$dbname);
 
 // cache control

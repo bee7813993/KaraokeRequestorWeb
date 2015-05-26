@@ -28,9 +28,10 @@ $select->closeCursor();
 <a href="../request.php" >トップに戻る </a>
 
 <!--- 入力フォーム --->
+<p>
 <form method="GET" action="add_notfound_request.php">
 <div CLASS="itemname">
-<p>内容</p>
+内容
 <textarea name="requesttext" id="requesttext" rows="4" wrap="soft" style="width:100%" placeholder="見つからなかった曲を教えてください。ニコニコ動画などのURLでもOK。オフ会中もしくは次回までに用意できるかもしれません">
 <?php  if(isset($word)) print($word); ?>
 </textarea>
@@ -39,11 +40,13 @@ $select->closeCursor();
 <input type="submit" value="送信"/>
 </div>
 </form>
+</p>
+<hr />
 <?php
 if(!count($allrequest) == 0 ){
     // <!--- 一覧 --->
     print "<table border=\"2\" id=\"notfoundtable\">\n";
-    print '<caption> 見つからなかった曲報告リスト <button type="submit" value="" class="reloadbtn"  onclick=location.reload() >更新</button></caption>'."\n";
+    print '<caption> 見つからなかった曲一覧 <button type="submit" value="" class="reloadbtn"  onclick=location.reload() >更新</button></caption>'."\n";
     print "<thead>\n";
     print "<tr>\n";
     print "<th>リクエスト内容 </th>\n";

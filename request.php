@@ -154,9 +154,13 @@ print '<input type="submit" name="配信"   value="カラオケ配信曲を歌�
 }
 ?>
 </form>
-<form method="GET" action="notfoundrequest/notfoundrequest.php" >
-<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn"/>
-</form>
+<?php
+if($usenfrequset == 1) {
+    print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';
+    print '<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn"/>';
+    print '</form>';
+}
+?>
 </div>
 <br />
 

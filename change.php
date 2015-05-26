@@ -35,7 +35,7 @@ try{
     while($row = $select->fetch(PDO::FETCH_ASSOC)){
         echo "<hr />";
         echo "<form action=\"update.php\" >";
-        echo '<table>';
+        echo '<table  class="modifytable">';
         echo '<tr>';
         echo '<td>';
         echo 'id';

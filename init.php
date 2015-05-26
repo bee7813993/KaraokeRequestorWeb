@@ -37,6 +37,15 @@ if(array_key_exists("requestcomment", $_REQUEST)) {
     $newrequestcomment = $_REQUEST["requestcomment"];
 }
 
+if(array_key_exists("usenfrequset", $_REQUEST)) {
+    $newusenfrequset = $_REQUEST["usenfrequset"];
+}
+
+if(array_key_exists("historylog", $_REQUEST)) {
+    $newhistorylog = $_REQUEST["historylog"];
+}
+
+
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
 }
@@ -106,6 +115,23 @@ if (! empty($newrequestcomment)){
     // $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
 }
 
+if (! empty($newusenfrequset)){
+    $usenfrequset = $newusenfrequset;
+    $config_ini = array_merge($config_ini,array("usenfrequset" => $usenfrequset));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "見つからなかった曲リスト使用フラグを".$usenfrequset."に変更しました。<br><br>";
+}
+
+if (! empty($newhistorylog)){
+    $historylog = $newhistorylog;
+    $config_ini = array_merge($config_ini,array("historylog" => $historylog));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "検索ログ保存フラグを".$historylog."に変更しました。<br><br>";
+}
 
 ?>
  
@@ -179,6 +205,20 @@ foobar2000 PATH設定　
 <textarea name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
 <?php print htmlspecialchars($requestcomment); ?>
 </textarea>
+<input type="submit" value="OK" />
+</form>
+
+見つからなかった曲リストの使用
+<form method="post" action="init.php">
+<input type="radio" name="usenfrequset" value="1" <?php print ($usenfrequset==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="usenfrequset" value="2" <?php print ($usenfrequset!=1)?'checked':' ' ?> /> 使用しない
+<input type="submit" value="OK" />
+</form>
+
+検索ログの保存
+<form method="post" action="init.php">
+<input type="radio" name="historylog" value="1" <?php print ($historylog==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="historylog" value="2" <?php print ($historylog!=1)?'checked':' ' ?> /> 使用しない
 <input type="submit" value="OK" />
 </form>
 

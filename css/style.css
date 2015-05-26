@@ -79,6 +79,9 @@ input.fullwidth{
 width: 95%;
 }
 
+table.modifytable {
+width: 95%;
+}
 
 #table tbody th.filename {
 width: 33%;

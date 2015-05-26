@@ -10,6 +10,9 @@ if(array_key_exists("m", $_REQUEST)) {
 $l_q = null;
 if(array_key_exists("q", $_REQUEST)) {
     $l_q = $_REQUEST["q"];
+    if($historylog == 1){
+        searchwordhistory('anisoninfo:'.$l_q);
+    }
 }
 $l_fullparam = null;
 if(array_key_exists("fullparam", $_REQUEST)) {

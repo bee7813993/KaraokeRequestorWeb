@@ -263,4 +263,12 @@ function makesongnamefromfilename($filename){
    return preg_replace($patstr, "$1", $str);
 }
 
+function searchwordhistory($word,$filename = 'history.log'){
+    date_default_timezone_set('Asia/Tokyo');
+    $fp = fopen($filename, 'a');
+    $logword = date('r').' '.$word."\r\n";
+    fwrite($fp,$logword);
+    fclose($fp);
+}
+
 ?>

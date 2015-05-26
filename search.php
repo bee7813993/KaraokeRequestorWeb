@@ -1,7 +1,12 @@
 
 <?php
+require_once 'commonfunc.php';
+
 if(array_key_exists("searchword", $_REQUEST)) {
     $word = $_REQUEST["searchword"];
+    if($historylog == 1){
+        searchwordhistory('file:'.$word);
+    }
 }
 
 
@@ -11,7 +16,6 @@ if(array_key_exists("order", $_REQUEST)) {
     $l_order = 'sort=size&ascending=0';
 }
 
-require_once 'commonfunc.php';
 
 ?>
 <!doctype html>
@@ -28,15 +32,18 @@ require_once 'commonfunc.php';
   <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+<a href="request.php" >トップに戻る </a> &nbsp; 
 <?php
  if(isset($word) ) {
  $nflink = "notfoundrequest/notfoundrequest.php?searchword=$word";
  }else {
  $nflink = "notfoundrequest/notfoundrequest.php";
  }
+ if($usenfrequset == 1) {
+    print '<a href="<?php echo $nflink; ?>" >探して見つからなかった曲があったら教えてください。 </a>';
+ }
 ?>
-<a href="request.php" >トップに戻る </a> &nbsp; <a href="<?php echo $nflink; ?>" >探して見つからなかった曲があったら教えてください。 </a>
-
 
 
 <?php

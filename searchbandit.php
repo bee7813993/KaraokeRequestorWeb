@@ -49,9 +49,13 @@
 
 
 <?php
+require_once 'commonfunc.php';
 
 if(array_key_exists("searchword", $_REQUEST)) {
     $l_searchword = $_REQUEST["searchword"];
+    if($historylog == 1){
+        searchwordhistory('bandit:'.$l_searchword);
+    }    
 }
 
 if(array_key_exists("column", $_REQUEST)) {
@@ -61,7 +65,6 @@ if(array_key_exists("column", $_REQUEST)) {
 $everythinghost = $_SERVER["SERVER_NAME"];
 //$everythinghost = 'localhost';
 
-require_once 'commonfunc.php';
 
 
 
