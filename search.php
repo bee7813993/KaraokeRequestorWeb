@@ -41,7 +41,7 @@ if(array_key_exists("order", $_REQUEST)) {
  $nflink = "notfoundrequest/notfoundrequest.php";
  }
  if($usenfrequset == 1) {
-    print '<a href="<?php echo $nflink; ?>" >探して見つからなかった曲があったら教えてください。 </a>';
+    print '<a href="'.$nflink.'" >探して見つからなかった曲があったら教えてください。 </a>';
  }
 ?>
 
