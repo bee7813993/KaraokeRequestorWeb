@@ -154,7 +154,7 @@ function ansoninfo_gettitlelist($url,$l_m){
 <hr />
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
-<INPUT type=radio <?php print selすectedcheck("pro",$l_m)=='selected'?'checked':' '; ?> value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
+<INPUT type=radio <?php print selectedcheck("pro",$l_m)=='selected'?'checked':' '; ?> value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
 <!---
 <INPUT type=radio <?php print selectedcheck("song",$l_m)=='selected'?'checked':' '; ?> value=song name=m id="song" onclick="dsp(2)"><label for="song">曲</label>
 --->

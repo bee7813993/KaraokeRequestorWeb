@@ -230,7 +230,7 @@ function getcurrentplayer(){
     if(count($currentsong) == 0){
         return "none";
     }else{
-        $player=selectplayerfromextension($currentsong[0]['songfile']);
+        $player=selectplayerfromextension($currentsong[0]['fullpath']);
     }
     return $player;
 }

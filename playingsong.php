@@ -13,7 +13,7 @@ $select->closeCursor();
 if(count($currentsong) == 0){
     print '{ "count": "none"}';
 }else {   
-$extension = pathinfo($currentsong[0]['songfile'], PATHINFO_EXTENSION);
+$extension = pathinfo($currentsong[0]['fullpath'], PATHINFO_EXTENSION);
 if( strcasecmp($extension,"mp3") == 0 
     || strcasecmp($extension,"m4a") == 0 
     || strcasecmp($extension,"wav") == 0 ){
