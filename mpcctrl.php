@@ -20,7 +20,7 @@
 
 ?>
 <body>
-<p align="center"> 動画再生用(Media Player Classic) </p>
+<p align="center" style="margin-bottom: 0;"> 動画再生用(Media Player Classic) </p>
 <div align="center" class="playercontrol" id="playercontrol">
 <input type="submit" value="再生開始" class="playstart" onClick="song_play()" />
 <br>
