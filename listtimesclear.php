@@ -30,7 +30,7 @@ if (! $retval ) {
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
-  <meta name="viewport" content="width=width,initial-scale=1.0,minimum-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
   <META http-equiv="refresh" content="1; url=request.php">
   
 

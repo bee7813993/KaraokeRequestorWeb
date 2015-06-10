@@ -22,7 +22,7 @@ if(array_key_exists("order", $_REQUEST)) {
 <html lang="ja">
 <head>
 <?php 
-//print_meta_header();
+print_meta_header();
 ?>
   <script type="text/javascript">
 
