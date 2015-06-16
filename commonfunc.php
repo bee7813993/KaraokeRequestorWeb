@@ -5,9 +5,9 @@ require_once("getid3/getid3.php");
 
 $showsonglengthflag = 0;
 
-if (isset($_SERVER) && isset($_SERVER["SERVER_NAME"]) ){
+if (isset($_SERVER) && isset($_SERVER["SERVER_ADDR"]) ){
     //var_dump($_SERVER);
-    $everythinghost = $_SERVER["SERVER_NAME"];
+    $everythinghost = $_SERVER["SERVER_ADDR"];
 } else {
     $everythinghost = 'localhost';
 }
