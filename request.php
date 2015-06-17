@@ -137,7 +137,8 @@ statusRequest.onload=function(ev){
 
 $(document).ready(function(){
   $('#table').dataTable({
-  "bPaginate" : false
+  "bPaginate" : false,
+  "order" : [[0, 'desc']]
    }
   );
 });
@@ -255,7 +256,25 @@ print "<td class=\"singer\">";
 print nl2br(htmlspecialchars($row['singer']));
 print "</td>\n";
 print "<td class=\"comment\">";
+print "<div>\n";
 print nl2br(htmlspecialchars($row['comment']));
+print "</div>\n";
+print "<form method=\"GET\" action=\"commentedit.php\">";
+print "<input type=\"hidden\" name=\"id\" value=\"";
+print $row['id'];
+print "\" />";
+print "<input type=\"submit\" name=\"edit\"   value=\"修正\"/>";
+print "</form>";
+print "<form method=\"GET\" action=\"commentedit.php\">";
+print '<input type="text" name="addcomment" id="addcomment" value="" placeholder="レス(コメントへの)"/>';
+print '<input type="text" name="name" id="name" value="';
+print singerfromip($allrequest);
+print '" />';
+print "<input type=\"hidden\" name=\"id\" value=\"";
+print $row['id'];
+print "\" placeholder=\"名前\"/>";
+print "<input type=\"submit\" name=\"add\"   value=\"送信\"/>";
+print "</form>";
 print "</td>\n";
 print "<td class=\"kind\">";
 print $row['kind'];

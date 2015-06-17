@@ -272,4 +272,18 @@ function searchwordhistory($word,$filename = 'history.log'){
     fclose($fp);
 }
 
+// return singer from IP
+function singerfromip($rt)
+{
+    $rt_i = array_reverse($rt);
+    foreach($rt_i as $row){
+          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
+            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
+                return $row['singer'];
+            }
+          }
+    }
+    return " ";
+}
+
 ?>
