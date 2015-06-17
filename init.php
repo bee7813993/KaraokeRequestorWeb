@@ -45,6 +45,13 @@ if(array_key_exists("historylog", $_REQUEST)) {
     $newhistorylog = $_REQUEST["historylog"];
 }
 
+if(array_key_exists("waitplayercheckstart", $_REQUEST)) {
+    $newwaitplayercheckstart = $_REQUEST["waitplayercheckstart"];
+}
+
+if(array_key_exists("playerchecktimes", $_REQUEST)) {
+    $newplayerchecktimes = $_REQUEST["playerchecktimes"];
+}
 
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
@@ -132,6 +139,25 @@ if (! empty($newhistorylog)){
     fclose($fp);
     print "検索ログ保存フラグを".$historylog."に変更しました。<br><br>";
 }
+
+if (! empty($newwaitplayercheckstart)){
+    $waitplayercheckstart = $newwaitplayercheckstart;
+    $config_ini = array_merge($config_ini,array("waitplayercheckstart" => $waitplayercheckstart));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "プレイヤー動作監視開始待ち時間を".$waitplayercheckstart."に変更しました。<br><br>";
+}
+
+if (! empty($newplayerchecktimes)){
+    $playerchecktimes = $newplayerchecktimes;
+    $config_ini = array_merge($config_ini,array("playerchecktimes" => $playerchecktimes));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "プレイヤー動作監視チェック回数を".$playerchecktimes."に変更しました。<br><br>";
+}
+
 
 ?>
  
@@ -248,7 +274,19 @@ BGMモード用
 <a href ="listtimesclear.php?times=1" > 再生回数1クリア </a>
 
 <hr />
+<form method="post" action="init.php">
+プレイヤー動作監視開始待ち時間(秒) :
+<input type="text" name="waitplayercheckstart" size="100" class="waitplayercheckstart" value="<?php echo $waitplayercheckstart; ?>" />
+<input type="submit" value="OK" />
+</form>
 
+<form method="post" action="init.php">
+プレイヤー動作監視チェック回数(回) :
+<input type="text" name="playerchecktimes" size="100" class="playerchecktimes" value="<?php echo $playerchecktimes; ?>" />
+<input type="submit" value="OK" />
+</form>
+
+<hr />
 <p>
 <a href ="init.php?clearauth=1" > ログイン情報クリア </a>
 </p>

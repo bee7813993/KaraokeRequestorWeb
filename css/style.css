@@ -94,7 +94,25 @@ width: 33%;
 }
 
 #table tbody td.comment {
-width: 25%;
+width: 30%;
+}
+
+#table tbody tr:nth-child(odd) {
+  /* 奇数行の背景色を設定します。 */
+  background-color: #ffeeff;
+}
+#table tbody tr:nth-child(even) {
+  /* 偶数行の背景色を設定します。 */
+  background-color: #eeffff;
+}
+
+.searchresult tbody tr:nth-child(odd) {
+  /* 奇数行の背景色を設定します。 */
+  background-color: #ffeeff;
+}
+.searchresult tbody tr:nth-child(even) {
+  /* 偶数行の背景色を設定します。 */
+  background-color: #eeffff;
 }
 
 div.searchtextbox {
@@ -114,7 +132,7 @@ input.searchtextbox {
     width: 95%;
 }
 
-@media only screen and (max-width: 500px){
+@media only screen and (max-width: 560px){
 #table{
 display: block;
 }

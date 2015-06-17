@@ -24,9 +24,22 @@ if(array_key_exists("order", $_REQUEST)) {
 <?php 
 print_meta_header();
 ?>
-  <script type="text/javascript">
+<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
+<script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="js/currency.js"></script>
 
-    // ここに処理を記述します。
+  <script type="text/javascript">
+$(document).ready(function(){
+  $('#searchresult').dataTable({
+  "bPaginate" : false,
+  "bStateSave" : true,
+  columnDefs: [
+  { type: 'currency', targets: [3] }
+   ]
+   }
+  );
+});
   </script>
   <title>動画検索TOP</title>
   <link type="text/css" rel="stylesheet" href="css/style.css" />

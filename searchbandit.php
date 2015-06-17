@@ -8,6 +8,11 @@
 
 <title>bandit検索モード検索結果</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
+<script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="js/currency.js"></script>
+
 </head>
 <body>
 <a href="search.php" >通常検索に戻る </a>
@@ -137,7 +142,8 @@ $songnum = 0;
         foreach($songtitles as $checktitle){
                   
               echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-              PrintLocalFileListfromkeyword($checktitle,'sort=size&ascending=0');
+              PrintLocalFileListfromkeyword($checktitle,'sort=size&ascending=0','searchresult'.$songnum);
+              print "  <script type=\"text/javascript\"> $(document).ready(function(){  $('#".'searchresult'.$songnum."').dataTable({  \"bPaginate\" : false   } ,  columnDefs: [  { type: 'currency', targets: [3] }   ] );});  </script> ";
 /*
               searchlocalfilename($checktitle,'sort=size&ascending=0',$result_a);
               echo $result_a["totalResults"]."件<br />";

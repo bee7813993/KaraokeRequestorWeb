@@ -99,6 +99,7 @@ function formatBytes($bytes, $precision = 2, array $units = null)
     }
 
     $exp   = floor(log($bytes) / log(1024));
+    $exp   = 2;  // MB固定
     $unit  = $units[$exp];
     $bytes = $bytes / pow(1024, floor($exp));
     $bytes = sprintf('%.'.$precision.'f', $bytes);
@@ -122,14 +123,14 @@ function searchlocalfilename($kerwords, &$result_array,$order = null)
 }
 
 //検索結果一覧を表示する処理
-function printsonglists($result_array)
+function printsonglists($result_array, $tableid)
 {
 		global $everythinghost;
 		global $showsonglengthflag;
 		$getID3 = new getID3();
 		$getID3->setOption(array('encoding' => 'UTF-8'));
 		
-  		echo "<table id=\"searchresult\">";
+  		print "<table id=\"$tableid\" class=\"searchresult\" >";
 print "<thead>\n";
 print "<tr>\n";
 print "<th>No. </th>\n";
@@ -198,12 +199,12 @@ print "</tbody>\n";
 }
 
 // 検索ワードからファイル一覧を表示するまでの処理
-function PrintLocalFileListfromkeyword($word,$order = null)
+function PrintLocalFileListfromkeyword($word,$order = null, $tableid='searchresult')
 {
     searchlocalfilename($word,$result_a,$order);
     echo $result_a["totalResults"]."件<br />";
     if( $result_a["totalResults"] >= 1) {
-        printsonglists($result_a);
+        printsonglists($result_a,$tableid);
     }
 }
 

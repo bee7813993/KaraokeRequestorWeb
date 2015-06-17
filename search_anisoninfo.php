@@ -137,6 +137,10 @@ function ansoninfo_gettitlelist($url,$l_kind){
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <meta http-equiv="Content-Script-Type" content="text/javascript" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
+<script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="js/currency.js"></script>
 
 <title>anison.info検索：曲タイトル検索結果</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
@@ -223,7 +227,8 @@ if(!isset($l_url)  ) {
         
         foreach($songtitles as $checktitle){
             echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-            PrintLocalFileListfromkeyword($checktitle,$l_order);
+            PrintLocalFileListfromkeyword($checktitle,$l_order, 'searchresult'.$songnum);
+              print "  <script type=\"text/javascript\"> $(document).ready(function(){  $('#".'searchresult'.$songnum."').dataTable({  \"bPaginate\" : false    ,  columnDefs: [  { type: 'currency', targets: [3] }   ] });});  </script> ";  
 /*
             searchlocalfilename($checktitle,$l_order,$result_a);
             echo $result_a["totalResults"]."件<br />";

@@ -106,6 +106,9 @@ if(array_key_exists("host", $_REQUEST)) {
     $host = trim($_REQUEST["host"]);
 }
 
+if(array_key_exists("autoreturn", $_REQUEST)) {
+    $autoreturn = trim($_REQUEST["autoreturn"]);
+}
 
 ?>
 
@@ -117,6 +120,17 @@ if(array_key_exists("host", $_REQUEST)) {
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
+<?php 
+if( !empty(autoreturn) ){
+echo <<< EOM
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+  setTimeout('history.go(-1)',1000);
+// -->
+</SCRIPT>
+EOM;
+}
+?>
 </head>
 <body>
 

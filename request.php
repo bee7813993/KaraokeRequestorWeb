@@ -39,6 +39,9 @@ $select->closeCursor();
 <title>カラオケ動画リクエスト</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <!-- <script type='text/javascript' src='jwplayer/jwplayer.js'></script> -->
+<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
+<script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
 
 <script type="text/javascript" src="mpcctrl.js"></script>
 
@@ -132,6 +135,13 @@ statusRequest.onload=function(ev){
 
 }
 
+$(document).ready(function(){
+  $('#table').dataTable({
+  "bPaginate" : false
+   }
+  );
+});
+
 </script>
 </head>
 <body>
@@ -203,6 +213,7 @@ print "<table border=\"2\" id=\"table\">\n";
 print '<caption> 現在の登録状況 <button type="submit" value="" class="topbtn"  onclick=location.reload() >更新</button></caption>'."\n";
 print "<thead>\n";
 print "<tr>\n";
+print "<th>No. </th>\n";
 print "<th>ファイル名 </th>\n";
 print "<th>登録者 </th>\n";
 print "<th>コメント </th>\n";
@@ -224,8 +235,14 @@ print "<th>変更 </th>\n";
 print "</tr>\n";
 print "<tbody>\n";
 
+$songcount = count($allrequest);
+
 foreach($allrequest as  $row) {
 print "<tr>\n";
+print "<td class=\"no\">";
+print $songcount;
+print "</td>\n";
+$songcount = $songcount - 1;
 print "<th class=\"filename\">";
 if( ($row['secret'] == 1 ) && strcmp($row['nowplaying'],'未再生') == 0){
 print '<b> ヒ・ミ・ツ♪(シークレット予約) </b>';
