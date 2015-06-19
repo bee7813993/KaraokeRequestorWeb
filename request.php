@@ -143,6 +143,16 @@ $(document).ready(function(){
   );
 });
 
+
+$(function() {
+    $('#requsetlisttable').dataTable({
+        "bPaginate" : false,
+        "order" : [[0, 'desc']],
+        "bDeferRender": true,
+        "sAjaxSource" : "./requestlist_table_json.php"
+    });
+} );
+
 </script>
 </head>
 <body>
@@ -248,7 +258,7 @@ print "<th class=\"filename\">";
 if( ($row['secret'] == 1 ) && strcmp($row['nowplaying'],'未再生') == 0){
 print '<b> ヒ・ミ・ツ♪(シークレット予約) </b>';
 }else{
-print nl2br(htmlspecialchars($row['songfile']));
+print nl2br(htmlspecialchars($row['songfile'],ENT_QUOTES));
 }
 print "</th>\n";
 
@@ -370,6 +380,14 @@ $db = null;
 </form>
 <a href="toolinfo.php" > 接続情報表示 </a>
 
+<hr>
+<table id="requsetlisttable">
+<thead>
+<tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr>
+</thead>
+<tbody>
+</tbody>
+</table>
 
 
 </body>
