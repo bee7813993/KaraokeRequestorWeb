@@ -155,6 +155,15 @@ table#request_table th.no {
     padding: 10px 3px;
 }
 
+table#request_table td.nowplaying {
+    padding: 8px 4px;
+}
+
+table#request_table td.action,
+table#request_table td.change {
+    padding: 8px 4px;
+}
+
 input#addcomment {
 width: 50%;
 }
