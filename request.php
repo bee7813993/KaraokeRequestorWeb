@@ -63,56 +63,56 @@ document.getElementById('freesinger').parentNode.style.visibility=flg?'visible':
 }
 
 
-// File API が使えるかチェック
-window.onload = function() {
-  var objDropArea = document.getElementById("drop_area");
-  if ( window.File && window.FileReader ) {
-    // ドロップ時のアクションを設定
-    objDropArea.addEventListener("drop", function(event) { fileRead(event); }, false);
-    // ブラウザが実装している処理を止める関数を設定
-    objDropArea.addEventListener("dragover", function(event) { preventDefault(event); }, false);
-  } else {
-    // ブラウザが対応していない場合の処理
-    objDropArea.innerHTML = 'お使いのブラウザは対応していません。';
-    var objDispArea = document.getElementById("disp_area");
-    objDispArea.parentNode.removeChild(objDispArea);
-  }
-}
+//// File API が使えるかチェック
+//window.onload = function() {
+//  var objDropArea = document.getElementById("drop_area");
+//  if ( window.File && window.FileReader ) {
+//    // ドロップ時のアクションを設定
+//    objDropArea.addEventListener("drop", function(event) { fileRead(event); }, false);
+//    // ブラウザが実装している処理を止める関数を設定
+//    objDropArea.addEventListener("dragover", function(event) { preventDefault(event); }, false);
+//  } else {
+//    // ブラウザが対応していない場合の処理
+//    objDropArea.innerHTML = 'お使いのブラウザは対応していません。';
+//    var objDispArea = document.getElementById("disp_area");
+//    objDispArea.parentNode.removeChild(objDispArea);
+//  }
+//}
 
-// ドロップ時のアクション
-function fileRead(event)
-{
-  preventDefault(event);
+//// ドロップ時のアクション
+//function fileRead(event)
+//{
+//  preventDefault(event);
+//
+//  var files = event.dataTransfer.files;
+//  var objDispArea = document.getElementById("disp_area");
+//
+//  objDispArea.innerHTML = '';
+//
+//  // ドロップされたファイルの処理
+//  for ( var i = 0; i < files.length; i++ ) {
+//
+//    var f = files[i];
+//
+//    var objFileReader = new FileReader();
+//    objFileReader.onerror = function(evt) {
+//      objDispArea.innerHTML = '【' + f.name + '】 ファイル読み込み時にエラーが発生しました。';
+//      return;
+//    }
+//
+//    // テキストの処理
+//    objDispArea.innerHTML = f.name;
+//
+//    document.getElementById("filename").value = f.name;
+//
+//  }
+//}
 
-  var files = event.dataTransfer.files;
-  var objDispArea = document.getElementById("disp_area");
-
-  objDispArea.innerHTML = '';
-
-  // ドロップされたファイルの処理
-  for ( var i = 0; i < files.length; i++ ) {
-
-    var f = files[i];
-
-    var objFileReader = new FileReader();
-    objFileReader.onerror = function(evt) {
-      objDispArea.innerHTML = '【' + f.name + '】 ファイル読み込み時にエラーが発生しました。';
-      return;
-    }
-
-    // テキストの処理
-    objDispArea.innerHTML = f.name;
-
-    document.getElementById("filename").value = f.name;
-
-  }
-}
-
-// ブラウザが実装している処理を止める
-function preventDefault(event)
-{
-  event.preventDefault();
-}
+//// ブラウザが実装している処理を止める
+//function preventDefault(event)
+//{
+//  event.preventDefault();
+//}
 
 // プレーヤーコントローラーの切り替え
 function selectPlayerctrl()
@@ -144,15 +144,60 @@ $(document).ready(function(){
 });
 
 
-$(function() {
-    $('#requsetlisttable').dataTable({
-        "bPaginate" : false,
-        "order" : [[0, 'desc']],
-        "bDeferRender": true,
-        "sAjaxSource" : "./requestlist_table_json.php"
-    });
-} );
+//$(function() {
+//    $('#requsetlisttable').dataTable({
+//        "ajax": {
+//          "url": "requestlist_table_json.php",
+//          "dataSrc": "",
+//          "type": "GET"
+//          },
+//        "columns" : [
+//        { "data": "1"},
+//        { "data": "2"},
+//        { "data": "3"},
+//        { "data": "4"},
+//        { "data": "5"},
+//        { "data": "6"},
+//        { "data": "7"},
+//        { "data": "8"}
+//        ],
+//        "bPaginate" : false,
+//        "order" : [[0, 'desc']],
+//        "bDeferRender": true
+//        
+//    });
+//} );
 
+
+$(function(requestTable) { $("#request_table").dataTable({
+     "ajax": {
+         "url": "requestlist_table_json.php",
+         "dataType": 'json',
+         "dataSrc": "",
+     },
+     "columns" : [
+          { "data": "no", "className":"no"},
+          { "data": "filename",className:"filename"},
+          { "data": "singer",className:"singer"},
+          { "data": "comment",className:"comment"},
+          { "data": "method",className:"kind"},
+          { "data": "playstatus",className:"nowplaying"},
+          { "data": "action",className:"action"},
+<?php
+if($user === "admin"){
+          print '{ "data": "change", className:"change" },';
+}
+?>
+     ],
+     "bPaginate" : false,
+     "order" : [[0, 'desc']],
+     bDeferRender: true,
+      "autoWidth": false,
+     });
+} );
+     
+     
+$("#sample_table").dataTable();
 </script>
 </head>
 <body>
@@ -212,24 +257,19 @@ if($usenfrequset == 1) {
 
 
 
+
+
+
+<table id="request_table" class="cell-border">
+<caption> 現在の登録状況 <button type="submit" value="" class="topbtn"  onclick=location.reload() >更新</button></caption>
+<thead>
+<tr>
+<th>No.</th>
+<th>ファイル名</th>
+<th>登録者</th>
+<th>コメント</th>
+<th>再生方法</th>
 <?php
-
-print "<div align=\"center\" id=\"content\" >";
-
-
-if(!count($allrequest) == 0 ){
-
-
-print "<table border=\"2\" id=\"table\">\n";
-print '<caption> 現在の登録状況 <button type="submit" value="" class="topbtn"  onclick=location.reload() >更新</button></caption>'."\n";
-print "<thead>\n";
-print "<tr>\n";
-print "<th>No. </th>\n";
-print "<th>ファイル名 </th>\n";
-print "<th>登録者 </th>\n";
-print "<th>コメント </th>\n";
-print "<th>再生方法 </th>\n";
-
      if($playmode == 1){
      print "<th>再生状況 </th>\n";
      }elseif ($playmode == 2){
@@ -239,156 +279,26 @@ print "<th>再生方法 </th>\n";
      }else{
      print "<th>順番 </th>\n";
      }
-print "<th>アクション </th>\n";
-if($user === "admin"){
-print "<th>変更 </th>\n";
-}
-print "</tr>\n";
-print "<tbody>\n";
-
-$songcount = count($allrequest);
-
-foreach($allrequest as  $row) {
-print "<tr>\n";
-print "<td class=\"no\">";
-print $songcount;
-print "</td>\n";
-$songcount = $songcount - 1;
-print "<th class=\"filename\">";
-if( ($row['secret'] == 1 ) && strcmp($row['nowplaying'],'未再生') == 0){
-print '<b> ヒ・ミ・ツ♪(シークレット予約) </b>';
-}else{
-print nl2br(htmlspecialchars($row['songfile'],ENT_QUOTES));
-}
-print "</th>\n";
-
-print "<td class=\"singer\">";
-print nl2br(htmlspecialchars($row['singer']));
-print "</td>\n";
-print "<td class=\"comment\">";
-print "<div>\n";
-print nl2br(htmlspecialchars($row['comment']));
-print "</div>\n";
-print "<form method=\"GET\" action=\"commentedit.php\">";
-print "<input type=\"hidden\" name=\"id\" value=\"";
-print $row['id'];
-print "\" />";
-print "<input type=\"submit\" name=\"edit\"   value=\"修正\"/>";
-print "</form>";
-print "<form method=\"GET\" action=\"commentedit.php\">";
-print '<input type="text" name="addcomment" id="addcomment" value="" placeholder="レス(コメントへの)"/>';
-print '<input type="text" name="name" id="name" value="';
-print singerfromip($allrequest);
-print '" />';
-print "<input type=\"hidden\" name=\"id\" value=\"";
-print $row['id'];
-print "\" placeholder=\"名前\"/>";
-print "<input type=\"submit\" name=\"add\"   value=\"送信\"/>";
-print "</form>";
-print "</td>\n";
-print "<td class=\"kind\">";
-print $row['kind'];
-print "</td>\n";
-
-print "<td class=\"nowplaying\">";
-print "<div>";
-     if($playmode == 1){  // 自動再生開始モード
-     print $row['nowplaying']."<br />";
-print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
-print "<input type=\"hidden\" name=\"id\" value=\"";
-print $row['id'];
-print "\" />";
-print "<input type=\"hidden\" name=\"songfile\" value=\"";
-print $row['songfile'];
-print "\" />";
-print "<select name=\"nowplaying\">";
-print " <option value=\"未再生\" selected >未再生 </option>";
-print " <option value=\"再生済\">再生済 </option>";
-print "</select>";
-print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
-print "</form>";
-     }elseif ($playmode == 2){  // 手動再生開始モード
-     print $row['nowplaying'];
-print "<form method=\"post\" action=\"changeplaystatus.php\" style=\"display: inline\" >";
-print "<input type=\"hidden\" name=\"id\" value=\"";
-print $row['id'];
-print "\" />";
-print "<input type=\"hidden\" name=\"songfile\" value=\"";
-print $row['songfile'];
-print "\" />";
-print "<select name=\"nowplaying\">";
-print " <option value=\"未再生\" selected >未再生 </option>";
-print " <option value=\"再生済\">再生済 </option>";
-print "</select>";
-print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
-print "</form>";
-     }elseif ($playmode == 4){ // BGMモード
-     print $row['playtimes'];
-     }else{
-     print $row['reqorder'];
-     }
-print "</div>";
-
-print "</td>\n";
-
-print "<td class=\"action\">";
-print "<form method=\"post\" action=\"delete.php\">";
-print "<input type=\"hidden\" name=\"id\" value=\"";
-print $row['id'];
-print "\" />";
-print "<input type=\"hidden\" name=\"songfile\" value=\"";
-print $row['songfile'];
-print "\" />";
-print '<div class="acition" >';
-print "<input type=\"submit\" name=\"up\"     value=\"上へ\"/>";
-print "<input type=\"submit\" name=\"down\"   value=\"下へ\"/>";
-//print '</div>';
-//print '<div class="acition2" >';
-print "<input type=\"submit\" name=\"warikomi\"   value=\"次に再生\"/>";
-print "<input type=\"submit\" name=\"delete\" value=\"削除\"/>";
-print '</div>';
-print '<div class="clear" >';
-print '</div>';
-print "</form>";
-print "</td>\n";
-if($user === "admin"){
-print "<td class=\"change\">";
-print "<form method=\"post\" action=\"change.php\">";
-print "<input type=\"hidden\" name=\"id\" value=\"";
-print $row['id'];
-print "\" />";
-print "<input type=\"hidden\" name=\"songfile\" value=\"";
-print $row['songfile'];
-print "\" />";
-print "<input type=\"submit\" name=\"変更\"   value=\"変更\"/>";
-print "</form>";
-print "</td>\n";
-}
-
-print "</tr>\n";
-}
-}
-$db = null;
 ?>
-</tbody>
-</table>
-</div>
+<th>アクション</th>
+<?php
+if($user === "admin"){
+          print '<th>変更</th>';
+}
+?>
 
-
-<form method="post" action="init.php">
-<input type="submit" value="設定" />
-</form>
-<a href="toolinfo.php" > 接続情報表示 </a>
-
-<hr>
-<table id="requsetlisttable">
-<thead>
-<tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr>
+</tr>
 </thead>
 <tbody>
 </tbody>
 </table>
 
+<script type="text/javascript" charset="utf8" src="js/requsetlist_ctrl.js"></script>
+<hr>
+<form method="post" action="init.php">
+<input type="submit" value="設定" />
+</form>
+<a href="toolinfo.php" > 接続情報表示 </a>
 
 </body>
 </html>

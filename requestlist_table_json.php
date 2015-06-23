@@ -2,6 +2,8 @@
 
 require_once 'commonfunc.php';
 
+$user=null;
+
 if (isset($_SERVER['PHP_AUTH_USER'])){
     if ($_SERVER['PHP_AUTH_USER'] === 'admin'){
         // print '管理者ログイン中<br>';
@@ -33,12 +35,15 @@ $reqcount = count($allrequest);
 
 foreach($allrequest as $value ){
     $onerequset = array();
-    $onerequset += array("No. " => $reqcount);
+    $onerequset += array("no" => $reqcount);
     $reqcount -= 1;
-
-    $onerequset += array("ファイル名" => $value['songfile']);
+    if( ($value['secret'] == 1 ) && strcmp($value['nowplaying'],'未再生') == 0){
+        $onerequset += array("filename" =>  nl2br(htmlspecialchars(' ヒ・ミ・ツ♪(シークレット予約) ')));
+    }else{
+        $onerequset += array("filename" =>  nl2br(htmlspecialchars($value['songfile'])));
+    }
     
-    $onerequset += array("登録者" => $value['singer']);
+    $onerequset += array("singer" =>  nl2br(htmlspecialchars($value['singer'])));
     
     $comment_pf = <<<EOD
 <div>\n %s </div>\n
@@ -53,10 +58,10 @@ foreach($allrequest as $value ){
 <input type="submit" name="add"   value="送信"/>\n
 </form>
 EOD;
-    $comment = sprintf($comment_pf, $value['comment'], $value['id'],  $value['singer'], $value['id']);
-    $onerequset += array("コメント" => $comment);
+    $comment = sprintf($comment_pf,  nl2br(htmlspecialchars($value['comment'])), $value['id'],   nl2br(htmlspecialchars($value['singer'])), $value['id']);
+    $onerequset += array("comment" => $comment);
 
-    $onerequset += array("再生方法" => $value['kind']);
+    $onerequset += array("method" => $value['kind']);
 
 $playstatus_pf = <<<EOD
 <div>
@@ -74,30 +79,31 @@ $playstatus_pf = <<<EOD
 EOD;
     $playstatus = sprintf($playstatus_pf,  $value['nowplaying'], $value['id'], $value['songfile']);
     if($config_ini['playmode'] == 1){
-        $onerequset += array("再生状況" => $playstatus);
+        $onerequset += array("playstatus" => $playstatus);
     }elseif($config_ini['playmode'] == 2){
-        $onerequset += array("再生状況" => $playstatus);
+        $onerequset += array("playstatus" => $playstatus);
     }elseif($config_ini['playmode'] == 2){
-        $onerequset += array("再生回数" => $value['playtimes']);
+        $onerequset += array("playstatus" => $value['playtimes']);
     }else{
-        $onerequset += array("順番" => $value['reqorder']);
+        $onerequset += array("playstatus" => $value['reqorder']);
     }
 
 $action_pf = <<<EOD
 <form method="post" action="delete.php">
-<input type="hidden" name="id" value="%s" />
-<input type="hidden" name="songfile" value="%s" />
+<input type="hidden" name="id" class="requestid" value="%s" />
+<input type="hidden" name="songfile" id="requestsongfile" value="%s" />
 <div class="acition" >
-<input type="submit" name="up"     value="上へ"/>
-<input type="submit" name="down"   value="下へ"/>
-<input type="submit" name="warikomi"   value="次に再生"/>
-<input type="submit" name="delete" value="削除"/>
+<input type="submit" name="up"  id="requestup"   value="上へ"/>
+<input type="submit" name="down" id="requestdown"  value="下へ"/>
+<input type="submit" name="warikomi" id="requesttonext"  value="次に再生"/>
+<input type="submit" name="delete" id="requestdelete" value="削除"/>
 </div>
+</form>
 <div class="clear" >
 </div>
 EOD;
     $action = sprintf($action_pf,$value['id'],$value['songfile']);
-    $onerequset += array("アクション" => $action);
+    $onerequset += array("action" => $action);
     
     if($user === "admin"){
     $change_entry_pf = <<<EOD
@@ -109,13 +115,13 @@ EOD;
 </form>
 EOD;
     $change_entry = sprintf($change_entry_pf,$value['id'],$value['songfile']);
-    $onerequset += array("変更" => $change_entry);
+    $onerequset += array("change" => $change_entry);
     }
     
     array_push ($requsetlisttable, $onerequset);
 }
 
-$json = json_encode(array("aaData" => $requsetlisttable),JSON_PRETTY_PRINT);
+$json = json_encode($requsetlisttable,JSON_PRETTY_PRINT);
 
 print $json;
 

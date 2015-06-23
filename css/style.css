@@ -106,6 +106,42 @@ width: 30%;
   background-color: #eeffff;
 }
 
+
+table#request_table td, th{
+border-top: 1px solid #000;
+border-right: 1px solid #000;
+border-left: 1px solid #000;
+border-bottom: 1px solid #000;
+}
+
+table#request_table {
+border-top: 1px solid #000;
+border-right: 1px solid #000;
+border-left: 1px solid #000;
+border-bottom: 1px solid #000;
+width: 95%;
+}
+
+#request_table tbody td.comment {
+width: 35%;
+}
+
+#request_table tbody td.filename {
+width: 30%;
+font-weight:bold;
+text-align: center; 
+}
+
+
+#request_table tbody tr:nth-child(odd) {
+  /* 奇数行の背景色を設定します。 */
+  background-color: #ffeeff;
+}
+#request_table tbody tr:nth-child(even) {
+  /* 偶数行の背景色を設定します。 */
+  background-color: #eeffff;
+}
+
 .searchresult tbody tr:nth-child(odd) {
   /* 奇数行の背景色を設定します。 */
   background-color: #ffeeff;
@@ -114,6 +150,19 @@ width: 30%;
   /* 偶数行の背景色を設定します。 */
   background-color: #eeffff;
 }
+
+table#request_table th.no {
+    padding: 10px 3px;
+}
+
+input#addcomment {
+width: 50%;
+}
+
+input#name {
+width: 20%;
+}
+
 
 div.searchtextbox {
 float : left;
@@ -184,6 +233,64 @@ width: 100%;
 		}
 #table tbody td.change { display: block; }
 #table tbody td.change:after { clear: both; }
+
+#request_table{
+display: block;
+}
+#request_table caption{
+display: block;
+}
+
+#request_table thead{
+display: none;
+}
+#request_table tbody{
+display: block;
+}
+			#request_table tbody td.filename{
+				display: block;
+				margin-bottom: 1.5em;
+			}
+			#request_table tbody th,
+			#request_table tbody td{
+				display: list-item;
+				border: none;
+			}
+#request_table tbody td.filename{
+margin-bottom: 5px;
+list-style-type: none;
+color: #fff;
+background: #000;
+}
+#request_table tbody td{
+margin-left: 20px;
+padding: 0;
+}
+
+#request_table tbody td.filename {
+width: 100%;
+margin: 0 auto;
+padding: 8px 10px;
+
+}
+
+#request_table tbody td.comment {
+width: 100%;
+}
+
+#request_table tbody td.singer:before { content: "[登録者] "; }
+#request_table tbody td.comment:before { content: "[コメント] "; }
+#request_table tbody td.kind:before { content: "[再生方法] "; }
+#request_table tbody td.nowplaying:before { content: "[再生状況] "; }
+#request_table tbody td.action { 
+		display: block;
+/* 		float: left; */
+		}
+#request_table tbody td.change { display: block; }
+#request_table tbody td.change:after { clear: both; }
+
+
+
 
 #notfoundtable{
 display: block;
