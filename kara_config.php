@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none'){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none'){
 
     global $configfile;
     global $config_ini;
@@ -45,6 +45,11 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         if(strcmp($playerchecktimes,'none') != 0){
             if(array_key_exists("playerchecktimes", $config_ini) ){
                 $playerchecktimes = $config_ini["playerchecktimes"];
+            }
+        }
+        if(strcmp($connectinternet,'none') != 0){
+            if(array_key_exists("connectinternet", $config_ini) ){
+                $connectinternet = $config_ini["connectinternet"];
             }
         }
     } else {
@@ -142,7 +147,16 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
             fclose($fp);
         }
     }
-
+    if(!strcmp($connectinternet,'none') == 0){
+        if(empty($connectinternet)){
+            $connectinternet = 1;
+            $config_ini = array_merge($config_ini,array("connectinternet" => $connectinternet));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+//        print "connectinternet $connectinternet";
+            fclose($fp);
+        }
+    }
 
 //    $playerpath = "'".$playerpath."'";
     //var_dump($config_ini);
@@ -181,7 +195,7 @@ if ($stmt === false ){
 
 }
 
-readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes);
+readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet);
 initdb($db,$dbname);
 
 // cache control

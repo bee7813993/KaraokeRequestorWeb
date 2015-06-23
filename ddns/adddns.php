@@ -121,7 +121,7 @@ if(array_key_exists("autoreturn", $_REQUEST)) {
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
 <?php 
-if( !empty(autoreturn) ){
+if( !empty($autoreturn) ){
 echo <<< EOM
 <SCRIPT LANGUAGE="JavaScript">
 <!--
@@ -175,7 +175,7 @@ if(!empty($host) && !empty($ttl) && !empty($ip) ){
         $command = "/usr/bin/nsupdate $tmpfname";
         exec($command);
         unlink($tmpfname);
-        print "DDNS の設定を更新しました。長くて60秒後以降使用できるはずです。HOST:$host.pcgame-r18.jp, IP:$ip  <br>\n";
+        print "DDNS の設定を更新しました。長くて60秒後以降使用できるはずです。HOST:$host.pcgame-r18.jp, IP:$ip autoreturn:$autoreturn <br>\n";
     }else {
         print "Hostname $host は使用できません<br>";
         $host = " ";

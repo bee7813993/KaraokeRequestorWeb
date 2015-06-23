@@ -59,9 +59,6 @@ $(document).ready(function(){
 ?>
 
 
-<?php
-//echo $word;
-?>
 <hr />
 <h2>ファイル名検索 </h2>
   <form action="search.php" method="GET">
@@ -103,6 +100,17 @@ $(document).ready(function(){
   	}
   	?>
 <hr />
+<?php
+if($connectinternet != 1){
+print <<<EOM
+<a href="request.php" >トップに戻る </a>
+
+</body>
+</html>
+EOM;
+die();
+}
+?>
   <h2>外部データベース連携検索 </h2>
   <h3>anison.info連携検索モード </h3>
  

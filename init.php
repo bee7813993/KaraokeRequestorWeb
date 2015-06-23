@@ -45,6 +45,10 @@ if(array_key_exists("historylog", $_REQUEST)) {
     $newhistorylog = $_REQUEST["historylog"];
 }
 
+if(array_key_exists("connectinternet", $_REQUEST)) {
+    $newconnectinternet = $_REQUEST["connectinternet"];
+}
+
 if(array_key_exists("waitplayercheckstart", $_REQUEST)) {
     $newwaitplayercheckstart = $_REQUEST["waitplayercheckstart"];
 }
@@ -140,6 +144,15 @@ if (! empty($newhistorylog)){
     print "検索ログ保存フラグを".$historylog."に変更しました。<br><br>";
 }
 
+if (! empty($newconnectinternet)){
+    $connectinternet = $newconnectinternet;
+    $config_ini = array_merge($config_ini,array("connectinternet" => $connectinternet));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    print "インターネット使用フラグを".$connectinternet."に変更しました。<br><br>";
+}
+
 if (! empty($newwaitplayercheckstart)){
     $waitplayercheckstart = $newwaitplayercheckstart;
     $config_ini = array_merge($config_ini,array("waitplayercheckstart" => $waitplayercheckstart));
@@ -179,8 +192,10 @@ print $playerpath;
 現在のfoobar2000 PATH :
 <?php
 print $foobarpath;
+?>
 
-
+<br>
+<?php
 print $requestcomment;
 ?>
 
@@ -248,6 +263,13 @@ foobar2000 PATH設定　
 <input type="submit" value="OK" />
 </form>
 
+インターネット接続 (使用しないにするとインターネット接続が前提の機能を無効にします)
+<form method="post" action="init.php">
+<input type="radio" name="connectinternet" value="1" <?php print ($connectinternet==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="connectinternet" value="2" <?php print ($connectinternet!=1)?'checked':' ' ?> /> 使用しない
+<input type="submit" value="OK" />
+</form>
+
 <hr />
 <a href ="listexport.php" > リクエストリストのダウンロード </a>
 <form action="listimport.php" method="post" enctype="multipart/form-data">
@@ -285,6 +307,29 @@ BGMモード用
 <input type="text" name="playerchecktimes" size="100" class="playerchecktimes" value="<?php echo $playerchecktimes; ?>" />
 <input type="submit" value="OK" />
 </form>
+
+<hr />
+DDNS登録
+<li> pcgame-r18.jp (アカウントを持っている人用) </li>
+<form method="post" action="https://pcgame-r18.jp/ddns/adddns.php">
+Hostname :<input type="text" name="host" class="host" style=”width: 40%;” value=" " />.pcgame-r18.jp
+&nbsp;
+IP:<input type="text" name="ip" size="10" class="ip" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
+<input type="hidden" name="ttl" size="10" class="ttl" value="30" />
+<input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
+<input type="submit" value="更新" />
+</form>
+
+<li> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></li>
+<form method="post" action="http://www.mydns.jp/directip.html">
+マスターID :<input type="text" name="MID" class="host" style=”width: 20%;” value=" " />
+&nbsp;
+パスワード :<input type="text" name="PWD" class="host" style=”width: 20%;” value=" " />
+&nbsp;
+IP:<input type="text" name="IPV4ADDR" size="10" class="ip" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
+<input type="submit" value="更新" />
+</form>
+
 
 <hr />
 <p>
