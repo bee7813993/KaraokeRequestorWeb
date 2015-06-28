@@ -82,7 +82,7 @@ EOD;
         $onerequset += array("playstatus" => $playstatus);
     }elseif($config_ini['playmode'] == 2){
         $onerequset += array("playstatus" => $playstatus);
-    }elseif($config_ini['playmode'] == 2){
+    }elseif($config_ini['playmode'] == 4){
         $onerequset += array("playstatus" => $value['playtimes']);
     }else{
         $onerequset += array("playstatus" => $value['reqorder']);
