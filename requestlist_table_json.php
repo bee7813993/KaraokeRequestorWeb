@@ -11,6 +11,20 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
     }
 }
 
+
+function returnusername($rt){
+    $rt_i = array_reverse($rt);
+    foreach($rt_i as $row){
+          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
+            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
+                return $row['singer'];
+            }
+          }
+    }
+    
+    return "";
+}
+
 $configfile = 'config.ini';
 $config_ini = array ();
 
@@ -58,7 +72,7 @@ foreach($allrequest as $value ){
 <input type="submit" name="add"   value="送信"/>\n
 </form>
 EOD;
-    $comment = sprintf($comment_pf,  nl2br(htmlspecialchars($value['comment'])), $value['id'],   nl2br(htmlspecialchars($value['singer'])), $value['id']);
+    $comment = sprintf($comment_pf,  nl2br(htmlspecialchars($value['comment'])), $value['id'],   nl2br(htmlspecialchars(returnusername($allrequest))), $value['id']);
     $onerequset += array("comment" => $comment);
 
     $onerequset += array("method" => $value['kind']);
@@ -99,21 +113,23 @@ $action_pf = <<<EOD
 <input type="submit" name="delete" id="requestdelete" value="削除"/>
 </div>
 </form>
+<a href="http://twitter.com/?status=%s" > Tweetする </a>
 <div class="clear" >
 </div>
 EOD;
-    $action = sprintf($action_pf,$value['id'],$value['songfile']);
+    $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
+    $action = sprintf($action_pf,$value['id'],$value['songfile'], nl2br(htmlspecialchars($tweet_message)));
     $onerequset += array("action" => $action);
     
     if($user === "admin"){
     $change_entry_pf = <<<EOD
-<td class="change">
 <form method="post" action="change.php">
 <input type="hidden" name="id" value="%s" />
 <input type="hidden" name="songfile" value="%s" />
 <input type="submit" name="変更"   value="変更"/>
 </form>
 EOD;
+    
     $change_entry = sprintf($change_entry_pf,$value['id'],$value['songfile']);
     $onerequset += array("change" => $change_entry);
     }
