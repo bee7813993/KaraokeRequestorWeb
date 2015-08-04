@@ -63,7 +63,8 @@ $(document).ready(function(){
 <h2>ファイル名検索 </h2>
   <form action="search.php" method="GET">
 
-  <div class="searchtextbox" >  検索ワード(ファイル名) <br>
+    検索ワード(ファイル名) <br>
+  <div class="searchtextbox" >
   <input type="text" name="searchword" class="searchtextbox" placeholder="曲名の一部での検索推奨。それ以外は下の外部DB連携も使えます"
   <?php
      if(!empty ($word)){
@@ -73,7 +74,9 @@ $(document).ready(function(){
   >
   </div>
   
-  <div> 結果表示順 <br>
+
+  <div>
+  <!--- 結果表示順 <br>
   <select name="order" class="searchtextbox" >
   <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
   <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
@@ -82,6 +85,7 @@ $(document).ready(function(){
   <option value="sort=name&ascending=0" <?php print selectedcheck("sort=name&ascending=0",$l_order); ?> >ファイル名(昇順 Z→A)</option>
   <option value="sort=date_modified&ascending=0" <?php print selectedcheck("sort=date_modified&ascending=0",$l_order); ?> >日付(新しい順)</option>
   <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
+--->
   </select>
   <input type="submit" value="検索">
   </div>
@@ -127,6 +131,7 @@ die();
 --->
 <BR>
 <INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+<!---
   <div> 結果表示順(同じ検索ワード内) <br>
   <select name="order" class="searchtextbox" >
   <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
@@ -138,6 +143,7 @@ die();
   <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
   </select>
   </div>
+--->
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">

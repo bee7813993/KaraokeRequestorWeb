@@ -165,7 +165,9 @@ function ansoninfo_gettitlelist($url,$l_kind){
 <INPUT type=radio value=pgrp name=m id="pgrp" onclick="dsp(6)"><label for="pgrp">関連情報</label>
 --->
 <BR>
+
 <INPUT  name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+<!---
   <div> 結果表示順(同じ検索ワード内) <br>
   <select name="order" class="searchtextbox" >
   <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
@@ -177,6 +179,7 @@ function ansoninfo_gettitlelist($url,$l_kind){
   <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
   </select>
   </div>
+--->
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">

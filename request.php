@@ -21,11 +21,6 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
 
 require_once 'commonfunc.php';
 
-$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
-$select = $db->query($sql);
-$allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
-$select->closeCursor();
-
 ?>
 
 <!doctype html>
@@ -295,7 +290,7 @@ if($user === "admin"){
 
 <script type="text/javascript" charset="utf8" src="js/requsetlist_ctrl.js"></script>
 <hr>
-<form method="post" action="init.php">
+<form method="get" action="init.php">
 <input type="submit" value="設定" />
 </form>
 <a href="toolinfo.php" > 接続情報表示 </a>

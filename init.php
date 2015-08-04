@@ -290,10 +290,12 @@ foobar2000 PATH設定　
 </form>
 <hr />
 BGMモード用
-&nbsp;
-<a href ="listtimesclear.php?times=0" > 再生回数0クリア </a>
-&nbsp;
-<a href ="listtimesclear.php?times=1" > 再生回数1クリア </a>
+<li>
+<a href ="listtimesclear.php?times=0" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
+</li>
+<li>
+<a href ="listtimesclear.php?times=1" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
+</li>
 
 <hr />
 <form method="post" action="init.php">
@@ -333,7 +335,10 @@ IP:<input type="text" name="IPV4ADDR" size="10" class="ip" value="<?php echo $_S
 
 <hr />
 <p>
-<a href ="init.php?clearauth=1" > ログイン情報クリア </a>
+<a href ="init.php?clearauth=1" > ログイン情報クリア (対応ブラウザのみ)</a>
+</p>
+<p>
+<a href="edit_priority.php" > 表示優先度設定 </a>
 </p>
 
 <a href="request.php" > リクエストTOP画面に戻る　</a>

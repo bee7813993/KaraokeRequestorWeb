@@ -87,10 +87,6 @@ document.getElementById('freesinger').parentNode.style.visibility=flg?'visible':
 <body>
 
 <form method="post" action="exec.php">
-
-
-
-<form method="post" action="exec.php">
 <div CLASS="itemname">
 曲名(ファイル名)<br>
 

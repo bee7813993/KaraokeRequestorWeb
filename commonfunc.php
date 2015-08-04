@@ -1,6 +1,7 @@
 <?php
 
 require_once 'kara_config.php';
+require_once 'prioritydb_func.php';
 require_once("getid3/getid3.php");
 
 $showsonglengthflag = 0;
@@ -133,7 +134,7 @@ function printsonglists($result_array, $tableid)
   		print "<table id=\"$tableid\" class=\"searchresult\" >";
 print "<thead>\n";
 print "<tr>\n";
-print "<th>No. </th>\n";
+print '<th>No. <font size="-2" class="searchresult_comment">(おすすめ順)</font></th>'."\n";
 print "<th>リクエスト </th>\n";
 print "<th>ファイル名(プレビューリンク) </th>\n";
 print "<th>サイズ </th>\n";
@@ -163,7 +164,7 @@ print "<tbody>\n";
 			   $length_str = $music_info['playtime_string'];
 			}
 		}
-    		echo "<tr><td class=\"no\">$k</td>";
+    		echo "<tr><td class=\"no\">$k "."</td>";
     		echo "<td class=\"reqbtn\">";
     		echo "<form action=\"request_confirm.php\" method=\"post\" >";
     		echo "<input type=\"hidden\" name=\"filename\" id=\"filename\" value=\"". $v['name'] . "\" />";
@@ -173,6 +174,7 @@ print "<tbody>\n";
     		echo "</td>";
     		echo "<td class=\"filename\">";
     		echo htmlspecialchars($v['name']);
+    		//echo "<br/>おすすめ度 :".$v['priority'];
         $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
     		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
     		echo "プレビュー";
@@ -198,13 +200,63 @@ print "</tbody>\n";
   	echo "\n\n";
 }
 
+function sortpriority($priority_db,$rearchedlist)
+{
+    $prioritylist = prioritydb_get($priority_db);
+    $rearchedlist_addpriority  = array();
+    // var_dump($rearchedlist["results"]);
+    foreach($rearchedlist["results"] as $k=>$v){
+    //print "<br>";
+     //var_dump($v);
+        $onefileinfo = array();
+        $onefileinfo += array('path' => $v['path']);
+        $onefileinfo += array('name' => $v['name']);
+        $onefileinfo += array('size' => $v['size']);
+        
+        $c_priority = -1;
+        foreach($prioritylist as $pk=>$pv){
+            $searchres = false;
+            if($pv['kind'] == 2 ) {
+                $searchres = mb_strstr($v['name'],$pv['priorityword']);
+            }else{
+                $searchres = mb_strstr($v['path'],$pv['priorityword']);
+            }
+            if ( $searchres != false ){
+                if($c_priority < $pv['prioritynum'] ){
+                   $c_priority = $pv['prioritynum'];
+                }
+            }
+        }
+        if($c_priority == -1) $c_priority = 50;
+        $onefileinfo += array('priority' => $c_priority);
+        
+        $rearchedlist_addpriority[] = $onefileinfo ;
+        //print "<br>";
+        //var_dump($rearchedlist_addpriority);
+    }
+    //print "<br>";
+    //var_dump($rearchedlist_addpriority);
+    foreach ($rearchedlist_addpriority as $key => $row) {
+    //var_dump($key);
+    //var_dump($row);
+        $priority_s[$key] = $row['priority'];
+        $size_s[$key] = $row['size'];
+    }
+    // priorityとsizeでsortする。
+    array_multisort($priority_s,SORT_DESC,$size_s,SORT_DESC,$rearchedlist_addpriority);
+    
+    return( array( 'totalResults' => $rearchedlist['totalResults'], 'results' => $rearchedlist_addpriority));
+}
+
 // 検索ワードからファイル一覧を表示するまでの処理
 function PrintLocalFileListfromkeyword($word,$order = null, $tableid='searchresult')
 {
+    global $priority_db;
     searchlocalfilename($word,$result_a,$order);
     echo $result_a["totalResults"]."件<br />";
     if( $result_a["totalResults"] >= 1) {
-        printsonglists($result_a,$tableid);
+        $result_withp = sortpriority($priority_db,$result_a);
+        printsonglists($result_withp,$tableid);
     }
 }
 
