@@ -51,6 +51,38 @@ function mpcstop(){
    }
 }
 
+function mpcdevicestart($playerpath){
+   global $MPCCMDURL;
+   $pscheck_cmd='tasklist /fi "imagename eq mpc-be.exe"';
+   exec($pscheck_cmd, $psresult );
+   sleep(1);
+   
+   $process_found = 0;
+   
+   foreach( $psresult as $psline ){
+     $pos = strpos($psline,"mpc-be.exe");
+     if ( $pos !== FALSE) {
+        $process_found = 1;
+     }
+   }
+   
+   if($process_found == 0){
+       $execcmd="start  \"\" \"".$MPCPATH."\"\n";
+       exec($execcmd);
+       sleep(5);
+   }
+
+    for($loopcount = 0 ; $loopcount < 2 ; $loopcount ++){
+       $mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=802", 5);
+       if( $mpcstat === FALSE) {
+           sleep(1);
+           continue;
+       }else{
+           break;
+       }
+    }
+}
+
 function runningcheck_shop_karaoke($db,$id){
 
    $exit = 1;
@@ -196,7 +228,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
 while(1){
 
      //config 再読込
-     readconfig($dbname,$playmode,$playerpath,$fooobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes);
+     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture);
      if(! empty($playerpath)){
         $MPCPATH = $playerpath;
      }
@@ -347,7 +379,7 @@ while(1){
      //$select->closeCursor();
 
      //config 再読込
-     readconfig($dbname,$playmode,$playerpath,$fooobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes);
+     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture);
      if(! empty($playerpath)){
         $MPCPATH = $playerpath;
      }
@@ -364,6 +396,7 @@ while(1){
           if($l_nowplaying === '再生中' ){
               print(mb_convert_encoding("再生中(カラオケ配信)を検出。終了待ち\n","SJIS"));
           }else{
+              mpcdevicestart($playerpath);
               $db->beginTransaction();
               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
               $ret = $db->exec($sql);

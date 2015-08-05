@@ -22,10 +22,10 @@ if(array_key_exists("playmode", $_REQUEST)) {
 
 if(array_key_exists("playerpath_any", $_REQUEST)) {
     $newplayerpath = $_REQUEST["playerpath_any"];
-    echo "set newplayerpath from any".$newplayerpath."\n";
+    // echo "set newplayerpath from any".$newplayerpath."\n";
     if(empty($newplayerpath)){
         $newplayerpath = $_REQUEST["playerpath"];
-        echo "set newplayerpath from tmpl".$newplayerpath."\n";
+        // echo "set newplayerpath from tmpl".$newplayerpath."\n";
     }    
 }
 
@@ -40,6 +40,11 @@ if(array_key_exists("requestcomment", $_REQUEST)) {
 if(array_key_exists("usenfrequset", $_REQUEST)) {
     $newusenfrequset = $_REQUEST["usenfrequset"];
 }
+
+if(array_key_exists("usevideocapture", $_REQUEST)) {
+    $newusevideocapture = $_REQUEST["usevideocapture"];
+}
+
 
 if(array_key_exists("historylog", $_REQUEST)) {
     $newhistorylog = $_REQUEST["historylog"];
@@ -85,7 +90,7 @@ if (! empty($newdb)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "DB ファイル名を".$dbname."に変更しました。";
+    // print "DB ファイル名を".$dbname."に変更しました。";
 }
 
 if (! empty($newplaymode)){
@@ -94,7 +99,7 @@ if (! empty($newplaymode)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "動作モードを".$playmode."に変更しました。<br><br>";
+    // print "動作モードを".$playmode."に変更しました。<br><br>";
 }
 
 if (! empty($newplayerpath)){
@@ -103,7 +108,7 @@ if (! empty($newplayerpath)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "MPCのPATHを".$playerpath."に変更しました。<br><br>";
+    // print "MPCのPATHを".$playerpath."に変更しました。<br><br>";
 }
 
 if (! empty($newfoobarpath)){
@@ -112,7 +117,7 @@ if (! empty($newfoobarpath)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "foobar2000のPATHを".$foobarpath."に変更しました。<br><br>";
+    // print "foobar2000のPATHを".$foobarpath."に変更しました。<br><br>";
 }
 
 if (! empty($newrequestcomment)){
@@ -121,7 +126,7 @@ if (! empty($newrequestcomment)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "リクエスト画面のコメント欄の説明を変更しました。<br><br>";
+    // print "リクエスト画面のコメント欄の説明を変更しました。<br><br>";
 }else {
     // $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
 }
@@ -132,7 +137,17 @@ if (! empty($newusenfrequset)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "見つからなかった曲リスト使用フラグを".$usenfrequset."に変更しました。<br><br>";
+    // print "見つからなかった曲リスト使用フラグを".$usenfrequset."に変更しました。<br><br>";
+}
+
+
+if (! empty($newusevideocapture)){
+    $usevideocapture = $newusevideocapture;
+    $config_ini = array_merge($config_ini,array("usenvideocapture" => $usevideocapture));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    // print "カラオケ配信ビデオキャプチャ使用フラグを".$usevideocapture."に変更しました。<br><br>";
 }
 
 if (! empty($newhistorylog)){
@@ -141,7 +156,7 @@ if (! empty($newhistorylog)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "検索ログ保存フラグを".$historylog."に変更しました。<br><br>";
+    // print "検索ログ保存フラグを".$historylog."に変更しました。<br><br>";
 }
 
 if (! empty($newconnectinternet)){
@@ -150,7 +165,7 @@ if (! empty($newconnectinternet)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "インターネット使用フラグを".$connectinternet."に変更しました。<br><br>";
+    // print "インターネット使用フラグを".$connectinternet."に変更しました。<br><br>";
 }
 
 if (! empty($newwaitplayercheckstart)){
@@ -159,7 +174,7 @@ if (! empty($newwaitplayercheckstart)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "プレイヤー動作監視開始待ち時間を".$waitplayercheckstart."に変更しました。<br><br>";
+    // print "プレイヤー動作監視開始待ち時間を".$waitplayercheckstart."に変更しました。<br><br>";
 }
 
 if (! empty($newplayerchecktimes)){
@@ -168,12 +183,13 @@ if (! empty($newplayerchecktimes)){
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);
-    print "プレイヤー動作監視チェック回数を".$playerchecktimes."に変更しました。<br><br>";
+    // print "プレイヤー動作監視チェック回数を".$playerchecktimes."に変更しました。<br><br>";
 }
 
 
 ?>
- 
+
+<!----
 現在のDBファイル名 : 
 <?php
 print $dbname;
@@ -198,12 +214,12 @@ print $foobarpath;
 <?php
 print $requestcomment;
 ?>
-
+---->
 <br>
 
 <hr>
 
-新しいファイル名　
+DBファイル名　
 <form method="post" action="init.php">
 <input type="text" size=20 name="filename" id="filename" value=<?php echo $dbname; ?> >
 <input type="submit" value="OK" />
@@ -229,7 +245,14 @@ MediaPlayerClassic PATH設定　
 </select>
 <br />
 &nbsp;(任意のPATH選択):
-<input type="text" name="playerpath_any" size="100" class="playerpath_any" />
+<input type="text" name="playerpath_any" size="100" class="playerpath_any" 
+<?php
+if( $playerpath !== 'C:\Program Files (x86)\MPC-BE\mpc-be.exe' && $playerpath !== 'C:\Program Files\MPC-BE\mpc-be.exe' )
+{
+    print 'value="'.$playerpath.'" ';
+}
+?>
+/>
 <input type="submit" value="OK" />
 </form>
 
@@ -239,7 +262,6 @@ foobar2000 PATH設定　
 <input type="text" name="foobarpath" size="100" class="foobarpath" value="<?php echo $foobarpath; ?>" />
 <input type="submit" value="OK" />
 </form>
-<hr />
 
 リクエスト画面の説明書き
 <form method="post" action="init.php">
@@ -249,25 +271,34 @@ foobar2000 PATH設定　
 <input type="submit" value="OK" />
 </form>
 
-見つからなかった曲リストの使用
+<hr />
+
 <form method="post" action="init.php">
+<div>
+見つからなかった曲リストの使用
 <input type="radio" name="usenfrequset" value="1" <?php print ($usenfrequset==1)?'checked':' ' ?> /> 使用する
 <input type="radio" name="usenfrequset" value="2" <?php print ($usenfrequset!=1)?'checked':' ' ?> /> 使用しない
-<input type="submit" value="OK" />
-</form>
-
+</div>
+<div>
+配信曲にビデオキャプチャデバイスを使用
+<input type="radio" name="usevideocapture" value="1" <?php print ($usevideocapture==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="usevideocapture" value="2" <?php print ($usevideocapture!=1)?'checked':' ' ?> /> 使用しない
+</div>
+<div>
 検索ログの保存
 <form method="post" action="init.php">
 <input type="radio" name="historylog" value="1" <?php print ($historylog==1)?'checked':' ' ?> /> 使用する
 <input type="radio" name="historylog" value="2" <?php print ($historylog!=1)?'checked':' ' ?> /> 使用しない
-<input type="submit" value="OK" />
-</form>
+</div>
+<div>
 
 インターネット接続 (使用しないにするとインターネット接続が前提の機能を無効にします)
 <form method="post" action="init.php">
 <input type="radio" name="connectinternet" value="1" <?php print ($connectinternet==1)?'checked':' ' ?> /> 使用する
 <input type="radio" name="connectinternet" value="2" <?php print ($connectinternet!=1)?'checked':' ' ?> /> 使用しない
+<br>
 <input type="submit" value="OK" />
+</div>
 </form>
 
 <hr />

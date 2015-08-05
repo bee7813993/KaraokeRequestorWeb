@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none'){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none', &$usevideocapture = 'none'){
 
     global $configfile;
     global $config_ini;
@@ -32,6 +32,12 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
                 $usenfrequset = $config_ini["usenfrequset"];
             }
         }
+        if(strcmp($usevideocapture,'none') != 0){
+            if(array_key_exists("usevideocapture", $config_ini) ){
+                $usevideocapture = $config_ini["usevideocapture"];
+            }
+        }
+        
         if(strcmp($historylog,'none') != 0){
             if(array_key_exists("historylog", $config_ini) ){
                 $historylog = $config_ini["historylog"];
@@ -114,6 +120,15 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
             fclose($fp);
         }
     }
+    if(!strcmp($usevideocapture,'none') == 0 ){
+        if(!isset($usevideocapture)){
+            $usevideocapture = 0;
+            $config_ini = array_merge($config_ini,array("usevideocapture" => urlencode($usevideocapture)));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+            fclose($fp);
+        }
+    }    
 
     if(!strcmp($historylog,'none') == 0 ){
         if(!isset($historylog)){
@@ -195,7 +210,7 @@ if ($stmt === false ){
 
 }
 
-readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet);
+readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture);
 initdb($db,$dbname);
 
 // cache control
