@@ -34,6 +34,7 @@ $(document).ready(function(){
   $('#searchresult').dataTable({
   "bPaginate" : false,
   "bStateSave" : true,
+  "autoWidth": false,
   columnDefs: [
   { type: 'currency', targets: [3] }
    ]

@@ -6,6 +6,17 @@ require_once("getid3/getid3.php");
 
 $showsonglengthflag = 0;
 
+
+$user='normal';
+
+if (isset($_SERVER['PHP_AUTH_USER'])){
+    if ($_SERVER['PHP_AUTH_USER'] === 'admin'){
+        // print '管理者ログイン中<br>';
+        $user=$_SERVER['PHP_AUTH_USER'];
+    }
+}
+
+
 if (isset($_SERVER) && isset($_SERVER["SERVER_ADDR"]) ){
     //var_dump($_SERVER);
     $everythinghost = $_SERVER["SERVER_ADDR"];
@@ -128,6 +139,15 @@ function printsonglists($result_array, $tableid)
 {
 		global $everythinghost;
 		global $showsonglengthflag;
+
+		$user='normal';
+if (isset($_SERVER['PHP_AUTH_USER'])){
+    if ($_SERVER['PHP_AUTH_USER'] === 'admin'){
+        // print '管理者ログイン中<br>';
+        $user=$_SERVER['PHP_AUTH_USER'];
+    }
+}		
+
 		$getID3 = new getID3();
 		$getID3->setOption(array('encoding' => 'UTF-8'));
 		
@@ -174,7 +194,9 @@ print "<tbody>\n";
     		echo "</td>";
     		echo "<td class=\"filename\">";
     		echo htmlspecialchars($v['name']);
-    		//echo "<br/>おすすめ度 :".$v['priority'];
+    		if($user == 'admin' ) {
+    		    echo "<br/>おすすめ度 :".$v['priority'];
+    		}
         $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
     		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
     		echo "プレビュー";

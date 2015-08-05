@@ -9,14 +9,6 @@ if(array_key_exists("fullpath", $_REQUEST)) {
     $fullpath = $_REQUEST["fullpath"];
 }
 
-$user='normal';
-
-if (isset($_SERVER['PHP_AUTH_USER'])){
-    if ($_SERVER['PHP_AUTH_USER'] === 'admin'){
-        // print '管理者ログイン中<br>';
-        $user=$_SERVER['PHP_AUTH_USER'];
-    }
-}
 
 
 require_once 'commonfunc.php';
