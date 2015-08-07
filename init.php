@@ -143,7 +143,7 @@ if (! empty($newusenfrequset)){
 
 if (! empty($newusevideocapture)){
     $usevideocapture = $newusevideocapture;
-    $config_ini = array_merge($config_ini,array("usenvideocapture" => $usevideocapture));
+    $config_ini = array_merge($config_ini,array("usevideocapture" => $usevideocapture));
     $fp = fopen($configfile, 'w');
     foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
     fclose($fp);

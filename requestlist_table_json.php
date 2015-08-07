@@ -113,12 +113,19 @@ $action_pf = <<<EOD
 <input type="submit" name="delete" id="requestdelete" value="削除"/>
 </div>
 </form>
-<a href="http://twitter.com/?status=%s" > Tweetする </a>
+%s
+
 <div class="clear" >
 </div>
 EOD;
+    
+    if($connectinternet == 1){
     $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
-    $action = sprintf($action_pf,$value['id'],$value['songfile'], nl2br(htmlspecialchars($tweet_message)));
+    $tweet_link = sprintf('<a href="http://twitter.com/?status=%s" > Tweetする </a>',nl2br(htmlspecialchars($tweet_message)));
+    }else {
+    $tweet_link = ' ';
+    }
+    $action = sprintf($action_pf,$value['id'],$value['songfile'], $tweet_link);
     $onerequset += array("action" => $action);
     
     if($user === "admin"){

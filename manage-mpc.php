@@ -67,9 +67,9 @@ function mpcdevicestart($playerpath){
    }
    
    if($process_found == 0){
-       $execcmd="start  \"\" \"".$MPCPATH."\"\n";
+       $execcmd="start  \"\" \"".$playerpath."\"\n";
        exec($execcmd);
-       sleep(5);
+       sleep(1);
    }
 
     for($loopcount = 0 ; $loopcount < 2 ; $loopcount ++){
@@ -396,7 +396,9 @@ while(1){
           if($l_nowplaying === '再生中' ){
               print(mb_convert_encoding("再生中(カラオケ配信)を検出。終了待ち\n","SJIS"));
           }else{
-              mpcdevicestart($playerpath);
+              if( $usevideocapture == 1 ) {
+                  mpcdevicestart($playerpath);
+              }
               $db->beginTransaction();
               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
               $ret = $db->exec($sql);
