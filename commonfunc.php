@@ -37,8 +37,8 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1){
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeoutsec);
         curl_setopt($ch, CURLOPT_FAILONERROR, true);
         $contents = curl_exec($ch);
-        
-        if( $contents !== FALSE) {
+        //var_dump($contents); //debug
+        if( $contents !== false) {
             curl_close($ch);
             break;
         }

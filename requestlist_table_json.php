@@ -121,7 +121,7 @@ EOD;
     
     if($connectinternet == 1){
     $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
-    $tweet_link = sprintf('<a href="http://twitter.com/?status=%s" > Tweetする </a>',nl2br(htmlspecialchars($tweet_message)));
+    $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" > Tweetする </a>',nl2br(htmlspecialchars($tweet_message)));
     }else {
     $tweet_link = ' ';
     }

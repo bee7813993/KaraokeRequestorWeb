@@ -73,8 +73,9 @@ function mpcdevicestart($playerpath){
    }
 
     for($loopcount = 0 ; $loopcount < 2 ; $loopcount ++){
-       $mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=802", 5);
+       $mpcstat = file_get_contents($MPCCMDURL."?wm_command=802", 5);
        if( $mpcstat === FALSE) {
+           //var_dump($mpcstat);
            sleep(1);
            continue;
        }else{

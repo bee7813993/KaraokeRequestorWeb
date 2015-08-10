@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none', &$usevideocapture = 'none'){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none', &$usevideocapture = 'none', &$commenturl='none'){
 
     global $configfile;
     global $config_ini;
@@ -56,6 +56,11 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         if(strcmp($connectinternet,'none') != 0){
             if(array_key_exists("connectinternet", $config_ini) ){
                 $connectinternet = $config_ini["connectinternet"];
+            }
+        }
+        if(strcmp($commenturl,'none') != 0){
+            if(array_key_exists("commenturl", $config_ini) ){
+                $commenturl = urldecode($config_ini["commenturl"]);
             }
         }
     } else {
@@ -172,6 +177,16 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
             fclose($fp);
         }
     }
+    if(!strcmp($commenturl,'none') == 0){
+        if(empty($commenturl)){
+            $commenturl = "";
+            $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl)));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+        print "commenturl $commenturl";
+            fclose($fp);
+        }
+    }
 
 //    $playerpath = "'".$playerpath."'";
     //var_dump($config_ini);
@@ -210,7 +225,7 @@ if ($stmt === false ){
 
 }
 
-readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture);
+readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$commenturl);
 initdb($db,$dbname);
 
 // cache control
