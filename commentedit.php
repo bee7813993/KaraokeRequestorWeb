@@ -26,7 +26,7 @@ print "wrong id";
 $failflg = 1;
 die();
 }else{
-    $sql = "SELECT comment FROM requesttable WHERE id = $l_id ORDER BY id DESC";
+    $sql = "SELECT comment,singer FROM requesttable WHERE id = $l_id ORDER BY id DESC";
     $select = $db->query($sql);
     $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
     $select->closeCursor();
@@ -53,6 +53,17 @@ die();
         		die();
             }
             $addcommentsuccessflg = 1;
+            // レスコメント時コメント表示
+            $playingid = getcurrentid();
+            if(isset($commenturl) && ($playingid == $l_id )){
+                  $nm=$allrequest[0]['singer'];
+                  $msg=$l_addcomment;
+                  $col = 1;
+                  commentpost($nm,$col,$msg,$commenturl);
+            //      print("コメントポスト実行");
+            }else{
+            //      print("コメントポスト実行されず $commenturl,$playingid,$l_id ");
+            }
         }
     }
 }
@@ -67,7 +78,7 @@ $db = null;
 
 print_meta_header();
 if($addcommentsuccessflg == 1){
-print '<META http-equiv="refresh" content="1; url=request.php">';
+  print '<META http-equiv="refresh" content="1; url=request.php">';
 }
 ?>
 <link type="text/css" rel="stylesheet" href="css/style.css" />

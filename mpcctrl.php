@@ -8,8 +8,8 @@
 <script type="text/javascript" src="mpcctrl.js"></script>
 </head>
 <?php
-  if( !empty($_POST['songnext']) ){
       require_once 'kara_config.php';
+  if( !empty($_POST['songnext']) ){
       $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生中' ORDER BY reqorder ASC ";
       $select = $db->query($sql);
       $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
@@ -35,7 +35,11 @@
 <br>
 <button type="submit" value="字幕ONOFF(ソフトサブのみ)" class="pcmorefunc" onClick="song_subtitleonnoff()" >字幕ONOFF(ソフトサブのみ)</button>
 <button type="submit" value="音声トラック変更" class="pcmorefunc" onClick="song_changeaudio()" >音声トラック変更</button>
-<button type="submit" value="フルスクリーンON/OFF" class="pcmorefunc" onClick="song_fullscreen()" >フルスクリーンON/OFF</button>
+<?php
+if($moviefullscreen == 1){
+print '<button type="submit" value="フルスクリーンON/OFF" class="pcmorefunc" onClick="song_fullscreen()" >フルスクリーンON/OFF</button>';
+}
+?>
 <br>
 <button type="submit" value="(-100ms)音ズレ修正" class="pcdelay" onClick="song_audiodelay_m100()" >(-100ms)音ズレ修正</button>
 <button type="submit" value="(-10ms)音ズレ修正" class="pcdelay" onClick="song_audiodelay_m10()" >(-10ms)音ズレ修正</button>

@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none', &$usevideocapture = 'none', &$commenturl='none'){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none', &$usevideocapture = 'none', &$commenturl='none', &$moviefullscreen='none',&$helpurl='none'){
 
     global $configfile;
     global $config_ini;
@@ -63,6 +63,17 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
                 $commenturl = urldecode($config_ini["commenturl"]);
             }
         }
+        if(strcmp($moviefullscreen,'none') != 0){
+            if(array_key_exists("moviefullscreen", $config_ini) ){
+                $moviefullscreen = urldecode($config_ini["moviefullscreen"]);
+            }
+        }
+        if(strcmp($helpurl,'none') != 0){
+            if(array_key_exists("helpurl", $config_ini) ){
+                $helpurl = urldecode($config_ini["helpurl"]);
+            }
+        }
+        
     } else {
         $fp = fopen($configfile, 'w');
         fclose($fp);
@@ -183,10 +194,31 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
             $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl)));
             $fp = fopen($configfile, 'w');
             foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-        print "commenturl $commenturl";
+//        print "commenturl $commenturl";
             fclose($fp);
         }
     }
+    if(!strcmp($moviefullscreen,'none') == 0){
+        if(empty($moviefullscreen)){
+            $moviefullscreen = "";
+            $config_ini = array_merge($config_ini,array("moviefullscreen" => $moviefullscreen));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+//        print "moviefullscreen $moviefullscreen";
+            fclose($fp);
+        }
+    }
+    if(!strcmp($helpurl,'none') == 0){
+        if(empty($helpurl)){
+            $helpurl = "";
+            $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+//        print "helpurl $helpurl";
+            fclose($fp);
+        }
+    }
+        
 
 //    $playerpath = "'".$playerpath."'";
     //var_dump($config_ini);
@@ -225,7 +257,7 @@ if ($stmt === false ){
 
 }
 
-readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$commenturl);
+readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$commenturl,$moviefullscreen,$helpurl);
 initdb($db,$dbname);
 
 // cache control

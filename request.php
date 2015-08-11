@@ -50,56 +50,6 @@ document.getElementById('freesinger').parentNode.style.visibility=flg?'visible':
 }
 
 
-//// File API が使えるかチェック
-//window.onload = function() {
-//  var objDropArea = document.getElementById("drop_area");
-//  if ( window.File && window.FileReader ) {
-//    // ドロップ時のアクションを設定
-//    objDropArea.addEventListener("drop", function(event) { fileRead(event); }, false);
-//    // ブラウザが実装している処理を止める関数を設定
-//    objDropArea.addEventListener("dragover", function(event) { preventDefault(event); }, false);
-//  } else {
-//    // ブラウザが対応していない場合の処理
-//    objDropArea.innerHTML = 'お使いのブラウザは対応していません。';
-//    var objDispArea = document.getElementById("disp_area");
-//    objDispArea.parentNode.removeChild(objDispArea);
-//  }
-//}
-
-//// ドロップ時のアクション
-//function fileRead(event)
-//{
-//  preventDefault(event);
-//
-//  var files = event.dataTransfer.files;
-//  var objDispArea = document.getElementById("disp_area");
-//
-//  objDispArea.innerHTML = '';
-//
-//  // ドロップされたファイルの処理
-//  for ( var i = 0; i < files.length; i++ ) {
-//
-//    var f = files[i];
-//
-//    var objFileReader = new FileReader();
-//    objFileReader.onerror = function(evt) {
-//      objDispArea.innerHTML = '【' + f.name + '】 ファイル読み込み時にエラーが発生しました。';
-//      return;
-//    }
-//
-//    // テキストの処理
-//    objDispArea.innerHTML = f.name;
-//
-//    document.getElementById("filename").value = f.name;
-//
-//  }
-//}
-
-//// ブラウザが実装している処理を止める
-//function preventDefault(event)
-//{
-//  event.preventDefault();
-//}
 
 // プレーヤーコントローラーの切り替え
 function selectPlayerctrl()
@@ -130,30 +80,6 @@ $(document).ready(function(){
   );
 });
 
-
-//$(function() {
-//    $('#requsetlisttable').dataTable({
-//        "ajax": {
-//          "url": "requestlist_table_json.php",
-//          "dataSrc": "",
-//          "type": "GET"
-//          },
-//        "columns" : [
-//        { "data": "1"},
-//        { "data": "2"},
-//        { "data": "3"},
-//        { "data": "4"},
-//        { "data": "5"},
-//        { "data": "6"},
-//        { "data": "7"},
-//        { "data": "8"}
-//        ],
-//        "bPaginate" : false,
-//        "order" : [[0, 'desc']],
-//        "bDeferRender": true
-//        
-//    });
-//} );
 
 
 $(function(requestTable) { $("#request_table").dataTable({
@@ -189,6 +115,14 @@ $("#sample_table").dataTable();
 </head>
 <body>
 <?php
+if(isset($helpurl)){
+
+print '<div align="right">';
+print '<a href="'.$helpurl. '" TARGET="_blank" > 使用方法 </a>';
+
+print '</div>';
+}
+
 if ($user === 'admin'){
     print '管理者ログイン中<br>';
 }
@@ -208,32 +142,6 @@ print '<input type="submit" name="配信"   value="カラオケ配信曲を歌�
 ?>
 </form>
 <?php
-if(isset($commenturl)) {
-    print '<input type="button" onclick="location.href=\''.$commenturl.'\'" value="こちらから画面にコメントを出せます(ニコ生風に)" class="topbtn"/>';
-    print <<<EOD
-<form name=forms action="http://xsd.php.xdomain.jp/r.php?r=0810&p=0" method="post">
-<b>名前<input type=text name="nm" style="font-size:1em;WIDTH:35%;" fontsize=9 MAXLENGTH="32" value=ゆう> 
-<table border="0.5" cellspacing = 0 cellpadding = 0 bordercolor="#333333">
-<tr>
-<th >文字色 
-<input type="radio" name="col" value="0" checked="checked"></th>
-<th bgcolor="gray"><input type="radio" name="col" value="1" ></th>
-<th bgcolor="red"><input type="radio" name="col" value="2" ></th>
-<th bgcolor="orange"><input type="radio" name="col" value="3" ></th>
-<th bgcolor="yellow"><input type="radio" name="col" value="4" ></th>
-<th bgcolor="lime"><input type="radio" name="col" value="5" ></th>
-<th bgcolor="aqua"><input type="radio" name="col" value="6" ></th>
-<th bgcolor="blue"><input type="radio" name="col" value="7" ></th>
-<th bgcolor="purple"><input type="radio" name="col" value="8" ></th>
-<th bgcolor="black"><input type="radio" name="col" value="9" ></th>
-</tr>
-</table><input type="text" style="font-size:1em;WIDTH:100%;" name="msg" fontsize=8 MAXLENGTH="256" tabindex="1">
-<br><font size=-1><input type="submit" name="SUBMIT" style="WIDTH:100%; HEIGHT:30;" align="right" value="送信/更新">
-</form>
-EOD;
-}
-?>
-<?php
 if($usenfrequset == 1) {
     print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';
     print '<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn"/>';
@@ -241,6 +149,8 @@ if($usenfrequset == 1) {
 }
 ?>
 </div>
+
+
 <br />
 
 <div align="center" >
@@ -268,9 +178,35 @@ if($usenfrequset == 1) {
 </iframe>
 </div>
 
-
-
-
+<?php
+print '<div align="center" >';
+if(isset($commenturl)) {
+//    print '<input type="button" onclick="location.href=\''.$commenturl.'\'" value="こちらから画面にコメントを出せます(ニコ生風に)" class="topbtn"/>';
+    print "こちらから画面にコメントを出せます(ニコ生風に)";
+    print <<<EOD
+<form name=forms action="commentpost.php" class="sendcomment" method="post">
+<b>名前<input type=text name="nm" style="font-size:1em;WIDTH:35%;" fontsize=9 MAXLENGTH="32" value=ゆう> 
+<table border="0.5" cellspacing = 0 cellpadding = 0 bordercolor="#333333">
+<tr>
+<th >文字色 
+<input type="radio" name="col" value="0" checked="checked"></th>
+<th bgcolor="gray"><input type="radio" name="col" value="1" ></th>
+<th bgcolor="red"><input type="radio" name="col" value="2" ></th>
+<th bgcolor="orange"><input type="radio" name="col" value="3" ></th>
+<th bgcolor="yellow"><input type="radio" name="col" value="4" ></th>
+<th bgcolor="lime"><input type="radio" name="col" value="5" ></th>
+<th bgcolor="aqua"><input type="radio" name="col" value="6" ></th>
+<th bgcolor="blue"><input type="radio" name="col" value="7" ></th>
+<th bgcolor="purple"><input type="radio" name="col" value="8" ></th>
+<th bgcolor="black"><input type="radio" name="col" value="9" ></th>
+</tr>
+</table><input type="text" style="font-size:1em;WIDTH:100%;" name="msg" fontsize=8 MAXLENGTH="256" tabindex="1">
+<br><font size=-1><input type="submit" name="SUBMIT" style="WIDTH:100%; HEIGHT:30;" align="right" value="送信">
+</form>
+EOD;
+print '</div>';
+}
+?>
 
 
 <table id="request_table" class="cell-border">

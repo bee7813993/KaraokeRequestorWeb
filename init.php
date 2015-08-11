@@ -62,6 +62,19 @@ if(array_key_exists("playerchecktimes", $_REQUEST)) {
     $newplayerchecktimes = $_REQUEST["playerchecktimes"];
 }
 
+if(array_key_exists("commenturl", $_REQUEST)) {
+    $newcommenturl = $_REQUEST["commenturl"];
+}
+
+if(array_key_exists("moviefullscreen", $_REQUEST)) {
+    $newmoviefullscreen = $_REQUEST["moviefullscreen"];
+}
+
+if(array_key_exists("helpurl", $_REQUEST)) {
+    $newhelpurl = $_REQUEST["helpurl"];
+}
+
+
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
 }
@@ -186,6 +199,32 @@ if (! empty($newplayerchecktimes)){
     // print "プレイヤー動作監視チェック回数を".$playerchecktimes."に変更しました。<br><br>";
 }
 
+if (! empty($newcommenturl)){
+    $commenturl = $newcommenturl;
+    $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    // print "プレイヤー動作監視チェック回数を".$commenturl."に変更しました。<br><br>";
+}
+
+if (! empty($newmoviefullscreen)){
+    $moviefullscreen = $newmoviefullscreen;
+    $config_ini = array_merge($config_ini,array("moviefullscreen" => $moviefullscreen));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    // print "プレイヤー動作監視チェック回数を".$moviefullscreen."に変更しました。<br><br>";
+}
+
+if (! empty($newhelpurl)){
+    $helpurl = $newhelpurl;
+    $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    // print "プレイヤー動作監視チェック回数を".$helpurl."に変更しました。<br><br>";
+}
 
 ?>
 
@@ -293,10 +332,18 @@ foobar2000 PATH設定　
 <div>
 
 インターネット接続 (使用しないにするとインターネット接続が前提の機能を無効にします)
-<form method="post" action="init.php">
 <input type="radio" name="connectinternet" value="1" <?php print ($connectinternet==1)?'checked':' ' ?> /> 使用する
 <input type="radio" name="connectinternet" value="2" <?php print ($connectinternet!=1)?'checked':' ' ?> /> 使用しない
 <br>
+コメントサーバーURL (http://xsd.php.xdomain.jp/r.php?r=12  等, 使用しないときは空で)
+<input type="text" name="commenturl" size="100" class="commenturl" value="<?php echo $commenturl; ?>" />
+<br>
+MPC-BEのフルスクリーンボタン
+<input type="radio" name="moviefullscreen" value="1" <?php print ($moviefullscreen==1)?'checked':' ' ?> /> 有効
+<input type="radio" name="moviefullscreen" value="2" <?php print ($moviefullscreen!=1)?'checked':' ' ?> /> 無効
+<br>
+ヘルプURL (https://www.evernote.com/shard/s213/sh/c0e87185-314f-446d-ac12-fd13f25f6cb9/78f03652cc14e2ae 等, 使用しないときは空で)
+<input type="text" name="helpurl" size="100" class="commenturl" value="<?php echo $helpurl; ?>" />
 <input type="submit" value="OK" />
 </div>
 </form>

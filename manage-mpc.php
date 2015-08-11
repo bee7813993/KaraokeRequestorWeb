@@ -380,7 +380,7 @@ while(1){
      //$select->closeCursor();
 
      //config 再読込
-     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture);
+     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$commenturl);
      if(! empty($playerpath)){
         $MPCPATH = $playerpath;
      }
@@ -390,7 +390,15 @@ while(1){
      if( empty($playerchecktimes)){
         $playerchecktimes = 3;
      }
+     
+     // 再生時コメント表示
+     if(isset($commenturl)){
+         $nm=$row['singer'];
+         $msg=$row['comment'];
+         $col = 1;
 
+         commentpost($nm,$col,$msg,$commenturl);
+     }
        
        if( strcmp ($l_kind , "カラオケ配信") === 0 )
        {

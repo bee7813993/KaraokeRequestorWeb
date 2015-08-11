@@ -120,8 +120,16 @@ $action_pf = <<<EOD
 EOD;
     
     if($connectinternet == 1){
-    $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
-    $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" > Tweetする </a>',nl2br(htmlspecialchars($tweet_message)));
+    if($value['nowplaying'] === '再生中'){
+            $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
+    }
+    elseif($value['nowplaying'] === '未再生'){
+            $tweet_message = sprintf("「%s」は「%s」を歌います",$value['singer'],$value['songfile']);
+    }
+    else{
+            $tweet_message = sprintf("「%s」は「%s」を歌いました",$value['singer'],$value['songfile']);
+    }
+    $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" TARGET="_blank" > Tweetする </a>',nl2br(htmlspecialchars($tweet_message)));
     }else {
     $tweet_link = ' ';
     }
