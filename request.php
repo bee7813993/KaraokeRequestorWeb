@@ -185,12 +185,16 @@ if(isset($commenturl)) {
     print "こちらから画面にコメントを出せます(ニコ生風に)";
     print <<<EOD
 <form name=forms action="commentpost.php" class="sendcomment" method="post">
-<b>名前<input type=text name="nm" style="font-size:1em;WIDTH:35%;" fontsize=9 MAXLENGTH="32" value=ゆう> 
+<b>名前<input type=text name="nm" style="font-size:1em;WIDTH:35%;" fontsize=9 MAXLENGTH="32" value="
+EOD;
+print returnusername_self();
+    print <<<EOD
+" > 
 <table border="0.5" cellspacing = 0 cellpadding = 0 bordercolor="#333333">
 <tr>
-<th >文字色 
-<input type="radio" name="col" value="0" checked="checked"></th>
-<th bgcolor="gray"><input type="radio" name="col" value="1" ></th>
+<th >文字色 </th>
+<th bgcolor="white"><input type="radio" name="col" value="0" ></th>
+<th bgcolor="gray"><input type="radio" name="col" value="1" checked="checked" ></th>
 <th bgcolor="red"><input type="radio" name="col" value="2" ></th>
 <th bgcolor="orange"><input type="radio" name="col" value="3" ></th>
 <th bgcolor="yellow"><input type="radio" name="col" value="4" ></th>

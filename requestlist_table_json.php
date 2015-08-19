@@ -12,19 +12,6 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
 }
 
 
-function returnusername($rt){
-    $rt_i = array_reverse($rt);
-    foreach($rt_i as $row){
-          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
-            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
-                return $row['singer'];
-            }
-          }
-    }
-    
-    return "";
-}
-
 $configfile = 'config.ini';
 $config_ini = array ();
 

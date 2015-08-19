@@ -24,6 +24,68 @@ if (isset($_SERVER) && isset($_SERVER["SERVER_ADDR"]) ){
     $everythinghost = 'localhost';
 }
 
+
+/**
+ * createUri
+ * 相対パスから絶対URLを返します
+ *
+ * @param string $base ベースURL（絶対URL）
+ * @param string $relational_path 相対パス
+ * @return string 相対パスの絶対URL
+ * @link http://blog.anoncom.net/2010/01/08/295.html/comment-page-1
+ */
+function createUri( $base, $relationalPath )
+{
+     $parse = array(
+          "scheme" => null,
+          "user" => null,
+          "pass" => null,
+          "host" => null,
+          "port" => null,
+          "query" => null,
+          "fragment" => null
+     );
+     $parse = parse_url( $base );
+     
+     //var_dump($parse);
+
+     if( strpos($parse["path"], "/", (strlen($parse["path"])-1)) !== false ){
+          $parse["path"] .= ".";
+     }
+
+     if( preg_match("#^https?://#", $relationalPath) ){
+          return $relationalPath;
+     }else if( preg_match("#^/.*$#", $relationalPath) ){
+          return $parse["scheme"] . "://" . $parse["host"] . $relationalPath;
+     }else{
+          $basePath = explode("/", str_replace('\\', '/', dirname($parse["path"])));
+          //var_dump($basePath);
+          if(empty($basePath[1] )) {
+              unset($basePath[1]);
+          }
+          $relPath = explode("/", $relationalPath);
+          //var_dump($relPath);
+          foreach( $relPath as $relDirName ){
+               if( $relDirName == "." ){
+                    array_shift( $basePath );
+                    array_unshift( $basePath, "" );
+               }else if( $relDirName == ".." ){
+                    array_pop( $basePath );
+                    if( count($basePath) == 0 ){
+                         $basePath = array("");
+                    }
+               }else{
+                    array_push($basePath, $relDirName);
+               }
+          }
+          //var_dump($basePath);
+          $path = implode("/", $basePath);
+          //print $path;
+          return $parse["scheme"] . "://" . $parse["host"] . $path;
+     }
+
+}
+
 function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1){
 
     $errno = 0;
@@ -430,4 +492,37 @@ function commentpost($nm,$col,$msg,$commenturl)
     }    
 }
 
+function getallrequest_array(){
+    global $db;
+    $sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
+    $select = $db->query($sql);
+    $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+    
+    return $allrequest;
+}
+
+function returnusername($rt){
+    if(empty($rt)){
+    return "";
+    }
+
+    $rt_i = array_reverse($rt);
+    foreach($rt_i as $row){
+          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
+            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
+                return $row['singer'];
+            }
+          }
+    }
+    
+    return "";
+}
+
+
+function returnusername_self(){
+
+    $allrequest = getallrequest_array ();
+    return returnusername($allrequest);
+}
 ?>
