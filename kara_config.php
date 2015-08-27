@@ -2,7 +2,7 @@
 $configfile = 'config.ini';
 $config_ini = array ();
 
-function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none', &$usevideocapture = 'none', &$commenturl='none', &$moviefullscreen='none',&$helpurl='none'){
+function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomment = 'none', &$usenfrequset = 'none', &$historylog = 'none', &$waitplayercheckstart = 'none', &$playerchecktimes = 'none', &$connectinternet = 'none', &$usevideocapture = 'none', &$moviefullscreen='none',&$helpurl='none', &$commenturl_base='none', &$commentroom='none',&$commenturl){
 
     global $configfile;
     global $config_ini;
@@ -61,6 +61,18 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
         if(strcmp($commenturl,'none') != 0){
             if(array_key_exists("commenturl", $config_ini) ){
                 $commenturl = urldecode($config_ini["commenturl"]);
+            }
+        }
+
+        if(strcmp($commenturl_base,'none') != 0){
+            if(array_key_exists("commenturl_base", $config_ini) ){
+                $commenturl_base = urldecode($config_ini["commenturl_base"]);
+            }
+        }
+
+        if(strcmp($commentroom,'none') != 0){
+            if(array_key_exists("commentroom", $config_ini) ){
+                $commentroom = urldecode($config_ini["commentroom"]);
             }
         }
         if(strcmp($moviefullscreen,'none') != 0){
@@ -188,16 +200,38 @@ function readconfig(&$dbname,&$playmode,&$playerpath,&$foobarpath,&$requestcomme
             fclose($fp);
         }
     }
-    if(!strcmp($commenturl,'none') == 0){
-        if(empty($commenturl)){
-            $commenturl = "";
-            $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl)));
+
+    if(!strcmp($commenturl_base,'none') == 0){
+        if(empty($commenturl_base)){
+            $commenturl_base = "";
+            $config_ini = array_merge($config_ini,array("commenturl_base" => urlencode($commenturl_base)));
             $fp = fopen($configfile, 'w');
             foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-//        print "commenturl $commenturl";
+//        print "commenturl_base $commenturl_base";
             fclose($fp);
+            //echo "commenturl_base empty";
+            $commenturl = "";
         }
     }
+
+    if(!strcmp($commentroom,'none') == 0){
+        if(empty($commentroom)){
+            $commentroom = "";
+            $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));
+            $fp = fopen($configfile, 'w');
+            foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+//        print "commentroom $commentroom";
+            fclose($fp);
+        }
+        if(!empty($commenturl_base) && !empty($commentroom) ){
+            if(!strcmp($commenturl,'none') == 0){
+                $commenturl = sprintf("%s?r=%s",$commenturl_base,$commentroom);
+            }
+        }
+    }
+    
+    
+    
     if(!strcmp($moviefullscreen,'none') == 0){
         if(empty($moviefullscreen)){
             $moviefullscreen = "";
@@ -257,7 +291,7 @@ if ($stmt === false ){
 
 }
 
-readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$commenturl,$moviefullscreen,$helpurl);
+readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroom,$commenturl);
 initdb($db,$dbname);
 
 // cache control

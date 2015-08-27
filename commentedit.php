@@ -58,8 +58,10 @@ die();
             if(isset($commenturl) && ($playingid == $l_id )){
                   $nm=$allrequest[0]['singer'];
                   $msg=$l_addcomment;
-                  $col = 1;
-                  commentpost($nm,$col,$msg,$commenturl);
+                  $col = '808080';
+                  $size = 3;
+                  
+                  commentpost_v2($nm,$col,$size,$msg,$commenturl);
             //      print("コメントポスト実行");
             }else{
             //      print("コメントポスト実行されず $commenturl,$playingid,$l_id ");

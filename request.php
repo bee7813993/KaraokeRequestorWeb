@@ -179,8 +179,8 @@ if($usenfrequset == 1) {
 </div>
 
 <?php
+if(!empty($commenturl)) {
 print '<div align="center" >';
-if(isset($commenturl)) {
 //    print '<input type="button" onclick="location.href=\''.$commenturl.'\'" value="こちらから画面にコメントを出せます(ニコ生風に)" class="topbtn"/>';
     print "こちらから画面にコメントを出せます(ニコ生風に)";
     print <<<EOD
@@ -193,16 +193,23 @@ print returnusername_self();
 <table border="0.5" cellspacing = 0 cellpadding = 0 bordercolor="#333333">
 <tr>
 <th >文字色 </th>
-<th bgcolor="white"><input type="radio" name="col" value="0" ></th>
-<th bgcolor="gray"><input type="radio" name="col" value="1" checked="checked" ></th>
-<th bgcolor="red"><input type="radio" name="col" value="2" ></th>
-<th bgcolor="orange"><input type="radio" name="col" value="3" ></th>
-<th bgcolor="yellow"><input type="radio" name="col" value="4" ></th>
-<th bgcolor="lime"><input type="radio" name="col" value="5" ></th>
-<th bgcolor="aqua"><input type="radio" name="col" value="6" ></th>
-<th bgcolor="blue"><input type="radio" name="col" value="7" ></th>
-<th bgcolor="purple"><input type="radio" name="col" value="8" ></th>
-<th bgcolor="black"><input type="radio" name="col" value="9" ></th>
+<th bgcolor="white"><input type="radio" name="col" value="FFFFFF" checked="checked" ></th>
+<th bgcolor="gray"><input type="radio" name="col" value="808080" ></th>
+<th bgcolor="pink"><input type="radio" name="col" value="FFC0CB" ></th>
+<th bgcolor="red"><input type="radio" name="col" value="FF0000" ></th>
+<th bgcolor="orange"><input type="radio" name="col" value="FFA500" ></th>
+<th bgcolor="yellow"><input type="radio" name="col" value="FFFF00" ></th>
+<th bgcolor="lime"><input type="radio" name="col" value="00FF00" ></th>
+<th bgcolor="aqua"><input type="radio" name="col" value="00FFFF" ></th>
+<th bgcolor="blue"><input type="radio" name="col" value="0000FF" ></th>
+<th bgcolor="purple"><input type="radio" name="col" value="800080" ></th>
+<th bgcolor="black"><input type="radio" name="col" value="111111" ></th>
+<th >その他の色 <input type="radio" name="col" value="CUSTOM" > <input type="color" name="c_col" value="#FFFFFF" ></th>
+<th> </th>
+<th>小<input type="radio" name="sz" value="0"></th>
+<th>中<input type="radio" name="sz" value="3" checked="checked"></th>
+<th>大<input type="radio" name="sz" value="6"></th>
+<th>特大<input type="radio" name="sz" value="9"></th>
 </tr>
 </table><input type="text" style="font-size:1em;WIDTH:100%;" name="msg" fontsize=8 MAXLENGTH="256" tabindex="1">
 <br><font size=-1><input type="submit" name="SUBMIT" style="WIDTH:100%; HEIGHT:30;" align="right" value="送信">

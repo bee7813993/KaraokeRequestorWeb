@@ -66,6 +66,15 @@ if(array_key_exists("commenturl", $_REQUEST)) {
     $newcommenturl = $_REQUEST["commenturl"];
 }
 
+if(array_key_exists("commenturl_base", $_REQUEST)) {
+    $newcommenturl_base = $_REQUEST["commenturl_base"];
+}
+
+if(array_key_exists("commentroom", $_REQUEST)) {
+    $newcommentroom = $_REQUEST["commentroom"];
+}
+
+
 if(array_key_exists("moviefullscreen", $_REQUEST)) {
     $newmoviefullscreen = $_REQUEST["moviefullscreen"];
 }
@@ -208,6 +217,25 @@ if (! empty($newcommenturl)){
     // print "プレイヤー動作監視チェック回数を".$commenturl."に変更しました。<br><br>";
 }
 
+if (isset($newcommenturl_base)){
+    $commenturl_base = $newcommenturl_base;
+    $config_ini = array_merge($config_ini,array("commenturl_base" => urlencode($commenturl_base)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    // print "プレイヤー動作監視チェック回数を".$commenturl_base."に変更しました。<br><br>";
+}
+
+if (! empty($newcommentroom)){
+    $commentroom = $newcommentroom;
+    $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    // print "プレイヤー動作監視チェック回数を".$commentroom."に変更しました。<br><br>";
+}
+
+
 if (! empty($newmoviefullscreen)){
     $moviefullscreen = $newmoviefullscreen;
     $config_ini = array_merge($config_ini,array("moviefullscreen" => $moviefullscreen));
@@ -217,7 +245,7 @@ if (! empty($newmoviefullscreen)){
     // print "プレイヤー動作監視チェック回数を".$moviefullscreen."に変更しました。<br><br>";
 }
 
-if (! empty($newhelpurl)){
+if (isset($newhelpurl)){
     $helpurl = $newhelpurl;
     $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));
     $fp = fopen($configfile, 'w');
@@ -335,15 +363,19 @@ foobar2000 PATH設定　
 <input type="radio" name="connectinternet" value="1" <?php print ($connectinternet==1)?'checked':' ' ?> /> 使用する
 <input type="radio" name="connectinternet" value="2" <?php print ($connectinternet!=1)?'checked':' ' ?> /> 使用しない
 <br>
-コメントサーバーURL (http://xsd.php.xdomain.jp/r.php?r=12  等, 使用しないときは空で)
-<input type="text" name="commenturl" size="100" class="commenturl" value="<?php echo $commenturl; ?>" />
+コメントサーバー設定 <br />
+URL (http://xsd.php.xdomain.jp/r2.php  等, 使用しないときは空で)
+<input type="text" name="commenturl_base" size="100" class="commenturl_base" value="<?php echo $commenturl_base; ?>" />
+<br />
+ルーム名 (半角英数字8文字まで)
+<input type="text" name="commentroom" MAXLENGTH="24" size="36" class="commentroom" value="<?php echo $commentroom; ?>" />
 <br>
 MPC-BEのフルスクリーンボタン
 <input type="radio" name="moviefullscreen" value="1" <?php print ($moviefullscreen==1)?'checked':' ' ?> /> 有効
 <input type="radio" name="moviefullscreen" value="2" <?php print ($moviefullscreen!=1)?'checked':' ' ?> /> 無効
 <br>
 ヘルプURL (https://www.evernote.com/shard/s213/sh/c0e87185-314f-446d-ac12-fd13f25f6cb9/78f03652cc14e2ae 等, 使用しないときは空で)
-<input type="text" name="helpurl" size="100" class="commenturl" value="<?php echo $helpurl; ?>" />
+<input type="text" name="helpurl" size="100" class="commenturl" value="<?php echo $helpurl; ?>" /><br />
 <input type="submit" value="OK" />
 </div>
 </form>

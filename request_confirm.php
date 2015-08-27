@@ -90,10 +90,16 @@ document.getElementById('freesinger').parentNode.style.visibility=flg?'visible':
 <div CLASS="itemname">
 曲名(ファイル名)<br>
 
-<textarea name="filename" id="filename" rows="4" wrap="soft" style="width:100%" >
+<textarea name="filename" id="filename" rows="4" wrap="soft" style="width:100%" 
 <?php
+if($shop_karaoke == 1){ 
+    print 'placeholder="後でセットリスト作成の参考のためにできれば曲名を入れておいてください" >';
+}else {
+    print 'placeholder="曲名" disabled >';
+}
+
     if (empty($filename)){
-      echo "曲名";
+      echo "";
     }else{
       echo "$filename";
     }

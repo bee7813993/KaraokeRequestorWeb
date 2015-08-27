@@ -229,7 +229,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
 while(1){
 
      //config 再読込
-     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture);
+     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);
      if(! empty($playerpath)){
         $MPCPATH = $playerpath;
      }
@@ -380,7 +380,7 @@ while(1){
      //$select->closeCursor();
 
      //config 再読込
-     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$commenturl);
+     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);
      if(! empty($playerpath)){
         $MPCPATH = $playerpath;
      }
@@ -395,9 +395,11 @@ while(1){
      if(isset($commenturl)){
          $nm=$row['singer'];
          $msg=$row['comment'];
-         $col = 1;
+         $col = 'FFFFFF';
+         $size = 3;
 
-         commentpost($nm,$col,$msg,$commenturl);
+         //commentpost_v1($nm,$col,$msg,$commenturl);
+         commentpost_v2($nm,$col,$size,$msg,$commenturl);
      }
        
        if( strcmp ($l_kind , "カラオケ配信") === 0 )
