@@ -19,9 +19,22 @@ require_once 'commonfunc.php';
 <html lang="ja">
 <head>
 <?php print_meta_header();?>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
+
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
 
 <title>カラオケ動画リクエスト</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
@@ -29,7 +42,7 @@ require_once 'commonfunc.php';
 <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
-
+<script src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="mpcctrl.js"></script>
 
 <style type="text/css">
@@ -129,7 +142,7 @@ if ($user === 'admin'){
 ?>
 <div  align="center" >
 <form method="GET" action="search.php" >
-<input type="submit" name="曲検索はこちら"   value="曲検索はこちら" class="topbtn"/>
+<input type="submit" name="曲検索はこちら"   value="曲検索はこちら" class="topbtn btn btn-default btn-lg"/>
 </form>
 </div>
 <div align="center" >
@@ -137,14 +150,14 @@ if ($user === 'admin'){
 <input type="hidden" name="shop_karaoke" value="1" />
 <?php
 if ($playmode != 4 && $playmode != 5){
-print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn"/> ';
+print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
 }
 ?>
 </form>
 <?php
 if($usenfrequset == 1) {
     print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';
-    print '<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn"/>';
+    print '<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn btn btn-default btn-lg"/>';
     print '</form>';
 }
 ?>
@@ -154,7 +167,7 @@ if($usenfrequset == 1) {
 <br />
 
 <div align="center" >
-現在の動作モード
+<h4> 現在の動作モード </h4>
 <?php
      if($playmode == 1){
      print ("自動再生開始モード: 自動で次の曲の再生を開始します。");
@@ -171,7 +184,7 @@ if($usenfrequset == 1) {
 </div>
 
 <div align="center" >
-<p onclick=selectPlayerctrl() > プレイヤーコントローラー </p>
+<h4 onclick=selectPlayerctrl() > プレイヤーコントローラー </h4>
 <iframe src="playerctrl_portal.php"  class="pcarea"  id="parentplayerarea"  onmouseover=selectPlayerctrl() ontouchstart=selectPlayerctrl() >
 ブラウザが対応してないかもです。
 <a href="mpcctrl.php" >こちらのリンク先</a>を使ってみてください。
@@ -180,39 +193,47 @@ if($usenfrequset == 1) {
 
 <?php
 if(!empty($commenturl)) {
-print '<div align="center" >';
+print '<div align="center" class="commentpost" >';
 //    print '<input type="button" onclick="location.href=\''.$commenturl.'\'" value="こちらから画面にコメントを出せます(ニコ生風に)" class="topbtn"/>';
-    print "こちらから画面にコメントを出せます(ニコ生風に)";
+    print "<h4>こちらから画面にコメントを出せます(ニコ生風に)</h4>";
     print <<<EOD
 <form name=forms action="commentpost.php" class="sendcomment" method="post">
-<b>名前<input type=text name="nm" style="font-size:1em;WIDTH:35%;" fontsize=9 MAXLENGTH="32" value="
+
+<div class="row" >
+<div class="col-xs-12 col-sm-12" ><b>文字色</b> </div>
+<div class="col-xs-2 col-sm-1" >その他 <input type="radio" name="col" value="CUSTOM" > <input type="color" name="c_col" value="#FFFFFF" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:white;"><input type="radio" name="col" value="FFFFFF" checked="checked" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:gray;"><input type="radio" name="col" value="808080" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:pink"><input type="radio" name="col" value="FFC0CB" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:red;"><input type="radio" name="col" value="FF0000" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:orange;"><input type="radio" name="col" value="FFA500" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:yellow;"><input type="radio" name="col" value="FFFF00" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:lime;"><input type="radio" name="col" value="00FF00" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:aqua;"><input type="radio" name="col" value="00FFFF" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:blue;"><input type="radio" name="col" value="0000FF" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:purple;"><input type="radio" name="col" value="800080" ></div>
+<div class="col-xs-2 col-sm-1" style="background-color:black;"><input type="radio" name="col" value="111111" ></div>
+</div>
+<div class="row" >
+<div class="col-xs-12 col-sm-2"><b>文字サイズ</b></div>
+<div class="col-xs-3 col-sm-2">小<input type="radio" name="sz" value="0"></div>
+<div class="col-xs-3 col-sm-2">中<input type="radio" name="sz" value="3" checked="checked"></div>
+<div class="col-xs-3 col-sm-2">大<input type="radio" name="sz" value="6"></div>
+<div class="col-xs-3 col-sm-2">特大<input type="radio" name="sz" value="9"></div>
+</div>
+<div class="col-xs-12 col-sm-1" ><b>名前</b></div>
+<div class="col-xs-12 col-sm-2" >
+<input type=text name="nm" style="font-size:1em;WIDTH:100%;" fontsize=9 MAXLENGTH="32" value="
 EOD;
 print returnusername_self();
     print <<<EOD
 " > 
-<table border="0.5" cellspacing = 0 cellpadding = 0 bordercolor="#333333">
-<tr>
-<th >文字色 </th>
-<th bgcolor="white"><input type="radio" name="col" value="FFFFFF" checked="checked" ></th>
-<th bgcolor="gray"><input type="radio" name="col" value="808080" ></th>
-<th bgcolor="pink"><input type="radio" name="col" value="FFC0CB" ></th>
-<th bgcolor="red"><input type="radio" name="col" value="FF0000" ></th>
-<th bgcolor="orange"><input type="radio" name="col" value="FFA500" ></th>
-<th bgcolor="yellow"><input type="radio" name="col" value="FFFF00" ></th>
-<th bgcolor="lime"><input type="radio" name="col" value="00FF00" ></th>
-<th bgcolor="aqua"><input type="radio" name="col" value="00FFFF" ></th>
-<th bgcolor="blue"><input type="radio" name="col" value="0000FF" ></th>
-<th bgcolor="purple"><input type="radio" name="col" value="800080" ></th>
-<th bgcolor="black"><input type="radio" name="col" value="111111" ></th>
-<th >その他の色 <input type="radio" name="col" value="CUSTOM" > <input type="color" name="c_col" value="#FFFFFF" ></th>
-<th> </th>
-<th>小<input type="radio" name="sz" value="0"></th>
-<th>中<input type="radio" name="sz" value="3" checked="checked"></th>
-<th>大<input type="radio" name="sz" value="6"></th>
-<th>特大<input type="radio" name="sz" value="9"></th>
-</tr>
-</table><input type="text" style="font-size:1em;WIDTH:100%;" name="msg" fontsize=8 MAXLENGTH="256" tabindex="1">
-<br><font size=-1><input type="submit" name="SUBMIT" style="WIDTH:100%; HEIGHT:30;" align="right" value="送信">
+</div>
+<div class="col-xs-12 col-sm-2" ><b>コメント</b></div>
+<div class="col-xs-12 col-sm-7" >
+<input type="text" style="font-size:1em;WIDTH:100%;" name="msg" fontsize=8 MAXLENGTH="256" tabindex="1">
+</div>
+<br><font size=-1><input type="submit" name="SUBMIT" style="WIDTH:100%; HEIGHT:30;" align="right" value="コメント送信" class="btn btn-default ">
 </form>
 EOD;
 print '</div>';
@@ -221,7 +242,7 @@ print '</div>';
 
 
 <table id="request_table" class="cell-border">
-<caption> 現在の登録状況 <button type="submit" value="" class="topbtn"  onclick=location.reload() >更新</button></caption>
+<caption> <h4>現在の登録状況 <button type="submit" value="" class="topbtn btn btn-default btn-xs"  onclick=location.reload() >更新</button></h4></caption>
 <thead>
 <tr>
 <th>No.</th>
@@ -256,7 +277,7 @@ if($user === "admin"){
 <script type="text/javascript" charset="utf8" src="js/requsetlist_ctrl.js"></script>
 <hr>
 <form method="get" action="init.php">
-<input type="submit" value="設定" />
+<input type="submit" value="設定" class=" btn btn-default " />
 </form>
 <a href="toolinfo.php" > 接続情報表示 </a>
 

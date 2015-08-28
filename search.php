@@ -24,10 +24,23 @@ if(array_key_exists("order", $_REQUEST)) {
 <?php 
 print_meta_header();
 ?>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
 <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
 <script type="text/javascript" charset="utf8" src="js/currency.js"></script>
+<script src="js/bootstrap.min.js"></script>
 
   <script type="text/javascript">
 $(document).ready(function(){
@@ -46,8 +59,9 @@ $(document).ready(function(){
   <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-
-<a href="request.php" >トップに戻る </a> &nbsp; 
+<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
+トップに戻る
+</button>  &nbsp; 
 <?php
  if(isset($word) ) {
  $nflink = "notfoundrequest/notfoundrequest.php?searchword=$word";
@@ -55,7 +69,7 @@ $(document).ready(function(){
  $nflink = "notfoundrequest/notfoundrequest.php";
  }
  if($usenfrequset == 1) {
-    print '<a href="'.$nflink.'" >探して見つからなかった曲があったら教えてください。 </a>';
+    print '<button type="button" onclick="location.href=\''.$nflink.'\' " class="btn btn-default " > 探して見つからなかった曲があったら教えてください。 </button>';
  }
 ?>
 
@@ -64,8 +78,8 @@ $(document).ready(function(){
 <h2>ファイル名検索 </h2>
   <form action="search.php" method="GET">
 
-    検索ワード(ファイル名) <br>
-  <div class="searchtextbox" >
+<div class="col-xs-12 col-sm-12" >    検索ワード(ファイル名) </div>
+  <div class="col-xs-12 col-sm-9" >
   <input type="text" name="searchword" class="searchtextbox" placeholder="曲名の一部での検索推奨。それ以外は下の外部DB連携も使えます"
   <?php
      if(!empty ($word)){
@@ -88,7 +102,9 @@ $(document).ready(function(){
   <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
 --->
   </select>
-  <input type="submit" value="検索">
+  <div class="col-xs-12 col-sm-3" >
+  <input type="submit" value="検索" class="btn btn-default ">
+  </div>
   </div>
   <div class="clearleftfloat"> 
   </form>
@@ -145,7 +161,7 @@ die();
   </select>
   </div>
 --->
-<INPUT type=submit value=検索><BR><BR>
+<INPUT type=submit value="検索" class="btn btn-default "><BR><BR>
 
 <span id="selectTag">
 </span>
@@ -158,21 +174,21 @@ die();
   <form action="searchbandit.php" method="GET" style="display: inline" />
   <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="2" />
-  <input type="submit" value="検索">
+  <input type="submit" value="検索" class="btn btn-default ">
   </form>
   <br />
   ゲームタイトル検索 
   <form action="searchbandit.php" method="GET" style="display: inline"/>
   <input type="text" name="searchword" class="searchtextbox" >
   <input type="hidden" name="column" value="3" />
-  <input type="submit" value="検索">
+  <input type="submit" value="検索" class="btn btn-default ">
   </form>
   <br />
   ゲームブランド検索 
   <form action="searchbandit.php" method="GET" style="display: inline" />
   <input type="text" name="searchword" class="searchtextbox">
   <input type="hidden" name="column" value="1" />
-  <input type="submit" value="検索">
+  <input type="submit" value="検索" class="btn btn-default ">
   </form>
   <br />
 
@@ -185,7 +201,9 @@ die();
 
 <hr>
 
-<a href="request.php" >トップに戻る </a>
+<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
+トップに戻る
+</button> 
 
 </body>
 </html>

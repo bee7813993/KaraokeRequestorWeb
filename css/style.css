@@ -15,45 +15,51 @@ input.toolinfo {
 div.toolinfo {
 	font-size: xx-large;
 }
+
+div.playercontrol {
+width: 95%;
+}
+
 input.playstart {
 -webkit-appearance: button;
-	width: 90%;
+	width: 100%; 
 	height: 4em;
 	margin: 0.5em;
 }
 
 button.pcbuttom {
 -webkit-appearance: button;
-	width: 25%;
+	width: 100%;
 	height: 3em;
-	margin: 1%;
+	margin: 2%;
 }
 
 input.pcbuttom {
 -webkit-appearance: button;
-	width: 30%;
+	width: 100%;
 	height: 3em;
+	margin: 2%;
 }
 
 button.pcvolume {
 -webkit-appearance: button;
-	width: 40%;
+	width: 100%;
 	height: 3em;
-	margin: 1%;
+	margin: 2%;
 }
 
 button.pcmorefunc {
 -webkit-appearance: button;
-	width: 25%;
+	width: 100%;
 	height: 3em;
-	margin: 1%;
+	margin: 2%;
 }
 
 button.pcdelay {
 -webkit-appearance: button;
-	width: 19%;
+	width: 100%;
 	height: 3em;
-	margin: 1%;
+	margin: 2%;
 }
 
 
@@ -77,8 +83,8 @@ height: 2em;
 
 
 .pcarea {
-    width: 95%;
-    height: 21em;
+    width: 98%;
+    height: 24em;
 }
 
 input.fullwidth{
@@ -188,6 +194,11 @@ div.searchtextbox {
 
 input.searchtextbox {
     width: 95%;
+}
+
+div.commentpost {
+    border-style: solid;
+    border-width: 1px;
 }
 
 @media only screen and (max-width: 560px){
