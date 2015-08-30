@@ -105,17 +105,27 @@ document.getElementById('freesinger').parentNode.style.visibility=flg?'visible':
 <?php
 if($shop_karaoke == 1){ 
     print 'placeholder="後でセットリスト作成の参考のためにできれば曲名を入れておいてください" >';
+
+    if (empty($filename)){
+      echo "";
+    }else{
+      echo "$filename";
+    }  
+    
+    echo "</textarea> ";
 }else {
     print 'placeholder="曲名" disabled >';
-}
 
     if (empty($filename)){
       echo "";
     }else{
       echo "$filename";
     }
+    echo "</textarea> ";
+    print '<input type="hidden" name="filename" id="filename" style="width:100%" value="'.$filename.'"  />';
+    }
 ?>
-</textarea>
+
 
     <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
 </div>
