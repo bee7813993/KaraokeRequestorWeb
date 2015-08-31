@@ -186,12 +186,14 @@ print('<span style="visibility:hidden;">');
 <div>
 <input type="checkbox" name="secret" value="1" > シークレット予約(歌うまで曲名を表示しません)
 </div>
-<div CLASS="pushbtn">
-<input type="submit" value="実行" class="btn btn-default "/>
+<div CLASS="row" >
+<div CLASS="pushbtn col-xs-12 col-sm-8">
+<input type="submit" value="実行" class="requestconfirm btn btn-default btn-lg"/>
+</div>
 </div>
 
 </form>
-
+<div CLASS="row" >
 <button type="button" onclick="location.href='search.php' " class="btn btn-default " >
 通常検索に戻る
 </button> 
@@ -199,6 +201,6 @@ print('<span style="visibility:hidden;">');
 <button type="button" onclick="location.href='request.php' " class="btn btn-default " >
 トップに戻る
 </button> 
-
+</div>
 </body>
 </html>

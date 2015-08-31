@@ -8,6 +8,12 @@ input[type="submit"] {
     margin: 3px;
 }
 
+input[type="submit"].requestconfirm {
+    height: 50px;
+    margin: 3px;
+    width: 100%
+}
+
 input.toolinfo {
 	width: 95%;
 	font-size: xx-large;

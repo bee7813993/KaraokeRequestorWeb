@@ -201,18 +201,18 @@ print '<div align="center" class="commentpost" >';
 
 <div class="row" >
 <div class="col-xs-12 col-sm-12" ><b>文字色</b> </div>
-<div class="col-xs-2 col-sm-1" >その他 <input type="radio" name="col" value="CUSTOM" > <input type="color" name="c_col" value="#FFFFFF" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:white;"><input type="radio" name="col" value="FFFFFF" checked="checked" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:gray;"><input type="radio" name="col" value="808080" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:pink"><input type="radio" name="col" value="FFC0CB" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:red;"><input type="radio" name="col" value="FF0000" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:orange;"><input type="radio" name="col" value="FFA500" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:yellow;"><input type="radio" name="col" value="FFFF00" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:lime;"><input type="radio" name="col" value="00FF00" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:aqua;"><input type="radio" name="col" value="00FFFF" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:blue;"><input type="radio" name="col" value="0000FF" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:purple;"><input type="radio" name="col" value="800080" ></div>
-<div class="col-xs-2 col-sm-1" style="background-color:black;"><input type="radio" name="col" value="111111" ></div>
+<div class="col-xs-2 col-sm-push-11 col-sm-1" >その他 <input type="radio" name="col" value="CUSTOM" > <input type="color" name="c_col" value="#FFFFFF" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:white;"><input type="radio" name="col" value="FFFFFF" checked="checked" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:gray;"><input type="radio" name="col" value="808080" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:pink"><input type="radio" name="col" value="FFC0CB" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:red;"><input type="radio" name="col" value="FF0000" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:orange;"><input type="radio" name="col" value="FFA500" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:yellow;"><input type="radio" name="col" value="FFFF00" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:lime;"><input type="radio" name="col" value="00FF00" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:aqua;"><input type="radio" name="col" value="00FFFF" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:blue;"><input type="radio" name="col" value="0000FF" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:purple;"><input type="radio" name="col" value="800080" ></div>
+<div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:black;"><input type="radio" name="col" value="111111" ></div>
 </div>
 <div class="row" >
 <div class="col-xs-12 col-sm-2"><b>文字サイズ</b></div>
