@@ -31,7 +31,7 @@ if (! $retval ) {
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
-  <META http-equiv="refresh" content="1; url=request.php">
+  <META http-equiv="refresh" content="1; url=requestlist_only.php">
   
 
   <title>再生回数クリア</title>
@@ -39,6 +39,6 @@ if (! $retval ) {
 </head>
 <body>
 <p> 再生回数<?php echo $l_times; ?>クリア完了 </p>
-<a href="request.php" >トップに戻る </a>
+<a href="requestlist_only.php" >トップに戻る </a>
 </body>
 </html>

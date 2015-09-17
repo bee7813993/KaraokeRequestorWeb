@@ -27,7 +27,7 @@ if (! $retval ) {
   <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
 <?php
 if($retval){
-print '<META http-equiv="refresh" content="1; url=request.php">';
+print '<META http-equiv="refresh" content="1; url=requestlist_only.php">';
 }
 ?>  
 

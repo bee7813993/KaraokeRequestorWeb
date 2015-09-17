@@ -13,6 +13,11 @@ $shop_karaoke = 0;
 if(array_key_exists("shop_karaoke", $_REQUEST)) {
     $shop_karaoke = $_REQUEST["shop_karaoke"];
 }
+
+$set_directurl = 0;
+if(array_key_exists("set_directurl", $_REQUEST)) {
+    $set_directurl = $_REQUEST["set_directurl"];
+}
     
 
 
@@ -82,6 +87,7 @@ function selectedcheck($rt,$singer){
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
 
 <title>カラオケ動画リクエスト確認画面</title>
@@ -113,6 +119,15 @@ if($shop_karaoke == 1){
     }  
     
     echo "</textarea> ";
+}else if($set_directurl == 1 ){
+    print 'placeholder="直接再生できるURLを指定を入れてください(youtubeのURLもOK)" >';
+    if (empty($filename)){
+      echo "";
+    }else{
+      echo "$filename";
+    }  
+    echo "</textarea> ";
+
 }else {
     print 'placeholder="曲名" disabled >';
 
@@ -181,6 +196,7 @@ print('<span style="visibility:hidden;">');
 <select name="kind">
  <option value="動画" <?php if($shop_karaoke == 0) print 'selected';?> >動画 </option>
  <option value="カラオケ配信" <?php if($shop_karaoke == 1) print 'selected';?> >カラオケ配信 </option>
+ <option value="URL指定" <?php if($set_directurl == 1) print 'selected';?> >URL指定 </option>
  </select>
 </div>
 <div>
@@ -198,7 +214,7 @@ print('<span style="visibility:hidden;">');
 通常検索に戻る
 </button> 
 
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
+<button type="button" onclick="location.href='requestlist_only.php' " class="btn btn-default " >
 トップに戻る
 </button> 
 </div>

@@ -138,7 +138,7 @@ function replace_obscure_words($word)
 
   // 単語が6文字以下の場合クォーテーションをつける
   if(strlen($word) <= 6){
-      $resultwords = '"'.$resultwords.'"';
+      //$resultwords = '"'.$resultwords.'"';
   }
   return $resultwords;
   
@@ -188,7 +188,7 @@ function searchlocalfilename($kerwords, &$result_array,$order = null)
 		if(empty($order)){
 		    $order = 'sort=size&ascending=0';
 		}
-  		$jsonurl = "http://" . $everythinghost . ":81/?search=" . urlencode($kerwords) . "&". $order . "&path=1&path_column=3&size_column=4&json=1";
+  		$jsonurl = "http://" . $everythinghost . ":81/?search=" . urlencode($kerwords) . "&". $order . "&path=1&path_column=3&size_column=4&case=0&json=1";
 //  		echo $jsonurl;
   		$json = file_get_html_with_retry($jsonurl, 5, 30);
 //  		echo $json;
@@ -344,6 +344,74 @@ function PrintLocalFileListfromkeyword($word,$order = null, $tableid='searchresu
     }
 }
 
+function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searchresult')
+{
+    global $priority_db;
+    searchlocalfilename($word,$result_a,$order);
+    
+    if( $result_a["totalResults"] >= 1) {
+        $result_withp = sortpriority($priority_db,$result_a);
+        echo $result_withp["totalResults"]."件<br />";
+        // print javascript
+        $printjs = <<<EOD
+  <script type="text/javascript">
+$(document).ready(function(){
+  $('#%s').dataTable({
+  "ajax": {
+      "url": "searchfilefromkeyword_json.php",
+      "type": "GET",
+      "data": { keyword:"%s" },
+      "dataType": 'json',
+      "dataSrc": "",
+  },
+  "bPaginate" : true,
+  "lengthMenu": [[50, 10, -1], [50, 10, "ALL"]],
+  "bStateSave" : true,
+  "autoWidth": false,
+  "columns" : [
+      { "data": "no", "className":"no"},
+      { "data": "reqbtn", "className":"reqbtn"},
+      { "data": "filename", "className":"filename"},
+      { "data": "filesize", "className":"filesize"},
+      { "data": "filepath", "className":"filepath"},
+  ],
+  columnDefs: [
+  { type: 'currency', targets: [3] }
+   ]
+   }
+  );
+});
+</script>
+EOD;
+        echo sprintf($printjs,$tableid,$word);
+        // print table_base
+        $printtablebase = <<<EOD
+<table id="%s" class="searchresult">
+<thead>
+<tr>
+<th>No. <font size="-2" class="searchresult_comment">(おすすめ順)</font></th>
+<th>リクエスト </th>
+<th>ファイル名(プレビューリンク) </th>
+<th>サイズ </th>
+<th>パス </th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+EOD;
+        echo sprintf($printtablebase,$tableid);
+    }
+}
+
+// 検索結果の件数だけ表示する処理
+function searchresultcount_fromkeyword($word)
+{
+    global $priority_db;
+    searchlocalfilename($word,$result_a);
+    return $result_a["totalResults"];
+}
+
 function selectplayerfromextension($filepath)
 {
 $extension = pathinfo($filepath, PATHINFO_EXTENSION);
@@ -496,7 +564,7 @@ function commentpost_v1($nm,$col,$msg,$commenturl)
 function commentpost_v2($nm,$col,$size,$msg,$commenturl)
 {
 
-    $commentmax=18;
+    $commentmax=4096;
     $msgarray = array();
     if(mb_strlen($msg) >= $commentmax){
          $lfarray = explode("\n", $msg);
@@ -581,4 +649,217 @@ function returnusername_self(){
     $allrequest = getallrequest_array ();
     return returnusername($allrequest);
 }
+
+
+function shownavigatioinbar($page = 'none'){
+    global $helpurl;
+    global $user;
+    
+    if($page == 'none') {
+        $page = basename($_SERVER["PHP_SELF"]);
+    }
+    
+    print '<nav class="navbar navbar-inverse">';
+print <<<EOD
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#gnavi">
+      <span class="sr-only">メニュー</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+EOD;
+
+    print '<div id="gnavi" class="collapse navbar-collapse">';
+    print '    <ul class="nav navbar-nav">';
+    print '     <li ';
+    if($page == 'requestlist_only.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="requestlist_only.php">予約一覧 </a></li>';
+    print '     <li ';
+    if($page == 'searchreserve.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="searchreserve.php">検索＆予約</a></li>';
+    print '     <li ';
+    if($page == 'playerctrl_portal.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="playerctrl_portal.php">PlayerController</a></li>';
+    print '     <li ';
+    if($page == 'comment.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="comment.php">コメント</a></li>';
+    print '     <li ';
+    if($page == 'request.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="request.php">全部</a></li>';
+    if ($user === 'admin'){
+        print '    <p class="navbar-text "> 管理者ログイン中</p>';
+    }
+    print '    <li class="dropdown navbar-right">';
+    print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
+
+    print '    <ul class="dropdown-menu">';
+    if(!empty($helpurl)){
+        print '      <li><a href="'.$helpurl.'">ヘルプ</a></li>';
+    }
+    print '      <li><a href="init.php">設定</a></li>';
+    print '      <li><a href="toolinfo.php">接続情報表示</a></li>';
+    print '    </ul>';
+    print '    </li>';
+    print '    </ul>';
+    
+//    print '    <p class="navbar-text navbar-right"> <a href="'.$helpurl.'" class="navbar-link">ヘルプ</a> </p>';
+    print '</div>';
+    print '</nav>';
+}
+
+
+function shownavigatioinbar_c1($page = 'none'){
+    global $helpurl;
+    global $user;
+    
+    if($page == 'none') {
+        $page = basename($_SERVER["PHP_SELF"]);
+    }
+    
+    print '<nav class="navbar navbar-inverse">';
+print <<<EOD
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#gnavi">
+      <span class="sr-only">メニュー</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+EOD;
+
+    print '<div id="gnavi" class="collapse navbar-collapse">';
+    print '    <ul class="nav navbar-nav">';
+    print '     <li ';
+    if($page == 'requestlist_only.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="../requestlist_only.php">予約一覧 </a></li>';
+    print '     <li ';
+    if($page == 'searchreserve.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="../searchreserve.php">検索＆予約</a></li>';
+    print '     <li ';
+    if($page == 'playerctrl_portal.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="../playerctrl_portal.php">PlayerController</a></li>';
+    print '     <li ';
+    if($page == 'comment.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="../comment.php">コメント</a></li>';
+    print '     <li ';
+    if($page == 'request.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="../request.php">全部</a></li>';
+    if ($user === 'admin'){
+        print '    <p class="navbar-text "> 管理者ログイン中</p>';
+    }
+    print '    <li class="dropdown navbar-right">';
+    print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
+
+    print '    <ul class="dropdown-menu">';
+    if(!empty($helpurl)){
+        print '      <li><a href="'.$helpurl.'">ヘルプ</a></li>';
+    }
+    print '      <li><a href="../init.php">設定</a></li>';
+    print '      <li><a href=../"toolinfo.php">接続情報表示</a></li>';
+    print '    </ul>';
+    print '    </li>';
+    print '    </ul>';
+    
+//    print '    <p class="navbar-text navbar-right"> <a href="'.$helpurl.'" class="navbar-link">ヘルプ</a> </p>';
+    print '</div>';
+    print '</nav>';
+}
+
+function showmode(){
+
+     global $playmode;
+
+    print '<div align="center" >';
+    print '<h4> 現在の動作モード </h4>';
+
+     if($playmode == 1){
+     print ("自動再生開始モード: 自動で次の曲の再生を開始します。");
+     }elseif ($playmode == 2){
+     print ("手動再生開始モード: 再生開始を押すと、次の曲が始まります。(歌う人が押してね)");
+     }elseif ($playmode == 4){
+     print ("BGMモード: 自動で次の曲の再生を開始します。すべての再生が終わると再生済みの曲をランダムに流します。");
+     }elseif ($playmode == 5){
+     print ("BGMモード(ランダムモード): 順番は関係なくリストの中からランダムで再生します。");
+     }else{
+     print ("手動プレイリスト登録モード: 機材係が手動でプレイリストに登録しています。");
+     }
+     print '</div>';
+}
+
+function selectrequestkind(){
+
+    global $playmode;
+    global $connectinternet;
+    global $usenfrequset;
+    
+print <<<EOD
+<div  align="center" >
+<form method="GET" action="search.php" >
+<input type="submit" name="曲検索はこちら"   value="曲検索はこちら" class="topbtn btn btn-default btn-lg"/>
+</form>
+</div>
+EOD;
+
+if ($playmode != 4 && $playmode != 5){
+    print '<div align="center" >';
+    print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
+    print '<input type="hidden" name="shop_karaoke" value="1" />';
+    print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
+    print '</form>';
+    print '</div>';
+}
+
+if( $connectinternet == 1){
+    print '<div align="center" >';
+    print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
+    print '<input type="hidden" name="set_directurl" value="1" />';
+    print '<input type="submit" name="URL"   value="再生動画のURLを指定する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
+    print '</form>';
+    print '</div>';
+}
+if($usenfrequset == 1) {
+    print '<div align="center" >';
+    print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';
+    print '<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn btn btn-default btn-lg"/>';
+    print '</form>';
+    print '</div>';
+
+}
+
+}
+
+
 ?>

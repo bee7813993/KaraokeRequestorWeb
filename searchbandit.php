@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet"> 
 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -18,8 +18,8 @@
     <![endif]-->
     
 <title>bandit検索モード検索結果</title>
-<link type="text/css" rel="stylesheet" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
+<link type="text/css" rel="stylesheet" href="css/style.css" />
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
 <script type="text/javascript" charset="utf8" src="js/currency.js"></script>
@@ -30,7 +30,7 @@
 通常検索に戻る
 </button> 
 
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
+<button type="button" onclick="location.href='requestlist_only.php' " class="btn btn-default " >
 トップに戻る
 </button> 
 <br />
@@ -179,7 +179,7 @@ $songnum = 0;
 通常検索に戻る
 </button> 
 
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
+<button type="button" onclick="location.href='requestlist_only.php' " class="btn btn-default " >
 トップに戻る
 </button> 
 </body>

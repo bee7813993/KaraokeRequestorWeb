@@ -78,7 +78,7 @@ if($itemcount > 0 ){
 
 ?>
 &nbsp;
-<a href="../request.php" >トップに戻る </a>
+<a href="../requestlist_only.php" >トップに戻る </a>
 
 </body>
 </html>

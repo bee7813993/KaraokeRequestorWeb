@@ -153,20 +153,16 @@ function ansoninfo_gettitlelist($url,$l_m){
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-<script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
 <title>anison.info検索メーカータイトル一覧</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-<button type="button" onclick="location.href='search.php' " class="btn btn-default " >
-通常検索に戻る
-</button> 
+<?php
+shownavigatioinbar('searchreserve.php');
+?>
 
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
-トップに戻る
-</button> 
-<br />
-<hr />
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
 <INPUT type=radio <?php print selectedcheck("pro",$l_m)=='selected'?'checked':' '; ?> value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>

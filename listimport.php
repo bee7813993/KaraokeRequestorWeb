@@ -93,6 +93,6 @@ if( strcmp($l_importtype,'add' ) === 0 ){
 </head>
 <body>
 <p> dbインポート完了 </p>
-<a href="request.php" >トップに戻る </a>
+<a href="requestlist_only.php" >トップに戻る </a>
 </body>
 </html>

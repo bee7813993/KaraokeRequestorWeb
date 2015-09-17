@@ -23,6 +23,6 @@
 <input type="text" name="toolurl" class="toolinfo" size="100" value="<?php echo 'http://'.$_SERVER["SERVER_ADDR"].'/';?>" />
 </div>
 <hr />
-<a href="request.php" > リクエストTOPに戻る </a>
+<a href="requestlist_only.php" > リクエストTOPに戻る </a>
 </body>
 </html>

@@ -5,7 +5,7 @@ if(array_key_exists("searchword", $_REQUEST)) {
 }
 
 $db = null;
-
+require_once '../commonfunc.php';
 require_once 'notfound_commonfunc.php';
 
 init_notfounddb($db,"notfoundrequest.db");
@@ -21,11 +21,27 @@ $select->closeCursor();
 <!doctype html>
 <html lang="ja">
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Bootstrap -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" charset="utf8" src="../js/jquery.js"></script>
+<script src="../js/bootstrap.min.js"></script>
+
   <title>見つからなかった曲報告TOP</title>
   <link type="text/css" rel="stylesheet" href="../css/style.css" />
 </head>
 <body>
-<a href="../request.php" >トップに戻る </a>
+<?php
+shownavigatioinbar_c1();
+?>
 
 <!--- 入力フォーム --->
 <p>
@@ -104,7 +120,7 @@ if(!count($allrequest) == 0 ){
 ?>
 </tbody>
 </table>
-<a href="../request.php" >トップに戻る </a>
+<a href="../requestlist_only.php" >トップに戻る </a>
 
 </body>
 </html>

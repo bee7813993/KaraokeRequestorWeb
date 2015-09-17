@@ -1,3 +1,3 @@
 <?php
-  http_redirect("request.php");
+  http_redirect("requestlist_only.php");
 ?>

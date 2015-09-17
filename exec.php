@@ -25,7 +25,7 @@ $l_singer=$l_freesinger;
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<META http-equiv="refresh" content="1; url=request.php">
+<META http-equiv="refresh" content="1; url=requestlist_only.php">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>DB登録中</title>
 </head>
@@ -33,6 +33,12 @@ $l_singer=$l_freesinger;
 
 
 <?php
+if($l_kind === "URL指定"){
+  $l_fullpath = $l_filename;
+  $displayfilename = $l_filename;
+}else {
+  $displayfilename = makesongnamefromfilename($l_filename) ;
+}
 
 try {
     $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret)";
@@ -45,7 +51,7 @@ try {
 	}
 
 $arg = array(
-	':fn' => makesongnamefromfilename($l_filename),
+	':fn' =>  $displayfilename,
 	':sing' => $l_singer,
 	':comment' => $l_comment,
 	':kind' => $l_kind,
@@ -84,7 +90,7 @@ print("1秒後に登録ページに移動します<br>");
 
 ?>
 
-<a href="request.php" > リクエストページに戻る <a><br>
+<a href="requestlist_only.php" > リクエストページに戻る <a><br>
 
 現在の登録状況<br>
 

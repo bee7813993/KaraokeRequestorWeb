@@ -127,61 +127,27 @@ $("#sample_table").dataTable();
 </script>
 </head>
 <body>
+
+
+
 <?php
-if(isset($helpurl)){
 
-print '<div align="right">';
-print '<a href="'.$helpurl. '" TARGET="_blank" > 使用方法 </a>';
+shownavigatioinbar();
 
-print '</div>';
-}
-
-if ($user === 'admin'){
-    print '管理者ログイン中<br>';
-}
 ?>
-<div  align="center" >
-<form method="GET" action="search.php" >
-<input type="submit" name="曲検索はこちら"   value="曲検索はこちら" class="topbtn btn btn-default btn-lg"/>
-</form>
-</div>
-<div align="center" >
-<form method="GET" action="request_confirm.php?shop_karaoke=1" >
-<input type="hidden" name="shop_karaoke" value="1" />
+
 <?php
-if ($playmode != 4 && $playmode != 5){
-print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
-}
-?>
-</form>
-<?php
-if($usenfrequset == 1) {
-    print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';
-    print '<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn btn btn-default btn-lg"/>';
-    print '</form>';
-}
+selectrequestkind();
 ?>
 </div>
 
 
 <br />
 
-<div align="center" >
-<h4> 現在の動作モード </h4>
+
 <?php
-     if($playmode == 1){
-     print ("自動再生開始モード: 自動で次の曲の再生を開始します。");
-     }elseif ($playmode == 2){
-     print ("手動再生開始モード: 再生開始を押すと、次の曲が始まります。(歌う人が押してね)");
-     }elseif ($playmode == 4){
-     print ("BGMモード: 自動で次の曲の再生を開始します。すべての再生が終わると再生済みの曲をランダムに流します。");
-     }elseif ($playmode == 5){
-     print ("BGMモード(ランダムモード): 順番は関係なくリストの中からランダムで再生します。");
-     }else{
-     print ("手動プレイリスト登録モード: 機材係が手動でプレイリストに登録しています。");
-     }
+showmode();
 ?>
-</div>
 
 <div align="center" >
 <h4 onclick=selectPlayerctrl() > プレイヤーコントローラー </h4>

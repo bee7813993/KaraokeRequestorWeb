@@ -24,16 +24,7 @@ if ($stmt === false ){
 
 }
 
-function print_meta_header(){
-    print '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
-    print "\n";
-    print '<meta http-equiv="Content-Style-Type" content="text/css" />';
-    print "\n";
-    print '<meta http-equiv="Content-Script-Type" content="text/javascript" />';
-    print "\n";
-    print '<meta name="viewport" content="width=device-width,initial-scale=1.0" />';
-    print "\n";
-}
+
 
 
 ?>

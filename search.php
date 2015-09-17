@@ -42,12 +42,36 @@ print_meta_header();
 <script type="text/javascript" charset="utf8" src="js/currency.js"></script>
 <script src="js/bootstrap.min.js"></script>
 
+<?php
+/*
+if(!empty($word)){
+
+print <<<EOD
   <script type="text/javascript">
 $(document).ready(function(){
   $('#searchresult').dataTable({
-  "bPaginate" : false,
+  "ajax": {
+      "url": "searchfilefromkeyword_json.php",
+      "type": "GET",
+      "data": { keyword:"
+EOD;
+echo $word;
+print <<<EOD
+" },
+      "dataType": 'json',
+      "dataSrc": "",
+  },
+  "bPaginate" : true,
+  "lengthMenu": [[50, 10, -1], [50, 10, "ALL"]],
   "bStateSave" : true,
   "autoWidth": false,
+  "columns" : [
+      { "data": "no", "className":"no"},
+      { "data": "reqbtn", "className":"reqbtn"},
+      { "data": "filename", "className":"filename"},
+      { "data": "filesize", "className":"filesize"},
+      { "data": "filepath", "className":"filepath"},
+  ],
   columnDefs: [
   { type: 'currency', targets: [3] }
    ]
@@ -55,14 +79,18 @@ $(document).ready(function(){
   );
 });
   </script>
+EOD;
+}
+*/
+?>
   <title>動画検索TOP</title>
   <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
-トップに戻る
-</button>  &nbsp; 
+
 <?php
+shownavigatioinbar('searchreserve.php');
+
  if(isset($word) ) {
  $nflink = "notfoundrequest/notfoundrequest.php?searchword=$word";
  }else {
@@ -115,16 +143,36 @@ $(document).ready(function(){
   	if ( empty ($word)){
   		
   	}else {
-  	    echo $word."の検索結果 : ";
-        PrintLocalFileListfromkeyword($word,$l_order);
-
+  	    $result_count =  searchresultcount_fromkeyword($word);
+  	    echo $word."の検索結果 : "; //.$result_count.'件';
+  	    
+  	   
+//        PrintLocalFileListfromkeyword($word,$l_order);
+/*
+print <<<EOD
+<table id="searchresult" class="searchresult">
+<thead>
+<tr>
+<th>No. <font size="-2" class="searchresult_comment">(おすすめ順)</font></th>
+<th>リクエスト </th>
+<th>ファイル名(プレビューリンク) </th>
+<th>サイズ </th>
+<th>パス </th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+EOD;
+*/
+    PrintLocalFileListfromkeyword_ajax($word,$l_order,'searchresult');
   	}
   	?>
 <hr />
 <?php
 if($connectinternet != 1){
 print <<<EOM
-<a href="request.php" >トップに戻る </a>
+<a href="requestlist_only.php" >トップに戻る </a>
 
 </body>
 </html>
@@ -136,15 +184,15 @@ die();
   <h3>anison.info連携検索モード </h3>
  
 <FORM name=f action=search_anisoninfo_list.php method=get>
-<INPUT type=radio checked value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
+<INPUT type=radio checked value=pro name=m id="pro" "><label for="pro">作品</label>
 <!---
-<INPUT type=radio value=song name=m id="song" onclick="dsp(2)"><label for="song">曲</label>
+<INPUT type=radio value=song name=m id="song" "><label for="song">曲</label>
 --->
-<INPUT type=radio value=person name=m id="person" onclick="dsp(3)"><label for="person">人物</label>
-<INPUT type=radio value=mkr name=m id="mkr" onclick="dsp(5)"><label for="mkr">制作(ブランド)</label>
+<INPUT type=radio value=person name=m id="person" "><label for="person">人物</label>
+<INPUT type=radio value=mkr name=m id="mkr" "><label for="mkr">制作(ブランド)</label>
 <!---
-<INPUT type=radio value=rec name=m id="rec" onclick="dsp(4)"><label for="rec">音源</label>
-<INPUT type=radio value=pgrp name=m id="pgrp" onclick="dsp(6)"><label for="pgrp">関連情報</label>
+<INPUT type=radio value=rec name=m id="rec" "><label for="rec">音源</label>
+<INPUT type=radio value=pgrp name=m id="pgrp" "><label for="pgrp">関連情報</label>
 --->
 <BR>
 <INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >

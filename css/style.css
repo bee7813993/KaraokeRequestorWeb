@@ -1,5 +1,5 @@
 ﻿body	{
-	background-color:lightblue;
+	background-color:#F8ECE0;
 }
 
 
@@ -152,6 +152,10 @@ text-align: center;
 #request_table tbody tr:nth-child(even) {
   /* 偶数行の背景色を設定します。 */
   background-color: #eeffff;
+}
+
+table#searchresult {
+width: 95%;
 }
 
 .searchresult tbody tr:nth-child(odd) {
@@ -367,6 +371,44 @@ width: 100%;
 /* 		float: left; */
 		}
 
+table.searchresult{
+display: block;
+}
+
+table.searchresult caption{
+display: block;
+}
+
+table.searchresult thead{
+display: none;
+}
+table.searchresult tbody{
+display: block;
+}
+			table.searchresult tbody tr{
+				display: block;
+				margin-bottom: 1.5em;
+				border: 1px solid #000000;
+			}
+			table.searchresult tbody th,
+			table.searchresult tbody td{
+				display: block;
+				border: none;
+			}
+
+table.searchresult tbody td.no { display: none; }
+
+table.searchresult tbody td.filename { 
+font-weight:bold;
+margin-bottom: 5px;
+list-style-type: none;
+color: #fff;
+background: #000;
+}
+ 
+table.searchresult tbody td.filesize:before { content: "[サイズ] "; }
+table.searchresult tbody td.length:before { content: "[再生時間] "; }
+table.searchresult tbody td.filepath:before { content: "[パス] "; }
 
 
 #searchresult{

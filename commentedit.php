@@ -2,6 +2,9 @@
 require_once 'commonfunc.php';
 //include 'kara_config.php';
 
+
+
+
 $failflg = 0;
 $addcommentsuccessflg = 0;
 $c_comment = "";
@@ -80,15 +83,34 @@ $db = null;
 
 print_meta_header();
 if($addcommentsuccessflg == 1){
-  print '<META http-equiv="refresh" content="1; url=request.php">';
+  print '<META http-equiv="refresh" content="1; url=requestlist_only.php">';
 }
 ?>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+<script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
 <title>コメント編集</title>
 
 </head>
 <body>
-<a href="request.php" > リクエストページに戻る <a><br>
+<?php
+shownavigatioinbar();
+?>
+<br>
 コメント編集
 <form action="update.php" >
 <input type="hidden" name="id" id="id" value="

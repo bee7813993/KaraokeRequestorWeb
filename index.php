@@ -1,4 +1,4 @@
 <?php
- header('location: request.php');
+ header('location: requestlist_only.php');
  exit();
 ?>

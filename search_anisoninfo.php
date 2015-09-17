@@ -162,15 +162,10 @@ function ansoninfo_gettitlelist($url,$l_kind){
 </head>
 
 <body>
-<button type="button" onclick="location.href='search.php' " class="btn btn-default " >
-通常検索に戻る
-</button> 
+<?php
+shownavigatioinbar('searchreserve.php');
+?>
 
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
-トップに戻る
-</button> 
-<br />
-<hr />
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
 <INPUT type=radio checked value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
@@ -248,9 +243,11 @@ if(!isset($l_url)  ) {
         }
         
         foreach($songtitles as $checktitle){
+            if(strlen($checktitle) == 0 ) continue;
             echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-            PrintLocalFileListfromkeyword($checktitle,$l_order, 'searchresult'.$songnum);
-              print "  <script type=\"text/javascript\"> $(document).ready(function(){  $('#".'searchresult'.$songnum."').dataTable({  \"bPaginate\" : false    ,  columnDefs: [  { type: 'currency', targets: [3] }   ] });});  </script> ";  
+            PrintLocalFileListfromkeyword_ajax($checktitle,$l_order, 'searchresult'.$songnum);
+            echo "<br />";
+/*              print "  <script type=\"text/javascript\"> $(document).ready(function(){  $('#".'searchresult'.$songnum."').dataTable({  \"bPaginate\" : false    ,  columnDefs: [  { type: 'currency', targets: [3] }   ] });});  </script> ";  */
 /*
             searchlocalfilename($checktitle,$l_order,$result_a);
             echo $result_a["totalResults"]."件<br />";
@@ -269,7 +266,7 @@ if(!isset($l_url)  ) {
 通常検索に戻る
 </button> 
 
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
+<button type="button" onclick="location.href='requestlist_only.php' " class="btn btn-default " >
 トップに戻る
 </button> 
 </body>

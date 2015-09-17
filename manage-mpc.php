@@ -423,27 +423,33 @@ while(1){
           runningcheck_shop_karaoke($db,$l_id);
        }else
        {
-       // ファイル名のチェック
-//print "Debug l_fullpath: $l_fullpath\r\n";
-       $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
-       if(file_exists($winfillpath )){
-         $filepath = $winfillpath;
-       }else{
-//print "Debug word: $word\r\n";
-         $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-         print $jsonurl;
-         $json = file_get_html_with_retry($jsonurl, 5);
-         $decode = json_decode($json, true);
-         $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-         $filepath = mb_convert_encoding($filepath,"cp932");
-       }
-//print "Debug filepath: $filepath\r\n";
+       
+       if(strcmp ($l_kind , "URL指定") !== 0){
+           // ファイル名のチェック
+    //print "Debug l_fullpath: $l_fullpath\r\n";
+           $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
+           if(file_exists($winfillpath )){
+             $filepath = $winfillpath;
+           }else{
+     print "fullpass file is not found. Search from Everything DB.: $word\r\n";
+             $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+             print $jsonurl;
+             $json = file_get_html_with_retry($jsonurl, 5);
+             $decode = json_decode($json, true);
+             $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+             $filepath = mb_convert_encoding($filepath,"cp932");
+           }
+    //print "Debug filepath: $filepath\r\n";
+        }else {
+            // print $l_kind;
+            $filepath = $l_fullpath;
+        }
            
            // 拡張子をチェックしてPlayerを選択
            $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-           if( strcasecmp($extension,"mp3") == 0 
+           if( (strcasecmp($extension,"mp3") == 0 
            || strcasecmp($extension,"m4a") == 0 
-           || strcasecmp($extension,"wav") == 0 ){
+           || strcasecmp($extension,"wav") == 0 ) && (strcmp ($l_kind , "URL指定") !== 0) ){
                // audio file
                if($l_nowplaying === '再生中' ){
                    print(mb_convert_encoding("再生中(foobar再生)を検出。現在の曲の終了待ち\n","SJIS"));
@@ -457,7 +463,7 @@ while(1){
                        sleep(30);
                        continue;
                    }
-    //             //  print(" Debug : execcmd : $execcmd\n");
+                 //  print(" Debug : execcmd : $execcmd\n");
                    
                    // 再生長取得
                    /* foo_http_controlを使用するようにしたので無効化
@@ -497,11 +503,11 @@ while(1){
                    }elseif ($playmode == 2){
                    $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
                    }else{
-                       print(" Debug : now auto play is off : $playmode\n");
+                       print(" now auto play is off : $playmode\n");
                        sleep(30);
                        continue;
                    }
-    //               print(" Debug : execcmd : $execcmd\n");
+                   // print(" Debug : execcmd : $execcmd\n");
                    if($nextplayingtimes === 0){
                        $l_playtimes = $l_playtimes + 1;
                    }else {
@@ -518,6 +524,9 @@ while(1){
                    exec($execcmd);
                    // print mb_convert_encoding("DEBUG : Player 起動完了を $waitplayercheckstart 秒待っています\n","SJIS-win");
                    sleep($waitplayercheckstart); // Player 起動待ち
+                   if(strcmp ($l_kind , "URL指定") === 0){
+                       sleep(5); // URL指定はさらに5秒待ち 
+                   } 
                }
                runningcheck_mpc($db,$l_id,$playerchecktimes);
                

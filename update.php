@@ -1,13 +1,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<META http-equiv="refresh" content="1; url=request.php">
+<META http-equiv="refresh" content="1; url=requestlist_only.php">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>項目修正実行</title>
 </head>
 <body>
 
 
-<a href="request.php" > リクエストページに戻る <a><br>
+<a href="requestlist_only.php" > リクエストページに戻る <a><br>
 
 <?php
 $db = null;
@@ -145,7 +145,7 @@ print "<a href=\"change.php?id=$l_id\" > 戻る </a>";
 
 ?>
 &nbsp;
-<a href="request.php" >トップに戻る </a>
+<a href="requestlist_only.php" >トップに戻る </a>
 
 </body>
 </html>

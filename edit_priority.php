@@ -110,7 +110,7 @@ $(function(priority_list) { $("#priority_list").dataTable({
 <p>
 <a href="init.php" >設定画面に戻る </a>
 &nbsp; 
-<a href="request.php" >トップに戻る </a>
+<a href="requestlist_only.php" >トップに戻る </a>
 </p>
 </body>
 </html>
