@@ -659,7 +659,7 @@ function shownavigatioinbar($page = 'none'){
         $page = basename($_SERVER["PHP_SELF"]);
     }
     
-    print '<nav class="navbar navbar-inverse">';
+    print '<nav class="navbar navbar-inverse navbar-fixed-top">';
 print <<<EOD
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#gnavi">

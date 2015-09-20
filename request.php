@@ -77,9 +77,9 @@ statusRequest.onload=function(ev){
    
    if("foobar" == stat.player)
    {
-        document.getElementById( 'parentplayerarea' ).src ="foobarctl.php";
+        document.getElementById( 'parentplayerarea' ).src ="playerctrl_portal.php?nomenu=1";
    }else {
-        document.getElementById( 'parentplayerarea' ).src ="mpcctrl.php";
+        document.getElementById( 'parentplayerarea' ).src ="playerctrl_portal.php?nomenu=1";
    }
 };
 
@@ -151,9 +151,9 @@ showmode();
 
 <div align="center" >
 <h4 onclick=selectPlayerctrl() > プレイヤーコントローラー </h4>
-<iframe src="playerctrl_portal.php"  class="pcarea"  id="parentplayerarea"  onmouseover=selectPlayerctrl() ontouchstart=selectPlayerctrl() >
+<iframe src="playerctrl_portal.php?nomenu=1"  class="pcarea"  id="parentplayerarea"  onmouseover=selectPlayerctrl() ontouchstart=selectPlayerctrl() >
 ブラウザが対応してないかもです。
-<a href="mpcctrl.php" >こちらのリンク先</a>を使ってみてください。
+<a href="playerctrl_portal.php" >こちらのリンク先</a>を使ってみてください。
 </iframe>
 </div>
 
