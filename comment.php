@@ -31,6 +31,7 @@ require_once 'commonfunc.php';
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script type="text/javascript" charset="utf8" src="js/requsetlist_ctrl.js"></script>
 </head>
 <body>
 <?php
