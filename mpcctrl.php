@@ -26,7 +26,7 @@
 <button type="submit" value="一時停止"  class="pcbuttom btn btn-default" onClick="song_pause()" >一時停止</button>
 </div >
 <div class="col-xs-4">
-<form method="post"action="mpcctrl.php" style="display: inline" >
+<form method="post"action="playerctrl_portal.php" style="display: inline" >
 <input type="submit" value="曲終了" name="songnext" class=" pcbuttom btn btn-default" onClick="song_next()" />
 </form>
 </div >
