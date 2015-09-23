@@ -188,7 +188,14 @@ function searchlocalfilename($kerwords, &$result_array,$order = null)
 		if(empty($order)){
 		    $order = 'sort=size&ascending=0';
 		}
-  		$jsonurl = "http://" . $everythinghost . ":81/?search=" . urlencode($kerwords) . "&". $order . "&path=1&path_column=3&size_column=4&case=0&json=1";
+		// IPv6check
+		$c_count = substr_count($everythinghost,':');
+		if ( $c_count > 1 ) {
+		    $askeverythinghost = '['.$everythinghost.']';
+		}else {
+		    $askeverythinghost = $everythinghost;
+		}
+  		$jsonurl = "http://" . $askeverythinghost . ":81/?search=" . urlencode($kerwords) . "&". $order . "&path=1&path_column=3&size_column=4&case=0&json=1";
 //  		echo $jsonurl;
   		$json = file_get_html_with_retry($jsonurl, 5, 30);
 //  		echo $json;
