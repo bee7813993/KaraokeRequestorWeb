@@ -2,7 +2,7 @@
 
 require_once 'kara_config.php';
 require_once 'prioritydb_func.php';
-require_once("getid3/getid3.php");
+//require_once("getid3/getid3.php");
 
 $showsonglengthflag = 0;
 

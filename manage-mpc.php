@@ -3,7 +3,7 @@
 date_default_timezone_set('Asia/Tokyo');
 include 'kara_config.php';
 require_once 'commonfunc.php';
-require_once("getid3/getid3.php");
+//require_once("getid3/getid3.php");
 
 if(empty($playerpath)){
     $MPCPATH='C:\Program Files (x86)\MPC-BE\mpc-be.exe';
