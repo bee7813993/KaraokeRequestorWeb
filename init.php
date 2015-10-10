@@ -83,6 +83,11 @@ if(array_key_exists("helpurl", $_REQUEST)) {
     $newhelpurl = $_REQUEST["helpurl"];
 }
 
+if(array_key_exists("autoplay_exec", $_REQUEST)) {
+    $newautoplay_exec = $_REQUEST["autoplay_exec"];
+}
+
+
 
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
@@ -273,22 +278,32 @@ if (isset($newhelpurl)){
     // print "プレイヤー動作監視チェック回数を".$helpurl."に変更しました。<br><br>";
 }
 
+if (isset($newautoplay_exec)){
+    $autoplay_exec = $newautoplay_exec;
+    $config_ini = array_merge($config_ini,array("autoplay_exec" => urlencode($autoplay_exec)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+    // print "プレイヤー動作監視チェック回数を".$autoplay_exec."に変更しました。<br><br>";
+}
+
+
 ?>
 
 <!----
 現在のDBファイル名 : 
 <?php
-print $dbname;
+print $config_ini["dbname"];
 ?>
 <br>
 現在の動作モード(1: 自動再生開始モード, 2: 手動再生開始モード, 3: 手動プレイリスト登録モード, 4: BGMモード(ジュークボックスモード), 5: BGMモード(フルランダムモード) ) : 
 <?php
-print $playmode;
+print $config_ini["$playmode"];
 ?>
 <br>
 現在のMediaPlayerClassic PATH :
 <?php
-print $playerpath;
+print urldecode($config_ini["$playerpath"]);
 ?>
 <br>
 現在のfoobar2000 PATH :
@@ -307,18 +322,18 @@ print $requestcomment;
 
 DBファイル名　
 <form method="post" action="init.php">
-<input type="text" size=20 name="filename" id="filename" value=<?php echo $dbname; ?> >
+<input type="text" size=20 name="filename" id="filename" value=<?php echo  $config_ini["dbname"]; ?> >
 <input type="submit" value="OK" />
 </form>
 
 動作モード選択　
 <form method="post" action="init.php">
 <select name="playmode" id="playmode" >  
-<option value="1" <?php print selectedcheck("1",$playmode); ?> >自動再生開始モード</option>
-<option value="2" <?php print selectedcheck("2",$playmode); ?> >手動再生開始モード</option>
-<option value="3" <?php print selectedcheck("3",$playmode); ?> >手動プレイリスト登録モード</option>
-<option value="4" <?php print selectedcheck("4",$playmode); ?> >BGMモード(ジュークボックスモード)</option>
-<option value="5" <?php print selectedcheck("5",$playmode); ?> >BGMモード(フルランダムモード)</option>
+<option value="1" <?php print selectedcheck("1",$config_ini["playmode"]); ?> >自動再生開始モード</option>
+<option value="2" <?php print selectedcheck("2",$config_ini["playmode"]); ?> >手動再生開始モード</option>
+<option value="3" <?php print selectedcheck("3",$config_ini["playmode"]); ?> >手動プレイリスト登録モード</option>
+<option value="4" <?php print selectedcheck("4",$config_ini["playmode"]); ?> >BGMモード(ジュークボックスモード)</option>
+<option value="5" <?php print selectedcheck("5",$config_ini["playmode"]); ?> >BGMモード(フルランダムモード)</option>
 </select>
 <input type="submit" value="OK" />
 </form>
@@ -326,16 +341,16 @@ DBファイル名　
 MediaPlayerClassic PATH設定　
 <form method="post" action="init.php">
 <select name="playerpath" id="playerpath" >  
-<option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",$playerpath); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
-<option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",$playerpath); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
+<option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
+<option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
 </select>
 <br />
 &nbsp;(任意のPATH選択):
 <input type="text" name="playerpath_any" size="100" class="playerpath_any" 
 <?php
-if( $playerpath !== 'C:\Program Files (x86)\MPC-BE\mpc-be.exe' && $playerpath !== 'C:\Program Files\MPC-BE\mpc-be.exe' )
+if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-be.exe' && $playerpath !== 'C:\Program Files\MPC-BE\mpc-be.exe' )
 {
-    print 'value="'.$playerpath.'" ';
+    print 'value="'.urldecode($config_ini["playerpath"]).'" ';
 }
 ?>
 />
@@ -345,14 +360,14 @@ if( $playerpath !== 'C:\Program Files (x86)\MPC-BE\mpc-be.exe' && $playerpath !=
 foobar2000 PATH設定　
 <form method="post" action="init.php">
 任意のPATH選択 :
-<input type="text" name="foobarpath" size="100" class="foobarpath" value="<?php echo $foobarpath; ?>" />
+<input type="text" name="foobarpath" size="100" class="foobarpath" value="<?php echo urldecode($config_ini["foobarpath"]); ?>" />
 <input type="submit" value="OK" />
 </form>
 
 リクエスト画面の説明書き
 <form method="post" action="init.php">
 <textarea name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
-<?php print htmlspecialchars($requestcomment); ?>
+<?php print htmlspecialchars(urldecode($config_ini["requestcomment"])); ?>
 </textarea>
 <input type="submit" value="OK" />
 </form>
@@ -362,39 +377,45 @@ foobar2000 PATH設定　
 <form method="post" action="init.php">
 <div>
 見つからなかった曲リストの使用
-<input type="radio" name="usenfrequset" value="1" <?php print ($usenfrequset==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="usenfrequset" value="2" <?php print ($usenfrequset!=1)?'checked':' ' ?> /> 使用しない
+<input type="radio" name="usenfrequset" value="1" <?php print ($config_ini["usenfrequset"]==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="usenfrequset" value="2" <?php print ($config_ini["usenfrequset"]!=1)?'checked':' ' ?> /> 使用しない
 </div>
 <div>
 配信曲にビデオキャプチャデバイスを使用
-<input type="radio" name="usevideocapture" value="1" <?php print ($usevideocapture==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="usevideocapture" value="2" <?php print ($usevideocapture!=1)?'checked':' ' ?> /> 使用しない
+<input type="radio" name="usevideocapture" value="1" <?php print ($config_ini["usevideocapture"]==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="usevideocapture" value="2" <?php print ($config_ini["usevideocapture"]!=1)?'checked':' ' ?> /> 使用しない
 </div>
 <div>
 検索ログの保存
 <form method="post" action="init.php">
-<input type="radio" name="historylog" value="1" <?php print ($historylog==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="historylog" value="2" <?php print ($historylog!=1)?'checked':' ' ?> /> 使用しない
+<input type="radio" name="historylog" value="1" <?php print ($config_ini["historylog"]==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="historylog" value="2" <?php print ($config_ini["historylog"]!=1)?'checked':' ' ?> /> 使用しない
 </div>
 <div>
 
 インターネット接続 (使用しないにするとインターネット接続が前提の機能を無効にします)
-<input type="radio" name="connectinternet" value="1" <?php print ($connectinternet==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="connectinternet" value="2" <?php print ($connectinternet!=1)?'checked':' ' ?> /> 使用しない
+<input type="radio" name="connectinternet" value="1" <?php print ($config_ini["connectinternet"]==1)?'checked':' ' ?> /> 使用する
+<input type="radio" name="connectinternet" value="2" <?php print ($config_ini["connectinternet"]!=1)?'checked':' ' ?> /> 使用しない
 <br>
 コメントサーバー設定 <br />
 URL (http://xsd.php.xdomain.jp/r2.php  等, 使用しないときは空で)
-<input type="text" name="commenturl_base" size="100" class="commenturl_base" value="<?php echo $commenturl_base; ?>" />
+<input type="text" name="commenturl_base" size="100" class="commenturl_base" value="<?php echo urldecode($config_ini["commenturl_base"]); ?>" />
 <br />
 ルーム名 (半角英数字8文字まで)
-<input type="text" name="commentroom" MAXLENGTH="24" size="36" class="commentroom" value="<?php echo $commentroom; ?>" />
+<input type="text" name="commentroom" MAXLENGTH="24" size="36" class="commentroom" value="<?php echo urldecode($config_ini["commentroom"]); ?>" />
 <br>
 MPC-BEのフルスクリーンボタン
-<input type="radio" name="moviefullscreen" value="1" <?php print ($moviefullscreen==1)?'checked':' ' ?> /> 有効
-<input type="radio" name="moviefullscreen" value="2" <?php print ($moviefullscreen!=1)?'checked':' ' ?> /> 無効
+<input type="radio" name="moviefullscreen" value="1" <?php print ($config_ini["moviefullscreen"]==1)?'checked':' ' ?> /> 有効
+<input type="radio" name="moviefullscreen" value="2" <?php print ($config_ini["moviefullscreen"]!=1)?'checked':' ' ?> /> 無効
 <br>
 ヘルプURL (https://www.evernote.com/shard/s213/sh/c0e87185-314f-446d-ac12-fd13f25f6cb9/78f03652cc14e2ae 等, 使用しないときは空で)
-<input type="text" name="helpurl" size="100" class="commenturl" value="<?php echo $helpurl; ?>" /><br />
+<input type="text" name="helpurl" size="100" class="commenturl"
+<?php
+if(array_key_exists("helpurl",$config_ini)) {
+print 'value="'.urldecode($config_ini["helpurl"]).'"';
+}
+?>
+/><br />
 <input type="submit" value="OK" />
 </div>
 </form>
@@ -427,15 +448,36 @@ BGMモード用
 </li>
 
 <hr />
+<h2>自動再生設定 </h2>
+
+<div class="form-group">
+<form method="post" action="init.php">
+<label> 自動再生プログラムPATH設定 例）nginx環境: autoplaystart_mpc.bat, xampp環境 : autoplaystart_mpc_xampp.bat </label>
+<input type="text" name="autoplay_exec" size="100" class="autoplay_exec" 
+<?php
+if(array_key_exists("autoplay_exec",$config_ini)) {
+print 'value="'.urldecode($config_ini["autoplay_exec"]).'"';
+}
+?>
+ />
+<input type="submit" value="OK" />
+</form>
+</div>
+<?php
+if(array_key_exists("autoplay_exec",$config_ini)) {
+print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
+}
+?>
+
 <form method="post" action="init.php">
 プレイヤー動作監視開始待ち時間(秒) :
-<input type="text" name="waitplayercheckstart" size="100" class="waitplayercheckstart" value="<?php echo $waitplayercheckstart; ?>" />
+<input type="text" name="waitplayercheckstart" size="100" class="waitplayercheckstart" value="<?php echo $config_ini["waitplayercheckstart"]; ?>" />
 <input type="submit" value="OK" />
 </form>
 
 <form method="post" action="init.php">
 プレイヤー動作監視チェック回数(回) :
-<input type="text" name="playerchecktimes" size="100" class="playerchecktimes" value="<?php echo $playerchecktimes; ?>" />
+<input type="text" name="playerchecktimes" size="100" class="playerchecktimes" value="<?php echo $config_ini["playerchecktimes"]; ?>" />
 <input type="submit" value="OK" />
 </form>
 

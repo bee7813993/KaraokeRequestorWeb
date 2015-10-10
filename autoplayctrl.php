@@ -10,7 +10,9 @@ function stopautoplay()
 
 function startautoplay()
 {
-    $execcmd='start "karaokeautorun" autoplaystart_mpc_xampp.bat';
+    global $config_ini;
+    $execcmd='start "karaokeautorun" '.urldecode($config_ini["autoplay_exec"]);
+    echo $execcmd;
     exec($execcmd);
 
 }
@@ -72,8 +74,8 @@ if(!empty($l_nextpage)){
 
 if($l_karaokeautorunaction == 'start'){
     $org_timeout = ini_get('default_socket_timeout');
-    ini_set('default_socket_timeout', 1);
-    @file_get_contents('http://localhost/autoplayctrl.php?karaokeautorunaction=start_exec');
+    ini_set('default_socket_timeout', 3);
+    file_get_contents('http://localhost/autoplayctrl.php?karaokeautorunaction=start_exec');
     ini_set('default_socket_timeout', $org_timeout);
     
 }
