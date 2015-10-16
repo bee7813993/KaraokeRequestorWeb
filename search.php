@@ -249,9 +249,7 @@ die();
 
 <hr>
 
-<button type="button" onclick="location.href='request.php' " class="btn btn-default " >
-トップに戻る
-</button> 
+
 
 </body>
 </html>

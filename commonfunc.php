@@ -216,9 +216,10 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
         $user=$_SERVER['PHP_AUTH_USER'];
     }
 }		
-
+    	if($showsonglengthflag == 1 ){
 		$getID3 = new getID3();
 		$getID3->setOption(array('encoding' => 'UTF-8'));
+		}
 		
   		print "<table id=\"$tableid\" class=\"searchresult\" >";
 print "<thead>\n";

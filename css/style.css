@@ -214,6 +214,10 @@ div.commentpost {
     border-width: 1px;
 }
 
+dt.resultwordlist {
+   width: 50%;
+}
+
 @media only screen and (max-width: 560px){
 #table{
 display: block;

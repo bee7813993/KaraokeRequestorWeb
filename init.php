@@ -87,6 +87,11 @@ if(array_key_exists("autoplay_exec", $_REQUEST)) {
     $newautoplay_exec = $_REQUEST["autoplay_exec"];
 }
 
+if(array_key_exists("autoplay_show", $_REQUEST)) {
+    $newautoplay_show = $_REQUEST["autoplay_show"];
+}
+
+
 
 
 if(array_key_exists("clearauth", $_REQUEST)) {
@@ -286,6 +291,13 @@ if (isset($newautoplay_exec)){
     fclose($fp);
     // print "プレイヤー動作監視チェック回数を".$autoplay_exec."に変更しました。<br><br>";
 }
+if (isset($newautoplay_show)){
+    $autoplay_show = $newautoplay_show;
+    $config_ini = array_merge($config_ini,array("autoplay_show" => $autoplay_show));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+}
 
 
 ?>
@@ -452,14 +464,31 @@ BGMモード用
 
 <div class="form-group">
 <form method="post" action="init.php">
-<label> 自動再生プログラムPATH設定 例）nginx環境: autoplaystart_mpc.bat, xampp環境 : autoplaystart_mpc_xampp.bat </label>
+<label> 自動再生プログラムPATH設定 例）xampp環境 : autoplaystart_mpc_xampp.bat, <Strike> nginx環境: autoplaystart_mpc.bat</Strike> </label>
 <input type="text" name="autoplay_exec" size="100" class="autoplay_exec" 
 <?php
 if(array_key_exists("autoplay_exec",$config_ini)) {
 print 'value="'.urldecode($config_ini["autoplay_exec"]).'"';
 }
 ?>
- />
+<label> 自動再生制御の一般ユーザーへの公開 <small>プレイヤーコントローラー画面 </small></label>
+<label class="checkbox-inline"> <input type="radio" name="autoplay_show" value="1" 
+<?php 
+if(array_key_exists("autoplay_show",$config_ini)) {
+  print ($config_ini["autoplay_show"]==1)?'checked':' ' ;
+}
+?>
+ /> 有効 </label>
+<label class="checkbox-inline"> <input type="radio" name="autoplay_show" value="2" 
+<?php 
+if(array_key_exists("autoplay_show",$config_ini)) {
+print ($config_ini["autoplay_show"]!=1)?'checked':' ' ;
+}else{
+print 'checked';
+}
+?>
+ /> 無効 </label>
+<br>
 <input type="submit" value="OK" />
 </form>
 </div>

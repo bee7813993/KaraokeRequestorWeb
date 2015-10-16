@@ -244,9 +244,21 @@ if(!isset($l_url)  ) {
         
         foreach($songtitles as $checktitle){
             if(strlen($checktitle) == 0 ) continue;
-            echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-            PrintLocalFileListfromkeyword_ajax($checktitle,$l_order, 'searchresult'.$songnum);
-            echo "<br />";
+            if(empty($showallresult)){
+                searchlocalfilename($checktitle,$result_a);
+                $resulturl='search.php?searchword='.urlencode($checktitle);
+                echo '<dl class="dl-horizontal resultwordlist">';
+                if(  $result_a["totalResults"] == 0){
+                echo ' <dt class="resultwordlist">「'.$checktitle.'」の検索結果 </dt> <dd> ⇒'.$result_a["totalResults"]."件</dd>";
+                }else{
+                echo ' <dt class="resultwordlist">「'.$checktitle.'」の検索結果 </dt> <dd> <a href="'.$resulturl.'" >⇒'.$result_a["totalResults"].'件 </a></dd>';
+                }
+                echo '</dl>';
+
+            }else {
+                echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
+                PrintLocalFileListfromkeyword_ajax($checktitle,$l_order, 'searchresult'.$songnum);
+                echo "<br />";
 /*              print "  <script type=\"text/javascript\"> $(document).ready(function(){  $('#".'searchresult'.$songnum."').dataTable({  \"bPaginate\" : false    ,  columnDefs: [  { type: 'currency', targets: [3] }   ] });});  </script> ";  */
 /*
             searchlocalfilename($checktitle,$l_order,$result_a);
@@ -257,6 +269,7 @@ if(!isset($l_url)  ) {
             //  var_dump($result_a);
 */            
             $songnum = $songnum + 1;
+            }
         }
     }
 }

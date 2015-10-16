@@ -17,6 +17,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL)
     print "<th>名前 </th>\n";
     print "<th>ジャンル </th>\n";
     print "<th>時期 </th>\n";
+    print "<th>anison.info情報 </th>\n";
     print "</tr>\n";
     print "</thead>\n"; 
     print "<tbody>\n";  
@@ -36,6 +37,13 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL)
        echo '<td class="onair" >'."\n";
        echo htmlspecialchars($item['onair'])."\n";
        echo "</td>"."\n";
+           // 詳細ページ
+           echo '<td class="searchname" >'."\n";
+           $url="http://anison.info/data/".$l;
+           echo '<a href="'.$url.'" target="_blank">'."\n";
+           echo '詳細情報'."\n";
+           echo '</a>'."\n";
+           echo "</td>"."\n";
        print "</tr>\n";
    }
    print "</tbody>\n";
@@ -58,6 +66,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL)
         print "<thead>\n";
         print "<tr>\n";
         print "<th>人物 </th>\n";
+        print "<th>anison.info情報 </th>\n";
         print "</tr>\n";
         print "</thead>\n"; 
         print "<tbody>\n";
@@ -67,6 +76,13 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL)
            echo '<td class="searchname" >'."\n";
            echo '<a href="search_anisoninfo.php?url='.$item['link'].'&kind=artist&order='.urlencode($l_order).'" >'."\n";
            echo htmlspecialchars($item['word'])."\n";
+           echo '</a>'."\n";
+           echo "</td>"."\n";
+           // 詳細ページ
+           echo '<td class="searchname" >'."\n";
+           $url="http://anison.info/data/".$item['link'];
+           echo '<a href="'.$url.'" target="_blank">'."\n";
+           echo '詳細情報'."\n";
            echo '</a>'."\n";
            echo "</td>"."\n";
            print "</tr>\n";
@@ -91,6 +107,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL)
         print "<thead>\n";
         print "<tr>\n";
         print "<th>制作会社 </th>\n";
+        print "<th>anison.info情報 </th>\n";
         print "</tr>\n";
         print "</thead>\n"; 
         print "<tbody>\n";
@@ -100,6 +117,13 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL)
            echo '<td class="searchname" >'."\n";
            echo '<a href="search_anisoninfo_mkr.php?url='.urlencode($item['link']).'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
            echo htmlspecialchars($item['word'])."\n";
+           echo '</a>'."\n";
+           echo "</td>"."\n";
+           // 詳細ページ
+           echo '<td class="searchname" >'."\n";
+           $url="http://anison.info/data/".$item['link'];
+           echo '<a href="'.$url.'" target="_blank">'."\n";
+           echo '詳細情報'."\n";
            echo '</a>'."\n";
            echo "</td>"."\n";
            print "</tr>\n";

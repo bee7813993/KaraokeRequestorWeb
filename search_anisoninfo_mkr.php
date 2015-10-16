@@ -27,6 +27,9 @@ if(array_key_exists("order", $_REQUEST)) {
 
 // URLを叩いて検索ワード候補をarrayで返す。
 function ansoninfo_gettitlelist($url,$l_m){
+    // 3回ループ
+    for($checktimes=0; $checktimes<3; $checktimes++){
+    
     $results = array();
     
     $result_dom=file_get_html($url);
@@ -128,7 +131,9 @@ function ansoninfo_gettitlelist($url,$l_m){
             $results['nextlink']=$nextlink;
         }
     } 
-    
+    if(count($results) > 0 ) break;
+    usleep(300000);
+    }
     return $results;
 }
 
@@ -165,15 +170,15 @@ shownavigatioinbar('searchreserve.php');
 
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
-<INPUT type=radio <?php print selectedcheck("pro",$l_m)=='selected'?'checked':' '; ?> value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
+<INPUT type=radio <?php print selectedcheck("pro",$l_m)=='selected'?'checked':' '; ?> value=pro name=m id="pro" ><label for="pro">作品</label>
 <!---
-<INPUT type=radio <?php print selectedcheck("song",$l_m)=='selected'?'checked':' '; ?> value=song name=m id="song" onclick="dsp(2)"><label for="song">曲</label>
+<INPUT type=radio <?php print selectedcheck("song",$l_m)=='selected'?'checked':' '; ?> value=song name=m id="song" ><label for="song">曲</label>
 --->
-<INPUT type=radio <?php print selectedcheck("person",$l_m)=='selected'?'checked':' '; ?> value=person name=m id="person" onclick="dsp(3)"><label for="person">人物</label>
-<INPUT type=radio <?php print selectedcheck("mkr",$l_m)=='selected'?'checked':' '; ?> value=mkr name=m id="mkr" onclick="dsp(5)"><label for="mkr">制作(ブランド)</label>
+<INPUT type=radio <?php print selectedcheck("person",$l_m)=='selected'?'checked':' '; ?> value=person name=m id="person" ><label for="person">人物</label>
+<INPUT type=radio <?php print selectedcheck("mkr",$l_m)=='selected'?'checked':' '; ?> value=mkr name=m id="mkr" ><label for="mkr">制作(ブランド)</label>
 <!---
-<INPUT type=radio value=rec name=m id="rec" onclick="dsp(4)"><label for="rec">音源</label>
-<INPUT type=radio value=pgrp name=m id="pgrp" onclick="dsp(6)"><label for="pgrp">関連情報</label>
+<INPUT type=radio value=rec name=m id="rec" ><label for="rec">音源</label>
+<INPUT type=radio value=pgrp name=m id="pgrp" ><label for="pgrp">関連情報</label>
 --->
 <BR>
 <INPUT  name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
