@@ -6,6 +6,9 @@ require_once 'commonfunc.php';
 <!doctype html>
 <html lang="ja">
 <head>
+<?php 
+print_meta_header();
+?>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache">
@@ -24,7 +27,6 @@ require_once 'commonfunc.php';
     <![endif]-->
 
 <title>リクエスト一覧</title>
-<link type="text/css" rel="stylesheet" href="css/style.css" />
 <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
@@ -58,6 +60,7 @@ if($user === "admin"){
      });
 } );
 </script>
+<link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 <?php
