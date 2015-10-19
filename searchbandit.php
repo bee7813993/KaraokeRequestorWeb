@@ -158,7 +158,16 @@ $songnum = 0;
                   
               echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
               PrintLocalFileListfromkeyword($checktitle,'sort=size&ascending=0','searchresult'.$songnum);
-              print "  <script type=\"text/javascript\"> $(document).ready(function(){  $('#".'searchresult'.$songnum."').dataTable({  \"bPaginate\" : false   } ,  columnDefs: [  { type: 'currency', targets: [3] }   ] );});  </script> ";
+              print "  <script type=\"text/javascript\"> "."\n";
+              print "$(document).ready(function(){"."\n";
+              print "  $('#".'searchresult'.$songnum.'\').dataTable('."\n";
+              print '  { "bPaginate" : false,'."\n";
+              print '  columnDefs:[{'."\n";
+              print '    \'type\': \'currency\','."\n";
+              print '    \'targets\': [3] '."\n";
+              print '  }],'."\n";
+              print ' });'."\n";
+              print '});  </script> ';
 /*
               searchlocalfilename($checktitle,'sort=size&ascending=0',$result_a);
               echo $result_a["totalResults"]."件<br />";
