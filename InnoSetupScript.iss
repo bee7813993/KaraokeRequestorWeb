@@ -21,20 +21,23 @@ OutputBaseFilename=KaraokeRequestorWebSetup
 
 [Files]
 ;;Source: "package\xampp-win32-5.6.12-0-VC11-installer.exe"; DestDir: {tmp}; Components: xampp
-Source: "*.php"; DestDir: "{app}"; Components: main
-Source: "*.bat"; DestDir: "{app}"; Components: main
-Source: "*.js"; DestDir: "{app}"; Components: main
-Source: "LICENSE"; DestDir: "{app}"; Components: main
-Source: "css\*"; DestDir: "{app}\css"; Components: main
-Source: "ddns\*"; DestDir: "{app}\ddns"; Components: main
-Source: "images\*"; DestDir: "{app}\images"; Components: main
-Source: "fonts\*"; DestDir: "{app}\fonts"; Components: main
-Source: "js\*"; DestDir: "{app}\js"; Components: main
-Source: "modules\*"; DestDir: "{app}\modules"; Components: main
-Source: "notfoundrequest\*.php"; DestDir: "{app}\notfoundrequest"; Components: main
-Source: "foobar2000\*"; DestDir: "{app}\foobar2000";Flags: recursesubdirs; Components: main
-Source: "krw.ico"; DestDir: "{app}"; Components: main
-Source: "favicon.ico"; DestDir: "{app}"; Components: main
+Source: "*.php"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "*.bat"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "*.js"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "LICENSE"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "css\*"; DestDir: "{app}\css"; Flags: IgnoreVersion; Components: main
+Source: "ddns\*"; DestDir: "{app}\ddns"; Flags: IgnoreVersion; Components: main
+Source: "images\*"; DestDir: "{app}\images"; Flags: IgnoreVersion; Components: main
+Source: "fonts\*"; DestDir: "{app}\fonts"; Flags: IgnoreVersion; Components: main
+Source: "js\*"; DestDir: "{app}\js"; Flags: IgnoreVersion; Components: main
+Source: "modules\*"; DestDir: "{app}\modules"; Flags: IgnoreVersion; Components: main
+Source: "notfoundrequest\*.php"; DestDir: "{app}\notfoundrequest"; Flags: IgnoreVersion; Components: main
+Source: "ニコカラコメントPlayer2.exe"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "ini.ini"; DestDir: "{app}"; Flags: onlyifdoesntexist; Components: main
+Source: "foobar2000\*"; DestDir: "{app}\foobar2000";Flags: IgnoreVersion recursesubdirs; Components: main
+Source: "commentPlayer\*"; DestDir: "{app}\commentPlayer";Flags: IgnoreVersion recursesubdirs; Components: main
+Source: "krw.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "favicon.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 
 [Run]
 ;;Filename: "{tmp}\xampp-win32-5.6.12-0-VC11-installer.exe";  StatusMsg: "Installing xampp..."
