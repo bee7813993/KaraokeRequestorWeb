@@ -35,13 +35,17 @@ $requsetlisttable = array();
 $reqcount = count($allrequest);
 
 foreach($allrequest as $value ){
+    $playingid = null;
+    if($value['nowplaying'] === '再生中'){
+        $playingid = 'id="nowplayinghere"';
+    }
     $onerequset = array();
     $onerequset += array("no" => $reqcount);
     $reqcount -= 1;
     if( ($value['secret'] == 1 ) && strcmp($value['nowplaying'],'未再生') == 0){
-        $onerequset += array("filename" =>  nl2br(htmlspecialchars(' ヒ・ミ・ツ♪(シークレット予約) ')));
+        $onerequset += array("filename" => '<div '.$playingid.' >'.  nl2br(htmlspecialchars(' ヒ・ミ・ツ♪(シークレット予約) ')).'</div>');
     }else{
-        $onerequset += array("filename" =>  nl2br(htmlspecialchars($value['songfile'])));
+        $onerequset += array("filename" => '<div '.$playingid.' >'.  nl2br(htmlspecialchars($value['songfile'])).'</div>');
     }
     
     $onerequset += array("singer" =>  nl2br(htmlspecialchars($value['singer'])));
@@ -65,7 +69,7 @@ EOD;
     $onerequset += array("method" => $value['kind']);
 
 $playstatus_pf = <<<EOD
-<div>
+<div >
 %s
 <form method="post" action="changeplaystatus.php" style="display: inline" >
 <input type="hidden" name="id" value="%s" />
@@ -78,7 +82,8 @@ $playstatus_pf = <<<EOD
 </form>
 </div>
 EOD;
-    $playstatus = sprintf($playstatus_pf,  $value['nowplaying'], $value['id'], $value['songfile']);
+
+    $playstatus = sprintf($playstatus_pf, $value['nowplaying'], $value['id'], $value['songfile']);
     if($config_ini['playmode'] == 1){
         $onerequset += array("playstatus" => $playstatus);
     }elseif($config_ini['playmode'] == 2){

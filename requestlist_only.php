@@ -33,7 +33,11 @@ print_meta_header();
 <script src="js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
-$(function(requestTable) { $("#request_table").dataTable({
+<!--
+
+
+
+$(function(requestTable_t) { $("#request_table").dataTable({
      "ajax": {
          "url": "requestlist_table_json.php",
          "dataType": 'json',
@@ -57,21 +61,50 @@ if($user === "admin"){
      "order" : [[0, 'desc']],
      bDeferRender: true,
       "autoWidth": false,
-     });
-} );
+     }); } );
+
+         
+    //タイマーをセット
+    function tm(){
+        tm = setInterval( function() {
+            if($("[name=autoreload]").prop("checked")){
+                var table = $('#request_table').DataTable();
+                table.ajax.reload();
+            }
+            if($("[name=autoplayingsong]").prop("checked")){
+                location.href = "#nowplayinghere";
+            }
+
+        },10000);
+    }
+
+function reloadtable () {
+    var table = $('#request_table').DataTable();
+    table.ajax.reload();
+}
+//-->
 </script>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body onLoad="tm()">
+<div class="container">
 <?php
 shownavigatioinbar();
 ?>
 <?php
 showmode();
 ?>
+<div class="checkbox">
+ <label class="checkbox-inline">
+ <input type="checkbox" name="autoreload" value="1"> 自動リロード
+ </label>
+ <label class="checkbox-inline">
+ <input type="checkbox" name="autoplayingsong" value="1"> 自動再生中移動
+ </label>
+</div>
 
 <table id="request_table" class="cell-border">
-<caption> <h4>現在の登録状況 <button type="submit" value="" class="topbtn btn btn-default btn-xs"  onclick=location.reload() >更新</button></h4></caption>
+<caption> <h4>現在の登録状況 <button type="submit" value="" class="topbtn btn btn-default btn-xs"  onclick=reloadtable() >更新</button></h4></caption>
 <thead>
 <tr>
 <th>No.</th>
@@ -109,7 +142,7 @@ if($user === "admin"){
 <input type="submit" value="設定" class=" btn btn-default " />
 </form>
 <a href="toolinfo.php" > 接続情報表示 </a>
-
+</div>
 </body>
 </html>
 

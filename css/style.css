@@ -134,7 +134,7 @@ border-top: 1px solid #000;
 border-right: 1px solid #000;
 border-left: 1px solid #000;
 border-bottom: 1px solid #000;
-width: 95%;
+
 }
 
 #request_table tbody td.comment {
@@ -216,6 +216,11 @@ div.commentpost {
 
 dt.resultwordlist {
    width: 50%;
+}
+
+div#nowplayinghere {
+    padding-top: 150px;
+    margin-top: -150px;
 }
 
 @media only screen and (max-width: 560px){
