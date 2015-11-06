@@ -90,16 +90,42 @@ EOD;
     }
 
 $action_pf = <<<EOD
+<div class="">
 <form method="post" action="delete.php">
 <input type="hidden" name="id" class="requestid" value="%s" />
 <input type="hidden" name="songfile" id="requestsongfile" value="%s" />
 <div class="acition" >
-<input type="submit" name="up"  id="requestup"   value="上へ"/>
-<input type="submit" name="down" id="requestdown"  value="下へ"/>
-<input type="submit" name="warikomi" id="requesttonext"  value="次に再生"/>
-<input type="submit" name="delete" id="requestdelete" value="削除"/>
+<button class="btn btn-default" type="submit" name="up"  id="requestup" value="up" >上へ</button>
+<button class="btn btn-default" type="submit" name="down" id="requestdown"  value="down" > 下へ</button>
+<button class="btn btn-default" type="submit" name="warikomi" id="requesttonext" value="warikomi" > 次に再生</button>
+<!--
+<button type="submit" name="delete" id="requestdelete" value="delete" > 削除</button>
+-->
 </div>
 </form>
+<button class="btn btn-default" data-toggle="modal" data-target="#act_modal_%s">削除</button>
+</div>
+<!-- 2.モーダルの配置 -->
+<div class="modal" id="act_modal_%s" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+         <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="modal-label">曲「%s」を削除します</h4>
+      </div>
+      <div class="modal-footer">
+        <form method="post" action="delete.php">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+          <input type="hidden" name="id" class="requestid" value="%s" />
+          <input type="hidden" name="songfile" id="requestsongfile" value="%s" />
+          <button class="btn btn-primary" type="submit" name="delete" id="requestdelete" value="delete" > 削除</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 %s
 
 <div class="clear" >
@@ -120,7 +146,7 @@ EOD;
     }else {
     $tweet_link = ' ';
     }
-    $action = sprintf($action_pf,$value['id'],$value['songfile'], $tweet_link);
+    $action = sprintf($action_pf,$value['id'],$value['songfile'],$value['id'],$value['id'],$value['songfile'],$value['id'],$value['songfile'], $tweet_link);
     $onerequset += array("action" => $action);
     
     if($user === "admin"){
