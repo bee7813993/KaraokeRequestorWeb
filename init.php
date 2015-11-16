@@ -91,7 +91,12 @@ if(array_key_exists("autoplay_show", $_REQUEST)) {
     $newautoplay_show = $_REQUEST["autoplay_show"];
 }
 
-
+if(array_key_exists("nonamerequest", $_REQUEST)) {
+    $newnonamerequest = $_REQUEST["nonamerequest"];
+}
+if(array_key_exists("nonameusername", $_REQUEST)) {
+    $newnonameusername = $_REQUEST["nonameusername"];
+}
 
 
 if(array_key_exists("clearauth", $_REQUEST)) {
@@ -126,7 +131,7 @@ if(array_key_exists("clearauth", $_REQUEST)) {
 <script src="js/bootstrap.min.js"></script>
 
 
-<title>DBファイル名設定画面</title>
+<title>設定画面</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -299,66 +304,59 @@ if (isset($newautoplay_show)){
     fclose($fp);
 }
 
+if (isset($newnonamerequest)){
+    $nonamerequest = $newnonamerequest;
+    $config_ini = array_merge($config_ini,array("nonamerequest" => $nonamerequest));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+}
+
+if (isset($newnonameusername)){
+    $nonameusername = $newnonameusername;
+    $config_ini = array_merge($config_ini,array("nonameusername" => urlencode($nonameusername)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+}
+
 
 ?>
 
-<!----
-現在のDBファイル名 : 
-<?php
-print $config_ini["dbname"];
-?>
-<br>
-現在の動作モード(1: 自動再生開始モード, 2: 手動再生開始モード, 3: 手動プレイリスト登録モード, 4: BGMモード(ジュークボックスモード), 5: BGMモード(フルランダムモード) ) : 
-<?php
-print $config_ini["$playmode"];
-?>
-<br>
-現在のMediaPlayerClassic PATH :
-<?php
-print urldecode($config_ini["$playerpath"]);
-?>
-<br>
-現在のfoobar2000 PATH :
-<?php
-print $foobarpath;
-?>
 
-<br>
-<?php
-print $requestcomment;
-?>
----->
-<br>
 
-<hr>
-
-DBファイル名　
-<form method="post" action="init.php">
-<input type="text" size=20 name="filename" id="filename" value=<?php echo  $config_ini["dbname"]; ?> >
-<input type="submit" value="OK" />
-</form>
-
-動作モード選択　
-<form method="post" action="init.php">
-<select name="playmode" id="playmode" >  
-<option value="1" <?php print selectedcheck("1",$config_ini["playmode"]); ?> >自動再生開始モード</option>
-<option value="2" <?php print selectedcheck("2",$config_ini["playmode"]); ?> >手動再生開始モード</option>
-<option value="3" <?php print selectedcheck("3",$config_ini["playmode"]); ?> >手動プレイリスト登録モード</option>
-<option value="4" <?php print selectedcheck("4",$config_ini["playmode"]); ?> >BGMモード(ジュークボックスモード)</option>
-<option value="5" <?php print selectedcheck("5",$config_ini["playmode"]); ?> >BGMモード(フルランダムモード)</option>
-</select>
-<input type="submit" value="OK" />
-</form>
-
-MediaPlayerClassic PATH設定　
-<form method="post" action="init.php">
-<select name="playerpath" id="playerpath" >  
-<option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
-<option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
-</select>
-<br />
-&nbsp;(任意のPATH選択):
-<input type="text" name="playerpath_any" size="100" class="playerpath_any" 
+<div class="container bg-info">
+  <h3>動作設定 </h3>
+  <form method="post" action="init.php">
+  <div class="form-group">
+    <label>DBファイル名</label>
+    <input type="text" name="filename" id="filename" class="form-control" value=<?php echo  $config_ini["dbname"]; ?> >
+  </div>
+  
+<!----<input type="submit" value="OK" />  </form>  ---->
+<!---- </form> ---->
+  <div class="form-group">
+    <label for="playmode">動作モード選択</label>
+<!---- <form method="post" action="init.php">  ---->
+    <select name="playmode" id="playmode" class="form-control" >  
+      <option value="1" <?php print selectedcheck("1",$config_ini["playmode"]); ?> >自動再生開始モード</option>
+      <option value="2" <?php print selectedcheck("2",$config_ini["playmode"]); ?> >手動再生開始モード</option>
+      <option value="3" <?php print selectedcheck("3",$config_ini["playmode"]); ?> >手動プレイリスト登録モード</option>
+      <option value="4" <?php print selectedcheck("4",$config_ini["playmode"]); ?> >BGMモード(ジュークボックスモード)</option>
+      <option value="5" <?php print selectedcheck("5",$config_ini["playmode"]); ?> >BGMモード(フルランダムモード)</option>
+    </select>
+<!---- <input type="submit" value="OK" /> ---->
+<!----     </form> ---->
+  </div>
+  <div class="form-group">
+    <label for="playerpath">MediaPlayerClassic PATH設定</label>
+<!---- <form method="post" action="init.php"> ---->
+    <select  class="form-control" name="playerpath" id="playerpath" >  
+      <option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
+      <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
+    </select>
+    <label > (任意のPATH選択) </label>
+    <input class="form-control" type="text" name="playerpath_any" size="100" class="playerpath_any" 
 <?php
 if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-be.exe' && $playerpath !== 'C:\Program Files\MPC-BE\mpc-be.exe' )
 {
@@ -366,120 +364,150 @@ if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-
 }
 ?>
 />
-<input type="submit" value="OK" />
-</form>
-
-foobar2000 PATH設定　
-<form method="post" action="init.php">
-任意のPATH選択 :
-<input type="text" name="foobarpath" size="100" class="foobarpath" value="<?php echo urldecode($config_ini["foobarpath"]); ?>" />
-<input type="submit" value="OK" />
-</form>
-
-リクエスト画面の説明書き
-<form method="post" action="init.php">
-<textarea name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
+<!----  <input type="submit" value="OK" /> ---->
+<!----  </form> ---->
+  </div>
+  <div class="form-group">
+    <label for="foobarpath"> foobar2000 PATH設定　</label>
+<!----  <form method="post" action="init.php">  ---->
+    <label > 任意のPATH選択  </label>
+    <input type="text" name="foobarpath" class="form-control" id="foobarpath" value="<?php echo urldecode($config_ini["foobarpath"]); ?>" />
+<!----  <input type="submit" value="OK" />
+</form> ---->
+  </div>
+  <div class="form-group">
+    <label for="comment"> リクエスト画面の説明書き </label>
+<!----   <form method="post" action="init.php"> ---->
+    <textarea class="form-control" name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
 <?php print htmlspecialchars(urldecode($config_ini["requestcomment"])); ?>
-</textarea>
-<input type="submit" value="OK" />
-</form>
+    </textarea>
+<!----   <input type="submit" value="OK" />
+</form> ---->
+  </div>
 
-<hr />
+<!----   <form method="post" action="init.php"> ---->
+  <div class="form-group">
+    <label class="radio control-label">見つからなかった曲リストの使用 </label>
+    <label class="radio-inline"> <input type="radio" name="usenfrequset" value="1" <?php print ($config_ini["usenfrequset"]==1)?'checked':' ' ?> /> 使用する </label>
+    <label class="radio-inline"> <input type="radio" name="usenfrequset" value="2" <?php print ($config_ini["usenfrequset"]!=1)?'checked':' ' ?> /> 使用しない </label>
+  </div>
+  <div class="form-group">
+    <label class="radio control-label">配信曲にビデオキャプチャデバイスを使用 </label>
+    <label class="radio-inline">
+      <input type="radio" name="usevideocapture" value="1" <?php print ($config_ini["usevideocapture"]==1)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usevideocapture" value="2" <?php print ($config_ini["usevideocapture"]!=1)?'checked':' ' ?> /> 使用しない
+    </label>
+  </div>
+  <div class="form-group">
+    <label class="radio control-label"> 検索ログの保存 </label>
+    <label class="radio-inline">
+<!----    <form method="post" action="init.php"> ---->
+      <input type="radio" name="historylog" value="1" <?php print ($config_ini["historylog"]==1)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="historylog" value="2" <?php print ($config_ini["historylog"]!=1)?'checked':' ' ?> /> 使用しない
+    </label>
+  </div>
+  <div class="form-group">
+    <label class="radio control-label"> インターネット接続 <br /><small>(使用しないにするとインターネット接続が前提の機能を無効にします)</small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="connectinternet" value="1" <?php print ($config_ini["connectinternet"]==1)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="connectinternet" value="2" <?php print ($config_ini["connectinternet"]!=1)?'checked':' ' ?> /> 使用しない
+    </label>
+  </div>
+  <div class="form-group">
+    <label >
+    コメントサーバー設定 <br />
+    <small> URL (http://xsd.php.xdomain.jp/r2.php  等, 使用しないときは空で) </small>
+    </label>
 
-<form method="post" action="init.php">
-<div>
-見つからなかった曲リストの使用
-<input type="radio" name="usenfrequset" value="1" <?php print ($config_ini["usenfrequset"]==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="usenfrequset" value="2" <?php print ($config_ini["usenfrequset"]!=1)?'checked':' ' ?> /> 使用しない
-</div>
-<div>
-配信曲にビデオキャプチャデバイスを使用
-<input type="radio" name="usevideocapture" value="1" <?php print ($config_ini["usevideocapture"]==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="usevideocapture" value="2" <?php print ($config_ini["usevideocapture"]!=1)?'checked':' ' ?> /> 使用しない
-</div>
-<div>
-検索ログの保存
-<form method="post" action="init.php">
-<input type="radio" name="historylog" value="1" <?php print ($config_ini["historylog"]==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="historylog" value="2" <?php print ($config_ini["historylog"]!=1)?'checked':' ' ?> /> 使用しない
-</div>
-<div>
-
-インターネット接続 (使用しないにするとインターネット接続が前提の機能を無効にします)
-<input type="radio" name="connectinternet" value="1" <?php print ($config_ini["connectinternet"]==1)?'checked':' ' ?> /> 使用する
-<input type="radio" name="connectinternet" value="2" <?php print ($config_ini["connectinternet"]!=1)?'checked':' ' ?> /> 使用しない
-<br>
-コメントサーバー設定 <br />
-URL (http://xsd.php.xdomain.jp/r2.php  等, 使用しないときは空で)
-<input type="text" name="commenturl_base" size="100" class="commenturl_base" value="<?php echo urldecode($config_ini["commenturl_base"]); ?>" />
-<br />
-ルーム名 (半角英数字8文字まで)
-<input type="text" name="commentroom" MAXLENGTH="24" size="36" class="commentroom" value="<?php echo urldecode($config_ini["commentroom"]); ?>" />
-<br>
-MPC-BEのフルスクリーンボタン
-<input type="radio" name="moviefullscreen" value="1" <?php print ($config_ini["moviefullscreen"]==1)?'checked':' ' ?> /> 有効
-<input type="radio" name="moviefullscreen" value="2" <?php print ($config_ini["moviefullscreen"]!=1)?'checked':' ' ?> /> 無効
-<br>
-ヘルプURL (https://www.evernote.com/shard/s213/sh/c0e87185-314f-446d-ac12-fd13f25f6cb9/78f03652cc14e2ae 等, 使用しないときは空で)
-<input type="text" name="helpurl" size="100" class="commenturl"
+    <input type="text" name="commenturl_base"  class="form-control"  value="<?php echo urldecode($config_ini["commenturl_base"]); ?>" />
+    <label > ルーム名 (半角英数字8文字まで) <br />
+    <input type="text" name="commentroom" MAXLENGTH="24" class="form-control" value="<?php echo urldecode($config_ini["commentroom"]); ?>" />
+  </div>
+  <div class="form-group">
+    <label class="radio control-label"> MPC-BEのフルスクリーンボタン </label>
+    <label class="radio-inline">
+      <input type="radio" name="moviefullscreen" value="1" <?php print ($config_ini["moviefullscreen"]==1)?'checked':' ' ?> /> 有効
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="moviefullscreen" value="2" <?php print ($config_ini["moviefullscreen"]!=1)?'checked':' ' ?> /> 無効
+    </label>
+  </div>  
+  <div class="form-group">
+    <label >
+      ヘルプURL <small>(https://www.evernote.com/shard/s213/sh/c0e87185-314f-446d-ac12-fd13f25f6cb9/78f03652cc14e2ae 等, 使用しないときは空で)</small>
+    </label>
+    <input type="text" name="helpurl" size="100" class="form-control"
 <?php
 if(array_key_exists("helpurl",$config_ini)) {
 print 'value="'.urldecode($config_ini["helpurl"]).'"';
 }
 ?>
-/><br />
-<input type="submit" value="OK" />
-</div>
-</form>
+/>
+  <div class="form-group">
+    <label class="radio control-label"> 名無しでのリクエスト許可 </label>
+    <label class="radio-inline">
+      <input type="radio" name="nonamerequest" value="1" 
+      <?php 
+      if(array_key_exists("nonamerequest",$config_ini)){
+          print ($config_ini["nonamerequest"]==1)?'checked':' ';
+      }else {
+          print 'checked';
+      }
+      ?> /> 許可
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="nonamerequest" value="2" 
+      <?php 
+      if(array_key_exists("nonamerequest",$config_ini)){
+          print ($config_ini["nonamerequest"]!=1)?'checked':' ';
+      }
+       
+      ?> /> 不許可
+    </label>
+    <label class="radio control-label"> 名無しリクエスト時の表示名 </label>
+    <input type="text" name="nonameusername" size="100" class="form-control"
+<?php
+if(array_key_exists("nonameusername",$config_ini)) {
+print 'value="'.urldecode($config_ini["nonameusername"]).'"';
+}else {
+print 'value="名無しさん"';}
+?>
+/>    
+  </div>  
+  </div>  
+  <h3>自動再生設定 </h3>
 
-<hr />
-<a href ="listexport.php" > リクエストリストのダウンロード </a>
-<form action="listimport.php" method="post" enctype="multipart/form-data">
-リクエストリストのインポート(csvより)
-<input type="file" name="dbcsv" accept="text/comma-separated-values" />
-<select name="importtype" id="importtype" > 
-<option value="new" >新規</option>
-<option value="add" >追加</option>
-</select>
-
-<input type="submit" value="Send" />  
-</form>
-<a href ="listclear.php" > リクエストリストの全消去 </a>
-
-<hr />
-<form method="post" action="delete.php">
-<input type="submit" name="resettsatus" value="全て未再生化" />
-</form>
-<hr />
-BGMモード用
-<li>
-<a href ="listtimesclear.php?times=0" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
-</li>
-<li>
-<a href ="listtimesclear.php?times=1" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
-</li>
-
-<hr />
-<h2>自動再生設定 </h2>
-
-<div class="form-group">
-<form method="post" action="init.php">
-<label> 自動再生プログラムPATH設定 例）xampp環境 : autoplaystart_mpc_xampp.bat, <Strike> nginx環境: autoplaystart_mpc.bat</Strike> </label>
-<input type="text" name="autoplay_exec" size="100" class="autoplay_exec" 
+  <div class="form-group">
+    <label> 自動再生プログラムPATH設定 <br /> 
+    <small>
+     例）xampp環境 : autoplaystart_mpc_xampp.bat, <Strike> nginx環境: autoplaystart_mpc.bat</Strike>
+    </small>
+    </label>
+    <input type="text" name="autoplay_exec" size="100" class="form-control" 
 <?php
 if(array_key_exists("autoplay_exec",$config_ini)) {
 print 'value="'.urldecode($config_ini["autoplay_exec"]).'"';
 }
-?>
-<label> 自動再生制御の一般ユーザーへの公開 <small>プレイヤーコントローラー画面 </small></label>
-<label class="checkbox-inline"> <input type="radio" name="autoplay_show" value="1" 
+?> />
+    <label class="radio control-label"> 自動再生制御の一般ユーザーへの公開 <small>プレイヤーコントローラー画面 </small></label>
+    <label class="checkbox-inline">
+      <input type="radio" name="autoplay_show" value="1" 
 <?php 
 if(array_key_exists("autoplay_show",$config_ini)) {
   print ($config_ini["autoplay_show"]==1)?'checked':' ' ;
 }
 ?>
- /> 有効 </label>
-<label class="checkbox-inline"> <input type="radio" name="autoplay_show" value="2" 
+ />
+      有効 
+    </label>
+    <label class="checkbox-inline">
+      <input type="radio" name="autoplay_show" value="2" 
 <?php 
 if(array_key_exists("autoplay_show",$config_ini)) {
 print ($config_ini["autoplay_show"]!=1)?'checked':' ' ;
@@ -487,62 +515,125 @@ print ($config_ini["autoplay_show"]!=1)?'checked':' ' ;
 print 'checked';
 }
 ?>
- /> 無効 </label>
-<br>
+ /> 
+      無効
+    </label>
+<!----
 <input type="submit" value="OK" />
 </form>
-</div>
+------>
+  </div>
 <?php
 if(array_key_exists("autoplay_exec",$config_ini)) {
 print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
 }
 ?>
-
+<!----
 <form method="post" action="init.php">
-プレイヤー動作監視開始待ち時間(秒) :
-<input type="text" name="waitplayercheckstart" size="100" class="waitplayercheckstart" value="<?php echo $config_ini["waitplayercheckstart"]; ?>" />
+------>
+  <div class="form-group">
+    <label > プレイヤー動作監視開始待ち時間(秒) </label>
+      
+    <input type="text" name="waitplayercheckstart" size="100" class="form-control" value="<?php echo $config_ini["waitplayercheckstart"]; ?>" />
+<!----
 <input type="submit" value="OK" />
 </form>
 
 <form method="post" action="init.php">
-プレイヤー動作監視チェック回数(回) :
-<input type="text" name="playerchecktimes" size="100" class="playerchecktimes" value="<?php echo $config_ini["playerchecktimes"]; ?>" />
+------>
+    <label > プレイヤー動作監視チェック回数(回)  </label>
+    <input type="text" name="playerchecktimes" size="100" class="form-control" value="<?php echo $config_ini["playerchecktimes"]; ?>" />
+<!----
 <input type="submit" value="OK" />
 </form>
+------>
+  </div>
+
+  <input type="submit" class="btn btn-default btn-lg" value="設定" />
+  </form>
+</div>
+  <hr />
+<div class="container bg-info">
+  <h3> リクエストリスト操作 </h3>
+  <a href ="listexport.php"  class="btn btn-default" > リクエストリストのダウンロード </a>
+  <form action="listimport.php" method="post" enctype="multipart/form-data">
+    <label > リクエストリストのインポート(csvより)
+      <input type="file" name="dbcsv" accept="text/comma-separated-values" />
+      <select name="importtype" id="importtype" class="form-control" > 
+        <option value="new" >新規</option>
+        <option value="add" >追加</option>
+      </select>
+    </label>
+    <input type="submit" value="Send" />  
+  </form>
+  <a href ="listclear.php" class="btn btn-default" > リクエストリストの全消去 </a>
+
+  <form method="post" action="delete.php">
+    <input type="submit" name="resettsatus" value="全て未再生化" class="btn btn-default" />
+  </form>
+
+  <label > BGMモード用 </label>
+  <li>
+    <a href ="listtimesclear.php?times=0" class="btn btn-default" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
+  </li>
+  <li>
+    <a href ="listtimesclear.php?times=1" class="btn btn-default" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
+  </li>
+</div>
 
 <hr />
-DDNS登録
-<li> pcgame-r18.jp (アカウントを持っている人用) </li>
-<form method="post" action="https://pcgame-r18.jp/ddns/adddns.php">
-Hostname :<input type="text" name="host" class="host" style=”width: 40%;” value=" " />.pcgame-r18.jp
-&nbsp;
-IP:<input type="text" name="ip" size="10" class="ip" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
-<input type="hidden" name="ttl" size="10" class="ttl" value="30" />
-<input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
-<input type="submit" value="更新" />
-</form>
 
-<li> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></li>
-<form method="post" action="http://www.mydns.jp/directip.html">
-マスターID :<input type="text" name="MID" class="host" style=”width: 20%;” value=" " />
-&nbsp;
-パスワード :<input type="text" name="PWD" class="host" style=”width: 20%;” value=" " />
-&nbsp;
-IP:<input type="text" name="IPV4ADDR" size="10" class="ip" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
-<input type="submit" value="更新" />
-</form>
+<div class="container bg-info">
+  <h3> ユーザー接続用DDNS登録 </h3>
+
+  <label> pcgame-r18.jp (アカウントを持っている人用) </label>
+  <form method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">
+      <div class="form-group">
+        <label class="control-label"> Hostname </label>
+        <div class="row">
+          <div class="col-xs-8">
+            <input type="text" name="host" class="form-control" style=”width: 40%;” value=" " />
+          </div>
+          <div class="col-xs-4">
+          .pcgame-r18.jp
+          </div>
+        </div>
+        <label class="control-label"> IP</label>
+        <div >
+          <input type="text" name="ip" size="10" class="form-control" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
+        </div>
+        <input type="hidden" name="ttl" size="10" class="ttl" value="30" />
+        <input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
+      <input type="submit" class="btn btn-default" value="更新" />
+      </div>
+  </form>
+
+  <label> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></label>
+  <form method="post"  action="http://www.mydns.jp/directip.html">
+  <div class="form-group">
+    <label class="control-label" >マスターID</label>
+    <input type="text" name="MID" class="form-control"  value=" " />
+
+    <label class="control-label ">パスワード</label>
+    <input type="text" name="PWD" class="form-control"  value=" " />
+
+    <label class="control-label ">IP</label>
+    <input type="text" name="IPV4ADDR" size="10" class="form-control" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
+  <input type="submit" class="btn btn-default" value="更新" />
+  </div>
+  </form>
 
 
-<hr />
-<p>
-<a href ="init.php?clearauth=1" > ログイン情報クリア (対応ブラウザのみ)</a>
-</p>
-<p>
-<a href="edit_priority.php" > 表示優先度設定 </a>
-</p>
+  <hr />
+  <p>
+    <a href ="init.php?clearauth=1" class="btn btn-default" > ログイン情報クリア (対応ブラウザのみ)</a>
+  </p>
+  <p>
+    <a href="edit_priority.php" class="btn btn-default" > 表示優先度設定 </a>
+  </p>
 
-<a href="requestlist_only.php" > リクエストTOP画面に戻る　</a>
-
+  <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
+</div>
 </body>
 </html>
 

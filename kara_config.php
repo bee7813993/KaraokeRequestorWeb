@@ -11,46 +11,76 @@ function readconfig_array()
         $config_ini = parse_ini_file($configfile);
     }else {
        // set initial value
+    }
+    // set initial value
+    if(!array_key_exists("dbname", $config_ini)){
         $dbname = 'request.db';
         $config_ini = array_merge($config_ini,array("dbname" => $dbname));
+    }
+    if(!array_key_exists("playmode", $config_ini)){
         $playmode = 3;
         $config_ini = array_merge($config_ini,array("playmode" => $playmode));
+    }
+    if(!array_key_exists("playerpath", $config_ini)){
         $playerpath = 'C:\Program Files (x86)\MPC-BE\mpc-be.exe';
         $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
+    }
+    if(!array_key_exists("foobarpath", $config_ini)){
         $foobarpath = '..\..\foobar2000\foobar2000.exe';
         $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
+    }
+    if(!array_key_exists("requestcomment", $config_ini)){
         $requestcomment = "曲への思い入れとか雑談とかどうぞ";
         $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
+    }
+    if(!array_key_exists("usenfrequset", $config_ini)){
         $usenfrequset = 0;
         $config_ini = array_merge($config_ini,array("usenfrequset" => urlencode($usenfrequset)));
+    }
+    if(!array_key_exists("usevideocapture", $config_ini)){
         $usevideocapture = 0;
         $config_ini = array_merge($config_ini,array("usevideocapture" => urlencode($usevideocapture)));
+    }
+    if(!array_key_exists("historylog", $config_ini)){
         $historylog = 0;
         $config_ini = array_merge($config_ini,array("historylog" => urlencode($historylog)));
-        $historylog = 0;
-        $config_ini = array_merge($config_ini,array("historylog" => urlencode($historylog)));
+    }
+    if(!array_key_exists("waitplayercheckstart", $config_ini)){
         $waitplayercheckstart = 2;
         $config_ini = array_merge($config_ini,array("waitplayercheckstart" => $waitplayercheckstart));            
+    }
+    if(!array_key_exists("playerchecktimes", $config_ini)){
         $playerchecktimes = 3;
         $config_ini = array_merge($config_ini,array("playerchecktimes" => $playerchecktimes));
+    }
+    if(!array_key_exists("connectinternet", $config_ini)){
         $connectinternet = 1;
         $config_ini = array_merge($config_ini,array("connectinternet" => $connectinternet));
+    }
+    if(!array_key_exists("commenturl_base", $config_ini)){
         $commenturl_base = "";
         $config_ini = array_merge($config_ini,array("commenturl_base" => urlencode($commenturl_base)));
+    }
+    if(!array_key_exists("commentroom", $config_ini)){
         $commentroom = "";
         $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));            
+    }
+    if(!array_key_exists("moviefullscreen", $config_ini)){
         $moviefullscreen = "";
         $config_ini = array_merge($config_ini,array("moviefullscreen" => $moviefullscreen));            
+    }
+    if(!array_key_exists("helpurl", $config_ini)){
         $helpurl = "";
         $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));            
-            
-        //write initial setting
-        $fp = fopen($configfile, 'w');
-        foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-        fclose($fp);
-            
     }
-    
+    if(!array_key_exists("nonamerequest", $config_ini)){
+        $nonamerequest = "2";
+        $config_ini = array_merge($config_ini,array("nonamerequest" => ($nonamerequest)));            
+    }
+    if(!array_key_exists("nonameusername", $config_ini)){
+        $nonameusername = "名無しさん";
+        $config_ini = array_merge($config_ini,array("nonameusername" => urlencode($nonameusername)));            
+    }
     if(array_key_exists("commenturl_base", $config_ini) && array_key_exists("commentroom", $config_ini))
     {
         $commenturl = sprintf("%s?r=%s",$config_ini["commenturl_base"],$config_ini["commentroom"]);

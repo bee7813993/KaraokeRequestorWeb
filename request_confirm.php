@@ -99,11 +99,30 @@ flg=(document.getElementById('singer').selectedIndex==0);
 if (!flg) document.getElementById('freesinger').value='';
 document.getElementById('freesinger').parentNode.style.visibility=flg?'visible':'hidden';
 }
+
+
+window.onload = function(){
+document.getElementById("requestconfirm").onsubmit = function(){
+var newname = document.getElementById("freesinger").value;
+var existname = document.getElementById("singer").value;
+
+if (newname == "" && existname =="<?php print(urldecode($config_ini['nonameusername']));?>") {
+<?php
+if($config_ini['nonamerequest'] != 1){
+print 'alert("リクエスト者が空欄です。名前を入れてください");';
+print 'return false;';
+}
+?>
+
+}
+}
+}
+
 </script>
 </head>
 <body>
 
-<form method="post" action="exec.php">
+<form method="post" action="exec.php" id="requestconfirm">
 <div CLASS="itemname">
 曲名(ファイル名)<br>
 
@@ -148,7 +167,7 @@ if($shop_karaoke == 1){
 <div CLASS="singer">
 リクエスト者<br>
 <select name="singer" onchange="check(this.form)" onfocus="check(this.form)" id="singer">
-<option value="0">新規入力↓</option>
+<option value="<?php print(urldecode($config_ini['nonameusername']));?>">新規入力↓</option>
 <?php
 $num = 1;
 
@@ -181,7 +200,7 @@ print('<span style="visibility:visible;">');
 print('<span style="visibility:hidden;">');
 }
 ?>
-<input type="text" name="freesinger" id="freesinger" style="width:100%" placeholder="名前を書いてね。２回目からは上のドロップダウンから選べるようになります。" >
+<input type="text" name="freesinger" id="freesinger" style="width:100%" placeholder="名前を書いてね。２回目からは上のドロップダウンから選べるようになります。" value="" >
 </span>
 </div>
 
@@ -204,7 +223,7 @@ print('<span style="visibility:hidden;">');
 </div>
 <div CLASS="row" >
 <div CLASS="pushbtn col-xs-12 col-sm-8">
-<input type="submit" value="実行" class="requestconfirm btn btn-default btn-lg"/>
+<input type="submit" value="実行" class="requestconfirm btn btn-default btn-lg" />
 </div>
 </div>
 

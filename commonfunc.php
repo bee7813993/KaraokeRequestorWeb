@@ -712,7 +712,7 @@ EOD;
     }
     print '><a href="request.php">全部</a></li>';
     if ($user === 'admin'){
-        print '    <p class="navbar-text "> 管理者ログイン中</p>';
+        print '    <p class="navbar-text "> <small>管理者ログイン中</small></p>';
     }
     print '    <li class="dropdown navbar-right">';
     print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
