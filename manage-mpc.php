@@ -1,5 +1,10 @@
 <?php
-//setlocale(LC_ALL, 'ja_JP.Shift_JIS');
+//setlocale(LC_ALL,  'ja_JP.UTF-8','ja_JP.Shift_JIS');
+if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
+    print('Locale not found: ja_JP.UTF-8');
+    exit(1);
+}
+
 date_default_timezone_set('Asia/Tokyo');
 include 'kara_config.php';
 require_once 'commonfunc.php';
@@ -19,6 +24,24 @@ if(empty($foobarpath)){
 $MPCSTATURL='http://localhost:13579/info.html';
 $MPCCMDURL='http://localhost:13579/command.html';
 $FOOBARSTATURL='http://localhost:82/karaokectrl/';
+
+function file_exist_check_japanese($filename){
+
+ $fileinfo=file_exists($filename);
+ if($fileinfo != FALSE){
+     return TRUE;
+ }
+
+ $fileinfo = fopen(addslashes($filename),'r');
+ if($fileinfo != FALSE){
+     fclose($fileinfo);
+     // print 'DEBUG : Success fopen' ;
+     return TRUE;
+ }
+ 
+ return FALSE;
+}
+
 
 function mpcstop(){
    global $MPCCMDURL;
@@ -427,11 +450,12 @@ while(1){
        if(strcmp ($l_kind , "URL指定") !== 0){
            // ファイル名のチェック
     //print "Debug l_fullpath: $l_fullpath\r\n";
-           $winfillpath = mb_convert_encoding($l_fullpath,"SJIS");
-           if(file_exists($winfillpath )){
-             $filepath = $winfillpath;
+           $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");
+           $fileinfo=file_exist_check_japanese($winfillpath);
+           if($fileinfo !== FALSE){
+               $filepath = $winfillpath;
            }else{
-     print "fullpass file is not found. Search from Everything DB.: $word\r\n";
+     print "fullpass file $winfillpath is not found. Search from Everything DB.: $word\r\n";
              $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
              print $jsonurl;
              $json = file_get_html_with_retry($jsonurl, 5);

@@ -98,6 +98,11 @@ if(array_key_exists("nonameusername", $_REQUEST)) {
     $newnonameusername = $_REQUEST["nonameusername"];
 }
 
+if(array_key_exists("downloadfolder", $_REQUEST)) {
+    $newdownloadfolder = $_REQUEST["downloadfolder"];
+}
+
+
 
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
@@ -320,6 +325,15 @@ if (isset($newnonameusername)){
     fclose($fp);
 }
 
+if (isset($newdownloadfolder)){
+    $downloadfolder = $newdownloadfolder;
+    $config_ini = array_merge($config_ini,array("downloadfolder" => urlencode($downloadfolder)));
+    $fp = fopen($configfile, 'w');
+    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
+    fclose($fp);
+}
+
+
 
 ?>
 
@@ -471,12 +485,22 @@ print 'value="'.urldecode($config_ini["helpurl"]).'"';
       ?> /> 不許可
     </label>
     <label class="radio control-label"> 名無しリクエスト時の表示名 </label>
-    <input type="text" name="nonameusername" size="100" class="form-control"
+    <input type="text" name="nonameusername" class="form-control"
 <?php
 if(array_key_exists("nonameusername",$config_ini)) {
 print 'value="'.urldecode($config_ini["nonameusername"]).'"';
 }else {
 print 'value="名無しさん"';}
+?>
+/>    
+    <label class="radio control-label"> アップ／ダウンロード先フォルダ <small> 要Everythingの検索対象</small> </label>
+    <input type="text" name="downloadfolder" class="form-control"
+<?php
+if(array_key_exists("downloadfolder",$config_ini)) {
+    print 'value="'.urldecode($config_ini["downloadfolder"]).'"';
+}else {
+    print 'value="'.$_SERVER["TMP"].'"';
+}
 ?>
 />    
   </div>  

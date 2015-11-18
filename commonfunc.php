@@ -832,6 +832,7 @@ function selectrequestkind(){
     global $playmode;
     global $connectinternet;
     global $usenfrequset;
+    global $config_ini;
     
 print <<<EOD
 <div  align="center" >
@@ -850,14 +851,24 @@ if ($playmode != 4 && $playmode != 5){
     print '</div>';
 }
 
-if( $connectinternet == 1){
+if (!empty($config_ini["downloadfolder"])){
     print '<div align="center" >';
-    print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
+    print '<form method="GET" action="file_uploader.php" >';
     print '<input type="hidden" name="set_directurl" value="1" />';
-    print '<input type="submit" name="URL"   value="再生動画のURLを指定する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
+    print '<input type="submit" name="URL"   value="ファイルをアップロードして予約する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
 }
+
+if( $connectinternet == 1){
+    print '<div align="center" >';
+    print '<form method="GET" action="request_confirm_url.php?shop_karaoke=1" >';
+    print '<input type="hidden" name="set_directurl" value="1" />';
+    print '<input type="submit" name="URL"   value="インターネット直接再生はこちらから(Youtube等)" class="topbtn btn btn-default btn-lg"/> ';
+    print '</form>';
+    print '</div>';
+}
+
 if($usenfrequset == 1) {
     print '<div align="center" >';
     print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';

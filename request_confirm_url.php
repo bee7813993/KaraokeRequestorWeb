@@ -126,7 +126,7 @@ print 'return false;';
 <form method="post" action="exec.php" id="requestconfirm">
 <div class="form-group">
 <label>
-曲名(ファイル名)
+URL
 </label>
 <textarea name="filename" id="filename" class="form-control" rows="4" wrap="soft" style="width:100%" 
 <?php
@@ -207,7 +207,7 @@ print('<span style="visibility:hidden;">');
 </div>
 
 <div CLASS="form-group">
-<label>コメント</label>
+<label>コメント<small> セトリ記録のため曲名とか書いてもらえると助かります </small></label>
 <textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
 </textarea>
 </div>

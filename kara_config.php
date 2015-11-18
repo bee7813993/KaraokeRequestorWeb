@@ -86,6 +86,14 @@ function readconfig_array()
         $commenturl = sprintf("%s?r=%s",$config_ini["commenturl_base"],$config_ini["commentroom"]);
         $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl))); 
     }    
+    if(!array_key_exists("downloadfolder", $config_ini)){
+        $downloadfolder = $_SERVER["TMP"];
+        $config_ini = array_merge($config_ini,array("downloadfolder" => urlencode($downloadfolder)));            
+    }
+    
+    if(mb_substr($config_ini["downloadfolder"],-1) !== '\\'){
+        $config_ini["downloadfolder"] = $config_ini["downloadfolder"].'\\';
+    }
     return $config_ini;
 
 }

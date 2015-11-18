@@ -18,6 +18,15 @@ OutputDir=userdocs:Inno Setup Examples Output
 SetupIconFile=krw.ico
 ;;CreateAppDir=no
 OutputBaseFilename=KaraokeRequestorWebSetup
+AppPublisher=XAMPP Site
+AppPublisherURL=https://www.apachefriends.org/jp/index.html
+
+[Languages]
+Name: japanese; MessagesFile: compiler:Languages\Japanese.isl 
+
+[Messages]
+WelcomeLabel2=このプログラムはご使用のコンピューターへ [name/ver] をインストールします。%n%nこのプログラムの実行には事前にxamppをインストールしておく必要があります。%nhttps://www.apachefriends.org/jp/index.html
+SelectDirLabel3=[name] をインストールするXAMPPをインストールしたフォルダ内のhtdocsフォルダを指定して、「次へ」をクリックしてください。
 
 [Files]
 ;;Source: "package\xampp-win32-5.6.12-0-VC11-installer.exe"; DestDir: {tmp}; Components: xampp
