@@ -36,6 +36,9 @@ document.all.upldfilename.value = document.all.InputFile.value;
 <?php
 require_once 'commonfunc.php';
 shownavigatioinbar('searchreserve.php');
+ini_set('memory_limit', '1536M');
+ini_set('post_max_size', '1024M');
+ini_set('upload_max_filesize', '1024M');
 ?>
 <div class="container">
   <form enctype="multipart/form-data" action="file_uploader_recv.php" method="POST" onsubmit="saveFilename()";>

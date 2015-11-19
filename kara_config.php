@@ -26,7 +26,7 @@ function readconfig_array()
         $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
     }
     if(!array_key_exists("foobarpath", $config_ini)){
-        $foobarpath = '..\..\foobar2000\foobar2000.exe';
+        $foobarpath = '.\foobar2000\foobar2000.exe';
         $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
     }
     if(!array_key_exists("requestcomment", $config_ini)){
@@ -90,9 +90,9 @@ function readconfig_array()
         $downloadfolder = $_SERVER["TMP"];
         $config_ini = array_merge($config_ini,array("downloadfolder" => urlencode($downloadfolder)));            
     }
-    
-    if(mb_substr($config_ini["downloadfolder"],-1) !== '\\'){
-        $config_ini["downloadfolder"] = $config_ini["downloadfolder"].'\\';
+    //print mb_substr(urldecode($config_ini["downloadfolder"]),-1);
+    if(strlen($config_ini["downloadfolder"]) != 0 &&mb_substr(urldecode($config_ini["downloadfolder"]),-1) !== '\\'){
+        $config_ini["downloadfolder"] = urlencode(urldecode($config_ini["downloadfolder"]).'\\');
     }
     return $config_ini;
 

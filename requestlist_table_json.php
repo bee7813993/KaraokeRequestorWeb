@@ -12,16 +12,6 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
 }
 
 
-$configfile = 'config.ini';
-$config_ini = array ();
-
-if(file_exists($configfile)){
-    $config_ini = parse_ini_file($configfile);
-    //var_dump($config_ini);
-
-}else{
-    print "no $configfile";
-}
 
 
 $sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";

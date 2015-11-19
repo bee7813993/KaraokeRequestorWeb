@@ -1,6 +1,6 @@
 <?php
 
-require_once 'kara_config.php';
+require_once 'commonfunc.php';
 
 function stopautoplay()
 {
@@ -71,11 +71,14 @@ if(!empty($l_nextpage)){
 </head>
 <body>
 <?php
+shownavigatioinbar();
+?>
+<?php
 
 if($l_karaokeautorunaction == 'start'){
     $org_timeout = ini_get('default_socket_timeout');
     ini_set('default_socket_timeout', 3);
-    file_get_contents('http://localhost/autoplayctrl.php?karaokeautorunaction=start_exec');
+    @file_get_contents('http://localhost/autoplayctrl.php?karaokeautorunaction=start_exec');
     ini_set('default_socket_timeout', $org_timeout);
     
 }

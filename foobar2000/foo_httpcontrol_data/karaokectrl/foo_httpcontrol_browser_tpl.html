@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>browser - foo_httpcontrol</title>
+<style type="text/css">
+<!--
+input { height:25px; width:30px; background-color:#DEDEDE; color:#000000; margin-right:5px;}
+body { background-color:#FFFFFF; font-family:Verdana, Arial, Helvetica, sans-serif; font-size:11px}
+.frm { margin: 0px; padding: 0px; }
+.dir { font-weight: bold; }
+table { width: 100%; }
+table td { font-family:Verdana, Arial, Helvetica, sans-serif; font-size:11px; padding: 3px; color: #999999; }
+tr.odd td { background-color: #fafafa; }
+tr.even td { background-color: #ffffff; }
+tr.rodd td { background-color: #fafafa; color: #000000; }
+tr.reven td { background-color: #ffffff; color: #000000;}
+td.c1 { width: 66%; }
+td.c2 { text-align: right; white-space: nowrap; width: 12%; padding-right: 5px; }
+td.c3 { text-align: left; white-space: nowrap; width: 5%; padding-left: 5px; padding-right: 10px;}
+td.c4 { text-align: right; white-space: nowrap; width: 10%; }
+a { color: #333333; text-decoration: underline; }
+a:hover { text-decoration: underline; color: #d00000; }
+select { background-color: #ffffff; }
+form { margin-top: 15px; }
+-->
+</style>
+</head>
+<body>
+<form action="/default/" method="get" name="cmd_form" target="_self" class="frm">
+[ <a href="/default/">Player...</a> ]
+&nbsp;&nbsp; [ <a href="javascript:EmptyPlaylist()">Empty playlist</a> ]
+&nbsp;&nbsp; 
+Enqueue: [ <a title="Enqueue current directory files only" href="/default/?cmd=Browse&amp;param1=[PATH]&amp;param2=EnqueueDir">Dir</a>&nbsp;&nbsp;<a title="Enqueue current directory including subdirectories" href="/default/?cmd=Browse&amp;param1=[PATH]&amp;param2=EnqueueDirSubdirs">Dir+subdirs</a> ]
+<input name="cmd" type="hidden" value="Browse">
+<input name="param1" type="hidden" value="">
+<input name="param2" type="hidden" value="">
+</form>
+<hr>
+[BROWSER]
+<!--[PGT] ms-->
+</body>
+</html>

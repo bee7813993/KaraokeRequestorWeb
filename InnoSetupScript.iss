@@ -3,9 +3,10 @@
 
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING .ISS SCRIPT FILES!
 
+
 [Setup]
 AppName=KaraokeRequestorWeb for xampp
-AppVersion=0.09.3
+AppVersion=0.09.4
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
 AppendDefaultDirName=no
@@ -25,7 +26,7 @@ AppPublisherURL=https://www.apachefriends.org/jp/index.html
 Name: japanese; MessagesFile: compiler:Languages\Japanese.isl 
 
 [Messages]
-WelcomeLabel2=このプログラムはご使用のコンピューターへ [name/ver] をインストールします。%n%nこのプログラムの実行には事前にxamppをインストールしておく必要があります。%nhttps://www.apachefriends.org/jp/index.html
+WelcomeLabel2=このプログラムはご使用のコンピューターへ [name/ver] をインストールします。%n%nこのプログラムの実行には事前にxamppをインストールしておく必要があります。%n(後からxamppをインストールしようとするとxamppのセットアップが失敗します)%nhttps://www.apachefriends.org/jp/index.html
 SelectDirLabel3=[name] をインストールするXAMPPをインストールしたフォルダ内のhtdocsフォルダを指定して、「次へ」をクリックしてください。
 
 [Files]
@@ -47,6 +48,7 @@ Source: "foobar2000\*"; DestDir: "{app}\foobar2000";Flags: IgnoreVersion recurse
 Source: "commentPlayer\*"; DestDir: "{app}\commentPlayer";Flags: IgnoreVersion recursesubdirs; Components: main
 Source: "krw.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "favicon.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: ".htaccess"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 
 [Run]
 ;;Filename: "{tmp}\xampp-win32-5.6.12-0-VC11-installer.exe";  StatusMsg: "Installing xampp..."
