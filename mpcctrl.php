@@ -6,8 +6,13 @@
       $select = $db->query($sql);
       $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
       $select->closeCursor();
-      $sql = "UPDATE requesttable set nowplaying = \"停止中\" WHERE id = ".$currentsong[0]['id'];
-      $ret = $db->exec($sql);
+      if(count($currentsong) < 1){
+          //再生中の曲がないとき
+          print '<p> 曲停止ボタンを押されましたが、再生中の曲はありませんでした </p>'."\n";
+      }else {
+          $sql = "UPDATE requesttable set nowplaying = \"停止中\" WHERE id = ".$currentsong[0]['id'];
+          $ret = $db->exec($sql);
+      }
   }
 
 ?>

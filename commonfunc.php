@@ -572,7 +572,7 @@ function commentpost_v1($nm,$col,$msg,$commenturl)
 function commentpost_v2($nm,$col,$size,$msg,$commenturl)
 {
 
-    $commentmax=4096;
+    $commentmax=20;
     $msgarray = array();
     if(mb_strlen($msg) >= $commentmax){
          $lfarray = explode("\n", $msg);
@@ -608,7 +608,7 @@ function commentpost_v2($nm,$col,$size,$msg,$commenturl)
     );
     //    print "$commenturl";
 
-    $curl=curl_init($commenturl);
+    $curl=curl_init(($commenturl));
     curl_setopt($curl,CURLOPT_POST, TRUE);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
@@ -741,7 +741,7 @@ function shownavigatioinbar_c1($page = 'none'){
         $page = basename($_SERVER["PHP_SELF"]);
     }
     
-    print '<nav class="navbar navbar-inverse">';
+    print '<nav class="navbar navbar-inverse navbar-fixed-top">';
 print <<<EOD
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#gnavi">

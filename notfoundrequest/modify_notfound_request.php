@@ -1,5 +1,6 @@
 <?php
 $db = null;
+require_once '../commonfunc.php';
 require_once 'notfound_commonfunc.php';
 init_notfounddb($db,"notfoundrequest.db");
 ?>

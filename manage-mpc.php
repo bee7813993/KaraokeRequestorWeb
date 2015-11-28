@@ -485,16 +485,7 @@ while(1){
         $playerchecktimes = 3;
      }
      
-     // 再生時コメント表示
-     if(isset($commenturl)){
-         $nm=$row['singer'];
-         $msg=$row['comment'];
-         $col = 'FFFFFF';
-         $size = 3;
 
-         //commentpost_v1($nm,$col,$msg,$commenturl);
-         commentpost_v2($nm,$col,$size,$msg,$commenturl);
-     }
        
        if( strcmp ($l_kind , "カラオケ配信") === 0 )
        {
@@ -589,6 +580,17 @@ while(1){
                       exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
                    }
                    sleep($waitplayercheckstart); // Player 起動待ち
+
+                   // 再生時コメント表示
+                   if(isset($commenturl)){
+                       $nm=$row['singer'];
+                       $msg=$row['comment'];
+                       $col = 'FFFFFF';
+                       $size = 3;
+
+                       //commentpost_v1($nm,$col,$msg,$commenturl);
+                       commentpost_v2($nm,$col,$size,$msg,$commenturl);
+                   }
                }
                runningcheck_audio($db,$l_id,$playerchecktimes);
                
@@ -599,13 +601,13 @@ while(1){
 //                 // video file
 
                    if($playmode == 1 || $playmode == 4 || $playmode == 5){
-                   // $execcmd="start /b \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+                   $execcmd="start /b \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
                    // MPC起動チェック
                    if(mpcrunningcheck($playerpath)===FALSE){
                        startmpcandwait($playerpath,1);
                    }
                    }elseif ($playmode == 2){
-                   // $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+                   $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
                    // MPC起動チェック
                    if(mpcrunningcheck($playerpath)===FALSE){
                        startmpcandwait($playerpath,1);
@@ -633,14 +635,28 @@ while(1){
                    sleep(1);
                    // web経由でファイル再生
                    //logtocmd 'MPC fileopen start '."\n";
-                   mpcplaylocalfile($playerpath,$filepath_utf8,$playmode,1);
+                   if(strcmp ($l_kind , "URL指定") == 0){
+                       exec($execcmd);
+                   }else{
+                       mpcplaylocalfile($playerpath,$filepath_utf8,$playmode,1);
+                   }
                    //logtocmd 'MPC fileopen end '."\n";
-                   // exec($execcmd);
+                   
                    // logtocmd mb_convert_encoding("DEBUG : Player 起動完了を $waitplayercheckstart 秒待っています\n","SJIS-win");
                    if(strcmp ($l_kind , "URL指定") === 0){
                        sleep(5); // URL指定はさらに5秒待ち 
                    } 
                    sleep($waitplayercheckstart); // Player 起動待ち
+                   // 再生時コメント表示
+                   if(isset($commenturl)){
+                       $nm=$row['singer'];
+                       $msg=$row['comment'];
+                       $col = 'FFFFFF';
+                       $size = 3;
+
+                       //commentpost_v1($nm,$col,$msg,$commenturl);
+                       commentpost_v2($nm,$col,$size,$msg,$commenturl);
+                   }
                }
                runningcheck_mpc($db,$l_id,$playerchecktimes);
                //logtocmd 'running check finished 終了'."\n";

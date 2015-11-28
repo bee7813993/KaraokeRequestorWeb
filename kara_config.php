@@ -83,7 +83,7 @@ function readconfig_array()
     }
     if(array_key_exists("commenturl_base", $config_ini) && array_key_exists("commentroom", $config_ini))
     {
-        $commenturl = sprintf("%s?r=%s",$config_ini["commenturl_base"],$config_ini["commentroom"]);
+        $commenturl = urldecode(sprintf("%s?r=%s",$config_ini["commenturl_base"],$config_ini["commentroom"]));
         $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl))); 
     }    
     if(!array_key_exists("downloadfolder", $config_ini)){
@@ -156,7 +156,7 @@ function readconfig(
         if(array_key_exists("commenturl", $config_ini) ){
             $commenturl = urldecode($config_ini["commenturl"]);
         }else{
-            $commenturl = sprintf("%s?r=%s",$commenturl_base,$commentroom);
+            $commenturl = urldecode(sprintf("%s?r=%s",$commenturl_base,$commentroom));
         }
 
 //    if(file_exists($configfile)){
