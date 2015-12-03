@@ -74,12 +74,48 @@ $(document).ready(function()
         });
     });
 
+
+
 });       
+
 
 function RequsetListIP(id,filename){
     var data = {id : id, songfile : filename, up : "up" };
     return false;
 }
 
-function sendcomment(){
+    function createXMLHttpRequest() {
+      if (window.XMLHttpRequest) {
+        return new XMLHttpRequest();
+      } else if (window.ActiveXObject) {
+        try {
+          return new ActiveXObject("Msxml2.XMLHTTP");
+        } catch (e) {
+          try {
+            return new ActiveXObject("Microsoft.XMLHTTP");
+          } catch (e2) {
+            return null;
+          }
+        }
+      } else {
+        return null;
+      }
+    }
+    var xmlhttp = createXMLHttpRequest();
+
+function moverequestlist(myel,id,kind,songfile){
+
+  var table = $('#request_table').DataTable();
+  var request = createXMLHttpRequest();
+  myel.setAttribute('disabled', true);
+  url="delete.php?id=" + id + "&" + kind + "=" + kind + "&songfile=" + songfile;
+  request.open("GET", url, true);
+  request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == 200) {
+          table.ajax.reload();
+          myel.setAttribute('disabled', false);
+      }
+  }
+  request.send("");
+  
 }

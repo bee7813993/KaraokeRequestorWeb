@@ -86,13 +86,13 @@ EOD;
 
 $action_pf = <<<EOD
 <div class="">
-<form method="post" action="delete.php">
+<form method="post" class="requestmove" action="delete.php">
 <input type="hidden" name="id" class="requestid" value="%s" />
 <input type="hidden" name="songfile" id="requestsongfile" value="%s" />
 <div class="acition" >
-<button class="btn btn-default" type="submit" name="up"  id="requestup" value="up" >上へ</button>
-<button class="btn btn-default" type="submit" name="down" id="requestdown"  value="down" > 下へ</button>
-<button class="btn btn-default" type="submit" name="warikomi" id="requesttonext" value="warikomi" > 次に再生</button>
+<button class="btn btn-default requestmove" type="button" name="up"  id="requestup" value="up" onClick='moverequestlist(this,%s,"up","%s")' >上へ</button>
+<button class="btn btn-default requestmove" type="button" name="down" id="requestdown"  value="down" onClick='moverequestlist(this,%s,"down","%s")' > 下へ</button>
+<button class="btn btn-default requestmove" type="button" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' > 次に再生</button>
 <!--
 <button type="submit" name="delete" id="requestdelete" value="delete" > 削除</button>
 -->
@@ -154,7 +154,7 @@ EOD;
        }
     }
     
-    $action = sprintf($action_pf,$value['id'],$value['songfile'],$value['id'],$value['id'],$dialogsongname,$value['id'],$value['songfile'], $tweet_link);
+    $action = sprintf($action_pf,$value['id'],$value['songfile'],$value['id'],$value['songfile'],$value['id'],$value['songfile'],$value['id'],$value['songfile'],$value['id'],$value['id'],$dialogsongname,$value['id'],$value['songfile'], $tweet_link);
     $onerequset += array("action" => $action);
     
     if($user === "admin"){

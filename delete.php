@@ -226,13 +226,13 @@ if( !empty($_POST['resettsatus']) ){
 
 }else{
 
-    $l_id=$_POST['id'];
+    $l_id=$_REQUEST['id'];
     $l_action='delete';
-    if( !empty($_POST['up']) )
+    if( !empty($_REQUEST['up']) )
      {$l_action = 'up';}
-    if( !empty($_POST['down']) )
+    if( !empty($_REQUEST['down']) )
      {$l_action = 'down';}
-    if( !empty($_POST['warikomi']) )
+    if( !empty($_REQUEST['warikomi']) )
      {$l_action = 'warikomi';}
 
     if ( $l_action === 'up' )
