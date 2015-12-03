@@ -257,7 +257,7 @@ if( !empty($_POST['resettsatus']) ){
     }
 }
 print("1秒後に登録ページに移動します<br>");
-
+if(!empty($DEBUG)){
 print("現在の登録状況<br>");
 try{
     $sql = "SELECT * FROM requesttable ORDER BY id DESC";
@@ -273,6 +273,7 @@ try{
 		die();
     } 
     $db = null;
+}
 ?>
 </body>
 </html>

@@ -16,6 +16,15 @@ $l_secret = 0;
 if(array_key_exists("secret", $_REQUEST)) {
     $l_secret = $_REQUEST["secret"];
 }
+$l_clientip = $_SERVER['REMOTE_ADDR'];
+if(array_key_exists("clientip", $_REQUEST)) {
+    $l_clientip = $_REQUEST["clientip"];
+}
+
+$l_clientua = $_SERVER['HTTP_USER_AGENT'];
+if(array_key_exists("clientua", $_REQUEST)) {
+    $l_clientua = $_REQUEST["clientua"];
+}
 
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
@@ -58,8 +67,8 @@ $arg = array(
 	':fp' => $l_fullpath,
 	':np' => "未再生",
 	':status' => 'new',
-	':ip' => $_SERVER['REMOTE_ADDR'],
-	':ua' => $_SERVER['HTTP_USER_AGENT'],
+	':ip' => $l_clientip  ,
+	':ua' => $l_clientua ,
 	':secret' => $l_secret
 	);
 $ret = $stmt->execute($arg);
@@ -70,11 +79,13 @@ if (! $ret ) {
 
 $sql = "SELECT * FROM requesttable where status = 'new' ORDER BY id DESC";
 try {
+if(!empty($DEBUG))
     print $sql.'<br />';
     $select = $db->query($sql);
     while($row = $select->fetch(PDO::FETCH_ASSOC)){
     $newid=$row['id'];
     $sql_u = 'UPDATE requesttable set reqorder = '. $newid . ', status = \'OK\' WHERE id = '. $newid;
+if(!empty($DEBUG))
     print $sql_u.'<br />';
     $ret = $db->query($sql_u);
     }
@@ -92,11 +103,14 @@ print("1秒後に登録ページに移動します<br>");
 
 <a href="requestlist_only.php" > リクエストページに戻る <a><br>
 
-現在の登録状況<br>
 
 <?php
 $sql = "SELECT * FROM requesttable ORDER BY id DESC";
+if(!empty($DEBUG)){
+print '現在の登録状況<br>';
+
 try{
+
     $select = $db->query($sql);
 
     while($row = $select->fetch(PDO::FETCH_ASSOC)){
@@ -109,6 +123,7 @@ try{
 		printf("Error: %s\n", $e->getMessage());
 		die();
 } 
+}
 ?>
 </body>
 </html>

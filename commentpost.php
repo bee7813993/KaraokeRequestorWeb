@@ -42,7 +42,9 @@ if( strcmp($col, 'CUSTOM') == 0 ){
 
 // build POST request
 
-
+if(!empty($nm) ) {
+   $msg = $msg . ' by'.$nm;
+}
 $output=commentpost_v2($nm,$col,$size,$msg,$commenturl);
 
 

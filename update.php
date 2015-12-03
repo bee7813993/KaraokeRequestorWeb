@@ -26,6 +26,7 @@ if(array_key_exists("songfile", $_REQUEST)) {
     
     try{
     $sql_u = 'UPDATE requesttable set songfile = \''. $l_songfile . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -39,6 +40,7 @@ if(array_key_exists("singer", $_REQUEST)) {
 
     try{
     $sql_u = 'UPDATE requesttable set singer = \''. $l_singer . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -53,6 +55,7 @@ if(array_key_exists("comment", $_REQUEST)) {
 
     try{
     $sql_u = 'UPDATE requesttable set comment = \''. $l_comment . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -65,6 +68,7 @@ if(array_key_exists("reqorder", $_REQUEST)) {
 
     try{
     $sql_u = 'UPDATE requesttable set reqorder = '. $l_reqorder . ' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -77,6 +81,7 @@ if(array_key_exists("fullpath", $_REQUEST)) {
 
     try{
     $sql_u = 'UPDATE requesttable set fullpath = \''. $l_fullpath . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -89,6 +94,7 @@ if(array_key_exists("nowplaying", $_REQUEST)) {
 
     try{
     $sql_u = 'UPDATE requesttable set nowplaying = \''. $l_nowplaying . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -101,6 +107,7 @@ if(array_key_exists("status", $_REQUEST)) {
 
     try{
     $sql_u = 'UPDATE requesttable set status = \''. $l_status . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -115,6 +122,7 @@ if(array_key_exists("playtimes", $_REQUEST)) {
 
     try{
     $sql_u = 'UPDATE requesttable set playtimes = \''. $l_playtimes . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
@@ -123,6 +131,38 @@ print "DEBUG:".$sql_u.'<br />';
     }
 
 }
+
+$l_clientip = $_SERVER['REMOTE_ADDR'];
+if(array_key_exists("clientip", $_REQUEST)) {
+    $l_clientip = $_REQUEST["clientip"];
+
+    try{
+    $sql_u = 'UPDATE requesttable set clientip = \''. $l_clientip . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
+print "DEBUG:".$sql_u.'<br />';
+    $ret = $db->query($sql_u);
+    }catch(PDOException $e) {
+		printf("Error: %s\n", $e->getMessage());
+		die();
+    }
+}
+
+$l_clientua = $_SERVER['HTTP_USER_AGENT'];
+if(array_key_exists("clientua", $_REQUEST)) {
+    $l_clientua = $_REQUEST["clientua"];
+
+    try{
+    $sql_u = 'UPDATE requesttable set clientua = \''. $l_clientua . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
+print "DEBUG:".$sql_u.'<br />';
+    $ret = $db->query($sql_u);
+    }catch(PDOException $e) {
+		printf("Error: %s\n", $e->getMessage());
+		die();
+    }
+
+}
+
 
 print("現在の登録状況<br>");
 

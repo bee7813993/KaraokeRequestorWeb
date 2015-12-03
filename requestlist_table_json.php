@@ -108,7 +108,7 @@ $action_pf = <<<EOD
         <button type="button" class="close" data-dismiss="modal">
          <span aria-hidden="true">&times;</span>
         </button>
-        <h4 class="modal-title" id="modal-label">曲「%s」を削除します</h4>
+        <h4 class="modal-title" id="modal-label">%sを削除します</h4>
       </div>
       <div class="modal-footer">
         <form method="post" action="delete.php">
@@ -141,7 +141,20 @@ EOD;
     }else {
     $tweet_link = ' ';
     }
-    $action = sprintf($action_pf,$value['id'],$value['songfile'],$value['id'],$value['id'],$value['songfile'],$value['id'],$value['songfile'], $tweet_link);
+    // シークレット予約時の曲対応
+    // 条件：表示している人が本人かどうか
+    $myname = returnusername_self();
+    if($value['singer'] === $myname ){
+       $dialogsongname='「'.$value['songfile'].'」';
+    }else{
+       if($value['secret'] == 1 ){
+           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う【シークレット予約曲】';
+       }else{
+           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う「'.$value['songfile'].'」';
+       }
+    }
+    
+    $action = sprintf($action_pf,$value['id'],$value['songfile'],$value['id'],$value['id'],$dialogsongname,$value['id'],$value['songfile'], $tweet_link);
     $onerequset += array("action" => $action);
     
     if($user === "admin"){

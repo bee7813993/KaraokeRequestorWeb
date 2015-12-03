@@ -66,7 +66,7 @@ print '<div align="center" class="commentpost" >';
 
 <div class="row" >
 <div class="col-xs-12 col-sm-12" ><b>文字色</b> </div>
-<div class="col-xs-2 col-sm-push-11 col-sm-1" >その他 <input type="radio" name="col" value="CUSTOM" > <input type="color" name="c_col" value="#FFFFFF" ></div>
+<div class="col-xs-2 col-sm-push-11 col-sm-1" >その他 <input type="radio" name="col" value="CUSTOM" > <input type="color" name="c_col" value="#808080" ></div>
 <div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:white;"><input type="radio" name="col" value="FFFFFF" checked="checked" ></div>
 <div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:gray;"><input type="radio" name="col" value="808080" ></div>
 <div class="col-xs-2 col-sm-pull-1 col-sm-1" style="background-color:pink"><input type="radio" name="col" value="FFC0CB" ></div>
@@ -88,7 +88,7 @@ print '<div align="center" class="commentpost" >';
 </div>
 <div class="col-xs-12 col-sm-1" ><b>名前</b></div>
 <div class="col-xs-12 col-sm-2" >
-<input type=text name="nm" style="font-size:1em;WIDTH:100%;" fontsize=9 MAXLENGTH="32" value="
+<input type=text name="nm" style="font-size:1em;WIDTH:100%;" fontsize=9 MAXLENGTH="32" title="匿名にしたいときは名前を空欄" value="
 EOD;
 print returnusername_self();
     print <<<EOD

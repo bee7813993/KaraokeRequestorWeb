@@ -164,7 +164,7 @@ try{
         echo 'IP';
         echo '</td>';
         echo '<td>';
-        echo '<input type="text" name="status" id="status" value="';
+        echo '<input type="text" name="clientip" id="clientip" value="';
         echo $row['clientip'];
         echo '" />';
         echo '</td>';
@@ -175,7 +175,7 @@ try{
         echo 'UserAgent';
         echo '</td>';
         echo '<td>';
-        echo '<input type="text" name="status" id="status" value="';
+        echo '<input type="text" name="clientua" id="clientua" value="';
         echo $row['clientua'];
         echo '" />';
         echo '</td>';

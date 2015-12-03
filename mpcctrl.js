@@ -1,4 +1,5 @@
-var playerurl = "http://" + location.hostname + ":13579/command.html"
+var playerurl  = "http://" + location.hostname + ":13579/command.html"
+var playerurl2 = "http://" + location.hostname + "/mpcctrl.php"
 
 //window.onload = function () {
 //    document.body.onclick  = setiframe();
@@ -37,6 +38,7 @@ function sleep(time, callback){
 function song_play(){
 var request = createXMLHttpRequest();
 url= playerurl + "?wm_command=887";
+url=playerurl2 + "?cmd=887";
 request.open("GET", url, true);
 request.send("");
 }
@@ -45,6 +47,7 @@ request.send("");
 function song_pause(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=888";
+url=playerurl2 + "?cmd=888";
 request.open("GET", url, true);
 request.send("");
 }
@@ -52,7 +55,8 @@ request.send("");
 //Volume Up 907
 function song_vup(){
 var request = createXMLHttpRequest();
-url=playerurl + "?wm_command=907";
+//url=playerurl + "?wm_command=907";
+url=playerurl2 + "?cmd=907";
 request.open("GET", url, true);
 request.send("");
 }
@@ -61,6 +65,7 @@ request.send("");
 function song_vdown(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=908";
+url=playerurl2 + "?cmd=908";
 request.open("GET", url, true);
 request.send("");
 }
@@ -69,6 +74,7 @@ request.send("");
 function song_next(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=816";
+url=playerurl2 + "?cmd=816";
 request.open("GET", url, true);
 request.send("");
 }
@@ -77,14 +83,16 @@ request.send("");
 function song_changeaudio(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=952";
+url=playerurl2 + "?cmd=952";
 request.open("GET", url, true);
 request.send("");
 }
 
-//On/Off Subtitle 955
+//On/Off Subtitle 956
 function song_subtitleonnoff(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=956";
+url=playerurl2 + "?cmd=956";
 request.open("GET", url, true);
 request.send("");
 }
@@ -93,6 +101,7 @@ request.send("");
 function song_stop(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=890";
+url=playerurl2 + "?cmd=890";
 request.open("GET", url, true);
 request.send("");
 }
@@ -101,6 +110,7 @@ request.send("");
 function song_audiodelay_m10(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=906";
+url=playerurl2 + "?cmd=906";
 request.open("GET", url, true);
 request.send("");
 }
@@ -108,6 +118,7 @@ request.send("");
 function song_audiodelay_m100(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=906";
+url=playerurl2 + "?cmd=delaym100";
 for(i = 0; i < 10; i = i + 1) {
   request.open("GET", url, true);
   sleep(100, song_audiodelay_m10());
@@ -118,6 +129,7 @@ for(i = 0; i < 10; i = i + 1) {
 function song_audiodelay_p10(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=905";
+url=playerurl2 + "?cmd=905";
 request.open("GET", url, true);
 request.send("");
 }
@@ -125,6 +137,7 @@ request.send("");
 function song_audiodelay_p100(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=905";
+url=playerurl2 + "?cmd=delayp100";
 for(i = 0; i < 10; i = i + 1) {
   request.open("GET", url, true);
   sleep(100, song_audiodelay_p10);
@@ -144,6 +157,43 @@ sleep(500, song_play());
 function song_fullscreen(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=830";
+url=playerurl2 + "?cmd=830";
 request.open("GET", url, true);
 request.send("");
 }
+
+
+// jump_later(large) 904
+function jump_later_large(){
+var request = createXMLHttpRequest();
+url=playerurl2 + "?cmd=904";
+request.open("GET", url, true);
+request.send("");
+}
+
+
+// jump_before(large) 901
+function jump_before_large(){
+var request = createXMLHttpRequest();
+url=playerurl2 + "?cmd=903";
+request.open("GET", url, true);
+request.send("");
+}
+
+// jump_later(mid) 902
+function jump_later(){
+var request = createXMLHttpRequest();
+url=playerurl2 + "?cmd=902";
+request.open("GET", url, true);
+request.send("");
+}
+
+
+// jump_before(mid) 901
+function jump_before(){
+var request = createXMLHttpRequest();
+url=playerurl2 + "?cmd=901";
+request.open("GET", url, true);
+request.send("");
+}
+

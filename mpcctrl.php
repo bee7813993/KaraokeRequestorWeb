@@ -1,17 +1,19 @@
 
 <?php
-      require_once 'kara_config.php';
-  if( !empty($_POST['songnext']) ){
-      $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生中' ORDER BY reqorder ASC ";
-      $select = $db->query($sql);
-      $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
-      $select->closeCursor();
-      if(count($currentsong) < 1){
-          //再生中の曲がないとき
-          print '<p> 曲停止ボタンを押されましたが、再生中の曲はありませんでした </p>'."\n";
+      require_once 'mpcctrl_func.php';
+  if( !empty($_REQUEST['songnext']) ){
+      songnext();
+  }
+  
+  if(array_key_exists("cmd", $_REQUEST)) {
+      $l_cmd = $_REQUEST["cmd"];
+      
+      if($l_cmd == "delayp100"){
+        delay_plus100_mpc();
+      }else if($l_cmd == "delaym100"){
+        delay_minus100_mpc();
       }else {
-          $sql = "UPDATE requesttable set nowplaying = \"停止中\" WHERE id = ".$currentsong[0]['id'];
-          $ret = $db->exec($sql);
+          command_mpc($l_cmd);
       }
   }
 
@@ -20,10 +22,12 @@
 
 <p align="center" style="margin-bottom: 0;"> 動画再生用(Media Player Classic) </p>
 <div align="center" class="playercontrol" id="playercontrol">
+<div class="row">
 <div class="col-xs-12">
 <input type="submit" value="再生開始" class="playstart btn btn-default" onClick="song_play()" />
 </div >
-<br>
+</div>
+<div class="row">
 <div class="col-xs-4">
 <button type="submit" value="曲の最初から" class="pcbuttom btn btn-default" onClick="song_startfirst()" >曲の最初から</button>
 </div >
@@ -35,14 +39,30 @@
 <input type="submit" value="曲終了" name="songnext" class=" pcbuttom btn btn-default" onClick="song_next()" />
 </form>
 </div >
-<br>
+</div>
+<div class="row">
+<div class="col-xs-3">
+<button type="submit" value="大きく手前にジャンプ" class=" pcdelay btn btn-default" onClick="jump_before_large()" title="少し巻き戻し" > ＜＜＜ </button>
+</div >
+<div class="col-xs-3">
+<button type="submit" value="手前にジャンプ" class=" pcdelay btn btn-default" onClick="jump_before()" title="少し巻き戻し" > ＜＜ </button>
+</div >
+<div class="col-xs-3">
+<button type="submit" value="後ろにジャンプ" class=" pcdelay btn btn-default" onClick="jump_later()" title="少し早送り" > ＞＞ </button>
+</div >
+<div class="col-xs-3">
+<button type="submit" value="大きく後ろにジャンプ" class=" pcdelay btn btn-default" onClick="jump_later_large()" title="少し早送り" > ＞＞＞ </button>
+</div >
+</div>
+<div class="row">
 <div class="col-xs-6">
 <button type="submit" value="ボリュームDOWN" class=" pcvolume btn btn-default" onClick="song_vdown()" >ボリュームDOWN</button>
 </div >
 <div class="col-xs-6">
 <button type="submit" value="ボリュームUP" class="pcvolume btn btn-default" onClick="song_vup()" >ボリュームUP</button>
 </div >
-<br>
+</div>
+<div class="row">
 <?php
 if($moviefullscreen == 1){
 print '<div class="col-xs-4">';
@@ -63,6 +83,8 @@ print '<button type="submit" value="音声トラック変更" class=" pcmorefunc
 print '</div >';
 }
 ?>
+</div>
+<div class="row">
 <div class="col-xs-3">
 <button type="submit" value="(-100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m100()" >(-100ms)<br>音ズレ修正</button>
 </div >
@@ -79,4 +101,5 @@ print '</div >';
 
 </div>
 
+</div>
 
