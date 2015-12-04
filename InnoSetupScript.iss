@@ -6,7 +6,7 @@
 
 [Setup]
 AppName=KaraokeRequestorWeb for xampp
-AppVersion=0.09.4
+AppVersion=0.09.5
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
 AppendDefaultDirName=no
@@ -32,6 +32,7 @@ SelectDirLabel3=[name] をインストールするXAMPPをインストールしたフォルダ内のhtdo
 [Files]
 ;;Source: "package\xampp-win32-5.6.12-0-VC11-installer.exe"; DestDir: {tmp}; Components: xampp
 Source: "*.php"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "check.html"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "*.bat"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "*.js"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "LICENSE"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
@@ -40,6 +41,7 @@ Source: "ddns\*"; DestDir: "{app}\ddns"; Flags: IgnoreVersion; Components: main
 Source: "images\*"; DestDir: "{app}\images"; Flags: IgnoreVersion; Components: main
 Source: "fonts\*"; DestDir: "{app}\fonts"; Flags: IgnoreVersion; Components: main
 Source: "js\*"; DestDir: "{app}\js"; Flags: IgnoreVersion; Components: main
+Source: "video-js\*"; DestDir: "{app}\js"; Flags: IgnoreVersion; Components: main
 Source: "modules\*"; DestDir: "{app}\modules"; Flags: IgnoreVersion; Components: main
 Source: "notfoundrequest\*.php"; DestDir: "{app}\notfoundrequest"; Flags: IgnoreVersion; Components: main
 Source: "ニコカラコメントPlayer2.exe"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
@@ -49,6 +51,8 @@ Source: "commentPlayer\*"; DestDir: "{app}\commentPlayer";Flags: IgnoreVersion r
 Source: "krw.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "favicon.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: ".htaccess"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "gitbase\.git\*"; DestDir: "{app}\.git"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
+Source: "gitcmd\*"; DestDir: "{app}\gitcmd"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 
 [Run]
 ;;Filename: "{tmp}\xampp-win32-5.6.12-0-VC11-installer.exe";  StatusMsg: "Installing xampp..."

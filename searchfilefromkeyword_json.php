@@ -67,7 +67,7 @@ if( $result_a["totalResults"] >= 1) {
 		     $fn = $fn . "\n" . '<br/>おすすめ度 :'.$v['priority'];
 		 }
 		 $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
-		 $fn = $fn . "\n" . '<Div Align="right"><A HREF = "preview.php?movieurl="' . $previewpath . '" > プレビュー </A></Div>';
+		 $fn = $fn . "\n" . '<Div Align="right"><A HREF = preview.php?movieurl='.urlencode($previewpath) . ' > プレビュー </A></Div>';
 		 $oneresult += array("filename" => $fn);
 		 
 		 $fs = formatBytes($v['size']);
