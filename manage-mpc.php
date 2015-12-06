@@ -120,6 +120,9 @@ function startmpcandwait($playerpath,$waittime = 1){
    // logtocmd 'DEBUG: now mpc first check end';
 }
 
+
+
+
 function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1){
      global $MPCCMDURL;
      global $MPCFILEOPENURL;
@@ -173,6 +176,24 @@ function mpcdevicestart($playerpath,$waittime = 1){
     }
 }
 
+function startfoobarandwait($arg1,$waittime = 1){
+   // start mpc
+   global $FOOBARSTATURL;
+   global $FOOBARPATH;
+   $execcmd="start  \"\" \"".$FOOBARPATH."\" \"".$arg1."\" > NUL \n";
+   // logtocmd $execcmd;
+   $fp = popen($execcmd,'r');
+   //exec($execcmd);
+   pclose($fp);
+   // logtocmd 'DEBUG: now start mpc';
+   sleep($waittime);
+   
+   // wait mpc web 
+   // logtocmd 'DEBUG: now mpc first check start';
+   file_get_html_with_retry($FOOBARSTATURL);
+   // logtocmd 'DEBUG: now mpc first check end';
+}
+
 function runningcheck_shop_karaoke($db,$id){
 
    $exit = 1;
@@ -220,7 +241,7 @@ function runningcheck_audio($db,$id,$playerchecktimes){
         logtocmd (json_last_error_msg());
         break;
        }
-       //var_dump($statusarray);
+       // var_dump($statusarray);
        
        
        if($statusarray["IS_PLAYING"] == 0 && $statusarray["IS_PAUSED"] == 0 ){
@@ -574,7 +595,7 @@ while(1){
                    mpcstop();
 
                    sleep(1);
-                   exec($execcmd);
+                   startfoobarandwait($filepath,3);
                    if ($playmode == 2){
                       sleep(1);
                       exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
