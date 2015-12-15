@@ -572,7 +572,7 @@ function commentpost_v1($nm,$col,$msg,$commenturl)
 function commentpost_v2($nm,$col,$size,$msg,$commenturl)
 {
 
-    $commentmax=20;
+    $commentmax=18;
     $msgarray = array();
     if(mb_strlen($msg) >= $commentmax){
          $lfarray = explode("\n", $msg);
@@ -699,12 +699,15 @@ EOD;
         print 'class="active" ';
     }
     print '><a href="playerctrl_portal.php">PlayerController</a></li>';
-    print '     <li ';
-    if($page == 'comment.php')
-    {
-        print 'class="active" ';
+    // comment 
+    if(commentenabledcheck()){
+        print '     <li ';
+        if($page == 'comment.php')
+        {
+            print 'class="active" ';
+        }
+        print '><a href="comment.php">コメント</a></li>';
     }
-    print '><a href="comment.php">コメント</a></li>';
     print '     <li ';
     if($page == 'request.php')
     {
@@ -732,10 +735,20 @@ EOD;
     print '</nav>';
 }
 
+function commentenabledcheck(){
+
+   global $config_ini;
+
+   if(empty($config_ini['commenturl'])) return false;
+   if(strcmp($config_ini['commenturl_base'],'notset') == 0 ) return false;
+   
+   return true;
+}
 
 function shownavigatioinbar_c1($page = 'none'){
     global $helpurl;
     global $user;
+    global $commenturl;
     
     if($page == 'none') {
         $page = basename($_SERVER["PHP_SELF"]);
@@ -773,12 +786,17 @@ EOD;
         print 'class="active" ';
     }
     print '><a href="../playerctrl_portal.php">PlayerController</a></li>';
-    print '     <li ';
-    if($page == 'comment.php')
-    {
-        print 'class="active" ';
+    
+    // comment 
+    if(commentenabledcheck()){
+        print '     <li ';
+        if($page == 'comment.php')
+        {
+            print 'class="active" ';
+        }
+        print '><a href="../comment.php">コメント</a></li>';
     }
-    print '><a href="../comment.php">コメント</a></li>';
+    
     print '     <li ';
     if($page == 'request.php')
     {

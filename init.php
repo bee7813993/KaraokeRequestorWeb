@@ -436,10 +436,17 @@ if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-
   <div class="form-group">
     <label >
     コメントサーバー設定 <br />
-    <small> URL (http://xsd.php.xdomain.jp/r2.php  等, 使用しないときは空で) </small>
+    <small> ローカルサーバー http://localhost/cms/r.php ,リモートサーバー http://xsd.php.xdomain.jp/r2.php </small>
     </label>
 
-    <input type="text" name="commenturl_base"  class="form-control"  value="<?php echo urldecode($config_ini["commenturl_base"]); ?>" />
+<!---- <form method="post" action="init.php"> ---->
+    <select  class="form-control" name="commenturl_base" >  
+      <option value="notset" > 使用しない </option>
+      <option <?php print selectedcheck("http://localhost/cms/r.php",urldecode($config_ini["commenturl_base"])); ?> value="http://localhost/cms/r.php" > http://localhost/cms/r.php </option>
+      <option <?php print selectedcheck("http://xsd.php.xdomain.jp/r2.php",urldecode($config_ini["commenturl_base"])); ?> value="http://xsd.php.xdomain.jp/r2.php" > http://xsd.php.xdomain.jp/r2.php </option>
+    </select>
+
+<!----    <input type="text"   class="form-control"  value="<?php echo urldecode($config_ini["commenturl_base"]); ?>" /> ---->
     <label > ルーム名 (半角英数字8文字まで) <br />
     <input type="text" name="commentroom" MAXLENGTH="24" class="form-control" value="<?php echo urldecode($config_ini["commentroom"]); ?>" />
   </div>

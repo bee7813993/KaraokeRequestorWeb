@@ -603,7 +603,7 @@ while(1){
                    sleep($waitplayercheckstart); // Player 起動待ち
 
                    // 再生時コメント表示
-                   if(isset($commenturl)){
+                   if(commentenabledcheck()){
                        $nm=$row['singer'];
                        $msg=$row['comment'];
                        $col = 'FFFFFF';
@@ -669,7 +669,7 @@ while(1){
                    } 
                    sleep($waitplayercheckstart); // Player 起動待ち
                    // 再生時コメント表示
-                   if(isset($commenturl)){
+                   if(commentenabledcheck()){
                        $nm=$row['singer'];
                        $msg=$row['comment'];
                        $col = 'FFFFFF';

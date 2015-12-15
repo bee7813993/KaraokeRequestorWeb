@@ -158,7 +158,7 @@ showmode();
 </div>
 
 <?php
-if(!empty($commenturl)) {
+if(commentenabledcheck()) {
 print '<div align="center" class="commentpost" >';
 //    print '<input type="button" onclick="location.href=\''.$commenturl.'\'" value="こちらから画面にコメントを出せます(ニコ生風に)" class="topbtn"/>';
     print "<h4>こちらから画面にコメントを出せます(ニコ生風に)</h4>";
