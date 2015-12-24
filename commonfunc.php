@@ -659,9 +659,10 @@ function returnusername_self(){
 }
 
 
-function shownavigatioinbar($page = 'none'){
+function shownavigatioinbar($page = 'none', $prefix = '' ){
     global $helpurl;
     global $user;
+    global $config_ini;
     
     if($page == 'none') {
         $page = basename($_SERVER["PHP_SELF"]);
@@ -681,24 +682,31 @@ EOD;
 
     print '<div id="gnavi" class="collapse navbar-collapse">';
     print '    <ul class="nav navbar-nav">';
+    if (multiroomenabled()){
+        reset($config_ini["roomurl"]);
+        $roominfo = each($config_ini["roomurl"]);
+        
+        print '    <p class="navbar-text ">'.$roominfo["key"] .'部屋</p>';
+        reset($config_ini["roomurl"]);
+    }
     print '     <li ';
     if($page == 'requestlist_only.php')
     {
         print 'class="active" ';
     }
-    print '><a href="requestlist_only.php">予約一覧 </a></li>';
+    print '><a href="'.$prefix.'requestlist_only.php">予約一覧 </a></li>';
     print '     <li ';
     if($page == 'searchreserve.php')
     {
         print 'class="active" ';
     }
-    print '><a href="searchreserve.php">検索＆予約</a></li>';
+    print '><a href="'.$prefix.'searchreserve.php">検索＆予約</a></li>';
     print '     <li ';
     if($page == 'playerctrl_portal.php')
     {
         print 'class="active" ';
     }
-    print '><a href="playerctrl_portal.php">PlayerController</a></li>';
+    print '><a href="'.$prefix.'playerctrl_portal.php">PlayerController</a></li>';
     // comment 
     if(commentenabledcheck()){
         print '     <li ';
@@ -706,14 +714,22 @@ EOD;
         {
             print 'class="active" ';
         }
-        print '><a href="comment.php">コメント</a></li>';
+        print '><a href="'.$prefix.'comment.php">コメント</a></li>';
     }
-    print '     <li ';
-    if($page == 'request.php')
-    {
-        print 'class="active" ';
+    if(multiroomenabled()){
+         print '    <li class="dropdown navbar-right">';
+         print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">別部屋情報  <b class="caret"></b></a>';
+         print '    <ul class="dropdown-menu">';
+         reset($config_ini["roomurl"]);
+         while($roominfo = each($config_ini["roomurl"])){
+             if(!empty($roominfo["value"])) {
+                 print '      <li><a href="'.$roominfo["value"].'">'.$roominfo["key"].'</a></li>';
+             }
+         }
+         print '    </ul>';
+         print '    </li>';         
     }
-    print '><a href="request.php">全部</a></li>';
+    
     if ($user === 'admin'){
         print '    <p class="navbar-text "> <small>管理者ログイン中</small></p>';
     }
@@ -724,8 +740,14 @@ EOD;
     if(!empty($helpurl)){
         print '      <li><a href="'.$helpurl.'">ヘルプ</a></li>';
     }
-    print '      <li><a href="init.php">設定</a></li>';
-    print '      <li><a href="toolinfo.php">接続情報表示</a></li>';
+    print '      <li><a href="'.$prefix.'init.php">設定</a></li>';
+    print '      <li><a href="'.$prefix.'toolinfo.php">接続情報表示</a></li>';
+    print '     <li ';
+    if($page == 'request.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="'.$prefix.'request.php">全部</a></li>';
     print '    </ul>';
     print '    </li>';
     print '    </ul>';
@@ -733,6 +755,15 @@ EOD;
 //    print '    <p class="navbar-text navbar-right"> <a href="'.$helpurl.'" class="navbar-link">ヘルプ</a> </p>';
     print '</div>';
     print '</nav>';
+}
+
+
+function shownavigatioinbar_c1($page = 'none'){
+
+    shownavigatioinbar($page, '../');
+    
+    return true;
+    
 }
 
 function commentenabledcheck(){
@@ -745,84 +776,6 @@ function commentenabledcheck(){
    return true;
 }
 
-function shownavigatioinbar_c1($page = 'none'){
-    global $helpurl;
-    global $user;
-    global $commenturl;
-    
-    if($page == 'none') {
-        $page = basename($_SERVER["PHP_SELF"]);
-    }
-    
-    print '<nav class="navbar navbar-inverse navbar-fixed-top">';
-print <<<EOD
-  <div class="navbar-header">
-    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#gnavi">
-      <span class="sr-only">メニュー</span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </button>
-  </div>
-EOD;
-
-    print '<div id="gnavi" class="collapse navbar-collapse">';
-    print '    <ul class="nav navbar-nav">';
-    print '     <li ';
-    if($page == 'requestlist_only.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="../requestlist_only.php">予約一覧 </a></li>';
-    print '     <li ';
-    if($page == 'searchreserve.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="../searchreserve.php">検索＆予約</a></li>';
-    print '     <li ';
-    if($page == 'playerctrl_portal.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="../playerctrl_portal.php">PlayerController</a></li>';
-    
-    // comment 
-    if(commentenabledcheck()){
-        print '     <li ';
-        if($page == 'comment.php')
-        {
-            print 'class="active" ';
-        }
-        print '><a href="../comment.php">コメント</a></li>';
-    }
-    
-    print '     <li ';
-    if($page == 'request.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="../request.php">全部</a></li>';
-    if ($user === 'admin'){
-        print '    <p class="navbar-text "> 管理者ログイン中</p>';
-    }
-    print '    <li class="dropdown navbar-right">';
-    print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
-
-    print '    <ul class="dropdown-menu">';
-    if(!empty($helpurl)){
-        print '      <li><a href="'.$helpurl.'">ヘルプ</a></li>';
-    }
-    print '      <li><a href="../init.php">設定</a></li>';
-    print '      <li><a href=../"toolinfo.php">接続情報表示</a></li>';
-    print '    </ul>';
-    print '    </li>';
-    print '    </ul>';
-    
-//    print '    <p class="navbar-text navbar-right"> <a href="'.$helpurl.'" class="navbar-link">ヘルプ</a> </p>';
-    print '</div>';
-    print '</nav>';
-}
 
 function showmode(){
 
@@ -895,6 +848,39 @@ if($usenfrequset == 1) {
     print '</div>';
 
 }
+
+}
+
+function writeconfig2ini($config_ini,$configfile)
+{
+  $fp = fopen($configfile, 'w');
+  foreach ($config_ini as $k => $i){
+      if(is_array($i)){
+          foreach ($i as $key2 => $item2){
+              fputs($fp, $k.'['.$key2.']='.$item2."\n");
+          }
+      }else {
+          fputs($fp, "$k=$i\n");
+      }
+  } 
+  fclose($fp);
+  
+}
+
+function multiroomenabled(){
+
+ global $config_ini;
+ 
+ $roomcounter = 0;
+ foreach($config_ini["roomurl"] as $k => $i){
+   if(!empty($i)){
+     $roomcounter++;
+   }
+
+ }
+ if($roomcounter > 1) return true;
+ 
+ return false;
 
 }
 

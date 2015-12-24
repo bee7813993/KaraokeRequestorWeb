@@ -102,6 +102,15 @@ if(array_key_exists("downloadfolder", $_REQUEST)) {
     $newdownloadfolder = $_REQUEST["downloadfolder"];
 }
 
+if(array_key_exists("roomno", $_REQUEST)) {
+    $newroomno = $_REQUEST["roomno"];
+}
+
+if(array_key_exists("roomurl", $_REQUEST)) {
+    $newroomurl = $_REQUEST["roomurl"];
+}
+
+
 
 
 if(array_key_exists("clearauth", $_REQUEST)) {
@@ -145,48 +154,40 @@ shownavigatioinbar();
 ?>
 
 <?php
+$change_counter = 0;
+
 if (! empty($newdb)){
     $dbname = $newdb;
     $config_ini = array_merge($config_ini,array("dbname" => $dbname));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "DB ファイル名を".$dbname."に変更しました。";
 }
 
 if (! empty($newplaymode)){
     $playmode = $newplaymode;
     $config_ini = array_merge($config_ini,array("playmode" => $playmode));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "動作モードを".$playmode."に変更しました。<br><br>";
 }
 
 if (! empty($newplayerpath)){
     $playerpath = $newplayerpath;
     $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "MPCのPATHを".$playerpath."に変更しました。<br><br>";
 }
 
 if (! empty($newfoobarpath)){
     $foobarpath = $newfoobarpath;
     $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "foobar2000のPATHを".$foobarpath."に変更しました。<br><br>";
 }
 
 if (! empty($newrequestcomment)){
     $requestcomment = $newrequestcomment;
     $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "リクエスト画面のコメント欄の説明を変更しました。<br><br>";
 }else {
     // $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
@@ -195,9 +196,7 @@ if (! empty($newrequestcomment)){
 if (! empty($newusenfrequset)){
     $usenfrequset = $newusenfrequset;
     $config_ini = array_merge($config_ini,array("usenfrequset" => $usenfrequset));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "見つからなかった曲リスト使用フラグを".$usenfrequset."に変更しました。<br><br>";
 }
 
@@ -205,72 +204,56 @@ if (! empty($newusenfrequset)){
 if (! empty($newusevideocapture)){
     $usevideocapture = $newusevideocapture;
     $config_ini = array_merge($config_ini,array("usevideocapture" => $usevideocapture));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "カラオケ配信ビデオキャプチャ使用フラグを".$usevideocapture."に変更しました。<br><br>";
 }
 
 if (! empty($newhistorylog)){
     $historylog = $newhistorylog;
     $config_ini = array_merge($config_ini,array("historylog" => $historylog));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "検索ログ保存フラグを".$historylog."に変更しました。<br><br>";
 }
 
 if (! empty($newconnectinternet)){
     $connectinternet = $newconnectinternet;
     $config_ini = array_merge($config_ini,array("connectinternet" => $connectinternet));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "インターネット使用フラグを".$connectinternet."に変更しました。<br><br>";
 }
 
 if (! empty($newwaitplayercheckstart)){
     $waitplayercheckstart = $newwaitplayercheckstart;
     $config_ini = array_merge($config_ini,array("waitplayercheckstart" => $waitplayercheckstart));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視開始待ち時間を".$waitplayercheckstart."に変更しました。<br><br>";
 }
 
 if (! empty($newplayerchecktimes)){
     $playerchecktimes = $newplayerchecktimes;
     $config_ini = array_merge($config_ini,array("playerchecktimes" => $playerchecktimes));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視チェック回数を".$playerchecktimes."に変更しました。<br><br>";
 }
 
 if (! empty($newcommenturl)){
     $commenturl = $newcommenturl;
     $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視チェック回数を".$commenturl."に変更しました。<br><br>";
 }
 
 if (isset($newcommenturl_base)){
     $commenturl_base = $newcommenturl_base;
     $config_ini = array_merge($config_ini,array("commenturl_base" => urlencode($commenturl_base)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視チェック回数を".$commenturl_base."に変更しました。<br><br>";
 }
 
 if (! empty($newcommentroom)){
     $commentroom = $newcommentroom;
     $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視チェック回数を".$commentroom."に変更しました。<br><br>";
 }
 
@@ -278,64 +261,78 @@ if (! empty($newcommentroom)){
 if (! empty($newmoviefullscreen)){
     $moviefullscreen = $newmoviefullscreen;
     $config_ini = array_merge($config_ini,array("moviefullscreen" => $moviefullscreen));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視チェック回数を".$moviefullscreen."に変更しました。<br><br>";
 }
 
 if (isset($newhelpurl)){
     $helpurl = $newhelpurl;
     $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視チェック回数を".$helpurl."に変更しました。<br><br>";
 }
 
 if (isset($newautoplay_exec)){
     $autoplay_exec = $newautoplay_exec;
     $config_ini = array_merge($config_ini,array("autoplay_exec" => urlencode($autoplay_exec)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
     // print "プレイヤー動作監視チェック回数を".$autoplay_exec."に変更しました。<br><br>";
 }
 if (isset($newautoplay_show)){
     $autoplay_show = $newautoplay_show;
     $config_ini = array_merge($config_ini,array("autoplay_show" => $autoplay_show));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
 }
 
 if (isset($newnonamerequest)){
     $nonamerequest = $newnonamerequest;
     $config_ini = array_merge($config_ini,array("nonamerequest" => $nonamerequest));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
 }
 
 if (isset($newnonameusername)){
     $nonameusername = $newnonameusername;
     $config_ini = array_merge($config_ini,array("nonameusername" => urlencode($nonameusername)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
 }
 
 if (isset($newdownloadfolder)){
     $downloadfolder = $newdownloadfolder;
     $config_ini = array_merge($config_ini,array("downloadfolder" => urlencode($downloadfolder)));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter++;
 }
 
+if (isset($newroomno) && isset($newroomurl)){
 
+    $roomno = $newroomno;
+    $roomurl = $newroomurl;
+    $roominfo = array();
+    $counter = 0;
+    foreach($roomno as $i){
+       if(empty($roomno[$counter]) && empty($roomurl[$counter])){}
+       else {
+           $roominfo[$roomno[$counter]]=$roomurl[$counter];
+       }
+       $counter++;
+    }
+    $config_ini = array_merge($config_ini,array("roomurl" => $roominfo));
+    $change_counter++;
+}
+
+if(  $change_counter > 0 ){
+    writeconfig2ini($config_ini,$configfile);
+}
 
 ?>
+
+<pre>
+<?php var_dump($config_ini); 
+
+// print "form input\n";
+// var_dump($_REQUEST); 
+// if( multiroomenabled()){print "enabled";}
+?>
+</pre>
 
 
 
@@ -509,7 +506,8 @@ if(array_key_exists("downloadfolder",$config_ini)) {
     print 'value="'.$_SERVER["TMP"].'"';
 }
 ?>
-/>    
+/>
+    
   </div>  
   </div>  
   <h3>自動再生設定 </h3>
@@ -579,6 +577,84 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
 </form>
 ------>
   </div>
+
+  <label class="radio control-label"> 別部屋URL設定 </label>
+  <table class="table table-striped table-bordered table-condensed">
+  <thead>
+    <tr>
+      <th class="col-xs-3" >部屋番号</th>
+      <th class="col-xs-9" >URL</th>
+    </tr>
+  </thead>
+  <tr>
+    <td><input type="text" class="form-control input-normal" placeholder="この部屋の部屋番号" name="roomno[]"
+    <?php
+      reset($config_ini["roomurl"]);
+      if( $roominfo = each($config_ini["roomurl"])){
+          print 'value="'.$roominfo["key"].'"' ;
+      }
+    ?>
+    ></td>
+    <td><input type="text" class="form-control input-normal" placeholder="この部屋のURL" name="roomurl[]"
+    <?php
+      if(isset($roominfo["value"])){
+        print 'value="'.$roominfo["value"].'"' ;
+      }
+    ?>
+    ></td>
+  <tr>
+  <tr>
+    <td>
+
+    <input type="text" class="form-control input-normal" placeholder="部屋1の部屋番号" name="roomno[]"
+    <?php
+      if( $roominfo = each($config_ini["roomurl"])){
+          print 'value="'.$roominfo["key"].'"' ;
+      }
+    ?>
+    ></td>
+    <td><input type="text" class="form-control input-normal" placeholder="部屋1のURL" name="roomurl[]"
+    <?php
+      if(isset($roominfo["value"])){
+        print 'value="'.$roominfo["value"].'"' ;
+      }
+    ?>
+    ></td>
+  <tr>
+  <tr>
+    <td><input type="text" class="form-control input-normal" placeholder="部屋2の部屋番号" name="roomno[]"
+    <?php
+      if( $roominfo = each($config_ini["roomurl"])){
+          print 'value="'.$roominfo["key"].'"' ;
+      }
+    ?>
+    ></td>
+    <td><input type="text" class="form-control input-normal" placeholder="部屋2のURL" name="roomurl[]"
+    <?php
+      if(isset($roominfo["value"])){
+        print 'value="'.$roominfo["value"].'"' ;
+      }
+    ?>
+    ></td>
+  <tr>
+  <tr>
+    <td><input type="text" class="form-control input-normal" placeholder="部屋3の部屋番号" name="roomno[]"
+    <?php
+      if( $roominfo = each($config_ini["roomurl"])){
+          print 'value="'.$roominfo["key"].'"' ;
+      }
+    ?>
+    ></td>
+    <td><input type="text" class="form-control input-normal" placeholder="部屋3のURL" name="roomurl[]"
+    <?php
+      if(isset($roominfo["value"])){
+        print 'value="'.$roominfo["value"].'"' ;
+      }
+    ?>
+    ></td>
+  <tr>
+  </table>
+
 
   <input type="submit" class="btn btn-default btn-lg" value="設定" />
   </form>
