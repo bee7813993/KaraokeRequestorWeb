@@ -154,7 +154,7 @@ EOD;
        }
     }
     
-    $action = sprintf($action_pf,$value['id'],$value['songfile'],$value['id'],$value['songfile'],$value['id'],$value['songfile'],$value['id'],$value['songfile'],$value['id'],$value['id'],$dialogsongname,$value['id'],$value['songfile'], $tweet_link);
+    $action = sprintf($action_pf,$value['id'],htmlspecialchars($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],$value['id'],$dialogsongname,$value['id'],htmlspecialchars($value['songfile']), $tweet_link);
     $onerequset += array("action" => $action);
     
     if($user === "admin"){
@@ -166,7 +166,7 @@ EOD;
 </form>
 EOD;
     
-    $change_entry = sprintf($change_entry_pf,$value['id'],$value['songfile']);
+    $change_entry = sprintf($change_entry_pf,$value['id'],htmlspecialchars($value['songfile']));
     $onerequset += array("change" => $change_entry);
     }
     
