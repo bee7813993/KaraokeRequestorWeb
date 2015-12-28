@@ -325,14 +325,15 @@ if(  $change_counter > 0 ){
 
 ?>
 
-<pre>
-<?php var_dump($config_ini); 
+<?php 
+//echo '<pre>';
+// var_dump($config_ini); 
 
 // print "form input\n";
 // var_dump($_REQUEST); 
 // if( multiroomenabled()){print "enabled";}
+//echo '</pre>';
 ?>
-</pre>
 
 
 
@@ -741,6 +742,39 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
 
   <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
 </div>
+
+<hr />
+
+<div class="container bg-info">
+  <h3> 自IP一覧 </h3>
+  <pre>
+  <?php
+  require_once("ipconfig.php");
+  $result_ipconfig=getiplist();
+  
+  //var_dump($result_ipconfig);
+  foreach($result_ipconfig as $ifinfo){
+     $count= 0;
+     foreach($ifinfo as $ips){
+        if($count != 0){
+        if(strchr($ips,':') !== false){
+          $ips = '['.strchr($ips,'%',$before_needle=true).']';
+        }
+        if(isset($ips)){
+           $link = 'http://'.$ips.'/';
+           print '<a href='.$link.' > '.$link.'</a><br />';
+        }
+        }
+        $count ++;
+     }
+     
+  }
+  
+  ?>
+  </pre>
+  
+</div>
+
 </body>
 </html>
 
