@@ -733,6 +733,12 @@ EOD;
     if ($user === 'admin'){
         print '    <p class="navbar-text "> <small>管理者ログイン中</small></p>';
     }
+    
+    if($page == 'init.php'){
+    print '     <p class="navbar-text "';
+    print '><button type="button" class="btn btn-success" onclick="document.allconfig.submit();" >設定反映</button></p>';
+    }
+    
     print '    <li class="dropdown navbar-right">';
     print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
 
@@ -864,6 +870,7 @@ function writeconfig2ini($config_ini,$configfile)
       }
   } 
   fclose($fp);
+  inieolchange();
   
 }
 
@@ -882,6 +889,62 @@ function multiroomenabled(){
  
  return false;
 
+}
+
+// 改行コード変換
+function convertEOL($string, $to = "\n")
+{
+    return strtr($string, array(
+        "\r\n" => $to,
+        "\r" => $to,
+        "\n" => $to,
+    ));
+}
+
+// ini.iniファイル 改行コード変換
+function inieolchange($file = 'ini.ini'){
+
+    $fd = fopen($file,'r+');
+    if($fd === false ){
+        print "ini.ini open failed";
+        return;
+    }
+    
+    $str = fread($fd,8192);
+    
+    $str = convertEOL($str,"\r\n");
+    fseek($fd, 0, SEEK_SET);
+    fwrite($fd,$str);
+    fclose($fd);
+}
+
+// ini.iniファイル room no 変更
+function iniroomchange($roomno,$file = 'ini.ini'){
+
+    $ini_a = array();
+    
+    $fd = fopen($file,'r+');
+    if($fd === false ){
+        print "ini.ini open failed";
+        return;
+    }
+    
+    while (($buffer = fgets($fd, 4096)) !== false) {
+       $ini_a[] = trim($buffer);
+    }
+    if (!feof($fd)) {
+       echo "Error: unexpected fgets() fail\n";
+       fclose($fd);
+       return;
+    }
+    $ini_a[0] = $roomno;
+    
+    fseek($fd, 0, SEEK_SET);
+    
+    foreach($ini_a as $oneline){
+        fwrite($fd,$oneline."\r\n");
+    }
+    fclose($fd);
 }
 
 

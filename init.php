@@ -254,6 +254,7 @@ if (! empty($newcommentroom)){
     $commentroom = $newcommentroom;
     $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));
     $change_counter++;
+    iniroomchange($commentroom);
     // print "プレイヤー動作監視チェック回数を".$commentroom."に変更しました。<br><br>";
 }
 
@@ -339,7 +340,7 @@ if(  $change_counter > 0 ){
 
 <div class="container bg-info">
   <h3>動作設定 </h3>
-  <form method="post" action="init.php">
+  <form name="allconfig" method="post" action="init.php">
   <div class="form-group">
     <label>DBファイル名</label>
     <input type="text" name="filename" id="filename" class="form-control" value=<?php echo  $config_ini["dbname"]; ?> >
