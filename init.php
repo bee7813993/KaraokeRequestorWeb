@@ -110,8 +110,13 @@ if(array_key_exists("roomurl", $_REQUEST)) {
     $newroomurl = $_REQUEST["roomurl"];
 }
 
+if(array_key_exists("nicoid", $_REQUEST)) {
+    $newnicoid = $_REQUEST["nicoid"];
+}
 
-
+if(array_key_exists("nicopass", $_REQUEST)) {
+    $newnicopass = $_REQUEST["nicopass"];
+}
 
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
@@ -160,44 +165,35 @@ if (! empty($newdb)){
     $dbname = $newdb;
     $config_ini = array_merge($config_ini,array("dbname" => $dbname));
     $change_counter++;
-    // print "DB ファイル名を".$dbname."に変更しました。";
 }
 
 if (! empty($newplaymode)){
     $playmode = $newplaymode;
     $config_ini = array_merge($config_ini,array("playmode" => $playmode));
     $change_counter++;
-    // print "動作モードを".$playmode."に変更しました。<br><br>";
 }
 
 if (! empty($newplayerpath)){
     $playerpath = $newplayerpath;
     $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
     $change_counter++;
-    // print "MPCのPATHを".$playerpath."に変更しました。<br><br>";
 }
 
 if (! empty($newfoobarpath)){
     $foobarpath = $newfoobarpath;
     $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
     $change_counter++;
-    // print "foobar2000のPATHを".$foobarpath."に変更しました。<br><br>";
 }
 
 if (! empty($newrequestcomment)){
     $requestcomment = $newrequestcomment;
     $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
     $change_counter++;
-    // print "リクエスト画面のコメント欄の説明を変更しました。<br><br>";
-}else {
-    // $requestcomment = "雑談とかどうぞ。その他見つからなかった曲とか、ダウンロードしておいてほしいカラオケ動画のURLとかあれば書いておいてもらえるとそのうち増えてるかも";
 }
-
 if (! empty($newusenfrequset)){
     $usenfrequset = $newusenfrequset;
     $config_ini = array_merge($config_ini,array("usenfrequset" => $usenfrequset));
     $change_counter++;
-    // print "見つからなかった曲リスト使用フラグを".$usenfrequset."に変更しました。<br><br>";
 }
 
 
@@ -205,49 +201,42 @@ if (! empty($newusevideocapture)){
     $usevideocapture = $newusevideocapture;
     $config_ini = array_merge($config_ini,array("usevideocapture" => $usevideocapture));
     $change_counter++;
-    // print "カラオケ配信ビデオキャプチャ使用フラグを".$usevideocapture."に変更しました。<br><br>";
 }
 
 if (! empty($newhistorylog)){
     $historylog = $newhistorylog;
     $config_ini = array_merge($config_ini,array("historylog" => $historylog));
     $change_counter++;
-    // print "検索ログ保存フラグを".$historylog."に変更しました。<br><br>";
 }
 
 if (! empty($newconnectinternet)){
     $connectinternet = $newconnectinternet;
     $config_ini = array_merge($config_ini,array("connectinternet" => $connectinternet));
     $change_counter++;
-    // print "インターネット使用フラグを".$connectinternet."に変更しました。<br><br>";
 }
 
 if (! empty($newwaitplayercheckstart)){
     $waitplayercheckstart = $newwaitplayercheckstart;
     $config_ini = array_merge($config_ini,array("waitplayercheckstart" => $waitplayercheckstart));
     $change_counter++;
-    // print "プレイヤー動作監視開始待ち時間を".$waitplayercheckstart."に変更しました。<br><br>";
 }
 
 if (! empty($newplayerchecktimes)){
     $playerchecktimes = $newplayerchecktimes;
     $config_ini = array_merge($config_ini,array("playerchecktimes" => $playerchecktimes));
     $change_counter++;
-    // print "プレイヤー動作監視チェック回数を".$playerchecktimes."に変更しました。<br><br>";
 }
 
 if (! empty($newcommenturl)){
     $commenturl = $newcommenturl;
     $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl)));
     $change_counter++;
-    // print "プレイヤー動作監視チェック回数を".$commenturl."に変更しました。<br><br>";
 }
 
 if (isset($newcommenturl_base)){
     $commenturl_base = $newcommenturl_base;
     $config_ini = array_merge($config_ini,array("commenturl_base" => urlencode($commenturl_base)));
     $change_counter++;
-    // print "プレイヤー動作監視チェック回数を".$commenturl_base."に変更しました。<br><br>";
 }
 
 if (! empty($newcommentroom)){
@@ -255,7 +244,6 @@ if (! empty($newcommentroom)){
     $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));
     $change_counter++;
     iniroomchange($commentroom);
-    // print "プレイヤー動作監視チェック回数を".$commentroom."に変更しました。<br><br>";
 }
 
 
@@ -263,21 +251,18 @@ if (! empty($newmoviefullscreen)){
     $moviefullscreen = $newmoviefullscreen;
     $config_ini = array_merge($config_ini,array("moviefullscreen" => $moviefullscreen));
     $change_counter++;
-    // print "プレイヤー動作監視チェック回数を".$moviefullscreen."に変更しました。<br><br>";
 }
 
 if (isset($newhelpurl)){
     $helpurl = $newhelpurl;
     $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));
     $change_counter++;
-    // print "プレイヤー動作監視チェック回数を".$helpurl."に変更しました。<br><br>";
 }
 
 if (isset($newautoplay_exec)){
     $autoplay_exec = $newautoplay_exec;
     $config_ini = array_merge($config_ini,array("autoplay_exec" => urlencode($autoplay_exec)));
     $change_counter++;
-    // print "プレイヤー動作監視チェック回数を".$autoplay_exec."に変更しました。<br><br>";
 }
 if (isset($newautoplay_show)){
     $autoplay_show = $newautoplay_show;
@@ -320,6 +305,18 @@ if (isset($newroomno) && isset($newroomurl)){
     $change_counter++;
 }
 
+if (isset($newnicoid)){
+    $nicoid = $newnicoid;
+    $config_ini = array_merge($config_ini,array("nicoid" => urlencode($nicoid)));
+    $change_counter++;
+}
+
+if (isset($newnicopass)){
+    $nicopass = $newnicopass;
+    $config_ini = array_merge($config_ini,array("nicopass" => urlencode($nicopass)));
+    $change_counter++;
+}
+
 if(  $change_counter > 0 ){
     writeconfig2ini($config_ini,$configfile);
 }
@@ -346,11 +343,8 @@ if(  $change_counter > 0 ){
     <input type="text" name="filename" id="filename" class="form-control" value=<?php echo  $config_ini["dbname"]; ?> >
   </div>
   
-<!----<input type="submit" value="OK" />  </form>  ---->
-<!---- </form> ---->
   <div class="form-group">
     <label for="playmode">動作モード選択</label>
-<!---- <form method="post" action="init.php">  ---->
     <select name="playmode" id="playmode" class="form-control" >  
       <option value="1" <?php print selectedcheck("1",$config_ini["playmode"]); ?> >自動再生開始モード</option>
       <option value="2" <?php print selectedcheck("2",$config_ini["playmode"]); ?> >手動再生開始モード</option>
@@ -358,12 +352,9 @@ if(  $change_counter > 0 ){
       <option value="4" <?php print selectedcheck("4",$config_ini["playmode"]); ?> >BGMモード(ジュークボックスモード)</option>
       <option value="5" <?php print selectedcheck("5",$config_ini["playmode"]); ?> >BGMモード(フルランダムモード)</option>
     </select>
-<!---- <input type="submit" value="OK" /> ---->
-<!----     </form> ---->
   </div>
   <div class="form-group">
     <label for="playerpath">MediaPlayerClassic PATH設定</label>
-<!---- <form method="post" action="init.php"> ---->
     <select  class="form-control" name="playerpath" id="playerpath" >  
       <option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
       <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
@@ -377,28 +368,19 @@ if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-
 }
 ?>
 />
-<!----  <input type="submit" value="OK" /> ---->
-<!----  </form> ---->
   </div>
   <div class="form-group">
     <label for="foobarpath"> foobar2000 PATH設定　</label>
-<!----  <form method="post" action="init.php">  ---->
     <label > 任意のPATH選択  </label>
     <input type="text" name="foobarpath" class="form-control" id="foobarpath" value="<?php echo urldecode($config_ini["foobarpath"]); ?>" />
-<!----  <input type="submit" value="OK" />
-</form> ---->
   </div>
   <div class="form-group">
     <label for="comment"> リクエスト画面の説明書き </label>
-<!----   <form method="post" action="init.php"> ---->
     <textarea class="form-control" name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
 <?php print htmlspecialchars(urldecode($config_ini["requestcomment"])); ?>
     </textarea>
-<!----   <input type="submit" value="OK" />
-</form> ---->
   </div>
 
-<!----   <form method="post" action="init.php"> ---->
   <div class="form-group">
     <label class="radio control-label">見つからなかった曲リストの使用 </label>
     <label class="radio-inline"> <input type="radio" name="usenfrequset" value="1" <?php print ($config_ini["usenfrequset"]==1)?'checked':' ' ?> /> 使用する </label>
@@ -416,7 +398,6 @@ if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-
   <div class="form-group">
     <label class="radio control-label"> 検索ログの保存 </label>
     <label class="radio-inline">
-<!----    <form method="post" action="init.php"> ---->
       <input type="radio" name="historylog" value="1" <?php print ($config_ini["historylog"]==1)?'checked':' ' ?> /> 使用する
     </label>
     <label class="radio-inline">
@@ -438,14 +419,12 @@ if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-
     <small> ローカルサーバー http://localhost/cms/r.php ,リモートサーバー http://xsd.php.xdomain.jp/r2.php </small>
     </label>
 
-<!---- <form method="post" action="init.php"> ---->
     <select  class="form-control" name="commenturl_base" >  
       <option value="notset" > 使用しない </option>
       <option <?php print selectedcheck("http://localhost/cms/r.php",urldecode($config_ini["commenturl_base"])); ?> value="http://localhost/cms/r.php" > http://localhost/cms/r.php </option>
       <option <?php print selectedcheck("http://xsd.php.xdomain.jp/r2.php",urldecode($config_ini["commenturl_base"])); ?> value="http://xsd.php.xdomain.jp/r2.php" > http://xsd.php.xdomain.jp/r2.php </option>
     </select>
 
-<!----    <input type="text"   class="form-control"  value="<?php echo urldecode($config_ini["commenturl_base"]); ?>" /> ---->
     <label > ルーム名 (半角英数字8文字まで) <br />
     <input type="text" name="commentroom" MAXLENGTH="24" class="form-control" value="<?php echo urldecode($config_ini["commentroom"]); ?>" />
   </div>
@@ -499,6 +478,32 @@ print 'value="'.urldecode($config_ini["nonameusername"]).'"';
 print 'value="名無しさん"';}
 ?>
 />    
+
+
+  <div class="form-group">
+    <label >
+    ニコニコ動画ダウンロード設定 
+    
+    </label>
+
+    <div class="form-group">
+      <label > ログインID(メールアドレス) <br />
+      <input type="text" name="nicoid"  class="form-control" 
+<?php
+if(array_key_exists("nicoid",$config_ini)) {
+print 'value="'.urldecode($config_ini["nicoid"]).'"';
+}
+?>    
+    />
+      <label > パスワード <br />
+      <input type="password" name="nicopass"  class="form-control" 
+<?php
+if(array_key_exists("nicopass",$config_ini)) {
+print 'value="'.urldecode($config_ini["nicopass"]).'"';
+}
+?>      />
+    </div>
+    <div class="form-group">
     <label class="radio control-label"> アップ／ダウンロード先フォルダ <small> 要Everythingの検索対象</small> </label>
     <input type="text" name="downloadfolder" class="form-control"
 <?php
@@ -509,6 +514,9 @@ if(array_key_exists("downloadfolder",$config_ini)) {
 }
 ?>
 />
+    </div>
+  </div>
+
     
   </div>  
   </div>  
@@ -549,35 +557,18 @@ print 'checked';
  /> 
       無効
     </label>
-<!----
-<input type="submit" value="OK" />
-</form>
------->
   </div>
 <?php
 if(array_key_exists("autoplay_exec",$config_ini)) {
 print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
 }
 ?>
-<!----
-<form method="post" action="init.php">
------->
   <div class="form-group">
     <label > プレイヤー動作監視開始待ち時間(秒) </label>
       
     <input type="text" name="waitplayercheckstart" size="100" class="form-control" value="<?php echo $config_ini["waitplayercheckstart"]; ?>" />
-<!----
-<input type="submit" value="OK" />
-</form>
-
-<form method="post" action="init.php">
------->
     <label > プレイヤー動作監視チェック回数(回)  </label>
     <input type="text" name="playerchecktimes" size="100" class="form-control" value="<?php echo $config_ini["playerchecktimes"]; ?>" />
-<!----
-<input type="submit" value="OK" />
-</form>
------->
   </div>
 
   <label class="radio control-label"> 別部屋URL設定 </label>
@@ -656,6 +647,7 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
     ></td>
   <tr>
   </table>
+
 
 
   <input type="submit" class="btn btn-default btn-lg" value="設定" />

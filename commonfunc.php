@@ -846,6 +846,16 @@ if( $connectinternet == 1){
     print '</div>';
 }
 
+if( nicofuncenabled() === true){
+    print '<div align="center" >';
+    print '<form method="GET" action="nicodownload_post.php" >';
+    print '<input type="hidden" name="set_directurl" value="1" />';
+    print '<input type="submit" name="URL"   value="ニコニコ動画ダウンロード予約はこちら" class="topbtn btn btn-default btn-lg"/> ';
+    print '</form>';
+    print '</div>';
+}
+
+
 if($usenfrequset == 1) {
     print '<div align="center" >';
     print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';
@@ -888,6 +898,31 @@ function multiroomenabled(){
  if($roomcounter > 1) return true;
  
  return false;
+
+}
+
+function nicofuncenabled(){
+
+  global $config_ini;
+  global $connectinternet;
+  
+  if($connectinternet != 1) {
+    return false;
+  };
+  
+  if(array_key_exists("nicoid", $config_ini)) {
+    $nicologinid = urldecode($config_ini["nicoid"]);
+  }
+  
+  if(array_key_exists("nicopass", $config_ini)) {
+    $nicopass = $config_ini["nicopass"];
+  }
+  
+  if(!empty($nicologinid) && !empty($nicopass)) {
+    return true;
+  }else {
+    return false;
+  }
 
 }
 

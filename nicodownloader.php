@@ -34,8 +34,13 @@ class NicoDownload
     public function Download($videoId, $fileName = null)
     {
         // パラメータチェック
+        
         if (!$this->CheckProperty()) return false;
         if (empty($videoId)) return false;
+        
+        $videoId = $this->CheckVideoID($videoId);
+        if($videoId === false ) return false;
+ 
  
         // ヘッダーを作成（基本的には不要らしい）
         $headers = array(
@@ -65,15 +70,23 @@ class NicoDownload
         // curl_execによる標準出力は表示せずにクリアする
         curl_setopt($ch, CURLOPT_URL, "https://secure.nicovideo.jp/secure/login?site=niconico");
         curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, array(
             'mail' => $this->LoginEmail,
             'password' => $this->LoginPassword,
             'next_url' => 'http://www.nicovideo.jp/watch/' . $videoId)
         );
         $response = curl_exec($ch);
- 
+        if($response === false){
+          print curl_error($ch);
+        }
+        
+        
         // 動画情報の取得
-        $info = $this->GetFileInfo($response);
+        
+//        $info = $this->GetFileInfo($response);
+        $info = $this->GetFileInfo2($videoId);
         if (!$info) {
             $info = array(
                 'title' => '',
@@ -81,6 +94,7 @@ class NicoDownload
                 'tags' => array(),
             );
         }
+// var_dump($info);
  
         // セッションを持続させるため、curlのハンドラーを再利用して、APIのURLを呼び出す
         curl_setopt($ch, CURLOPT_URL, 'http://flapi.nicovideo.jp/api/getflv');
@@ -90,14 +104,18 @@ class NicoDownload
         ));
  
         $response = curl_exec($ch);
+        if($response === false){
+          print curl_error($ch);
+        }
  
         // ビデオのダウンロードURLを割り出す
-        preg_match("'url=(.*?)&link'", urldecode($response), $match);
-        if (empty($match)) {
-            if (file_exists($filePathCookie)) unlink($filePathCookie);
+        $movieurl = $this->GetdownloadURL($response);
+        if (empty($movieurl)) {
+              if (file_exists($filePathCookie)) unlink($filePathCookie);
             curl_close($ch);
             return false;
         }
+//        var_dump($this);
  
         // 次のステップの為、HTTPメソッドとパラメータをリセットする
         curl_setopt($ch, CURLOPT_POST, false);
@@ -107,7 +125,7 @@ class NicoDownload
         // データはCURLOPT_FILEで指定したファイルへ書き出す
         // さらに、CURLOPT_VERBOSEを有効にして詳細情報を、CURLOPT_STDERRで指定したファイルへ書きだす
  
-        curl_setopt($ch, CURLOPT_URL, $match[1]);
+        curl_setopt($ch, CURLOPT_URL, $movieurl);
         curl_setopt($ch, CURLOPT_HTTPGET, true);
         $fpTmp = @fopen($filePathInfo, 'w');
         $rtValue = false;
@@ -117,7 +135,7 @@ class NicoDownload
             curl_setopt($ch, CURLOPT_STDERR, $fpTmp);
  
             // 作業用ディレクトリにビデオファイルを保存する
-            $filePathDL = $this->WorkDir . $videoId;
+            $filePathDL = mb_convert_encoding($this->WorkDir . $videoId,'SJIS-win','UTF-8');
             $fp = @fopen($filePathDL, 'wb');
             if ($fp) {
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
@@ -125,6 +143,8 @@ class NicoDownload
  
                 if (curl_exec($ch)) {
                     $rtValue = true;
+                }else{
+                    print curl_error($ch);
                 }
  
                 // CURLOPT_FILEを使用した場合、ファイルハンドルを閉じる前にcloseする
@@ -178,7 +198,7 @@ class NicoDownload
                 $filePath .= $videoId . '_' . $info['title'] . '.' . $fileExtension;
             }
  
-            rename($filePathDL, $filePath);
+            rename($filePathDL, mb_convert_encoding($filePath,'SJIS-win','UTF-8'));
  
             // ダウンロードしたファイルの動画情報を返すようにする
             $rtValue = $info;
@@ -307,4 +327,81 @@ class NicoDownload
             'tags' => $tags,
         );
     }
+    private function GetFileInfo2($VideoID)
+    {
+        $headers = array(
+            'User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-us,en;q=0.8,de;q=0.6,ja;q=0.4,id;q=0.2',
+            'Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7',
+            'Keep-Alive: 300',
+            'Connection: keep-alive',
+            'Referer: http://www.nicovideo.jp/'
+        );
+        $filePathCookie = $this->WorkDir . 'cookie';
+
+        $chinfo = curl_init();
+        curl_setopt($chinfo, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($chinfo, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($chinfo, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($chinfo, CURLOPT_COOKIEJAR, $filePathCookie);
+        curl_setopt($chinfo, CURLOPT_COOKIEFILE, $filePathCookie);
+        
+        curl_setopt($chinfo, CURLOPT_URL, "http://ext.nicovideo.jp/api/getthumbinfo/$VideoID");
+        curl_setopt($chinfo, CURLOPT_POST, false);
+        curl_setopt($chinfo, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($chinfo, CURLOPT_RETURNTRANSFER, true);
+        
+        $response = curl_exec($chinfo);
+        if($response === false){
+          print curl_error($chinfo);
+        }
+        $title = '';
+        $description = '';
+        $tags = array();
+        
+                
+        $nicoinfo = simplexml_load_string($response);
+
+        $title = $nicoinfo->thumb->title;
+        $description = $nicoinfo->thumb->description;
+        $tags = $nicoinfo->thumb->tags;
+        
+        // 結果を作成して返却
+        return array(
+            'title' => $title,
+            'description' => $description,
+            'tags' => $tags,
+        );        
+        
+        
+    }
+
+    private function CheckVideoID($VideoID)
+    {
+      if(strpos($VideoID,'/') !== false )
+        $VideoID = basename($VideoID);
+        
+      
+      if(ctype_alpha(substr($VideoID,0,2))){
+        if(ctype_digit(substr($VideoID,2))){
+          return $VideoID;
+        }
+      }
+      print $VideoID;
+      return false;
+      
+    }
+    
+    private function GetdownloadURL($data){
+
+      parse_str(urldecode($data));
+      return $url;
+
+      //old
+      preg_match("'url=(.*?)&ms'", urldecode($data), $match);
+      return $match[1];
+    }
+        
+
 }
