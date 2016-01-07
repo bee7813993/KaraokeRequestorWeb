@@ -66,9 +66,22 @@ if(array_key_exists("nicoid", $_REQUEST)) {
 
 shownavigatioinbar('searchreserve.php');
 
+if (setlocale(LC_ALL, 'Japanese_Japan.65001') === false) {
+    // print('Locale not found: Japanese_Japan.65001');
+    //exit(1);
+}
+
+function basename_jp($path){
+    $p_info = explode('\\', $path);
+    return end($p_info);
+}
+
+
 if(!empty($downfilename) ){
-  print basename($downfilename).'のダウンロードに成功';
-  
+  $downfilename_base=basename_jp($downfilename);
+
+  print $downfilename_base.'のダウンロードに成功<br />';
+  print "time : ".$nd->DownloadStatus["total_time"].", size : ".$nd->DownloadStatus["size_download"];
   print<<<EOD
 <p>
 このファイルをリクエスト 
@@ -77,7 +90,7 @@ if(!empty($downfilename) ){
 <input type="hidden" name="filename" id="filename" value="
 EOD;
 
-echo basename($downfilename);
+echo $downfilename_base;
   print<<<EOD
 ">
 <input type="hidden" name="fullpath" id="fullpath" value="
@@ -91,18 +104,18 @@ echo $downfilename;
 EOD;
 
 }else{
-
-  echo "$nicoidのダウンロードに失敗しました\n";
+  if(!empty($nicoid))
+    echo "$nicoidのダウンロードに失敗しました\n";
 
 
   if(nicofuncenabled()){
-    echo "<p>再試行</p>\n";
+    //echo "<p>再試行</p>\n";
     print<<<EOD
 <div class="container ">
   <form name="nicodownload" method="post" action="nicodownload_recv.php">
   <div class="form-group">
-    <label>ニコニコ動画ID (smXXXXXX)</label>
-    <input class="form-control" type="text" name="nicoid"  value="" />
+    <label>ニコニコ動画ID (smXXXXXX等)</label>
+    <input class="form-control" type="text" name="nicoid"  value="" placeholder="sm000000等の動画ID"/>
     <input type="submit" class="btn btn-default btn-lg" value="Download (押すとダウンロードが終わるまでしばらく待ちます)" />
   </div>
 </div>

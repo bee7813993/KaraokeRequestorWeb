@@ -45,6 +45,7 @@ if(array_key_exists("uploaddfilename",$_REQUEST)) {
     $filename=basename($_FILES['userfile']['name']);
 }
     $filename=basename($_FILES['userfile']['name']);
+    $filename = str_replace(array('/','\\', '?', ':', '*', '\"', '>', '<', '|'),array('／','￥','？','：','＊','”','＞','＜','｜'),$filename);
 
 $uploaddir = urldecode($config_ini["downloadfolder"]);
 $uploadfile = $uploaddir  .$filename;

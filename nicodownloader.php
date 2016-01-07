@@ -19,6 +19,8 @@ class NicoDownload
  
     // 作業用ディレクトリ（要書き込み権限）
     public $WorkDir = './';
+    
+    public $DownloadStatus = array();
  
     //
     // ニコニコ動画ダウンロード
@@ -33,6 +35,10 @@ class NicoDownload
     //  tags : タグ
     public function Download($videoId, $fileName = null)
     {
+    if (setlocale(LC_ALL, 'ja_JP.UTF-8','Japanese_Japan.932') === false) {
+    print('Locale not found: ja_JP.UTF-8');
+    exit(1);
+}
         // パラメータチェック
         
         if (!$this->CheckProperty()) return false;
@@ -138,7 +144,9 @@ class NicoDownload
             $filePathDL = mb_convert_encoding($this->WorkDir . $videoId,'SJIS-win','UTF-8');
             $fp = @fopen($filePathDL, 'wb');
             if ($fp) {
+                set_time_limit (900);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+                curl_setopt($ch, CURLOPT_TIMEOUT_MS, 600000);
                 curl_setopt($ch, CURLOPT_FILE, $fp);
  
                 if (curl_exec($ch)) {
@@ -146,6 +154,7 @@ class NicoDownload
                 }else{
                     print curl_error($ch);
                 }
+                $this->DownloadStatus = curl_getinfo($ch);
  
                 // CURLOPT_FILEを使用した場合、ファイルハンドルを閉じる前にcloseする
                 curl_close($ch);
@@ -195,7 +204,8 @@ class NicoDownload
                 $filePath .= $fileName;
             }
             else {
-                $filePath .= $videoId . '_' . $info['title'] . '.' . $fileExtension;
+                $title=  str_replace(array('/','\\', '?', ':', '*', '\"', '>', '<', '|'),array('／','￥','？','：','＊','”','＞','＜','｜'), $info['title']);
+                $filePath .= $videoId . '_' . $title . '.' . $fileExtension;
             }
  
             rename($filePathDL, mb_convert_encoding($filePath,'SJIS-win','UTF-8'));
