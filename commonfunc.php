@@ -682,43 +682,13 @@ EOD;
 
     print '<div id="gnavi" class="collapse navbar-collapse">';
     print '    <ul class="nav navbar-nav">';
-    if (multiroomenabled()){
-        reset($config_ini["roomurl"]);
-        $roominfo = each($config_ini["roomurl"]);
-        
-        print '    <p class="navbar-text ">'.$roominfo["key"] .'部屋</p>';
-        reset($config_ini["roomurl"]);
-    }
-    print '     <li ';
-    if($page == 'requestlist_only.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="'.$prefix.'requestlist_only.php">予約一覧 </a></li>';
-    print '     <li ';
-    if($page == 'searchreserve.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="'.$prefix.'searchreserve.php">検索＆予約</a></li>';
-    print '     <li ';
-    if($page == 'playerctrl_portal.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="'.$prefix.'playerctrl_portal.php">PlayerController</a></li>';
-    // comment 
-    if(commentenabledcheck()){
-        print '     <li ';
-        if($page == 'comment.php')
-        {
-            print 'class="active" ';
-        }
-        print '><a href="'.$prefix.'comment.php">コメント</a></li>';
-    }
+
     if(multiroomenabled()){
-         print '    <li class="dropdown navbar-right">';
-         print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">別部屋情報  <b class="caret"></b></a>';
+         print '    <li class="dropdown navbar-left">';
+         reset($config_ini["roomurl"]);
+         $roominfo = each($config_ini["roomurl"]);
+         
+         print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">'.$roominfo["key"] .'部屋  <b class="caret"></b></a>';
          print '    <ul class="dropdown-menu">';
          reset($config_ini["roomurl"]);
          while($roominfo = each($config_ini["roomurl"])){
@@ -728,6 +698,43 @@ EOD;
          }
          print '    </ul>';
          print '    </li>';         
+    }
+
+
+    print '     <li ';
+    if($page == 'requestlist_only.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="'.$prefix.'requestlist_only.php">予約一覧 </a></li>';
+//    print '     <li ';
+    print '     <li class="dropdown "';
+    if($page == 'searchreserve.php')
+    {
+        print 'class="active" ';
+    }
+        //selectrequestkind();
+//    print '><a href="'.$prefix.'searchreserve.php">検索＆予約</a></li>';
+    print '><a href="#" class="dropdown-toggle" data-toggle="dropdown" >検索＆予約 <b class="caret"></b></a>';
+         print '    <ul class="dropdown-menu">';
+         selectrequestkind($kind='dd',$prefix);
+         print '    </ul>';
+    print '</li>';
+
+    print '     <li  ';
+    if($page == 'playerctrl_portal.php')
+    {
+        print 'class="active" ';
+    }
+    print '><a href="'.$prefix.'playerctrl_portal.php" >Player</a></li>';
+    // comment 
+    if(commentenabledcheck()){
+        print '     <li ';
+        if($page == 'comment.php')
+        {
+            print 'class="active" ';
+        }
+        print '><a href="'.$prefix.'comment.php">コメント</a></li>';
     }
     
     if ($user === 'admin'){
@@ -804,13 +811,14 @@ function showmode(){
      print '</div>';
 }
 
-function selectrequestkind(){
+function selectrequestkind($kind='button',$prefix = '' ){
 
     global $playmode;
     global $connectinternet;
     global $usenfrequset;
     global $config_ini;
-    
+
+if($kind == 'button'){
 print <<<EOD
 <div  align="center" >
 <form method="GET" action="search.php" >
@@ -818,49 +826,75 @@ print <<<EOD
 </form>
 </div>
 EOD;
+}else if($kind == 'dd'){
+print '      <li><a href="'.$prefix.'searchreserve.php">検索＆予約MENU</a></li>';
+print '      <li role="separator" class="divider"></li>';
+print '      <li><a href="'.$prefix.'search.php">ファイル検索</a></li>';
+}
 
 if ($playmode != 4 && $playmode != 5){
+  if($kind == 'button'){
     print '<div align="center" >';
     print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
     print '<input type="hidden" name="shop_karaoke" value="1" />';
     print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
+  }else if($kind == 'dd'){
+    print '      <li><a href="'.$prefix.'request_confirm.php?shop_karaoke=1">カラオケ配信</a></li>';
+  }
 }
 
 if (!empty($config_ini["downloadfolder"])){
+  if($kind == 'button'){
     print '<div align="center" >';
     print '<form method="GET" action="file_uploader.php" >';
     print '<input type="submit" name="UPL"   value="ファイルをアップロードして予約する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
+  }else if($kind == 'dd'){
+    print '      <li><a href="'.$prefix.'file_uploader.php">アップロード</a></li>';
+  }
 }
 
+if( nicofuncenabled() === true){
+  if($kind == 'button'){
+    print '<div align="center" >';
+    print '<form method="GET" action="nicodownload_post.php" >';
+    print '<input type="submit" name="nico"   value="ニコニコ動画ダウンロード予約はこちら" class="topbtn btn btn-default btn-lg"/> ';
+    print '</form>';
+    print '</div>';
+  }else if($kind == 'dd'){
+    print '      <li><a href="'.$prefix.'nicodownload_post.php">ニコニコ動画</a></li>';
+  }
+}
+
+
 if( $connectinternet == 1){
+  if($kind == 'button'){
     print '<div align="center" >';
     print '<form method="GET" action="request_confirm_url.php?shop_karaoke=1" >';
     print '<input type="hidden" name="set_directurl" value="1" />';
     print '<input type="submit" name="URL"   value="インターネット直接再生はこちらから(Youtube等)" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
+  }else if($kind == 'dd'){
+    print '      <li><a href="'.$prefix.'request_confirm_url.php?shop_karaoke=1&set_directurl=1">youtube</a></li>';
+  }
 }
 
-if( nicofuncenabled() === true){
-    print '<div align="center" >';
-    print '<form method="GET" action="nicodownload_post.php" >';
-    print '<input type="submit" name="nico"   value="ニコニコ動画ダウンロード予約はこちら" class="topbtn btn btn-default btn-lg"/> ';
-    print '</form>';
-    print '</div>';
-}
 
 
 if($usenfrequset == 1) {
+  if($kind == 'button'){
     print '<div align="center" >';
     print '<form method="GET" action="notfoundrequest/notfoundrequest.php" >';
     print '<input type="submit" name="noffoundsong"   value="見つからなかった曲があればこちらから教えてください" class="topbtn btn btn-default btn-lg"/>';
     print '</form>';
     print '</div>';
-
+  }else if($kind == 'dd'){
+    print '      <li><a href="'.$prefix.'notfoundrequest/notfoundrequest.php">未発見曲報告</a></li>';
+  }
 }
 
 }
