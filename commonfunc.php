@@ -738,12 +738,12 @@ EOD;
     }
     
     if ($user === 'admin'){
-        print '    <p class="navbar-text "> <small>管理者ログイン中</small></p>';
-    }
+        print '    <p class="navbar-text "> <small>管理者ログイン中</small><br>';
     
-    if($page == 'init.php'){
-    print '     <p class="navbar-text "';
-    print '><button type="button" class="btn btn-success" onclick="document.allconfig.submit();" >設定反映</button></p>';
+        if($page == 'init.php'){
+            print '<button type="button" class="btn btn-success" onclick="document.allconfig.submit();" >設定反映</button>';
+        }
+        print '    </p>';
     }
     
     print '    <li class="dropdown navbar-right">';
@@ -761,6 +761,9 @@ EOD;
         print 'class="active" ';
     }
     print '><a href="'.$prefix.'request.php">全部</a></li>';
+    print '      <li class="dropdown-header" > ';
+    print get_version();
+    print '      </li>';
     print '    </ul>';
     print '    </li>';
     print '    </ul>';
@@ -893,6 +896,7 @@ if($usenfrequset == 1) {
     print '</form>';
     print '</div>';
   }else if($kind == 'dd'){
+    print '      <li role="separator" class="divider"></li>';
     print '      <li><a href="'.$prefix.'notfoundrequest/notfoundrequest.php">未発見曲報告</a></li>';
   }
 }
@@ -985,8 +989,30 @@ function inieolchange($file = 'ini.ini'){
     fclose($fd);
 }
 
+function is_url($text) {
+    if (preg_match('/^(https?|ftp)(:\/\/[-_.!~*\'()a-zA-Z0-9;\/?:\@&=+\$,%#]+)$/', $text)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+function commenturl_mod($commenturl = 'http://'.'localhost'.'/cms/r.php' ){
+    if(! is_url($commenturl)) {
+        $commenturl = 'http://'.$_SERVER["SERVER_ADDR"].'/cms/r.php'.$commenturl.' is not commenturl' ;
+    }
+    $commenturl = preg_replace('/\/r.*\.php/','',$commenturl);
+    
+    if( $commenturl === null ){
+          $commenturl = 'http://'.$_SERVER["SERVER_ADDR"].'/cms/r.php'.'not commenturl';
+    }
+    
+    return $commenturl;
+
+}
+
 // ini.iniファイル room no 変更
-function iniroomchange($roomno,$file = 'ini.ini'){
+function iniroomchange($config_ini,$file = 'ini.ini'){
 
     $ini_a = array();
     
@@ -1004,14 +1030,158 @@ function iniroomchange($roomno,$file = 'ini.ini'){
        fclose($fd);
        return;
     }
-    $ini_a[0] = $roomno;
+    $ini_a[0] = $config_ini["commentroom"];
+    $ini_a[2] = commenturl_mod(urldecode($config_ini["commenturl_base"]));
     
     fseek($fd, 0, SEEK_SET);
     
+    $writebyte = 0;
+    
     foreach($ini_a as $oneline){
-        fwrite($fd,$oneline."\r\n");
+        $res = fwrite($fd,$oneline."\r\n");
+        $writebyte = $writebyte + $res;
     }
+    ftruncate($fd,$writebyte);
     fclose($fd);
+}
+
+function get_git_version(){
+    global $config_ini;
+    $result_str = null;
+    
+    if(array_key_exists("gitcommandpath", $config_ini)){
+      $gitcmd = urldecode($config_ini["gitcommandpath"]);
+      if(file_exists($gitcmd)){
+          $execcmd = $gitcmd.' describe --tags';
+      
+          $result_str = exec($execcmd);
+          if( mb_substr($result_str ,0 ,1) === 'v' ){
+              if(is_numeric( mb_substr($result_str ,1 ,1))){
+                  $git_version = $result_str;
+              }
+          }
+      }
+    }
+    
+    return $result_str;
+}
+
+
+// バージョン情報
+function get_version(){
+    
+    $localversion = '';
+
+    if(file_exists('version')){
+        $localversion = file_get_contents('version');
+    }
+    
+    $gitversion = get_git_version();
+    
+    if(empty($gitversion)){
+        return $localversion;
+    }else {
+        return $gitversion;
+    }
+}
+
+function get_gittaglist(&$errmsg = 'none'){
+
+    global $config_ini;
+    $taglist = array();
+    $errorcnt = 0;
+    if(array_key_exists("gitcommandpath", $config_ini)){
+      $gitcmd = urldecode($config_ini["gitcommandpath"]);
+      if(file_exists($gitcmd)){
+          $execcmd = $gitcmd.' config --global core.autoCRLF false';
+          exec($execcmd);
+          $execcmd = $gitcmd.' fetch origin';
+          set_time_limit (900);
+          exec($execcmd,$result_str);
+          foreach($result_str as $line){
+              $err_str_pos = mb_strstr($line, "unable to access");
+              if( !$err_str_pos ) {
+                  $errmsg += "network access failed";
+                  $errorcnt ++;
+              }else if (mb_strstr($line, "fatal") !== false) {
+                  $errmsg += "fetch unknown error: $line";
+                  $errorcnt ++;
+              }
+          }
+          if($errorcnt > 0){
+              return $taglist;
+          }
+          
+          $execcmd = $gitcmd.' tag';
+          exec($execcmd, $result_str);
+          foreach($result_str as $line){
+            if( mb_substr($line ,0 ,1) === 'v' ){
+              if(is_numeric( mb_substr($line ,1 ,1))){
+                  $taglist[] = $line;
+              }
+            }
+          }
+      }
+    }
+    
+    return $taglist;
+}
+
+// memo
+// cd c:\xampp\htdocs
+// gitcmd\cmd\git config --global core.autoCRLF false
+// gitcmd\cmd\git fetch origin
+// gitcmd\cmd\git reset --hard origin/master 
+
+function update_fromgit($version_str, &$errmsg){
+
+    global $config_ini;
+    $taglist = array();
+    $errorcnt = 0;
+    if(array_key_exists("gitcommandpath", $config_ini)){
+      $gitcmd = urldecode($config_ini["gitcommandpath"]);
+      if(file_exists($gitcmd)){
+          $execcmd = $gitcmd.' config --global core.autoCRLF false';
+          exec($execcmd);
+          
+          $execcmd = $gitcmd.' fetch origin';
+          set_time_limit (900);
+          exec($execcmd,$result_str);
+          foreach($result_str as $line){
+              $err_str_pos = mb_strstr($line, "unable to access");
+              if( !$err_str_pos ) {
+                  $errmsg += "network access failed";
+                  $errorcnt ++;
+              }else if (mb_strstr($line, "fatal") !== false) {
+                  $errmsg += "fetch unknown error: $line";
+                  $errorcnt ++;
+              }
+          }
+          if($errorcnt > 1){
+              return false;
+          }
+
+          
+          $execcmd = $gitcmd.' reset --hard '.$version_str;
+          exec($execcmd,$result_str);
+          foreach($result_str as $line){
+              $err_str_pos = mb_strstr($line, "unknown revision");
+              if( !$err_str_pos ) {
+                  $errmsg += "no version : $version_str";
+                  $errorcnt ++;
+              }else if (mb_strstr($line, "fatal") !== false) {
+                  $errmsg += "reset --hard unknown error: $line";
+                  $errorcnt ++;
+              }
+          }
+      }
+    }
+    
+    if($errorcnt > 0) {
+        return false;
+    }
+    
+    return true;
 }
 
 

@@ -1,5 +1,9 @@
 <html>
 <head>
+<?php 
+require_once 'commonfunc.php';
+print_meta_header();
+?>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
@@ -26,22 +30,23 @@
 </head>
 <body>
 <?php
-// 処理記載部
-require_once 'kara_config.php';
+// 処理記述部
+
+$change_counter = 0;
 if(array_key_exists("SSID", $_REQUEST)) {
     $SSID = urlencode($_REQUEST["SSID"]);
     $config_ini = array_merge($config_ini,array("SSID" => $SSID));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter ++;
 }
 
 if(array_key_exists("wifipass", $_REQUEST)) {
     $wifipass = urlencode($_REQUEST["wifipass"]);
     $config_ini = array_merge($config_ini,array("wifipass" => $wifipass));
-    $fp = fopen($configfile, 'w');
-    foreach ($config_ini as $k => $i) fputs($fp, "$k=$i\n");
-    fclose($fp);
+    $change_counter ++;
+}
+
+if(  $change_counter > 0 ){
+    writeconfig2ini($config_ini,$configfile);
 }
 
 ?>

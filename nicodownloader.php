@@ -412,6 +412,50 @@ class NicoDownload
       preg_match("'url=(.*?)&ms'", urldecode($data), $match);
       return $match[1];
     }
+
+    //********************************************************************************************
+    /**
+     * @brief       検索
+     */
+    //********************************************************************************************
+     
+    private function search($query){
+     
+        //期間(yyyy-MM-dd HH:mm:ss)
+        $from = date('Y-m-d H:i:s', strtotime('-2 day'));//今から2日前
+        $to   = date('Y-m-d H:i:s');//今
+     
+         
+        //json生成
+        $json = array(
+            'query'     => $query,
+            'service'   => array('video'),
+            'search'    => array('title', 'description', 'tags'),
+            'join'      => array('cmsid', 'title', 'start_time'),//ここはいろいろ情報が取れるのでドキュメント参照
+            'filters'   => array(),
+            'sort_by'   => 'start_time',
+            'order' => 'desc',
+            'from'      => 0,
+            'size'      => 100,
+            'issuer'    => 'KaraokeRequestorWeb'//ここは開発するアプリケーションの名前に変えて下しあ
+        );
+         
+        //jsonエンコード
+        $data = json_encode($json);
+     
+        //POST
+        $url = 'http://api.search.nicovideo.jp/api/snapshot/';//スナップショット検索APIエンドポイント
+        $headers = array('Content-type: application/json');
+
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($curl);
+        curl_close($curl);
+         
+        return $response;
+    }
         
 
 }

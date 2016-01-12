@@ -34,6 +34,9 @@ if(array_key_exists("nicoid", $_REQUEST)) {
 ?>
 <html lang="ja">
 <head>
+<?php 
+print_meta_header();
+?>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache">

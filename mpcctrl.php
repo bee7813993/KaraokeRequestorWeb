@@ -84,6 +84,7 @@ print '</div >';
 }
 ?>
 </div>
+<!-----
 <div class="row">
 <div class="col-xs-3">
 <button type="submit" value="(-100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m100()" >(-100ms)<br>音ズレ修正</button>
@@ -100,6 +101,7 @@ print '</div >';
 <br>
 
 </div>
+---->
 
 </div>
 

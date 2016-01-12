@@ -243,7 +243,7 @@ if (! empty($newcommentroom)){
     $commentroom = $newcommentroom;
     $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));
     $change_counter++;
-    iniroomchange($commentroom);
+    iniroomchange($config_ini);
 }
 
 

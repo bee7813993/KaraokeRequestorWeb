@@ -73,6 +73,10 @@ function readconfig_array()
         $helpurl = "";
         $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));            
     }
+    if(!array_key_exists("autoplay_exec", $config_ini)){
+        $autoplay_exec = "autoplaystart_mpc_xampp.bat";
+        $config_ini = array_merge($config_ini,array("autoplay_exec" => urlencode($autoplay_exec)));            
+    }
     if(!array_key_exists("nonamerequest", $config_ini)){
         $nonamerequest = "2";
         $config_ini = array_merge($config_ini,array("nonamerequest" => ($nonamerequest)));            
@@ -109,7 +113,11 @@ function readconfig_array()
     if(strlen($config_ini["downloadfolder"]) != 0 &&mb_substr(urldecode($config_ini["downloadfolder"]),-1) !== '\\'){
         $config_ini["downloadfolder"] = urlencode(urldecode($config_ini["downloadfolder"]).'\\');
     }
-    
+
+    if(!array_key_exists("gitcommandpath", $config_ini)){
+        $gitcommandpath = "gitcmd\\cmd\\git.exe";
+        $config_ini = array_merge($config_ini,array("gitcommandpath" => urlencode($gitcommandpath)));            
+    }    
     
     return $config_ini;
 
