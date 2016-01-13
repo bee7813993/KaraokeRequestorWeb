@@ -51,5 +51,23 @@ function delay_minus100_mpc(){
     }
 }
 
+function start_first_mpc(){
+    global $MPCCMDURL;
+    
+    $res = TRUE;
+    $requesturl=$MPCCMDURL.'?wm_command=-1&percent=0';
+    $res = file_get_html_with_retry($requesturl);
+    return $res;
+}
+
+function go_end_mpc(){
+    global $MPCCMDURL;
+    
+    $res = TRUE;
+    $requesturl=$MPCCMDURL.'?wm_command=-1&percent=99.5';
+    $res = file_get_html_with_retry($requesturl);
+    return $res;
+}
+
 
 ?>

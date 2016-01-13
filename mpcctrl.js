@@ -70,11 +70,11 @@ request.open("GET", url, true);
 request.send("");
 }
 
-//Stop & next = Exit 816
+//Stop & next = Exit 816 => Stop 890
 function song_next(){
 var request = createXMLHttpRequest();
-url=playerurl + "?wm_command=816";
-url=playerurl2 + "?cmd=816";
+url=playerurl + "?wm_command=890";
+url=playerurl2 + "?cmd=890";
 request.open("GET", url, true);
 request.send("");
 }
@@ -148,8 +148,10 @@ for(i = 0; i < 10; i = i + 1) {
 // restart this song = Stop and Play
 function song_startfirst(){
 
-song_stop();
-sleep(500, song_play());
+var request = createXMLHttpRequest();
+url=playerurl2 + "?cmd=start_first";
+request.open("GET", url, true);
+request.send("");
 
 }
 

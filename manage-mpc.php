@@ -84,7 +84,7 @@ function mpcrunningcheck($playerpath){
 
    global $MPCCMDURL;
    global $playercommandname;
-   $pscheck_cmd='tasklist /fi "imagename eq "'.$playercommandname;
+   $pscheck_cmd='tasklist /fi "imagename eq '.$playercommandname.'"';
    //logtocmd $pscheck_cmd;
    exec($pscheck_cmd, $psresult );
    sleep(1);
@@ -154,7 +154,52 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1){
     }
 }
 
+// Capture viewerソフトを終了させる
+function captureviewstop(){
+   global $config_ini;
+   
+   if(array_key_exists("captureviewer", $config_ini)) {
+     $capviewercommandname = basename_jp($config_ini["captureviewer"]); 
+     if(!empty($capviewercommandname)){
+       $pscheck_cmd='tasklist /fi "imagename eq '.$capviewercommandname.'"';
+       exec($pscheck_cmd, $psresult );
+       $process_found = 0;
+       foreach( $psresult as $psline ){
+         $pos = strpos($psline,$capviewercommandname);
+         if ( $pos !== FALSE) {
+            $process_found = 1;
+         }
+       }
+       if($process_found == 1){
+         $pscheck_cmd='taskkill  /im '.$capviewercommandname.' -f';
+       }
+     }
+   }
+   return false;
+   
+}
 
+// Capture viewerソフトを起動する。(設定がなければMPCのデバイス再生)
+function captureviewstart($playerpath,$waittime = 1){
+
+  global $config_ini;
+  
+  if(array_key_exists("captureviewer", $config_ini)) {
+    if(!empty($config_ini["captureviewer"])) {
+      global $MPCCMDURL;
+      $execcmd="start  \"\" \"".$config_ini["captureviewer"]."\" > NUL \n";
+      // logtocmd $execcmd;
+      $fp = popen($execcmd,'r');
+      //exec($execcmd);
+      pclose($fp);
+      // logtocmd 'DEBUG: now start capture_viewer';
+      sleep(1);
+      return true;
+    }
+  }
+  mpcdevicestart($playerpath, $waittime);
+  return false;
+}
 
 function mpcdevicestart($playerpath,$waittime = 1){
      global $MPCCMDURL;
@@ -286,6 +331,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
    global $MPCSTATURL;
    // get MPC status
    $exit = 1;
+   $startonce = false;
    while($exit == 1)
    {
        // db statusを確認
@@ -320,7 +366,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
        $totaltime_a =  explode(':', $etime_a[1] );
        $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
-       if($playtime > ($totaltime - 4) ){
+       if($startonce && ( $playtime > ($totaltime - 4) ) ){
        print ($mpsctat_array[2]);
            echo ', ';
            print ($playtime);
@@ -329,6 +375,8 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
            echo "\n";
            break;
        }
+       
+       if($playtime > 1 ) $startonce = true;
        // logtocmd "DEBUG : $mpsctat_array[2], $playtime : $totaltime \n";
 
        sleep(2);
@@ -506,6 +554,7 @@ while(1){
         $playerchecktimes = 3;
      }
      
+     
 
        
        if( strcmp ($l_kind , "カラオケ配信") === 0 )
@@ -514,7 +563,7 @@ while(1){
               logtocmd("再生中(カラオケ配信)を検出。終了待ち\n");
           }else{
               if( $usevideocapture == 1 ) {
-                  mpcdevicestart($playerpath,1);
+                  captureviewstart($playerpath,1);
               }
               $db->beginTransaction();
               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
@@ -527,6 +576,7 @@ while(1){
           // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
           logtocmd("カラオケ配信終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n");
           runningcheck_shop_karaoke($db,$l_id);
+          captureviewstop();
        }else
        {
        

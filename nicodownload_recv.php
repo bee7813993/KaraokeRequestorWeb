@@ -74,11 +74,6 @@ if (setlocale(LC_ALL, 'Japanese_Japan.65001') === false) {
     //exit(1);
 }
 
-function basename_jp($path){
-    $p_info = explode('\\', $path);
-    return end($p_info);
-}
-
 
 if(!empty($downfilename) ){
   $downfilename_base=basename_jp($downfilename);

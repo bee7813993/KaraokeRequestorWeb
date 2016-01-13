@@ -1184,5 +1184,9 @@ function update_fromgit($version_str, &$errmsg){
     return true;
 }
 
+function basename_jp($path){
+    $p_info = explode('\\', $path);
+    return end($p_info);
+}
 
 ?>

@@ -12,6 +12,8 @@
         delay_plus100_mpc();
       }else if($l_cmd == "delaym100"){
         delay_minus100_mpc();
+      }else if($l_cmd == "start_first"){
+        start_first_mpc();
       }else {
           command_mpc($l_cmd);
       }
