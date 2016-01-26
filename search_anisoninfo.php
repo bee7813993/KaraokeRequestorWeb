@@ -35,8 +35,12 @@ function ansoninfo_gettitlelisturl($m,$q,$fullparam){
 function ansoninfo_gettitlelist($url,$l_kind){
     $results = array();
     
-    
-    $result_dom=file_get_html($url);
+    for($checktimes=0; $checktimes<3; $checktimes++){
+        $html = file_get_html_with_retry($url);
+        if($html !== FALSE) break;
+    }
+    if($html === FALSE) return; 
+    $result_dom=str_get_html($html);
     
     if(strcmp("program",$l_kind) == 0){
       foreach( $result_dom->find( 'table.sorted' ) as $list ){

@@ -105,7 +105,7 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1){
             break;
         }
         $errno = curl_errno($ch);
-        print $timeoutsec;
+        // print $timeoutsec;
         curl_close($ch);
     }
     if ($loopcount === $retrytimes) {

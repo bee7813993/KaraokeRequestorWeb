@@ -45,7 +45,12 @@ function ansoninfo_gettitlelist($url,$l_m){
     
     $results = array();
     
-    $result_dom=file_get_html($url);
+    $html = file_get_html_with_retry($url);
+    if($html === FALSE) continue;
+    
+    $result_dom=str_get_html($html);
+
+    //print '<CODE>'.$result_dom.'</CODE>';
     
     if(strcmp ('pro',$l_m) == 0)
     {
