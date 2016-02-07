@@ -733,6 +733,11 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
     <a href="edit_priority.php" class="btn btn-default" > 表示優先度設定 </a>
   </p>
 
+  <p>
+    <a href ="online_update.php" class="btn btn-default" > オンラインアップデート画面 </a>
+  </p>
+
+
   <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
 </div>
 
@@ -766,7 +771,10 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
   ?>
   </pre>
   
+  
 </div>
+
+<hr />  
 
 </body>
 </html>
