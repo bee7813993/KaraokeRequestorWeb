@@ -41,19 +41,51 @@ foreach($allrequest as $value ){
     $onerequset += array("singer" =>  nl2br(htmlspecialchars($value['singer'])));
     
     $comment_pf = <<<EOD
-<div>\n %s </div>\n
-<form method="GET" action="commentedit.php">\n
-<input type="hidden" name="id" value="%s" />\n
-<input type="submit" name="edit"   value="修正"/>\n
-</form>\n
-<form method="GET" action="commentedit.php">\n
-<input type="text" name="addcomment" id="addcomment" value="" placeholder="レス(コメントへの)"/>\n
-<input type="text" name="name" id="name" value="%s" "  placeholder="名前" />\n
-<input type="hidden" name="id" value="%s" />\n
-<input type="submit" name="add"   value="送信"/>\n
-</form>
+<div style="width:100%%;height:100%%;">
+<div data-toggle="modal" data-target="#comment_modal_%s" style="width:100%%;height:100%%;" title="このエリアを押すことでコメントにレスを付けたり編集したりできます">
+\n %s 
+</div>\n
+<!-- 2.モーダルの配置 -->
+<div class="modal" id="comment_modal_%s" tabindex="-1" >
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+         <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="modal-label">コメントへのレス＆編集</h4>
+      </div>
+      <form method="GET" action="update.php">\n
+      <div class="form-group">
+      <textarea class="form-control" name="comment"  >%s</textarea>
+      <input type="hidden" name="id" value="%s" />\n
+      <input type="submit" class="btn btn-default pull-right" name="edit"   value="修正"/>\n
+      </div>
+      </form>\n
+      <form method="GET" action="commentedit.php">\n
+      <label class="control-label">コメント <small>再生中にコメントするとその場で流れます</small></label>
+      <div class="form-group btn-toolbar">
+      <label  class="col-sm-2 control-label">レス</label>
+      <div class="col-sm-10">
+      <input type="text" class="form-control" name="addcomment"  value="" placeholder="レス(コメントへの)"/>\n
+      </div>
+      <label  class="col-sm-2 control-label">名前</label>
+      <div class="col-sm-10">
+        <input type="text" name="name" class="form-control" value="%s" placeholder="名前" />\n
+      </div>
+      <input type="hidden" name="id" value="%s" />\n
+      <input type="submit" name="add"  class="btn btn-primary pull-right" value="送信"/>\n
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+</div>
 EOD;
-    $comment = sprintf($comment_pf,  nl2br(htmlspecialchars($value['comment'])), $value['id'],   nl2br(htmlspecialchars(returnusername($allrequest))), $value['id']);
+    $comment = sprintf($comment_pf, $value['id'],  nl2br(htmlspecialchars($value['comment'])), $value['id'], $value['comment'], $value['id'],   nl2br(htmlspecialchars(returnusername($allrequest))), $value['id']);
     $onerequset += array("comment" => $comment);
 
     $onerequset += array("method" => $value['kind']);
@@ -85,20 +117,26 @@ EOD;
     }
 
 $action_pf = <<<EOD
-<div class="">
+<div class="dropdown">
 <form method="post" class="requestmove" action="delete.php">
 <input type="hidden" name="id" class="requestid" value="%s" />
 <input type="hidden" name="songfile" id="requestsongfile" value="%s" />
 <div class="acition" >
-<button class="btn btn-default requestmove" type="button" name="up"  id="requestup" value="up" onClick='moverequestlist(this,%s,"up","%s")' >上へ</button>
-<button class="btn btn-default requestmove" type="button" name="down" id="requestdown"  value="down" onClick='moverequestlist(this,%s,"down","%s")' > 下へ</button>
-<button class="btn btn-default requestmove" type="button" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' > 次に再生</button>
+<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+リスト操作
+<span class="caret"></span>
+</button>
+<ul class="dropdown-menu">
+<li> <a class="requestmove" name="up"  id="requestup" value="up" onClick='moverequestlist(this,%s,"up","%s")' >上へ</a> </li>
+<li> <a class="requestmove" name="down" id="requestdown"  value="down" onClick='moverequestlist(this,%s,"down","%s")' > 下へ</a> </li>
+<li> <a class="requestmove" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' > 次に再生</a> </li>
+<li> <a class="" data-toggle="modal" data-target="#act_modal_%s">削除</a> </li>
+</ul>
+</div>
 <!--
 <button type="submit" name="delete" id="requestdelete" value="delete" > 削除</button>
 -->
-</div>
 </form>
-<button class="btn btn-default" data-toggle="modal" data-target="#act_modal_%s">削除</button>
 </div>
 <!-- 2.モーダルの配置 -->
 <div class="modal" id="act_modal_%s" tabindex="-1">
@@ -137,7 +175,7 @@ EOD;
     else{
             $tweet_message = sprintf("「%s」は「%s」を歌いました",$value['singer'],$value['songfile']);
     }
-    $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" TARGET="_blank" > Tweetする </a>',nl2br(htmlspecialchars($tweet_message)));
+    $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" TARGET="_blank" > Tweetする </a>',urlencode($tweet_message));
     }else {
     $tweet_link = ' ';
     }
