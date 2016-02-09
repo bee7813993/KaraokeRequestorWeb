@@ -143,6 +143,87 @@ function ansoninfo_gettitlelist($url,$l_m){
             $nextlink=$nextlink_td->find('a' ,0)->href;
             $results['nextlink']=$nextlink;
         }
+    } elseif(strcmp ('song',$l_m) == 0)
+    {  
+        foreach( $result_dom->find( 'table.list' ) as $list ){
+          $tdcount = count ($list -> find( 'tr th') );
+          if ( $tdcount != 5 ) {
+            //print $tdcount.'<br />';
+            continue;
+          }
+            foreach( $list->find( 'tr' ) as $m_lists ){
+//            var_dump($m_lists);
+             $m_list = $m_lists->find( 'td',0 ) ; // songtitle 
+//             print $m_list;
+             if( $m_list === null )continue;
+             $mkrinfo = $m_list->find('a', 0 );
+             // songtitle
+             $songlink = null;
+             $songtitle = null;
+             $artistlink = null;
+             $artist = null;
+             $titlelink = null;
+             $title = null;
+             $kind = null;
+             if(!isset($mkrinfo)) continue;
+                $songlink  = $mkrinfo->href;
+                $songtitle = $mkrinfo->plaintext;
+                                
+              $m_list = $m_lists->find( 'td',1 ) ; // artist
+              $mkrinfo = $m_list->find('a',0);
+              if(!isset($mkrinfo)){
+                $result_one = array (
+                                'songtitle' => $songtitle , 
+                                'songlink' => $songlink , 
+                                'artist' => $artist , 
+                                'artistlink' => $artistlink , 
+                                'titlelink' => $titlelink , 
+                                'title' => $title , 
+                                'oped' => $kind , 
+                                );
+               $results[]=$result_one;
+               continue;
+              }
+                $artistlink = $mkrinfo->href;
+                $artist = $mkrinfo->plaintext;
+             $m_list = $m_lists->find( 'td',2 ) ; // genle
+             $m_list = $m_lists->find( 'td',3 ) ; // title
+             $mkrinfo = $m_list->find('a', 0 );
+             if(is_null($mkrinfo) ) {
+                $title= $m_list->plaintext;
+             }else {
+                $titlelink  = $mkrinfo->href;
+                $title = $mkrinfo->plaintext;
+             }
+
+             $m_list = $m_lists->find( 'td',4 ) ; // kind
+             $kind = $m_list->plaintext;
+
+                $result_one = array (
+                                'songtitle' => $songtitle , 
+                                'songlink' => $songlink , 
+                                'artist' => $artist , 
+                                'artistlink' => $artistlink , 
+                                'titlelink' => $titlelink , 
+                                'title' => $title , 
+                                'oped' => $kind , 
+                                );
+                $results[]=$result_one;
+
+            }
+        }
+        $prevlink_td = $result_dom->find( 'td.seekPrev',0 );
+        if(isset($prevlink_td))
+        {
+            $prevlink = $prevlink_td->find('a' ,0)->href;
+            $results['prevlink']= $prevlink;
+        }
+        $nextlink_td = $result_dom->find( 'td.seekNext',0 );
+        if(isset($nextlink_td))
+        {
+            $nextlink=$nextlink_td->find('a' ,0)->href;
+            $results['nextlink']=$nextlink;
+        }
     } 
     if(count($results) > 0 ) break;
     usleep(300000);
@@ -184,10 +265,8 @@ shownavigatioinbar('searchreserve.php');
 ?>
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
+<INPUT type=radio value=song name=m id="song" "><label for="song">曲 (よみがなの一部でOK)</label>
 <INPUT type=radio <?php print selectedcheck("pro",$l_m)=='selected'?'checked':' '; ?> value=pro name=m id="pro" ><label for="pro">作品</label>
-<!---
-<INPUT type=radio <?php print selectedcheck("song",$l_m)=='selected'?'checked':' '; ?> value=song name=m id="song" ><label for="song">曲</label>
---->
 <INPUT type=radio <?php print selectedcheck("person",$l_m)=='selected'?'checked':' '; ?> value=person name=m id="person" ><label for="person">人物</label>
 <INPUT type=radio <?php print selectedcheck("mkr",$l_m)=='selected'?'checked':' '; ?> value=mkr name=m id="mkr" ><label for="mkr">制作(ブランド)</label>
 <!---

@@ -103,12 +103,12 @@ shownavigatioinbar('searchreserve.php');
 
 
 <hr />
-<h2>ファイル名検索 </h2>
+<h2>ファイル名(曲名)検索 </h2>
   <form action="search.php" method="GET">
 
 <div class="col-xs-12 col-sm-12" >    検索ワード(ファイル名) </div>
   <div class="col-xs-12 col-sm-9" >
-  <input type="text" name="searchword" class="searchtextbox" placeholder="曲名の一部での検索推奨。それ以外は下の外部DB連携も使えます"
+  <input type="text" name="searchword" class="searchtextbox" placeholder="歌手名作品名検索は下の外部DB連携で検索できます"
   <?php
      if(!empty ($word)){
      print 'value="' . $word . '"';
@@ -136,7 +136,7 @@ shownavigatioinbar('searchreserve.php');
   </div>
   <div class="clearleftfloat"> 
   </form>
-  and検索は スペース 区切りでいけるっぽい。<br>
+  and検索は スペース 区切り。not検索はnotにしたい単語の先頭に!(半角)<br>
   全件検索は*(半角)でいけるっぽい。<br><br>
   </div>
   <?php
@@ -180,14 +180,12 @@ EOM;
 die();
 }
 ?>
-  <h2>外部データベース連携検索 </h2>
+  <h2>歌手名、作品名、ブランド名検索 <small>外部データベース連携検索</small> </h2>
   <h3>anison.info連携検索モード </h3>
  
 <FORM name=f action=search_anisoninfo_list.php method=get>
+<INPUT type=radio value=song name=m id="song" "><label for="song">曲 (よみがなの一部でOK)</label>
 <INPUT type=radio checked value=pro name=m id="pro" "><label for="pro">作品</label>
-<!---
-<INPUT type=radio value=song name=m id="song" "><label for="song">曲</label>
---->
 <INPUT type=radio value=person name=m id="person" "><label for="person">人物</label>
 <INPUT type=radio value=mkr name=m id="mkr" "><label for="mkr">制作(ブランド)</label>
 <!---

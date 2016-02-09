@@ -158,8 +158,9 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1){
 function captureviewstop(){
    global $config_ini;
    
-   if(array_key_exists("captureviewer", $config_ini)) {
-     $capviewercommandname = basename_jp($config_ini["captureviewer"]); 
+   if(array_key_exists("captureapli_path", $config_ini)) {
+     $capviewercommandname = basename_jp(urldecode($config_ini["captureapli_path"])); 
+
      if(!empty($capviewercommandname)){
        $pscheck_cmd='tasklist /fi "imagename eq '.$capviewercommandname.'"';
        exec($pscheck_cmd, $psresult );
@@ -172,6 +173,8 @@ function captureviewstop(){
        }
        if($process_found == 1){
          $pscheck_cmd='taskkill  /im '.$capviewercommandname.' -f';
+         exec($pscheck_cmd, $psresult );
+         return true;
        }
      }
    }
@@ -183,21 +186,28 @@ function captureviewstop(){
 function captureviewstart($playerpath,$waittime = 1){
 
   global $config_ini;
-  
-  if(array_key_exists("captureviewer", $config_ini)) {
-    if(!empty($config_ini["captureviewer"])) {
-      global $MPCCMDURL;
-      $execcmd="start  \"\" \"".$config_ini["captureviewer"]."\" > NUL \n";
-      // logtocmd $execcmd;
-      $fp = popen($execcmd,'r');
-      //exec($execcmd);
-      pclose($fp);
-      // logtocmd 'DEBUG: now start capture_viewer';
-      sleep(1);
-      return true;
-    }
+  if(array_key_exists("usevideocapture", $config_ini)) {
+     if($config_ini["usevideocapture"]==3 ){
+       if(array_key_exists("captureapli_path", $config_ini)) {
+         if(!empty($config_ini["captureapli_path"])) {
+           global $MPCCMDURL;
+           $execcmd="start  \"\" \"".urldecode($config_ini["captureapli_path"])."\" > NUL \n";
+           // logtocmd $execcmd;
+           $fp = popen($execcmd,'r');
+           //exec($execcmd);
+           pclose($fp);
+           // logtocmd 'DEBUG: now start capture_viewer';
+           sleep(1);
+           return true;
+         }
+       }
+     }else if($config_ini["usevideocapture"]==1 ){
+       mpcdevicestart($playerpath, $waittime);
+       return true;
+     }
   }
-  mpcdevicestart($playerpath, $waittime);
+
+  
   return false;
 }
 
@@ -562,9 +572,7 @@ while(1){
           if($l_nowplaying === '再生中' ){
               logtocmd("再生中(カラオケ配信)を検出。終了待ち\n");
           }else{
-              if( $usevideocapture == 1 ) {
-                  captureviewstart($playerpath,1);
-              }
+              captureviewstart($playerpath,1);
               $db->beginTransaction();
               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
               $ret = $db->exec($sql);

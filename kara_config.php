@@ -118,6 +118,10 @@ function readconfig_array()
         $gitcommandpath = "gitcmd\\cmd\\git.exe";
         $config_ini = array_merge($config_ini,array("gitcommandpath" => urlencode($gitcommandpath)));            
     }    
+    if(!array_key_exists("max_filesize", $config_ini)){
+        $max_filesize = 800;
+        $config_ini = array_merge($config_ini,array("max_filesize" => $max_filesize));
+    }    
     
     return $config_ini;
 

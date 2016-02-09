@@ -118,6 +118,17 @@ if(array_key_exists("nicopass", $_REQUEST)) {
     $newnicopass = $_REQUEST["nicopass"];
 }
 
+if(array_key_exists("captureapli_path", $_REQUEST)) {
+    $newcaptureapli_path = $_REQUEST["captureapli_path"];
+}
+
+if(array_key_exists("max_filesize", $_REQUEST)) {
+    $newmax_filesize = $_REQUEST["max_filesize"];
+}
+
+
+
+
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
 }
@@ -317,6 +328,20 @@ if (isset($newnicopass)){
     $change_counter++;
 }
 
+if (isset($newcaptureapli_path)){
+    $captureapli_path = $newcaptureapli_path;
+    $config_ini = array_merge($config_ini,array("captureapli_path" => urlencode($captureapli_path)));
+    $change_counter++;
+}
+
+if (isset($newmax_filesize)){
+    $max_filesize = $newmax_filesize;
+    $config_ini = array_merge($config_ini,array("max_filesize" => urlencode($max_filesize)));
+    $change_counter++;
+}
+
+
+
 if(  $change_counter > 0 ){
     writeconfig2ini($config_ini,$configfile);
 }
@@ -387,13 +412,39 @@ if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-
     <label class="radio-inline"> <input type="radio" name="usenfrequset" value="2" <?php print ($config_ini["usenfrequset"]!=1)?'checked':' ' ?> /> 使用しない </label>
   </div>
   <div class="form-group">
+    <label for="max_filesize"> 検索結果に表示する最大ファイルサイズ(MB)<small> 0 で無制限 </small> </label>
+    </label>
+    <input type="text" name="max_filesize" size="100" class="form-control"
+<?php
+if(array_key_exists("max_filesize",$config_ini)) {
+print 'value="'.urldecode($config_ini["max_filesize"]).'"';
+}
+?>
+/>
+  </div>
+  <div class="form-group">
     <label class="radio control-label">配信曲にビデオキャプチャデバイスを使用 </label>
     <label class="radio-inline">
-      <input type="radio" name="usevideocapture" value="1" <?php print ($config_ini["usevideocapture"]==1)?'checked':' ' ?> /> 使用する
+      <input type="radio" name="usevideocapture" value="2" <?php print ($config_ini["usevideocapture"]!=1 && $config_ini["usevideocapture"]!=3)?'checked':' ' ?> /> 使用しない
     </label>
     <label class="radio-inline">
-      <input type="radio" name="usevideocapture" value="2" <?php print ($config_ini["usevideocapture"]!=1)?'checked':' ' ?> /> 使用しない
+      <input type="radio" name="usevideocapture" value="1" <?php print ($config_ini["usevideocapture"]==1)?'checked':' ' ?> /> MPC-BEを使用する
     </label>
+    <label class="radio-inline">
+      <input type="radio" name="usevideocapture" value="3" <?php print ($config_ini["usevideocapture"]==3)?'checked':' ' ?> /> 別のアプリを使用する
+    </label>
+  </div>
+  <div class="form-group">
+    <label >
+      配信表示アプリ <small>(「別アプリ使用」の設定の時のみ有効)</small>
+    </label>
+    <input type="text" name="captureapli_path" size="100" class="form-control"
+<?php
+if(array_key_exists("captureapli_path",$config_ini)) {
+print 'value="'.urldecode($config_ini["captureapli_path"]).'"';
+}
+?>
+/>
   </div>
   <div class="form-group">
     <label class="radio control-label"> 検索ログの保存 </label>
@@ -437,6 +488,7 @@ if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-
       <input type="radio" name="moviefullscreen" value="2" <?php print ($config_ini["moviefullscreen"]!=1)?'checked':' ' ?> /> 無効
     </label>
   </div>  
+
   <div class="form-group">
     <label >
       ヘルプURL <small>(https://www.evernote.com/shard/s213/sh/c0e87185-314f-446d-ac12-fd13f25f6cb9/78f03652cc14e2ae 等, 使用しないときは空で)</small>
@@ -448,6 +500,7 @@ print 'value="'.urldecode($config_ini["helpurl"]).'"';
 }
 ?>
 />
+  </div> 
   <div class="form-group">
     <label class="radio control-label"> 名無しでのリクエスト許可 </label>
     <label class="radio-inline">
@@ -478,6 +531,7 @@ print 'value="'.urldecode($config_ini["nonameusername"]).'"';
 print 'value="名無しさん"';}
 ?>
 />    
+  </div> 
 
 
   <div class="form-group">
@@ -514,11 +568,9 @@ if(array_key_exists("downloadfolder",$config_ini)) {
 }
 ?>
 />
-    </div>
-  </div>
 
     
-  </div>  
+    </div>  
   </div>  
   <h3>自動再生設定 </h3>
 
@@ -652,6 +704,7 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
 
   <input type="submit" class="btn btn-default btn-lg" value="設定" />
   </form>
+  </div>
 </div>
   <hr />
 <div class="container bg-info">

@@ -185,6 +185,9 @@ function searchlocalfilename($kerwords, &$result_array,$order = null)
 {
 
 		global $everythinghost;
+		global $config_ini;
+		//var_dump($config_ini);
+		
 		if(empty($order)){
 		    $order = 'sort=size&ascending=0';
 		}
@@ -194,6 +197,13 @@ function searchlocalfilename($kerwords, &$result_array,$order = null)
 		    $askeverythinghost = '['.$everythinghost.']';
 		}else {
 		    $askeverythinghost = $everythinghost;
+		}
+		
+		if(array_key_exists("max_filesize", $config_ini)){
+		  if( $config_ini["max_filesize"] > 0 ){
+		      $filesizebyte = $config_ini["max_filesize"] * 1024 * 1024;
+		      $kerwords = $kerwords.' size:<='.$filesizebyte;
+		  }
 		}
   		$jsonurl = "http://" . $askeverythinghost . ":81/?search=" . urlencode($kerwords) . "&". $order . "&path=1&path_column=3&size_column=4&case=0&json=1";
 //  		echo $jsonurl;
@@ -1187,6 +1197,15 @@ function update_fromgit($version_str, &$errmsg){
 function basename_jp($path){
     $p_info = explode('\\', $path);
     return end($p_info);
+}
+
+/*
+ * BR タグを改行コードに変換する
+ */
+function br2nl($string)
+{
+    // 大文字・小文字を区別しない
+    return preg_replace('/<br[[:space:]]*\/?[[:space:]]*>/i', "\n", $string);
 }
 
 ?>

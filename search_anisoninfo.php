@@ -43,6 +43,8 @@ function ansoninfo_gettitlelist($url,$l_kind){
     $result_dom=str_get_html($html);
     
     if(strcmp("program",$l_kind) == 0){
+      $title = $result_dom->find( 'div.subject' )[0]->plaintext;
+      //$results['title'] = $title;
       foreach( $result_dom->find( 'table.sorted' ) as $list ){
         foreach( $list->find( 'tr' ) as $tr ){
             $oped = null;
@@ -76,6 +78,7 @@ function ansoninfo_gettitlelist($url,$l_kind){
             if(isset($value)){
             $arrange = $value->plaintext;
             }
+            
 
             $result_one = array (
                                    'oped' => $oped,
@@ -83,7 +86,8 @@ function ansoninfo_gettitlelist($url,$l_kind){
                                    'artist' => $artist , 
                                    'lyrics' => $lyrics,
                                    'compose' => $compose,
-                                   'arrange' => $arrange
+                                   'arrange' => $arrange,
+                                   'title' => $title
                                    );
             $results[]=$result_one;            
         }
@@ -122,7 +126,8 @@ function ansoninfo_gettitlelist($url,$l_kind){
                                    'genre' => $genre , 
                                    'program' => $program,
                                    'oped' => $oped,
-                                   'date' => $date
+                                   'date' => $date,
+                                   'title' => $program
                                    );
             $results[]=$result_one;            
         }
@@ -172,10 +177,8 @@ shownavigatioinbar('searchreserve.php');
 
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
+<INPUT type=radio value=song name=m id="song" "><label for="song">曲 (よみがなの一部でOK)</label>
 <INPUT type=radio checked value=pro name=m id="pro" onclick="dsp(1)"><label for="pro">作品</label>
-<!---
-<INPUT type=radio value=song name=m id="song" onclick="dsp(2)"><label for="song">曲</label>
---->
 <INPUT type=radio value=person name=m id="person" onclick="dsp(3)"><label for="person">人物</label>
 <INPUT type=radio value=mkr name=m id="mkr" onclick="dsp(5)"><label for="mkr">制作(ブランド)</label>
 <!---
@@ -251,11 +254,23 @@ if(!isset($l_url)  ) {
             if(empty($showallresult)){
                 searchlocalfilename($checktitle,$result_a);
                 $resulturl='search.php?searchword='.urlencode($checktitle);
+                
+                $songinfotxt = '「'.$checktitle.'」';
+                if(array_key_exists("artist", $value)){
+                    $songinfotxt = $songinfotxt.' <br>歌：'.trim(br2nl($value["artist"]));
+                }
+                if(array_key_exists("title", $value)){
+                    $songinfotxt = $songinfotxt.' <br>作品：'.trim(br2nl($value["title"]));
+                }
+                if(array_key_exists("oped", $value)){
+                    $songinfotxt = $songinfotxt.' '.trim(br2nl($value["oped"]));
+                }
+                
                 echo '<dl class="dl-horizontal resultwordlist">';
                 if(  $result_a["totalResults"] == 0){
-                echo ' <dt class="resultwordlist">「'.$checktitle.'」の検索結果 </dt> <dd> ⇒'.$result_a["totalResults"]."件</dd>";
+                echo ' <div >'.$songinfotxt.'<br>検索結果  ⇒'.$result_a["totalResults"]."件</div>";
                 }else{
-                echo ' <dt class="resultwordlist">「'.$checktitle.'」の検索結果 </dt> <dd> <a href="'.$resulturl.'" >⇒'.$result_a["totalResults"].'件 </a></dd>';
+                echo ' <div ><a href="'.$resulturl.'" >'.$songinfotxt.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
                 }
                 echo '</dl>';
 
