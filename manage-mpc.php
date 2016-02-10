@@ -172,7 +172,9 @@ function captureviewstop(){
          }
        }
        if($process_found == 1){
-         $pscheck_cmd='taskkill  /im '.$capviewercommandname.' -f';
+         //$pscheck_cmd='taskkill  /im '.$capviewercommandname.' -f';
+         $pscheck_cmd='stopcapture.vbs '.$capviewercommandname;
+         
          exec($pscheck_cmd, $psresult );
          return true;
        }
@@ -191,6 +193,7 @@ function captureviewstart($playerpath,$waittime = 1){
        if(array_key_exists("captureapli_path", $config_ini)) {
          if(!empty($config_ini["captureapli_path"])) {
            global $MPCCMDURL;
+           mpcstop();
            $execcmd="start  \"\" \"".urldecode($config_ini["captureapli_path"])."\" > NUL \n";
            // logtocmd $execcmd;
            $fp = popen($execcmd,'r');
