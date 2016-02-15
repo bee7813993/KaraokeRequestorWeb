@@ -20,6 +20,11 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
 if (isset($_SERVER) && isset($_SERVER["SERVER_ADDR"]) ){
     //var_dump($_SERVER);
     $everythinghost = $_SERVER["SERVER_ADDR"];
+    $count_semi = substr_count($everythinghost, ':');
+    $count_dot = substr_count($everythinghost, '.');
+    if($count_semi > 0 && $count_dot == 0) {
+      $everythinghost = '['.$everythinghost.']';
+    }
 } else {
     $everythinghost = 'localhost';
 }
@@ -1192,6 +1197,51 @@ function update_fromgit($version_str, &$errmsg){
     }
     
     return true;
+}
+
+function make_preview_modal($filepath, $modalid) {
+  global $everythinghost;
+  
+  $dlpathinfo = pathinfo($filepath);
+  $filetype = '';
+  if($dlpathinfo['extension'] === 'mp4'){
+      $filetype = ' type="video/mp4"';
+  }else if($dlpathinfo['extension'] === 'flv'){
+      $filetype = ' type="video/x-flv"';
+  }else {
+      return "この動画形式はプレビューできません";
+  }  
+
+  $previewpath = $previewpath = "http://" . $everythinghost . ":81/" . urlencode($filepath);
+
+  $button='<a href="#" data-toggle="modal" class="previewmodallink btn btn-default" data-target="#'.$modalid.'" > プレビュー </a>';
+  
+  $modaldg='<!-- 2.モーダルの配置 -->'.
+'<div class="modal" id="'.$modalid.'" tabindex="-1">'.
+'  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+         <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="modal-label">動画プレビュー</h4>
+      </div>
+      <div class="modal-body">
+        <video id="preview_video" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}" width="90%" height="90%" >
+        <source src="'.
+$previewpath.'" '.$filetype.
+'/>
+        </video>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>';
+
+return $button."\n".$modaldg;
+
 }
 
 function basename_jp($path){

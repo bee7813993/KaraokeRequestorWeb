@@ -61,6 +61,13 @@ print_meta_header();
     <![endif]-->
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>    
+
+<link href="video-js/video-js.css" rel="stylesheet" type="text/css">
+<script src="video-js/video.js"></script>
+<script>
+videojs.options.flash.swf = "video-js/video-js.swf";
+</script>
+
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -80,6 +87,25 @@ if(!empty($downfilename) ){
 
   print $downfilename_base.'のダウンロードに成功<br />';
   print "time : ".$nd->DownloadStatus["total_time"].", size : ".$nd->DownloadStatus["size_download"];
+
+  
+  $previewpath = $previewpath = "http://" . $everythinghost . ":81/" . urlencode($downfilename);
+  
+  $dlpathinfo = pathinfo($downfilename_base);
+  
+  $filetype = '';
+  if($dlpathinfo['extension'] === 'mp4'){
+      $filetype = ' type="video/mp4"';
+  }else if($dlpathinfo['extension'] === 'flv'){
+      $filetype = ' type="video/x-flv"';
+  }else {
+      print "この動画形式は対応していません";
+      die;
+  }
+  print "<div>\n";
+  print make_preview_modal($downfilename,'preview_modal');
+  print "</div>\n";
+
   print<<<EOD
 <p>
 このファイルをリクエスト 
@@ -99,7 +125,20 @@ echo $downfilename;
 ">
 <input type="submit" value="リクエスト" class="btn btn-default">
 </form>
+<hr />
 EOD;
+
+if($dlpathinfo['extension'] === 'mp4'){
+  print '<form enctype="multipart/form-data" action="mp4mix_audio.php" method="POST";>';
+  print '<input type="hidden" name="MAX_FILE_SIZE" value="900000000" />';
+  print '<input type="hidden" name="basefilename" id="basefilename"  value='.urlencode($downfilename).'>';
+  print '<div class="form-group">';
+  print '  <label>音源差し替え<small>手元の端末内にあるm4aやmp3の音楽ファイルに音源を差し替えることが出来ます</small></label>';
+  print '  <input name="userfile" type="file" id="InputFile" class="form-control" />';
+  print '  <input type="submit" class="btn btn-default" value="音源差替" />';
+  print '</div>';
+
+}
 
 }else{
   if(!empty($nicoid))
