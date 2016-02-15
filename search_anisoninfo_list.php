@@ -252,8 +252,6 @@ function ansoninfo_gettitlelist($url,$l_m){
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    
     
 <title>anison.info検索ワード候補一覧</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />

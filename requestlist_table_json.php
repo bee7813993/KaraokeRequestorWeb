@@ -39,12 +39,17 @@ foreach($allrequest as $value ){
     }
     
     $onerequset += array("singer" =>  nl2br(htmlspecialchars($value['singer'])));
-    
+
+$showcommentblock = "";
+if(strlen($value['comment']) === 0){
+//    $showcommentblock = '<a class="btn btn-default" data-toggle="modal" data-target="#comment_modal_'.$value['id'].'">修正orレス</a>';
+    $showcommentblock = '<a href="#" data-toggle="modal" class="commentmodallink" data-target="#comment_modal_'.$value['id'].'"  title="このエリアを押すことでコメントにレスを付けたり編集したりできます">'.nl2br(htmlspecialchars($value['comment']))."</a>\n";
+} else {
+    $showcommentblock = '<a href="#" data-toggle="modal" class="commentmodallink" data-target="#comment_modal_'.$value['id'].'"  title="このエリアを押すことでコメントにレスを付けたり編集したりできます">'.nl2br(htmlspecialchars($value['comment']))."</a>\n";
+}    
     $comment_pf = <<<EOD
-<div style="width:100%%;height:100%%;">
-<div data-toggle="modal" data-target="#comment_modal_%s" style="width:100%%;height:100%%;" title="このエリアを押すことでコメントにレスを付けたり編集したりできます">
-\n %s 
-</div>\n
+<div style="position: relative;width:100%%;height:100%%;min-height: 1em;">
+%s 
 <!-- 2.モーダルの配置 -->
 <div class="modal" id="comment_modal_%s" tabindex="-1" >
   <div class="modal-dialog">
@@ -85,7 +90,7 @@ foreach($allrequest as $value ){
 </div>
 </div>
 EOD;
-    $comment = sprintf($comment_pf, $value['id'],  nl2br(htmlspecialchars($value['comment'])), $value['id'], $value['comment'], $value['id'],   nl2br(htmlspecialchars(returnusername($allrequest))), $value['id']);
+    $comment = sprintf($comment_pf, $showcommentblock, $value['id'], $value['comment'], $value['id'],   nl2br(htmlspecialchars(returnusername($allrequest))), $value['id']);
     $onerequset += array("comment" => $comment);
 
     $onerequset += array("method" => $value['kind']);
@@ -130,7 +135,7 @@ $action_pf = <<<EOD
 <li> <a class="requestmove" name="up"  id="requestup" value="up" onClick='moverequestlist(this,%s,"up","%s")' >上へ</a> </li>
 <li> <a class="requestmove" name="down" id="requestdown"  value="down" onClick='moverequestlist(this,%s,"down","%s")' > 下へ</a> </li>
 <li> <a class="requestmove" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' > 次に再生</a> </li>
-<li> <a class="" data-toggle="modal" data-target="#act_modal_%s">削除</a> </li>
+<li> <a href="#" class="" data-toggle="modal" data-target="#act_modal_%s">削除</a> </li>
 </ul>
 </div>
 <!--
