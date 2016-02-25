@@ -126,6 +126,13 @@ if(array_key_exists("max_filesize", $_REQUEST)) {
     $newmax_filesize = $_REQUEST["max_filesize"];
 }
 
+if(array_key_exists("usebgv", $_REQUEST)) {
+    $newusebgv = $_REQUEST["usebgv"];
+}
+
+if(array_key_exists("BGVfolder", $_REQUEST)) {
+    $newBGVfolder = $_REQUEST["BGVfolder"];
+}
 
 
 
@@ -340,6 +347,17 @@ if (isset($newmax_filesize)){
     $change_counter++;
 }
 
+if (isset($newusebgv)){
+    $usebgv = $newusebgv;
+    $config_ini = array_merge($config_ini,array("usebgv" => $usebgv));
+    $change_counter++;
+}
+
+if (isset($newBGVfolder)){
+    $BGVfolder = $newBGVfolder;
+    $config_ini = array_merge($config_ini,array("BGVfolder" => $BGVfolder));
+    $change_counter++;
+}
 
 
 if(  $change_counter > 0 ){
@@ -699,6 +717,27 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
     ></td>
   <tr>
   </table>
+
+  <div class="form-group">
+    <label class="radio control-label">BGVモード </label>
+    <label class="radio-inline"> <input type="radio" name="usebgv" value="1" <?php print ($config_ini["usebgv"]==1)?'checked':' ' ?> /> 使用する </label>
+    <label class="radio-inline"> <input type="radio" name="usebgv" value="2" <?php print ($config_ini["usebgv"]!=1)?'checked':' ' ?> /> 使用しない </label>
+
+    <div class="form-group">
+    <label class="radio control-label"> BGVフォルダ <small> 空でBGV検索画面無効 </small> </label>
+    <input type="text" name="BGVfolder" class="form-control"
+<?php
+if(array_key_exists("BGVfolder",$config_ini)) {
+    print 'value="'.urldecode($config_ini["BGVfolder"]).'"';
+}else {
+    print 'value=""';
+}
+?>
+/>
+
+    
+    </div>  
+  </div>
 
 
 

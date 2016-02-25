@@ -310,6 +310,10 @@ display: block;
 				display: list-item;
 				border: none;
 			}
+			#request_table tbody tr{
+				display: block;
+				margin-bottom: 1.5em;
+			}
 #request_table tbody td.filename{
 margin-bottom: 5px;
 list-style-type: none;
@@ -317,8 +321,17 @@ color: #fff;
 background: #000;
 }
 #request_table tbody td{
+width: calc(100% - 20px);
 margin-left: 20px;
 padding: 0;
+margin-right: 0px;
+}
+
+#request_table tbody td.comment{
+width: calc(100% - 20px);
+margin-left: 20px;
+padding: 0;
+margin-right: 0px;
 }
 
 #request_table tbody td.filename {
@@ -328,9 +341,7 @@ padding: 8px 0px;
 
 }
 
-#request_table tbody td.comment {
-width: 100%;
-}
+
 
 #request_table tbody td.singer:before { content: "[登録者] "; }
 #request_table tbody td.comment:before { content: "[コメント] "; }

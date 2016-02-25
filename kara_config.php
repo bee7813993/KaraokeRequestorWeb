@@ -122,6 +122,10 @@ function readconfig_array()
         $max_filesize = 800;
         $config_ini = array_merge($config_ini,array("max_filesize" => $max_filesize));
     }    
+    if(!array_key_exists("usebgv", $config_ini)){
+        $usebgv = 2;
+        $config_ini = array_merge($config_ini,array("usebgv" => $usebgv));
+    }    
     
     return $config_ini;
 
@@ -212,7 +216,8 @@ $sql = "create table IF NOT EXISTS requesttable (
  clientip text,
  clientua text,
  playtimes INTEGER,
- secret INTEGER
+ secret INTEGER,
+ loop INTEGER
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){

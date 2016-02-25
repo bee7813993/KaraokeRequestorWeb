@@ -4,6 +4,10 @@
   if( !empty($_REQUEST['songnext']) ){
       songnext();
   }
+
+  if(  array_key_exists('songstart',$_REQUEST) ){
+      songstart();
+  }  
   
   if(array_key_exists("cmd", $_REQUEST)) {
       $l_cmd = $_REQUEST["cmd"];
@@ -26,7 +30,9 @@
 <div align="center" class="playercontrol" id="playercontrol">
 <div class="row">
 <div class="col-xs-12">
-<input type="submit" value="再生開始" class="playstart btn btn-default" onClick="song_play()" />
+<form method="post"action="playerctrl_portal.php" style="display: inline" >
+<input type="submit" name="songstart" value="再生開始" class="playstart btn btn-default"  /> 
+</form>
 </div >
 </div>
 <div class="row">

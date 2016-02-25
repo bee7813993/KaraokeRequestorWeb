@@ -23,12 +23,22 @@ if (isset($_SERVER) && isset($_SERVER["SERVER_ADDR"]) ){
     $count_semi = substr_count($everythinghost, ':');
     $count_dot = substr_count($everythinghost, '.');
     if($count_semi > 0 && $count_dot == 0) {
-      $everythinghost = '['.$everythinghost.']';
+      $everythinghost = addipv6blanket($everythinghost);
     }
 } else {
     $everythinghost = 'localhost';
 }
 
+
+function addipv6blanket($ipv6addr){
+
+    if( (mb_substr($ipv6addr,0,1) == '[' ) and (mb_substr($ipv6addr,-1,1) == ']' ) ) {
+    return $ipv6addr;
+    } else {
+    return '['.$ipv6addr.']';
+    }
+
+}
 
 /**
  * createUri
@@ -186,7 +196,7 @@ function formatBytes($bytes, $precision = 2, array $units = null)
 }
 
 // 検索ワードから検索結果一覧を取得する処理
-function searchlocalfilename($kerwords, &$result_array,$order = null)
+function searchlocalfilename($kerwords, &$result_array,$order = null, $path = null)
 {
 
 		global $everythinghost;
@@ -197,12 +207,7 @@ function searchlocalfilename($kerwords, &$result_array,$order = null)
 		    $order = 'sort=size&ascending=0';
 		}
 		// IPv6check
-		$c_count = substr_count($everythinghost,':');
-		if ( $c_count > 1 ) {
-		    $askeverythinghost = '['.$everythinghost.']';
-		}else {
-		    $askeverythinghost = $everythinghost;
-		}
+	    $askeverythinghost = $everythinghost;
 		
 		if(array_key_exists("max_filesize", $config_ini)){
 		  if( $config_ini["max_filesize"] > 0 ){
@@ -283,9 +288,12 @@ print "<tbody>\n";
     		    echo "<br/>おすすめ度 :".$v['priority'];
     		}
         $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
-    		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
-    		echo "プレビュー";
-    		echo " </A></Div>";
+            echo "<div Align=\"right\">";
+            print make_preview_modal($previewpath,$k);
+            echo "</div>";
+//    		echo "<Div Align=\"right\"><A HREF = \"preview.php?movieurl=" . $previewpath . "\" >";
+//    		echo "プレビュー";
+//    		echo " </A></Div>";
     		echo "</td>";
     		echo "<td class=\"filesize\">";
     		echo formatBytes($v['size']);
@@ -367,7 +375,7 @@ function PrintLocalFileListfromkeyword($word,$order = null, $tableid='searchresu
     }
 }
 
-function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searchresult')
+function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searchresult',$bgvmode = 0)
 {
     global $priority_db;
     searchlocalfilename($word,$result_a,$order);
@@ -382,8 +390,8 @@ $(document).ready(function(){
   $('#%s').dataTable({
   "ajax": {
       "url": "searchfilefromkeyword_json.php",
-      "type": "GET",
-      "data": { keyword:"%s" },
+      "type": "POST",
+      "data": { keyword:"%s", bgvmode:%s },
       "dataType": 'json',
       "dataSrc": "",
   },
@@ -406,7 +414,7 @@ $(document).ready(function(){
 });
 </script>
 EOD;
-        echo sprintf($printjs,$tableid,$word);
+        echo sprintf($printjs,$tableid,addslashes($word),$bgvmode);
         // print table_base
         $printtablebase = <<<EOD
 <table id="%s" class="searchresult">
@@ -450,7 +458,7 @@ return $player;
 
 function getcurrentplayer(){
     global $db;
-    $sql = "SELECT * FROM requesttable  WHERE nowplaying = \"再生中\" ORDER BY reqorder ASC ";
+    $sql = "SELECT * FROM requesttable  WHERE nowplaying = \"再生中\" OR nowplaying = \"再生開始待ち\" ORDER BY reqorder ASC ";
     $select = $db->query($sql);
     $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
     $select->closeCursor();
@@ -847,6 +855,9 @@ EOD;
 }else if($kind == 'dd'){
 print '      <li><a href="'.$prefix.'searchreserve.php">検索＆予約MENU</a></li>';
 print '      <li role="separator" class="divider"></li>';
+if( $config_ini["usebgv"] == 1 && !empty($config_ini["BGVfolder"]) ){
+print '      <li><a href="'.$prefix.'search_bgv.php">BGV選択</a></li>';
+}
 print '      <li><a href="'.$prefix.'search.php">ファイル検索</a></li>';
 }
 
@@ -1202,17 +1213,27 @@ function update_fromgit($version_str, &$errmsg){
 function make_preview_modal($filepath, $modalid) {
   global $everythinghost;
   
+//  print $filepath;
+  
   $dlpathinfo = pathinfo($filepath);
+  if(array_key_exists('extension',$dlpathinfo)){
   $filetype = '';
   if($dlpathinfo['extension'] === 'mp4'){
       $filetype = ' type="video/mp4"';
   }else if($dlpathinfo['extension'] === 'flv'){
       $filetype = ' type="video/x-flv"';
+  }else if($dlpathinfo['extension'] === 'avi'){
+      $filetype = ' type="video/x-msvideo"';
+      return null;
   }else {
+      return null;
       return "この動画形式はプレビューできません";
   }  
+  }else {
+      return null;
+  }
 
-  $previewpath = $previewpath = "http://" . $everythinghost . ":81/" . urlencode($filepath);
+  $previewpath = "http://" . $everythinghost . ":81/" . urlencode($filepath);
 
   $button='<a href="#" data-toggle="modal" class="previewmodallink btn btn-default" data-target="#'.$modalid.'" > プレビュー </a>';
   

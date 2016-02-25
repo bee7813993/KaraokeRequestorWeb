@@ -19,6 +19,25 @@ function songnext(){
       }
 }
 
+function songstart(){
+      global  $db;
+      $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生開始待ち' ORDER BY reqorder ASC ";
+      $select = $db->query($sql);
+      if($select === false) return;
+      $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
+      $select->closeCursor();
+      if(count($currentsong) < 1){
+          //再生中の曲がないとき
+          print '<small>  </small>'."\n";
+          command_mpc(887);
+      }else {
+          $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = ".$currentsong[0]['id'];
+          $ret = $db->exec($sql);
+          sleep(2);
+          command_mpc(887);
+      }
+}
+
 function command_mpc($num){
     
     global $MPCCMDURL;

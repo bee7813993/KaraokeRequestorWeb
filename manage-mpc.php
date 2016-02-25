@@ -120,13 +120,36 @@ function startmpcandwait($playerpath,$waittime = 1){
    // logtocmd 'DEBUG: now mpc first check end';
 }
 
+function mpc_waiting_start($db, $id){
+
+// status を 再生開始待ちに
+   $db->beginTransaction();
+   $sql = "UPDATE requesttable set nowplaying = \"再生開始待ち\" WHERE id = $id ";
+   $ret = $db->exec($sql);
+   if (! $ret ) {
+       logtocmd("再生開始待ち への変更にしっぱいしました。<br>");
+   }
+   // logtocmd("DEBUG:再生開始待ち への変更。$id<br>");
+   $db->commit(); 
+// status が 再生中になるのを待つ
+   $state = 6;
+   while($state == 6){
+     $state = check_nowplaying_state ($db,$id);
+     sleep(0.5);
+   }
+   // logtocmd("DEBUG:再生中への変更確認。$id<br>");
 
 
+}
 
-function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1){
+
+function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db, $id){
      global $MPCCMDURL;
      global $MPCFILEOPENURL;
 
+    if( $playmode == 2) {
+            mpc_waiting_start($db, $id);
+    }
     if(mpcrunningcheck($playerpath)===FALSE){
         startmpcandwait($playerpath,$waittime);
     }
@@ -135,6 +158,7 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1){
    file_get_html_with_retry($MPCCMDURL);
 
     for($loopcount = 0 ; $loopcount < 1 ; $loopcount ++){
+       
        $requesturl = $MPCFILEOPENURL.rawurlencode($playfilepath);
        // logtocmd $requesturl;
        $mpcstat = file_get_contents($requesturl, 1);
@@ -147,11 +171,13 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1){
            break;
        }
     }
+/*
     if( $playmode == 2) {
         //一時停止する
         sleep($waittime);
         file_get_html_with_retry($MPCCMDURL."?wm_command=888");
     }
+*/
 }
 
 // Capture viewerソフトを終了させる
@@ -174,7 +200,7 @@ function captureviewstop(){
        if($process_found == 1){
          //$pscheck_cmd='taskkill  /im '.$capviewercommandname.' -f';
          $pscheck_cmd='stopcapture.vbs '.$capviewercommandname;
-         
+         // logtocmd('DEBUG:'.$pscheck_cmd);
          exec($pscheck_cmd, $psresult );
          return true;
        }
@@ -195,7 +221,7 @@ function captureviewstart($playerpath,$waittime = 1){
            global $MPCCMDURL;
            mpcstop();
            $execcmd="start  \"\" \"".urldecode($config_ini["captureapli_path"])."\" > NUL \n";
-           // logtocmd $execcmd;
+           logtocmd ($execcmd);
            $fp = popen($execcmd,'r');
            //exec($execcmd);
            pclose($fp);
@@ -257,13 +283,10 @@ function runningcheck_shop_karaoke($db,$id){
    $exit = 1;
    while($exit == 1)
    {
-       $sql = "SELECT nowplaying FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
-       $select = $db->query($sql);
-       $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
-       $select->closeCursor();
-       //var_dump($currentstatus);
-       if( $currentstatus[0]['nowplaying'] === '停止中' || $currentstatus[0]['nowplaying'] === '再生済'){
-           logtocmd (date("H.i.s")."Status is change to ".$currentstatus[0]['nowplaying']." at id: ".$id."\n");
+       // db statusを確認
+       $stat = check_nowplaying_state ($db,$id);
+       if($stat === 3  || $stat === 4 || $stat === 5){
+           logtocmd (date("H.i.s")."Status is change to ".$stat." at id: ".$id."\n");
            $exit = 0;
            break;
        }
@@ -277,12 +300,9 @@ function runningcheck_audio($db,$id,$playerchecktimes){
    $exit = 1;
    while($exit == 1)
    {
-       $sql = "SELECT nowplaying FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
-       $select = $db->query($sql);
-       $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
-       $select->closeCursor();
-       //var_dump($currentstatus);
-       if( $currentstatus[0]['nowplaying'] === '停止中' ){
+       // db statusを確認
+       $stat = check_nowplaying_state ($db,$id);
+       if($stat === 3 ){
            $exit = 0;
            break;
        }
@@ -339,6 +359,213 @@ function minimum_playtimescheck_withoutme($all, $myid)
     return $m_value;
 }
 
+/**
+ * @fn
+ * check_filetype
+ * @brief 指定したIDのファイルタイプを返す
+ * @param ($db) DB
+ * @param ($id) ID
+ * @return 1: movie, 2 : audio, false :error
+ */
+function check_filetype ($db,$id){
+
+        $sql = "SELECT fullpath FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+        $select = $db->query($sql);
+        $rowall = $select->fetchAll(PDO::FETCH_ASSOC);
+        $select->closeCursor();
+        
+        if($rowall === false) {
+            logtocmd ("ERROR : Filename of $id is none");
+            return false;
+        }
+        
+        $filepath = $rowall[0]['fullpath'];
+
+        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
+        if( empty($extension) ){
+            logtocmd ("ERROR : File of $id has no extension : $filepath");
+            return false;
+        // Audio File
+        }elseif( strcasecmp($extension,"mp3") == 0 ){
+            return 2;
+        }elseif(strcasecmp($extension,"m4a") == 0 ){
+            return 2;
+        }elseif(strcasecmp($extension,"wav") == 0 ){
+            return 2;
+        }elseif(strcasecmp($extension,"ogg") == 0 ){
+            return 2;
+        }elseif(strcasecmp($extension,"flac") == 0 ){
+            return 2;
+        }elseif(strcasecmp($extension,"wma") == 0 ){
+            return 2;
+        }elseif(strcasecmp($extension,"aac") == 0 ){
+            return 2;
+        // Movie File
+        }elseif(strcasecmp($extension,"mp4") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"avi") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"mkv") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"mpg") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"flv") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"webm") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"wmv") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"ogm") == 0 ){
+            return 1;
+        }elseif(strcasecmp($extension,"mov") == 0 ){
+            return 1;
+        }else{
+        // unknown file set to movie
+            return 1;
+        }
+}
+
+
+/**
+ * @fn
+ * check_nowplaying_state
+ * @brief 
+ * @param ($db) DB
+ * @param ($id) ID
+ * @return 1:未再生, 2:再生中, 3:停止中, 4:再生済, 5:再生済？, その他：設定されている文字列
+ */
+function check_nowplaying_state ($db,$id){
+    $sql = "SELECT nowplaying FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+    $select = $db->query($sql);
+    if($select === false){
+        logtocmd ("ERROR : nowplaying of $id is none");
+        return false;
+    }
+    $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+    
+    if($currentstatus === false) {
+        logtocmd ("ERROR : nowplaying of $id is none");
+        return false;
+    }
+    $c_status = $currentstatus[0]['nowplaying'];
+    
+    if($c_status === '未再生'){
+        return 1;
+    }else if($c_status === '再生中'){
+        return 2;
+    }else if($c_status === '停止中'){
+        return 3;
+    }else if($c_status === '再生済'){
+        return 4;
+    }else if($c_status === '再生済？'){
+        return 5;
+        
+    }else if($c_status === '再生開始待ち'){
+        return 6;
+    }else{
+        return $c_status;
+    }
+        
+}
+
+function song_start_again($db,$id){
+
+    $kind = check_filetype ($db,$id);
+    if( $kind === 1){
+        // case mpc
+        global $MPCCMDURL;
+        $requesturl=$MPCCMDURL.'?wm_command=-1&percent=0';
+        $res = file_get_html_with_retry($requesturl);
+        sleep(0.5);
+        $requesturl=$MPCCMDURL.'?wm_command=887';
+        $res = file_get_html_with_retry($requesturl);
+    }else if( $kind === 2) {
+        // case foobar
+        global $FOOBARSTATURL;
+        $requesturl=$MPCCMDURL.'?cmd=SeekSecond&param1=0';
+        $res = file_get_html_with_retry($requesturl);
+    }else {
+        break;
+    }
+}
+
+function song_stop($kind){
+
+    if( $kind === 1){
+        // case mpc
+        global $MPCCMDURL;
+        $requesturl=$MPCCMDURL.'?wm_command=888';
+        $res = file_get_html_with_retry($requesturl);
+    }else if( $kind === 2) {
+        // case foobar
+        global $FOOBARSTATURL;
+        $requesturl=$MPCCMDURL.'?cmd=PlayOrPause&param1=0';
+        $res = file_get_html_with_retry($requesturl);
+    }else {
+        break;
+    }
+}
+
+/**
+ * @fn
+ * check_request_loop
+ * @brief 
+ * @param ($db) DB
+ * @param ($id) ID
+ * @return 1:Set loop, other:not set loop
+ */
+
+function check_request_loop($db,$id){
+    $sql = "SELECT loop FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+    $select = $db->query($sql);
+    if($select === false) return false;
+    $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+    
+    if($currentstatus === false) {
+        logtocmd ("ERROR : nowplaying of $id is none");
+        return false;
+    }
+    $c_status = $currentstatus[0]['loop'];
+    return $c_status;
+    
+}
+
+function check_end_song($db,$id,$playerchecktimes,$playmode){
+
+    $exit = 1;
+    $kind = check_filetype ($db,$id);
+    while($exit == 1)
+    {
+       // db statusを確認
+       $stat = check_nowplaying_state ($db,$id);
+       print $stat;
+       if($stat === 3 ){
+           break;
+       }
+       
+       $loopflg = check_request_loop($db,$id);
+       
+       
+       if( $kind === 1){
+           runningcheck_mpc($db,$id,$playerchecktimes);
+       }else if( $kind === 2) {
+           runningcheck_audio($db,$id,$playerchecktimes);
+       }else {
+           break;
+       }
+       
+       if($loopflg == 1) {
+//       if($playmode == 2) {
+           song_start_again($db,$id);
+       }else {
+           break;
+       }
+    }
+    song_stop( $kind );
+}
+
 function runningcheck_mpc($db,$id,$playerchecktimes){
 
    global $MPCSTATURL;
@@ -348,12 +575,8 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
    while($exit == 1)
    {
        // db statusを確認
-       $sql = "SELECT nowplaying FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
-       $select = $db->query($sql);
-       $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
-       $select->closeCursor();
-       //var_dump($currentstatus);
-       if( $currentstatus[0]['nowplaying'] === '停止中' ){
+       $stat = check_nowplaying_state ($db,$id);
+       if($stat === 3 ){
            break;
        }
        
@@ -392,7 +615,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
        if($playtime > 1 ) $startonce = true;
        // logtocmd "DEBUG : $mpsctat_array[2], $playtime : $totaltime \n";
 
-       sleep(2);
+       sleep(1.5);
    }
 }
 
@@ -567,8 +790,6 @@ while(1){
         $playerchecktimes = 3;
      }
      
-     
-
        
        if( strcmp ($l_kind , "カラオケ配信") === 0 )
        {
@@ -618,17 +839,17 @@ while(1){
         }
            
            // 拡張子をチェックしてPlayerを選択
-           $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-           if( (strcasecmp($extension,"mp3") == 0 
-           || strcasecmp($extension,"m4a") == 0 
-           || strcasecmp($extension,"wav") == 0 ) && (strcmp ($l_kind , "URL指定") !== 0) ){
+           $filetype = check_filetype ($db,$l_id);
+           if( $filetype == 2 && (strcmp ($l_kind , "URL指定") !== 0) ){
                // audio file
                if($l_nowplaying === '再生中' ){
                    logtocmd("再生中(foobar再生)を検出。現在の曲の終了待ち\n");
                }else{
+                   
                    if($playmode == 1 || $playmode == 4 || $playmode == 5){
                        $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
                    }elseif ($playmode == 2){
+                       mpc_waiting_start($db, $l_id);
                        $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
                    }else{
                        logtocmd(" Debug : now auto play is off : $playmode\n");
@@ -655,11 +876,11 @@ while(1){
                    // とりあえず動画Playerを終了する。
                    mpcstop();
 
-                   sleep(1);
+                   // sleep(1);
                    startfoobarandwait($filepath,3);
                    if ($playmode == 2){
-                      sleep(1);
-                      exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
+//                      sleep(0.5);
+//                      exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
                    }
                    sleep($waitplayercheckstart); // Player 起動待ち
 
@@ -714,13 +935,13 @@ while(1){
                      logtocmd("再生中 への変更に失敗しました。<br>");
                    }
                    $db->commit();
-                   sleep(1);
+                   sleep(0.5);
                    // web経由でファイル再生
                    //logtocmd 'MPC fileopen start '."\n";
                    if(strcmp ($l_kind , "URL指定") == 0){
                        exec($execcmd);
                    }else{
-                       mpcplaylocalfile($playerpath,$filepath_utf8,$playmode,1);
+                       mpcplaylocalfile($playerpath,$filepath_utf8,$playmode,1,$db,$l_id);
                    }
                    //logtocmd 'MPC fileopen end '."\n";
                    
@@ -740,7 +961,7 @@ while(1){
                        commentpost_v2($nm,$col,$size,$msg,$commenturl);
                    }
                }
-               runningcheck_mpc($db,$l_id,$playerchecktimes);
+               check_end_song($db,$l_id,$playerchecktimes,$playmode);
                //logtocmd 'running check finished 終了'."\n";
            }
        

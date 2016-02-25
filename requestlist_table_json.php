@@ -32,12 +32,16 @@ foreach($allrequest as $value ){
     $onerequset = array();
     $onerequset += array("no" => $reqcount);
     $reqcount -= 1;
+    $songfilename = '';
     if( ($value['secret'] == 1 ) && strcmp($value['nowplaying'],'未再生') == 0){
-        $onerequset += array("filename" => '<div '.$playingid.' >'.  nl2br(htmlspecialchars(' ヒ・ミ・ツ♪(シークレット予約) ')).'</div>');
+        $songfilename = nl2br(htmlspecialchars(' ヒ・ミ・ツ♪(シークレット予約) '));
     }else{
-        $onerequset += array("filename" => '<div '.$playingid.' >'.  nl2br(htmlspecialchars($value['songfile'])).'</div>');
+        $songfilename = nl2br(htmlspecialchars($value['songfile']));
     }
-    
+    if($value['loop'] == 1){
+        $songfilename = '<b>'.htmlspecialchars('【ＢＧＶ】').'</b><br>'.$songfilename;
+    }
+    $onerequset += array("filename" => '<div '.$playingid.' >'.  $songfilename.'</div>');
     $onerequset += array("singer" =>  nl2br(htmlspecialchars($value['singer'])));
 
 $showcommentblock = "";

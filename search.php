@@ -119,16 +119,7 @@ shownavigatioinbar('searchreserve.php');
   
 
   <div>
-  <!--- 結果表示順 <br>
-  <select name="order" class="searchtextbox" >
-  <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
-  <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
-  <option value="sort=path&ascending=0" <?php print selectedcheck("sort=path&ascending=0",$l_order); ?> >フォルダ名(昇順 Z→A)</option>
-  <option value="sort=name&ascending=1" <?php print selectedcheck("sort=name&ascending=1",$l_order); ?> >ファイル名(降順 A→Z)</option>
-  <option value="sort=name&ascending=0" <?php print selectedcheck("sort=name&ascending=0",$l_order); ?> >ファイル名(昇順 Z→A)</option>
-  <option value="sort=date_modified&ascending=0" <?php print selectedcheck("sort=date_modified&ascending=0",$l_order); ?> >日付(新しい順)</option>
-  <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
---->
+
   </select>
   <div class="col-xs-12 col-sm-3" >
   <input type="submit" value="検索" class="btn btn-default ">
@@ -136,7 +127,9 @@ shownavigatioinbar('searchreserve.php');
   </div>
   <div class="clearleftfloat"> 
   </form>
-  and検索は スペース 区切り。not検索はnotにしたい単語の先頭に!(半角)<br>
+  and検索は スペース 区切り<br>
+  or検索は |(半角) 区切り<br>
+  not検索はnotにしたい単語の先頭に!(半角)<br>
   全件検索は*(半角)でいけるっぽい。<br><br>
   </div>
   <?php
@@ -146,25 +139,6 @@ shownavigatioinbar('searchreserve.php');
   	    $result_count =  searchresultcount_fromkeyword($word);
   	    echo $word."の検索結果 : "; //.$result_count.'件';
   	    
-  	   
-//        PrintLocalFileListfromkeyword($word,$l_order);
-/*
-print <<<EOD
-<table id="searchresult" class="searchresult">
-<thead>
-<tr>
-<th>No. <font size="-2" class="searchresult_comment">(おすすめ順)</font></th>
-<th>リクエスト </th>
-<th>ファイル名(プレビューリンク) </th>
-<th>サイズ </th>
-<th>パス </th>
-</tr>
-</thead>
-<tbody>
-</tbody>
-</table>
-EOD;
-*/
     PrintLocalFileListfromkeyword_ajax($word,$l_order,'searchresult');
   	}
   	?>

@@ -20,6 +20,11 @@ if(array_key_exists("set_directurl", $_REQUEST)) {
 }
     
 
+$forcebgv = 0;
+if(array_key_exists("forcebgv", $_REQUEST)) {
+    $forcebgv = $_REQUEST["forcebgv"];
+}
+
 
 include 'kara_config.php';
 
@@ -119,6 +124,7 @@ print 'return false;';
 }
 
 </script>
+<script type="text/javascript" charset="utf8" src="js/requsetlist_confirm.js"></script>
 </head>
 <body>
 
@@ -241,9 +247,25 @@ print('<span style="visibility:hidden;">');
 </div>
 <div class="checkbox">
 <label>
-<input type="checkbox" name="secret" value="1" > シークレット予約(歌うまで曲名を表示しません)
+<input type="checkbox" name="secret" value="1" /> シークレット予約(歌うまで曲名を表示しません)
 </label>
 </div>
+<?php
+if($config_ini['usebgv'] == 1 ){
+print '<div class="checkbox">';
+print "<label>";
+print '<input type="checkbox" name="loop" value="1" ';
+if($forcebgv == 1 ){
+    print 'checked';
+}elseif(empty($config_ini['BGVfolder'])){
+    print 'checked';
+}
+print ' /> BGVモード';
+print '</label>';
+print '</div>';
+}
+
+?>
 <div CLASS="row" >
 <div CLASS="pushbtn col-xs-12 col-sm-8">
 <input type="submit" value="実行" class="requestconfirm btn btn-default btn-lg" />

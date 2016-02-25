@@ -15,6 +15,15 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
 if(array_key_exists("keyword", $_REQUEST)) {
     $keyword = $_REQUEST["keyword"];
 }
+$bgvmode = 0;
+if(array_key_exists("bgvmode", $_REQUEST)) {
+    $bgvmode = $_REQUEST["bgvmode"];
+}
+
+$path = null;
+if(array_key_exists("path", $_REQUEST)) {
+    $path = $_REQUEST["path"];
+}
 
 if(!isset($keyword)){
     die();
@@ -25,7 +34,7 @@ $order = null;
 if(array_key_exists("order", $_REQUEST)) {
     $order = $_REQUEST["order"];
 }
-searchlocalfilename($keyword,$result_a,$order);
+searchlocalfilename($keyword,$result_a,$order,$path);
 
 if( $result_a["totalResults"] >= 1) {
     //build search result 
@@ -58,6 +67,9 @@ if( $result_a["totalResults"] >= 1) {
 		 $reqbtn = '<form action="request_confirm.php" method="post" >';
 		 $reqbtn = $reqbtn . "\n" . '<input type="hidden" name="filename" id="filename" value="'. $v['name'] . '" />';
 		 $reqbtn = $reqbtn . "\n" . '<input type="hidden" name="fullpath" id="fullpath" value="'. $v['path'] . '\\' . $v['name'] . '" />';
+		 if($bgvmode == 1){
+		     $reqbtn = $reqbtn . "\n" . '<input type="hidden" name="forcebgv" id="forcebgv" value="1" />';
+		 }
 		 $reqbtn = $reqbtn . "\n" . '<input type="submit" value="リクエスト" />';
 		 $reqbtn = $reqbtn . "\n" . '</form>';
 		 $oneresult += array("reqbtn" => $reqbtn);
@@ -66,8 +78,12 @@ if( $result_a["totalResults"] >= 1) {
 		 if($user == 'admin' ) {
 		     $fn = $fn . "\n" . '<br/>おすすめ度 :'.$v['priority'];
 		 }
-		 $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
-		 $fn = $fn . "\n" . '<Div Align="right"><A HREF = preview.php?movieurl='.urlencode($previewpath) . ' > プレビュー </A></Div>';
+//		 $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
+		 $previewpath = $v['path'] . "/" . $v['name'];
+		 $previewmodal = make_preview_modal($previewpath,$k); 
+		 $fn = $fn . "\n" . '<div Align="right">';
+		 $fn = $fn . $previewmodal;
+		 $fn = $fn . '</div>';
 		 $oneresult += array("filename" => $fn);
 		 
 		 $fs = formatBytes($v['size']);

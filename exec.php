@@ -16,6 +16,12 @@ $l_secret = 0;
 if(array_key_exists("secret", $_REQUEST)) {
     $l_secret = $_REQUEST["secret"];
 }
+
+$l_loop = 0;
+if(array_key_exists("loop", $_REQUEST)) {
+    $l_loop = $_REQUEST["loop"];
+}
+
 $l_clientip = $_SERVER['REMOTE_ADDR'];
 if(array_key_exists("clientip", $_REQUEST)) {
     $l_clientip = $_REQUEST["clientip"];
@@ -50,7 +56,7 @@ if($l_kind === "URL指定"){
 }
 
 try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret)";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop)";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -69,7 +75,8 @@ $arg = array(
 	':status' => 'new',
 	':ip' => $l_clientip  ,
 	':ua' => $l_clientua ,
-	':secret' => $l_secret
+	':secret' => $l_secret,
+	':loop' => $l_loop
 	);
 $ret = $stmt->execute($arg);
 if (! $ret ) {
