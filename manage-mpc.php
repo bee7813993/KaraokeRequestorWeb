@@ -6,8 +6,8 @@ if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
 }
 
 date_default_timezone_set('Asia/Tokyo');
-include 'kara_config.php';
 require_once 'commonfunc.php';
+require_once 'mpcctrl_func.php';
 //require_once("getid3/getid3.php");
 
 if(empty($playerpath)){
@@ -171,6 +171,10 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
            break;
        }
     }
+    
+    // BGVモードではmuteにする。
+    $loop = check_request_loop($db,$id);
+    if($loop == 1) toggle_mute_mpc();
 /*
     if( $playmode == 2) {
         //一時停止する
@@ -536,6 +540,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
 
     $exit = 1;
     $kind = check_filetype ($db,$id);
+    $loopflg = check_request_loop($db,$id);
     while($exit == 1)
     {
        // db statusを確認
@@ -545,7 +550,6 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
            break;
        }
        
-       $loopflg = check_request_loop($db,$id);
        
        
        if( $kind === 1){
@@ -564,6 +568,11 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
        }
     }
     song_stop( $kind );
+    // BGVモードではmuteを解除する。
+    if($loopflg == 1) {
+        toggle_mute_mpc();
+    }
+
 }
 
 function runningcheck_mpc($db,$id,$playerchecktimes){
@@ -617,6 +626,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
 
        sleep(1.5);
    }
+   sleep(2.5);
 }
 
 

@@ -23,7 +23,10 @@ function songstart(){
       global  $db;
       $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生開始待ち' ORDER BY reqorder ASC ";
       $select = $db->query($sql);
-      if($select === false) return;
+      if($select === false) {
+          command_mpc(887);
+          return;
+      }
       $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
       $select->closeCursor();
       if(count($currentsong) < 1){
@@ -77,6 +80,10 @@ function start_first_mpc(){
     $requesturl=$MPCCMDURL.'?wm_command=-1&percent=0';
     $res = file_get_html_with_retry($requesturl);
     return $res;
+}
+
+function toggle_mute_mpc(){
+    return command_mpc(909);;
 }
 
 function go_end_mpc(){
