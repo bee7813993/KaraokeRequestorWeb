@@ -9,7 +9,7 @@ if(array_key_exists("searchword", $_REQUEST)) {
     }
 }
 if(empty($word)){
-$searchword = urldecode($config_ini["BGVfolder"]);
+$searchword = "";
 }else{
 $searchword = $word.' '.urldecode($config_ini["BGVfolder"]);
 }

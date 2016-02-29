@@ -86,8 +86,28 @@ class NicoDownload
         $response = curl_exec($ch);
         if($response === false){
           print curl_error($ch);
+          return false;
         }
+        // print $response;
+        $logincheck = stristr($response,'Email address or password incorrect');
+        // print $logincheck;
         
+
+        if( $logincheck === false ){
+             // print("login OK");
+        }else{
+              print("ニコニコ動画ログインIDもしくはパスワードの設定が違います<br />");
+              return false;
+          }
+
+        $logincheck = stristr($response,'been locked due to multiple failed');
+        if( $logincheck === false ){
+            // print("login OK");
+        }else{
+              print("複数回ログインに失敗しアカウントロックされています<br />");
+              return false;
+        }
+
         
         // 動画情報の取得
         
@@ -112,7 +132,9 @@ class NicoDownload
         $response = curl_exec($ch);
         if($response === false){
           print curl_error($ch);
+          return false;
         }
+
  
         // ビデオのダウンロードURLを割り出す
         $movieurl = $this->GetdownloadURL($response);
@@ -406,7 +428,11 @@ class NicoDownload
     private function GetdownloadURL($data){
 
       parse_str(urldecode($data));
+      if(!empty($url)){
       return $url;
+      }else{
+      return false;
+      }
 
       //old
       preg_match("'url=(.*?)&ms'", urldecode($data), $match);

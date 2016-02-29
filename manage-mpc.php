@@ -490,7 +490,7 @@ function song_start_again($db,$id){
         $requesturl=$MPCCMDURL.'?cmd=SeekSecond&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
-        break;
+        return false;
     }
 }
 
@@ -507,7 +507,7 @@ function song_stop($kind){
         $requesturl=$MPCCMDURL.'?cmd=PlayOrPause&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
-        break;
+        return false;
     }
 }
 

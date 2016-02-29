@@ -14,12 +14,12 @@ if(array_key_exists("nicoid", $config_ini)) {
 if(array_key_exists("nicopass", $config_ini)) {
     $nicopass = $config_ini["nicopass"];
 }
-
+$nicoid_str = "";
 if(nicofuncenabled()) {
 
 if(array_key_exists("nicoid", $_REQUEST)) {
     $nicoid = $_REQUEST["nicoid"];
-    
+    $nicoid_str = $nicoid;
     require_once 'nicodownloader.php';
     
     $nd = new NicoDownload();
@@ -142,7 +142,7 @@ if($dlpathinfo['extension'] === 'mp4'){
 
 }else{
   if(!empty($nicoid))
-    echo "$nicoidのダウンロードに失敗しました\n";
+    echo $nicoid_str."のダウンロードに失敗しました\n";
 
 
   if(nicofuncenabled()){
