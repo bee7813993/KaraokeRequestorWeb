@@ -6,7 +6,7 @@
 
 [Setup]
 AppName=KaraokeRequestorWeb for xampp
-AppVersion=0.09.6
+AppVersion=0.09.7
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
 AppendDefaultDirName=no
@@ -55,6 +55,7 @@ Source: "favicon.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: ".htaccess"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "gitbase\.git\*"; DestDir: "{app}\.git"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "gitcmd\*"; DestDir: "{app}\gitcmd"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
+Source: "l-smash\*"; DestDir: "{app}\gitcmd"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 
 [Run]
 ;;Filename: "{tmp}\xampp-win32-5.6.12-0-VC11-installer.exe";  StatusMsg: "Installing xampp..."
