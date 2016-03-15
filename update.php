@@ -163,6 +163,37 @@ print "DEBUG:".$sql_u.'<br />';
 
 }
 
+$l_value = "";
+if(array_key_exists("secret", $_REQUEST)) {
+    $l_value = $_REQUEST["secret"];
+
+    try{
+    $sql_u = 'UPDATE requesttable set secret = \''. $l_value . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
+print "DEBUG:".$sql_u.'<br />';
+    $ret = $db->query($sql_u);
+    }catch(PDOException $e) {
+		printf("Error: %s\n", $e->getMessage());
+		die();
+    }
+}
+
+$l_value = "";
+if(array_key_exists("loop", $_REQUEST)) {
+    $l_value = $_REQUEST["loop"];
+
+    try{
+    $sql_u = 'UPDATE requesttable set loop = \''. $l_value . '\' WHERE id = '. $l_id;
+if(!empty($DEBUG))
+print "DEBUG:".$sql_u.'<br />';
+    $ret = $db->query($sql_u);
+    }catch(PDOException $e) {
+		printf("Error: %s\n", $e->getMessage());
+		die();
+    }
+}
+
+
 
 print("現在の登録状況<br>");
 
