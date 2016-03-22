@@ -902,13 +902,13 @@ if( nicofuncenabled() === true){
 if( $connectinternet == 1){
   if($kind == 'button'){
     print '<div align="center" >';
-    print '<form method="GET" action="request_confirm_url.php?shop_karaoke=1" >';
+    print '<form method="GET" action="request_confirm_url.php?shop_karaoke=0" >';
     print '<input type="hidden" name="set_directurl" value="1" />';
     print '<input type="submit" name="URL"   value="インターネット直接再生はこちらから(Youtube等)" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
   }else if($kind == 'dd'){
-    print '      <li><a href="'.$prefix.'request_confirm_url.php?shop_karaoke=1&set_directurl=1">youtube</a></li>';
+    print '      <li><a href="'.$prefix.'request_confirm_url.php?shop_karaoke=0&set_directurl=1">URL(youtube等)</a></li>';
   }
 }
 

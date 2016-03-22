@@ -7,9 +7,20 @@ $(document).ready(function()
         
         // 操作対象のフォーム要素を取得
         var $form = $(this);
+        var $script     = $('#nanasycheck');
         
         // 送信ボタンを取得
         var $button = $form.find('input[type="submit"]');
+        var newname = $('form input[name="freesinger"]').val();
+        var existname = $('#singer').val();
+        var existname_setting = JSON.parse($script.attr('data-nanasy'));
+        var nanasyflg = JSON.parse($script.attr('data-nanasyflg'));
+        
+        if (newname == "" && existname == existname_setting ) {
+            if(nanasyflg != 1) {
+                return false;
+            }
+        }
         
                 /**
                  * Ajax通信メソッド

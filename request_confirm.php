@@ -71,6 +71,9 @@ function selectedcheck($rt,$singer){
     return FALSE;
 }
 
+function json_safe_encode($data){
+    return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+}
 
 
 ?>
@@ -124,7 +127,14 @@ print 'return false;';
 }
 
 </script>
-<script type="text/javascript" charset="utf8" src="js/requsetlist_confirm.js"></script>
+<?php 
+$nanasyname = $config_ini["nonameusername"];
+?>
+<script id="nanasycheck" type="text/javascript" charset="utf8" src="js/requsetlist_confirm.js" 
+     data-nanasy ='<?php echo json_safe_encode(urldecode($nanasyname)); ?>'
+     data-nanasyflg ='<?php echo json_safe_encode($config_ini['nonamerequest']); ?>'
+> </script>
+
 </head>
 <body>
 
