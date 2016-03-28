@@ -12,128 +12,7 @@ if ($_SERVER['PHP_AUTH_USER'] !== 'admin'){
 
 require_once 'commonfunc.php';
 
-if(array_key_exists("filename", $_REQUEST)) {
-    $newdb = $_REQUEST["filename"];
-}
-
-if(array_key_exists("playmode", $_REQUEST)) {
-    $newplaymode = $_REQUEST["playmode"];
-}
-
-if(array_key_exists("playerpath_any", $_REQUEST)) {
-    $newplayerpath = $_REQUEST["playerpath_any"];
-    // echo "set newplayerpath from any".$newplayerpath."\n";
-    if(empty($newplayerpath)){
-        $newplayerpath = $_REQUEST["playerpath"];
-        // echo "set newplayerpath from tmpl".$newplayerpath."\n";
-    }    
-}
-
-if(array_key_exists("foobarpath", $_REQUEST)) {
-    $newfoobarpath = $_REQUEST["foobarpath"];
-}
-
-if(array_key_exists("requestcomment", $_REQUEST)) {
-    $newrequestcomment = $_REQUEST["requestcomment"];
-}
-
-if(array_key_exists("usenfrequset", $_REQUEST)) {
-    $newusenfrequset = $_REQUEST["usenfrequset"];
-}
-
-if(array_key_exists("usevideocapture", $_REQUEST)) {
-    $newusevideocapture = $_REQUEST["usevideocapture"];
-}
-
-
-if(array_key_exists("historylog", $_REQUEST)) {
-    $newhistorylog = $_REQUEST["historylog"];
-}
-
-if(array_key_exists("connectinternet", $_REQUEST)) {
-    $newconnectinternet = $_REQUEST["connectinternet"];
-}
-
-if(array_key_exists("waitplayercheckstart", $_REQUEST)) {
-    $newwaitplayercheckstart = $_REQUEST["waitplayercheckstart"];
-}
-
-if(array_key_exists("playerchecktimes", $_REQUEST)) {
-    $newplayerchecktimes = $_REQUEST["playerchecktimes"];
-}
-
-if(array_key_exists("commenturl", $_REQUEST)) {
-    $newcommenturl = $_REQUEST["commenturl"];
-}
-
-if(array_key_exists("commenturl_base", $_REQUEST)) {
-    $newcommenturl_base = $_REQUEST["commenturl_base"];
-}
-
-if(array_key_exists("commentroom", $_REQUEST)) {
-    $newcommentroom = $_REQUEST["commentroom"];
-}
-
-
-if(array_key_exists("moviefullscreen", $_REQUEST)) {
-    $newmoviefullscreen = $_REQUEST["moviefullscreen"];
-}
-
-if(array_key_exists("helpurl", $_REQUEST)) {
-    $newhelpurl = $_REQUEST["helpurl"];
-}
-
-if(array_key_exists("autoplay_exec", $_REQUEST)) {
-    $newautoplay_exec = $_REQUEST["autoplay_exec"];
-}
-
-if(array_key_exists("autoplay_show", $_REQUEST)) {
-    $newautoplay_show = $_REQUEST["autoplay_show"];
-}
-
-if(array_key_exists("nonamerequest", $_REQUEST)) {
-    $newnonamerequest = $_REQUEST["nonamerequest"];
-}
-if(array_key_exists("nonameusername", $_REQUEST)) {
-    $newnonameusername = $_REQUEST["nonameusername"];
-}
-
-if(array_key_exists("downloadfolder", $_REQUEST)) {
-    $newdownloadfolder = $_REQUEST["downloadfolder"];
-}
-
-if(array_key_exists("roomno", $_REQUEST)) {
-    $newroomno = $_REQUEST["roomno"];
-}
-
-if(array_key_exists("roomurl", $_REQUEST)) {
-    $newroomurl = $_REQUEST["roomurl"];
-}
-
-if(array_key_exists("nicoid", $_REQUEST)) {
-    $newnicoid = $_REQUEST["nicoid"];
-}
-
-if(array_key_exists("nicopass", $_REQUEST)) {
-    $newnicopass = $_REQUEST["nicopass"];
-}
-
-if(array_key_exists("captureapli_path", $_REQUEST)) {
-    $newcaptureapli_path = $_REQUEST["captureapli_path"];
-}
-
-if(array_key_exists("max_filesize", $_REQUEST)) {
-    $newmax_filesize = $_REQUEST["max_filesize"];
-}
-
-if(array_key_exists("usebgv", $_REQUEST)) {
-    $newusebgv = $_REQUEST["usebgv"];
-}
-
-if(array_key_exists("BGVfolder", $_REQUEST)) {
-    $newBGVfolder = $_REQUEST["BGVfolder"];
-}
-
+$newconfig = $_REQUEST;
 
 
 if(array_key_exists("clearauth", $_REQUEST)) {
@@ -179,189 +58,53 @@ shownavigatioinbar();
 <?php
 $change_counter = 0;
 
-if (! empty($newdb)){
-    $dbname = $newdb;
-    $config_ini = array_merge($config_ini,array("dbname" => $dbname));
-    $change_counter++;
-}
-
-if (! empty($newplaymode)){
-    $playmode = $newplaymode;
-    $config_ini = array_merge($config_ini,array("playmode" => $playmode));
-    $change_counter++;
-}
-
-if (! empty($newplayerpath)){
-    $playerpath = $newplayerpath;
-    $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
-    $change_counter++;
-}
-
-if (! empty($newfoobarpath)){
-    $foobarpath = $newfoobarpath;
-    $config_ini = array_merge($config_ini,array("foobarpath" => urlencode($foobarpath)));
-    $change_counter++;
-}
-
-if (! empty($newrequestcomment)){
-    $requestcomment = $newrequestcomment;
-    $config_ini = array_merge($config_ini,array("requestcomment" => urlencode($requestcomment)));
-    $change_counter++;
-}
-if (! empty($newusenfrequset)){
-    $usenfrequset = $newusenfrequset;
-    $config_ini = array_merge($config_ini,array("usenfrequset" => $usenfrequset));
-    $change_counter++;
-}
+/*** for debug 
+print '<pre>';
+print "_REQUEST\n";
+var_dump($_REQUEST);
+print "config_ini\n";
+var_dump($config_ini);
+print '</pre>';
+***/
 
 
-if (! empty($newusevideocapture)){
-    $usevideocapture = $newusevideocapture;
-    $config_ini = array_merge($config_ini,array("usevideocapture" => $usevideocapture));
-    $change_counter++;
-}
-
-if (! empty($newhistorylog)){
-    $historylog = $newhistorylog;
-    $config_ini = array_merge($config_ini,array("historylog" => $historylog));
-    $change_counter++;
-}
-
-if (! empty($newconnectinternet)){
-    $connectinternet = $newconnectinternet;
-    $config_ini = array_merge($config_ini,array("connectinternet" => $connectinternet));
-    $change_counter++;
-}
-
-if (! empty($newwaitplayercheckstart)){
-    $waitplayercheckstart = $newwaitplayercheckstart;
-    $config_ini = array_merge($config_ini,array("waitplayercheckstart" => $waitplayercheckstart));
-    $change_counter++;
-}
-
-if (! empty($newplayerchecktimes)){
-    $playerchecktimes = $newplayerchecktimes;
-    $config_ini = array_merge($config_ini,array("playerchecktimes" => $playerchecktimes));
-    $change_counter++;
-}
-
-if (! empty($newcommenturl)){
-    $commenturl = $newcommenturl;
-    $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl)));
-    $change_counter++;
-}
-
-if (isset($newcommenturl_base)){
-    $commenturl_base = $newcommenturl_base;
-    $config_ini = array_merge($config_ini,array("commenturl_base" => urlencode($commenturl_base)));
-    $change_counter++;
-}
-
-if (! empty($newcommentroom)){
-    $commentroom = $newcommentroom;
-    $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));
-    $change_counter++;
-    iniroomchange($config_ini);
-}
-
-
-if (! empty($newmoviefullscreen)){
-    $moviefullscreen = $newmoviefullscreen;
-    $config_ini = array_merge($config_ini,array("moviefullscreen" => $moviefullscreen));
-    $change_counter++;
-}
-
-if (isset($newhelpurl)){
-    $helpurl = $newhelpurl;
-    $config_ini = array_merge($config_ini,array("helpurl" => urlencode($helpurl)));
-    $change_counter++;
-}
-
-if (isset($newautoplay_exec)){
-    $autoplay_exec = $newautoplay_exec;
-    $config_ini = array_merge($config_ini,array("autoplay_exec" => urlencode($autoplay_exec)));
-    $change_counter++;
-}
-if (isset($newautoplay_show)){
-    $autoplay_show = $newautoplay_show;
-    $config_ini = array_merge($config_ini,array("autoplay_show" => $autoplay_show));
-    $change_counter++;
-}
-
-if (isset($newnonamerequest)){
-    $nonamerequest = $newnonamerequest;
-    $config_ini = array_merge($config_ini,array("nonamerequest" => $nonamerequest));
-    $change_counter++;
-}
-
-if (isset($newnonameusername)){
-    $nonameusername = $newnonameusername;
-    $config_ini = array_merge($config_ini,array("nonameusername" => urlencode($nonameusername)));
-    $change_counter++;
-}
-
-if (isset($newdownloadfolder)){
-    $downloadfolder = $newdownloadfolder;
-    $config_ini = array_merge($config_ini,array("downloadfolder" => urlencode($downloadfolder)));
-    $change_counter++;
-}
-
-if (isset($newroomno) && isset($newroomurl)){
-
-    $roomno = $newroomno;
-    $roomurl = $newroomurl;
-    $roominfo = array();
-    $counter = 0;
-    foreach($roomno as $i){
-       if(empty($roomno[$counter]) && empty($roomurl[$counter])){}
-       else {
-           $roominfo[$roomno[$counter]]=$roomurl[$counter];
-       }
-       $counter++;
+// to urlencode
+foreach($newconfig as $key => $value){
+    if(is_array($value)){
+        foreach ($value as $roomno => $roomurl){
+            if($key === 'roomurl') {
+                if(!empty($newconfig['roomno'][$roomno])){
+                    $newconfig['roomurl'][$newconfig['roomno'][$roomno]]=$roomurl;
+                    unset($newconfig['roomurl'][$roomno]);
+                    unset($newconfig['roomno'][$roomno]);
+                }else{
+                    unset($newconfig['roomurl'][$roomno]);
+                    unset($newconfig['roomno'][$roomno]);
+                }
+            }
+        }
+    }else {
+        $newconfig[$key] = urlencode($value);
     }
-    $config_ini = array_merge($config_ini,array("roomurl" => $roominfo));
+}
+// $config_ini['roomurl'] = array();
+$config_ini_new = array_merge($config_ini,$newconfig);
+
+if(!empty($config_ini_new) ){
     $change_counter++;
 }
-
-if (isset($newnicoid)){
-    $nicoid = $newnicoid;
-    $config_ini = array_merge($config_ini,array("nicoid" => urlencode($nicoid)));
-    $change_counter++;
-}
-
-if (isset($newnicopass)){
-    $nicopass = $newnicopass;
-    $config_ini = array_merge($config_ini,array("nicopass" => urlencode($nicopass)));
-    $change_counter++;
-}
-
-if (isset($newcaptureapli_path)){
-    $captureapli_path = $newcaptureapli_path;
-    $config_ini = array_merge($config_ini,array("captureapli_path" => urlencode($captureapli_path)));
-    $change_counter++;
-}
-
-if (isset($newmax_filesize)){
-    $max_filesize = $newmax_filesize;
-    $config_ini = array_merge($config_ini,array("max_filesize" => urlencode($max_filesize)));
-    $change_counter++;
-}
-
-if (isset($newusebgv)){
-    $usebgv = $newusebgv;
-    $config_ini = array_merge($config_ini,array("usebgv" => $usebgv));
-    $change_counter++;
-}
-
-if (isset($newBGVfolder)){
-    $BGVfolder = $newBGVfolder;
-    $config_ini = array_merge($config_ini,array("BGVfolder" => $BGVfolder));
-    $change_counter++;
-}
-
 
 if(  $change_counter > 0 ){
-    writeconfig2ini($config_ini,$configfile);
+
+/**** for debug
+print '<pre>';
+print "config_ini_mod\n";
+var_dump($config_ini_new);
+print '</pre>';
+*****/
+
+    writeconfig2ini($config_ini_new,$configfile);
+    $config_ini = $config_ini_new;
 }
 
 ?>
@@ -383,7 +126,7 @@ if(  $change_counter > 0 ){
   <form name="allconfig" method="post" action="init.php">
   <div class="form-group">
     <label>DBファイル名</label>
-    <input type="text" name="filename" id="filename" class="form-control" value=<?php echo  $config_ini["dbname"]; ?> >
+    <input type="text" name="dbname" id="dbname" class="form-control" value=<?php echo  $config_ini["dbname"]; ?> >
   </div>
   
   <div class="form-group">
@@ -400,7 +143,8 @@ if(  $change_counter > 0 ){
     <label for="playerpath">MediaPlayerClassic PATH設定</label>
     <select  class="form-control" name="playerpath" id="playerpath" >  
       <option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
-      <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版 or MPC-BE64bit版)</option>
+      <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版)</option>
+      <option <?php print selectedcheck("C:\Program Files\MPC-BE x64\mpc-be64.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE x64\mpc-be64.exe" >C:\Program Files\MPC-BE x64\mpc-be64.exe (64bitOSでMPC-BE64bit版)</option>
     </select>
     <label > (任意のPATH選択) </label>
     <input class="form-control" type="text" name="playerpath_any" size="100" class="playerpath_any" 
@@ -464,6 +208,75 @@ print 'value="'.urldecode($config_ini["captureapli_path"]).'"';
 ?>
 />
   </div>
+  <div class="form-group">
+    <label >
+      配信開始時実行コマンド 
+    </label>
+    <input type="text" name="DeliveryCMD" size="100" class="form-control"
+<?php
+if(array_key_exists("DeliveryCMD",$config_ini)) {
+print 'value="'.urldecode($config_ini["DeliveryCMD"]).'"';
+}
+?>
+/>
+  </div>
+  <div class="form-group">
+    <label >
+      配信終了時実行コマンド 
+    </label>
+    <input type="text" name="DeliveryCMDEND" size="100" class="form-control"
+<?php
+if(array_key_exists("DeliveryCMDEND",$config_ini)) {
+print 'value="'.urldecode($config_ini["DeliveryCMDEND"]).'"';
+}
+?>
+/>
+  </div>
+
+  <div class="form-group">
+    <label class="radio control-label">BGVモード </label>
+    <label class="radio-inline"> <input type="radio" name="usebgv" value="1" <?php print ($config_ini["usebgv"]==1)?'checked':' ' ?> /> 使用する </label>
+    <label class="radio-inline"> <input type="radio" name="usebgv" value="2" <?php print ($config_ini["usebgv"]!=1)?'checked':' ' ?> /> 使用しない </label>
+
+    <div class="form-group">
+    <label class="radio control-label"> BGVフォルダ <small> 空でBGV検索画面無効 </small> </label>
+    <input type="text" name="BGVfolder" class="form-control"
+<?php
+if(array_key_exists("BGVfolder",$config_ini)) {
+    print 'value="'.urldecode($config_ini["BGVfolder"]).'"';
+}else {
+    print 'value=""';
+}
+?>
+/>
+    </div>
+    <div class="form-group">
+    <label >
+      BGV開始時実行コマンド 
+    </label>
+    <input type="text" name="BGVCMDSTART" size="100" class="form-control"
+<?php
+if(array_key_exists("BGVCMDSTART",$config_ini)) {
+print 'value="'.urldecode($config_ini["BGVCMDSTART"]).'"';
+}
+?>
+/>
+    </div>
+    <div class="form-group">
+    <label >
+      BGV終了時実行コマンド 
+    </label>
+    <input type="text" name="BGVCMDEND" size="100" class="form-control"
+<?php
+if(array_key_exists("BGVCMDEND",$config_ini)) {
+print 'value="'.urldecode($config_ini["BGVCMDEND"]).'"';
+}
+?>
+/>
+    </div>
+  </div>
+
+
   <div class="form-group">
     <label class="radio control-label"> 検索ログの保存 </label>
     <label class="radio-inline">
@@ -718,26 +531,6 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
   <tr>
   </table>
 
-  <div class="form-group">
-    <label class="radio control-label">BGVモード </label>
-    <label class="radio-inline"> <input type="radio" name="usebgv" value="1" <?php print ($config_ini["usebgv"]==1)?'checked':' ' ?> /> 使用する </label>
-    <label class="radio-inline"> <input type="radio" name="usebgv" value="2" <?php print ($config_ini["usebgv"]!=1)?'checked':' ' ?> /> 使用しない </label>
-
-    <div class="form-group">
-    <label class="radio control-label"> BGVフォルダ <small> 空でBGV検索画面無効 </small> </label>
-    <input type="text" name="BGVfolder" class="form-control"
-<?php
-if(array_key_exists("BGVfolder",$config_ini)) {
-    print 'value="'.urldecode($config_ini["BGVfolder"]).'"';
-}else {
-    print 'value=""';
-}
-?>
-/>
-
-    
-    </div>  
-  </div>
 
 
 
