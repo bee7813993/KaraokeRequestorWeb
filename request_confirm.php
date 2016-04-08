@@ -25,13 +25,31 @@ if(array_key_exists("forcebgv", $_REQUEST)) {
     $forcebgv = $_REQUEST["forcebgv"];
 }
 
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+    if(!is_numeric($selectid)){
+        $selectid = 'none';
+    }
+}
 
 include 'kara_config.php';
+
+if($shop_karaoke == 1 && is_numeric($selectid)){
+    $forcebgv = 1;
+}
 
 $sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
 $select = $db->query($sql);
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 $select->closeCursor();
+
+if(is_numeric($selectid)){
+    $sql = "SELECT * FROM requesttable where id = ". $selectid;
+    $select = $db->query($sql);
+    $selectrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+}
 
 function pickupsinger($rt)
 {
@@ -146,7 +164,11 @@ $nanasyname = $config_ini["nonameusername"];
 </label>
 <textarea name="filename" id="filename" class="form-control" rows="4" wrap="soft" style="width:100%" 
 <?php
-if($shop_karaoke == 1){ 
+if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+    echo "> ";
+    print $selectrequest[0]['songfile'];
+    echo "</textarea> ";
+}else if($shop_karaoke == 1){ 
     print 'placeholder="後でセットリスト作成の参考のためにできれば曲名を入れておいてください" >';
 
     if (empty($filename)){
@@ -176,10 +198,16 @@ if($shop_karaoke == 1){
     echo "</textarea> ";
     print '<input type="hidden" name="filename" id="filename" style="width:100%" value="'.$filename.'"  />';
     }
+
 ?>
 
-
     <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
+<?php
+if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+    print '<dt> BGV曲名 </dt>';
+    print '<dd>'. $filename.' <dd>';
+}
+?>
 </div>
 
 <div CLASS="form-group">
@@ -233,7 +261,10 @@ print('<span style="visibility:hidden;">');
 <dt>再生方法</dt>
 <dd>
 <?php 
-  if($shop_karaoke == 1){
+  if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+      print $selectrequest[0]['kind'];
+      $forcebgv = 1;
+  }else if($shop_karaoke == 1){
       print 'カラオケ配信'."\n";
       print '<input type="hidden" name="kind" id="kind"  value="カラオケ配信" />'."\n";
   }else if($set_directurl == 1){
@@ -267,14 +298,14 @@ print "<label>";
 print '<input type="checkbox" name="loop" value="1" ';
 if($forcebgv == 1 ){
     print 'checked';
-}elseif(empty($config_ini['BGVfolder'])){
-    print 'checked';
 }
 print ' /> BGVモード';
 print '</label>';
 print '</div>';
 }
-
+if(is_numeric($selectid)){
+print '<input type="hidden" name="selectid" id="selectid"  value='.$selectid.' />'."\n";
+}
 ?>
 <div CLASS="row" >
 <div CLASS="pushbtn col-xs-12 col-sm-8">

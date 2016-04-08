@@ -14,12 +14,17 @@ if(array_key_exists("nicoid", $config_ini)) {
 if(array_key_exists("nicopass", $config_ini)) {
     $nicopass = $config_ini["nicopass"];
 }
-$nicoid_str = "";
+
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
+
 if(nicofuncenabled()) {
 
 if(array_key_exists("nicoid", $_REQUEST)) {
     $nicoid = $_REQUEST["nicoid"];
-    $nicoid_str = $nicoid;
+    
     require_once 'nicodownloader.php';
     
     $nd = new NicoDownload();
@@ -120,10 +125,12 @@ echo $downfilename_base;
 <input type="hidden" name="fullpath" id="fullpath" value="
 EOD;
 
-echo $downfilename;
+  echo $downfilename.'" />';
+  if(is_numeric($selectid)){
+      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
+  }
   print<<<EOD
-">
-<input type="submit" value="リクエスト" class="btn btn-default">
+<input type="submit" value="リクエスト" class="btn btn-default" />
 </form>
 <hr />
 EOD;
@@ -135,6 +142,9 @@ if($dlpathinfo['extension'] === 'mp4'){
   print '<div class="form-group">';
   print '  <label>音源差し替え<small>手元の端末内にあるm4aやmp3の音楽ファイルに音源を差し替えることが出来ます</small></label>';
   print '  <input name="userfile" type="file" id="InputFile" class="form-control" />';
+  if(is_numeric($selectid)){
+      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
+  }
   print '  <input type="submit" class="btn btn-default" value="音源差替" />';
   print '</div>';
 
@@ -142,7 +152,7 @@ if($dlpathinfo['extension'] === 'mp4'){
 
 }else{
   if(!empty($nicoid))
-    echo $nicoid_str."のダウンロードに失敗しました\n";
+    echo "$nicoidのダウンロードに失敗しました\n";
 
 
   if(nicofuncenabled()){

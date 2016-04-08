@@ -32,6 +32,14 @@ if(array_key_exists("clientua", $_REQUEST)) {
     $l_clientua = $_REQUEST["clientua"];
 }
 
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+    if(!is_numeric($selectid)){
+        $selectid = 'none';
+    }
+}
+
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
 }
@@ -54,9 +62,9 @@ if($l_kind === "URL指定"){
 }else {
   $displayfilename = makesongnamefromfilename($l_filename) ;
 }
-
+if(is_numeric($selectid)){
 try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop)";
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, clientip=:ip, clientua=:ua,  secret=:secret, loop=:loop where id = ".$selectid;
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -71,6 +79,28 @@ $arg = array(
 	':comment' => $l_comment,
 	':kind' => $l_kind,
 	':fp' => $l_fullpath,
+	':ip' => $l_clientip  ,
+	':ua' => $l_clientua ,
+	':secret' => $l_secret,
+	':loop' => $l_loop
+	);
+}else {
+  try {
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop)";
+    $stmt = $db->prepare($sql);
+  } catch (PDOException $e) {
+	echo 'Connection failed: ' . $e->getMessage();
+  }
+	if ($stmt === false ){
+		print("INSERT　 prepare 失敗しました。<br>");
+	}
+
+  $arg = array(
+	':fn' =>  $displayfilename,
+	':sing' => $l_singer,
+	':comment' => $l_comment,
+	':kind' => $l_kind,
+	':fp' => $l_fullpath,
 	':np' => "未再生",
 	':status' => 'new',
 	':ip' => $l_clientip  ,
@@ -78,6 +108,7 @@ $arg = array(
 	':secret' => $l_secret,
 	':loop' => $l_loop
 	);
+}
 $ret = $stmt->execute($arg);
 if (! $ret ) {
 	print("${l_filename} を追加にしっぱいしました。");

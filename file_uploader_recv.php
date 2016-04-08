@@ -38,6 +38,11 @@ if (setlocale(LC_ALL, 'ja_JP.UTF-8','Japanese_Japan.932') === false) {
 require_once 'commonfunc.php';
 shownavigatioinbar('searchreserve.php');
 
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
+
 if(array_key_exists("uploaddfilename",$_REQUEST)) {
     $filename=basename($_REQUEST["uploaddfilename"]);
     // print '移動予定先ファイル:'.$filename;
@@ -75,6 +80,11 @@ print $_FILES['userfile']['name'].'のアップロードに成功';
 <form action="request_confirm.php" method="post">
 <input type="hidden" name="filename" id="filename" value="<?php echo makesongnamefromfilename($_FILES['userfile']['name']); ?>">
 <input type="hidden" name="fullpath" id="fullpath" value="<?php echo $uploadfile; ?>">
+<?php
+  if(is_numeric($selectid)){
+      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
+  }
+?>
 <input type="submit" value="リクエスト" class="btn btn-default">
 </form>
 </div>

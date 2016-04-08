@@ -10,6 +10,11 @@ if(array_key_exists("nicopass", $config_ini)) {
     $nicopass = $config_ini["nicopass"];
 }
 
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
+
 if(nicofuncenabled()) {
 
 if(array_key_exists("nicoid", $_REQUEST)) {
@@ -69,6 +74,11 @@ print<<<EOD
   <div class="form-group">
     <label>ニコニコ動画ID (smXXXXXX等)</label>
     <input class="form-control" type="text" name="nicoid"  value="" placeholder="sm000000等の動画ID"/>
+EOD;
+  if(is_numeric($selectid)){
+      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
+  }
+print<<<EOD
     <input type="submit" class="btn btn-default btn-lg" value="Download (押すとダウンロードが終わるまでしばらく待ちます)" />
   </div>
 </div>

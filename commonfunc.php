@@ -375,10 +375,13 @@ function PrintLocalFileListfromkeyword($word,$order = null, $tableid='searchresu
     }
 }
 
-function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searchresult',$bgvmode = 0)
+function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searchresult',$bgvmode = 0, $selectid = '')
 {
     global $priority_db;
     searchlocalfilename($word,$result_a,$order);
+    if(empty($bgvmode)){
+        $bgvmode = 0;
+    }
     
     if( $result_a["totalResults"] >= 1) {
         $result_withp = sortpriority($priority_db,$result_a);
@@ -391,7 +394,7 @@ $(document).ready(function(){
   "ajax": {
       "url": "searchfilefromkeyword_json.php",
       "type": "POST",
-      "data": { keyword:"%s", bgvmode:%s },
+      "data": { keyword:"%s", bgvmode:%s, selectid:%s },
       "dataType": 'json',
       "dataSrc": "",
   },
@@ -414,7 +417,10 @@ $(document).ready(function(){
 });
 </script>
 EOD;
-        echo sprintf($printjs,$tableid,addslashes($word),$bgvmode);
+        if(empty($selectid)){
+            $selectid = '"none"';
+        }
+        echo sprintf($printjs,$tableid,addslashes($word),$bgvmode,$selectid);
         // print table_base
         $printtablebase = <<<EOD
 <table id="%s" class="searchresult">
@@ -837,7 +843,7 @@ function showmode(){
      print '</div>';
 }
 
-function selectrequestkind($kind='button',$prefix = '' ){
+function selectrequestkind($kind='button',$prefix = '', $id='' ){
 
     global $playmode;
     global $connectinternet;
@@ -848,6 +854,11 @@ if($kind == 'button'){
 print <<<EOD
 <div  align="center" >
 <form method="GET" action="search.php" >
+EOD;
+if(!empty($id)){
+print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
+}
+print <<<EOD
 <input type="submit" name="曲検索はこちら"   value="曲検索はこちら" class="topbtn btn btn-default btn-lg"/>
 </form>
 </div>
@@ -866,6 +877,9 @@ if ($playmode != 4 && $playmode != 5){
     print '<div align="center" >';
     print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
     print '<input type="hidden" name="shop_karaoke" value="1" />';
+    if(!empty($id)){
+        print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
+    }
     print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
@@ -878,6 +892,9 @@ if (!empty($config_ini["downloadfolder"])){
   if($kind == 'button'){
     print '<div align="center" >';
     print '<form method="GET" action="file_uploader.php" >';
+    if(!empty($id)){
+        print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
+    }
     print '<input type="submit" name="UPL"   value="ファイルをアップロードして予約する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
@@ -890,6 +907,9 @@ if( nicofuncenabled() === true){
   if($kind == 'button'){
     print '<div align="center" >';
     print '<form method="GET" action="nicodownload_post.php" >';
+    if(!empty($id)){
+        print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
+    }
     print '<input type="submit" name="nico"   value="ニコニコ動画ダウンロード予約はこちら" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
@@ -904,6 +924,9 @@ if( $connectinternet == 1){
     print '<div align="center" >';
     print '<form method="GET" action="request_confirm_url.php?shop_karaoke=0" >';
     print '<input type="hidden" name="set_directurl" value="1" />';
+    if(!empty($id)){
+        print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
+    }
     print '<input type="submit" name="URL"   value="インターネット直接再生はこちらから(Youtube等)" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';

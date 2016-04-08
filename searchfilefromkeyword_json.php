@@ -20,6 +20,11 @@ if(array_key_exists("bgvmode", $_REQUEST)) {
     $bgvmode = $_REQUEST["bgvmode"];
 }
 
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
+
 $path = null;
 if(array_key_exists("path", $_REQUEST)) {
     $path = $_REQUEST["path"];
@@ -69,6 +74,9 @@ if( $result_a["totalResults"] >= 1) {
 		 $reqbtn = $reqbtn . "\n" . '<input type="hidden" name="fullpath" id="fullpath" value="'. $v['path'] . '\\' . $v['name'] . '" />';
 		 if($bgvmode == 1){
 		     $reqbtn = $reqbtn . "\n" . '<input type="hidden" name="forcebgv" id="forcebgv" value="1" />';
+		 }
+		 if(is_numeric($selectid)){
+		     $reqbtn = $reqbtn . "\n" . '<input type="hidden" name="selectid" id="selectid" value='.$selectid.' />';
 		 }
 		 $reqbtn = $reqbtn . "\n" . '<input type="submit" value="リクエスト" />';
 		 $reqbtn = $reqbtn . "\n" . '</form>';

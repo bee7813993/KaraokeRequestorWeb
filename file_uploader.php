@@ -36,6 +36,10 @@ document.all.upldfilename.value = document.all.InputFile.value;
 <?php
 require_once 'commonfunc.php';
 shownavigatioinbar('searchreserve.php');
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
 ini_set('memory_limit', '1536M');
 ini_set('post_max_size', '1024M');
 ini_set('upload_max_filesize', '1024M');
@@ -44,6 +48,11 @@ ini_set('upload_max_filesize', '1024M');
   <form enctype="multipart/form-data" action="file_uploader_recv.php" method="POST" onsubmit="saveFilename()";>
   <input type="hidden" name="MAX_FILE_SIZE" value="900000000" />
   <input type="hidden" name="uploaddfilename" id="upldfilename" >
+<?php
+  if(is_numeric($selectid)){
+      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
+  }
+?>
   <div class="form-group">
     <label for="InputFile">アップロードするファイルを指定</label>
     <input name="userfile" type="file" id="InputFile" class="form-control" />

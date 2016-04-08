@@ -2,6 +2,11 @@
 
 require_once 'commonfunc.php';
 
+$selectid = '';
+if(array_key_exists("id", $_REQUEST)) {
+    $selectid = $_REQUEST["id"];
+}
+
 ?>
 <!doctype html>
 <html lang="ja">
@@ -42,7 +47,7 @@ shownavigatioinbar();
 showmode();
 
 
-selectrequestkind();
+selectrequestkind('button','',$selectid);
 ?>
 
 

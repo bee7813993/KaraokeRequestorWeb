@@ -255,6 +255,21 @@ print('<span style="visibility:hidden;">');
 <input type="checkbox" name="secret" value="1" > シークレット予約(歌うまで曲名を表示しません)
 </label>
 </div>
+<?php
+if($config_ini['usebgv'] == 1 ){
+print '<div class="checkbox">';
+print "<label>";
+print '<input type="checkbox" name="loop" value="1" ';
+if($forcebgv == 1 ){
+    print 'checked';
+}
+print ' /> BGVモード';
+print '</label>';
+print '</div>';
+}
+
+?>
+
 <div CLASS="row" >
 <div CLASS="pushbtn col-xs-12 col-sm-8">
 <input type="submit" value="実行" class="requestconfirm btn btn-default btn-lg" />

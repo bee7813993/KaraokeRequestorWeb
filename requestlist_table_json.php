@@ -125,6 +125,8 @@ EOD;
         $onerequset += array("playstatus" => $value['reqorder']);
     }
 
+$sasikaemenu = '<li> <a class="requestmove" name="changesong" id="changesong" href="searchreserve.php?id='.$value['id'].'" value="changesong"  > 曲差し替え</a> </li>';
+
 $action_pf = <<<EOD
 <div class="dropdown">
 <form method="post" class="requestmove" action="delete.php">
@@ -139,6 +141,7 @@ $action_pf = <<<EOD
 <li> <a class="requestmove" name="up"  id="requestup" value="up" onClick='moverequestlist(this,%s,"up","%s")' >上へ</a> </li>
 <li> <a class="requestmove" name="down" id="requestdown"  value="down" onClick='moverequestlist(this,%s,"down","%s")' > 下へ</a> </li>
 <li> <a class="requestmove" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' > 次に再生</a> </li>
+%s
 <li> <a href="#" class="" data-toggle="modal" data-target="#act_modal_%s">削除</a> </li>
 </ul>
 </div>
@@ -201,7 +204,7 @@ EOD;
        }
     }
     
-    $action = sprintf($action_pf,$value['id'],htmlspecialchars($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],$value['id'],$dialogsongname,$value['id'],htmlspecialchars($value['songfile']), $tweet_link);
+    $action = sprintf($action_pf,$value['id'],htmlspecialchars($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$sasikaemenu,$value['id'],$value['id'],$dialogsongname,$value['id'],htmlspecialchars($value['songfile']), $tweet_link);
     $onerequset += array("action" => $action);
     
     if($user === "admin"){

@@ -9,11 +9,14 @@ if(array_key_exists("searchword", $_REQUEST)) {
     }
 }
 
-
 if(array_key_exists("order", $_REQUEST)) {
     $l_order = $_REQUEST["order"];
 }else{
     $l_order = 'sort=size&ascending=0';
+}
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
 }
 
 
@@ -109,12 +112,18 @@ shownavigatioinbar('searchreserve.php');
 <div class="col-xs-12 col-sm-12" >    検索ワード(ファイル名) </div>
   <div class="col-xs-12 col-sm-9" >
   <input type="text" name="searchword" class="searchtextbox" placeholder="歌手名作品名検索は下の外部DB連携で検索できます"
+
   <?php
      if(!empty ($word)){
      print 'value="' . $word . '"';
      }
   ?>
   >
+  <?php
+  if(is_numeric($selectid)){
+      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
+  }
+  ?>
   </div>
   
 
@@ -139,7 +148,7 @@ shownavigatioinbar('searchreserve.php');
   	    $result_count =  searchresultcount_fromkeyword($word);
   	    echo $word."の検索結果 : "; //.$result_count.'件';
   	    
-    PrintLocalFileListfromkeyword_ajax($word,$l_order,'searchresult');
+    PrintLocalFileListfromkeyword_ajax($word,$l_order,'searchresult',0,$selectid);
   	}
   	?>
 <hr />

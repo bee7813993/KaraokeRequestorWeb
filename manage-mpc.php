@@ -174,7 +174,16 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
     
     // BGVモードではmuteにする。
     $loop = check_request_loop($db,$id);
-    if($loop == 1) toggle_mute_mpc();
+    if($loop == 1) {
+        global $config_ini;
+
+        toggle_mute_mpc();
+        // BGV スタートコマンドを実行する。
+        if( array_key_exists('BGVCMDSTART',$config_ini) && !empty($config_ini['BGVCMDSTART']) ){
+            $cmd = urldecode($config_ini['BGVCMDSTART']);
+            exec($cmd);
+        }
+    }
 /*
     if( $playmode == 2) {
         //一時停止する
@@ -490,7 +499,7 @@ function song_start_again($db,$id){
         $requesturl=$MPCCMDURL.'?cmd=SeekSecond&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
-        return false;
+        break;
     }
 }
 
@@ -507,7 +516,7 @@ function song_stop($kind){
         $requesturl=$MPCCMDURL.'?cmd=PlayOrPause&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
-        return false;
+        break;
     }
 }
 
@@ -570,7 +579,14 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
     song_stop( $kind );
     // BGVモードではmuteを解除する。
     if($loopflg == 1) {
+        global $config_ini;
+
         toggle_mute_mpc();
+        // BGV ストップコマンドを実行する。
+        if( array_key_exists('BGVCMDEND',$config_ini) && !empty($config_ini['BGVCMDEND']) ){
+            $cmd = urldecode($config_ini['BGVCMDEND']);
+            exec($cmd);
+        }
     }
 
 }
@@ -803,10 +819,16 @@ while(1){
        
        if( strcmp ($l_kind , "カラオケ配信") === 0 )
        {
+          global $config_ini;
           if($l_nowplaying === '再生中' ){
               logtocmd("再生中(カラオケ配信)を検出。終了待ち\n");
           }else{
-              captureviewstart($playerpath,1);
+              if( array_key_exists('DeliveryCMD',$config_ini) && !empty($config_ini['DeliveryCMD']) ){
+                  $cmd = urldecode($config_ini['DeliveryCMD']);
+                  exec($cmd);
+              }else {
+                  captureviewstart($playerpath,1);
+              }
               $db->beginTransaction();
               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
               $ret = $db->exec($sql);
@@ -818,7 +840,12 @@ while(1){
           // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
           logtocmd("カラオケ配信終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n");
           runningcheck_shop_karaoke($db,$l_id);
+          if( array_key_exists('DeliveryCMD',$config_ini) && !empty($config_ini['DeliveryCMD']) && array_key_exists('DeliveryCMDEND',$config_ini) && !empty($config_ini['DeliveryCMDEND']) ){
+              $cmd = urldecode($config_ini['DeliveryCMDEND']);
+              exec($cmd);
+          } else {
           captureviewstop();
+          }
        }else
        {
        

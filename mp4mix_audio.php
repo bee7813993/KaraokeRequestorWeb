@@ -18,6 +18,10 @@ if(array_key_exists("userfile",$_FILES)){
     $filename = str_replace(array('/','\\', '?', ':', '*', '\"', '>', '<', '|'),array('／','￥','？','：','＊','”','＞','＜','｜'),$filename);
 }
 
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
 
 $uploaddir = urldecode($config_ini["downloadfolder"]);
 $uploadfile = $uploaddir  .$filename;
@@ -131,9 +135,12 @@ echo $basefilename_mod_base;
 <input type="hidden" name="fullpath" id="fullpath" value="
 EOD;
 
-echo $basefilename_mod;
+echo $basefilename_mod.'"/>';
+  if(is_numeric($selectid)){
+      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
+  }
   print<<<EOD
-">
+
 <input type="submit" value="リクエスト" class="btn btn-default">
 </form>
 EOD;
