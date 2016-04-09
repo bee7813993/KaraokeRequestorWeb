@@ -499,7 +499,7 @@ function song_start_again($db,$id){
         $requesturl=$MPCCMDURL.'?cmd=SeekSecond&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
-        break;
+//        break;
     }
 }
 
@@ -516,7 +516,7 @@ function song_stop($kind){
         $requesturl=$MPCCMDURL.'?cmd=PlayOrPause&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
-        break;
+//        break;
     }
 }
 
@@ -817,9 +817,11 @@ while(1){
      }
      
        
-       if( strcmp ($l_kind , "カラオケ配信") === 0 )
+       $loopflg = check_request_loop($db,$l_id);
+       if( (strcmp ($l_kind , "カラオケ配信") === 0)  && ($loopflg != 1 ))
        {
           global $config_ini;
+
           if($l_nowplaying === '再生中' ){
               logtocmd("再生中(カラオケ配信)を検出。終了待ち\n");
           }else{

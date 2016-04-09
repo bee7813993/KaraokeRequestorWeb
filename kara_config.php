@@ -88,11 +88,13 @@ function readconfig_array()
 
     if(!array_key_exists("roomurl", $config_ini)){
         $roominfo = array();
-        $url = (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
-        $urlpath = pathinfo($url);
-        $roominfo[]=$urlpath['dirname'];
+        if(array_key_exists("HTTP_HOST",$_SERVER)){
+          $url = (empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"];
+          $urlpath = pathinfo($url);
+          $roominfo[]=$urlpath['dirname'];
         
-        $config_ini = array_merge($config_ini,array("roomurl" => $roominfo));
+          $config_ini = array_merge($config_ini,array("roomurl" => $roominfo));
+        }
     }
 
 
@@ -232,15 +234,15 @@ readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequs
 initdb($db,$dbname);
 
 // cache control
-header( 'Expires: Thu, 01 Jan 1970 00:00:00 GMT' );
-header( 'Last-Modified: '.gmdate( 'D, d M Y H:i:s' ).' GMT' );
+@header( 'Expires: Thu, 01 Jan 1970 00:00:00 GMT' );
+@header( 'Last-Modified: '.gmdate( 'D, d M Y H:i:s' ).' GMT' );
 
 // HTTP/1.1
-header( 'Cache-Control: no-store, no-cache, must-revalidate' );
-header( 'Cache-Control: post-check=0, pre-check=0', FALSE );
+@header( 'Cache-Control: no-store, no-cache, must-revalidate' );
+@header( 'Cache-Control: post-check=0, pre-check=0', FALSE );
 
 // HTTP/1.0
-header( 'Pragma: no-cache' );
+@header( 'Pragma: no-cache' );
 
 
 ?>

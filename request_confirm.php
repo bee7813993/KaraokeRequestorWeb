@@ -263,6 +263,7 @@ print('<span style="visibility:hidden;">');
 <?php 
   if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
       print $selectrequest[0]['kind'];
+      print '<input type="hidden" name="kind" id="kind"  value="'.$selectrequest[0]['kind'].'" />'."\n";
       $forcebgv = 1;
   }else if($shop_karaoke == 1){
       print 'カラオケ配信'."\n";
