@@ -125,7 +125,12 @@ EOD;
         $onerequset += array("playstatus" => $value['reqorder']);
     }
 
-$sasikaemenu = '<li> <a class="requestmove" name="changesong" id="changesong" href="searchreserve.php?id='.$value['id'].'" value="changesong"  > 曲差し替え</a> </li>';
+$sasikaemenu = '';
+if($value['kind'] == 'カラオケ配信' && $config_ini['usebgv'] == 1 ) {
+  $sasikaemenu = '<li> <a class="requestmove" name="changesong" id="changesong" href="searchreserve.php?id='.$value['id'].'" value="changesong"  > BGV選択</a> </li>';
+} else {
+  $sasikaemenu = '<li> <a class="requestmove" name="changesong" id="changesong" href="searchreserve.php?id='.$value['id'].'" value="changesong"  > 曲差し替え</a> </li>';
+}
 
 $action_pf = <<<EOD
 <div class="dropdown">

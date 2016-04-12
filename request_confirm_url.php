@@ -18,8 +18,23 @@ $set_directurl = 0;
 if(array_key_exists("set_directurl", $_REQUEST)) {
     $set_directurl = $_REQUEST["set_directurl"];
 }
-    
 
+$forcebgv = 0;
+if(array_key_exists("forcebgv", $_REQUEST)) {
+    $forcebgv = $_REQUEST["forcebgv"];
+}
+
+$selectid = 'none';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+    if(!is_numeric($selectid)){
+        $selectid = 'none';
+    }
+}    
+
+if($shop_karaoke == 1 && is_numeric($selectid)){
+    $forcebgv = 1;
+}
 
 include 'kara_config.php';
 
@@ -27,6 +42,14 @@ $sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
 $select = $db->query($sql);
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 $select->closeCursor();
+
+if(is_numeric($selectid)){
+    $sql = "SELECT * FROM requesttable where id = ". $selectid;
+    $select = $db->query($sql);
+    $selectrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+}
+
 
 function pickupsinger($rt)
 {
@@ -48,15 +71,22 @@ function pickupsinger($rt)
    return $singerlist;
 }
 
-function selectedcheck($rt,$singer){
+function selectedcheck($rt,$singer,$beforesinger = 'none' ){
     $rt_i = array_reverse($rt);
-    foreach($rt_i as $row){
-        if($row['singer'] === $singer){
-          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
-            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
+
+    if($beforesinger == 'none'){
+      foreach($rt_i as $row){
+          if($row['singer'] === $singer){
+            if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
+              if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
                 return TRUE;
+              }
             }
           }
+      }
+    }else{
+        if($singer === $beforesinger){
+            return TRUE;
         }
     }
     
@@ -69,8 +99,6 @@ function selectedcheck($rt,$singer){
 function json_safe_encode($data){
     return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 }
-
-
 
 ?>
 
@@ -141,7 +169,11 @@ URL
 </label>
 <textarea name="filename" id="filename" class="form-control" rows="4" wrap="soft" style="width:100%" 
 <?php
-if($shop_karaoke == 1){ 
+if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+    print 'placeholder="直接再生できるURLを指定を入れてください(youtubeのURLもOK)" >';
+    //print $selectrequest[0]['songfile'];
+    echo "</textarea> ";
+}else if($shop_karaoke == 1){ 
     print 'placeholder="後でセットリスト作成の参考のためにできれば曲名を入れておいてください" >';
 
     if (empty($filename)){
@@ -173,8 +205,13 @@ if($shop_karaoke == 1){
     }
 ?>
 
-
     <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
+<?php
+if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+//    print '<dt> BGV曲名 </dt>';
+//    print '<dd>'. $filename.' <dd>';
+}
+?>
 </div>
 
 <div CLASS="form-group">
@@ -184,6 +221,10 @@ if($shop_karaoke == 1){
 <?php
 $num = 1;
 
+$beforesinger = 'none';
+if(is_numeric($selectid)){
+  $beforesinger = $selectrequest[0]['singer'];
+}
 $selectedcounter = 0;
 $singerlist = pickupsinger($allrequest);
 foreach($singerlist as $singer){
@@ -191,7 +232,7 @@ foreach($singerlist as $singer){
   print "<option value=\"";
   print $singer;
   print "\"";
-  if( selectedcheck($allrequest,$singer) && $selectedcounter === 0 ) 
+  if( selectedcheck($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
   {
       print " selected ";
       $selectedcounter = $selectedcounter + 1 ;
@@ -220,6 +261,15 @@ print('<span style="visibility:hidden;">');
 <div CLASS="form-group">
 <label>コメント<small> セトリ記録のため曲名とか書いてもらえると助かります </small></label>
 <textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
+<?php
+if(is_numeric($selectid) ){
+    print htmlspecialchars($selectrequest[0]['comment']);
+    if($selectrequest[0]['kind'] == "カラオケ配信"){
+      print "\n";
+      print $selectrequest[0]['songfile'];
+    }
+}
+?>
 </textarea>
 </div>
 
@@ -228,7 +278,11 @@ print('<span style="visibility:hidden;">');
 <dt>再生方法</dt>
 <dd>
 <?php 
-  if($shop_karaoke == 1){
+  if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+      print $selectrequest[0]['kind'];
+      print '<input type="hidden" name="kind" id="kind"  value="'.$selectrequest[0]['kind'].'" />'."\n";
+      $forcebgv = 1;
+  }else if($shop_karaoke == 1){
       print 'カラオケ配信'."\n";
       print '<input type="hidden" name="kind" id="kind"  value="カラオケ配信" />'."\n";
   }else if($set_directurl == 1){
@@ -252,7 +306,7 @@ print('<span style="visibility:hidden;">');
 </div>
 <div class="checkbox">
 <label>
-<input type="checkbox" name="secret" value="1" > シークレット予約(歌うまで曲名を表示しません)
+<input type="checkbox" name="secret" value="1" /> シークレット予約(歌うまで曲名を表示しません)
 </label>
 </div>
 <?php
@@ -267,9 +321,11 @@ print ' /> BGVモード';
 print '</label>';
 print '</div>';
 }
-
+if(is_numeric($selectid)){
+print '<input type="hidden" name="selectid" id="selectid"  value='.$selectid.' />'."\n";
+print '<input type="hidden" name="urlreq" id="urlreq"  value=1 />'."\n";
+}
 ?>
-
 <div CLASS="row" >
 <div CLASS="pushbtn col-xs-12 col-sm-8">
 <input type="submit" value="実行" class="requestconfirm btn btn-default btn-lg" />

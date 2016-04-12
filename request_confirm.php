@@ -71,15 +71,22 @@ function pickupsinger($rt)
    return $singerlist;
 }
 
-function selectedcheck($rt,$singer){
+function selectedcheck($rt,$singer,$beforesinger = 'none' ){
     $rt_i = array_reverse($rt);
-    foreach($rt_i as $row){
-        if($row['singer'] === $singer){
-          if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
-            if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
+
+    if($beforesinger == 'none'){
+      foreach($rt_i as $row){
+          if($row['singer'] === $singer){
+            if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
+              if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {
                 return TRUE;
+              }
             }
           }
+      }
+    }else{
+        if($singer === $beforesinger){
+            return TRUE;
         }
     }
     
@@ -198,7 +205,6 @@ if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
     echo "</textarea> ";
     print '<input type="hidden" name="filename" id="filename" style="width:100%" value="'.$filename.'"  />';
     }
-
 ?>
 
     <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
@@ -217,6 +223,10 @@ if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
 <?php
 $num = 1;
 
+$beforesinger = 'none';
+if(is_numeric($selectid)){
+  $beforesinger = $selectrequest[0]['singer'];
+}
 $selectedcounter = 0;
 $singerlist = pickupsinger($allrequest);
 foreach($singerlist as $singer){
@@ -224,7 +234,7 @@ foreach($singerlist as $singer){
   print "<option value=\"";
   print $singer;
   print "\"";
-  if( selectedcheck($allrequest,$singer) && $selectedcounter === 0 ) 
+  if( selectedcheck($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
   {
       print " selected ";
       $selectedcounter = $selectedcounter + 1 ;
@@ -253,6 +263,11 @@ print('<span style="visibility:hidden;">');
 <div CLASS="form-group">
 <label>コメント</label>
 <textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
+<?php
+if(is_numeric($selectid) ){
+print htmlspecialchars($selectrequest[0]['comment']);
+}
+?>
 </textarea>
 </div>
 

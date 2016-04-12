@@ -3,11 +3,11 @@ $db = null;
 
 require_once 'commonfunc.php';
 
-$l_filename=$_POST['filename'];
-$l_singer=$_POST['singer'];
-$l_freesinger=$_POST['freesinger'];
-$l_comment=$_POST['comment'];
-$l_kind=$_POST['kind'];
+$l_filename=$_REQUEST['filename'];
+$l_singer=$_REQUEST['singer'];
+$l_freesinger=$_REQUEST['freesinger'];
+$l_comment=$_REQUEST['comment'];
+$l_kind=$_REQUEST['kind'];
 $l_fullpath= "";
 if(array_key_exists("fullpath", $_REQUEST)) {
     $l_fullpath = $_REQUEST["fullpath"];
@@ -40,6 +40,11 @@ if(array_key_exists("selectid", $_REQUEST)) {
     }
 }
 
+$l_urlreq = 0;
+if(array_key_exists("urlreq", $_REQUEST)) {
+    $l_urlreq = $_REQUEST["urlreq"];
+}
+
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
 }
@@ -53,24 +58,32 @@ $l_singer=$l_freesinger;
 <title>DB登録中</title>
 </head>
 <body>
-
+<pre >
+<?php
+// var_dump( $_REQUEST);
+?>
+</pre>
 
 <?php
 if($l_kind === "URL指定"){
+  $l_fullpath = $l_filename;
+  $displayfilename = $l_filename;
+}else if($l_urlreq == 1){
   $l_fullpath = $l_filename;
   $displayfilename = $l_filename;
 }else {
   $displayfilename = makesongnamefromfilename($l_filename) ;
 }
 if(is_numeric($selectid)){
+// print($displayfilename);
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, clientip=:ip, clientua=:ua,  secret=:secret, loop=:loop where id = ".$selectid;
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop where id = ".$selectid;
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
 }
 	if ($stmt === false ){
-		print("INSERT　 prepare 失敗しました。<br>");
+		print("UPDATE　 prepare 失敗しました。<br>");
 	}
 
 $arg = array(
@@ -79,8 +92,6 @@ $arg = array(
 	':comment' => $l_comment,
 	':kind' => $l_kind,
 	':fp' => $l_fullpath,
-	':ip' => $l_clientip  ,
-	':ua' => $l_clientua ,
 	':secret' => $l_secret,
 	':loop' => $l_loop
 	);

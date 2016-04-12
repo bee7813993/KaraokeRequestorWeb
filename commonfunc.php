@@ -966,7 +966,7 @@ function writeconfig2ini($config_ini,$configfile)
   } 
   fclose($fp);
   inieolchange();
-  
+  iniroomchange($config_ini);
 }
 
 function multiroomenabled(){
