@@ -2,6 +2,7 @@
 <head>
 <?php 
 require_once 'commonfunc.php';
+
 print_meta_header();
 ?>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -43,6 +44,17 @@ if(array_key_exists("wifipass", $_REQUEST)) {
     $wifipass = urlencode($_REQUEST["wifipass"]);
     $config_ini = array_merge($config_ini,array("wifipass" => $wifipass));
     $change_counter ++;
+}
+
+if(array_key_exists("wifipass", $_REQUEST)) {
+    $wifipass = urlencode($_REQUEST["wifipass"]);
+    $config_ini = array_merge($config_ini,array("wifipass" => $wifipass));
+    $change_counter ++;
+}
+
+$l_qrsize = 3;
+if(array_key_exists("qrsize", $_REQUEST)) {
+    $l_qrsize = $_REQUEST["qrsize"];
 }
 
 if(  $change_counter > 0 ){
@@ -100,6 +112,40 @@ if(array_key_exists("wifipass", $config_ini)){
 <label>接続先 URL</label>
 <input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value=<?php echo 'http://'.$_SERVER["HTTP_HOST"];?>/>
 <input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="<?php echo 'http://'.$_SERVER["SERVER_ADDR"].'/';?>" />
+</div>
+
+<div class="row">
+  <div class="col-sm-6" class="text-center">
+    <div class="text-center">
+    <?php
+      print 'http://'.$_SERVER["HTTP_HOST"].'/ <br />'
+    ?>
+    </div>
+<img src="qrcode_php/outputqrimg.php?data=
+<?php
+print 'http://'.$_SERVER["HTTP_HOST"].'/&qrsize='.$l_qrsize;
+?>
+" alt="QRコード" class="img-responsive center-block" /> <br />
+  </div>
+  <div class="col-sm-6" >
+    <div class="text-center">
+  <?php
+    print 'http://'.$_SERVER["SERVER_ADDR"].'/ <br />'
+  ?>
+    </div>
+<img src="qrcode_php/outputqrimg.php?data=
+<?php
+print 'http://'.$_SERVER["SERVER_ADDR"].'/&qrsize='.$l_qrsize;
+?>
+" alt="QRコード" class="img-responsive center-block" /> <br />
+  </div>
+</div>
+<div class="row">
+    <div class="btn-group btn-group-justified" role="group">
+	  <a href="?qrsize=3" class="btn btn-default" role="button">Small</a>
+	  <a href="?qrsize=5" class="btn btn-default" role="button">Middum</a>
+	  <a href="?qrsize=8" class="btn btn-default" role="button">Large</a>
+    </div>
 </div>
 <hr />
 <a href="requestlist_only.php" > リクエストTOPに戻る </a>
