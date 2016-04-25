@@ -531,7 +531,31 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
   <tr>
   </table>
 
-
+  <div class="form-group">
+    <label class="radio control-label"> リクエスト時_順番ピッタリ移動 </label>
+    <label class="checkbox-inline">
+      <input type="radio" name="request_automove" value="1" 
+<?php 
+if(array_key_exists("request_automove",$config_ini)) {
+  print ($config_ini["request_automove"]==1)?'checked':' ' ;
+}else{
+  print 'checked';
+}
+?>
+ />
+      有効 
+    </label>
+    <label class="checkbox-inline">
+      <input type="radio" name="request_automove" value="2" 
+<?php 
+if(array_key_exists("request_automove",$config_ini)) {
+  print ($config_ini["request_automove"]!=1)?'checked':' ' ;
+}
+?>
+ /> 
+      無効
+    </label>
+  </div>
 
 
   <input type="submit" class="btn btn-default btn-lg" value="設定" />

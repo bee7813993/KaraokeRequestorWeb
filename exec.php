@@ -49,6 +49,14 @@ if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
 }
 
+function getnewid($db){
+    $sql = 'select count(*) from requesttable';
+    $select = $db->query($sql);
+    $count = $select->fetchColumn();
+    $select->closeCursor();
+    
+    return $count + 1;
+}
 // print("${l_singer} さんの ${l_filename} を追加する予定。<br>");
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -65,7 +73,7 @@ $l_singer=$l_freesinger;
 </pre>
 
 <?php
-if($l_kind === "URL指定"){
+if(mb_stristr($l_kind , "URL指定") !== FALSE){
   $l_fullpath = $l_filename;
   $displayfilename = $l_filename;
 }else if($l_urlreq == 1){
@@ -142,6 +150,16 @@ if(!empty($DEBUG))
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
 }
+  if($config_ini["request_automove"] == 1){
+    require_once('function_moveitem.php');
+    $db->exec("BEGIN DEFERRED;");
+    $list = new MoveItem;
+    $turnlist = $list->getturnlist($db);
+    $newreq = $list->get_new_reqorder($newid);
+    $list->insertreqorder($newid,$newreq);
+    $list->save_allrequest($db);
+    $db->exec("COMMIT;");
+  }
 
 
 print("${l_filename} を追加しました。<br>");
