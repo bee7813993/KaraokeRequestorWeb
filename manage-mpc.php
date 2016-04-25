@@ -28,12 +28,12 @@ $MPCFILEOPENURL='http://localhost:13579/browser.html?path=';
 $FOOBARSTATURL='http://localhost:82/karaokectrl/';
 
 function file_exist_check_japanese($filename){
-
+/*
  $fileinfo=file_exists($filename);
  if($fileinfo != FALSE){
      return TRUE;
  }
-
+*/
  $fileinfo = fopen(addslashes($filename),'r');
  if($fileinfo != FALSE){
      fclose($fileinfo);
@@ -135,6 +135,7 @@ function mpc_waiting_start($db, $id){
    $state = 6;
    while($state == 6){
      $state = check_nowplaying_state ($db,$id);
+     if($state != 6) break;
      sleep(0.5);
    }
    // logtocmd("DEBUG:再生中への変更確認。$id<br>");
@@ -378,11 +379,11 @@ function minimum_playtimescheck_withoutme($all, $myid)
  * @brief 指定したIDのファイルタイプを返す
  * @param ($db) DB
  * @param ($id) ID
- * @return 1: movie, 2 : audio, false :error
+ * @return 1: movie, 2 : audio, 3, URL, false :error
  */
 function check_filetype ($db,$id){
 
-        $sql = "SELECT fullpath FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+        $sql = "SELECT fullpath,kind FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
         $select = $db->query($sql);
         $rowall = $select->fetchAll(PDO::FETCH_ASSOC);
         $select->closeCursor();
@@ -390,6 +391,9 @@ function check_filetype ($db,$id){
         if($rowall === false) {
             logtocmd ("ERROR : Filename of $id is none");
             return false;
+        }
+        if( mb_stristr($rowall[0]['kind'], 'URL指定') !== FALSE ){
+            return 3;
         }
         
         $filepath = $rowall[0]['fullpath'];
@@ -485,7 +489,7 @@ function check_nowplaying_state ($db,$id){
 function song_start_again($db,$id){
 
     $kind = check_filetype ($db,$id);
-    if( $kind === 1){
+    if( $kind === 1 || $kind === 3 ){
         // case mpc
         global $MPCCMDURL;
         $requesturl=$MPCCMDURL.'?wm_command=-1&percent=0';
@@ -505,7 +509,7 @@ function song_start_again($db,$id){
 
 function song_stop($kind){
 
-    if( $kind === 1){
+    if( $kind === 1 || $kind === 3){
         // case mpc
         global $MPCCMDURL;
         $requesturl=$MPCCMDURL.'?wm_command=888';
@@ -559,9 +563,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
            break;
        }
        
-       
-       
-       if( $kind === 1){
+       if( $kind === 1 || $kind === 3){
            runningcheck_mpc($db,$id,$playerchecktimes);
        }else if( $kind === 2) {
            runningcheck_audio($db,$id,$playerchecktimes);
@@ -851,11 +853,12 @@ while(1){
        }else
        {
        
-       if(strcmp ($l_kind , "URL指定") !== 0){
+       if( mb_stristr ($l_kind , "URL指定") !== FALSE){
            // ファイル名のチェック
     //logtocmd "Debug l_fullpath: $l_fullpath\r\n";
            $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");
            $fileinfo=file_exist_check_japanese($winfillpath);
+//           $fileinfo=TRUE;
            if($fileinfo !== FALSE){
                $filepath = $winfillpath;
                $filepath_utf8=$l_fullpath;
@@ -879,7 +882,7 @@ while(1){
            
            // 拡張子をチェックしてPlayerを選択
            $filetype = check_filetype ($db,$l_id);
-           if( $filetype == 2 && (strcmp ($l_kind , "URL指定") !== 0) ){
+           if( $filetype == 2 ){
                // audio file
                if($l_nowplaying === '再生中' ){
                    logtocmd("再生中(foobar再生)を検出。現在の曲の終了待ち\n");
@@ -974,10 +977,10 @@ while(1){
                      logtocmd("再生中 への変更に失敗しました。<br>");
                    }
                    $db->commit();
-                   sleep(0.5);
+                   // sleep(0.5);
                    // web経由でファイル再生
                    //logtocmd 'MPC fileopen start '."\n";
-                   if(strcmp ($l_kind , "URL指定") == 0){
+                   if($filetype == 3){
                        exec($execcmd);
                    }else{
                        mpcplaylocalfile($playerpath,$filepath_utf8,$playmode,1,$db,$l_id);
@@ -985,7 +988,7 @@ while(1){
                    //logtocmd 'MPC fileopen end '."\n";
                    
                    // logtocmd mb_convert_encoding("DEBUG : Player 起動完了を $waitplayercheckstart 秒待っています\n","SJIS-win");
-                   if(strcmp ($l_kind , "URL指定") === 0){
+                   if($filetype == 3){
                        sleep(5); // URL指定はさらに5秒待ち 
                    } 
                    sleep($waitplayercheckstart); // Player 起動待ち
