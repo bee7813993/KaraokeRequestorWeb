@@ -218,7 +218,12 @@ dt.resultwordlist {
    width: 50%;
 }
 
-div#nowplayinghere {
+tr td.filename div.idmove {
+    padding-top: 150px;
+    margin-top: -150px;
+}
+
+tr td.filename a.nowplayinghere {
     padding-top: 150px;
     margin-top: -150px;
 }

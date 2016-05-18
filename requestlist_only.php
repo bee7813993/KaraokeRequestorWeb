@@ -8,6 +8,12 @@ require_once 'commonfunc.php';
 <head>
 <?php 
 print_meta_header();
+
+$showid='none';
+if(array_key_exists("showid", $_REQUEST)) {
+    $showid = $_REQUEST["showid"];
+}
+
 ?>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Pragma" content="no-cache">
@@ -42,7 +48,20 @@ $(function(requestTable_t) { $("#request_table").dataTable({
          "url": "requestlist_table_json.php",
          "dataType": 'json',
          "dataSrc": "",
+<?php
+if($showid != 'none' ) {
+print '             "complete" : function(settings) {'."\n";
+             //alert( 'DataTables has redrawn the table' );
+print '             var element = document.getElementById( "id_'.$showid.'" ) ;'."\n";
+print '             var rect = element.getBoundingClientRect() ;'."\n";
+print '             var positionX = rect.left + window.pageXOffset ;	// 要素のX座標'."\n";
+print '             var positionY = rect.top + window.pageYOffset ;	// 要素のY座標'."\n";
+print '             window.scrollTo( positionX, positionY ) ;'."\n";
+print '         },'."\n";
+}
+?>
      },
+
      "columns" : [
           { "data": "no", "className":"no"},
           { "data": "filename",className:"filename"},
@@ -59,7 +78,7 @@ if($user === "admin"){
      ],
      "bPaginate" : false,
      "order" : [[0, 'desc']],
-     bDeferRender: true,
+     bDeferRender: false,
       "autoWidth": false,
      }); } );
 

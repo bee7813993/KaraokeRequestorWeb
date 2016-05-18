@@ -25,10 +25,10 @@ $requsetlisttable = array();
 $reqcount = count($allrequest);
 
 foreach($allrequest as $value ){
-    $playingid = null;
-    if($value['nowplaying'] === '再生中'){
-        $playingid = 'id="nowplayinghere"';
-    }
+    $playingid = 'id="id_'.$value['id'].'" ';
+    
+       // $playingid = 'id="nowplayinghere"';
+    
     $onerequset = array();
     $onerequset += array("no" => $reqcount);
     $reqcount -= 1;
@@ -41,7 +41,11 @@ foreach($allrequest as $value ){
     if($value['loop'] == 1){
         $songfilename = '<b>'.htmlspecialchars('【ＢＧＶ】').'</b><br>'.$songfilename;
     }
-    $onerequset += array("filename" => '<div '.$playingid.' >'.  $songfilename.'</div>');
+    if($value['nowplaying'] === '再生中'){
+    $onerequset += array("filename" => '<div '.$playingid.' class="idmove" > '.  $songfilename.'</div><a name="nowplayinghere" class="nowplayinghere" >&nbsp</a>');
+    }else{
+    $onerequset += array("filename" => '<div '.$playingid.' class="idmove" > '.  $songfilename.'</div>');
+    }
     $onerequset += array("singer" =>  nl2br(htmlspecialchars($value['singer'])));
 
 $showcommentblock = "";

@@ -2,7 +2,7 @@
 $db = null;
 
 require_once 'commonfunc.php';
-
+//var_dump($_REQUEST);
 $l_filename=$_REQUEST['filename'];
 $l_singer=$_REQUEST['singer'];
 $l_freesinger=$_REQUEST['freesinger'];
@@ -59,18 +59,6 @@ function getnewid($db){
 }
 // print("${l_singer} さんの ${l_filename} を追加する予定。<br>");
 ?>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<META http-equiv="refresh" content="1; url=requestlist_only.php">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>DB登録中</title>
-</head>
-<body>
-<pre >
-<?php
-// var_dump( $_REQUEST);
-?>
-</pre>
 
 <?php
 if(mb_stristr($l_kind , "URL指定") !== FALSE){
@@ -162,36 +150,53 @@ if(!empty($DEBUG))
   }
 
 
-print("${l_filename} を追加しました。<br>");
-
-print("1秒後に登録ページに移動します<br>");
-
-?>
+if(!empty($DEBUG)){
+    print("${l_filename} を追加しました。<br>");
+    print("1秒後に登録ページに移動します<br>");
+}
+//print "きぬ";
+if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
+   $newidnotice = '{"newid": '.$newid.'}';
+   print $newidnotice;
+}else {
+   print<<<EOT
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<META http-equiv="refresh" content="1; url=requestlist_only.php">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>DB登録中</title>
+</head>
+<body>
+<pre >
+EOT;
+// var_dump( $_REQUEST);
+   print<<<EOT
+</pre>
 
 <a href="requestlist_only.php" > リクエストページに戻る <a><br>
+EOT;
+    $sql = "SELECT * FROM requesttable ORDER BY id DESC";
+    if(!empty($DEBUG)){
+        print '現在の登録状況<br>';
 
+        try{
 
-<?php
-$sql = "SELECT * FROM requesttable ORDER BY id DESC";
-if(!empty($DEBUG)){
-print '現在の登録状況<br>';
+            $select = $db->query($sql);
 
-try{
+            while($row = $select->fetch(PDO::FETCH_ASSOC)){
+	            echo implode("|", $row) . "\n<br>";
+            }
+            $db = null;
 
-    $select = $db->query($sql);
-
-    while($row = $select->fetch(PDO::FETCH_ASSOC)){
-	    echo implode("|", $row) . "\n<br>";
+        }catch(PDOException $e) {
+		    printf("Error: %s\n", $e->getMessage());
+		    die();
+        }
     }
-
-    $db = null;
-
-}catch(PDOException $e) {
-		printf("Error: %s\n", $e->getMessage());
-		die();
-} 
-}
-?>
+    print<<<EOT
 </body>
 </html>
+EOT;
+}
 
+?>

@@ -93,7 +93,9 @@ EOD;
 
 <?php
 shownavigatioinbar('searchreserve.php');
-
+?>
+<div class="container">
+<?php
  if(isset($word) ) {
  $nflink = "notfoundrequest/notfoundrequest.php?searchword=$word";
  }else {
@@ -126,8 +128,9 @@ shownavigatioinbar('searchreserve.php');
   ?>
   </div>
   
+</div>
 
-  <div>
+<div class="container">
 
   </select>
   <div class="col-xs-12 col-sm-3" >
