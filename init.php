@@ -565,7 +565,8 @@ if(array_key_exists("request_automove",$config_ini)) {
   <hr />
 <div class="container bg-info">
   <h3> リクエストリスト操作 </h3>
-  <a href ="listexport.php"  class="btn btn-default" > リクエストリストのダウンロード </a>
+  <a href ="listexport_sjis.php"  class="btn btn-default" > リクエストリストのダウンロード(SJIS) </a>
+  <a href ="listexport.php"  class="btn btn-default" > リクエストリストのダウンロード(UTF-8) </a>
   <form action="listimport.php" method="post" enctype="multipart/form-data">
     <label > リクエストリストのインポート(csvより)
       <input type="file" name="dbcsv" accept="text/comma-separated-values" />

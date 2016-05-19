@@ -63,7 +63,7 @@ class MoveItem {
            foreach($oneturn as $onerequest){
                if($onerequest['nowplaying'] == '未再生' ){
                    $startcheck = true;
-                    print "このターンに未再生がありました".$onerequest['reqorder']." <br>\n";
+                   // print "このターンに未再生がありました".$onerequest['reqorder']." <br>\n";
                    break;
                }
            }
@@ -109,7 +109,7 @@ class MoveItem {
                $newreqorder = $oneturn[count($oneturn)-1]['reqorder']+1;
            }else{
            for($i = 0 ; $i < count($oneturn) ; $i++){
-            print  $oneturn[$i]['id'].$oneturn[$i]['reqorder'];
+            // print  $oneturn[$i]['id'].$oneturn[$i]['reqorder'];
                if($oneturn[$i]['nowplaying'] == '未再生' ){
                    $newreqorder = $oneturn[$i]['reqorder'];
                    break;
@@ -117,7 +117,7 @@ class MoveItem {
            }
            }
            if($newreqorder === false) break;
-           print " $newreqorder";
+           // print " $newreqorder";
            //print "<pre>\nbefiresinger:\n";
            //var_dump($beforesinger);print "</pre>";
            if(!empty($beforesinger)){
@@ -146,7 +146,7 @@ class MoveItem {
            }else{
              // 最初のターンの場合そのターンの一番後ろにする
              if($newreqorder == 1 ){
-               print "ターンの一番後ろにしました";
+               // print "ターンの一番後ろにしました";
                // そのターンの先頭にするときはコメントアウト
                $newreqorder = $oneturn[count($oneturn)-1]['reqorder']+1;
              }
@@ -154,7 +154,7 @@ class MoveItem {
            }
            return $newreqorder;
        }
-       print "come max_reqorder".$this->max_reqorder;
+       // print "come max_reqorder".$this->max_reqorder;
        return $this->max_reqorder + 1;
    }
    
@@ -180,7 +180,7 @@ class MoveItem {
        $currentreqorder = 1;
        for($i=0;$i < count($this->allrequest_new) ; $i++){
            if($this->allrequest_new[$i]['id'] == $id ){
-       print $this->allrequest_new[$i]['id'].':'.$id.':'.$reqorder."<br />";;
+       // print $this->allrequest_new[$i]['id'].':'.$id.':'.$reqorder."<br />";;
                $this->allrequest_new[$i]['reqorder'] = $reqorder;
                continue;
            }
@@ -207,8 +207,9 @@ class MoveItem {
               $sql = 'UPDATE requesttable set reqorder="'.$this->allrequest_new[$i]['reqorder'].'" where id = "'.$this->allrequest_new[$i]['id'].'"';
               //print $sql."<br />\n";
               $count = $db->exec($sql);
-              if($count !== 1) 
-                  print "reqorderを$count 件修正しました。".$this->allrequest[$i]['reqorder'].' to '.$this->allrequest_new[$i]['reqorder']."\n";
+              if($count !== 1) {
+               //   print "reqorderを$count 件修正しました。".$this->allrequest[$i]['reqorder'].' to '.$this->allrequest_new[$i]['reqorder']."\n";
+               }
           }
        }
    }

@@ -195,6 +195,203 @@ function formatBytes($bytes, $precision = 2, array $units = null)
     return $sign.$bytes.' '.$unit;
 }
 
+
+
+// プライオリティテーブルの取得
+function get_prioritytable()
+{
+    $rearchedlist_addpriority  = array();
+    foreach($rearchedlist["results"] as $k=>$v){
+        $onefileinfo = array();
+        $onefileinfo += array('path' => $v['path']);
+        $onefileinfo += array('name' => $v['name']);
+        $onefileinfo += array('size' => $v['size']);
+        
+        $c_priority = -1;
+        foreach($prioritylist as $pk=>$pv){
+            $searchres = false;
+            if($pv['kind'] == 2 ) {
+                $searchres = mb_strstr($v['name'],$pv['priorityword']);
+            }else{
+                $searchres = mb_strstr($v['path'],$pv['priorityword']);
+            }
+            if ( $searchres != false ){
+                if($c_priority < $pv['prioritynum'] ){
+                   $c_priority = $pv['prioritynum'];
+                }
+            }
+        }
+        if($c_priority == -1) $c_priority = 50;
+        $onefileinfo += array('priority' => $c_priority);
+        
+        $rearchedlist_addpriority[] = $onefileinfo ;
+    }
+    
+}
+
+// 検索ワードからeverything検索件数だけ取得
+function count_onepriority($word)
+{
+    global $everythinghost;
+    $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($word) . '&json=1&count=5';
+    $json = file_get_html_with_retry($jsonurl, 5, 30);
+    $result_array = json_decode($json, true);
+    return $result_array['totalResults'];
+}
+
+// プライオリティリストからプライオリティ順にしてプライオリティ無指定50を追加
+function orderprioritylist($prioritylist){
+    array_multisort(array_column($prioritylist, 'prioritynum' ),SORT_DESC,$prioritylist);
+    $otherstr = "";
+    foreach($prioritylist as $prioritylistone){
+        if(empty($otherstr)){
+            $otherstr = '!"'.$prioritylistone['priorityword'].'"';
+        }else {
+            $otherstr = $otherstr. ' !"'.$prioritylistone['priorityword'].'"';
+        }
+    }
+    $i = 0;
+    $c_priority = null;
+    $newpriorityword = '';
+    $newprioritylist = array();
+    foreach($prioritylist as $prioritylistone){
+        if($prioritylistone['prioritynum'] < 50 ){
+            break;
+        }
+        $i++;
+    }
+    $ndarray = array( 'id' => 999, 'kind' => 1, 'priorityword' => $otherstr, 'prioritynum' => 50 );
+    
+    array_splice($prioritylist, $i, 0, array($ndarray));
+
+    $c_priority = null;
+    $newpriorityword = '';
+    $newprioritylist = array();
+    foreach($prioritylist as $prioritylistone){
+    
+        if($c_priority == $prioritylistone['prioritynum']){
+            $newpriorityword = $newpriorityword.'|'.$prioritylistone['priorityword'].'';
+        }else {
+            if(!empty($newpriorityword)){
+                $newprioritylist[] = array( 'prioritynum' => $c_priority, 'priorityword' => '<'.$newpriorityword.'>' );
+            }
+            $c_priority = $prioritylistone['prioritynum'];
+            $newpriorityword = ''.$prioritylistone['priorityword'].'';
+        }
+    }
+    return $newprioritylist;
+}
+
+// 検索ワードからプライオリティ順にして$start件目から$length件取得
+function search_order_priority($word,$start,$length)
+{
+    global $priority_db;
+    global $everythinghost;
+    
+    $currentnum = 0;
+    $pickup_array = array();
+    $return_array = array();
+    $totalcount = count_onepriority($word);
+    
+    $prioritylist = prioritydb_get($priority_db);
+    
+    $prioritylist=orderprioritylist($prioritylist);
+    
+//    var_dump($prioritylist);
+//    die();
+    
+    $r_length = $length;
+    $r_start = $start;
+    
+    foreach($prioritylist as $prioritylistone){
+        $kerwords = $word.' '.$prioritylistone['priorityword'];
+        $pcount = count_onepriority($kerwords);
+        if($pcount <= 0 ){
+            // print '### non P:'.$prioritylistone['prioritynum'].' W:'.$prioritylistone['priorityword']."\n";
+            continue;
+        }
+        if( ($currentnum <= $r_start ) && ( $currentnum + $pcount ) > $r_start ){
+            $c_start = $r_start - $currentnum;
+            if( ($r_start + $r_length) > ($currentnum + $pcount) ){
+                $c_length = $currentnum + $pcount - $r_start;
+                $r_length = $r_length - $c_length;
+                $currentnum = $currentnum + $pcount;
+                $r_start = $currentnum;
+            }else {
+                $c_length = $r_length;
+                $r_length = 0;
+            }
+            $order = 'sort=size&ascending=0';
+            
+            $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $order . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $c_length . '&offset=' .$c_start.'';
+            $json = file_get_html_with_retry($jsonurl, 5, 30);
+            $result_array = json_decode($json, true);
+            // print '#### P:'.$prioritylistone['prioritynum'].' offset:'.$c_start.' count'.$c_length."\n";
+            $pickup_array = array_merge ($pickup_array,$result_array['results']);
+            //var_dump($result_array);
+            if($r_length == 0) break;
+        }
+        
+    }
+    $return_array = array( "totalResults" => $totalcount , "results" => $pickup_array );
+    return $return_array;
+    
+}
+
+
+
+// 検索ワードから検索結果一覧を取得する処理
+function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length = 10, $order = null, $path = null)
+{
+
+		global $everythinghost;
+		global $config_ini;
+        global $priority_db;
+
+        $prioritylist = prioritydb_get($priority_db);
+		
+		// IPv6check
+	    $askeverythinghost = $everythinghost;
+		
+		if(array_key_exists("max_filesize", $config_ini)){
+		  if( $config_ini["max_filesize"] > 0 ){
+		      $filesizebyte = $config_ini["max_filesize"] * 1024 * 1024;
+		      $kerwords = $kerwords.' size:<='.$filesizebyte;
+		  }
+		}
+		
+		$orderstr = 'sort=size&ascending=0';
+		//var_dump($order);
+		if(empty($order)){
+		    $result_array = search_order_priority($kerwords,$start,$length);
+		}else if($order[0]['column']==3  ){
+		    if($order[0]['dir']=='asc'){
+		       $orderstr='sort=size&ascending=1';
+		    }else {
+		       $orderstr='sort=size&ascending=0';
+		    }
+		}else if($order[0]['column']==2  ){
+		    if($order[0]['dir']=='asc'){
+		       $orderstr='sort=name&ascending=1';
+		    }else {
+		       $orderstr='sort=name&ascending=0';
+		    }
+		}else if($order[0]['column']==4  ){
+		    if($order[0]['dir']=='asc'){
+		       $orderstr='sort=path&ascending=1';
+		    }else {
+		       $orderstr='sort=path&ascending=0';
+		    }
+		}else {
+		    $result_array = search_order_priority($kerwords,$start,$length);
+		    return $result_array;
+		}
+        $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $orderstr . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $length . '&offset=' .$start.'';
+        $json = file_get_html_with_retry($jsonurl, 5, 30);
+        $result_array = json_decode($json, true);		
+}
+
+
 // 検索ワードから検索結果一覧を取得する処理
 function searchlocalfilename($kerwords, &$result_array,$order = null, $path = null)
 {
@@ -315,6 +512,52 @@ print "</tbody>\n";
   	echo "\n\n";
 }
 
+function addpriority($priority_db,$rearchedlist)
+{
+    $prioritylist = prioritydb_get($priority_db);
+    $rearchedlist_addpriority  = array();
+    // var_dump($rearchedlist["results"]);
+    foreach($rearchedlist["results"] as $k=>$v){
+    //print "<br>";
+     //var_dump($v);
+        $onefileinfo = array();
+        $onefileinfo += array('path' => $v['path']);
+        $onefileinfo += array('name' => $v['name']);
+        $onefileinfo += array('size' => $v['size']);
+        
+        $c_priority = -1;
+        foreach($prioritylist as $pk=>$pv){
+            $searchres = false;
+            if($pv['kind'] == 2 ) {
+                $searchres = mb_strstr($v['name'],$pv['priorityword']);
+            }else{
+                $searchres = mb_strstr($v['path'],$pv['priorityword']);
+            }
+            if ( $searchres != false ){
+                if($c_priority < $pv['prioritynum'] ){
+                   $c_priority = $pv['prioritynum'];
+                }
+            }
+        }
+        if($c_priority == -1) $c_priority = 50;
+        $onefileinfo += array('priority' => $c_priority);
+        
+        $rearchedlist_addpriority[] = $onefileinfo ;
+        //print "<br>";
+        //var_dump($rearchedlist_addpriority);
+    }
+    //print "<br>";
+    //var_dump($rearchedlist_addpriority);
+    foreach ($rearchedlist_addpriority as $key => $row) {
+    //var_dump($key);
+    //var_dump($row);
+        $priority_s[$key] = $row['priority'];
+        $size_s[$key] = $row['size'];
+    }
+    
+    return( array( 'totalResults' => $rearchedlist['totalResults'], 'results' => $rearchedlist_addpriority));
+}
+
 function sortpriority($priority_db,$rearchedlist)
 {
     $prioritylist = prioritydb_get($priority_db);
@@ -378,29 +621,34 @@ function PrintLocalFileListfromkeyword($word,$order = null, $tableid='searchresu
 function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searchresult',$bgvmode = 0, $selectid = '')
 {
     global $priority_db;
-    searchlocalfilename($word,$result_a,$order);
+//    searchlocalfilename($word,$result_a,$order);
+    searchlocalfilename_part($word,$result_a,$order);
     if(empty($bgvmode)){
         $bgvmode = 0;
     }
     
     if( $result_a["totalResults"] >= 1) {
-        $result_withp = sortpriority($priority_db,$result_a);
-        echo $result_withp["totalResults"]."件<br />";
+       // $result_withp = sortpriority($priority_db,$result_a);
+       // echo $result_a["totalResults"]."件<br />";
         // print javascript
+//  
+
         $printjs = <<<EOD
   <script type="text/javascript">
 $(document).ready(function(){
   $('#%s').dataTable({
+  "processing": true,
+  "serverSide": true,
   "ajax": {
-      "url": "searchfilefromkeyword_json.php",
+      "url": "searchfilefromkeyword_json_part.php",
       "type": "POST",
       "data": { keyword:"%s", bgvmode:%s, selectid:%s },
       "dataType": 'json',
-      "dataSrc": "",
+      "dataSrc": "data",
   },
   "bPaginate" : true,
-  "lengthMenu": [[50, 10, -1], [50, 10, "ALL"]],
-  "bStateSave" : true,
+  "lengthMenu": [[50, 10, 100], [50, 10, 100]],
+  "bStateSave" : false,
   "autoWidth": false,
   "columns" : [
       { "data": "no", "className":"no"},
@@ -409,9 +657,11 @@ $(document).ready(function(){
       { "data": "filesize", "className":"filesize"},
       { "data": "filepath", "className":"filepath"},
   ],
+  "sDom": '<"H"lrip>t<"F"ip>',
   columnDefs: [
-  { type: 'currency', targets: [3] }
-   ]
+  { type: 'currency', targets: [3] },
+  { "orderable": false , targets: [1]} 
+   ],
    }
   );
 });
@@ -440,6 +690,7 @@ EOD;
         echo sprintf($printtablebase,$tableid);
     }
 }
+
 
 // 検索結果の件数だけ表示する処理
 function searchresultcount_fromkeyword($word)

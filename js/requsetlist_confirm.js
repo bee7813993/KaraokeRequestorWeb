@@ -42,22 +42,22 @@ $(document).ready(function()
                 $button.attr('disabled', true);
             },
             success : function( data ) {
-                newid = JSON.parse(data);
-                if( newid == "none" ){
-                  window.location.href = 'requestlist_only.php' ;
-                }else{
+                try{
+                  newid = JSON.parse(data);
                   window.location.href = 'requestlist_only.php?showid=' + newid.newid;
+                } catch(e){
+                  window.location.href = 'requestlist_only.php' ;
                 }
             },
             // 応答後
             complete: function(data, xhr, textStatus) {
                 // ボタンを有効化し、再送信を許可
                 $button.attr('disabled', false);
-                newid = JSON.parse(data);
-                if( newid == "none" ){
-                  window.location.href = 'requestlist_only.php' ;
-                }else{
+                try{
+                  newid = JSON.parse(data);
                   window.location.href = 'requestlist_only.php?showid=' + newid.newid;
+                } catch(e){
+                  window.location.href = 'requestlist_only.php' ;
                 }
             },
             /**
