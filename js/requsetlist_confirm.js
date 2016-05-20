@@ -55,9 +55,9 @@ $(document).ready(function()
                 $button.attr('disabled', false);
                 try{
                   newid = JSON.parse(data);
-                  window.location.href = 'requestlist_only.php?showid=' + newid.newid;
+//                  window.location.href = 'requestlist_only.php?showid=' + newid.newid;
                 } catch(e){
-                  window.location.href = 'requestlist_only.php' ;
+                  // window.location.href = 'requestlist_only.php' ;
                 }
             },
             /**
