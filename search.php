@@ -102,7 +102,7 @@ shownavigatioinbar('searchreserve.php');
  $nflink = "notfoundrequest/notfoundrequest.php";
  }
  if($usenfrequset == 1) {
-    print '<button type="button" onclick="location.href=\''.$nflink.'\' " class="btn btn-default " > 探して見つからなかった曲があったら教えてください。 </button>';
+    print '<button type="button" onclick="location.href=\''.$nflink.'\' " class="btn btn-default btn-sm" > 探して見つからなかった曲があったら教えてください。 </button>';
  }
 ?>
 
@@ -110,9 +110,9 @@ shownavigatioinbar('searchreserve.php');
 <hr />
 <h2>ファイル名(曲名)検索 </h2>
   <form action="search.php" method="GET">
-
-<div class="col-xs-12 col-sm-12" >    検索ワード(ファイル名) </div>
-  <div class="col-xs-12 col-sm-9" >
+  <div class="container">
+  <label>検索ワード(ファイル名) </label>
+  
   <input type="text" name="searchword" class="searchtextbox" placeholder="歌手名作品名検索は下の外部DB連携で検索できます"
 
   <?php
@@ -126,19 +126,11 @@ shownavigatioinbar('searchreserve.php');
       print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
   }
   ?>
-  </div>
-  
-</div>
 
-<div class="container">
-
-  </select>
-  <div class="col-xs-12 col-sm-3" >
   <input type="submit" value="検索" class="btn btn-default ">
   </div>
-  </div>
-  <div class="clearleftfloat"> 
   </form>
+  <div class="clearleftfloat"> 
   and検索は スペース 区切り<br>
   or検索は |(半角) 区切り<br>
   not検索はnotにしたい単語の先頭に!(半角)<br>
@@ -229,6 +221,7 @@ die();
   (登録されてない曲は見つけられません。)<br>
   (曲名の一部を含む別の曲とかも検索結果に出ちゃいます。ありがちな1単語の曲名だとたくさん結果に出てきてしまうので注意してね)<br>
   (網羅されてない新しい曲とか、特殊文字（★とか）が曲名に入っていると見つからない可能性があるので改めてファイル名検索してみて)
+</div>
 
 
 <hr>

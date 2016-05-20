@@ -279,6 +279,7 @@ function orderprioritylist($prioritylist){
             $newpriorityword = ''.$prioritylistone['priorityword'].'';
         }
     }
+    $newprioritylist[] = array( 'prioritynum' => $c_priority, 'priorityword' => '<'.$newpriorityword.'>' );
     return $newprioritylist;
 }
 
@@ -297,11 +298,12 @@ function search_order_priority($word,$start,$length)
     
     $prioritylist=orderprioritylist($prioritylist);
     
-//    var_dump($prioritylist);
+//     var_dump($prioritylist);
 //    die();
     
     $r_length = $length;
     $r_start = $start;
+    $count_p = $start ;
     
     foreach($prioritylist as $prioritylistone){
         $kerwords = $word.' '.$prioritylistone['priorityword'];
@@ -327,8 +329,14 @@ function search_order_priority($word,$start,$length)
             $json = file_get_html_with_retry($jsonurl, 5, 30);
             $result_array = json_decode($json, true);
             // print '#### P:'.$prioritylistone['prioritynum'].' offset:'.$c_start.' count'.$c_length."\n";
-            $pickup_array = array_merge ($pickup_array,$result_array['results']);
-            //var_dump($result_array);
+            // priority番号追加
+            $resultslist_withp = array();
+            foreach($result_array['results'] as $v) {
+               $resultslist_withp[] =  ( $v + array("pcount" => $count_p ) );
+               $count_p++;
+            }
+            $pickup_array = array_merge ($pickup_array,$resultslist_withp);
+            // var_dump($resultslist_withp);
             if($r_length == 0) break;
         }
         
@@ -519,11 +527,15 @@ function addpriority($priority_db,$rearchedlist)
     // var_dump($rearchedlist["results"]);
     foreach($rearchedlist["results"] as $k=>$v){
     //print "<br>";
-     //var_dump($v);
+    // var_dump($v);
         $onefileinfo = array();
         $onefileinfo += array('path' => $v['path']);
         $onefileinfo += array('name' => $v['name']);
         $onefileinfo += array('size' => $v['size']);
+        if(array_key_exists("pcount", $v)) {
+            $onefileinfo += array('pcount' => $v['pcount']);
+        }
+        
         
         $c_priority = -1;
         foreach($prioritylist as $pk=>$pv){

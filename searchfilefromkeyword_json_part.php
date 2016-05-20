@@ -94,7 +94,11 @@ $draw++;
 			   $length_str = $music_info['playtime_string'];
 			}
 		}
-		 $oneresult += array("no" => $k);
+		if(array_key_exists("pcount", $v)) {
+		   $oneresult += array("no" => $v['pcount']);
+		}else{
+		   $oneresult += array("no" => '-');
+		}
 		 
 		 $reqbtn = '<form action="request_confirm.php" method="post" >';
 		 $reqbtn = $reqbtn . "\n" . '<input type="hidden" name="filename" id="filename" value="'. $v['name'] . '" />';
