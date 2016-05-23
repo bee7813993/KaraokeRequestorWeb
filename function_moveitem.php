@@ -118,26 +118,34 @@ class MoveItem {
            }
            if($newreqorder === false) break;
            // print " $newreqorder";
-           //print "<pre>\nbefiresinger:\n";
-           //var_dump($beforesinger);print "</pre>";
+           // print "<pre>\n-------- before singer list:\n";
+           // var_dump($beforesinger);print "</pre>";
+           // print "<pre>\n-------- oneturn list:\n";
+           // var_dump($oneturn);print "</pre>";
            if(!empty($beforesinger)){
                // 前ターンの自分の前の人がいたらその前の人にする
-               $cheekedreqorder= $oneturn[0]['reqorder'];
+               $cheekedreqorder= $oneturn[count($oneturn)-1]['reqorder']+1;;
+               foreach( $oneturn as $onerequest){
+                 if($onerequest['nowplaying']==='未再生'){
+                     $cheekedreqorder= $onerequest['reqorder'];
+                     break;
+                 }
+               }
                $setvalue = false;
                foreach( array_reverse ($oneturn) as $onerequest){
                    
                    foreach ($beforesinger as $beforeorder){
-                   // print $onerequest['singer'].$onerequest['reqorder'].$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
+                    // print $onerequest['singer'].$onerequest['reqorder'].$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
                        if($onerequest['singer'] == $beforeorder['singer']){
                            $newreqorder = $cheekedreqorder ;
-                           //print "reqorderを".$newreqorder.'にしました';
+                           // print "reqorderを".$newreqorder.'にしました';
                            $setvalue = true;
                            break;
                        }
                        
                        //print $cheekedreqorder;
                    }
-                   //print $oneturn[0]['reqorder'];
+                   // print $oneturn[0]['reqorder'];
                    if($setvalue === true){
                        break;
                    }

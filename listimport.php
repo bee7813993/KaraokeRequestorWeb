@@ -22,7 +22,7 @@ if(empty($dbname)){
 if( strcmp($l_importtype,'add' ) === 0 ){
 
     try {
-        $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, reqorder, fullpath, nowplaying, status, clientip, clientua, playtimes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, reqorder, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
     } catch (PDOException $e) {
     	echo 'Connection failed: ' . $e->getMessage();
@@ -42,7 +42,7 @@ if( strcmp($l_importtype,'add' ) === 0 ){
     }
 
     try {
-        $sql = "INSERT INTO requesttable  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO requesttable  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
     } catch (PDOException $e) {
     	echo 'Connection failed: ' . $e->getMessage();
