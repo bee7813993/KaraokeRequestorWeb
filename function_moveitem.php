@@ -133,11 +133,15 @@ class MoveItem {
                }
                $setvalue = false;
                foreach( array_reverse ($oneturn) as $onerequest){
-                   
+                   $cheekedreqorder = $onerequest['reqorder'] + 1;
                    foreach ($beforesinger as $beforeorder){
-                    // print $onerequest['singer'].$onerequest['reqorder'].$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
+                      // print $onerequest['singer'].$onerequest['reqorder'].$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
                        if($onerequest['singer'] == $beforeorder['singer']){
-                           $newreqorder = $cheekedreqorder ;
+                           if( $cheekedreqorder == $onerequest['reqorder']){
+                               $newreqorder = $cheekedreqorder + 1 ;
+                           }else {
+                               $newreqorder = $cheekedreqorder ;
+                           }
                            // print "reqorderを".$newreqorder.'にしました';
                            $setvalue = true;
                            break;
@@ -149,7 +153,9 @@ class MoveItem {
                    if($setvalue === true){
                        break;
                    }
-                   $cheekedreqorder=$onerequest['reqorder'] ;
+                   if($onerequest['nowplaying']==='未再生'){
+                       $cheekedreqorder=$onerequest['reqorder'] ;
+                   }
                }
            }else{
              // 最初のターンの場合そのターンの一番後ろにする

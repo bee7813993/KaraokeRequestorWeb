@@ -23,6 +23,7 @@ if(empty($foobarpath)){
     $FOOBARPATH=$foobarpath;
 }
 $MPCSTATURL='http://localhost:13579/info.html';
+$MPCBESTATURL='http://localhost:13579/status.html';
 $MPCCMDURL='http://localhost:13579/command.html';
 $MPCFILEOPENURL='http://localhost:13579/browser.html?path=';
 $FOOBARSTATURL='http://localhost:82/karaokectrl/';
@@ -507,7 +508,7 @@ function song_start_again($db,$id){
     }
 }
 
-function song_stop($kind){
+function song_stop($kind, $stat = 'none'){
 
     if( $kind === 1 || $kind === 3){
         // case mpc
@@ -578,7 +579,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
            break;
        }
     }
-    song_stop( $kind );
+    song_stop( $kind , $stat);
     // BGVモードではmuteを解除する。
     if($loopflg == 1) {
         global $config_ini;
@@ -636,7 +637,9 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
            echo ':';
            print ($totaltime);
            echo "\n";
-           break;
+           if($totaltime != 0 ){
+               break;
+           }
        }
        
        if($playtime > 1 ) $startonce = true;

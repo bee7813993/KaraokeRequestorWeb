@@ -5,8 +5,8 @@
 
 
 [Setup]
-AppName=KaraokeRequestorWeb for xampp
-AppVersion=0.09.7
+AppName=ÅuÇ‰Ç©ÇËÅvUniversal KAraoke REquest Web tool
+AppVersion=0.09.8
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
 AppendDefaultDirName=no
