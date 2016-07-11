@@ -245,9 +245,17 @@ function orderprioritylist($prioritylist){
     $otherstr = "";
     foreach($prioritylist as $prioritylistone){
         if(empty($otherstr)){
-            $otherstr = '!"'.$prioritylistone['priorityword'].'"';
+            if($prioritylistone["kind"] == 2 ) {  // file
+                $otherstr = '!file:"'.$prioritylistone['priorityword'].'"';
+            }else {
+                $otherstr = '!path:"'.$prioritylistone['priorityword'].'"';
+            }
         }else {
-            $otherstr = $otherstr. ' !"'.$prioritylistone['priorityword'].'"';
+            if($prioritylistone["kind"] == 2 ) {  // file
+                $otherstr = $otherstr. ' !file:"'.$prioritylistone['priorityword'].'"';
+            }else {
+                $otherstr = $otherstr. ' !path:"'.$prioritylistone['priorityword'].'"';
+            }
         }
     }
     $i = 0;
@@ -260,9 +268,12 @@ function orderprioritylist($prioritylist){
         }
         $i++;
     }
+    if(empty($otherstr)){
+    return($prioritylist);
+    }
     $ndarray = array( 'id' => 999, 'kind' => 1, 'priorityword' => $otherstr, 'prioritynum' => 50 );
     
-    array_splice($prioritylist, $i, 0, array($ndarray));
+    //array_splice($prioritylist, $i, 0, array($ndarray));
 
     $c_priority = null;
     $newpriorityword = '';
@@ -270,16 +281,25 @@ function orderprioritylist($prioritylist){
     foreach($prioritylist as $prioritylistone){
     
         if($c_priority == $prioritylistone['prioritynum']){
-            $newpriorityword = $newpriorityword.'|'.$prioritylistone['priorityword'].'';
+            if($prioritylistone["kind"] == 2 ) {  // file
+                $newpriorityword = $newpriorityword.'|file:'.$prioritylistone['priorityword'].'';
+            }else {
+                $newpriorityword = $newpriorityword.'|path:'.$prioritylistone['priorityword'].'';
+            }
         }else {
             if(!empty($newpriorityword)){
                 $newprioritylist[] = array( 'prioritynum' => $c_priority, 'priorityword' => '<'.$newpriorityword.'>' );
             }
             $c_priority = $prioritylistone['prioritynum'];
-            $newpriorityword = ''.$prioritylistone['priorityword'].'';
+            if($prioritylistone["kind"] == 2 ) {  // file
+                $newpriorityword = 'file:'.$prioritylistone['priorityword'].'';
+            }else{
+                $newpriorityword = 'path:'.$prioritylistone['priorityword'].'';
+            }
         }
     }
     $newprioritylist[] = array( 'prioritynum' => $c_priority, 'priorityword' => '<'.$newpriorityword.'>' );
+    array_splice($newprioritylist, $i, 0, array($ndarray));
     return $newprioritylist;
 }
 
@@ -301,24 +321,33 @@ function search_order_priority($word,$start,$length)
 //     var_dump($prioritylist);
 //    die();
     
-    $r_length = $length;
-    $r_start = $start;
-    $count_p = $start ;
+    $r_length = $length;  // 残要求件数
+    $r_start = $start;    // 残件開始位置
+    $count_p = $start ;   // 
+    
+    $a = 0;
     
     foreach($prioritylist as $prioritylistone){
-        $kerwords = $word.' '.$prioritylistone['priorityword'];
-        $pcount = count_onepriority($kerwords);
+        $kerwords = ''.$word.' '.$prioritylistone['priorityword'];
+        $pcount = count_onepriority($kerwords);  //そのプライオリティの件数
         if($pcount <= 0 ){
             // print '### non P:'.$prioritylistone['prioritynum'].' W:'.$prioritylistone['priorityword']."\n";
             continue;
         }
+        if($r_start > $pcount ){
+            $r_start = $r_start - $pcount;
+            continue;
+        }
+
+         //  print '#### P:'.$prioritylistone['prioritynum'].' currentnum:'.$currentnum.' r_start:'.$r_start.' pcount:'.$pcount.' r_length:'.$r_length."\n";
         if( ($currentnum <= $r_start ) && ( $currentnum + $pcount ) > $r_start ){
             $c_start = $r_start - $currentnum;
-            if( ($r_start + $r_length) > ($currentnum + $pcount) ){
-                $c_length = $currentnum + $pcount - $r_start;
-                $r_length = $r_length - $c_length;
-                $currentnum = $currentnum + $pcount;
-                $r_start = $currentnum;
+            
+            if( ($r_start + $r_length) > ($currentnum + $pcount) ){  // 要求件数が残件を超えている場合
+                $c_length = $currentnum + $pcount - $r_start;  // 現在の位置からその優先度の数
+                    $r_length = $r_length - $c_length;
+                    $currentnum = $currentnum + $pcount;
+                    $r_start = $currentnum;
             }else {
                 $c_length = $r_length;
                 $r_length = 0;
@@ -328,7 +357,7 @@ function search_order_priority($word,$start,$length)
             $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $order . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $c_length . '&offset=' .$c_start.'';
             $json = file_get_html_with_retry($jsonurl, 5, 30);
             $result_array = json_decode($json, true);
-            // print '#### P:'.$prioritylistone['prioritynum'].' offset:'.$c_start.' count'.$c_length."\n";
+            // print '##### P:'.$prioritylistone['prioritynum'].' offset:'.$c_start.' count'.$c_length."\n";
             // priority番号追加
             $resultslist_withp = array();
             foreach($result_array['results'] as $v) {
@@ -364,14 +393,17 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		if(array_key_exists("max_filesize", $config_ini)){
 		  if( $config_ini["max_filesize"] > 0 ){
 		      $filesizebyte = $config_ini["max_filesize"] * 1024 * 1024;
-		      $kerwords = $kerwords.' size:<='.$filesizebyte;
+		      $kerwords = 'path:'.$kerwords.' size:<='.$filesizebyte;
 		  }
 		}
 		
 		$orderstr = 'sort=size&ascending=0';
 		//var_dump($order);
-		if(empty($order)){
+		if(empty($prioritylist)){
+		    $orderstr = 'sort=size&ascending=0';
+		}else if(empty($order)){
 		    $result_array = search_order_priority($kerwords,$start,$length);
+		    return $result_array;
 		}else if($order[0]['column']==3  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';

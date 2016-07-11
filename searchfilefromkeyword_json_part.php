@@ -12,7 +12,6 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
         $user=$_SERVER['PHP_AUTH_USER'];
     }
 }
-
 if(array_key_exists("keyword", $_REQUEST)) {
     $keyword = $_REQUEST["keyword"];
 }
@@ -64,6 +63,7 @@ if(array_key_exists("etorder", $_REQUEST)) {
     $etorder = $_REQUEST["etorder"];
 }
 searchlocalfilename_part($keyword,$result_a,$start,$length,$r_order,$path);
+//var_dump($result_a);
 
 if( $result_a["totalResults"] >= 1) {
     //build search result 
