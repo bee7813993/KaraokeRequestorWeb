@@ -922,7 +922,7 @@ while(1){
                    mpcstop();
 
                    // sleep(1);
-                   startfoobarandwait($filepath,3);
+                   startfoobarandwait(mb_convert_encoding($filepath,"SJIS"),3);
                    if ($playmode == 2){
 //                      sleep(0.5);
 //                      exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");

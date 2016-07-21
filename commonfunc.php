@@ -318,7 +318,7 @@ function search_order_priority($word,$start,$length)
     
     $prioritylist=orderprioritylist($prioritylist);
     
-//     var_dump($prioritylist);
+    //  var_dump($prioritylist);
 //    die();
     
     $r_length = $length;  // 残要求件数
@@ -334,12 +334,8 @@ function search_order_priority($word,$start,$length)
             // print '### non P:'.$prioritylistone['prioritynum'].' W:'.$prioritylistone['priorityword']."\n";
             continue;
         }
-        if($r_start > $pcount ){
-            $r_start = $r_start - $pcount;
-            continue;
-        }
 
-         //  print '#### P:'.$prioritylistone['prioritynum'].' currentnum:'.$currentnum.' r_start:'.$r_start.' pcount:'.$pcount.' r_length:'.$r_length."\n";
+            // print '#### P:'.$prioritylistone['prioritynum'].' currentnum:'.$currentnum.' r_start:'.$r_start.' pcount:'.$pcount.' r_length:'.$r_length."\n";
         if( ($currentnum <= $r_start ) && ( $currentnum + $pcount ) > $r_start ){
             $c_start = $r_start - $currentnum;
             
@@ -348,6 +344,7 @@ function search_order_priority($word,$start,$length)
                     $r_length = $r_length - $c_length;
                     $currentnum = $currentnum + $pcount;
                     $r_start = $currentnum;
+                    
             }else {
                 $c_length = $r_length;
                 $r_length = 0;
@@ -357,6 +354,7 @@ function search_order_priority($word,$start,$length)
             $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $order . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $c_length . '&offset=' .$c_start.'';
             $json = file_get_html_with_retry($jsonurl, 5, 30);
             $result_array = json_decode($json, true);
+            // print '###   P:'.$prioritylistone['prioritynum'].' W:'.$prioritylistone['priorityword']."\n";
             // print '##### P:'.$prioritylistone['prioritynum'].' offset:'.$c_start.' count'.$c_length."\n";
             // priority番号追加
             $resultslist_withp = array();
@@ -367,6 +365,8 @@ function search_order_priority($word,$start,$length)
             $pickup_array = array_merge ($pickup_array,$resultslist_withp);
             // var_dump($resultslist_withp);
             if($r_length == 0) break;
+        }else {
+            $currentnum = $currentnum + $pcount;
         }
         
     }
