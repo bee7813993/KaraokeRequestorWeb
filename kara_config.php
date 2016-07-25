@@ -21,9 +21,13 @@ function readconfig_array()
         $playmode = 3;
         $config_ini = array_merge($config_ini,array("playmode" => $playmode));
     }
-    if(!array_key_exists("playerpath", $config_ini)){
-        $playerpath = 'C:\Program Files (x86)\MPC-BE\mpc-be.exe';
-        $config_ini = array_merge($config_ini,array("playerpath" => urlencode($playerpath)));
+    if(!array_key_exists("playerpath_select", $config_ini)){
+        $playerpath_select = 'C:\Program Files (x86)\MPC-BE\mpc-be.exe';
+        $config_ini = array_merge($config_ini,array("playerpath_select" => urlencode($playerpath_select)));
+    }
+    if(!array_key_exists("playerpath_any", $config_ini)){
+        $playerpath_any = '';
+        $config_ini = array_merge($config_ini,array("playerpath_any" => urlencode($playerpath_any)));
     }
     if(!array_key_exists("foobarpath", $config_ini)){
         $foobarpath = '.\foobar2000\foobar2000.exe';
@@ -128,6 +132,13 @@ function readconfig_array()
         $usebgv = 2;
         $config_ini = array_merge($config_ini,array("usebgv" => $usebgv));
     }    
+
+    if($config_ini["playerpath_select"] == urlencode("その他PATH指定" )) {
+        $config_ini = array_merge($config_ini,array("playerpath" => ($config_ini["playerpath_any"])));
+    }else{
+        $config_ini = array_merge($config_ini,array("playerpath" => ($config_ini["playerpath_select"])));
+    }
+    // $playerpath =$config_ini["playerpath"];
     
     return $config_ini;
 

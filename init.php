@@ -140,18 +140,19 @@ print '</pre>';
     </select>
   </div>
   <div class="form-group">
-    <label for="playerpath">MediaPlayerClassic PATH設定</label>
-    <select  class="form-control" name="playerpath" id="playerpath" >  
-      <option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
-      <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版)</option>
-      <option <?php print selectedcheck("C:\Program Files\MPC-BE x64\mpc-be64.exe",urldecode($config_ini["playerpath"])); ?> value="C:\Program Files\MPC-BE x64\mpc-be64.exe" >C:\Program Files\MPC-BE x64\mpc-be64.exe (64bitOSでMPC-BE64bit版)</option>
+    <label for="playerpath_select">MediaPlayerClassic PATH設定</label>
+    <select  class="form-control" name="playerpath_select" id="playerpath_select" >  
+      <option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath_select"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
+      <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath_select"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版)</option>
+      <option <?php print selectedcheck("C:\Program Files\MPC-BE x64\mpc-be64.exe",urldecode($config_ini["playerpath_select"])); ?> value="C:\Program Files\MPC-BE x64\mpc-be64.exe" >C:\Program Files\MPC-BE x64\mpc-be64.exe (64bitOSでMPC-BE64bit版)</option>
+      <option <?php print selectedcheck("その他PATH指定",urldecode($config_ini["playerpath_select"])); ?> value="その他PATH指定" >その他PATH指定</option>
     </select>
     <label > (任意のPATH選択) </label>
     <input class="form-control" type="text" name="playerpath_any" size="100" class="playerpath_any" 
 <?php
-if( urldecode($config_ini["playerpath"]) !== 'C:\Program Files (x86)\MPC-BE\mpc-be.exe' && $playerpath !== 'C:\Program Files\MPC-BE\mpc-be.exe' )
+if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
 {
-    print 'value="'.urldecode($config_ini["playerpath"]).'" ';
+    print 'value="'.urldecode($config_ini["playerpath_any"]).'" ';
 }
 ?>
 />
