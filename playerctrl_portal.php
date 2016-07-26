@@ -41,7 +41,7 @@ $playerkind = getcurrentplayer();
 <?php
 if($nomenu == 0 ){
     shownavigatioinbar();
-    print '<button type="" value="" class="btn btn-default btn-xs"  onclick=location.reload() >再生中の曲用に更新</button>';
+    print '<button type="" value="" class="btn btn-default btn-xs"  onclick="location.href=\'playerctrl_portal.php\'" >再生中の曲用に更新</button>';
 }
 
 if( strcmp('foobar', $playerkind) === 0 ) {
