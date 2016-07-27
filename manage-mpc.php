@@ -647,7 +647,6 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
 
        sleep(1.5);
    }
-   sleep(2.5);
 }
 
 
@@ -866,14 +865,32 @@ while(1){
                $filepath = $winfillpath;
                $filepath_utf8=$l_fullpath;
            }else{
-     logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $word\r\n");
-             $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-             // logtocmd $jsonurl;
+             $filepath = null;
+             // まず フルパス中のbasenameで再検索
+             $songbasename = basename($l_fullpath);
+             logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
+             $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($songbasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
              $json = file_get_html_with_retry($jsonurl, 5);
-             $decode = json_decode($json, true);
-             $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-             $filepath_utf8= $filepath;
-             $filepath = mb_convert_encoding($filepath,"cp932");
+             if($json != false){
+                 $decode = json_decode($json, true);
+                 if($decode != NULL){
+                   if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
+                       $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+                       $filepath = mb_convert_encoding($filepath,"cp932");
+                   }
+                 }
+             }
+             if(empty($filepath)){
+             // 曲名で再建策
+                 logtocmd ("fullpass basename $songbasename is not found. Search from Everything DB.: $word\r\n");
+                 $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+                 // logtocmd $jsonurl;
+                 $json = file_get_html_with_retry($jsonurl, 5);
+                 $decode = json_decode($json, true);
+                 $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+                 $filepath_utf8= $filepath;
+                 $filepath = mb_convert_encoding($filepath,"cp932");
+             }
              logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");
            }
     //logtocmd "Debug filepath: $filepath\r\n";

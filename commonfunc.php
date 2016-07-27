@@ -1161,6 +1161,14 @@ EOD;
 }else if($kind == 'dd'){
 print '      <li><a href="'.$prefix.'searchreserve.php">検索＆予約MENU</a></li>';
 print '      <li role="separator" class="divider"></li>';
+if( !empty($config_ini["limitlistname"][0]) ){
+    for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){
+        if(empty($config_ini["limitlistname"][$i])) continue; 
+        print '      <li><a href="'.$prefix.'limitlist.php?data='.$config_ini["limitlistfile"][$i].'">'.$config_ini["limitlistname"][$i].'</a></li>';
+    }
+    print '      <li role="separator" class="divider"></li>';
+}
+
 if( $config_ini["usebgv"] == 1 && !empty($config_ini["BGVfolder"]) ){
 print '      <li><a href="'.$prefix.'search_bgv.php">BGV選択</a></li>';
 }

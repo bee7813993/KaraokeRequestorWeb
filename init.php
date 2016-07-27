@@ -558,6 +558,37 @@ if(array_key_exists("request_automove",$config_ini)) {
     </label>
   </div>
 
+<!---- 縛り曲リストの設定 ----->
+  <h3>縛り曲リスト </h3>
+  <?php 
+
+  for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){
+      if(empty($config_ini["limitlistname"][$i])) continue; 
+      print '<div class="form-group">';
+      print '  <label > 縛り曲リスト名 '.$i.' </label>';
+      print '  <input type="text" name="limitlistname[]" size="100" class="form-control" value="';
+      if(array_key_exists($i,$config_ini["limitlistname"]))
+       { 
+         echo $config_ini["limitlistname"][$i];
+       }
+      print '" />';
+      print '  <label > 縛り曲リストファイル名（json形式）'.$i.' </label>';
+      print '  <input type="text" name="limitlistfile[]" size="100" class="form-control" value="';
+      if(array_key_exists($i,$config_ini["limitlistfile"])) 
+       { 
+         echo $config_ini["limitlistfile"][$i];
+       }
+      print '" />';
+      print '</div>';
+  
+  }
+  ?>
+  <div class="form-group">
+    <label > 縛り曲リスト名(new)  </label>
+    <input type="text" name="limitlistname[]" size="100" class="form-control" value="" />
+    <label > 縛り曲リストファイル名(new)（json形式） </label>
+    <input type="text" name="limitlistfile[]" size="100" class="form-control" value="" />
+  </div>
 
   <input type="submit" class="btn btn-default btn-lg" value="設定" />
   </form>

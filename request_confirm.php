@@ -33,6 +33,14 @@ if(array_key_exists("selectid", $_REQUEST)) {
     }
 }
 
+$bgvfile = "";
+if(array_key_exists("bgvfile", $_REQUEST)) {
+    $bgvfile = $_REQUEST["bgvfile"];
+    if($forcebgv == 1) $fullpath=$bgvfile;
+}
+
+
+
 include 'kara_config.php';
 
 if($shop_karaoke == 1 && is_numeric($selectid)){

@@ -1,0 +1,152 @@
+{
+  "title" : "ラブライブ！曲一覧",
+  "category" : [
+      {
+          "name" : "ラブライブ！曲",
+          "song" : [
+          {
+              "title" : "Snow halation",
+              "artist" : "μ's",
+              "songinfo" : [
+                  "作詞：畑 亜貴 作曲：山田高弘",
+                  "2010年12月22日発売",
+                  "μ's 2ndシングル"
+              ],
+              "file" : [
+                  {
+                      "kind"     : "動画",
+                      "filename" : "Snow halation_ラブライブμ’ｓ2ndシングル_（OnVocal、OffVocal、２．５次元切替）_HD音源.mp4",
+                      "comment"  : "ハイレゾ音源 60fps",
+                      "flags"    : [
+                          "Movie",
+                          "OnVocal",
+                          "OffVocal"
+                      ]
+                  },
+                  {
+                      "kind"     : "配信",
+                      "bgvfile"  : "Snow halation_ラブライブμ’ｓ2ndシングル_（OnVocal、OffVocal、２．５次元切替）_HD音源.mp4",
+                      "flags"    : [
+                          "shop_karaoke",
+                          "OffVocal",
+                          "BGV"
+                      ]
+                  }
+              ]
+          }
+          ]
+      },
+      {
+          "name" : "ラブライブ！サンシャイン！！曲",
+          "song" : [
+          {
+              "title" : "君のこころは輝いてるかい",
+              "artist" : "Aqours",
+              "songinfo" : [
+                  "作詞：畑 亜貴 作曲：光増ハジメ 編曲：EFFY",
+                  "2015年10月7日発売",
+                  "Aqoursのデビューシングル"
+              ],
+              "file" : [
+                  {
+                      "kind"     : "動画",
+                      "filename" : "【ニコカラＨＤ】君のこころは輝いてるかい？･改【ラブライブ！】_OnOff.mp4",
+                      "flags"    : [
+                          "Movie"    ,
+                          "OnVocal"  ,
+                          "OffVocal" 
+                      ]
+                  },
+                  {
+                      "kind"     : "配信",
+                      "bgvfile"  : "【ニコカラＨＤ】君のこころは輝いてるかい？･改【ラブライブ！】_OnOff.mp4",
+                      "flags"    : [
+                           "shop_karaoke",
+                           "OffVocal",
+                           "BGV"
+                      ]
+                  }
+              ]
+          },
+          {
+              "title" : "恋になりたいAQUARIUM",
+              "artist" : "Aqours",
+              "songinfo" : [
+                  "作詞：畑 亜貴 作曲：佐々倉有吾",
+                  "2016年4月27日",
+                  "Aqoursの2ndシングル"
+              ],
+              "file" : [
+                  {
+                      "kind"     : "動画",
+                      "filename" : "【ニコカラHD】恋になりたいAQUARIUM【ラブライブ!サンシャイン!!】_OnOff.mp4",
+                      "flags"    : [
+                          "Movie",
+                          "OnVocal",
+                          "OffVocal"
+                      ]
+                  },
+                  {
+                      "kind"     : "配信",
+                      "bgvfile"  : "【ニコカラHD】恋になりたいAQUARIUM【ラブライブ!サンシャイン!!】_OnOff.mp4",
+                      "flags"    : [
+                          "shop_karaoke",
+                          "OffVocal",
+                          "BGV"
+                      ]
+                  }
+              ]
+          },
+          {
+              "title" : "青空Jumping Heart",
+              "artist" : "Aqours",
+              "songinfo" : [
+                  "作詞：畑 亜貴 作曲：伊藤 賢 光増ハジメ 編曲：EFFY",
+                  "2016年7月20日",
+                  "ラブライブ！サンシャイン！！アニメOP"
+              ],
+              "file" : [
+                  {
+                      "kind"     : "動画",
+                      "filename" : "[Aqours]青空Jumping Heart_ラブライブ！サンシャイン！！アニメOP_OnOff.mp4",
+                      "flags"    : [
+                          "Movie",
+                          "OnVocal",
+                          "OffVocal"
+                      ]
+                  },
+                  {
+                      "kind"     : "配信",
+                      "bgvfile"  : "[Aqours]青空Jumping Heart_ラブライブ！サンシャイン！！アニメOP_OnOff.mp4",
+                      "flags"    : [
+                          "shop_karaoke",
+                          "OffVocal",
+                          "BGV"
+                      ]
+                  }
+              ]
+          },
+          {
+              "title" : "元気全開DAY!DAY!DAY!",
+              "artist" : "CYaRon!",
+              "songinfo" : [
+                  "作詞：畑亜貴. 作曲：高田暁・Kon-K",
+                  "2016年5月11日",
+                  "CYaRon! ユニットシングル１"
+              ],
+              "file" : [
+                  {
+                      "kind"     : "配信",
+                      "bgvfile"  : "決めたよHandinHand.mp4",
+                      "flags"    : [
+                          "shop_karaoke",
+                          "OffVocal",
+                          "BGV"
+                      ]
+                  }
+              ]
+          }
+          ]
+      }
+  ]
+}
