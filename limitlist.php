@@ -24,7 +24,7 @@ print_meta_header();
 
     // ここに処理を記述します。
   </script>
-  <title>検索予約ツール接続情報</title>
+  <title>ピックアップ曲表示</title>
   <link type="text/css" rel="stylesheet" href="css/style.css" />
   <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
   <script src="js/bootstrap.min.js"></script>

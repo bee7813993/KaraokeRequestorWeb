@@ -216,6 +216,11 @@ class NicoDownload
                     $fileExtension = 'mp4';
                     break;
                 case 'video/x-flv':
+                    $fileExtension = 'flv';
+                    break;
+                case 'application/x-shockwave-flash':
+                    $fileExtension = 'swf';
+                    break;
                 default:
                     break;
             }
@@ -409,7 +414,7 @@ class NicoDownload
         
     }
 
-    private function CheckVideoID($VideoID)
+    public function CheckVideoID($VideoID)
     {
       if(strpos($VideoID,'/') !== false )
         $VideoID = basename($VideoID);

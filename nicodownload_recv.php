@@ -20,9 +20,10 @@ if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
+$errmsg = '';
 if(nicofuncenabled()) {
 
-if(array_key_exists("nicoid", $_REQUEST)) {
+  if(array_key_exists("nicoid", $_REQUEST)) {
     $nicoid = $_REQUEST["nicoid"];
     
     require_once 'nicodownloader.php';
@@ -34,12 +35,18 @@ if(array_key_exists("nicoid", $_REQUEST)) {
     $nd->DownloadDir = urldecode($config_ini["downloadfolder"]);
     
     //var_dump($nd);
-    $rtDl = $nd->Download($nicoid);
+    
+    if(substr( $nd->CheckVideoID($nicoid),0,2) == 'nm' ){
+        $errmsg = 'nmで始まるIDは動画ではないので対応していません。（ニコニコムービーメーカー）';
+    }else
+    {
+        $rtDl = $nd->Download($nicoid);
     //print $rtDl;
-    if($rtDl !== false){
-      $downfilename = mb_convert_encoding($rtDl["filePath"],'UTF-8','auto'); 
+        if($rtDl !== false){
+          $downfilename = mb_convert_encoding($rtDl["filePath"],'UTF-8','auto'); 
+        }
     }
-}
+  }
 }
 ?>
 <html lang="ja">
@@ -152,7 +159,11 @@ if($dlpathinfo['extension'] === 'mp4'){
 
 }else{
   if(!empty($nicoid))
-    echo "$nicoidのダウンロードに失敗しました\n";
+    echo $nicoid."のダウンロードに失敗しました\n";
+    
+  if(!empty($errmsg)){
+    echo '<p>'.$errmsg.'</p>';
+  }
 
 
   if(nicofuncenabled()){

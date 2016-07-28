@@ -35,7 +35,7 @@ function file_exist_check_japanese($filename){
      return TRUE;
  }
 */
- $fileinfo = fopen(addslashes($filename),'r');
+ $fileinfo = @fopen(addslashes($filename),'r');
  if($fileinfo != FALSE){
      fclose($fileinfo);
      // logtocmd 'DEBUG : Success fopen' ;
@@ -819,7 +819,6 @@ while(1){
      if( empty($playerchecktimes)){
         $playerchecktimes = 3;
      }
-     
        
        $loopflg = check_request_loop($db,$l_id);
        if( (strcmp ($l_kind , "カラオケ配信") === 0)  && ($loopflg != 1 ))
@@ -854,13 +853,14 @@ while(1){
           }
        }else
        {
-       
-       if( mb_stristr ($l_kind , "URL指定") !== FALSE){
+       $ft = check_filetype ($db,$l_id);
+       if( $ft !== 3){
            // ファイル名のチェック
-    //logtocmd "Debug l_fullpath: $l_fullpath\r\n";
+     // logtocmd ("Debug l_fullpath: $l_fullpath\r\n");
            $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");
            $fileinfo=file_exist_check_japanese($winfillpath);
 //           $fileinfo=TRUE;
+// logtocmd ("Debug#".$fileinfo);
            if($fileinfo !== FALSE){
                $filepath = $winfillpath;
                $filepath_utf8=$l_fullpath;
@@ -868,7 +868,7 @@ while(1){
              $filepath = null;
              // まず フルパス中のbasenameで再検索
              $songbasename = basename($l_fullpath);
-             logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
+             // logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
              $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($songbasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
              $json = file_get_html_with_retry($jsonurl, 5);
              if($json != false){
@@ -876,7 +876,7 @@ while(1){
                  if($decode != NULL){
                    if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
                        $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-                       $filepath = mb_convert_encoding($filepath,"cp932");
+                       $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
                    }
                  }
              }
@@ -890,8 +890,9 @@ while(1){
                  $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
                  $filepath_utf8= $filepath;
                  $filepath = mb_convert_encoding($filepath,"cp932");
+                 logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");
              }
-             logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");
+             
            }
     //logtocmd "Debug filepath: $filepath\r\n";
         }else {

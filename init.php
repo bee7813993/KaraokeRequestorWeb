@@ -119,6 +119,36 @@ print '</pre>';
 //echo '</pre>';
 ?>
 
+<div class="container bg-info">
+  <h3> リクエストリスト操作 </h3>
+  <a href ="listexport_sjis.php"  class="btn btn-default" > リクエストリストのダウンロード(SJIS) </a>
+  <a href ="listexport.php"  class="btn btn-default" > リクエストリストのダウンロード(UTF-8) </a>
+  <form action="listimport.php" method="post" enctype="multipart/form-data">
+    <label > リクエストリストのインポート(csvより)
+      <input type="file" name="dbcsv" accept="text/comma-separated-values" />
+      <select name="importtype" id="importtype" class="form-control" > 
+        <option value="new" >新規</option>
+        <option value="add" >追加</option>
+      </select>
+    </label>
+    <input type="submit" value="Send" />  
+  </form>
+  <a href ="listclear.php" class="btn btn-default" > リクエストリストの全消去 </a>
+
+  <form method="post" action="delete.php">
+    <input type="submit" name="resettsatus" value="全て未再生化" class="btn btn-default" />
+  </form>
+
+  <label > BGMモード用 </label>
+  <li>
+    <a href ="listtimesclear.php?times=0" class="btn btn-default" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
+  </li>
+  <li>
+    <a href ="listtimesclear.php?times=1" class="btn btn-default" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
+  </li>
+</div>
+
+<hr />
 
 
 <div class="container bg-info">
@@ -139,6 +169,52 @@ print '</pre>';
       <option value="5" <?php print selectedcheck("5",$config_ini["playmode"]); ?> >BGMモード(フルランダムモード)</option>
     </select>
   </div>
+
+  <h3>自動再生設定 </h3>
+<?php
+if(array_key_exists("autoplay_exec",$config_ini) && strlen($config_ini["autoplay_exec"]) > 0) {
+print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
+}
+?>
+
+
+  <div class="form-group">
+    <label> 自動再生プログラムPATH設定 <br /> 
+    <small>
+     例）xampp環境 : autoplaystart_mpc_xampp.bat, <Strike> nginx環境: autoplaystart_mpc.bat</Strike>
+    </small>
+    </label>
+    <input type="text" name="autoplay_exec" size="100" class="form-control" 
+<?php
+if(array_key_exists("autoplay_exec",$config_ini)) {
+print 'value="'.urldecode($config_ini["autoplay_exec"]).'"';
+}
+?> />
+    <label class="radio control-label"> 自動再生制御の一般ユーザーへの公開 <small>プレイヤーコントローラー画面 </small></label>
+    <label class="checkbox-inline">
+      <input type="radio" name="autoplay_show" value="1" 
+<?php 
+if(array_key_exists("autoplay_show",$config_ini)) {
+  print ($config_ini["autoplay_show"]==1)?'checked':' ' ;
+}
+?>
+ />
+      有効 
+    </label>
+    <label class="checkbox-inline">
+      <input type="radio" name="autoplay_show" value="2" 
+<?php 
+if(array_key_exists("autoplay_show",$config_ini)) {
+print ($config_ini["autoplay_show"]!=1)?'checked':' ' ;
+}else{
+print 'checked';
+}
+?>
+ /> 
+      無効
+    </label>
+  </div>
+
   <div class="form-group">
     <label for="playerpath_select">MediaPlayerClassic PATH設定</label>
     <select  class="form-control" name="playerpath_select" id="playerpath_select" >  
@@ -404,49 +480,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
     
     </div>  
   </div>  
-  <h3>自動再生設定 </h3>
 
-  <div class="form-group">
-    <label> 自動再生プログラムPATH設定 <br /> 
-    <small>
-     例）xampp環境 : autoplaystart_mpc_xampp.bat, <Strike> nginx環境: autoplaystart_mpc.bat</Strike>
-    </small>
-    </label>
-    <input type="text" name="autoplay_exec" size="100" class="form-control" 
-<?php
-if(array_key_exists("autoplay_exec",$config_ini)) {
-print 'value="'.urldecode($config_ini["autoplay_exec"]).'"';
-}
-?> />
-    <label class="radio control-label"> 自動再生制御の一般ユーザーへの公開 <small>プレイヤーコントローラー画面 </small></label>
-    <label class="checkbox-inline">
-      <input type="radio" name="autoplay_show" value="1" 
-<?php 
-if(array_key_exists("autoplay_show",$config_ini)) {
-  print ($config_ini["autoplay_show"]==1)?'checked':' ' ;
-}
-?>
- />
-      有効 
-    </label>
-    <label class="checkbox-inline">
-      <input type="radio" name="autoplay_show" value="2" 
-<?php 
-if(array_key_exists("autoplay_show",$config_ini)) {
-print ($config_ini["autoplay_show"]!=1)?'checked':' ' ;
-}else{
-print 'checked';
-}
-?>
- /> 
-      無効
-    </label>
-  </div>
-<?php
-if(array_key_exists("autoplay_exec",$config_ini)) {
-print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
-}
-?>
   <div class="form-group">
     <label > プレイヤー動作監視開始待ち時間(秒) </label>
       
@@ -479,7 +513,8 @@ print '<button type="button" class="btn btn-default btn-lg" onclick="location.hr
       }
     ?>
     ></td>
-  <tr>
+  </tr>
+
   <tr>
     <td>
 
@@ -559,7 +594,7 @@ if(array_key_exists("request_automove",$config_ini)) {
   </div>
 
 <!---- 縛り曲リストの設定 ----->
-  <h3>縛り曲リスト </h3>
+  <h3>ピックアップ曲リスト </h3>
   <?php 
 
   for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){
@@ -595,36 +630,6 @@ if(array_key_exists("request_automove",$config_ini)) {
   </div>
 </div>
   <hr />
-<div class="container bg-info">
-  <h3> リクエストリスト操作 </h3>
-  <a href ="listexport_sjis.php"  class="btn btn-default" > リクエストリストのダウンロード(SJIS) </a>
-  <a href ="listexport.php"  class="btn btn-default" > リクエストリストのダウンロード(UTF-8) </a>
-  <form action="listimport.php" method="post" enctype="multipart/form-data">
-    <label > リクエストリストのインポート(csvより)
-      <input type="file" name="dbcsv" accept="text/comma-separated-values" />
-      <select name="importtype" id="importtype" class="form-control" > 
-        <option value="new" >新規</option>
-        <option value="add" >追加</option>
-      </select>
-    </label>
-    <input type="submit" value="Send" />  
-  </form>
-  <a href ="listclear.php" class="btn btn-default" > リクエストリストの全消去 </a>
-
-  <form method="post" action="delete.php">
-    <input type="submit" name="resettsatus" value="全て未再生化" class="btn btn-default" />
-  </form>
-
-  <label > BGMモード用 </label>
-  <li>
-    <a href ="listtimesclear.php?times=0" class="btn btn-default" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
-  </li>
-  <li>
-    <a href ="listtimesclear.php?times=1" class="btn btn-default" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
-  </li>
-</div>
-
-<hr />
 
 <div class="container bg-info">
   <h3> ユーザー接続用DDNS登録 </h3>
@@ -665,9 +670,11 @@ if(array_key_exists("request_automove",$config_ini)) {
   <input type="submit" class="btn btn-default" value="更新" />
   </div>
   </form>
-
+</div>
 
   <hr />
+
+<div class="container bg-info">
   <p>
     <a href ="init.php?clearauth=1" class="btn btn-default" > ログイン情報クリア (対応ブラウザのみ)</a>
   </p>
