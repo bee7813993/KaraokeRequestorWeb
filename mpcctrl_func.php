@@ -3,6 +3,7 @@
 require_once 'commonfunc.php';
 
 $MPCCMDURL='http://localhost:13579/command.html';
+$MPCSTATUSURL='http://localhost:13579/status.html';
 
 function songnext(){
       global  $db;
@@ -93,6 +94,43 @@ function go_end_mpc(){
     $requesturl=$MPCCMDURL.'?wm_command=-1&percent=99.5';
     $res = file_get_html_with_retry($requesturl);
     return $res;
+}
+
+function set_volume($c_volume){
+
+    global $MPCCMDURL;
+
+    $requesturl=$MPCCMDURL.'?wm_command=-2&volume='.trim($c_volume);
+//    print $requesturl;
+    file_get_html_with_retry($requesturl);
+}
+
+function get_volume(){
+
+    global $MPCSTATUSURL;
+    $statusformat = 'OnStatus(\'%s\', \'%s\', %d, \'%s\', %d, \'%s\', %d, %d, \'%s\')';
+
+    $status = file_get_html_with_retry($MPCSTATUSURL);
+    if($status === FALSE) return $status;
+    // print $status;
+    $status_array = explode(',', $status);
+    // var_dump($status_array);
+    return $status_array[7];
+}
+
+function volume_fadeout(){
+    global $MPCCMDURL;
+
+    $volume = get_volume();
+    // print $volume;
+    $delta_volume=round($volume/10);
+    if($delta_volume < 4 ) $delta_volume = 4;
+    for($c_volume = $volume ; $c_volume > 0 ; $c_volume -= $delta_volume){
+    // print $c_volume;
+        set_volume($c_volume);
+        usleep(100000);
+    }
+    return $volume;
 }
 
 

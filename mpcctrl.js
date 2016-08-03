@@ -75,8 +75,8 @@ function song_next(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=890";
 url=playerurl2 + "?cmd=890";
-request.open("GET", url, true);
-request.send("");
+//request.open("GET", url, true);
+//request.send("");
 }
 
 //change audio track 952
@@ -199,3 +199,18 @@ request.open("GET", url, true);
 request.send("");
 }
 
+// fadeout
+function exec_fadeout(){
+var request = createXMLHttpRequest();
+url=playerurl2 + "?fadeout=1";
+request.open("GET", url, true);
+request.send("");
+}
+
+// common command
+function mpccmd_num(cmdnum){
+var request = createXMLHttpRequest();
+url=playerurl2 + "?cmd=" + cmdnum;
+request.open("GET", url, true);
+request.send("");
+}

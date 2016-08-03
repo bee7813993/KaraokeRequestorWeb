@@ -9,6 +9,10 @@
       songstart();
   }  
   
+  if(  array_key_exists('fadeout',$_REQUEST) ){
+      $v=volume_fadeout();
+  }  
+
   if(array_key_exists("cmd", $_REQUEST)) {
       $l_cmd = $_REQUEST["cmd"];
       
@@ -63,10 +67,13 @@
 </div >
 </div>
 <div class="row">
-<div class="col-xs-6">
+<div class="col-xs-4">
 <button type="submit" value="ボリュームDOWN" class=" pcvolume btn btn-default" onClick="song_vdown()" >ボリュームDOWN</button>
 </div >
-<div class="col-xs-6">
+<div class="col-xs-4">
+<button type="submit" value="フェードアウト" class=" pcvolume btn btn-default" onClick="exec_fadeout()" >フェードアウト</button>
+</div >
+<div class="col-xs-4">
 <button type="submit" value="ボリュームUP" class="pcvolume btn btn-default" onClick="song_vup()" >ボリュームUP</button>
 </div >
 </div>
@@ -93,23 +100,71 @@ print '</div >';
 ?>
 </div>
 <!-----
-<div class="row">
-<div class="col-xs-3">
-<button type="submit" value="(-100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m100()" >(-100ms)<br>音ズレ修正</button>
-</div >
-<div class="col-xs-3">
-<button type="submit" value="(-10ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m10()" >(-10ms)<br>音ズレ修正</button>
-</div >
-<div class="col-xs-3">
-<button type="submit" value="(+10ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_p10()" >(+10ms)<br>音ズレ修正</button>
-</div >
-<div class="col-xs-3">
-<button type="submit" value="(+100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_p100()" >(+100ms)<br>音ズレ修正</button>
-</div >
-<br>
-
-</div>
 ---->
 
+ 
+<div class="container"><!-- ここは小見出し -->
+<div class="row">
+
+            
+<!-- ここからアコーディオン（Collapse） -->
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <h4 class="panel-title">
+          
+        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+          拡張機能
+        </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+      <div class="panel-body">
+        <div class="row">
+            <div class="col-xs-3">
+            <button type="submit" value="(-100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m100()" >(-100ms)<br>音ズレ修正</button>
+            </div >
+            <div class="col-xs-3">
+            <button type="submit" value="(-10ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m10()" >(-10ms)<br>音ズレ修正</button>
+            </div >
+            <div class="col-xs-3">
+            <button type="submit" value="(+10ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_p10()" >(+10ms)<br>音ズレ修正</button>
+            </div >
+            <div class="col-xs-3">
+            <button type="submit" value="(+100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_p100()" >(+100ms)<br>音ズレ修正</button>
+            </div >
+        </div>
+        <div class="row">
+            <div class="col-xs-4">
+            <button type="submit" value="スピードダウン" class=" pcdelay btn btn-default" onClick="mpccmd_num('894')" >スピードダウン</button>
+            </div >
+            <div class="col-xs-4">
+            <button type="submit" value="標準スピード" class=" pcdelay btn btn-default" onClick="mpccmd_num('896')" >標準スピード</button>
+            </div >
+            <div class="col-xs-4">
+            <button type="submit" value="スピードアップ" class=" pcdelay btn btn-default" onClick="mpccmd_num('895')" >スピードアップ</button>
+            </div >
+        </div>
+        <div class="row">
+            <div class="col-xs-4">
+            <button type="submit" value="画面サイズ縮小" class=" pcdelay btn btn-default" onClick="mpccmd_num('863')" >画面サイズ縮小</button>
+            </div >
+            <div class="col-xs-4">
+            <button type="submit" value="画面サイズ標準" class=" pcdelay btn btn-default" onClick="mpccmd_num('861')" >画面サイズ標準</button>
+            </div >
+            <div class="col-xs-4">
+            <button type="submit" value="画面サイズ拡大" class=" pcdelay btn btn-default" onClick="mpccmd_num('862')" >画面サイズ拡大</button>
+            </div >
+        </div>
+        <div class="row">
+            <div class="col-xs-4">
+            <button type="submit" value="D3Dフルスクリーン" class=" pcdelay btn btn-default" onClick="mpccmd_num('1023')" >D3Dフルスクリーン <small>再生が重い場合</small></button>
+            </div >
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 </div>
 

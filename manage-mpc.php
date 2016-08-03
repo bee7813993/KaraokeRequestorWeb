@@ -509,12 +509,20 @@ function song_start_again($db,$id){
 }
 
 function song_stop($kind, $stat = 'none'){
-
     if( $kind === 1 || $kind === 3){
         // case mpc
         global $MPCCMDURL;
+        
+        if($stat == 3)
+          $volume = volume_fadeout();
+        
         $requesturl=$MPCCMDURL.'?wm_command=888';
         $res = file_get_html_with_retry($requesturl);
+        
+        if($stat == 3){
+          set_volume($volume);
+          }
+        
     }else if( $kind === 2) {
         // case foobar
         global $FOOBARSTATURL;
@@ -555,11 +563,11 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
     $exit = 1;
     $kind = check_filetype ($db,$id);
     $loopflg = check_request_loop($db,$id);
+    $stat = 2;
     while($exit == 1)
     {
        // db statusを確認
        $stat = check_nowplaying_state ($db,$id);
-       print $stat;
        if($stat === 3 ){
            break;
        }
@@ -579,6 +587,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
            break;
        }
     }
+    $stat = check_nowplaying_state ($db,$id);
     song_stop( $kind , $stat);
     // BGVモードではmuteを解除する。
     if($loopflg == 1) {
@@ -645,7 +654,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
        if($playtime > 1 ) $startonce = true;
        // logtocmd "DEBUG : $mpsctat_array[2], $playtime : $totaltime \n";
 
-       sleep(1.5);
+       sleep(1.0);
    }
 }
 
