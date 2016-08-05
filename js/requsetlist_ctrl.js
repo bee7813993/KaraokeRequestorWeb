@@ -84,24 +84,23 @@ function RequsetListIP(id,filename){
     return false;
 }
 
-    function createXMLHttpRequest() {
-      if (window.XMLHttpRequest) {
-        return new XMLHttpRequest();
-      } else if (window.ActiveXObject) {
-        try {
-          return new ActiveXObject("Msxml2.XMLHTTP");
-        } catch (e) {
-          try {
-            return new ActiveXObject("Microsoft.XMLHTTP");
-          } catch (e2) {
-            return null;
-          }
-        }
-      } else {
+function createXMLHttpRequest() {
+  if (window.XMLHttpRequest) {
+    return new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    try {
+      return new ActiveXObject("Msxml2.XMLHTTP");
+    } catch (e) {
+      try {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+      } catch (e2) {
         return null;
       }
     }
-    var xmlhttp = createXMLHttpRequest();
+  } else {
+    return null;
+  }
+}
 
 function moverequestlist(myel,id,kind,songfile){
 
@@ -117,5 +116,31 @@ function moverequestlist(myel,id,kind,songfile){
       }
   }
   request.send("");
+  
+}
+
+
+var xmlhttp = createXMLHttpRequest();
+
+function changerequeststatus(myel){
+
+  var id = myel.form.id.value;
+  var songfile = myel.form.songfile.value;
+  var nowplaying = myel.form.nowplaying.value;
+  var url;
+  var table = $('#request_table').DataTable();
+  
+  myel.setAttribute('disabled', true);
+  url = "changeplaystatus.php?id=" + id + "&songfile=" + songfile + "&nowplaying=" +nowplaying;
+  var request = createXMLHttpRequest();
+  request.open("GET", url, true);
+  request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == 200) {
+          table.ajax.reload();
+          myel.setAttribute('disabled', false);
+      }
+  }
+  request.send("");
+  return false;
   
 }

@@ -113,7 +113,7 @@ $playstatus_pf = <<<EOD
  <option value="未再生" selected >未再生 </option>
  <option value="再生済">再生済 </option>
 </select>
-<input type="submit" name="update" value="変更"/>
+<input type="submit" name="update" value="変更" onClick='changerequeststatus(this);return false;' />
 </form>
 </div>
 EOD;
@@ -186,12 +186,26 @@ $action_pf = <<<EOD
 </div>
 EOD;
     
+    // シークレット予約時の曲対応
+    // 条件：表示している人が本人かどうか
+    $public_songname=$value['songfile'];
+    $myname = returnusername_self();
+    if($value['singer'] === $myname ){
+       $dialogsongname='「'.$value['songfile'].'」';
+    }else{
+       if($value['secret'] == 1 ){
+           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う【シークレット予約曲】';
+           $public_songname='シークレットで予約した曲';
+       }else{
+           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う「'.$value['songfile'].'」';
+       }
+    }
     if($connectinternet == 1){
     if($value['nowplaying'] === '再生中'){
             $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
     }
     elseif($value['nowplaying'] === '未再生'){
-            $tweet_message = sprintf("「%s」は「%s」を歌います",$value['singer'],$value['songfile']);
+            $tweet_message = sprintf("「%s」は「%s」を歌います",$value['singer'],$public_songname);
     }
     else{
             $tweet_message = sprintf("「%s」は「%s」を歌いました",$value['singer'],$value['songfile']);
@@ -199,18 +213,6 @@ EOD;
     $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" TARGET="_blank" > Tweetする </a>',urlencode($tweet_message));
     }else {
     $tweet_link = ' ';
-    }
-    // シークレット予約時の曲対応
-    // 条件：表示している人が本人かどうか
-    $myname = returnusername_self();
-    if($value['singer'] === $myname ){
-       $dialogsongname='「'.$value['songfile'].'」';
-    }else{
-       if($value['secret'] == 1 ){
-           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う【シークレット予約曲】';
-       }else{
-           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う「'.$value['songfile'].'」';
-       }
     }
     
     $action = sprintf($action_pf,$value['id'],htmlspecialchars($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$sasikaemenu,$value['id'],$value['id'],$dialogsongname,$value['id'],htmlspecialchars($value['songfile']), $tweet_link);
