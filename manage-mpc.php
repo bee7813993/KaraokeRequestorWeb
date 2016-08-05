@@ -918,17 +918,11 @@ while(1){
                    logtocmd("再生中(foobar再生)を検出。現在の曲の終了待ち\n");
                }else{
                    
-                   if($playmode == 1 || $playmode == 4 || $playmode == 5){
-                       $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
-                   }elseif ($playmode == 2){
-                       mpc_waiting_start($db, $l_id);
-                       $execcmd="start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " \"$filepath\"\n";
-                   }else{
+                   if($playmode != 1 && $playmode != 4 && $playmode != 5 && $playmode != 2){
                        logtocmd(" Debug : now auto play is off : $playmode\n");
                        sleep(30);
                        continue;
                    }
-                 //  logtocmd(" Debug : execcmd : $execcmd\n");
                    
                    // 再生長取得
                    /* foo_http_controlを使用するようにしたので無効化
@@ -949,7 +943,7 @@ while(1){
                    mpcstop();
 
                    // sleep(1);
-                   startfoobarandwait(mb_convert_encoding($filepath,"SJIS"),3);
+                   startfoobarandwait(mb_convert_encoding($filepath,"SJIS","SJIS, UTF-8"),3);
                    if ($playmode == 2){
 //                      sleep(0.5);
 //                      exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
