@@ -81,7 +81,10 @@ EOD;
 print<<<EOD
     <input type="submit" class="btn btn-default btn-lg" value="Download (押すとダウンロードが終わるまでしばらく待ちます)" />
   </div>
+  </form>
 </div>
+
+<a href="http://www.nicokara.net/" class="btn btn-link" target="_blank" > ニコカラを検索できるサイトはこちら <small> 検索結果から予約する仕組みは現在作成中 </small> </a>
 EOD;
 }else {
   print "ニコニコ動画ダウンロード機能は有効になっていません";

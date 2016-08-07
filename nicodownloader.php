@@ -97,6 +97,14 @@ class NicoDownload
              // print("login OK");
         }else{
               print("ニコニコ動画ログインIDもしくはパスワードの設定が違います<br />");
+              print("ログインID：".$this->LoginEmail."<br />");
+              /* for debug
+              print("パスワード：".$this->LoginPassword."<br />");
+              print("<pre>");
+              print($response);
+              print("/<pre>");
+              */
+              
               return false;
           }
 
