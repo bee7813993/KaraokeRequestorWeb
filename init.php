@@ -45,6 +45,12 @@ if(array_key_exists("clearauth", $_REQUEST)) {
     
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script type="text/javascript" >
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+
 
 
 <title>設定画面</title>
@@ -233,6 +239,32 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
 ?>
 />
   </div>
+  <div class="form-group">
+    <label class="radio control-label"><span data-toggle="tooltip" data-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。予約確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </label>
+    <label class="radio-inline" data-toggle="tooltip" data-placement="top" title="予約確認画面に項目を追加するかどうか">
+      <input type="radio" name="useotherplayer" value="1" <?php print ($config_ini["useotherplayer"]==1)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline"> <input type="radio" name="useotherplayer" value="2" <?php print ($config_ini["useotherplayer"]!=1)?'checked':' ' ?> /> 使用しない </label></br>
+    <label > <span data-toggle="tooltip" data-placement="top" title="リクエスト確認画面でのこの項目に対する説明文">リクエスト確認画面での説明文 </span></label>
+    <input type="text" name="otherplayer_disc" class="form-control" 
+<?php
+if(array_key_exists("otherplayer_disc",$config_ini)) {
+print 'value="'.urldecode($config_ini["otherplayer_disc"]).'"';
+}
+?>
+/>
+    <label > <span data-toggle="tooltip" data-placement="top" title="起動する別プログラム コマンドプロンプトから「 ＜コマンド名＞ ＜ファイル名＞ 」で起動させる">別プレーヤーのPATH（空白で手動実行) </span></label>
+    <input type="text" name="otherplayer_path" class="form-control" 
+<?php
+if(array_key_exists("otherplayer_path",$config_ini)) {
+print 'value="'.urldecode($config_ini["otherplayer_path"]).'"';
+}
+?>
+/>
+
+  </div>
+
+
   <div class="form-group">
     <label for="foobarpath"> foobar2000 PATH設定　</label>
     <label > 任意のPATH選択  </label>
@@ -481,6 +513,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
     </div>  
   </div>  
 
+
   <div class="form-group">
     <label > プレイヤー動作監視開始待ち時間(秒) </label>
       
@@ -568,7 +601,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
   </table>
 
   <div class="form-group">
-    <label class="radio control-label"> リクエスト時_順番ピッタリ移動 </label>
+    <label class="radio control-label"  > <span data-toggle="tooltip" data-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >リクエスト時_順番ピッタリ移動 </span ></label> 
     <label class="checkbox-inline">
       <input type="radio" name="request_automove" value="1" 
 <?php 
@@ -594,7 +627,7 @@ if(array_key_exists("request_automove",$config_ini)) {
   </div>
 
 <!---- 縛り曲リストの設定 ----->
-  <h3>ピックアップ曲リスト </h3>
+  <h3> <span data-toggle="tooltip" data-placement="top" title="検索予約メニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
   <?php 
 
   for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){

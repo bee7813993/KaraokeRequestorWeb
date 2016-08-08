@@ -660,7 +660,6 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
 
 
 while(1){
-
      //config 再読込
      readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);
      if(! empty($playerpath)){
@@ -967,26 +966,29 @@ while(1){
                if($l_nowplaying === '再生中' ){
                    logtocmd("再生中(MPC再生)を検出。現在の曲の終了待ち\n");
                }else{
-//                 // video file
+                   // video file
 
-                   if($playmode == 1 || $playmode == 4 || $playmode == 5){
-                   $execcmd="start /b \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
-                   // MPC起動チェック
-                   if(mpcrunningcheck($playerpath)===FALSE){
-                       startmpcandwait($playerpath,1);
-                   }
-                   }elseif ($playmode == 2){
-                   $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
-                   // MPC起動チェック
-                   if(mpcrunningcheck($playerpath)===FALSE){
-                       startmpcandwait($playerpath,1);
-                   }
-                   //logtocmd ('MPC running check finished '."\n");
-                   
-                   }else{
-                       logtocmd(" now auto play is off : $playmode\n");
-                       sleep(30);
-                       continue;
+                   if(mb_strstr($l_kind,'動画_別プ') != FALSE){
+                   }else{ 
+                       if($playmode == 1 || $playmode == 4 || $playmode == 5){
+                       $execcmd="start /b \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+                       // MPC起動チェック
+                       if(mpcrunningcheck($playerpath)===FALSE){
+                           startmpcandwait($playerpath,1);
+                       }
+                       }elseif ($playmode == 2){
+                       $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+                       // MPC起動チェック
+                       if(mpcrunningcheck($playerpath)===FALSE){
+                           startmpcandwait($playerpath,1);
+                       }
+                       //logtocmd ('MPC running check finished '."\n");
+                       
+                       }else{
+                           logtocmd(" now auto play is off : $playmode\n");
+                           sleep(30);
+                           continue;
+                       }
                    }
                    // logtocmd(" Debug : execcmd : $execcmd\n");
                    if($nextplayingtimes === 0){
@@ -1004,7 +1006,14 @@ while(1){
                    // sleep(0.5);
                    // web経由でファイル再生
                    //logtocmd 'MPC fileopen start '."\n";
-                   if($filetype == 3){
+                   if(mb_strstr($l_kind,'動画_別プ') != FALSE){
+                       if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
+                           // 別Playerを指定している場合、実行を試みる。
+                           $execcmd="start /b \"\" \"".mb_convert_encoding(urldecode($config_ini["otherplayer_path"]),"SJIS-win")."\"" . " \"$filepath\"\n";
+  //                         print $execcmd;
+                           exec($execcmd);
+                       }
+                   }else if($filetype == 3){
                        exec($execcmd);
                    }else{
                        mpcplaylocalfile($playerpath,$filepath_utf8,$playmode,1,$db,$l_id);
@@ -1027,7 +1036,20 @@ while(1){
                        commentpost_v2($nm,$col,$size,$msg,$commenturl);
                    }
                }
-               check_end_song($db,$l_id,$playerchecktimes,$playmode);
+               if(mb_strstr($l_kind,'動画_別プ') != FALSE){
+                   // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
+                   logtocmd("別Player終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n");
+                   runningcheck_shop_karaoke($db,$l_id);
+                   if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
+                       $opcmd = mb_convert_encoding(basename(urldecode($config_ini["otherplayer_path"])),"SJIS-win");
+//                       print $opcmd;
+                       $pscheck_cmd='taskkill  /im '.$opcmd.' -f';
+//                       print $pscheck_cmd;
+                       exec($pscheck_cmd);
+                   }
+               }else{
+                   check_end_song($db,$l_id,$playerchecktimes,$playmode);
+               }
                //logtocmd 'running check finished 終了'."\n";
            }
        

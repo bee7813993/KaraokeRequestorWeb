@@ -45,6 +45,14 @@ if(array_key_exists("urlreq", $_REQUEST)) {
     $l_urlreq = $_REQUEST["urlreq"];
 }
 
+$l_otherplayer = 0;
+if(array_key_exists("otherplayer", $_REQUEST)) {
+    $l_otherplayer = $_REQUEST["otherplayer"];
+    if($l_kind === '動画' ){
+        $l_kind = '動画_別プ';
+    }
+}
+
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
 }

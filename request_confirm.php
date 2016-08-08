@@ -108,7 +108,51 @@ function json_safe_encode($data){
     return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 }
 
-
+function extention_musiccheck($fn){
+    if(empty($fn)) return 0;
+    $extension = pathinfo($fn, PATHINFO_EXTENSION);
+    if( empty($extension) ){
+        logtocmd ("ERROR : File of $id has no extension : $filepath");
+        return false;
+    // Audio File
+    }elseif( strcasecmp($extension,"mp3") == 0 ){
+        return 2;
+    }elseif(strcasecmp($extension,"m4a") == 0 ){
+        return 2;
+    }elseif(strcasecmp($extension,"wav") == 0 ){
+        return 2;
+    }elseif(strcasecmp($extension,"ogg") == 0 ){
+        return 2;
+    }elseif(strcasecmp($extension,"flac") == 0 ){
+        return 2;
+    }elseif(strcasecmp($extension,"wma") == 0 ){
+        return 2;
+    }elseif(strcasecmp($extension,"aac") == 0 ){
+        return 2;
+    // Movie File
+    }elseif(strcasecmp($extension,"mp4") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"avi") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"mkv") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"mpg") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"flv") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"webm") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"wmv") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"ogm") == 0 ){
+        return 1;
+    }elseif(strcasecmp($extension,"mov") == 0 ){
+        return 1;
+    }else{
+    // unknown file set to movie
+        return 1;
+    }    
+}
 ?>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -327,8 +371,38 @@ print ' /> BGVモード';
 print '</label>';
 print '</div>';
 }
+
+if(empty($fullpath)){
+$typecheckfn = $filename;
+}else{
+$typecheckfn = $fullpath;
+}
+
+if($config_ini['useotherplayer'] == 1 && $shop_karaoke != 1 && extention_musiccheck($typecheckfn) == 1){
+print '<div class="checkbox">';
+print "<label>";
+print '<input type="checkbox" name="otherplayer" value="1" />';
+if(empty($config_ini["otherplayer_disc"])){
+print '別プレイヤー再生';
+}else{
+print urldecode($config_ini["otherplayer_disc"]);
+}
+print '</label>';
+print '</div>';
+}
+
 if(is_numeric($selectid)){
 print '<input type="hidden" name="selectid" id="selectid"  value='.$selectid.' />'."\n";
+}
+
+if($shop_karaoke == 1){
+print '<div class="well">';
+print '<li>自分の番が回ってきたらカラオケ配信に切り替わるので、「デンモク」から歌いたい曲をリクエストしてください</li>';
+print '<li>歌い終わったらメニュー「Player」の中にある「曲終了」ボタンを押してください</li>';
+if($config_ini['usebgv'] == 1 ){
+  print '<li>このカラオケ配信予約の後、「リスト操作」ボタンを押した後に出てくる「BGV選択」から配信曲の字幕の裏に流す動画を選ぶことができます</li>';
+}
+print '</div>';
 }
 ?>
 <div CLASS="row" >
