@@ -144,3 +144,21 @@ function changerequeststatus(myel){
   return false;
   
 }
+
+function song_end(myel, id){
+  var url;
+  var table = $('#request_table').DataTable();
+  
+  myel.setAttribute('disabled', true);
+  url = "playerctrl_portal.php?songnext=1";
+  var request = createXMLHttpRequest();
+  request.open("GET", url, true);
+  request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == 200) {
+          table.ajax.reload();
+          myel.setAttribute('disabled', false);
+      }
+  }
+  request.send("");
+  return false;
+}

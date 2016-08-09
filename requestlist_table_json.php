@@ -185,6 +185,13 @@ $action_pf = <<<EOD
 <div class="clear" >
 </div>
 EOD;
+    // 曲終了ボタン
+    $songstop = "";
+    if($value['nowplaying'] === '再生中'){
+        if($value['kind'] === 'カラオケ配信' || $value['kind'] === '動画_別プ' ){ 
+        $songstop ='<button type="button" class="btn btn-default" onClick=\'song_end(this,'.$value["id"].');return false;\' >曲停止</button>';
+        }
+    }
     
     // シークレット予約時の曲対応
     // 条件：表示している人が本人かどうか
@@ -214,6 +221,7 @@ EOD;
     }else {
     $tweet_link = ' ';
     }
+    $tweet_link = $songstop.$tweet_link;
     
     $action = sprintf($action_pf,$value['id'],htmlspecialchars($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$sasikaemenu,$value['id'],$value['id'],$dialogsongname,$value['id'],htmlspecialchars($value['songfile']), $tweet_link);
     $onerequset += array("action" => $action);
