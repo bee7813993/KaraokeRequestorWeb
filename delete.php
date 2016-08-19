@@ -38,6 +38,7 @@ function dbup($id, $db)
 {
 	global $tmpid;
 // 対象のreqorderを取得
+
 $sql = "SELECT * FROM requesttable where id = $id ";
 $select = $db->query($sql);
 $row = $select->fetch(PDO::FETCH_ASSOC);
@@ -53,30 +54,40 @@ $targetorder = $row['reqorder'];
  if(  $row !== false ){
  // 移動先のreqorder値の項目があったら
  $sql = "UPDATE requesttable set reqorder = $tmpid WHERE reqorder = $nextorder ";
+ $db->beginTransaction();
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("$nextorder から $tmpid への移動にしっぱいしました。<br>");
+	$db->commit();
 	die();
  }
  $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("${id} の $nextorder への移動にしっぱいしました。<br>");
+	$db->commit();
 	die();
  }
  $sql = "UPDATE requesttable set reqorder = $targetorder WHERE reqorder = $tmpid ";
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("$tmpid から $targetorder への移動にしっぱいしました。<br>");
+	$db->commit();
 	die();
  }
+ $db->commit();
  }else{
+ print "ここきた";
+
  $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
+ $db->beginTransaction();
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("${id} から $nextid への移動にしっぱいしました。<br>");
+	$db->commit();
 	die();
  }
+ $db->commit();
  }
 }
 
@@ -110,9 +121,11 @@ $targetorder = $row['reqorder'];
  if(  $row !== false ){
  // 移動先のreqorder値の項目があったら
  $sql = "UPDATE requesttable set reqorder = $tmpid WHERE reqorder = $nextorder ";
+ $db->beginTransaction();
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("$targetorder から $tmpid  への移動にしっぱいしました。<br>");
+	$db->commit();
 	return false;
 	die();
  }
@@ -120,6 +133,7 @@ $targetorder = $row['reqorder'];
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("${id} の $nextorder への移動にしっぱいしました。<br>");
+	$db->commit();
 	return false;
 	die();
  }
@@ -127,18 +141,23 @@ $targetorder = $row['reqorder'];
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("$tmpid から $targetorder への移動にしっぱいしました。<br>");
+	$db->commit();
 	return false;
 	die();
  }
+ $db->commit();
  }else{
  $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
+ $db->beginTransaction();
  $stmt = $db->prepare($sql);
  $ret = $db->query($sql);
  if (! $ret ) {
 	print("${id} の  $nextorder への移動にしっぱいしました。<br>");
+	$db->commit();
 	return false;
 	die();
  }
+ $db->commit();
  }
  } 
 }
@@ -222,10 +241,11 @@ function warikomi($id, $db)
 
 if( !empty($_POST['resettsatus']) ){
      $sql = "UPDATE requesttable set nowplaying = \"未再生\" ";
+     $db->beginTransaction();
      $ret = $db->query($sql);
+     $db->commit();
 
 }else{
-
     $l_id=$_REQUEST['id'];
     $l_action='delete';
     if( !empty($_REQUEST['up']) )

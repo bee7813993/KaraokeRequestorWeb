@@ -16,7 +16,9 @@ function songnext(){
           print '<small> 曲終了ボタンを押されましたが、再生中の曲はありませんでした </small>'."\n";
       }else {
           $sql = "UPDATE requesttable set nowplaying = \"停止中\" WHERE id = ".$currentsong[0]['id'];
+          $db->beginTransaction();
           $ret = $db->exec($sql);
+          $db->commit();
       }
 }
 
@@ -36,7 +38,9 @@ function songstart(){
           command_mpc(887);
       }else {
           $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = ".$currentsong[0]['id'];
+          $db->beginTransaction();
           $ret = $db->exec($sql);
+          $db->commit();
           sleep(2);
           command_mpc(887);
       }
@@ -128,7 +132,7 @@ function volume_fadeout(){
     for($c_volume = $volume ; $c_volume > 0 ; $c_volume -= $delta_volume){
     // print $c_volume;
         set_volume($c_volume);
-        usleep(100000);
+        usleep(1);
     }
     return $volume;
 }

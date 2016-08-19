@@ -647,6 +647,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
            print ($totaltime);
            echo "\n";
            if($totaltime != 0 ){
+               sleep(4);
                break;
            }
        }
@@ -752,26 +753,6 @@ while(1){
                             continue;
                         }
                     }
-/*                    if(count($ptarray) == 1 && $playid == $lastplayid && count($ptarray) != 1 ){
-                        $nosong = 1;
-                        $nextplayingtimes = minimum_playtimescheck_withoutme($allrequest,$playid) - 1 ;
-                        $sql = "UPDATE requesttable set  playtimes = $nextplayingtimes WHERE id = $playid ";
-                        $ret = $db->exec($sql);
-                        if (! $ret ) {
-                            logtocmd("id : $playid の再生回数 $nextplayingtimes への変更にしっぱいしました。<br>\n");
-                        }
-                        break;
-                    }
-                    if($playid == $lastplayid && count($allrequest) != 1 ){
-                        $nextplayingtimes = minimum_playtimescheck_withoutme($allrequest,$playid) - 1 ;
-                        $sql = "UPDATE requesttable set  playtimes = $nextplayingtimes WHERE id = $playid ";
-                        $ret = $db->exec($sql);
-                        if (! $ret ) {
-                            logtocmd("id : $playid の再生回数 $nextplayingtimes への変更にしっぱいしました。<br>\n");
-                        }
-                        continue;
-                    }
-*/
                     break;
                 }
             }
@@ -839,14 +820,15 @@ while(1){
               if( array_key_exists('DeliveryCMD',$config_ini) && !empty($config_ini['DeliveryCMD']) ){
                   $cmd = urldecode($config_ini['DeliveryCMD']);
                   exec($cmd);
-              }else {
+              }
+              if( array_key_exists('usevideocapture',$config_ini) && ( $config_ini['usevideocapture'] == 1 || $config_ini['usevideocapture'] == 3)){ 
                   captureviewstart($playerpath,1);
               }
               $db->beginTransaction();
               $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
               $ret = $db->exec($sql);
               if (! $ret ) {
-              	logtocmd("再生中 への変更にしっぱいしました。<br>");
+              	logtocmd("再生中 への変更に失敗しました。<br>");
               }
               $db->commit(); 
           }        

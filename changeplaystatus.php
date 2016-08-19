@@ -43,8 +43,10 @@ shownavigatioinbar();
 
 $sql = "UPDATE requesttable set nowplaying = \"$l_nowplaying\" WHERE id = $l_id ";
 print $sql;
+ $db->beginTransaction();
  $stmt = $db->prepare($sql);
  $ret = $db->query($sql);
+ $db->commit();
  if (! $ret ) {
 	print("$l_nowplaying への変更に失敗しました。<br>");
 	print("順番入れ替えと競合した可能性があるのでもう一度試してください<br>");
