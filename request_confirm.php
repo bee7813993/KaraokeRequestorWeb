@@ -367,13 +367,15 @@ print '<input type="checkbox" name="loop" value="1" ';
 if($forcebgv == 1 ){
     print 'checked';
 }
-print ' /> BGVモード';
+print ' /> BGVモード <small> この動画をカラオケ配信のBGVとして予約します。</small>';
 print '</label>';
 print '</div>';
 }
 
+$typecheckfn = "";
 if(empty($fullpath)){
-$typecheckfn = $filename;
+  if(!empty($filename))
+      $typecheckfn = $filename;
 }else{
 $typecheckfn = $fullpath;
 }

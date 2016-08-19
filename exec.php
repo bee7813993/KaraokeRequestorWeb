@@ -20,6 +20,7 @@ if(array_key_exists("secret", $_REQUEST)) {
 $l_loop = 0;
 if(array_key_exists("loop", $_REQUEST)) {
     $l_loop = $_REQUEST["loop"];
+    $l_kind="カラオケ配信";
 }
 
 $l_clientip = $_SERVER['REMOTE_ADDR'];
