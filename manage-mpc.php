@@ -374,6 +374,7 @@ function minimum_playtimescheck_withoutme($all, $myid)
     return $m_value;
 }
 
+
 /**
  * @fn
  * check_filetype
@@ -384,7 +385,7 @@ function minimum_playtimescheck_withoutme($all, $myid)
  */
 function check_filetype ($db,$id){
 
-        $sql = "SELECT fullpath,kind FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+        $sql = "SELECT songfile,fullpath,kind FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
         $select = $db->query($sql);
         $rowall = $select->fetchAll(PDO::FETCH_ASSOC);
         $select->closeCursor();
@@ -394,6 +395,10 @@ function check_filetype ($db,$id){
             return false;
         }
         if( mb_stristr($rowall[0]['kind'], 'URL指定') !== FALSE ){
+            return 3;
+        }
+        
+        if( is_url($rowall[0]['songfile']) ){
             return 3;
         }
         
@@ -450,7 +455,15 @@ function check_filetype ($db,$id){
  * @brief 
  * @param ($db) DB
  * @param ($id) ID
- * @return 1:未再生, 2:再生中, 3:停止中, 4:再生済, 5:再生済？, その他：設定されている文字列
+ * @return 
+ * 1:未再生, 
+ * 2:再生中, 
+ * 3:停止中, 
+ * 4:再生済, 
+ * 5:再生済？, 
+ * 6:再生開始待ち, 
+ * 7:変更中, 
+ * その他：設定されている文字列
  */
 function check_nowplaying_state ($db,$id){
     $sql = "SELECT nowplaying FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
@@ -481,6 +494,8 @@ function check_nowplaying_state ($db,$id){
         
     }else if($c_status === '再生開始待ち'){
         return 6;
+    }else if($c_status === '変更中'){
+        return 7;
     }else{
         return $c_status;
     }
@@ -509,9 +524,10 @@ function song_start_again($db,$id){
 }
 
 function song_stop($kind, $stat = 'none'){
+    global $MPCCMDURL;
+    global $FOOBARSTATURL;
     if( $kind === 1 || $kind === 3){
         // case mpc
-        global $MPCCMDURL;
         
         if($stat == 3)
           $volume = volume_fadeout();
@@ -525,7 +541,6 @@ function song_stop($kind, $stat = 'none'){
         
     }else if( $kind === 2) {
         // case foobar
-        global $FOOBARSTATURL;
         $requesturl=$MPCCMDURL.'?cmd=PlayOrPause&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
@@ -558,6 +573,129 @@ function check_request_loop($db,$id){
     
 }
 
+function onerequestinfo_fromid($db,$id){
+    $sql = "SELECT * FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+    $select = $db->query($sql);
+    if($select === false) return false;
+    $currentrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+    
+    if($currentrequest === false) {
+        logtocmd ("ERROR : nowplaying of $id is none");
+        return false;
+    }
+    return $currentrequest[0];
+}
+
+function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
+    // ファイル名のチェック
+    // logtocmd ("Debug l_fullpath: $l_fullpath\r\n");
+    $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");
+    $fileinfo=file_exist_check_japanese($winfillpath);
+    // logtocmd ("Debug#".$fileinfo);
+    if($fileinfo !== FALSE){
+        $filepath = $winfillpath;
+        $filepath_utf8=$l_fullpath;
+    }else{
+      $filepath = null;
+      // まず フルパス中のbasenameで再検索
+      $songbasename = basename($l_fullpath);
+      // logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
+      $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($songbasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+      $json = file_get_html_with_retry($jsonurl, 5);
+      if($json != false){
+          $decode = json_decode($json, true);
+          if($decode != NULL){
+            if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
+                $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+                $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+            }
+          }
+      }
+      if(empty($filepath)){
+      // 曲名で再建策
+          logtocmd ("fullpass basename $songbasename is not found. Search from Everything DB.: $word\r\n");
+          $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+          // logtocmd $jsonurl;
+          $json = file_get_html_with_retry($jsonurl, 5);
+          $decode = json_decode($json, true);
+          $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+          $filepath_utf8= $filepath;
+          $filepath = mb_convert_encoding($filepath,"cp932");
+          logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");
+      }
+    }
+    return $filepath;
+}
+
+function start_song($db,$id,$addplaytimes = 0){
+
+    global $FOOBARPATH;
+    global $MPCPATH;
+    global $config_ini;
+
+
+    readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);
+
+    $row = onerequestinfo_fromid($db,$id);
+    if( $row === false){
+        return $row;
+    }
+    
+    $filepath = get_fullfilename($row["fullpath"],$row["songfile"],$filepath_utf8);
+    var_dump($row);
+    $filetype = check_filetype ($db,$id);
+    if( $filetype == 2 ){
+    
+        // とりあえず動画Playerを終了する。
+        mpcstop();
+        // audio file
+        startfoobarandwait(mb_convert_encoding($filepath,"SJIS","SJIS, UTF-8"),3);
+        if ($config_ini['playmode'] == 2){
+            sleep(0.5);
+            exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
+        }
+    }
+    else{
+        // video file
+        //logtocmd 'MPC fileopen start '."\n";
+        if(mb_strstr($row['kind'],'動画_別プ') != FALSE){
+        // web経由でファイル再生
+            if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
+                // 別Playerを指定している場合、実行を試みる。
+                $execcmd="start /b \"\" \"".mb_convert_encoding(urldecode($config_ini["otherplayer_path"]),"SJIS-win")."\"" . " \"$filepath\"\n";
+  //              print $execcmd;
+                exec($execcmd);
+            }
+        }else{
+
+            // MPC起動チェック
+            if(mpcrunningcheck($playerpath)===FALSE){
+                startmpcandwait($playerpath,1);
+            }
+
+            if($filetype == 3){
+              if ($config_ini['playmode'] == 2){
+                $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+              }else {
+                $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+              }
+              exec($execcmd);
+            }else{
+              mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
+            }
+        }
+    }
+    $db->beginTransaction();
+    $sql = "UPDATE requesttable set nowplaying = \"再生中\", playtimes = ".($row["playtimes"] + $addplaytimes )."  WHERE id = $id ";
+    $ret = $db->exec($sql);
+    if (! $ret ) {
+      logtocmd("再生中 への変更に失敗しました。<br>");
+    }
+    $db->commit();
+    return true;
+}
+
 function check_end_song($db,$id,$playerchecktimes,$playmode){
 
     $exit = 1;
@@ -568,8 +706,11 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
     {
        // db statusを確認
        $stat = check_nowplaying_state ($db,$id);
-       if($stat === 3 ){
+       if($stat === 3 ){  // 停止中
            break;
+       }else if( $stat === 7) { // 変更中
+           logtocmd("再生中曲差し替えを検出\n");
+           start_song($db,$id,0);
        }
        
        if( $kind === 1 || $kind === 3){
@@ -579,7 +720,12 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
        }else {
            break;
        }
-       
+       $stat = check_nowplaying_state ($db,$id);
+       if( $stat === 7) { // 変更中
+           logtocmd("再生中曲差し替えを検出\n");
+           start_song($db,$id,0);
+           continue;
+       }
        if($loopflg == 1) {
 //       if($playmode == 2) {
            song_start_again($db,$id);
@@ -614,6 +760,9 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
        // db statusを確認
        $stat = check_nowplaying_state ($db,$id);
        if($stat === 3 ){
+           break;
+       }
+       if($stat === 7 ){
            break;
        }
        
@@ -845,47 +994,9 @@ while(1){
        {
        $ft = check_filetype ($db,$l_id);
        if( $ft !== 3){
-           // ファイル名のチェック
-     // logtocmd ("Debug l_fullpath: $l_fullpath\r\n");
-           $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");
-           $fileinfo=file_exist_check_japanese($winfillpath);
-//           $fileinfo=TRUE;
-// logtocmd ("Debug#".$fileinfo);
-           if($fileinfo !== FALSE){
-               $filepath = $winfillpath;
-               $filepath_utf8=$l_fullpath;
-           }else{
-             $filepath = null;
-             // まず フルパス中のbasenameで再検索
-             $songbasename = basename($l_fullpath);
-             // logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
-             $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($songbasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-             $json = file_get_html_with_retry($jsonurl, 5);
-             if($json != false){
-                 $decode = json_decode($json, true);
-                 if($decode != NULL){
-                   if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
-                       $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-                       $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
-                   }
-                 }
-             }
-             if(empty($filepath)){
-             // 曲名で再建策
-                 logtocmd ("fullpass basename $songbasename is not found. Search from Everything DB.: $word\r\n");
-                 $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-                 // logtocmd $jsonurl;
-                 $json = file_get_html_with_retry($jsonurl, 5);
-                 $decode = json_decode($json, true);
-                 $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
-                 $filepath_utf8= $filepath;
-                 $filepath = mb_convert_encoding($filepath,"cp932");
-                 logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");
-             }
-             
-           }
+           $filepath = get_fullfilename($l_fullpath,$word,$filepath_utf8);
     //logtocmd "Debug filepath: $filepath\r\n";
-        }else {
+       }else {
             // logtocmd $l_kind;
             $filepath = $l_fullpath;
             $filepath_utf8= $filepath;
@@ -893,147 +1004,40 @@ while(1){
            
            // 拡張子をチェックしてPlayerを選択
            $filetype = check_filetype ($db,$l_id);
-           if( $filetype == 2 ){
-               // audio file
-               if($l_nowplaying === '再生中' ){
-                   logtocmd("再生中(foobar再生)を検出。現在の曲の終了待ち\n");
-               }else{
-                   
-                   if($playmode != 1 && $playmode != 4 && $playmode != 5 && $playmode != 2){
-                       logtocmd(" Debug : now auto play is off : $playmode\n");
-                       sleep(30);
-                       continue;
-                   }
-                   
-                   // 再生長取得
-                   /* foo_http_controlを使用するようにしたので無効化
-                   */
-                   if($nextplayingtimes === 0){
-                       $l_playtimes = $l_playtimes + 1;
-                   }else {
-                       $l_playtimes = $nextplayingtimes;
-                   }
-                   $db->beginTransaction();
-                   $sql = "UPDATE requesttable set nowplaying = \"再生中\", playtimes = $l_playtimes WHERE id = $l_id ";
-                   $ret = $db->exec($sql);
-                   if (! $ret ) {
-                   	logtocmd("再生中 への変更に失敗しました。<br>");
-                   }
-                   $db->commit();
-                   // とりあえず動画Playerを終了する。
-                   mpcstop();
+           if($l_nowplaying === '再生中' ){
+                   logtocmd("再生中を検出。現在の曲の終了待ち\n");
+           }else{
+               start_song($db,$l_id,1);
+               if($filetype == 3){
+                   sleep(10); // URL指定はさらに10秒待ち 
+               } 
+               sleep($waitplayercheckstart); // Player 起動待ち
+               // 再生時コメント表示
+               if(commentenabledcheck()){
+                   $nm=$row['singer'];
+                   $msg=$row['comment'];
+                   $col = 'FFFFFF';
+                   $size = 3;
 
-                   // sleep(1);
-                   startfoobarandwait(mb_convert_encoding($filepath,"SJIS","SJIS, UTF-8"),3);
-                   if ($playmode == 2){
-//                      sleep(0.5);
-//                      exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
-                   }
-                   sleep($waitplayercheckstart); // Player 起動待ち
-
-                   // 再生時コメント表示
-                   if(commentenabledcheck()){
-                       $nm=$row['singer'];
-                       $msg=$row['comment'];
-                       $col = 'FFFFFF';
-                       $size = 3;
-
-                       //commentpost_v1($nm,$col,$msg,$commenturl);
-                       commentpost_v2($nm,$col,$size,$msg,$commenturl);
-                   }
+                   //commentpost_v1($nm,$col,$msg,$commenturl);
+                   commentpost_v2($nm,$col,$size,$msg,$commenturl);
                }
-               runningcheck_audio($db,$l_id,$playerchecktimes);
-               
-           }else {
-               if($l_nowplaying === '再生中' ){
-                   logtocmd("再生中(MPC再生)を検出。現在の曲の終了待ち\n");
-               }else{
-                   // video file
-
-                   if(mb_strstr($l_kind,'動画_別プ') != FALSE){
-                   }else{ 
-                       if($playmode == 1 || $playmode == 4 || $playmode == 5){
-                       $execcmd="start /b \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
-                       // MPC起動チェック
-                       if(mpcrunningcheck($playerpath)===FALSE){
-                           startmpcandwait($playerpath,1);
-                       }
-                       }elseif ($playmode == 2){
-                       $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
-                       // MPC起動チェック
-                       if(mpcrunningcheck($playerpath)===FALSE){
-                           startmpcandwait($playerpath,1);
-                       }
-                       //logtocmd ('MPC running check finished '."\n");
-                       
-                       }else{
-                           logtocmd(" now auto play is off : $playmode\n");
-                           sleep(30);
-                           continue;
-                       }
-                   }
-                   // logtocmd(" Debug : execcmd : $execcmd\n");
-                   if($nextplayingtimes === 0){
-                       $l_playtimes = $l_playtimes + 1;
-                   }else {
-                       $l_playtimes = $nextplayingtimes;
-                   }
-                   $db->beginTransaction();
-                   $sql = "UPDATE requesttable set nowplaying = \"再生中\", playtimes = $l_playtimes  WHERE id = $l_id ";
-                   $ret = $db->exec($sql);
-                   if (! $ret ) {
-                     logtocmd("再生中 への変更に失敗しました。<br>");
-                   }
-                   $db->commit();
-                   // sleep(0.5);
-                   // web経由でファイル再生
-                   //logtocmd 'MPC fileopen start '."\n";
-                   if(mb_strstr($l_kind,'動画_別プ') != FALSE){
-                       if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
-                           // 別Playerを指定している場合、実行を試みる。
-                           $execcmd="start /b \"\" \"".mb_convert_encoding(urldecode($config_ini["otherplayer_path"]),"SJIS-win")."\"" . " \"$filepath\"\n";
-  //                         print $execcmd;
-                           exec($execcmd);
-                       }
-                   }else if($filetype == 3){
-                       exec($execcmd);
-                   }else{
-                       mpcplaylocalfile($playerpath,$filepath_utf8,$playmode,1,$db,$l_id);
-                   }
-                   //logtocmd 'MPC fileopen end '."\n";
-                   
-                   // logtocmd mb_convert_encoding("DEBUG : Player 起動完了を $waitplayercheckstart 秒待っています\n","SJIS-win");
-                   if($filetype == 3){
-                       sleep(5); // URL指定はさらに5秒待ち 
-                   } 
-                   sleep($waitplayercheckstart); // Player 起動待ち
-                   // 再生時コメント表示
-                   if(commentenabledcheck()){
-                       $nm=$row['singer'];
-                       $msg=$row['comment'];
-                       $col = 'FFFFFF';
-                       $size = 3;
-
-                       //commentpost_v1($nm,$col,$msg,$commenturl);
-                       commentpost_v2($nm,$col,$size,$msg,$commenturl);
-                   }
-               }
-               if(mb_strstr($l_kind,'動画_別プ') != FALSE){
-                   // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
-                   logtocmd("別Player終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n");
-                   runningcheck_shop_karaoke($db,$l_id);
-                   if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
-                       $opcmd = mb_convert_encoding(basename(urldecode($config_ini["otherplayer_path"])),"SJIS-win");
-//                       print $opcmd;
-                       $pscheck_cmd='taskkill  /im '.$opcmd.' -f';
-//                       print $pscheck_cmd;
-                       exec($pscheck_cmd);
-                   }
-               }else{
-                   check_end_song($db,$l_id,$playerchecktimes,$playmode);
-               }
-               //logtocmd 'running check finished 終了'."\n";
            }
+           if(mb_strstr($l_kind,'動画_別プ') != FALSE){
+               // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
+               logtocmd("別Player終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n");
+               runningcheck_shop_karaoke($db,$l_id);
+               if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
+                   $opcmd = mb_convert_encoding(basename(urldecode($config_ini["otherplayer_path"])),"SJIS-win");
+//                   print $opcmd;
+                   $pscheck_cmd='taskkill  /im '.$opcmd.' -f';
+//                   print $pscheck_cmd;
+                   exec($pscheck_cmd);
+               }
+           }else{
+               check_end_song($db,$l_id,$playerchecktimes,$playmode);
+           }
+           //logtocmd 'running check finished 終了'."\n";
        
         }
 
