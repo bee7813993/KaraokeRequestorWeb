@@ -16,7 +16,10 @@ $l_secret = 0;
 if(array_key_exists("secret", $_REQUEST)) {
     $l_secret = $_REQUEST["secret"];
 }
-
+$l_urlreq = 0;
+if( mb_stristr($l_kind , "URL指定") !== FALSE ){
+    $l_urlreq = 1;
+}
 $l_loop = 0;
 if(array_key_exists("loop", $_REQUEST)) {
     $l_loop = $_REQUEST["loop"];
@@ -41,7 +44,6 @@ if(array_key_exists("selectid", $_REQUEST)) {
     }
 }
 
-$l_urlreq = 0;
 if(array_key_exists("urlreq", $_REQUEST)) {
     $l_urlreq = $_REQUEST["urlreq"];
 }
@@ -70,10 +72,7 @@ function getnewid($db){
 ?>
 
 <?php
-if(mb_stristr($l_kind , "URL指定") !== FALSE){
-  $l_fullpath = $l_filename;
-  $displayfilename = $l_filename;
-}else if($l_urlreq == 1){
+if(mb_stristr($l_kind , "URL指定") !== FALSE  || $l_urlreq == 1 ){
   $l_fullpath = $l_filename;
   $displayfilename = $l_filename;
 }else {
