@@ -79,9 +79,28 @@ if(mb_stristr($l_kind , "URL指定") !== FALSE  || $l_urlreq == 1 ){
   $displayfilename = makesongnamefromfilename($l_filename) ;
 }
 if(is_numeric($selectid)){
+
+/*** 既存登録の差し替え処理 ***/
 // print($displayfilename);
+
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop where id = ".$selectid;
+    $sql = "SELECT * FROM requesttable where id = '".$selectid."' ORDER BY id DESC";
+    $select = $db->query($sql);
+    $request = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+} catch (PDOException $e) {
+	echo 'Connection failed: ' . $e->getMessage();
+}
+
+if($request[0]['nowplaying'] === '再生中' ) {
+   $new_nowplaying = '変更中';
+}else{
+   $new_nowplaying = $request[0]['nowplaying'];
+
+}
+
+try {
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying where id = ".$selectid;
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -97,7 +116,8 @@ $arg = array(
 	':kind' => $l_kind,
 	':fp' => $l_fullpath,
 	':secret' => $l_secret,
-	':loop' => $l_loop
+	':loop' => $l_loop,
+	':nowplaying' => $new_nowplaying
 	);
 }else {
   try {
@@ -170,7 +190,6 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUE
    print<<<EOT
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<META http-equiv="refresh" content="1; url=requestlist_only.php">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>DB登録中</title>
 </head>
