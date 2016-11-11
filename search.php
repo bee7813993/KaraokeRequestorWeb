@@ -131,10 +131,10 @@ shownavigatioinbar('searchreserve.php');
   </div>
   </form>
   <div class="clearleftfloat"> 
-  and検索は スペース 区切り<br>
-  or検索は |(半角) 区切り<br>
-  not検索はnotにしたい単語の先頭に!(半角)<br>
-  全件検索は*(半角)でいけるっぽい。<br><br>
+  and検索は スペース 区切り<br />
+  or検索は |(半角) 区切り<br />
+  not検索はnotにしたい単語の先頭に!(半角)<br />
+  全件検索は*(半角)でいけるっぽい。<br/ ><br />
   </div>
   <?php
   	if ( empty ($word)){
@@ -170,10 +170,10 @@ die();
 <INPUT type=radio value=rec name=m id="rec" "><label for="rec">音源</label>
 <INPUT type=radio value=pgrp name=m id="pgrp" "><label for="pgrp">関連情報</label>
 --->
-<BR>
+<BR />
 <INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
 <!---
-  <div> 結果表示順(同じ検索ワード内) <br>
+  <div> 結果表示順(同じ検索ワード内) <br />
   <select name="order" class="searchtextbox" >
   <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
   <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
@@ -185,7 +185,14 @@ die();
   </select>
   </div>
 --->
-<INPUT type=submit value="検索" class="btn btn-default "><BR><BR>
+<?php
+if(!empty($selectid) ) {
+  print '<input type="hidden" name="selectid" value="';
+  print $selectid;
+  print '" />';
+}
+?>
+<INPUT type=submit value="検索" class="btn btn-default "><BR/ ><BR />
 
 <span id="selectTag">
 </span>
@@ -217,9 +224,9 @@ die();
   <br />
 
   
-  (キーワードでインターネット上のデータベースサイトから曲名を検索し、その曲名でローカルにファイルがあるかを検索)<br>
-  (登録されてない曲は見つけられません。)<br>
-  (曲名の一部を含む別の曲とかも検索結果に出ちゃいます。ありがちな1単語の曲名だとたくさん結果に出てきてしまうので注意してね)<br>
+  (キーワードでインターネット上のデータベースサイトから曲名を検索し、その曲名でローカルにファイルがあるかを検索)<br />
+  (登録されてない曲は見つけられません。)<br />
+  (曲名の一部を含む別の曲とかも検索結果に出ちゃいます。ありがちな1単語の曲名だとたくさん結果に出てきてしまうので注意してね)<br />
   (網羅されてない新しい曲とか、特殊文字（★とか）が曲名に入っていると見つからない可能性があるので改めてファイル名検索してみて)
 </div>
 

@@ -2,6 +2,7 @@
 // 変数チェック
 require_once 'modules/simple_html_dom.php';
 require_once 'commonfunc.php';
+require_once 'search_anisoninfo_common.php';
 
 $l_kind = null;
 if(array_key_exists("kind", $_REQUEST)) {
@@ -18,122 +19,14 @@ if(array_key_exists("order", $_REQUEST)) {
     $l_order = urldecode($_REQUEST["order"]);
 }
 
-
-
-// URLを叩いて検索ワード候補リクエスト用URL生成
-function ansoninfo_gettitlelisturl($m,$q,$fullparam){
-    if(isset($fullparam)){
-        $url="http://anison.info/data/".$fullparam;
-    }else {
-        $urlbase="http://anison.info/data/n.php?m=%s&q=%s&year=&genre=";
-        $url=sprintf($urlbase,urlencode($m),$q);
-    }
-    return $url;
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
 }
 
-// URLを叩いて検索ワード候補をarrayで返す。
-function ansoninfo_gettitlelist($url,$l_kind){
-    $results = array();
-    
-    for($checktimes=0; $checktimes<3; $checktimes++){
-        $html = file_get_html_with_retry($url);
-        if($html !== FALSE) break;
-    }
-    if($html === FALSE) return; 
-    $result_dom=str_get_html($html);
-    
-    if(strcmp("program",$l_kind) == 0){
-      $title = $result_dom->find( 'div.subject' )[0]->plaintext;
-      //$results['title'] = $title;
-      foreach( $result_dom->find( 'table.sorted' ) as $list ){
-        foreach( $list->find( 'tr' ) as $tr ){
-            $oped = null;
-            $songtitle = null;
-            $artist = null;
-            $lyrics = null;
-            $compose = null;
-            $arrange = null;
-            
-            $value=$tr->find('td[headers=oped]',0);
-            if(isset($value)){
-                $oped = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=song]',0);
-            if(isset($value)){
-            $songtitle = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=vocal]',0);
-            if(isset($value)){
-            $artist = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=lyrics]',0);
-            if(isset($value)){
-            $lyrics = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=compose]',0);
-            if(isset($value)){
-            $compose = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=arrange]',0);
-            if(isset($value)){
-            $arrange = $value->plaintext;
-            }
-            
-
-            $result_one = array (
-                                   'oped' => $oped,
-                                   'songtitle' => $songtitle , 
-                                   'artist' => $artist , 
-                                   'lyrics' => $lyrics,
-                                   'compose' => $compose,
-                                   'arrange' => $arrange,
-                                   'title' => $title
-                                   );
-            $results[]=$result_one;            
-        }
-      }
-    }elseif(strcmp("artist",$l_kind) == 0){
-      foreach( $result_dom->find( 'table.sorted' ) as $list ){
-        foreach( $list->find( 'tr' ) as $tr ){
-            $songtitle = null;
-            $genre = null;
-            $program = null;
-            $oped = null;
-            $date = null;
-            $value=$tr->find('td[headers=song]',0);
-            if(isset($value)){
-                $songtitle = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=genre]',0);
-            if(isset($value)){
-                $genre = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=program]',0);
-            if(isset($value)){
-                $program = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=oped]',0);
-            if(isset($value)){
-                $oped = $value->plaintext;
-            }
-            $value=$tr->find('td[headers=date]',0);
-            if(isset($value)){
-                $date = $value->plaintext;
-            }
-
-            $result_one = array ('oped' => $oped,
-                                   'songtitle' => $songtitle , 
-                                   'genre' => $genre , 
-                                   'program' => $program,
-                                   'oped' => $oped,
-                                   'date' => $date,
-                                   'title' => $program
-                                   );
-            $results[]=$result_one;            
-        }
-      }        
-    }
-    return $results;
+$l_q = null;
+if(array_key_exists("q", $_REQUEST)) {
+    $l_q = $_REQUEST["q"];
 }
 
 
@@ -201,12 +94,25 @@ shownavigatioinbar('searchreserve.php');
   </select>
   </div>
 --->
+<?php
+if(!empty($selectid) ) {
+  print '<input type="hidden" name="selectid" value="';
+  print $selectid;
+  print '" />';
+}
+?>
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">
 </span>
 
 </FORM>
+
+<div class="well">
+ここに表示される検索結果の件数は、曲名で検索しなおして見つかった件数になります。
+同じ曲名が含まれる別の曲も見つかりますので、リンク先でファイル名を見て、目的の曲かどうか確認してリクエストしてください。
+
+</div>
 
 <?php
 // リクエストに種類もワードもなかった場合のチェック
@@ -216,81 +122,19 @@ if(!isset($l_url)  ) {
 }else {
 // 検索ワード候補取得部分
    $nexturlbase = 'http://anison.info/data/';
-    $list = ansoninfo_gettitlelist($nexturlbase.$l_url,$l_kind);
-
-   //var_dump($list);
-    $songnum = 0;
-    foreach($list as $value){
-        if(!isset($value["songtitle"]) ) continue;
-        $songtitles = array();
-        $songtitle = replace_obscure_words($value["songtitle"]);
-        $songtitles[] = $songtitle;
-        
-        // 全部全角にしたときのチェック
-        $songtitle_tmp = mb_convert_kana($songtitle,"A");
-        $same = 0;
-        foreach($songtitles as $checktitle){
-          if(strcmp($checktitle ,$songtitle_tmp) == 0){
-            $same = 1;
-          }
-        }
-        if($same === 0) {
-           $songtitles[] = $songtitle_tmp;
-        }
-        // 全部半角にしたときのチェック
-        $songtitle_tmp = mb_convert_kana($songtitle,"a");
-        $same = 0;
-        foreach($songtitles as $checktitle){
-          if(strcmp($checktitle ,$songtitle_tmp) == 0){
-            $same = 1;
-          }
-        }
-        if($same === 0) {
-           $songtitles[] = $songtitle_tmp;
-        }
-        
-        foreach($songtitles as $checktitle){
-            if(strlen($checktitle) == 0 ) continue;
-            if(empty($showallresult)){
-                searchlocalfilename($checktitle,$result_a);
-                $resulturl='search.php?searchword='.urlencode($checktitle);
-                
-                $songinfotxt = '「'.$checktitle.'」';
-                if(array_key_exists("artist", $value)){
-                    $songinfotxt = $songinfotxt.' <br>歌：'.trim(br2nl($value["artist"]));
-                }
-                if(array_key_exists("title", $value)){
-                    $songinfotxt = $songinfotxt.' <br>作品：'.trim(br2nl($value["title"]));
-                }
-                if(array_key_exists("oped", $value)){
-                    $songinfotxt = $songinfotxt.' '.trim(br2nl($value["oped"]));
-                }
-                
-                echo '<dl class="dl-horizontal resultwordlist">';
-                if(  $result_a["totalResults"] == 0){
-                echo ' <div >'.$songinfotxt.'<br>検索結果  ⇒'.$result_a["totalResults"]."件</div>";
-                }else{
-                echo ' <div ><a href="'.$resulturl.'" >'.$songinfotxt.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
-                }
-                echo '</dl>';
-
-            }else {
-                echo "<a name=\"song_".(string)$songnum."\">「".$checktitle."」の検索結果 : </a>&nbsp; &nbsp;  <a href=\"#song_".(string)($songnum + 1)."\" > 次の曲へ </a>";
-                PrintLocalFileListfromkeyword_ajax($checktitle,$l_order, 'searchresult'.$songnum);
-                echo "<br />";
-/*              print "  <script type=\"text/javascript\"> $(document).ready(function(){  $('#".'searchresult'.$songnum."').dataTable({  \"bPaginate\" : false    ,  columnDefs: [  { type: 'currency', targets: [3] }   ] });});  </script> ";  */
-/*
-            searchlocalfilename($checktitle,$l_order,$result_a);
-            echo $result_a["totalResults"]."件<br />";
-            if( $result_a["totalResults"] >= 1) {
-                printsonglists($result_a);
-            }
-            //  var_dump($result_a);
-*/            
-            $songnum = $songnum + 1;
-            }
-        }
+    $list = ansoninfo_gettitlelist($nexturlbase.$l_url,$l_kind,$selectid);
+    if(!empty($l_q )){
+       print '<h1 > ';
+       print $l_q;
+       print ' の検索結果 </h1 > ';
     }
+    // var_dump($list['searchinfo']);
+    // maker表示
+    if(array_key_exists("maker", $list['searchinfo'])) {
+       $url = 'search_anisoninfo_list.php?m=mkr&q='.$list['searchinfo']['maker']['maker'];
+        print '<dt>ブランド </dt><dd> <a href="'.$url.'" >'.$list['searchinfo']['maker']['maker'].'</a></dd>';
+    }
+    anisoninfo_display_finallist($list['result'],$nexturlbase,$selectid);
 }
 ?>
 

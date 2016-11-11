@@ -190,6 +190,7 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUE
    print<<<EOT
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
+<META http-equiv="refresh" content="1; url=requestlist_only.php" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>DB登録中</title>
 </head>

@@ -1198,11 +1198,11 @@ if (!empty($config_ini["downloadfolder"])){
     if(!empty($id)){
         print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
     }
-    print '<input type="submit" name="UPL"   value="ファイルをアップロードして予約する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
+    print '<input type="submit" name="UPL"   value="手元のファイルを転送して予約する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
   }else if($kind == 'dd'){
-    print '      <li><a href="'.$prefix.'file_uploader.php">アップロード</a></li>';
+    print '      <li><a href="'.$prefix.'file_uploader.php">ファイル転送</a></li>';
   }
 }
 

@@ -29,7 +29,7 @@ document.all.upldfilename.value = document.all.InputFile.value;
 }
 </script>
 
-<title>ファイルアップロード／ダウンロード指定</title>
+<title>ローカルファイル転送指定</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -54,7 +54,7 @@ ini_set('upload_max_filesize', '1024M');
   }
 ?>
   <div class="form-group">
-    <label for="InputFile">アップロードするファイルを指定</label>
+    <label for="InputFile">手元の曲ファイルを指定</label>
     <input name="userfile" type="file" id="InputFile" class="form-control" />
   </div>
 <input type="submit" value="ファイルを送信" class="btn btn-default" />

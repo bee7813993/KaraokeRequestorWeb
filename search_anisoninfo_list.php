@@ -25,21 +25,15 @@ if(array_key_exists("order", $_REQUEST)) {
 }
 
 
-// 検索ワード候補表示画面
-
-// URLを叩いて検索ワード候補リクエスト用URL生成
-function ansoninfo_gettitlelisturl($m,$q,$fullparam){
-    if(isset($fullparam)){
-        $url="http://anison.info/data/".$fullparam;
-    }else {
-        $urlbase="http://anison.info/data/n.php?m=%s&q=%s&year=&genre=";
-        $url=sprintf($urlbase,urlencode($m),$q);
-    }
-    return $url;
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
 }
 
+
+
 // URLを叩いて検索ワード候補をarrayで返す。
-function ansoninfo_gettitlelist($url,$l_m){
+function ansoninfo_gettitlelist_list($url,$l_m){
     // 3回ループ
     for($checktimes=0; $checktimes<3; $checktimes++){
     
@@ -273,6 +267,7 @@ shownavigatioinbar('searchreserve.php');
 --->
 <BR>
 <INPUT  name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+<!----
   <div> 結果表示順(同じ検索ワード内) <br>
   <select name="order" class="searchtextbox" >
   <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
@@ -284,6 +279,15 @@ shownavigatioinbar('searchreserve.php');
   <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
   </select>
   </div>
+--->
+<?php
+if(!empty($selectid) ) {
+  print '<input type="hidden" name="selectid" value="';
+  print $selectid;
+  print '" />';
+}
+?>
+
 <INPUT type=submit value=検索><BR><BR>
 
 <span id="selectTag">
@@ -299,10 +303,10 @@ if(!isset($l_fullparam) && (!isset($l_m) || !isset($l_q))  ) {
     echo "<p> 検索ワードと検索種類が指定されていません </p>";
 }else {
 // 検索ワード候補取得部分
-    $list = ansoninfo_gettitlelist(ansoninfo_gettitlelisturl($l_m,$l_q,$l_fullparam),$l_m);
+    $list = ansoninfo_gettitlelist_list(ansoninfo_gettitlelisturl($l_m,$l_q,$l_fullparam),$l_m);
 
    //var_dump($list);
-   anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order);
+   anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order,$selectid);
 
 
 }
