@@ -643,7 +643,7 @@ function start_song($db,$id,$addplaytimes = 0){
     }
     
     $filepath = get_fullfilename($row["fullpath"],$row["songfile"],$filepath_utf8);
-    var_dump($row);
+    // var_dump($row);
     $filetype = check_filetype ($db,$id);
     if( $filetype == 2 ){
     
