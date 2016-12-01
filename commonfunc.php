@@ -401,31 +401,55 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		//var_dump($order);
 		if(empty($prioritylist)){
 		    $orderstr = 'sort=size&ascending=0';
-		}else if(empty($order)){
-		    $result_array = search_order_priority($kerwords,$start,$length);
-		    return $result_array;
-		}else if($order[0]['column']==3  ){
+		  if(empty($order)){
+		    $orderstr = 'sort=size&ascending=0';
+		  }else if($order[0]['column']==3  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';
 		    }else {
 		       $orderstr='sort=size&ascending=0';
 		    }
-		}else if($order[0]['column']==2  ){
+		  }else if($order[0]['column']==2  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=name&ascending=1';
 		    }else {
 		       $orderstr='sort=name&ascending=0';
 		    }
-		}else if($order[0]['column']==4  ){
+		  }else if($order[0]['column']==4  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=path&ascending=1';
 		    }else {
 		       $orderstr='sort=path&ascending=0';
 		    }
+		  }
 		}else {
+		  if(empty($order)){
 		    $result_array = search_order_priority($kerwords,$start,$length);
 		    return $result_array;
+		  }else if($order[0]['column']==3  ){
+		    if($order[0]['dir']=='asc'){
+		       $orderstr='sort=size&ascending=1';
+		    }else {
+		       $orderstr='sort=size&ascending=0';
+		    }
+		  }else if($order[0]['column']==2  ){
+		    if($order[0]['dir']=='asc'){
+		       $orderstr='sort=name&ascending=1';
+		    }else {
+		       $orderstr='sort=name&ascending=0';
+		    }
+		  }else if($order[0]['column']==4  ){
+		    if($order[0]['dir']=='asc'){
+		       $orderstr='sort=path&ascending=1';
+		    }else {
+		       $orderstr='sort=path&ascending=0';
+		    }
+		  }else {
+		    $result_array = search_order_priority($kerwords,$start,$length);
+		    return $result_array;
+		  }
 		}
+		
         $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $orderstr . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $length . '&offset=' .$start.'';
         $json = file_get_html_with_retry($jsonurl, 5, 30);
         $result_array = json_decode($json, true);		
