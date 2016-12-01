@@ -72,6 +72,7 @@ if( $result_a["totalResults"] >= 1) {
     $resultlisttable = array( 'draw' => $draw,  'recordsTotal' => $result_a["totalResults"], 'recordsFiltered' => $result_a["totalResults"] );
 $draw++;
     $resultlisttable_data = array();
+    $itemcounter = $start;
     foreach($result_withp["results"] as $k=>$v ){
         $oneresult = array();
         
@@ -97,7 +98,8 @@ $draw++;
 		if(array_key_exists("pcount", $v)) {
 		   $oneresult += array("no" => $v['pcount']);
 		}else{
-		   $oneresult += array("no" => '-');
+		   $oneresult += array("no" => $itemcounter);
+		   $itemcounter = $itemcounter + 1;
 		}
 		 
 		 $reqbtn = '<form action="request_confirm.php" method="post" >';
