@@ -83,7 +83,11 @@ function selectedcheck($rt,$singer,$beforesinger = 'none' ){
     $rt_i = array_reverse($rt);
 
     if($beforesinger == 'none'){
-      foreach($rt_i as $row){
+      foreach($rt as $row){
+//      print '<script type="text/javascript">';
+ //     print 'alart("'.var_dump($row).'")';
+ //     print '</script>';
+      
           if($row['singer'] === $singer){
             if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
               if($row['clientua'] === $_SERVER["HTTP_USER_AGENT"] ) {

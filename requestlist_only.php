@@ -113,6 +113,14 @@ shownavigatioinbar();
 <?php
 showmode();
 ?>
+<?php
+// トップページメッセージ表示
+if(array_key_exists("noticeof_listpage",$config_ini)) {
+    print '<div class="well">';
+    print urldecode($config_ini["noticeof_listpage"]);
+    print '</div>';
+}
+?>
 <div class="checkbox">
  <label class="checkbox-inline">
  <input type="checkbox" name="autoreload" value="1"> 自動リロード

@@ -104,6 +104,14 @@ shownavigatioinbar('searchreserve.php');
  if($usenfrequset == 1) {
     print '<button type="button" onclick="location.href=\''.$nflink.'\' " class="btn btn-default btn-sm" > 探して見つからなかった曲があったら教えてください。 </button>';
  }
+ if(empty($word) ) {
+// トップページメッセージ表示
+if(array_key_exists("noticeof_searchpage",$config_ini)) {
+    print '<div class="well">';
+    print urldecode($config_ini["noticeof_searchpage"]);
+    print '</div>';
+ }
+ }
 ?>
 
 

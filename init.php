@@ -221,6 +221,37 @@ print 'checked';
     </label>
   </div>
 
+<!---- トップ画面メッセージの設定 ----->
+  <div class="form-group">
+    <label >
+    トップ画面メッセージの設定 
+    
+    </label>
+
+    <div class="form-group">
+    <label for=> 予約一覧（トップ）画面表示メッセージ <small> HTML記述OK </small> </label>
+     <textarea name="noticeof_listpage" class="form-control" id="noticeof_listpage" >
+<?php
+if(array_key_exists("noticeof_listpage",$config_ini)) {
+    print urldecode($config_ini["noticeof_listpage"]);
+}else {
+    print '';
+}
+?></textarea>
+    </div>  
+    <div class="form-group">
+    <label for=> 検索画面表示メッセージ <small> HTML記述OK </small> </label>
+     <textarea name="noticeof_searchpage" class="form-control" id="noticeof_searchpage" >
+<?php
+if(array_key_exists("noticeof_searchpage",$config_ini)) {
+    print urldecode($config_ini["noticeof_searchpage"]);
+}else {
+    print '';
+}
+?></textarea>
+    </div>  
+  </div>  
+
   <div class="form-group">
     <label for="playerpath_select">MediaPlayerClassic PATH設定</label>
     <select  class="form-control" name="playerpath_select" id="playerpath_select" >  
@@ -242,9 +273,19 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
   <div class="form-group">
     <label class="radio control-label"><span data-toggle="tooltip" data-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。予約確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </label>
     <label class="radio-inline" data-toggle="tooltip" data-placement="top" title="予約確認画面に項目を追加するかどうか">
-      <input type="radio" name="useotherplayer" value="1" <?php print ($config_ini["useotherplayer"]==1)?'checked':' ' ?> /> 使用する
+      <input type="radio" name="useotherplayer" value="1" <?php 
+      if(array_key_exists("useotherplayer",$config_ini)){
+          print ($config_ini["useotherplayer"]==1)?'checked':' ';
+      }
+      ?> /> 使用する
     </label>
-    <label class="radio-inline"> <input type="radio" name="useotherplayer" value="2" <?php print ($config_ini["useotherplayer"]!=1)?'checked':' ' ?> /> 使用しない </label></br>
+    <label class="radio-inline"> <input type="radio" name="useotherplayer" value="2" <?php 
+    if(array_key_exists("useotherplayer",$config_ini)){
+        print ($config_ini["useotherplayer"]!=1)?'checked':' ';
+    }else{
+        print "checked";
+    }
+    ?> /> 使用しない </label></br>
     <label > <span data-toggle="tooltip" data-placement="top" title="リクエスト確認画面でのこの項目に対する説明文">リクエスト確認画面での説明文 </span></label>
     <input type="text" name="otherplayer_disc" class="form-control" 
 <?php
