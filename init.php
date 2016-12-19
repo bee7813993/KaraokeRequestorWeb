@@ -229,7 +229,7 @@ print 'checked';
     </label>
 
     <div class="form-group">
-    <label for=> 予約一覧（トップ）画面表示メッセージ <small> HTML記述OK </small> </label>
+    <label for=> 予約一覧（トップ）画面表示メッセージ <small> HTML記述OK、「#yukarihost#」はホスト名に置換 </small> </label>
      <textarea name="noticeof_listpage" class="form-control" id="noticeof_listpage" >
 <?php
 if(array_key_exists("noticeof_listpage",$config_ini)) {
@@ -240,7 +240,7 @@ if(array_key_exists("noticeof_listpage",$config_ini)) {
 ?></textarea>
     </div>  
     <div class="form-group">
-    <label for=> 検索画面表示メッセージ <small> HTML記述OK </small> </label>
+    <label for=> 検索画面表示メッセージ <small> HTML記述OK 「#yukarihost#」はホスト名に置換 </small> </label>
      <textarea name="noticeof_searchpage" class="form-control" id="noticeof_searchpage" >
 <?php
 if(array_key_exists("noticeof_searchpage",$config_ini)) {

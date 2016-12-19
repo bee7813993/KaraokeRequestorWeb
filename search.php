@@ -108,7 +108,7 @@ shownavigatioinbar('searchreserve.php');
 // トップページメッセージ表示
 if(array_key_exists("noticeof_searchpage",$config_ini)) {
     print '<div class="well">';
-    print urldecode($config_ini["noticeof_searchpage"]);
+    print print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_searchpage"]));
     print '</div>';
  }
  }
