@@ -700,10 +700,14 @@ function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searc
        // echo $result_a["totalResults"]."件<br />";
         // print javascript
 //  
+  
 
         $printjs = <<<EOD
   <script type="text/javascript">
 $(document).ready(function(){
+  var element = document.getElementById( "%s" ) ;
+  var rect = element.getBoundingClientRect() ;
+
   $('#%s').dataTable({
   "processing": true,
   "serverSide": true,
@@ -713,6 +717,9 @@ $(document).ready(function(){
       "data": { keyword:"%s", bgvmode:%s, selectid:%s },
       "dataType": 'json',
       "dataSrc": "data",
+  },
+  "drawCallback": function( settings ) {
+      $("html,body").animate({scrollTop:rect.top},100);
   },
   "bPaginate" : true,
   "lengthMenu": [[50, 10, 100], [50, 10, 100]],
@@ -738,7 +745,7 @@ EOD;
         if(empty($selectid)){
             $selectid = '"none"';
         }
-        echo sprintf($printjs,$tableid,addslashes($word),$bgvmode,$selectid);
+        echo sprintf($printjs,$tableid,$tableid,addslashes($word),$bgvmode,$selectid);
         // print table_base
         $printtablebase = <<<EOD
 <table id="%s" class="searchresult">
