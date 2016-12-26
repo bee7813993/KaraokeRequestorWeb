@@ -116,9 +116,11 @@ showmode();
 <?php
 // トップページメッセージ表示
 if(array_key_exists("noticeof_listpage",$config_ini)) {
-    print '<div class="well">';
-    print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_listpage"]));
-    print '</div>';
+    if(!empty($config_ini["noticeof_listpage"])){
+        print '<div class="well">';
+        print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_listpage"]));
+        print '</div>';
+    }
 }
 ?>
 <div class="checkbox">

@@ -107,9 +107,11 @@ shownavigatioinbar('searchreserve.php');
  if(empty($word) ) {
 // トップページメッセージ表示
 if(array_key_exists("noticeof_searchpage",$config_ini)) {
-    print '<div class="well">';
-    print print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_searchpage"]));
-    print '</div>';
+    if(!empty($config_ini["noticeof_searchpage"])){
+      print '<div class="well">';
+      print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_searchpage"]));
+      print '</div>';
+    }
  }
  }
 ?>
@@ -128,14 +130,14 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
      print 'value="' . $word . '"';
      }
   ?>
-  >
+   />
   <?php
   if(is_numeric($selectid)){
       print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
   }
   ?>
 
-  <input type="submit" value="検索" class="btn btn-default ">
+  <input type="submit" value="検索" class="btn btn-default " />
   </div>
   </form>
   <div class="clearleftfloat"> 
