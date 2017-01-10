@@ -40,7 +40,9 @@ if(array_key_exists("showid", $_REQUEST)) {
 
 <script type="text/javascript">
 <!--
-
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
 
 
 $(function(requestTable_t) { $("#request_table").dataTable({
@@ -80,6 +82,7 @@ if($user === "admin"){
      "order" : [[0, 'desc']],
      bDeferRender: false,
       "autoWidth": false,
+      "searching": false,
      }); } );
 
          
@@ -124,13 +127,14 @@ if(array_key_exists("noticeof_listpage",$config_ini)) {
 }
 ?>
 <div class="checkbox">
- <label class="checkbox-inline">
- <input type="checkbox" name="autoreload" value="1"> 自動リロード
+ <label class="checkbox-inline"  data-toggle="tooltip" data-placement="top" title="コピペとかする時はチェックを外してください" >
+ <input type="checkbox" name="autoreload" value="1" /> 自動リロード 
  </label>
  <label class="checkbox-inline">
- <input type="checkbox" name="autoplayingsong" value="1"> 自動再生中移動
+ <input type="checkbox" name="autoplayingsong" value="1" /> 自動再生中移動
  </label>
 </div>
+<hr />
 
 <table id="request_table" class="cell-border">
 <caption> <h4>現在の登録状況 <button type="submit" value="" class="topbtn btn btn-default btn-xs"  onclick=reloadtable() >更新</button></h4></caption>
@@ -167,10 +171,9 @@ if($user === "admin"){
 
 <script type="text/javascript" charset="utf8" src="js/requsetlist_ctrl.js"></script>
 <hr>
-<form method="get" action="init.php">
-<input type="submit" value="設定" class=" btn btn-default " />
+<form method="get" action="simplelistexport_sjis.php">
+<input type="submit" value="リクエストリスト(CSV)のダウンロード" class=" btn btn-default " />
 </form>
-<a href="toolinfo.php" > 接続情報表示 </a>
 </div>
 </body>
 </html>
