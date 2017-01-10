@@ -724,6 +724,9 @@ $(document).ready(function(){
   "bPaginate" : true,
   "lengthMenu": [[50, 10, 100], [50, 10, 100]],
   "bStateSave" : true,
+  "stateSaveParams" : function (settings, data) {
+    data.start = 0;
+  },
   "autoWidth": false,
   "columns" : [
       { "data": "no", "className":"no"},
