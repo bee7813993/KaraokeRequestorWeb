@@ -3,6 +3,18 @@
 	padding-top: 90px;
 }
 
+.navbar-brand-dropdown {
+	margin: 0;
+}
+.navbar-brand.dropdown-toggle {
+	padding-top: 30px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+.dropdown-menu.dropdown-brand {
+	margin-left: -30px;
+}
+
 /*
 input[type="submit"] {
     height: 30px;

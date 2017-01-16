@@ -1027,6 +1027,9 @@ function shownavigatioinbar($page = 'none', $prefix = '' ){
     }
     
     print '<nav class="navbar navbar-inverse navbar-fixed-top">';
+    
+
+
 print <<<EOD
   <div class="navbar-header">
     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#gnavi">
@@ -1035,18 +1038,14 @@ print <<<EOD
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-  </div>
 EOD;
-
-    print '<div id="gnavi" class="collapse navbar-collapse">';
-    print '    <ul class="nav navbar-nav">';
-
     if(multiroomenabled()){
-         print '    <li class="dropdown navbar-left">';
+         print '  <ul class="nav navbar-nav navbar-brand-dropdown">';
+         print '    <li class="dropdown">';
          reset($config_ini["roomurl"]);
          $roominfo = each($config_ini["roomurl"]);
          
-         print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">'.$roominfo["key"] .'部屋  <b class="caret"></b></a>';
+         print '    <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown" href="">'.$roominfo["key"] .'部屋  <b class="caret"></b></a>';
          print '    <ul class="dropdown-menu">';
          reset($config_ini["roomurl"]);
          while($roominfo = each($config_ini["roomurl"])){
@@ -1056,7 +1055,18 @@ EOD;
          }
          print '    </ul>';
          print '    </li>';         
+         print '    <a class="navbar-brand" href="search.php">検索</a>';
+         print '</ul>';
+    }else{
+         print '    <a class="navbar-brand" href="search.php">検索</a>';
     }
+    print <<<EOD
+  </div>
+EOD;
+    
+    print '<div id="gnavi" class="collapse navbar-collapse">';
+    print '    <ul class="nav navbar-nav">';
+
 
 
     print '     <li ';
@@ -1073,7 +1083,7 @@ EOD;
     }
         //selectrequestkind();
 //    print '><a href="'.$prefix.'searchreserve.php">検索＆予約</a></li>';
-    print '><a href="#" class="dropdown-toggle" data-toggle="dropdown" >検索＆予約 <b class="caret"></b></a>';
+    print '><a href="#" class="dropdown-toggle" data-toggle="dropdown" >いろいろ予約 <b class="caret"></b></a>';
          print '    <ul class="dropdown-menu">';
          selectrequestkind($kind='dd',$prefix);
          print '    </ul>';
