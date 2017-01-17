@@ -1,5 +1,7 @@
-var foobarctrlurl = "http://" + location.hostname + ":82/karaokectrl/"
+var foobarctrlurl_old = "http://" + location.hostname + ":82/karaokectrl/"
 var nowplayingurl = "http://" + location.hostname + "/playingsong.php"
+var foobarctrlurl = "http://" + location.hostname + "/foobarctl.php"
+
 function sleep(time, callback){
   setTimeout(callback, time);
 }
@@ -41,37 +43,18 @@ request.send("");
 
 //Volume Up 907
 function song_vup(){
-var statusRequest = new XMLHttpRequest();
-statusRequest.open("GET", nowplayingurl);
-statusRequest.send();
-statusRequest.onload=function(ev){
-   stat = JSON.parse(statusRequest.responseText);
-   
-   newvolume = (stat.volume - 0 ) + 5;
-   var request = createXMLHttpRequest();
-   url=foobarctrlurl + "?cmd=Volume&param1=" + newvolume;
-   request.open("GET", url, true);
-   request.send("");
-};
+var request = createXMLHttpRequest();
+url=foobarctrlurl + "?cmd=VolumeUP&param1=0";
+request.open("GET", url, true);
+request.send("");
 }
 
 //Volume Down 908
 function song_vdown(){
-var statusRequest = new XMLHttpRequest();
-statusRequest.open("GET", nowplayingurl);
-statusRequest.send();
-statusRequest.onload=function(ev){
-   stat = JSON.parse(statusRequest.responseText);
-   
-   newvolume = (stat.volume - 0 ) - 5;
-   if( newvolume < 0 ) {
-       newvolume = 0;
-   }
-   var request = createXMLHttpRequest();
-   url=foobarctrlurl + "?cmd=Volume&param1=" + newvolume;
-   request.open("GET", url, true);
-   request.send("");
-};
+var request = createXMLHttpRequest();
+url=foobarctrlurl + "?cmd=VolumeDown&param1=0";
+request.open("GET", url, true);
+request.send("");
 }
 
 //Stop & next = Exit 816
@@ -95,7 +78,7 @@ request.send("");
 // restart this song = Seek to 0 sec
 function song_startfirst(){
 var request = createXMLHttpRequest();
-url=foobarctrlurl + "?cmd=SeekSecond&param1=0";
+url=foobarctrlurl + "?cmd=StartFirst&param1=0";
 request.open("GET", url, true);
 request.send("");
 

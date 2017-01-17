@@ -706,7 +706,8 @@ if(array_key_exists("request_automove",$config_ini)) {
   <hr />
 
 <div class="container bg-info">
-  <h3> ユーザー接続用DDNS登録 </h3>
+  <h2> ユーザー接続用DDNS登録 </h2>
+  <h3> ローカル接続用 </h3>
 
   <label> pcgame-r18.jp (アカウントを持っている人用) </label>
   <form method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">
@@ -741,6 +742,86 @@ if(array_key_exists("request_automove",$config_ini)) {
 
     <label class="control-label ">IP</label>
     <input type="text" name="IPV4ADDR" size="10" class="form-control" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
+  <input type="submit" class="btn btn-default" value="更新" />
+  </div>
+  </form>
+  <hr />
+  <h3> オンライン接続用 <small>現状グローバルIPを持つ回線を使用してルーターにてポート開放する必要があります </small></h3>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#onlinehost').on('submit', function(event) {
+    event.preventDefault();
+    $.post(
+    $(this).attr('action'),
+    $(this).serializeArray(),
+    function(result) {
+        window.location.href='init.php';
+    });
+    return false;
+  });
+});
+</script>
+  <label> オンライン接続用ホスト名 </label>
+  <form id="onlinehost" method="post"  action="toolinfo.php">
+  <div class="form-group">
+    <label class="control-label" >ホスト名</label>
+    <input type="text" name="globalhost" class="form-control"  value="<?php
+    if(array_key_exists("globalhost",$config_ini)) {
+        print $config_ini["globalhost"];
+    }
+    ?>" />
+<?php
+    if(array_key_exists("globalhost",$config_ini)) {
+      if(!empty($config_ini['globalhost'])){
+        print '<dl class="dl-horizontal">';
+        print '<dt> オンライン版接続確認 </dt>';
+        $ret = check_online_available($config_ini['globalhost']);
+       
+        if( $ret == 'OK' ){
+           print '<dd > <div class="bg-success" >'.$ret .'</div></dd>';
+        }else {
+           print '<dd > <div class="alert-danger" > NG : '.$ret .'</div></dd>';
+        }
+        print '</dl>';
+      }
+    }
+?>
+  <input type="submit" class="btn btn-default" value="更新" />
+  </div>
+  </form>
+  
+  <label> pcgame-r18.jp (アカウントを持っている人用) </label>
+  <form id="onlinehostpcg" method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">
+      <div class="form-group">
+        <label class="control-label"> Hostname </label>
+        <div class="row">
+          <div class="col-xs-8">
+            <input type="text" name="host" class="form-control" style=”width: 40%;” value="" />
+          </div>
+          <div class="col-xs-4">
+          .pcgame-r18.jp
+          </div>
+        </div>
+        <label class="control-label"> IP</label>
+        <div >
+          <input type="text" name="ip" size="10" class="form-control" value="<?php echo get_globalipv4();?>" />
+        </div>
+        <input type="hidden" name="ttl" size="10" class="ttl" value="30" />
+        <input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
+      <input type="submit" class="btn btn-default" value="更新" />
+      </div>
+  </form>
+  <label> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></label>
+  <form method="post"  action="http://www.mydns.jp/directip.html">
+  <div class="form-group">
+    <label class="control-label" >マスターID</label>
+    <input type="text" name="MID" class="form-control"  value=" " />
+
+    <label class="control-label ">パスワード</label>
+    <input type="text" name="PWD" class="form-control"  value=" " />
+
+    <label class="control-label ">IP</label>
+    <input type="text" name="IPV4ADDR" size="10" class="form-control" value="<?php echo get_globalipv4();?>" />
   <input type="submit" class="btn btn-default" value="更新" />
   </div>
   </form>

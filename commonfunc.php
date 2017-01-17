@@ -101,7 +101,7 @@ function createUri( $base, $relationalPath )
 
 }
 
-function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1){
+function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar = 4){
 
     $errno = 0;
 
@@ -113,6 +113,13 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1){
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeoutsec);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeoutsec);
         curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        if($ipvar == 6){
+            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6 );
+        }else if($ipvar == 4){
+            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
+        }else{
+            curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
+        }
         $contents = curl_exec($ch);
         //var_dump($contents); //debug
         if( $contents !== false) {
@@ -229,6 +236,19 @@ function get_prioritytable()
     
 }
 
+function get_globalipv4(){
+    // IP取得URL （どこかいいサイトがあったら教えて）
+    $checkglobakurl = 'http://vps.pcgame-r18.jp/ddns/checkip.php';
+
+    return file_get_html_with_retry($checkglobakurl);
+}
+
+function check_online_available($host){
+    $checkurl = 'http://vps.pcgame-r18.jp/ddns/online_yukari_check.php?host='.$host;
+    $ret = file_get_html_with_retry($checkurl,2,4);
+    return $ret;
+}
+
 // 検索ワードからeverything検索件数だけ取得
 function count_onepriority($word)
 {
@@ -323,7 +343,7 @@ function search_order_priority($word,$start,$length)
     
     $r_length = $length;  // 残要求件数
     $r_start = $start;    // 残件開始位置
-    $count_p = $start ;   // 
+    $count_p = $start + 1 ;   // 
     
     $a = 0;
     

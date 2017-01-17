@@ -72,7 +72,7 @@ if( $result_a["totalResults"] >= 1) {
     $resultlisttable = array( 'draw' => $draw,  'recordsTotal' => $result_a["totalResults"], 'recordsFiltered' => $result_a["totalResults"] );
 $draw++;
     $resultlisttable_data = array();
-    $itemcounter = $start;
+    $itemcounter = $start + 1;
     foreach($result_withp["results"] as $k=>$v ){
         $oneresult = array();
         

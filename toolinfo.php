@@ -32,7 +32,7 @@ print_meta_header();
 <body>
 <?php
 // 処理記述部
-
+$online_avaiavle = 0;
 $change_counter = 0;
 if(array_key_exists("SSID", $_REQUEST)) {
     $SSID = urlencode($_REQUEST["SSID"]);
@@ -46,10 +46,14 @@ if(array_key_exists("wifipass", $_REQUEST)) {
     $change_counter ++;
 }
 
-if(array_key_exists("wifipass", $_REQUEST)) {
-    $wifipass = urlencode($_REQUEST["wifipass"]);
-    $config_ini = array_merge($config_ini,array("wifipass" => $wifipass));
+
+if(array_key_exists("globalhost", $_REQUEST)) {
+    $globalhost = urlencode($_REQUEST["globalhost"]);
+    $config_ini = array_merge($config_ini,array("globalhost" => $globalhost));
     $change_counter ++;
+}
+if(array_key_exists("globalhost", $config_ini)) {
+    $globalhost = $config_ini["globalhost"];
 }
 
 $l_qrsize = 3;
@@ -113,9 +117,19 @@ if(array_key_exists("wifipass", $config_ini)){
 <input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value=<?php echo 'http://'.$_SERVER["HTTP_HOST"];?>/>
 <input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="<?php echo 'http://'.$_SERVER["SERVER_ADDR"].'/';?>" />
 </div>
+<?php
+  if(!empty($globalhost)){
+      $ret = check_online_available($globalhost);
+      if( $ret == 'OK' ){
+          $online_avaiavle = 1;
+          print '<label>オンライン版接続先 URL<small>Wifiに接続しなくてもアクセスできるURLです</small></label>';
+          print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="http://'.$globalhost.'/" />';
+      }
+  }
+?>
 
 <div class="row">
-  <div class="col-sm-6" class="text-center">
+  <div class="col-sm-<?php print $online_avaiavle ? 4 : 6 ;?>" class="text-center">
     <div class="text-center">
     <?php
       print 'http://'.$_SERVER["HTTP_HOST"].'/ <br />'
@@ -127,7 +141,7 @@ print 'http://'.$_SERVER["HTTP_HOST"].'/&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
-  <div class="col-sm-6" >
+  <div class="col-sm-<?php print $online_avaiavle ? 4 : 6 ;?>" >
     <div class="text-center">
   <?php
     print 'http://'.$_SERVER["SERVER_ADDR"].'/ <br />'
@@ -139,6 +153,25 @@ print 'http://'.$_SERVER["SERVER_ADDR"].'/&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
+<?php
+// オンライン版
+if($online_avaiavle){
+print <<<EOT
+  <div class="col-sm-4" class="text-center">
+    <div class="text-center">
+EOT;
+      print 'http://'.$globalhost.'/ <br />';
+print <<<EOT
+    </div>
+<img src="qrcode_php/outputqrimg.php?data=
+EOT;
+print 'http://'.$globalhost.'/&qrsize='.$l_qrsize;
+print <<<EOT
+" alt="QRコード" class="img-responsive center-block" /> <br />
+  </div>
+EOT;
+}
+?>
 </div>
 <div class="row">
     <div class="btn-group btn-group-justified" role="group">

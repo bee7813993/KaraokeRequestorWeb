@@ -541,7 +541,7 @@ function song_stop($kind, $stat = 'none'){
         
     }else if( $kind === 2) {
         // case foobar
-        $requesturl=$MPCCMDURL.'?cmd=PlayOrPause&param1=0';
+        $requesturl=$FOOBARSTATURL.'?cmd=PlayOrPause&param1=0';
         $res = file_get_html_with_retry($requesturl);
     }else {
 //        break;

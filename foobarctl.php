@@ -1,60 +1,50 @@
-
 <?php
 
-$foobarctrlurl = "http://localhost:82/karaokectrl/";
-
-
-function songstart(){
-      require_once 'commonfunc.php';
-      global  $foobarctrlurl;
-      global $db;
-      $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生開始待ち' ORDER BY reqorder ASC ";
-      $select = $db->query($sql);
-      if($select === false) return;
-      $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
-      $select->closeCursor();
-      $starturl = $foobarctrlurl."?cmd=Start&param1=0";
-      if(count($currentsong) < 1){
-          //再生中の曲がないとき
-          print '<small>  </small>'."\n";
-          $res = file_get_html_with_retry($starturl);
-      }else {
-          $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = ".$currentsong[0]['id'];
-          $ret = $db->exec($sql);
-          sleep(2);
-          $res = file_get_html_with_retry($starturl);
-      }
-}
+  require_once 'foobar_func.php';
 
   if( !empty($_REQUEST['songnext']) ){
-      require_once 'kara_config.php';
-      $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生中' ORDER BY reqorder ASC ";
-      $select = $db->query($sql);
-      $currentsong = $select->fetchAll(PDO::FETCH_ASSOC);
-      $select->closeCursor();
-      $sql = "UPDATE requesttable set nowplaying = \"停止中\" WHERE id = ".$currentsong[0]['id'];
-      $ret = $db->exec($sql);
+      songnext();
   }
 
   if( array_key_exists('songstart',$_REQUEST) ){
-      songstart();
-  }  
+      foobar_songstart();
+  }
+  if(array_key_exists("cmd", $_REQUEST)) {
+      $l_cmd = $_REQUEST["cmd"];
+      
+      if($l_cmd == "Start"){
+        foobar_songstart();
+      }else if($l_cmd == "PlayOrPause"){
+        foobar_song_pause();
+      }else if($l_cmd == "VolumeUP"){
+        foobar_song_vup();
+      }else if($l_cmd == "VolumeDown"){
+        foobar_song_vdown();
+      }else if($l_cmd == "Stop"){
+        foobar_song_stop();
+      }else if($l_cmd == "StartFirst"){
+        foobar_song_restart();
+      }else {
+          // nothing to do
+      }
+  }
+  
 
 ?>
 <script type="text/javascript" src="foobarctrl.js"></script>
 <p align="center" style="margin-bottom: 0;" > 音楽再生用(foobar2000) </p>
 <div align="center" class="playercontrol" >
 <div class="col-xs-12">
-<form method="post"action="playerctrl_portal.php" style="display: inline" >
-<input type="submit" value="再生開始" name="songstart" class="playstart btn btn-default" onClick="song_play()" />
-</form>
+
+<button type="submit" value="再生開始" name="songstart" class="pcbuttom btn btn-default" onClick="song_play()" /> 再生開始 </button>
+
 </div >
 <br>
 <div class="col-xs-4">
 <button type="submit" value="曲の最初から" class="pcbuttom btn btn-default" onClick="song_startfirst()" >曲の最初から</button>
 </div >
 <div class="col-xs-4">
-<button type="submit" value="一時停止"  class="pcbuttom btn btn-default" onClick="song_pause()" >一時停止</button>
+<button type="submit" value="一時停止"  class="pcbuttom btn btn-default" onClick="song_pause()" >一時停止/再開</button>
 </div >
 <div class="col-xs-4">
 <button type="submit" value="曲終了" name="songnext" class="pcbuttom  btn btn-default" onClick="song_next()" />曲終了</button>
