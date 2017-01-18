@@ -45,16 +45,16 @@ if(array_key_exists("wifipass", $_REQUEST)) {
     $config_ini = array_merge($config_ini,array("wifipass" => $wifipass));
     $change_counter ++;
 }
-
+if(array_key_exists("globalhost", $config_ini)) {
+    $globalhost = $config_ini["globalhost"];
+}
 
 if(array_key_exists("globalhost", $_REQUEST)) {
     $globalhost = urlencode($_REQUEST["globalhost"]);
     $config_ini = array_merge($config_ini,array("globalhost" => $globalhost));
     $change_counter ++;
 }
-if(array_key_exists("globalhost", $config_ini)) {
-    $globalhost = $config_ini["globalhost"];
-}
+
 
 $l_qrsize = 3;
 if(array_key_exists("qrsize", $_REQUEST)) {
@@ -123,7 +123,7 @@ if(array_key_exists("wifipass", $config_ini)){
       if( $ret == 'OK' ){
           $online_avaiavle = 1;
           print '<label>オンライン版接続先 URL<small>Wifiに接続しなくてもアクセスできるURLです</small></label>';
-          print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="http://'.$globalhost.'/" />';
+          print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="http://'.urldecode($globalhost).'/" />';
       }
   }
 ?>
@@ -160,12 +160,12 @@ print <<<EOT
   <div class="col-sm-4" class="text-center">
     <div class="text-center">
 EOT;
-      print 'http://'.$globalhost.'/ <br />';
+      print 'http://'.urldecode($globalhost).'/ <br />';
 print <<<EOT
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 EOT;
-print 'http://'.$globalhost.'/&qrsize='.$l_qrsize;
+print 'http://'.urldecode($globalhost).'/&qrsize='.$l_qrsize;
 print <<<EOT
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>

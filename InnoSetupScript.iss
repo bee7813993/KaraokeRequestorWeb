@@ -6,7 +6,7 @@
 
 [Setup]
 AppName=ÅuÇ‰Ç©ÇËÅvUniversal KAraoke REquest Web tool
-AppVersion=0.09.8
+AppVersion=0.09.9
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
 AppendDefaultDirName=no
