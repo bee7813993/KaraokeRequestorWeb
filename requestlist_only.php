@@ -44,6 +44,7 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
+var showfirst = 1;
 
 $(function(requestTable_t) { $("#request_table").dataTable({
      "ajax": {
@@ -54,11 +55,14 @@ $(function(requestTable_t) { $("#request_table").dataTable({
 if($showid != 'none' ) {
 print '             "complete" : function(settings) {'."\n";
              //alert( 'DataTables has redrawn the table' );
-print '             var element = document.getElementById( "id_'.$showid.'" ) ;'."\n";
-print '             var rect = element.getBoundingClientRect() ;'."\n";
-print '             var positionX = rect.left + window.pageXOffset ;	// 要素のX座標'."\n";
-print '             var positionY = rect.top + window.pageYOffset ;	// 要素のY座標'."\n";
-print '             window.scrollTo( positionX, positionY ) ;'."\n";
+print '             if( showfirst ){';
+print '               var element = document.getElementById( "id_'.$showid.'" ) ;'."\n";
+print '               var rect = element.getBoundingClientRect() ;'."\n";
+print '               var positionX = rect.left + window.pageXOffset ;	// 要素のX座標'."\n";
+print '               var positionY = rect.top + window.pageYOffset ;	// 要素のY座標'."\n";
+print '               window.scrollTo( positionX, positionY ) ;'."\n";
+print '               showfirst = 0';
+print '             }';
 print '         },'."\n";
 }
 ?>
