@@ -20,7 +20,7 @@ class MoveItem {
    public $allrequest_new = array();
    public $max_reqorder = 0;
    
-   
+   /* 各ターン一覧を作成。同じ人が次に現れたところで次のターンが始まるということにする */
    public function getturnlist($db){
        $this->allrequest = getallrequest_fromdb($db);
        $this->allrequest_new = $this->allrequest;
@@ -42,13 +42,86 @@ class MoveItem {
        $this->turnlist = $turnlist;
    }
    
+   /* そのIDの新しい再生順を返す */
    public function get_new_reqorder($id,$notsingstart = 0){
        $beforeturn = array();
        $newsinger = $this->get_singer_fromid($id);
        if($newsinger === false) {
            return false;
        }
-       foreach($this->turnlist as $oneturn){
+       
+       // 1番最初のリクエスト
+       if(count($this->allrequest) == 0){
+           return 1;
+       }
+/**** 作りかけの新しい処理      
+       $currentturn = $this->get_insert_turn($this->turnlist,$newsinger,$id);
+       $beforesinger = array(); //前のターンリスト
+       $findmynameflg = false;
+       // 1つ前のターンで自分より前の人の名前のリストを取得
+       if($currentturn > 0 ){
+           foreach( $this->turnlist[$currentturn-1] as $b_onerequest ){
+               if($b_onerequest['singer'] === $newsinger ){
+                 // 自分の名前が見つかる以降リストアップ
+                 $findmynameflg = true;
+               }else{
+                 if($findmynameflg === false) 
+                 array_push($beforesinger,$b_onerequest);
+               }
+           }
+       }
+       // 最初のターン(前のターンがない)→現ターンの一番後ろに追加
+       if(count($beforesinger) == 0){
+           $turnlast = end($this->turnlist[$currentturn]);
+           reset($this->turnlist[$currentturn]);
+           return $turnlast['reqorder'] + 1;
+       }
+       
+       //array_unshift($beforesinger,
+       
+       $insertreqest_key = false;
+       // 前ターンリスト最優先から順番にチェック
+       foreach ($beforesinger as $beforeorder){
+           //今ターンの中をチェック
+           foreach( $this->turnlist[$currentturn] as $key => $onerequest){
+               // 名前が見つかる
+               if($onerequest['singer'] === $beforeorder['singer']){
+                  $insertreqest_key = $key;
+                  break;
+               }
+           }
+           if($insertreqest_key !== false ) break;
+       }
+       print '<pre>';
+       var_dump($beforesinger );
+       print 'insertreqest_key'.$insertreqest_key;
+       print '</pre>';
+       //もし見つからなかったら、今ターンの最初
+       if($insertreqest_key === false ){
+         $insertreqest_key = 0;
+       }
+       print '<pre>';
+        print 'insertreqest_key'.$insertreqest_key;
+        print '</pre>';
+       
+       //挿入した場所が未再生でなかったら後ろにずらす
+       foreach( $this->turnlist[$currentturn] as $key => $onerequest){
+       print '<pre>';
+       var_dump($onerequest );
+        print '</pre>';
+         if($key < $insertreqest_key ) continue;
+         $neworder = $onerequest['reqorder'] ;
+         if($onerequest['nowplaying'] ==='未再生' ){
+            break;
+         }
+       }
+       
+       return $neworder;
+       
+****/       
+       ///以下古い処理
+       
+       foreach($this->turnlist as $turnkey => $oneturn){
        //print "<pre>";
        //    var_dump($oneturn);
        //print "</pre>";
@@ -84,7 +157,7 @@ class MoveItem {
 
            // 1つ前のターンで自分より前の人の名前のリストを取得
            $mynamefound = false;
-           $beforesinger = array();
+           $beforesinger = array(); 
            foreach( ($beforeturn) as $b_onerequest ){
            // print $b_onerequest['songfile'].$b_onerequest['singer'].$newsinger."<br>\n";
                if($mynamefound === false) {
@@ -123,7 +196,7 @@ class MoveItem {
            // print "<pre>\n-------- oneturn list:\n";
            // var_dump($oneturn);print "</pre>";
            if(!empty($beforesinger)){
-               // 前ターンの自分の前の人がいたらその前の人にする
+               // 前ターンの自分の前の人がいたらその人の次にする
                $cheekedreqorder= $oneturn[count($oneturn)-1]['reqorder']+1;;
                foreach( $oneturn as $onerequest){
                  if($onerequest['nowplaying']==='未再生'){
@@ -132,7 +205,9 @@ class MoveItem {
                  }
                }
                $setvalue = false;
-               foreach( array_reverse ($oneturn) as $onerequest){
+               // 差し込むべきIDを探す。
+               $insertid = null;
+               foreach( array_reverse ($oneturn) as $key => $onerequest){
                    $cheekedreqorder = $onerequest['reqorder'] + 1;
                    foreach ($beforesinger as $beforeorder){
                       // print $onerequest['singer'].$onerequest['reqorder'].$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
@@ -141,6 +216,13 @@ class MoveItem {
                                $newreqorder = $cheekedreqorder + 1 ;
                            }else {
                                $newreqorder = $cheekedreqorder ;
+                           }
+                           
+                           // 再生中or再生済みチェック
+                           for($i=$key ;$i<count($oneturn); $i++){
+                             if(array_key_exists($i,$oneturn) && $oneturn[$i]['nowplaying'] !=='未再生' ){
+                               $newreqorder = $oneturn[$i]['reqorder'] + 1;
+                             }
                            }
                            // print "reqorderを".$newreqorder.'にしました';
                            $setvalue = true;
@@ -170,6 +252,27 @@ class MoveItem {
        }
        // print "come max_reqorder".$this->max_reqorder;
        return $this->max_reqorder + 1;
+   }
+
+
+   
+   //ターン一覧から、挿入すべきターン番号を返す 
+   public function get_insert_turn($turnlist,$newsinger,$id){
+       foreach($turnlist as $turnkey => $oneturn){
+           foreach($oneturn as $onerequest){
+               if($onerequest['nowplaying'] == '未再生' ){
+                   // print "このターンに未再生がありました".$onerequest['reqorder']." <br>\n";
+                   // このターンに自分の名前があるかどうかのチェック
+                   // 現在のターンに名前がある → 次のターンへ
+                   if($this->check_exists_mymember($oneturn,$newsinger,$id) === true){
+                     continue;
+                   }                   
+                   return $turnkey;
+                   break;
+               }
+           }
+       }
+       return false;
    }
    
    public function get_singer_fromid($id){
@@ -242,6 +345,8 @@ class MoveItem {
    public function get_current_reqorderlist($db){
        
    }
+   
+   /* ターンの中に$singer で与えられた名前があるかどうか。$idを指定するとそのIDは除外する */
    public function check_exists_mymember($oneturn,$singer,$id='none'){
        foreach($oneturn as $value){
            //print "check_exists_mymember :".$value['singer'].':'.$singer."<br>\n";
