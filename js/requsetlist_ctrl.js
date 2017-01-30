@@ -162,3 +162,58 @@ function song_end(myel, id){
   request.send("");
   return false;
 }
+
+// コメント編集および削除modal表示時のリロード抑制
+$(function () {
+        $('#request_table').on('show.bs.modal', '.modal', function (event) {
+            storeautoreloadcheck = $('#autoreload').prop('checked');
+            $('#autoreload').prop('checked',false);
+        });
+        $('#request_table').on('hide.bs.modal', '.modal', function (event) {
+            $('#autoreload').prop('checked',storeautoreloadcheck);
+        });
+});
+
+$(function () {
+        
+        $('#request_table').on('submit', '.sendnomove',  function (event){
+            event.preventDefault();
+            var $form = $(this);
+            
+            var $button = $form.find('input[type="submit"]');
+            
+            $.ajax({
+                url: $form.attr('action'),
+                type: $form.attr('method'),
+                data: $form.serialize(),
+                timeout: 10000,  // 単位はミリ秒
+                
+                // 送信前
+                beforeSend: function(xhr, settings) {
+                    // ボタンを無効化し、二重送信を防止
+                    $button.attr('disabled', true);
+                },
+                // 応答後
+                complete: function(data, xhr, textStatus) {
+                    // ボタンを有効化し、再送信を許可
+                    var table = $('#request_table').DataTable();
+                    $button.attr('disabled', false);
+                    $('div.modal').modal('hide');
+                    table.ajax.reload();
+                },
+                /**
+                * Ajax通信が失敗した場合に呼び出されるメソッド
+                */
+                error: function(XMLHttpRequest, textStatus, errorThrown)
+                {
+                    alert('Error : ' + errorThrown);
+                }
+                
+        });
+        //サブミット後、ページをリロードしないようにする
+        return false;
+    });
+});
+
+
+

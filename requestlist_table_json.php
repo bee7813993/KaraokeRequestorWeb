@@ -68,14 +68,14 @@ if(strlen($value['comment']) === 0){
         </button>
         <h4 class="modal-title" id="modal-label">コメントへのレス＆編集</h4>
       </div>
-      <form method="GET" action="update.php">\n
+      <form method="GET" action="update.php" class="sendnomove" >\n
       <div class="form-group">
       <textarea class="form-control" name="comment"  >%s</textarea>
       <input type="hidden" name="id" value="%s" />\n
-      <input type="submit" class="btn btn-default pull-right" name="edit"   value="修正"/>\n
+      <input type="submit" class="btn btn-default pull-right" name="edit"   value="修正"  />\n
       </div>
       </form>\n
-      <form method="GET" action="commentedit.php">\n
+      <form method="GET" action="commentedit.php" class="sendnomove" >\n
       <label class="control-label">コメント <small>再生中にコメントするとその場で流れます</small></label>
       <div class="form-group btn-toolbar">
       <label  class="col-sm-2 control-label">レス</label>
@@ -170,7 +170,7 @@ $action_pf = <<<EOD
         <h4 class="modal-title" id="modal-label">%sを削除します</h4>
       </div>
       <div class="modal-footer">
-        <form method="post" action="delete.php">
+        <form method="post" class="sendnomove" action="delete.php">
         <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
           <input type="hidden" name="id" class="requestid" value="%s" />
           <input type="hidden" name="songfile" id="requestsongfile" value="%s" />

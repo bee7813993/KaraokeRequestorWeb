@@ -132,10 +132,10 @@ if(array_key_exists("noticeof_listpage",$config_ini)) {
 ?>
 <div class="checkbox">
  <label class="checkbox-inline"  data-toggle="tooltip" data-placement="top" title="コピペとかする時はチェックを外してください" >
- <input type="checkbox" name="autoreload" value="1" checked /> 自動リロード 
+ <input type="checkbox" name="autoreload" id="autoreload" value="1" checked /> 自動リロード 
  </label>
  <label class="checkbox-inline">
- <input type="checkbox" name="autoplayingsong" value="1" /> 自動再生中移動
+ <input type="checkbox" name="autoplayingsong" id="autoplayingsong" value="1" /> 自動再生中移動
  </label>
 </div>
 <hr />
