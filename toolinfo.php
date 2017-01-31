@@ -65,10 +65,56 @@ if(  $change_counter > 0 ){
     writeconfig2ini($config_ini,$configfile);
 }
 
+if(!empty($globalhost)){
+    $ret = check_online_available($globalhost);
+    if( $ret == 'OK' ){
+        $online_avaiavle = 1;
+    }
+}
+
+
+print '<div class="container">';
+
+if( $online_avaiavle === 1 ){
+    print '<label>オンライン版接続先 URL<small>Wifiに接続しなくてもアクセスできるURLです</small></label>';
+    print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="http://'.urldecode($globalhost).'/" />';
+
+
+// オンライン版
+print '<label>QRコード</label>';
+print <<<EOT
+  <div class="col-sm-4" class="text-center">
+    <div class="text-center">
+EOT;
+      print 'http://'.urldecode($globalhost).'/ <br />';
+print <<<EOT
+    </div>
+<img src="qrcode_php/outputqrimg.php?data=
+EOT;
+print 'http://'.urldecode($globalhost).'/&qrsize='.$l_qrsize;
+print <<<EOT
+" alt="QRコード" class="img-responsive center-block" /> <br />
+  </div>
+EOT;
+
+print <<<EOT
+<div class="panel-group" id="localnetinfo" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingOne">
+      <h4 class="panel-title">
+       <a role="button" data-toggle="collapse" data-parent="#localnetinfo" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" class="">
+        ローカル接続情報表示
+       </a>
+      </h4>
+    </div>
+    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+EOT;
+}else{
+    print '<div id="localnetinfo" ><div><div>';
+}
 ?>
 
 
-<div class="container">
  <form method="GET" >
  <div class="form-group">
   <label>接続用WiFI SSID</label>
@@ -129,7 +175,7 @@ if(array_key_exists("wifipass", $config_ini)){
 ?>
 
 <div class="row">
-  <div class="col-sm-<?php print $online_avaiavle ? 4 : 6 ;?>" class="text-center">
+  <div class="col-sm-<?php print $online_avaiavle ? 6 : 6 ;?>" class="text-center">
     <div class="text-center">
     <?php
       print 'http://'.$_SERVER["HTTP_HOST"].'/ <br />'
@@ -141,7 +187,7 @@ print 'http://'.$_SERVER["HTTP_HOST"].'/&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
-  <div class="col-sm-<?php print $online_avaiavle ? 4 : 6 ;?>" >
+  <div class="col-sm-<?php print $online_avaiavle ? 6 : 6 ;?>" >
     <div class="text-center">
   <?php
     print 'http://'.$_SERVER["SERVER_ADDR"].'/ <br />'
@@ -153,25 +199,7 @@ print 'http://'.$_SERVER["SERVER_ADDR"].'/&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
-<?php
-// オンライン版
-if($online_avaiavle){
-print <<<EOT
-  <div class="col-sm-4" class="text-center">
-    <div class="text-center">
-EOT;
-      print 'http://'.urldecode($globalhost).'/ <br />';
-print <<<EOT
-    </div>
-<img src="qrcode_php/outputqrimg.php?data=
-EOT;
-print 'http://'.urldecode($globalhost).'/&qrsize='.$l_qrsize;
-print <<<EOT
-" alt="QRコード" class="img-responsive center-block" /> <br />
-  </div>
-EOT;
-}
-?>
+
 </div>
 <div class="row">
     <div class="btn-group btn-group-justified" role="group">
@@ -180,6 +208,7 @@ EOT;
 	  <a href="?qrsize=8" class="btn btn-default" role="button">Large</a>
     </div>
 </div>
+</div> </div> 
 <hr />
 <a href="requestlist_only.php" > リクエストTOPに戻る </a>
 </div>

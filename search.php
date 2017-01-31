@@ -104,7 +104,12 @@ shownavigatioinbar('searchreserve.php');
  if($usenfrequset == 1) {
     print '<button type="button" onclick="location.href=\''.$nflink.'\' " class="btn btn-default btn-sm" > 探して見つからなかった曲があったら教えてください。 </button>';
  }
- if(empty($word) ) {
+ $result_count = false;
+ if(!empty($word) ) {
+     $result_count =  searchresultcount_fromkeyword($word);
+ }
+ 
+ if(empty($word) || $result_count === 0 ) {
 // トップページメッセージ表示
 if(array_key_exists("noticeof_searchpage",$config_ini)) {
     if(!empty($config_ini["noticeof_searchpage"])){
@@ -150,8 +155,8 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   	if ( empty ($word)){
   		
   	}else {
-  	    $result_count =  searchresultcount_fromkeyword($word);
-  	    echo $word."の検索結果 : "; //.$result_count.'件';
+  	    // $result_count =  searchresultcount_fromkeyword($word);
+  	    echo $word."の検索結果 : ".$result_count.'件';
   	    
     PrintLocalFileListfromkeyword_ajax($word,$l_order,'searchresult',0,$selectid);
   	}
