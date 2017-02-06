@@ -18,7 +18,7 @@ if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
 }
 date_default_timezone_set('Asia/Tokyo');
 
-$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
+$sql = "SELECT * FROM requesttable ORDER BY reqorder ASC";
 $select = $db->query($sql);
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 $select->closeCursor();
