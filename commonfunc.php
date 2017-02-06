@@ -249,6 +249,13 @@ function check_online_available($host){
     return $ret;
 }
 
+function check_json_available_fromurl($url){
+    $jsonbase = file_get_html_with_retry($url);
+    $result = json_decode($jsonbase);
+    if($result === null ) return false;
+    else return true;
+}
+
 // 検索ワードからeverything検索件数だけ取得
 function count_onepriority($word)
 {

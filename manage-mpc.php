@@ -45,6 +45,27 @@ function file_exist_check_japanese($filename){
  return FALSE;
 }
 
+function workcheck_andrestartxampp(){
+
+    $xamppstop_cmd = '..\xampp_stop.exe';
+    $xamppstart_cmd = '..\xampp_start.exe';
+    $url = 'http://localhost/requestlist_table_json.php';
+
+    if( check_json_available_fromurl($url)){
+       // print 'xampp working'."\n";
+    } else {
+       print 'apache happens some error'."\n";
+       print 'now stopping xampp'."\n";
+       exec($xamppstop_cmd);
+       print 'now starting xampp'."\n";
+       $cmd = 'start "" /b /MIN '.$xamppstart_cmd.'';
+       $fp = popen($cmd,'r');
+       pclose($fp);
+    }
+    check_json_available_fromurl($url);
+
+}
+
 function logtocmd($msg){
   print(mb_convert_encoding("$msg\n","SJIS-win"));
 }
@@ -808,7 +829,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
    }
 }
 
-
+/******** ここからメイン処理 ********/
 while(1){
      //config 再読込
      readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);
@@ -1064,7 +1085,7 @@ while(1){
     
     if( $played === 5)
     logtocmd("no next song, waiting...<br>\n");
-
+    workcheck_andrestartxampp();
     sleep($played);
 //     break;
 
