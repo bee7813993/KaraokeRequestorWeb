@@ -119,12 +119,13 @@ $draw++;
 		 if($user == 'admin' ) {
 		     $fn = $fn . "\n" . '<br/>おすすめ度 :'.$v['priority'];
 		 }
-//		 $previewpath = "http://" . $everythinghost . ":81/" . $v['path'] . "/" . $v['name'];
-		 $previewpath = $v['path'] . "/" . $v['name'];
-		 $previewmodal = make_preview_modal($previewpath,$k); 
-		 $fn = $fn . "\n" . '<div Align="right">';
-		 $fn = $fn . $previewmodal;
-		 $fn = $fn . '</div>';
+		 if(!check_access_from_online()){
+			 $previewpath = $v['path'] . "/" . $v['name'];
+			 $previewmodal = make_preview_modal($previewpath,$k); 
+			 $fn = $fn . "\n" . '<div Align="right">';
+			 $fn = $fn . $previewmodal;
+			 $fn = $fn . '</div>';
+		 }
 		 $oneresult += array("filename" => $fn);
 		 
 		 $fs = formatBytes($v['size']);

@@ -82,10 +82,10 @@ foreach($limitlist_array["category"] as $category1 ){
     print "</h2>";
     if(!empty($category1["song"])){
         foreach($category1["song"] as $songinfo){
-            print '<div class="divid0 panel panel-primary">';
-            print '<div class="panel-heading " >';
+            print '<div class="divid0 panel panel-primary"> ';
+            print '<div class="panel-heading " ><strong>';
             print $songinfo["title"];
-            print "</div>";
+            print "</strong></div>";
             print '<div class="panel-body">';
             print '<div class="container">';
             if(!empty($songinfo["artist"])){
@@ -102,20 +102,25 @@ foreach($limitlist_array["category"] as $category1 ){
             }
             print '</div> ';//container
             if(!empty($songinfo["file"])){
-                print '<div class="list-group">';
+                //  print '<div class="list-group">';
                 foreach($songinfo["file"] as $files){
+                // print '<pre>'.var_dump($files).'</pre>';
                     $link = 'request_confirm.php?filename='.urlencode($songinfo["title"]);
                     if(array_key_exists("filename", $files)) {
                         $link = $link.'&fullpath='.urlencode($files["filename"]);
                     }
-                    if(array_key_exists("shop_karaoke", $files["flags"]) ) {
-                        $link = $link.'&shop_karaoke=1';
-                    }
-                    if(array_key_exists("BGV", $files["flags"]) ) {
-                        $link = $link.'&forcebgv=1';
-                        if(array_key_exists("bgvfile", $files)) {
-                            $link = $link.'&bgvfile='.urlencode($files["bgvfile"]);
-                        }
+                    // flags check
+                    foreach ($files["flags"] as $flagname ){
+                       if( $flagname === "shop_karaoke" || $flagname === "配信" ){
+                           $link = $link.'&shop_karaoke=1';
+                       }
+                       if( $flagname === "BGV"  ){
+                           $link = $link.'&forcebgv=1';
+                           if(array_key_exists("bgvfile", $files)) {
+                              $link = $link.'&bgvfile='.urlencode($files["bgvfile"]);
+                           }
+                       }
+                       
                     }
                     print '<a href='.$link.' class="list-group-item divid10" style="overflow: auto;" >';
 //                    print '<span class="col-xs-1 col-sm-1  " >'.$files["kind"].'</span>';

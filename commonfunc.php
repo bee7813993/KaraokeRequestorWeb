@@ -249,6 +249,17 @@ function check_online_available($host){
     return $ret;
 }
 
+function check_access_from_online(){
+    global $config_ini;
+    if(array_key_exists("globalhost", $config_ini)) {
+        if(strpos ($config_ini["globalhost"],$_SERVER["SERVER_NAME"])!==false){
+          return true;
+        }
+    }
+    return false;
+    
+}
+
 function check_json_available_fromurl($url){
     $jsonbase = file_get_html_with_retry($url);
     $result = json_decode($jsonbase);
@@ -1067,6 +1078,46 @@ print <<<EOD
     </button>
 EOD;
     if(multiroomenabled()){
+// リンクが存在するかチェック用javascript
+         print <<<EOD
+<script type="text/javascript">
+    function createXMLHttpRequest() {
+      if (window.XMLHttpRequest) {
+        return new XMLHttpRequest();
+      } else if (window.ActiveXObject) {
+        try {
+          return new ActiveXObject("Msxml2.XMLHTTP");
+        } catch (e) {
+          try {
+            return new ActiveXObject("Microsoft.XMLHTTP");
+          } catch (e2) {
+            return null;
+          }
+        }
+      } else {
+        return null;
+      }
+    }
+    
+function _delete_element( id_name ){
+    var dom_obj = document.getElementById(id_name);
+    var dom_obj_parent = dom_obj.parentNode;
+    dom_obj_parent.removeChild(dom_obj);
+}
+
+function check_yukari_available ( yukarihost , id ) {
+    var http = new createXMLHttpRequest();;
+    url = '' + yukarihost + '/check.html';
+    http.open("GET", url, false);
+    http.send();
+    if( http.status != 200 ) {
+        _delete_element(id);
+    }
+    
+}
+
+</script>
+EOD;
          print '  <ul class="nav navbar-nav navbar-brand-dropdown">';
          print '    <li class="dropdown">';
          reset($config_ini["roomurl"]);
@@ -1077,7 +1128,14 @@ EOD;
          reset($config_ini["roomurl"]);
          while($roominfo = each($config_ini["roomurl"])){
              if(!empty($roominfo["value"])) {
-                 print '      <li><a href="'.$roominfo["value"].'">'.$roominfo["key"].'</a></li>';
+                 print '      <li id="'.$roominfo["key"].'room" ><a href="'.$roominfo["value"].'">'.$roominfo["key"].'</a></li>'."\n";
+/**
+                 print '<script type="text/javascript">'."\n";
+                 print '$(document).ready( function(){'."\n";
+                 print 'check_yukari_available(\''.$roominfo["value"].'\', "'.$roominfo["key"].'room" );'."\n";
+                 print '});'."\n";
+                 print '</script>'."\n";
+                 **/
              }
          }
          print '    </ul>';
@@ -1262,7 +1320,7 @@ if ($playmode != 4 && $playmode != 5){
   }
 }
 
-if (!empty($config_ini["downloadfolder"])){
+if (!empty($config_ini["downloadfolder"]) && (check_access_from_online() === false) ){
   if($kind == 'button'){
     print '<div align="center" >';
     print '<form method="GET" action="file_uploader.php" >';
