@@ -71,28 +71,40 @@ var_dump($_REQUEST);
 print "config_ini\n";
 var_dump($config_ini);
 print '</pre>';
-***/
+*****/
 
 
 // to urlencode
+$new_roomurlglobal = array();
 foreach($newconfig as $key => $value){
     if(is_array($value)){
+    $roomcount = 0;
         foreach ($value as $roomno => $roomurl){
             if($key === 'roomurl') {
                 if(!empty($newconfig['roomno'][$roomno])){
                     $newconfig['roomurl'][$newconfig['roomno'][$roomno]]=$roomurl;
-                    unset($newconfig['roomurl'][$roomno]);
-                    unset($newconfig['roomno'][$roomno]);
                 }else{
-                    unset($newconfig['roomurl'][$roomno]);
-                    unset($newconfig['roomno'][$roomno]);
                 }
+                if(array_key_exists("roomurlglobal", $newconfig)){
+                  foreach($newconfig["roomurlglobal"] as $rv ){
+                    if( $rv == $roomcount ){
+                        print "now setting newconfig['roomurlglobal'][".$newconfig['roomno'][$roomno].']';
+                        $new_roomurlglobal += array( $newconfig['roomno'][$roomno] => 1 );
+                    }else{
+                    }
+                  }
+                }
+            unset($newconfig['roomno'][$roomno]);
+            unset($newconfig['roomurl'][$roomno]);
             }
+            $roomcount++;
         }
     }else {
         $newconfig[$key] = urlencode($value);
     }
 }
+
+if(!empty($newconfig) ) $newconfig['roomurlglobal'] = $new_roomurlglobal ;
 // $config_ini['roomurl'] = array();
 $config_ini_new = array_merge($config_ini,$newconfig);
 
@@ -251,6 +263,22 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
 ?></textarea>
     </div>  
   </div>  
+
+<!---- トップ画面リクエストリストリロード時間 ----->
+  <div class="form-group">
+    <label for="reloadtime"> リクエスト一覧リロード時間 <small> 0 でリロード無効。数値を大きくするとオンライン接続時の通信量を減らせます </small> </label>
+    </label>
+    <input type="text" name="reloadtime" size="100" class="form-control"
+<?php
+if(array_key_exists("reloadtime",$config_ini)) {
+print ' value="'.urldecode($config_ini["reloadtime"]).'"';
+}else {
+print ' value="20" '; 
+}
+
+?>
+/>
+  </div>
 
   <div class="form-group">
     <label for="playerpath_select">MediaPlayerClassic PATH設定</label>
@@ -568,77 +596,39 @@ if(array_key_exists("downloadfolder",$config_ini)) {
   <thead>
     <tr>
       <th class="col-xs-3" >部屋番号</th>
-      <th class="col-xs-9" >URL</th>
+      <th class="col-xs-8" >URL</th>
+      <th class="col-xs-1" >グローバル</th>
     </tr>
   </thead>
-  <tr>
-    <td><input type="text" class="form-control input-normal" placeholder="この部屋の部屋番号" name="roomno[]"
-    <?php
-      reset($config_ini["roomurl"]);
-      if( $roominfo = each($config_ini["roomurl"])){
-          print 'value="'.$roominfo["key"].'"' ;
+<?php 
+  $roomcount = 0;
+  foreach ( $config_ini["roomurl"] as $key => $value ){
+      if( empty($key) || empty($value) ){
+          continue;
       }
-    ?>
+      print '  <tr>'."\n";
+      print '    <td><input type="text" class="form-control input-normal" placeholder="部屋'.$roomcount.'の部屋番号" name="roomno[]"';
+      print 'value="'.$key.'"' ;
+      print '    ></td>'."\n";
+      print '    <td><input type="text" class="form-control input-normal" placeholder="部屋'.$roomcount.'のURL" name="roomurl[]"';
+      print 'value="'.$value.'"' ;
+      print '    ></td>'."\n";
+      print '    <td><input type="checkbox" class="form-control input-normal" placeholder="オンライン用URLかどうか？" name="roomurlglobal[]" value='.$roomcount;
+      if(array_key_exists("roomurlglobal", $config_ini) && array_key_exists($key, $config_ini["roomurlglobal"]) && $config_ini["roomurlglobal"][$key] == 1){
+        print ' checked' ;
+      }
+      print '    ></td>'."\n";
+      $roomcount ++;
+  }
+?>  
+  <tr>
+    <td><input type="text" class="form-control input-normal" placeholder="部屋<?php echo $roomcount;?>の部屋番号" name="roomno[]"
     ></td>
     <td><input type="text" class="form-control input-normal" placeholder="この部屋のURL" name="roomurl[]"
-    <?php
-      if(isset($roominfo["value"])){
-        print 'value="'.$roominfo["value"].'"' ;
-      }
-    ?>
+    ></td>
+    <td><input type="checkbox" class="form-control input-normal" placeholder="オンライン用URLかどうか？" name="roomurlglobal[]" value="<?php echo $roomcount;?>"
     ></td>
   </tr>
-
-  <tr>
-    <td>
-
-    <input type="text" class="form-control input-normal" placeholder="部屋1の部屋番号" name="roomno[]"
-    <?php
-      if( $roominfo = each($config_ini["roomurl"])){
-          print 'value="'.$roominfo["key"].'"' ;
-      }
-    ?>
-    ></td>
-    <td><input type="text" class="form-control input-normal" placeholder="部屋1のURL" name="roomurl[]"
-    <?php
-      if(isset($roominfo["value"])){
-        print 'value="'.$roominfo["value"].'"' ;
-      }
-    ?>
-    ></td>
-  <tr>
-  <tr>
-    <td><input type="text" class="form-control input-normal" placeholder="部屋2の部屋番号" name="roomno[]"
-    <?php
-      if( $roominfo = each($config_ini["roomurl"])){
-          print 'value="'.$roominfo["key"].'"' ;
-      }
-    ?>
-    ></td>
-    <td><input type="text" class="form-control input-normal" placeholder="部屋2のURL" name="roomurl[]"
-    <?php
-      if(isset($roominfo["value"])){
-        print 'value="'.$roominfo["value"].'"' ;
-      }
-    ?>
-    ></td>
-  <tr>
-  <tr>
-    <td><input type="text" class="form-control input-normal" placeholder="部屋3の部屋番号" name="roomno[]"
-    <?php
-      if( $roominfo = each($config_ini["roomurl"])){
-          print 'value="'.$roominfo["key"].'"' ;
-      }
-    ?>
-    ></td>
-    <td><input type="text" class="form-control input-normal" placeholder="部屋3のURL" name="roomurl[]"
-    <?php
-      if(isset($roominfo["value"])){
-        print 'value="'.$roominfo["value"].'"' ;
-      }
-    ?>
-    ></td>
-  <tr>
   </table>
 
   <div class="form-group">

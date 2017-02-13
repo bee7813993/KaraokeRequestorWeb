@@ -80,6 +80,10 @@ print '         },'."\n";
 if($user === "admin"){
           print '{ "data": "change", className:"change" },';
 }
+$reload_interval = 20*1000;
+if(array_key_exists("reloadtime",$config_ini) ){
+    $reload_interval = $config_ini["reloadtime"] * 1000;
+}
 ?>
      ],
      "bPaginate" : false,
@@ -101,7 +105,7 @@ if($user === "admin"){
                 location.href = "#nowplayinghere";
             }
 
-        },10000);
+        },<?php echo $reload_interval; ?>);
     }
 
 function reloadtable () {
@@ -112,7 +116,7 @@ function reloadtable () {
 </script>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
-<body onLoad="tm()">
+<body <?php if($reload_interval != 0 ) print 'onLoad="tm()"'; ?> >
 <div class="container">
 <?php
 shownavigatioinbar();
@@ -129,7 +133,9 @@ if(array_key_exists("noticeof_listpage",$config_ini)) {
         print '</div>';
     }
 }
-?>
+
+if($reload_interval != 0){
+print <<<EOT
 <div class="checkbox">
  <label class="checkbox-inline"  data-toggle="tooltip" data-placement="top" title="コピペとかする時はチェックを外してください" >
  <input type="checkbox" name="autoreload" id="autoreload" value="1" checked /> 自動リロード 
@@ -138,6 +144,10 @@ if(array_key_exists("noticeof_listpage",$config_ini)) {
  <input type="checkbox" name="autoplayingsong" id="autoplayingsong" value="1" /> 自動再生中移動
  </label>
 </div>
+EOT;
+}
+?>
+
 <hr />
 
 <table id="request_table" class="cell-border">
