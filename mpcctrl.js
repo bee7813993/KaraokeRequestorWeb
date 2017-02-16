@@ -1,5 +1,5 @@
-var playerurl  = "http://" + location.hostname + ":13579/command.html"
-var playerurl2 = "http://" + location.hostname + "/mpcctrl.php"
+var playerurl  = "http://" + location.host + ":13579/command.html"
+var playerurl2 = "http://" + location.host + "/mpcctrl.php"
 
 //window.onload = function () {
 //    document.body.onclick  = setiframe();

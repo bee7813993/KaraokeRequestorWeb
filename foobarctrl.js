@@ -1,6 +1,6 @@
-var foobarctrlurl_old = "http://" + location.hostname + ":82/karaokectrl/"
-var nowplayingurl = "http://" + location.hostname + "/playingsong.php"
-var foobarctrlurl = "http://" + location.hostname + "/foobarctl.php"
+var foobarctrlurl_old = "http://" + location.host + ":82/karaokectrl/"
+var nowplayingurl = "http://" + location.host + "/playingsong.php"
+var foobarctrlurl = "http://" + location.host + "/foobarctl.php"
 
 function sleep(time, callback){
   setTimeout(callback, time);
