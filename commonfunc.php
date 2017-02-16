@@ -244,9 +244,13 @@ function get_globalipv4(){
 }
 
 function check_online_available($host){
-    $checkurl = 'http://vps.pcgame-r18.jp/ddns/online_yukari_check.php?host='.$host;
-    $ret = file_get_html_with_retry($checkurl,2,4);
-    return $ret;
+    global $config_ini;
+    if($config_ini["connectinternet"] == 1){
+      $checkurl = 'http://vps.pcgame-r18.jp/ddns/online_yukari_check.php?host='.$host;
+      $ret = file_get_html_with_retry($checkurl,2,4);
+      return $ret;
+    }
+    return "now disabled online";
 }
 
 function check_access_from_online(){

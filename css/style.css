@@ -134,7 +134,7 @@ width: 30%;
 }
 
 
-table#request_table td, th{
+table#request_table td, table#request_table th{
 border-top: 1px solid #000;
 border-right: 1px solid #000;
 border-left: 1px solid #000;
