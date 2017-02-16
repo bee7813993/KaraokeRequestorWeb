@@ -689,11 +689,33 @@ if(array_key_exists("request_automove",$config_ini)) {
     <input type="text" name="limitlistfile[]" size="100" class="form-control" value="" />
   </div>
 
+  <!---- ビンゴ表示機能の設定 ----->
+  <div class="form-group">
+  <?php
+      $usebingo=false;
+      if(array_key_exists("usebingo",$config_ini)){
+          if($config_ini["usebingo"]==1 ){
+             $usebingo=true;
+          }
+      }
+  ?>
+    <label class="radio control-label"> ビンゴ表示機能 <br /><small></small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="usebingo" value="1" <?php print ($usebingo)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usebingo" value="2" <?php print (!$usebingo)?'checked':' ' ?> /> 使用しない
+    </label>
+    <a href ="bingo_input.php" class="btn btn-default" > ビンゴ項目入力画面 </a>
+  </div>
+
+
   <input type="submit" class="btn btn-default btn-lg" value="設定" />
   </form>
   </div>
 </div>
   <hr />
+<hr />
 
 <div class="container bg-info">
   <h2> ホスト名設定（オンライン接続およびDDNSの設定） </h2>

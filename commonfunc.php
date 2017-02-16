@@ -40,6 +40,14 @@ function addipv6blanket($ipv6addr){
 
 }
 
+/* ビンゴ機能が有効かどうか */
+$usebingo=false;
+if(array_key_exists("usebingo",$config_ini)){
+    if($config_ini["usebingo"]==1 ){
+       $usebingo=true;
+    }
+}
+
 /**
  * createUri
  * 相対パスから絶対URLを返します
@@ -1063,6 +1071,7 @@ function shownavigatioinbar($page = 'none', $prefix = '' ){
     global $helpurl;
     global $user;
     global $config_ini;
+    global $usebingo;
     
     if($page == 'none') {
         $page = basename($_SERVER["PHP_SELF"]);
@@ -1212,6 +1221,9 @@ EOD;
     }
     print '      <li><a href="'.$prefix.'init.php">設定</a></li>';
     print '      <li><a href="'.$prefix.'toolinfo.php">接続情報表示</a></li>';
+    if($usebingo){
+        print '      <li><a href="'.$prefix.'bingo_showresult.php">ビンゴ結果表示</a></li>';
+    }
     print '     <li ';
     if($page == 'request.php')
     {

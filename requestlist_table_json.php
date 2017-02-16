@@ -98,7 +98,28 @@ if(strlen($value['comment']) === 0){
 </div>
 </div>
 EOD;
+
+
     $comment = sprintf($comment_pf, $showcommentblock, $value['id'], $value['comment'], $value['id'],   nl2br(htmlspecialchars(returnusername($allrequest))), $value['id']);
+
+if($usebingo){
+    require_once 'binngo_func.php';
+    $bingoinfo = new SongBingo();
+    $bingoinfo->initbingodb('songbingo.db'); 
+    $bingoidlist = $bingoinfo->getnumfromid( $value['id'] );
+    $bingoidtxt = "";
+    foreach($bingoidlist as $valueids ){
+       if(strlen($bingoidtxt)>0){
+           $bingoidtxt = $bingoidtxt.', ';
+       }
+       $bingoidtxt = $bingoidtxt.$valueids;
+    }
+    if(!empty($bingoidlist)){
+       $comment=$comment.'<div align="right">ビンゴ番号：'.$bingoidtxt.'</div>';
+    }
+    $bingoinfo = null;
+}
+
     $onerequset += array("comment" => $comment);
 
     $onerequset += array("method" => $value['kind']);
@@ -134,6 +155,12 @@ if($value['kind'] == 'カラオケ配信' && $config_ini['usebgv'] == 1 ) {
   $sasikaemenu = '<li> <a class="requestmove" name="changesong" id="changesong" href="searchreserve.php?id='.$value['id'].'" value="changesong"  > BGV選択</a> </li>';
 } else {
   $sasikaemenu = '<li> <a class="requestmove" name="changesong" id="changesong" href="searchreserve.php?id='.$value['id'].'" value="changesong"  > 曲差し替え</a> </li>';
+}
+if($user === "admin"){
+    if($usebingo){
+        $list_bingoinput='<li> <a class="requestmove" name="bingoinput" id="bingoinput" href="bingo_openinput.php?id='.$value['id'].'" value="bingoinput"  > ビンゴ入力</a> </li>';
+        $sasikaemenu = $sasikaemenu.$list_bingoinput;
+    }
 }
 
 $action_pf = <<<EOD
