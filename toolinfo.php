@@ -83,7 +83,8 @@ if( $online_avaiavle === 1 ){
 // オンライン版
 print '<label>QRコード</label>';
 print <<<EOT
-  <div class="col-sm-4" class="text-center">
+  <div class="row">
+  <div class="col-sm-12" class="text-center">
     <div class="text-center">
 EOT;
       print 'http://'.urldecode($globalhost).'/ <br />';
@@ -96,7 +97,7 @@ print <<<EOT
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
 EOT;
-
+print '</div>'; //row
 print <<<EOT
 <div class="panel-group" id="localnetinfo" role="tablist" aria-multiselectable="true">
   <div class="panel panel-default">
@@ -201,6 +202,9 @@ print 'http://'.$_SERVER["SERVER_ADDR"].'/&qrsize='.$l_qrsize;
   </div>
 
 </div>
+
+</div> </div> 
+<hr />
 <div class="row">
     <div class="btn-group btn-group-justified" role="group">
 	  <a href="?qrsize=3" class="btn btn-default" role="button">Small</a>
@@ -208,8 +212,6 @@ print 'http://'.$_SERVER["SERVER_ADDR"].'/&qrsize='.$l_qrsize;
 	  <a href="?qrsize=8" class="btn btn-default" role="button">Large</a>
     </div>
 </div>
-</div> </div> 
-<hr />
 <a href="requestlist_only.php" > リクエストTOPに戻る </a>
 </div>
 </body>

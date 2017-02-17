@@ -141,7 +141,7 @@ foreach($limitlist_array["category"] as $category1 ){
                     print '</span>'; //divid11
                     print '</a>'; //divid10
                 }
-                print '</div>'; // "list-group"
+                //print '</div>'; // "list-group"
                 
                 
             }
