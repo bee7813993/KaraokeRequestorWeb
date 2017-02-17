@@ -3,45 +3,45 @@ $(document).ready(function()
     $("form.bingoinput").submit(function()
     {
         var newid = "none";
-        // HTML‚Å‚Ì‘—M‚ğƒLƒƒƒ“ƒZƒ‹
+        // HTMLã§ã®é€ä¿¡ã‚’ã‚­ãƒ£ãƒ³ã‚»ãƒ«
         event.preventDefault();
         
-        // ‘€ì‘ÎÛ‚ÌƒtƒH[ƒ€—v‘f‚ğæ“¾
+        // æ“ä½œå¯¾è±¡ã®ãƒ•ã‚©ãƒ¼ãƒ è¦ç´ ã‚’å–å¾—
         var $form = $(this);
         var $script     = $('#nanasycheck');
         
-        // ‘—Mƒ{ƒ^ƒ“‚ğæ“¾
+        // é€ä¿¡ãƒœã‚¿ãƒ³ã‚’å–å¾—
         var $button = $form.find('button[type="submit"]');
         var newid = $form.find('input[name="id"]').val();
                 /**
-                 * Ajax’ÊMƒƒ\ƒbƒh
-                 * @param type  : HTTP’ÊM‚Ìí—Ş
-                 * @param url   : ƒŠƒNƒGƒXƒg‘—Mæ‚ÌURL
-                 * @param data  : ƒT[ƒo‚É‘—M‚·‚é’l
+                 * Ajaxé€šä¿¡ãƒ¡ã‚½ãƒƒãƒ‰
+                 * @param type  : HTTPé€šä¿¡ã®ç¨®é¡
+                 * @param url   : ãƒªã‚¯ã‚¨ã‚¹ãƒˆé€ä¿¡å…ˆã®URL
+                 * @param data  : ã‚µãƒ¼ãƒã«é€ä¿¡ã™ã‚‹å€¤
                  */
         $.ajax({
             url: $form.attr('action'),
             type: $form.attr('method'),
             data: $form.serialize(),
-            timeout: 10000,  // ’PˆÊ‚Íƒ~ƒŠ•b
+            timeout: 10000,  // å˜ä½ã¯ãƒŸãƒªç§’
             //dataType: 'json',
             
-            // ‘—M‘O
+            // é€ä¿¡å‰
             beforeSend: function(xhr, settings) {
-                // ƒ{ƒ^ƒ“‚ğ–³Œø‰»‚µA“ñd‘—M‚ğ–h~
+                // ãƒœã‚¿ãƒ³ã‚’ç„¡åŠ¹åŒ–ã—ã€äºŒé‡é€ä¿¡ã‚’é˜²æ­¢
                 $button.attr('disabled', true);
             },
             success : function( data ) {
                   window.location.href = 'bingo_openinput.php?id=' + newid;
             },
-            // ‰“šŒã
+            // å¿œç­”å¾Œ
             complete: function(data, xhr, textStatus) {
-                // ƒ{ƒ^ƒ“‚ğ—LŒø‰»‚µAÄ‘—M‚ğ‹–‰Â
+                // ãƒœã‚¿ãƒ³ã‚’æœ‰åŠ¹åŒ–ã—ã€å†é€ä¿¡ã‚’è¨±å¯
                 $button.attr('disabled', false);
                   window.location.href = 'bingo_openinput.php?id=' + newid;
             },
             /**
-            * Ajax’ÊM‚ª¸”s‚µ‚½ê‡‚ÉŒÄ‚Ño‚³‚ê‚éƒƒ\ƒbƒh
+            * Ajaxé€šä¿¡ãŒå¤±æ•—ã—ãŸå ´åˆã«å‘¼ã³å‡ºã•ã‚Œã‚‹ãƒ¡ã‚½ãƒƒãƒ‰
             */
             error: function(XMLHttpRequest, textStatus, errorThrown)
             {
@@ -49,7 +49,7 @@ $(document).ready(function()
             }
         });
         
-        //ƒTƒuƒ~ƒbƒgŒãAƒy[ƒW‚ğƒŠƒ[ƒh‚µ‚È‚¢‚æ‚¤‚É‚·‚é
+        //ã‚µãƒ–ãƒŸãƒƒãƒˆå¾Œã€ãƒšãƒ¼ã‚¸ã‚’ãƒªãƒ­ãƒ¼ãƒ‰ã—ãªã„ã‚ˆã†ã«ã™ã‚‹
         return false;
 
     });

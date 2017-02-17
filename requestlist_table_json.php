@@ -42,7 +42,7 @@ foreach($allrequest as $value ){
         $songfilename = '<b>'.htmlspecialchars('【ＢＧＶ】').'</b><br>'.$songfilename;
     }
     if($value['nowplaying'] === '再生中'){
-    $onerequset += array("filename" => '<div '.$playingid.' class="idmove" > '.  $songfilename.'</div><a name="nowplayinghere" class="nowplayinghere" >&nbsp</a>');
+    $onerequset += array("filename" => '<div '.$playingid.' class="idmove" > '.  $songfilename.'<a name="nowplayinghere" class="nowplayinghere" >&nbsp</a></div>');
     }else{
     $onerequset += array("filename" => '<div '.$playingid.' class="idmove" > '.  $songfilename.'</div>');
     }
@@ -217,6 +217,12 @@ EOD;
     if($value['nowplaying'] === '再生中'){
         if($value['kind'] === 'カラオケ配信' || $value['kind'] === '動画_別プ' ){ 
         $songstop ='<button type="button" class="btn btn-default" onClick=\'song_end(this,'.$value["id"].');return false;\' >曲停止</button>';
+        }
+    }
+    // 曲開始ボタン
+    if($value['nowplaying'] === '再生開始待ち'){
+        if($value['kind'] === '動画'  ){ 
+        $songstop ='<button type="button" class="btn btn-default" onClick=\'song_start(this,'.$value["id"].');return false;\' >曲開始</button>';
         }
     }
     
