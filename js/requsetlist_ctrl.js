@@ -163,6 +163,24 @@ function song_end(myel, id){
   return false;
 }
 
+function song_start(myel, id){
+  var url;
+  var table = $('#request_table').DataTable();
+  
+  myel.setAttribute('disabled', true);
+  url = "playerctrl_portal.php?songstart=1";
+  var request = createXMLHttpRequest();
+  request.open("GET", url, true);
+  request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == 200) {
+          table.ajax.reload();
+          myel.setAttribute('disabled', false);
+      }
+  }
+  request.send("");
+  return false;
+}
+
 // コメント編集および削除modal表示時のリロード抑制
 $(function () {
         $('#request_table').on('show.bs.modal', '.modal', function (event) {
