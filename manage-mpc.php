@@ -626,7 +626,7 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
       $json = file_get_html_with_retry($jsonurl, 5);
       if($json != false){
           $decode = json_decode($json, true);
-          if($decode != NULL){
+          if($decode != NULL && isset($decode{'results'}{'0'})){
             if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
                 $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
                 $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
@@ -640,8 +640,7 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
           // logtocmd $jsonurl;
           $json = file_get_html_with_retry($jsonurl, 5);
           $decode = json_decode($json, true);
-          var_dump( $decode);
-          if( isset($decode{'results'}{'0'}{'name'} ) return false;
+          if( !isset($decode{'results'}{'0'}{'name'}) ) return false;
           $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
           $filepath_utf8= $filepath;
           $filepath = mb_convert_encoding($filepath,"cp932");
@@ -667,7 +666,7 @@ function start_song($db,$id,$addplaytimes = 0){
     
     $filepath = get_fullfilename($row["fullpath"],$row["songfile"],$filepath_utf8);
     if( $filepath === false){
-       logtocmd($word."ファイルが見つかりませんでした、Skipします");
+       logtocmd($word."<start_song>ファイルが見つかりませんでした、Skipします");
        return false;
     }
     // var_dump($row);
@@ -1024,16 +1023,15 @@ while(1){
        $ft = check_filetype ($db,$l_id);
        if( $ft !== 3){
            $filepath = get_fullfilename($l_fullpath,$word,$filepath_utf8);
-           if($filepath === false ){
-               logtocmd($word."ファイルが見つかりませんでした、Skipします");
-               continue;
-           }
     //logtocmd "Debug filepath: $filepath\r\n";
        }else {
             // logtocmd $l_kind;
             $filepath = $l_fullpath;
             $filepath_utf8= $filepath;
-        }
+       }
+       if($filepath === false ){
+           logtocmd($word."ファイルが見つかりませんでした、Skipします\nファイルが入ったHDDが認識しなくなっているかもしれません");
+       }else{
            
            // 拡張子をチェックしてPlayerを選択
            $filetype = check_filetype ($db,$l_id);
@@ -1072,7 +1070,8 @@ while(1){
            }
            //logtocmd 'running check finished 終了'."\n";
        
-        }
+        } // if($filepath === false )
+        } // if( (strcmp ($l_kind , "カラオケ配信") === 0)  && ($loopflg != 1 ))
 
 
 
