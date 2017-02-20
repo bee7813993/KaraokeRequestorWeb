@@ -640,6 +640,8 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
           // logtocmd $jsonurl;
           $json = file_get_html_with_retry($jsonurl, 5);
           $decode = json_decode($json, true);
+          var_dump( $decode);
+          if( isset($decode{'results'}{'0'}{'name'} ) return false;
           $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
           $filepath_utf8= $filepath;
           $filepath = mb_convert_encoding($filepath,"cp932");
@@ -664,6 +666,10 @@ function start_song($db,$id,$addplaytimes = 0){
     }
     
     $filepath = get_fullfilename($row["fullpath"],$row["songfile"],$filepath_utf8);
+    if( $filepath === false){
+       logtocmd($word."ファイルが見つかりませんでした、Skipします");
+       return false;
+    }
     // var_dump($row);
     $filetype = check_filetype ($db,$id);
     if( $filetype == 2 ){
@@ -785,6 +791,8 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
        }
        if($stat === 7 ){
            break;
+       }else if($stat === 4 ){
+           break; //再生済
        }
        
        // MPCの状態取得3回チャレンジする
@@ -1016,6 +1024,10 @@ while(1){
        $ft = check_filetype ($db,$l_id);
        if( $ft !== 3){
            $filepath = get_fullfilename($l_fullpath,$word,$filepath_utf8);
+           if($filepath === false ){
+               logtocmd($word."ファイルが見つかりませんでした、Skipします");
+               continue;
+           }
     //logtocmd "Debug filepath: $filepath\r\n";
        }else {
             // logtocmd $l_kind;

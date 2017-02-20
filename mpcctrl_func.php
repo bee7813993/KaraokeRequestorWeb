@@ -132,7 +132,7 @@ function volume_fadeout(){
     for($c_volume = $volume ; $c_volume > 0 ; $c_volume -= $delta_volume){
     // print $c_volume;
         set_volume($c_volume);
-        usleep(1);
+        usleep(100000);
     }
     return $volume;
 }
