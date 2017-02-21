@@ -56,7 +56,7 @@ if(strlen($value['comment']) === 0){
     $showcommentblock = '<a href="#" data-toggle="modal" class="commentmodallink" data-target="#comment_modal_'.$value['id'].'"  title="このエリアを押すことでコメントにレスを付けたり編集したりできます">'.nl2br(htmlspecialchars($value['comment']))."</a>\n";
 }    
     $comment_pf = <<<EOD
-<div style="position: relative;width:100%%;height:100%%;min-height: 1em;">
+<div style="position: relative;width:100%%;min-height: 1em;">
 %s 
 <!-- 2.モーダルの配置 -->
 <div class="modal" id="comment_modal_%s" tabindex="-1" >
@@ -102,7 +102,7 @@ EOD;
 
     $comment = sprintf($comment_pf, $showcommentblock, $value['id'], $value['comment'], $value['id'],   nl2br(htmlspecialchars(returnusername($allrequest))), $value['id']);
 
-if($usebingo){
+if($usebingo &&  $value['nowplaying'] !== '未再生'){
     require_once 'binngo_func.php';
     $bingoinfo = new SongBingo();
     $bingoinfo->initbingodb('songbingo.db'); 

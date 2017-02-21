@@ -36,7 +36,7 @@ class SongBingo {
         $firstnum = true;
         $arraynum = count($textarray);
         if($arraynum <= $this->bingomax){
-        print 'come lower';
+        // print 'come lower';
           $finished = true;
           $firstnum = true;
           $numbers = range(1, $this->bingomax);
@@ -46,7 +46,7 @@ class SongBingo {
             // bingoの数75個割り当て
             foreach($textarray as $condtext ){
             print '<hr>';
-            var_dump($numbers);
+            // var_dump($numbers);
                 $word = trim($condtext);
                 if(strlen($word) == 0) continue;
                 $result_array[] = array( 'num' => $b_num, 'word' => $word);
@@ -56,7 +56,7 @@ class SongBingo {
                 // 
             }
             $firstnum = false;
-            print count($result_array).' ';
+            print count($result_array).'個登録 ';
             if(count($result_array) >= $this->bingomax ) $finished = false;
           }
         }else{
@@ -79,7 +79,7 @@ class SongBingo {
                     $b_num = array_pop($numbers);
                 }
             }
-            print count($result_array).' ';
+            print count($result_array).'個登録 ';
             if(count($result_array) >= $arraynum  ) $finished = false;
           }
         }
@@ -150,9 +150,11 @@ class SongBingo {
             }
             // fetch loop
             $numberlist = array();
+            $idlist = array();
             $lastdata = null;
             while ($data = $select->fetch(PDO::FETCH_ASSOC)) {
                 $numberlist[] = $data['number'];
+                $idlist[] = $data['reqid'];
                 $lastdata = $data;
             }
             $result[] = array($lastdata['requirement'],$numberlist,$lastdata['opened']);
@@ -177,12 +179,14 @@ class SongBingo {
             }
             // fetch loop
             $requirementlist = array();
+            $idlist = array();
             $opednum = 0;
             while ($data = $select->fetch(PDO::FETCH_ASSOC)) {
                 $requirementlist[] = $data['requirement'];
                 $opednum +=  $data['opened'];
+                $idlist[] = $data['reqid'];
             }
-            $result[] = array($onerequirement["number"],$requirementlist,$opednum);
+            $result[] = array($onerequirement["number"],$requirementlist,$opednum,$idlist);
         }
         return $result;
     }

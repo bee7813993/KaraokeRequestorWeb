@@ -92,7 +92,7 @@ try {
 	echo 'Connection failed: ' . $e->getMessage();
 }
 
-if($request[0]['nowplaying'] === '再生中' ) {
+if($request[0]['nowplaying'] === '再生中' || $request[0]['nowplaying'] === '再生開始待ち' ) {
    $new_nowplaying = '変更中';
 }else{
    $new_nowplaying = $request[0]['nowplaying'];

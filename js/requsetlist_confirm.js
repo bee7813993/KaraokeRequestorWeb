@@ -1,6 +1,6 @@
 $(document).ready(function()
 {
-    $("form#requestconfirm").submit(function()
+    $("form#requestconfirm").submit(function(event)
     {
         var newid = "none";
         // HTMLでの送信をキャンセル

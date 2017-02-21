@@ -51,7 +51,9 @@ if(!empty($l_nextpage)){
     print '<META http-equiv="refresh" content="1; url='.$l_nextpage.'">'."\n";
     }
 ?>
-
+<?php 
+print_meta_header();
+?>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">

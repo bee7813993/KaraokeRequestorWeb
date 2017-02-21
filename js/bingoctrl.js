@@ -1,6 +1,6 @@
 $(document).ready(function()
 {
-    $("form.bingoinput").submit(function()
+    $("form.bingoinput").submit(function(event)
     {
         var newid = "none";
         // HTMLでの送信をキャンセル
