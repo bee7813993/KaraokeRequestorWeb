@@ -1,19 +1,19 @@
 <?php
 
 // URLを叩いて検索ワード候補リクエスト用URL生成
-function ansoninfo_gettitlelisturl($m,$q,$fullparam){
+function ansoninfo_gettitlelisturl($m,$q,$fullparam,$year = '', $genre=''){
     if(isset($fullparam)){
         $url="http://anison.info/data/".trim($fullparam,". \t\n\r\0\x0B");
     }else {
-        $urlbase="http://anison.info/data/n.php?m=%s&q=%s&year=&genre=";
-        $url=sprintf($urlbase,urlencode($m),$q);
+        $urlbase="http://anison.info/data/n.php?m=%s&q=%s&year=%s&genre=%s";
+        $url=sprintf($urlbase,urlencode($m),$q,$year,$genre);
     }
     return $url;
 }
 
 // 人物URLからローカルリスト出力URLの生成
 // 歌手名 http://localhost/search_anisoninfo.php?url=person/16363.html&kind=artist&order=
-function ansoninfo_getlocalurl_artist($link,$q = null, $selectid = null){
+function ansoninfo_getlocalurl_artist($link,$q = null, $selectid = null,$year='',$genre=""){
     $url="search_anisoninfo.php?url=".trim($link,". \t\n\r\0\x0B");
     if(!empty($q)){
       $url=$url.'&q='.$q;
@@ -21,7 +21,7 @@ function ansoninfo_getlocalurl_artist($link,$q = null, $selectid = null){
     if(!empty($selectid)){
       $url=$url.'&selectid='.$selectid;
     }
-      $url=$url."&kind=artist&order=";
+      $url=$url."&kind=artist&order=&year=".$year."&genre=".$genre;
     return $url;
 }
 
@@ -137,7 +137,7 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
             $artisturl ='';
             foreach($artistinfo as $ainfo){
                 $artisturl = $artisturl.'&nbsp;<a href="'.ansoninfo_getlocalurl_artist($ainfo->href,$ainfo->plaintext,$selectid).'">'.$ainfo->plaintext.'</a>';
-                $artist = preg_replace('/'.$ainfo->plaintext.'/','',$artist);
+                $artist = preg_replace('/'.preg_quote($ainfo->plaintext,'/').'/','',$artist);
             }
             }
             $value=$tr->find('td[headers=lyrics]',0);
@@ -199,7 +199,7 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
                 $titleinfo = $value->find( 'a' );
                 foreach($titleinfo as $ainfo){
                     $titleurl = $titleurl.'&nbsp;<a href="'.ansoninfo_getlocalurl_program($ainfo->href,$ainfo->plaintext,$selectid ).'">'.$ainfo->plaintext.'</a>';
-                    $program = preg_replace('/'.$ainfo->plaintext.'/','',$program);
+                    $program = preg_replace('/'.preg_quote($ainfo->plaintext,'/').'/','',$program);
                 }
             }
             $value=$tr->find('td[headers=oped]',0);
@@ -234,17 +234,23 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
 
 
 
-function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid = NULL)
+function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid = NULL,$year='',$genre='')
 {
    if(strcmp ('pro',$l_m) == 0)
    {    
     $nexturlbase = 'http://anison.info/data/';
 // 曲名からのファイル検索結果表示部分
     if(isset($list['searchword'])){
-        print "<p> ".$list['searchword']." の検索結果 </p>\n";
+        print "<p> ".$list['searchword'];
     }else{
-        print "<p> $l_q の検索結果 </p>\n";
+        print "<p> $l_q ";
     }
+    if(!empty($year))
+      print $year."年";
+    if(!empty($genre))
+      print "ジャンル：".$genre;
+    print " の検索結果 </p>\n";
+
     echo "<table id=\"searchlistresult\">";
     print "<thead>\n";
     print "<tr>\n";
@@ -286,18 +292,24 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
    echo "</table>"."\n";
         echo "<hr />\n";
         if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '前の50件';
             echo '</a> &nbsp;';
         }
         if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '次の50件';
             echo '</a> &nbsp;';
         }
     }elseif(strcmp ('person',$l_m) == 0)
     {
-        print "<p> $l_q の検索結果 </p>\n";
+        print "<p> $l_q ";
+        if(!empty($year))
+          print $year."年";
+        if(!empty($genre))
+          print "ジャンル：".$genre;
+        print " の検索結果 </p>\n";
+        
         echo "<table id=\"searchlistresult\">";
         print "<thead>\n";
         print "<tr>\n";
@@ -312,7 +324,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
            echo '<td class="searchname" >'."\n";
 
 
-           echo '<a href="'.ansoninfo_getlocalurl_artist($item['link'],$item['word'],$selectid).urlencode($l_order);
+           echo '<a href="'.ansoninfo_getlocalurl_artist($item['link'],$item['word'],$selectid,$year,$genre).urlencode($l_order);
            if(!empty($selectid) ) print '&selectid='.$selectid;
            echo '">'."\n";
            echo htmlspecialchars($item['word'])."\n";
@@ -331,12 +343,12 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
         echo "</table>"."\n";
         echo "<hr />\n";
         if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '前の50件';
             echo '</a> &nbsp;';
         }
         if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '次の50件';
             echo '</a> &nbsp;';
         }
@@ -366,12 +378,12 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
         print "</dl\">\n";
         echo "<hr />\n";
         if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '前の50件';
             echo '</a> &nbsp;';
         }
         if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '次の50件';
             echo '</a> &nbsp;';
         }
@@ -379,7 +391,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
     {
     $result_a = null;
         print "<p> $l_q の曲名候補 </p>\n";
-        echo "<table id=\"searchlistresult\">";
+        echo "<table id=\"searchlistresult\" class=\"table\" >";
         print "<thead>\n";
         print "<tr>\n";
         print "<th>曲名 </th>\n";
@@ -390,55 +402,93 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
         print "</thead>\n"; 
         print "<tbody>\n";
         foreach($list as $item){
-           if(!isset($item['songtitle'])) continue;
-           searchlocalfilename($item['songtitle'],$result_a);
-           $resulturl='search.php?searchword='.urlencode($item['songtitle']);
-           print "<tr>\n";
-           echo '<td class="searchname" >'."\n";
-           if(  $result_a["totalResults"] == 0){
-             echo ' <div >'.$item['songtitle'].'<br>検索結果  ⇒'.$result_a["totalResults"]."件</div>";
-           }else{
-                echo ' <div ><a href="'.$resulturl.'" >'.$item['songtitle'].'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
-           }
-           echo "</td>"."\n";
-           // 詳細ページ
-           echo '<td class="searchname" >'."\n";
-           $url="http://anison.info/data/".$item['songlink'];
-           echo '<a href="'.$url.'" target="_blank">'."\n";
-           echo '詳細情報'."\n";
-           echo '</a>'."\n";
-           echo "</td>"."\n";
-           // 歌手名 http://localhost/search_anisoninfo.php?url=person/16363.html&kind=artist&order=
-           echo '<td class="searchname" >'."\n";
-           $url=ansoninfo_getlocalurl_artist($item['artistlink'],$item['artist'],$selectid); // "search_anisoninfo.php?url=".$item['artistlink']."&kind=artist&q=".$l_q."&order=";
-           echo '<a href="'.$url.'" >'."\n";
-           echo $item['artist']."\n";
-           echo '</a>'."\n";
-           echo "</td>"."\n";
-           // 作品名 http://localhost/search_anisoninfo.php?url=program/16198.html&kind=program&order=
-           echo '<td class="searchname" >'."\n";
-           if(empty($item['titlelink'])){
-             print $item['title'].' '.$item['oped']."\n";;
-           }else{
-             $url=ansoninfo_getlocalurl_program($item['titlelink'],$item['title'],$selectid);
-             echo '<a href="'.$url.'" >'."\n";
-             echo $item['title'].' '.$item['oped']."\n";
-             echo '</a>'."\n";
-           }
-           echo "</td>"."\n";
-           print "</tr>\n";
+            $songtitles = variation_titlelist($item);
+            if(count($songtitles) == 0)continue;
+            foreach($songtitles as $checktitle){
+                searchlocalfilename($checktitle,$result_a);
+                $resulturl='search.php?searchword='.urlencode($checktitle);
+                if(!empty($selectid)) $resulturl=$resulturl.'&selectid='.$selectid;
+                if(strlen($checktitle) == 0 ) continue;
+                print "<tr>\n";
+                echo '<td class="resultcount" >'."\n";
+                if( $result_a["totalResults"] == 0){
+                    echo ' <div >'.$checktitle.'<br>検索結果  ⇒'.$result_a["totalResults"]."件</div>";
+                }else{
+                    echo ' <div ><a href="'.$resulturl.'" >'.$checktitle.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
+                }
+                if ( $result_a["totalResults"] > 100){
+                    $sword = $checktitle.' '.$item["title"];
+                    searchlocalfilename($sword,$result_a);
+                    $resulturl='search.php?searchword='.urlencode($sword);
+                    if(!empty($selectid)) $resulturl=$resulturl.'&selectid='.$selectid;
+                    if( $result_a["totalResults"] > 0){
+                        echo ' <div ><a href="'.$resulturl.'" >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
+                    }else {
+                        echo ' <div >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </div>';
+                    }
+                    $sword = $checktitle.' '.$item["artist"];
+                    searchlocalfilename($sword,$result_a);
+                    $resulturl='search.php?searchword='.urlencode($sword);
+                    if(!empty($selectid)) $resulturl=$resulturl.'&selectid='.$selectid;
+                    if( $result_a["totalResults"] > 0){
+                        echo ' <div ><a href="'.$resulturl.'" >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
+                    }else {
+                        echo ' <div >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </div>';
+                    }
+                }
+                echo "</td>"."\n";
+/*****
+                if(!isset($item['songtitle'])) continue;
+                searchlocalfilename($item['songtitle'],$result_a);
+                $resulturl='search.php?searchword='.urlencode($item['songtitle']);
+                print "<tr>\n";
+                echo '<td class="searchname" >'."\n";
+                if(  $result_a["totalResults"] == 0){
+                  echo ' <div >'.$item['songtitle'].'<br>検索結果  ⇒'.$result_a["totalResults"]."件</div>";
+                }else{
+                     echo ' <div ><a href="'.$resulturl.'" >'.$item['songtitle'].'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
+                }
+                echo "</td>"."\n";
+******/
+                // 詳細ページ
+                echo '<td class="searchname" >'."\n";
+                $url="http://anison.info/data/".$item['songlink'];
+                echo '<a href="'.$url.'" target="_blank">'."\n";
+                echo '詳細情報'."\n";
+                echo '</a>'."\n";
+                echo "</td>"."\n";
+                // 歌手名 http://localhost/search_anisoninfo.php?url=person/16363.html&kind=artist&order=
+                echo '<td class="searchname" >'."\n";
+                $url=ansoninfo_getlocalurl_artist($item['artistlink'],$item['artist'],$selectid); // "search_anisoninfo.php?url=".$item['artistlink']."&kind=artist&q=".$l_q."&order=";
+                echo '<a href="'.$url.'" >'."\n";
+                echo $item['artist']."\n";
+                echo '</a>'."\n";
+                echo "</td>"."\n";
+                // 作品名 http://localhost/search_anisoninfo.php?url=program/16198.html&kind=program&order=
+                echo '<td class="searchname" >'."\n";
+                if(empty($item['titlelink'])){
+                  print $item['title'].' '.$item['oped']."\n";;
+                }else{
+                  $url=ansoninfo_getlocalurl_program($item['titlelink'],$item['title'],$selectid);
+                  echo '<a href="'.$url.'" >'."\n";
+                  echo $item['title'].' '.$item['oped']."\n";
+                  echo '</a>'."\n";
+                }
+                echo "</td>"."\n";
+                print "</tr>\n";
+             }
         }
         print "</tbody>\n";
         echo "</table>"."\n";
         echo "<hr />\n";
         print "<p>";
         if(isset($list["prevlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["prevlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '前の100件';
             echo '</a> &nbsp;';
         }
         if(isset($list["nextlink"])){
-            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'">'."\n";
+            echo '<a href="search_anisoninfo_list.php?fullparam='.urlencode($list["nextlink"]).'&m='.$l_m.'&q='.$l_q.'&order='.urlencode($l_order).'&year='.$year.'&genre='.$genre.'">'."\n";
             echo '次の100件';
             echo '</a> &nbsp;';
         }
@@ -446,10 +496,41 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
     }
 }
 
+function variation_titlelist ($onelist){
+  $songtitles = array();
+  if(!isset($onelist["songtitle"]) ) return $songtitles;
+  $orgsongtitle = $onelist["songtitle"];
+
+  // 元のワード
+  $songtitles[]=$orgsongtitle;
+  // 記号文字を排除
+  $songtitle_tmp= replace_obscure_words($orgsongtitle);
+  $same = 0;
+  foreach($songtitles as $checktitle){
+      if(strcmp($checktitle ,$songtitle_tmp) == 0) $same = 1;
+  }
+  if($same === 0) $songtitles[] = $songtitle_tmp;
+  // 全部全角にしたときのチェック
+  $songtitle_tmp = mb_convert_kana($orgsongtitle,"A");
+  $same = 0;
+  foreach($songtitles as $checktitle){
+      if(strcmp($checktitle ,$songtitle_tmp) == 0) $same = 1;
+  }
+  if($same === 0) $songtitles[] = $songtitle_tmp;
+  // 全部半角にしたときのチェック
+  $songtitle_tmp = mb_convert_kana($orgsongtitle,"a");
+  $same = 0;
+  foreach($songtitles as $checktitle){
+      if(strcmp($checktitle ,$songtitle_tmp) == 0) $same = 1;
+  }
+  if($same === 0) $songtitles[] = $songtitle_tmp;
+  return $songtitles;
+}
+
 function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
 {
     // Table header
-    echo "<table id=\"searchlistresult\">";
+    echo "<table id=\"searchlistresult\" class=\"table\" >";
     print "<thead>\n";
     print "<tr>\n";
     print "<th>曲名検索件数 </th>\n";
@@ -462,6 +543,10 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
     print "<tbody>\n";  
 
     foreach($list as $value){
+        $songtitles = variation_titlelist($value);
+        if(count($songtitles) == 0)continue;
+
+/****
         if(!isset($value["songtitle"]) ) continue;
         $songtitles = array();
         $songtitle = replace_obscure_words($value["songtitle"]);
@@ -489,6 +574,7 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
         if($same === 0) {
            $songtitles[] = $songtitle_tmp;
         }
+*****/
 
         foreach($songtitles as $checktitle){
             if(strlen($checktitle) == 0 ) continue;
@@ -503,6 +589,26 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
                     echo ' <div >'.$checktitle.'<br>検索結果  ⇒'.$result_a["totalResults"]."件</div>";
                 }else{
                     echo ' <div ><a href="'.$resulturl.'" >'.$checktitle.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
+                }
+                if ( $result_a["totalResults"] > 100){
+                    $sword = $checktitle.' '.$value["title"];
+                    searchlocalfilename($sword,$result_a);
+                    $resulturl='search.php?searchword='.urlencode($sword);
+                    if(!empty($selectid)) $resulturl=$resulturl.'&selectid='.$selectid;
+                    if( $result_a["totalResults"] > 0){
+                        echo ' <div ><a href="'.$resulturl.'" >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
+                    }else {
+                        echo ' <div >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </div>';
+                    }
+                    $sword = $checktitle.' '.$value["artist"];
+                    searchlocalfilename($sword,$result_a);
+                    $resulturl='search.php?searchword='.urlencode($sword);
+                    if(!empty($selectid)) $resulturl=$resulturl.'&selectid='.$selectid;
+                    if( $result_a["totalResults"] > 0){
+                        echo ' <div ><a href="'.$resulturl.'" >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
+                    }else {
+                        echo ' <div >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </div>';
+                    }
                 }
                 echo "</td>"."\n";
                 echo '<td class="songtitle" >'."\n";

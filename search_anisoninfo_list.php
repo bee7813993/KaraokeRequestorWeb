@@ -30,7 +30,15 @@ if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
+$year='';
+if(array_key_exists("year", $_REQUEST)) {
+    $year = $_REQUEST["year"];
+}
 
+$genre='';
+if(array_key_exists("genre", $_REQUEST)) {
+    $genre = $_REQUEST["genre"];
+}
 
 // URLを叩いて検索ワード候補をarrayで返す。
 function ansoninfo_gettitlelist_list($url,$l_m){
@@ -303,10 +311,11 @@ if(!isset($l_fullparam) && (!isset($l_m) || !isset($l_q))  ) {
     echo "<p> 検索ワードと検索種類が指定されていません </p>";
 }else {
 // 検索ワード候補取得部分
-    $list = ansoninfo_gettitlelist_list(ansoninfo_gettitlelisturl($l_m,$l_q,$l_fullparam),$l_m);
+
+    $list = ansoninfo_gettitlelist_list(ansoninfo_gettitlelisturl($l_m,$l_q,$l_fullparam,$year,$genre),$l_m);
 
    //var_dump($list);
-   anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order,$selectid);
+   anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order,$selectid,$year,$genre);
 
 
 }

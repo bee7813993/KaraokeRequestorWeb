@@ -177,29 +177,38 @@ die();
   <h3>anison.info連携検索モード </h3>
  
 <FORM name=f action=search_anisoninfo_list.php method=get>
-<INPUT type=radio value=song name=m id="song" "><label for="song">曲 (よみがなの一部でOK)</label>
-<INPUT type=radio checked value=pro name=m id="pro" "><label for="pro">作品</label>
-<INPUT type=radio value=person name=m id="person" "><label for="person">人物</label>
-<INPUT type=radio value=mkr name=m id="mkr" "><label for="mkr">制作(ブランド)</label>
+  <div class="form-group">
+   <div class="form-check form-check-inline">
+    <label class="form-check-label">
+        <INPUT class="form-check-input" type=radio value=song name=m id="song" >曲 
+    </label>
+    <label class="form-check-label">
+        <INPUT class="form-check-input" type=radio checked value=pro name=m id="pro" >作品
+    </label>
+    <label class="form-check-label">
+        <INPUT  class="form-check-input" type=radio value=person name=m id="person" >人物
+    </label>
+    <label class="form-check-label">
+        <INPUT  class="form-check-input" type=radio value=mkr name=m id="mkr" >制作(ブランド)
+    </label>
 <!---
-<INPUT type=radio value=rec name=m id="rec" "><label for="rec">音源</label>
-<INPUT type=radio value=pgrp name=m id="pgrp" "><label for="pgrp">関連情報</label>
---->
-<BR />
-<INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
-<!---
-  <div> 結果表示順(同じ検索ワード内) <br />
-  <select name="order" class="searchtextbox" >
-  <option value="sort=size&ascending=0" <?php print selectedcheck("sort=size&ascending=0",$l_order); ?> >サイズ順(大きい順)</option>
-  <option value="sort=path&ascending=1" <?php print selectedcheck("sort=path&ascending=1",$l_order); ?> >フォルダ名(降順 A→Z)</option>
-  <option value="sort=path&ascending=0" <?php print selectedcheck("sort=path&ascending=0",$l_order); ?> >フォルダ名(昇順 Z→A)</option>
-  <option value="sort=name&ascending=1" <?php print selectedcheck("sort=name&ascending=1",$l_order); ?> >ファイル名(降順 A→Z)</option>
-  <option value="sort=name&ascending=0" <?php print selectedcheck("sort=name&ascending=0",$l_order); ?> >ファイル名(昇順 Z→A)</option>
-  <option value="sort=date_modified&ascending=0" <?php print selectedcheck("sort=date_modified&ascending=0",$l_order); ?> >日付(新しい順)</option>
-  <option value="sort=date_modified&ascending=1" <?php print selectedcheck("sort=date_modified&ascending=1",$l_order); ?> >日付(古い順)</option>
-  </select>
+  <div class="form-check form-check-inline">
+    <label class="form-check-label">
+        <INPUT  class="form-check-input" type=radio value=rec name=m id="rec" "><label for="rec">音源</label>
+    </label>
+  </div>
+  <div class="form-check form-check-inline">
+    <label class="form-check-label">
+        <INPUT  class="form-check-input" type=radio value=pgrp name=m id="pgrp" "><label for="pgrp">関連情報</label>
+    </label>
   </div>
 --->
+   </div>
+  </div>
+  <div class="form-group">
+      <label >検索ワード (よみがなの一部でOK)<small>空白で年代指定でその年全検索</small> </label>
+      <INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+  </div>
 <?php
 if(!empty($selectid) ) {
   print '<input type="hidden" name="selectid" value="';
@@ -207,6 +216,38 @@ if(!empty($selectid) ) {
   print '" />';
 }
 ?>
+<div class="form-group form-inline">
+  <div class="form-group ">
+      <label > 放映／発売年指定 </label>
+      <select class="form-control" name="year" >
+          <option value="" > 放映／発売年指定 </option>
+<?php
+  $year = date('Y');
+  for( $i = $year + 1; $i >= 1953 ; $i-- ){
+      print '<option value="'.$i.'"> '.$i.' </option>';
+  }
+?>
+      </select>
+  </div>
+  <div class="form-group">
+      <label > ジャンル指定 </label>
+      <select class="form-control" name="genre" >';
+      <option value="" selected>ジャンル指定 </option>
+      <option value="anison">アニメーション/特撮/ゲーム</option>
+      <option value="anime">アニメーション</option>
+      <option value="tv">　テレビアニメーション</option>
+      <option value="vd">　ビデオアニメーション</option>
+      <option value="mv">　劇場アニメーション</option>
+      <option value="wa">　Webアニメーション</option>
+      <option value="sfx">テレビ特撮'</option>
+      <option value="game">ゲーム</option>
+      <option value="radio">ラジオ</option>
+      <option value="wradio">Webラジオ</option>
+      <option value="other">その他</option>
+      </select>
+  </div>
+</div>
+
 <INPUT type=submit value="検索" class="btn btn-default "><BR/ ><BR />
 
 <span id="selectTag">
