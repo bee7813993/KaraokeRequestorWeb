@@ -1,6 +1,8 @@
 <?php
 require_once 'commonfunc.php';
-
+if(array_key_exists("showid", $_REQUEST)) {
+    $showid = $_REQUEST["showid"];
+}
 ?>
 
 <!doctype html>
@@ -10,8 +12,9 @@ require_once 'commonfunc.php';
 print_meta_header();
 
 $showid='none';
-if(array_key_exists("showid", $_REQUEST)) {
-    $showid = $_REQUEST["showid"];
+if(array_key_exists("username", $_REQUEST)) {
+    $username = $_REQUEST["username"];
+    setcookie("YkariUsername", $username, time() + 5184000 );
 }
 
 ?>

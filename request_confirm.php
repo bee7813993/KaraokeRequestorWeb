@@ -59,9 +59,12 @@ if(is_numeric($selectid)){
     $select->closeCursor();
 }
 
-function pickupsinger($rt)
+function pickupsinger($rt, $moreuser = "")
 {
    $singerlist = array();
+   if(!empty($moreuser)){
+       $singerlist[] = $moreuser;
+   }
    foreach($rt as $row)
    {
        $foundflg = 0;
@@ -218,7 +221,12 @@ $nanasyname = $config_ini["nonameusername"];
 
 </head>
 <body>
-
+<?php 
+$YkariUsername = "";
+if(array_key_exists("YkariUsername", $_COOKIE)) {
+    $YkariUsername = $_COOKIE["YkariUsername"];
+}
+?>
 <div class="container">
 <form method="post" action="exec.php" id="requestconfirm">
 <div class="form-group">
@@ -284,13 +292,19 @@ if(is_numeric($selectid)){
   $beforesinger = $selectrequest[0]['singer'];
 }
 $selectedcounter = 0;
-$singerlist = pickupsinger($allrequest);
-foreach($singerlist as $singer){
+$singerlist = pickupsinger($allrequest,$YkariUsername);
+
+foreach($singerlist as $singer)
 {
   print "<option value=\"";
   print $singer;
   print "\"";
-  if( selectedcheck($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
+  if(!empty($YkariUsername)){
+      if($singer === $YkariUsername){
+         print " selected ";
+         $selectedcounter = $selectedcounter + 1 ;
+      }
+  }else if( selectedcheck($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
   {
       print " selected ";
       $selectedcounter = $selectedcounter + 1 ;
@@ -299,7 +313,7 @@ foreach($singerlist as $singer){
   print htmlspecialchars($singer);
   print "</option>";
 }
-}
+
 ?>
 
 

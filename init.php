@@ -474,6 +474,16 @@ print 'value="'.urldecode($config_ini["BGVCMDEND"]).'"';
     </label>
   </div>
   <div class="form-group">
+    <label title="検索結果がこの数を超えた場合、作品名や歌手名と一緒に検索結果を表示する" > anison.info 詳細検索表示件数 <small> 0で1件でもあれば表示</small> </label>
+    <?php 
+        $anisoninfomanynumber = 15;
+        if(array_key_exists("anisoninfomanynumber",$config_ini)) {
+           $anisoninfomanynumber = $config_ini["anisoninfomanynumber"];
+        }
+    ?>
+    <input type="text" name="anisoninfomanynumber" size="100" class="form-control" value="<?php echo $anisoninfomanynumber; ?>" />
+  </div>
+  <div class="form-group">
     <label >
     コメントサーバー設定 <br />
     <small> ローカルサーバー http://localhost/cms/r.php ,リモートサーバー http://xsd.php.xdomain.jp/r2.php </small>

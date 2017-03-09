@@ -22,6 +22,9 @@ $(document).ready(function()
                 return false;
             }
         }
+        if (newname == "" ){
+            newname = existname;
+        }
         
                 /**
                  * Ajax通信メソッド
@@ -44,9 +47,9 @@ $(document).ready(function()
             success : function( data ) {
                 try{
                   newid = JSON.parse(data);
-                  window.location.href = 'requestlist_only.php?showid=' + newid.newid;
+                  window.location.href = 'requestlist_only.php?username=' + newname + '&showid=' + newid.newid;
                 } catch(e){
-                  window.location.href = 'requestlist_only.php' ;
+                  window.location.href = 'requestlist_only.php?username=' + newname;
                 }
             },
             // 応答後
@@ -55,9 +58,9 @@ $(document).ready(function()
                 $button.attr('disabled', false);
                 try{
                   newid = JSON.parse(data);
-//                  window.location.href = 'requestlist_only.php?showid=' + newid.newid;
+//                  window.location.href = 'requestlist_only.php?username=' + newname + '&showid=' + newid.newid;
                 } catch(e){
-                  // window.location.href = 'requestlist_only.php' ;
+                  // window.location.href = 'requestlist_only.php?username=' + newname;
                 }
             },
             /**

@@ -405,6 +405,7 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
             $songtitles = variation_titlelist($item);
             if(count($songtitles) == 0)continue;
             foreach($songtitles as $checktitle){
+                global $config_ini;
                 searchlocalfilename($checktitle,$result_a);
                 $resulturl='search.php?searchword='.urlencode($checktitle);
                 if(!empty($selectid)) $resulturl=$resulturl.'&selectid='.$selectid;
@@ -416,7 +417,11 @@ function anisoninfo_display_middlelist($list,$l_m,$l_q,$l_order = NULL,$selectid
                 }else{
                     echo ' <div ><a href="'.$resulturl.'" >'.$checktitle.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
                 }
-                if ( $result_a["totalResults"] > 100){
+                $limno = 15;
+                if(array_key_exists('anisoninfomanynumber',$config_ini) ){
+                   $limno = $config_ini['anisoninfomanynumber'];
+                }
+                if ( $result_a["totalResults"] > $limno ){
                     $sword = $checktitle.' '.$item["title"];
                     searchlocalfilename($sword,$result_a);
                     $resulturl='search.php?searchword='.urlencode($sword);
@@ -579,6 +584,8 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
         foreach($songtitles as $checktitle){
             if(strlen($checktitle) == 0 ) continue;
             if(empty($showallresult)){
+                global $config_ini;
+                
                 searchlocalfilename($checktitle,$result_a);
                 $resulturl='search.php?searchword='.urlencode($checktitle);
                 if(!empty($selectid)) $resulturl=$resulturl.'&selectid='.$selectid;
@@ -590,7 +597,11 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
                 }else{
                     echo ' <div ><a href="'.$resulturl.'" >'.$checktitle.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </a></div>';
                 }
-                if ( $result_a["totalResults"] > 100){
+                $limno = 15;
+                if(array_key_exists('anisoninfomanynumber',$config_ini) ){
+                   $limno = $config_ini['anisoninfomanynumber'];
+                }
+                if ( $result_a["totalResults"] > $limno ){
                     $sword = $checktitle.' '.$value["title"];
                     searchlocalfilename($sword,$result_a);
                     $resulturl='search.php?searchword='.urlencode($sword);
