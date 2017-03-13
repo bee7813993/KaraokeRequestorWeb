@@ -88,8 +88,9 @@ function foobar_song_stop(){
       global  $foobarctrlurl;
       
       songnext();
-      $requesturl=$foobarctrlurl."?cmd=Stop&param1=0";
-      $res = file_get_html_with_retry($requesturl,1);
+      $requesturl=$foobarctrlurl."?cmd=PlayOrPause&param1=0";
+      // $res = file_get_html_with_retry($requesturl,1);
+      // error_log(print_r($res,true),"3","C:/xampp/log/debug.log");
       return $res;
 }
 
