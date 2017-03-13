@@ -15,7 +15,7 @@ function readconfig_array()
     // set initial value
     if(!array_key_exists("dbname", $config_ini)){
         $dbname = 'request.db';
-        $config_ini = array_merge($config_ini,array("dbname" => $dbname));
+        $config_ini = array_merge($config_ini,array("dbname" => urldecode($dbname)));
     }
     if(!array_key_exists("playmode", $config_ini)){
         $playmode = 3;
@@ -169,7 +169,7 @@ function readconfig(
     $config_ini = readconfig_array();
     
     if ( $dbname !== 'none' )
-       $dbname = $config_ini["dbname"];
+       $dbname = urldecode($config_ini["dbname"]);
     if ( $playmode !== 'none' )
         $playmode = $config_ini["playmode"];
     if ( $playerpath !== 'none' )

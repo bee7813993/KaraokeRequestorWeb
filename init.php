@@ -174,7 +174,7 @@ print '</pre>';
   <form name="allconfig" method="post" action="init.php">
   <div class="form-group">
     <label>DBファイル名</label>
-    <input type="text" name="dbname" id="dbname" class="form-control" value=<?php echo  $config_ini["dbname"]; ?> >
+    <input type="text" name="dbname" id="dbname" class="form-control" value=<?php echo  urldecode($config_ini["dbname"]); ?> >
   </div>
   
   <div class="form-group">
