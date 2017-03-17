@@ -49,13 +49,14 @@ if(array_key_exists("uploaddfilename",$_REQUEST)) {
 }else if(array_key_exists("userfile",$_FILES)){
     $filename=basename($_FILES['userfile']['name']);
 }
-    $filename=basename($_FILES['userfile']['name']);
+    $filename=($_FILES['userfile']['name']);
     $filename = str_replace(array('/','\\', '?', ':', '*', '\"', '>', '<', '|'),array('／','￥','？','：','＊','”','＞','＜','｜'),$filename);
 
 $uploaddir = urldecode($config_ini["downloadfolder"]);
 $uploadfile = $uploaddir  .$filename;
 
 //$res = rename($_FILES['userfile']['tmp_name'], mb_convert_encoding($uploadfile,"SJIS-win","UTF8"));
+if(is_writable($uploaddir)){
 $res = move_uploaded_file($_FILES['userfile']['tmp_name'],mb_convert_encoding($uploadfile,"SJIS-win","UTF8"));
 if($res)
 {
@@ -68,6 +69,24 @@ if($res)
     print '</pre>';
     print '<a  class="btn btn-default" href="file_uploader.php" > 戻る </a>';
     die();
+}
+}else{
+    //拡張子
+    $ext = substr($_FILES['userfile']['name'], strrpos($filename, '.') + 1);
+    $uploadfile = $_FILES['userfile']['tmp_name'].'.'.$ext;
+    $res = move_uploaded_file($_FILES['userfile']['tmp_name'],$uploadfile);
+    if($res === FALSE){
+    echo "アップロードに失敗しました\n";
+    print '<pre>';
+    print_r($_FILES);
+    print '移動予定先ファイル:'.$uploadfile;
+    print '</pre>';
+    print '<a  class="btn btn-default" href="file_uploader.php" > 戻る </a>';
+    die();
+    }
+    
+    print '<p>' .$uploaddir.'への書き込みができないため一時ファイル'. $uploadfile.'をそのまま使用します</p>';
+   
 }
 
 
