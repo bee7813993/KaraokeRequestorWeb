@@ -875,6 +875,18 @@ function getcurrentid(){
     return $nowid;
 }
 
+function countafterplayingitem(){
+    global $db;
+    $curid = getcurrentid();
+    if($curid === 'none') return 0;
+    $sql = 'SELECT * FROM requesttable  WHERE reqorder >= (SELECT reqorder FROM requesttable WHERE id = '.$curid.');' ;
+    $select = $db->query($sql);
+    $items = $select->fetchAll(PDO::FETCH_ASSOC);
+    $select->closeCursor();
+    //var_dump($currentsong);
+    return count($items);
+}
+
 function selectedcheck($definevalue, $checkvalue){
     if(strcmp($definevalue,$checkvalue) == 0) {
         return 'selected';

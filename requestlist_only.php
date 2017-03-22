@@ -16,7 +16,6 @@ if(array_key_exists("username", $_REQUEST)) {
     $username = $_REQUEST["username"];
     setcookie("YkariUsername", $username, time() + 5184000 );
 }
-
 ?>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta http-equiv="Pragma" content="no-cache">
@@ -47,14 +46,36 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
-var showfirst = 1;
+<?php
+$adddnum="";
+if(array_key_exists( "requestlist_num", $config_ini) ) {
+    if( $config_ini["requestlist_num"] !== 0 ){
+        $adddnum = '&num='.$config_ini["requestlist_num"];
+    }
+}
+?>
 
+var showfirst = 1;
 $(function(requestTable_t) { $("#request_table").dataTable({
+  "processing": true,
+  "serverSide": true,
      "ajax": {
          "url": "requestlist_table_json.php",
+         "type": "POST",
          "dataType": 'json',
-         "dataSrc": "",
+         "dataSrc": "data",
+         "data": {},
 <?php
+$currentplay = countafterplayingitem();
+$displayStart = 0;
+if($currentplay !== 0 ){
+    $diffnoplayitem = $currentplay - $config_ini["requestlist_num"];
+    if($diffnoplayitem > 0 ){
+        $displayStart = $diffnoplayitem;
+    }
+}
+
+
 if($showid != 'none' ) {
 print '             "complete" : function(settings) {'."\n";
              //alert( 'DataTables has redrawn the table' );
@@ -70,7 +91,9 @@ print '         },'."\n";
 }
 ?>
      },
-
+     "bPaginate" : true,
+     "lengthMenu": [[<?php echo $config_ini["requestlist_num"];?>, -1], [<?php echo $config_ini["requestlist_num"];?>, "ALL"]],
+     "displayStart": <?php echo $displayStart;?>,
      "columns" : [
           { "data": "no", "className":"no"},
           { "data": "filename",className:"filename"},
@@ -89,7 +112,6 @@ if(array_key_exists("reloadtime",$config_ini) ){
 }
 ?>
      ],
-     "bPaginate" : false,
      "order" : [[0, 'desc']],
      bDeferRender: false,
       "autoWidth": false,
@@ -102,7 +124,7 @@ if(array_key_exists("reloadtime",$config_ini) ){
         tm = setInterval( function() {
             if($("[name=autoreload]").prop("checked")){
                 var table = $('#request_table').DataTable();
-                table.ajax.reload();
+                table.ajax.reload(null,false);
             }
             if($("[name=autoplayingsong]").prop("checked")){
                 location.href = "#nowplayinghere";
@@ -113,7 +135,7 @@ if(array_key_exists("reloadtime",$config_ini) ){
 
 function reloadtable () {
     var table = $('#request_table').DataTable();
-    table.ajax.reload();
+    table.ajax.reload(null,false);
 }
 //-->
 </script>

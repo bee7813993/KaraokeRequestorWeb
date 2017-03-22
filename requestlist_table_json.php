@@ -11,16 +11,38 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
     }
 }
 
+$displayfrom=0;
+$displaynum=80000;
+$draw = 1;
+if(array_key_exists("start", $_REQUEST)) {
+    $displayfrom = $_REQUEST["start"];
+}
 
-$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
+if(array_key_exists("length", $_REQUEST)) {
+    $displaynum = $_REQUEST["length"];
+}
+
+if(array_key_exists("draw", $_REQUEST)) {
+    $draw = $_REQUEST["draw"];
+}
+
+
+$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC LIMIT ". $displaynum .' OFFSET '. $displayfrom.';' ;
+try {
 $select = $db->query($sql);
+if(!$select){
+     print_r($db->errorInfo());
+}
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo 'Connection failed: ' . $e->getMessage();
+}
 $select->closeCursor();
 
 $json = json_encode($allrequest,JSON_PRETTY_PRINT);
 
 $requsetlisttable = array();
-$reqcount = count($allrequest);
+$reqcount = count(getallrequest_array()) - $displayfrom;
 
 foreach($allrequest as $value ){
     $playingid = 'id="id_'.$value['id'].'" ';
@@ -273,7 +295,12 @@ EOD;
     array_push ($requsetlisttable, $onerequset);
 }
 
-$json = json_encode($requsetlisttable,JSON_PRETTY_PRINT);
+$totalrequest = count(getallrequest_array());
+
+$returnarray = array( "draw" => $draw, "recordsTotal" => $totalrequest,  "recordsFiltered" => $totalrequest, "data" => $requsetlisttable);
+
+//$json = json_encode($requsetlisttable,JSON_PRETTY_PRINT);
+$json = json_encode($returnarray,JSON_PRETTY_PRINT);
 
 print $json;
 

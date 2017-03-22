@@ -279,6 +279,21 @@ print ' value="20" ';
 ?>
 />
   </div>
+<!---- トップ画面リクエスト一覧表示件数 ----->
+  <div class="form-group">
+    <label for="reloadtime"> リクエスト一覧表示件数 <small> 0 全件表示。数値を小さくするとオンライン接続時の通信量を減らせます </small> </label>
+    </label>
+    <input type="text" name="requestlist_num" size="100" class="form-control"
+<?php
+if(array_key_exists("requestlist_num",$config_ini)) {
+print ' value="'.urldecode($config_ini["requestlist_num"]).'"';
+}else {
+print ' value="10" '; 
+}
+
+?>
+/>
+  </div>
 
   <div class="form-group">
     <label for="playerpath_select">MediaPlayerClassic PATH設定</label>
