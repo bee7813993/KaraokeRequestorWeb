@@ -12,8 +12,6 @@ if (isset($_SERVER['PHP_AUTH_USER'])){
 }
 
 
-
-
 $sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
 $select = $db->query($sql);
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);

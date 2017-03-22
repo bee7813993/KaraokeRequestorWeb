@@ -48,22 +48,35 @@ function file_exist_check_japanese($filename){
 function workcheck_andrestartxampp(){
 
     $xamppstop_cmd = '..\xampp_stop.exe';
-    $xamppstart_cmd = '..\xampp_start.exe';
+    $xamppstart_cmd = '.\start_xampp_fromphp.bat';
+//    $xamppstart_cmd = '..\xampp_start.exe';
     $url = 'http://localhost/requestlist_table_json.php';
+    
+    $workedcheck = true;
+    $stopstartsleeptime = 0;
 
+    while($workedcheck){
     if( check_json_available_fromurl($url)){
+       $workedcheck = false;
        // print 'xampp working'."\n";
     } else {
+       if($stopstartsleeptime < 10 ){
+           $stopstartsleeptime = $stopstartsleeptime + 1;
+       }else{
+           logtocmd('xamppに不具合発生中。自動再生を停止した後、xamppコントロールパネルでApacheのStop、Startしてみてください'."\n"); 
+       }
        print 'apache happens some error'."\n";
        print 'now stopping xampp'."\n";
        exec($xamppstop_cmd);
+       sleep($stopstartsleeptime);
+       print getcwd();
        print 'now starting xampp'."\n";
-       $cmd = 'start "" /b /MIN '.$xamppstart_cmd.'';
+       $cmd = 'start "" /I /MIN  '.$xamppstart_cmd.'';
        $fp = popen($cmd,'r');
        pclose($fp);
     }
     check_json_available_fromurl($url);
-
+    }
 }
 
 function logtocmd($msg){
@@ -758,6 +771,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
        }else {
            break;
        }
+       workcheck_andrestartxampp();
     }
     $stat = check_nowplaying_state ($db,$id);
     song_stop( $kind , $stat);
