@@ -81,7 +81,7 @@ var request = createXMLHttpRequest();
 url=foobarctrlurl + "?cmd=StartFirst&param1=0";
 request.open("GET", url, true);
 request.send("");
-
+song_play();
 }
 
 

@@ -46,8 +46,8 @@ request.send("");
 //Pause 888
 function song_pause(){
 var request = createXMLHttpRequest();
-url=playerurl + "?wm_command=888";
-url=playerurl2 + "?cmd=888";
+url=playerurl + "?wm_command=889";
+url=playerurl2 + "?cmd=889";
 request.open("GET", url, true);
 request.send("");
 }
@@ -119,10 +119,8 @@ function song_audiodelay_m100(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=906";
 url=playerurl2 + "?cmd=delaym100";
-for(i = 0; i < 10; i = i + 1) {
   request.open("GET", url, true);
-  sleep(100, song_audiodelay_m10());
-}
+  request.send("");
 }
 
 // Audio Delay +10ms 905
@@ -130,18 +128,16 @@ function song_audiodelay_p10(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=905";
 url=playerurl2 + "?cmd=905";
-request.open("GET", url, true);
-request.send("");
+  request.open("GET", url, true);
+  request.send("");
 }
 
 function song_audiodelay_p100(){
 var request = createXMLHttpRequest();
 url=playerurl + "?wm_command=905";
 url=playerurl2 + "?cmd=delayp100";
-for(i = 0; i < 10; i = i + 1) {
   request.open("GET", url, true);
-  sleep(100, song_audiodelay_p10);
-}
+  request.send("");
 }
 
 

@@ -54,11 +54,9 @@ if(array_key_exists("autoplay_exec",$config_ini)) {
     if(!empty($config_ini["autoplay_exec"])){
         if(array_key_exists("autoplay_show",$config_ini)) {
             if($config_ini["autoplay_show"]==1){
-            
+            print '<div align="center">';
             print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
-            
-            
-            
+            print '</div>';
             }
         }
     }

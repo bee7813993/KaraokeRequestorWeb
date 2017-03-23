@@ -63,7 +63,7 @@ function delay_plus100_mpc(){
     $res = TRUE;
     $requesturl=$MPCCMDURL.'?wm_command=905';
     $res = file_get_html_with_retry($requesturl);
-    usleep(50000);
+    usleep(30000);
     }
 }
 

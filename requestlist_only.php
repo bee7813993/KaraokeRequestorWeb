@@ -182,7 +182,9 @@ EOT;
 <th>No.</th>
 <th>ファイル名</th>
 <th>登録者</th>
-<th>コメント<br /><small>コメント欄を押すとレスを付けたりできます</small></th>
+<th >
+  <lavel data-toggle="tooltip" data-placement="top" title="コメント欄を押すとレスを付けたりできます">コメント </lavel>
+</th>
 <th>再生方法</th>
 <?php
      if($playmode == 1){

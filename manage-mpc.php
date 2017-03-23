@@ -208,18 +208,6 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
        }
     }
     
-    // BGVモードではmuteにする。
-    $loop = check_request_loop($db,$id);
-    if($loop == 1) {
-        global $config_ini;
-
-        toggle_mute_mpc();
-        // BGV スタートコマンドを実行する。
-        if( array_key_exists('BGVCMDSTART',$config_ini) && !empty($config_ini['BGVCMDSTART']) ){
-            $cmd = urldecode($config_ini['BGVCMDSTART']);
-            exec($cmd);
-        }
-    }
 /*
     if( $playmode == 2) {
         //一時停止する
@@ -433,6 +421,10 @@ function check_filetype ($db,$id){
         }
         
         if( is_url($rowall[0]['songfile']) ){
+            return 3;
+        }
+
+        if( is_url($rowall[0]['fullpath']) ){
             return 3;
         }
         
@@ -701,19 +693,16 @@ function start_song($db,$id,$addplaytimes = 0){
         if(mb_strstr($row['kind'],'動画_別プ') != FALSE){
         // web経由でファイル再生
             if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
+                // とりあえず動画Playerを終了する。
+                mpcstop();
                 // 別Playerを指定している場合、実行を試みる。
                 $execcmd="start /b \"\" \"".mb_convert_encoding(urldecode($config_ini["otherplayer_path"]),"SJIS-win")."\"" . " \"$filepath\"\n";
-  //              print $execcmd;
                 exec($execcmd);
             }
         }else{
-
-            // MPC起動チェック
-            if(mpcrunningcheck($playerpath)===FALSE){
-                startmpcandwait($playerpath,1);
-            }
-
             if($filetype == 3){
+              // とりあえず動画Playerを終了する。
+              mpcstop(); sleep(2);
               if ($config_ini['playmode'] == 2){
                 $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
               }else {
@@ -721,7 +710,23 @@ function start_song($db,$id,$addplaytimes = 0){
               }
               exec($execcmd);
             }else{
+              // MPC起動チェック
+              if(mpcrunningcheck($playerpath)===FALSE){
+                  startmpcandwait($playerpath,1);
+              }
               mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
+            }
+            // BGVモードではmuteにする。
+            $loop = check_request_loop($db,$id);
+            if($loop == 1) {
+                global $config_ini;
+
+                toggle_mute_mpc();
+                // BGV スタートコマンドを実行する。
+                if( array_key_exists('BGVCMDSTART',$config_ini) && !empty($config_ini['BGVCMDSTART']) ){
+                    $cmd = urldecode($config_ini['BGVCMDSTART']);
+                    exec($cmd);
+                }
             }
         }
     }

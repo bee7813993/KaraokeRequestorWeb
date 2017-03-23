@@ -235,9 +235,12 @@ EOD;
     // 曲終了ボタン
     $songstop = "";
     if($value['nowplaying'] === '再生中'){
+        // すべての場合に表示する
+        $stopbtnmsg= '曲停止';
         if($value['kind'] === 'カラオケ配信' || $value['kind'] === '動画_別プ' ){ 
-        $songstop ='<button type="button" class="btn btn-default" onClick=\'song_end(this,'.$value["id"].');return false;\' >曲停止</button>';
+         $stopbtnmsg = '<small>曲停止</small><br /><strong>要次曲</strong>';
         }
+        $songstop ='<button type="button" class="btn btn-default" onClick=\'song_end(this,'.$value["id"].');return false;\' >'.$stopbtnmsg.'</button>';
     }
     // 曲開始ボタン
     if($value['nowplaying'] === '再生開始待ち'){
