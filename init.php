@@ -602,8 +602,6 @@ if(array_key_exists("downloadfolder",$config_ini)) {
 }
 ?>
 />
-
-    
     </div>  
   </div>  
 
@@ -734,13 +732,29 @@ if(array_key_exists("request_automove",$config_ini)) {
     <a href ="bingo_input.php" class="btn btn-default" > ビンゴ項目入力画面 </a>
   </div>
 
-
+  <div class="form-group">
+    <label class="control-label"> pfwd.exeインストールフォルダ  </label>
+    <input type="text" name="pfwdplace" class="form-control"
+<?php
+if(array_key_exists("pfwdplace",$config_ini)) {
+    print 'value="'.urldecode($config_ini["pfwdplace"]).'"';
+}else {
+    print 'value="pfwd_forykr\\"';
+}
+?>
+/>
+  </div>  
   <input type="submit" class="btn btn-default btn-lg" value="設定" />
   </form>
   </div>
 </div>
   <hr />
 <hr />
+<?php
+require_once 'pfwdctl.php';
+$pfwdinfo = new pfwd();
+$pfwdinfo->readpfwdcfg();
+?>
 
 <div class="container bg-info">
   <h2> ホスト名設定（オンライン接続およびDDNSの設定） </h2>
@@ -764,8 +778,16 @@ $(document).ready(function(){
   <div class="form-group">
     <label class="control-label" >ホスト名</label>
     <input type="text" name="globalhost" class="form-control"  value="<?php
-    if(array_key_exists("globalhost",$config_ini)) {
+    $pfwdhost = "";
+    if(!empty($pfwdinfo->get_pfwdhost()) && !empty($pfwdinfo->get_pfwdopenport())) {
+        $pfwdhost = $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdopenport();
+        print $pfwdhost;
+    }else if(array_key_exists("globalhost",$config_ini)) {
         print urldecode($config_ini["globalhost"]);
+    }
+    $btnvalue='更新';
+    if( $pfwdhost !== urldecode($config_ini["globalhost"]) ){
+        $btnvalue=' 更新（押してください）';
     }
     ?>" />
 <?php
@@ -784,9 +806,86 @@ $(document).ready(function(){
       }
     }
 ?>
-  <input type="submit" class="btn btn-default" value="更新" />
+  <input type="submit" class="btn btn-default" value="<?php print $btnvalue;?>" />
   </div>
   </form>
+<script type="text/javascript">
+$(document).ready(function(){
+  $('#pfwdconfig').on('submit', function(event) {
+    event.preventDefault();
+    $.post(
+    $(this).attr('action'),
+    $(this).serializeArray(),
+    function(result) {
+        window.location.href='init.php';
+    });
+    return false;
+  });
+});
+
+function createXMLHttpRequest() {
+  if (window.XMLHttpRequest) {
+    return new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    try {
+      return new ActiveXObject("Msxml2.XMLHTTP");
+    } catch (e) {
+      try {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+      } catch (e2) {
+        return null;
+      }
+    }
+  } else {
+    return null;
+  }
+}
+
+function start_pfwdcmd(){
+var request = createXMLHttpRequest();
+url="pfwd_exec.php?pfwdstart=1";
+request.open("GET", url, true);
+request.send("");
+}
+
+function stop_pfwdcmd(){
+var request = createXMLHttpRequest();
+url="pfwd_exec.php?pfwdstop=1";
+request.open("GET", url, true);
+request.send("");
+}
+
+var xmlhttp = createXMLHttpRequest();
+
+</script>
+      <label> プライベートIPオンライン接続コマンド </label>
+      <form id="pfwdconfig" method="post"  action="pfwd_exec.php">
+  <div class="form-group">
+      <label class="control-label" >接続ホスト名</label>
+    <input type="text" name="pfwdserverhost" class="form-control"  value="<?php
+        print $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdport();
+    ?>" />
+      <label class="control-label" >ユーザー接続ポート</label>
+    <input type="text" name="pfwdserveropenport" class="form-control"  value="<?php
+        print $pfwdinfo->get_pfwdopenport();
+    ?>" />
+    <input type="submit" class="btn btn-default" value="設定" />
+    </div>
+    </form>
+  <div class="form-group">
+      <label class="control-label" >プログラム起動停止</label>
+      <button type="button" class="btn btn-default" onClick="start_pfwdcmd()" >起動</button>
+      <button type="button" class="btn btn-default" onClick="stop_pfwdcmd()" >停止</button>
+      
+      <?php
+          if($pfwdinfo->statpfwdcmd()){
+              print '<span class="bg-success" > 起動中</span>';
+          } else {
+              print '<span class="alert-danger" >停止中</span>';
+          }
+      ?>
+      
+  </div>
   <h4> DDNS登録 </h4>
   <label> pcgame-r18.jp (アカウントを持っている人用) </label>
   <form id="onlinehostpcg" method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">

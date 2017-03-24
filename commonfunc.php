@@ -255,10 +255,10 @@ function get_globalipv4(){
     return file_get_html_with_retry($checkglobakurl);
 }
 
-function check_online_available($host){
+function check_online_available($host,$timeout = 2){
     global $config_ini;
     if($config_ini["connectinternet"] == 1){
-      $checkurl = 'http://vps.pcgame-r18.jp/ddns/online_yukari_check.php?host='.$host;
+      $checkurl = 'http://vps.pcgame-r18.jp/ddns/online_yukari_check.php?host='.$host.'&timeout='.$timeout;
       $ret = file_get_html_with_retry($checkurl,2,4);
       return $ret;
     }
