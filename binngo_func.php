@@ -226,13 +226,15 @@ class SongBingo {
     }
     
     public function getnumfromid( $id ){
-        $sql = 'select number FROM bingotable WHERE reqid = '.$id.' ORDER BY number';
+        $sql = 'select number,opened FROM bingotable WHERE reqid = '.$id.' ORDER BY number';
         $select = $this->bingodb->query($sql);
         
         $result=array();
 
         while ($data = $select->fetch(PDO::FETCH_ASSOC)) {
-            $result[] = $data['number'];
+             if($data['opened'] == 1) {
+                $result[] = $data['number'];
+            }
         }
         $select->closeCursor();
         return $result;

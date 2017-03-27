@@ -62,24 +62,24 @@ $list = $bingoinfo->numkey_readdata();
 function check_opened_now($opednum,$idlist){
     global $config_ini;
     global $db;
-    
     if($opednum === 0 ) return false; /* 解放されていない */
     foreach($idlist as $oneid){
+        if($oneid === 99999 ) continue;
         $sql =  'select * FROM requesttable WHERE id="'.$oneid.'";';
         $select = $db->query($sql);
         $row = $select->fetchAll(PDO::FETCH_ASSOC);
         $select->closeCursor();
         // var_dump($row);
-        if(count($row) == 0 ) return false;
-        if($row[0]['nowplaying'] !== '未再生' ) {
+        if(count($row) == 0 ) continue;
+        foreach($row as $oneidresult ){
+           if($oneidresult['nowplaying'] !== '未再生' ) {
             return true; // 1つでも再生が含まれれば 開放済とする
+           }
         }
     }
     /* その番号に所属するIDのすべてが未再生 */
     return false;
 }
-
-//var_dump($list);
 print '<table  class="table">';
 print '<thead>';
 print '<th> 番号 </th>';
@@ -88,7 +88,7 @@ print '<th> 解放済 </th>';
 print '</thead>';
 print '<tbody>';
 foreach( $list as $oneword ){
-    if( check_opened_now($oneword[0],$oneword[3]) === false ) continue;
+    if( check_opened_now($oneword[2],$oneword[3]) === false ) continue;
     print '<tr> ';
     print '  <td> ';
     print $oneword[0];

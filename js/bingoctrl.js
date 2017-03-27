@@ -32,13 +32,13 @@ $(document).ready(function()
                 $button.attr('disabled', true);
             },
             success : function( data ) {
-                  window.location.href = 'bingo_openinput.php?id=' + newid;
+                  window.location.href = 'requestlist_only.php';
             },
             // 応答後
             complete: function(data, xhr, textStatus) {
                 // ボタンを有効化し、再送信を許可
                 $button.attr('disabled', false);
-                  window.location.href = 'bingo_openinput.php?id=' + newid;
+                  window.location.href = 'requestlist_only.php';
             },
             /**
             * Ajax通信が失敗した場合に呼び出されるメソッド

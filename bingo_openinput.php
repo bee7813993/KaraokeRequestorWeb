@@ -8,6 +8,12 @@ require_once 'commonfunc.php';
 require_once 'binngo_func.php';
 mb_language("Japanese");
 
+global $db;
+$sql = 'SELECT * FROM requesttable WHERE id = '.$id.' ORDER BY reqorder DESC';
+$select = $db->query($sql);
+$allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+$select->closeCursor();
+
 ?>
 
 <!doctype html>
@@ -33,13 +39,11 @@ print_meta_header();
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-<title>ビンゴクラステスト</title>
+<title>ビンゴ結果入力</title>
 
 <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
-
-
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <script type="text/javascript" charset="utf8" src="js/bingoctrl.js"></script>
 </head>
@@ -51,6 +55,11 @@ shownavigatioinbar();
 $bingoinfo = new SongBingo();
 $bingoinfo->initbingodb('songbingo.db'); 
 $list = $bingoinfo->wordkey_readdata();
+
+print '<p>';
+print '「'.$allrequest[0]['songfile'].'」のビンゴ番号入力';
+print '</p>';
+
 ?>
 <div class="container panel panel-default">
     <div class="panel-heading">
@@ -98,7 +107,6 @@ print '</table>';
 ?>
     </div>
 </div>
-
 
 </body>
 </html>

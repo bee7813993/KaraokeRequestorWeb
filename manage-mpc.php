@@ -702,13 +702,16 @@ function start_song($db,$id,$addplaytimes = 0){
         }else{
             if($filetype == 3){
               // とりあえず動画Playerを終了する。
-              mpcstop(); sleep(2);
+              mpcstop();
+              sleep(2);
               if ($config_ini['playmode'] == 2){
                 $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
               }else {
                 $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
               }
-              exec($execcmd);
+              //exec($execcmd);
+              $fp = popen($execcmd,'r');
+              pclose($fp);
             }else{
               // MPC起動チェック
               if(mpcrunningcheck($playerpath)===FALSE){
