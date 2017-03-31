@@ -45,6 +45,7 @@ class MoveItem {
    /* そのIDの新しい再生順を返す */
    public function get_new_reqorder($id,$notsingstart = 0){
        $beforeturn = array();
+       $beforeturn_1 = array();
        $newsinger = $this->get_singer_fromid($id);
        if($newsinger === false) {
            return false;
@@ -92,23 +93,28 @@ class MoveItem {
            }
            if($insertreqest_key !== false ) break;
        }
+
        print '<pre>';
        var_dump($beforesinger );
        print 'insertreqest_key'.$insertreqest_key;
        print '</pre>';
+
        //もし見つからなかったら、今ターンの最初
        if($insertreqest_key === false ){
          $insertreqest_key = 0;
        }
+
        print '<pre>';
         print 'insertreqest_key'.$insertreqest_key;
         print '</pre>';
-       
+   
        //挿入した場所が未再生でなかったら後ろにずらす
        foreach( $this->turnlist[$currentturn] as $key => $onerequest){
+
        print '<pre>';
        var_dump($onerequest );
         print '</pre>';
+
          if($key < $insertreqest_key ) continue;
          $neworder = $onerequest['reqorder'] ;
          if($onerequest['nowplaying'] ==='未再生' ){
@@ -120,7 +126,6 @@ class MoveItem {
        
 ****/       
        ///以下古い処理
-       
        foreach($this->turnlist as $turnkey => $oneturn){
        //print "<pre>";
        //    var_dump($oneturn);
@@ -142,11 +147,13 @@ class MoveItem {
            }
            // 現在のターンに1つも未再生がない → 次のターンへ
            if($startcheck == false) {
+               $beforeturn_1 = $beforeturn;
                $beforeturn = $oneturn;
                continue;
            }
            // 現在のターンに名前がある → 次のターンへ
            if($this->check_exists_mymember($oneturn,$newsinger,$id) === true){
+               $beforeturn_1 = $beforeturn;
                $beforeturn = $oneturn;
                // print "このターンに自分の名前がありました".$newsinger." <br>\n";
                // var_dump($oneturn);
@@ -158,6 +165,27 @@ class MoveItem {
            // 1つ前のターンで自分より前の人の名前のリストを取得
            $mynamefound = false;
            $beforesinger = array(); 
+           /**
+       print "<pre>\n-------- beforeturn_1 list:\n";
+       var_dump($beforeturn_1);print "</pre>";
+           if(!empty($beforeturn_1)){
+               foreach( ($beforeturn_1) as $b_onerequest ){
+                print $b_onerequest['songfile'].$b_onerequest['singer'].$newsinger."<br>\n";
+                   if($mynamefound === false) {
+                       if($b_onerequest['singer'] === $newsinger ){
+                           $mynamefound = false;
+                           //array_push($beforesinger,$b_onerequest);
+                           continue;
+                       }else{
+                           // print $b_onerequest['singer'].$newsinger."<br>\n";
+                           array_push($beforesinger,$b_onerequest);
+                       }
+                   }else {
+                       //array_push($beforesinger,$b_onerequest);
+                   }
+               }
+           }
+**/
            foreach( ($beforeturn) as $b_onerequest ){
            // print $b_onerequest['songfile'].$b_onerequest['singer'].$newsinger."<br>\n";
                if($mynamefound === false) {
@@ -191,10 +219,10 @@ class MoveItem {
            }
            if($newreqorder === false) break;
            // print " $newreqorder";
-           // print "<pre>\n-------- before singer list:\n";
-           // var_dump($beforesinger);print "</pre>";
-           // print "<pre>\n-------- oneturn list:\n";
-           // var_dump($oneturn);print "</pre>";
+//           print "<pre>\n-------- before singer list:\n";
+//           var_dump($beforesinger);print "</pre>";
+//           print "<pre>\n-------- oneturn list:\n";
+//           var_dump($oneturn);print "</pre>";
            if(!empty($beforesinger)){
                // 前ターンの自分の前の人がいたらその人の次にする
                $cheekedreqorder= $oneturn[count($oneturn)-1]['reqorder']+1;;
@@ -209,8 +237,8 @@ class MoveItem {
                $insertid = null;
                foreach( array_reverse ($oneturn) as $key => $onerequest){
                    $cheekedreqorder = $onerequest['reqorder'] + 1;
-                   foreach ($beforesinger as $beforeorder){
-                      // print $onerequest['singer'].$onerequest['reqorder'].$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
+                   foreach (($beforesinger) as $beforeorder){
+                       // print $cheekedreqorder.'onerequest:'.$onerequest['singer'].$onerequest['reqorder'].' beforeorder:'.$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
                        if($onerequest['singer'] == $beforeorder['singer']){
                            if( $cheekedreqorder == $onerequest['reqorder']){
                                $newreqorder = $cheekedreqorder + 1 ;
@@ -220,11 +248,15 @@ class MoveItem {
                            
                            // 再生中or再生済みチェック
                            for($i=$key ;$i<count($oneturn); $i++){
+                          // print "<pre>".$newreqorder;var_dump($oneturn[$i]);print "</pre>";
                              if(array_key_exists($i,$oneturn) && $oneturn[$i]['nowplaying'] !=='未再生' ){
-                               $newreqorder = $oneturn[$i]['reqorder'] + 1;
+                                   if($newreqorder <= $oneturn[$i]['reqorder']){
+                            //   print "<pre>".$newreqorder;print $oneturn[$i]['reqorder'];print "</pre>";
+                                       $newreqorder = $oneturn[$i]['reqorder'] + 1;
+                                   }
                              }
                            }
-                           // print "reqorderを".$newreqorder.'にしました';
+                          //  print "reqorderを".$newreqorder.'にしました';
                            $setvalue = true;
                            break;
                        }

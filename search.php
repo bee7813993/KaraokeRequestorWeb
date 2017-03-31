@@ -128,7 +128,7 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   <div class="container">
   <label>検索ワード(ファイル名) </label>
   
-  <input type="text" name="searchword" class="searchtextbox" placeholder="歌手名作品名検索は下の外部DB連携で検索できます"
+  <input type="text" name="searchword" id="filenamesearchword" class="searchtextbox" placeholder="歌手名作品名検索は下の外部DB連携で検索できます"
 
   <?php
      if(!empty ($word)){
@@ -142,7 +142,7 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   }
   ?>
 
-  <input type="submit" value="検索" class="btn btn-default " />
+  <input type="submit" value="検索" id="filenamesearchsubmit" class="btn btn-default " />
   </div>
   </form>
   <div class="clearleftfloat"> 
