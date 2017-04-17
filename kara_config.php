@@ -242,7 +242,7 @@ if ($stmt === false ){
 }
 
 readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroom,$commenturl);
-initdb($db,$dbname);
+$res=initdb($db,$dbname);
 
 // cache control
 @header( 'Expires: Thu, 01 Jan 1970 00:00:00 GMT' );
@@ -257,4 +257,3 @@ initdb($db,$dbname);
 
 
 ?>
-

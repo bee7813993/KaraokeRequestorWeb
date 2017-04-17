@@ -1,7 +1,7 @@
 <?php
 /*** 仮作成 ***/
 include 'kara_config.php';
-
+//die();
 function arr2csv($arr) {
     $fp = fopen('php://temp', 'r+b');
     foreach ($arr as $fields) {
@@ -42,7 +42,7 @@ if(empty($dbname)){
     $csvarray[] = array( $num, $row["songfile"] ,  $row["singer"] ,  $row["comment"] );
     $num++;
   }
-  $stream = fopen('php://output', 'w');
+  $stream = fopen('php://output', 'wb');
     // rewind($stream);
     // var_dump($csvarray);
     fwrite ($stream, arr2csv($csvarray));

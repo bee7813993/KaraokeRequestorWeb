@@ -72,7 +72,7 @@ $html=file_get_contents($listurl);
 
 $regstr = '/<td.*>.*?<\/td>/ui';
 $regstr_in = '/<td.*>(.*?)<\/td>/ui';
-$extcheck = '/\.mp4$|\.avi$|\.mkv$|\.mpg$|\.flv$/i';
+$extcheck = '/\.mp4$|\.avi$|\.mkv$|\.mpg$|\.flv$|\.wmv$|\.mpeg$|\.ogm$|\.mov$/i';
 preg_match_all($regstr,$html,$regs);
 foreach($regs[0] as $tdtag){
    if(preg_match($regstr_in,$tdtag,$internaltd)){
