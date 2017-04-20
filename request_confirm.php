@@ -42,6 +42,9 @@ if(array_key_exists("bgvfile", $_REQUEST)) {
 
 
 include 'kara_config.php';
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth -> do_eashauthcheck();
 
 if($shop_karaoke == 1 && is_numeric($selectid)){
     $forcebgv = 1;

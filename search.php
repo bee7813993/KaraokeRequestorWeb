@@ -1,6 +1,8 @@
-
 <?php
 require_once 'commonfunc.php';
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth -> do_eashauthcheck();
 
 if(array_key_exists("searchword", $_REQUEST)) {
     $word = $_REQUEST["searchword"];
@@ -174,7 +176,7 @@ die();
 }
 ?>
   <h2>歌手名、作品名、ブランド名検索 <small>外部データベース連携検索</small> </h2>
-  <h3>anison.info連携検索モード </h3>
+  <h3 id="searchanisoninfo" >anison.info連携検索モード </h3>
  
 <FORM name=f action=search_anisoninfo_list.php method=get>
   <div class="form-group">
@@ -254,7 +256,7 @@ if(!empty($selectid) ) {
 </span>
 
 </FORM>
-  <h3>banditの隠れ家連携検索モード </h3>
+  <h3 id="searchbandit" >banditの隠れ家連携検索モード </h3>
   
 
   歌手名検索 
@@ -288,8 +290,6 @@ if(!empty($selectid) ) {
 
 
 <hr>
-
-
 
 </body>
 </html>

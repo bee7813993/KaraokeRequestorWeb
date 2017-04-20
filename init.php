@@ -11,6 +11,9 @@ if ($_SERVER['PHP_AUTH_USER'] !== 'admin'){
 }
 
 require_once 'commonfunc.php';
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth -> do_eashauthcheck();
 
 $newconfig = $_REQUEST;
 
@@ -293,6 +296,25 @@ print ' value="10" ';
 
 ?>
 />
+  </div>
+
+<!---- 公開用シンプルリクエスト一覧表示 ----->
+  <?php
+      $usesimplelist=true;
+      if(array_key_exists("usesimplelist",$config_ini)){
+          if($config_ini["usesimplelist"]!=1 ){
+             $usesimplelist=false;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <label class="radio control-label"> 公開用シンプルリクエスト一覧表示 <br /><small></small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="usesimplelist" value="1" <?php print ($usesimplelist)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usesimplelist" value="2" <?php print (!$usesimplelist)?'checked':' ' ?> /> 使用しない
+    </label>
   </div>
 
   <div class="form-group">
@@ -744,6 +766,61 @@ if(array_key_exists("pfwdplace",$config_ini)) {
 ?>
 />
   </div>  
+  <!---- pfwd起動自動チェック ----->
+  <div class="form-group">
+    <label class="control-label"> pfwd 自動再起動チェック、タイムアウト時間 <small>0でチェック無効</small> </label>
+    <input type="text" name="pfwdchecktimeout" class="form-control"
+<?php
+if(array_key_exists("pfwdchecktimeout",$config_ini)) {
+    print 'value="'.urldecode($config_ini["pfwdchecktimeout"]).'"';
+}else {
+    print 'value="0"';
+}
+?>
+/>
+  </div>
+  
+  <!---- 簡易認証設定 ----->
+  <?php
+      $useeasyauth=false;
+      if(array_key_exists("useeasyauth",$config_ini)){
+          if($config_ini["useeasyauth"]==1 ){
+             $useeasyauth=true;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <label class="radio control-label"> 簡易認証 <br /><small></small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="useeasyauth" value="1" <?php print ($useeasyauth)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="useeasyauth" value="2" <?php print (!$useeasyauth)?'checked':' ' ?> /> 使用しない
+    </label>
+      <div class="form-group">
+      <label class="control-label"> 簡易認証キーワード </label>
+      <input type="text" name="useeasyauth_word" class="form-control" id="useeasyauth_word" 
+<?php
+if(array_key_exists("useeasyauth_word",$config_ini)) {
+    print 'value="'.urldecode($config_ini["useeasyauth_word"]).'"';
+}else {
+    $newvalue= "";
+    echo 'value="'.$newvalue.'"';
+}
+?>
+/>
+<script language="javascript" type="text/javascript">
+    function GenRandomKeyword() {
+        var rand = Math.floor( Math.random() * 9999 ) ;
+        target = document.getElementById("useeasyauth_word");
+        target.value = ( '0000' + rand ).slice( -4 );
+        
+    }
+</script>
+    <button type="button" class="btn btn-default" onclick="GenRandomKeyword();" > キーワードランダム生成 </button>
+    </div>
+  </div>
+
   <input type="submit" class="btn btn-default btn-lg" value="設定" />
   </form>
   </div>

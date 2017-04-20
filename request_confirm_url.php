@@ -1,5 +1,5 @@
 <?php
-
+$filename = "";
 if(array_key_exists("filename", $_REQUEST)) {
     $filename = $_REQUEST["filename"];
 }
@@ -37,6 +37,9 @@ if($shop_karaoke == 1 && is_numeric($selectid)){
 }
 
 include 'kara_config.php';
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth -> do_eashauthcheck();
 
 $sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
 $select = $db->query($sql);
@@ -175,45 +178,13 @@ if(array_key_exists("YkariUsername", $_COOKIE)) {
 <label>
 URL
 </label>
-<textarea name="filename" id="filename" class="form-control" rows="4" wrap="soft" style="width:100%" 
-<?php
-if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
-    print 'placeholder="直接再生できるURLを指定を入れてください(youtubeのURLもOK)" >';
-    //print $selectrequest[0]['songfile'];
-    echo "</textarea> ";
-}else if($shop_karaoke == 1){ 
-    print 'placeholder="後でセットリスト作成の参考のためにできれば曲名を入れておいてください" >';
+    <input type="text" name="fullpath" id="fullpath" style="width:100%" placeholder="直接再生できるURLを指定を入れてください(youtubeのURLもOK)" value=<?php echo '"'.$filename.'"'; ?> />
+<label>
+曲名
+</label>
+<textarea name="filename" id="filename" class="form-control" rows="4" wrap="soft" style="width:100%" placeholder="後でセットリスト作成の参考のためにできれば曲名を入れておいてください" >
+</textarea>
 
-    if (empty($filename)){
-      echo "";
-    }else{
-      echo "$filename";
-    }  
-    
-    echo "</textarea> ";
-}else if($set_directurl == 1 ){
-    print 'placeholder="直接再生できるURLを指定を入れてください(youtubeのURLもOK)" >';
-    if (empty($filename)){
-      echo "";
-    }else{
-      echo "$filename";
-    }  
-    echo "</textarea> ";
-
-}else {
-    print 'placeholder="曲名" disabled >';
-
-    if (empty($filename)){
-      echo "";
-    }else{
-      echo "$filename";
-    }
-    echo "</textarea> ";
-    print '<input type="hidden" name="filename" id="filename" style="width:100%" value="'.$filename.'"  />';
-    }
-?>
-
-    <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
 <?php
 if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
 //    print '<dt> BGV曲名 </dt>';
@@ -267,7 +238,7 @@ print('<span style="visibility:hidden;">');
 </div>
 
 <div CLASS="form-group">
-<label>コメント<small> セトリ記録のため曲名とか書いてもらえると助かります </small></label>
+<label>コメント</label>
 <textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
 <?php
 if(is_numeric($selectid) ){

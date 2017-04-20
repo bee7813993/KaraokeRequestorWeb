@@ -73,7 +73,7 @@ function getnewid($db){
 
 <?php
 if(mb_stristr($l_kind , "URL指定") !== FALSE  || $l_urlreq == 1 ){
-  $l_fullpath = $l_filename;
+//  $l_fullpath = $l_filename;
   $displayfilename = $l_filename;
 }else {
   $displayfilename = makesongnamefromfilename($l_filename) ;

@@ -2,9 +2,13 @@
 <head>
 <?php 
 require_once 'commonfunc.php';
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth -> do_eashauthcheck();
 
 print_meta_header();
 ?>
+
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
@@ -64,20 +68,33 @@ if(array_key_exists("qrsize", $_REQUEST)) {
 if(  $change_counter > 0 ){
     writeconfig2ini($config_ini,$configfile);
 }
-
+$globalurl = "";
 if(!empty($globalhost)){
     $ret = check_online_available($globalhost);
     if( $ret == 'OK' ){
         $online_avaiavle = 1;
     }
+    $globalurl = 'http://'.urldecode($globalhost).'/';
 }
 
 
 print '<div class="container">';
+// 認証パスワード表示
+if(  $config_ini['useeasyauth'] == 1 ){
+    print '<div class="form-group">';
+    print '<label for="useeasyauth_word">認証パスワード <small> もし聞かれたらこれを入力してください </small></label>';
+    print '<input type="text" class="form-control input-lg toolinfo" id="useeasyauth_word"  value="'.$config_ini['useeasyauth_word'].'">';
+    print '</div>';
+    if(isset($globalhost)) {
+        $globalurl = 'http://'.urldecode($globalhost).'/'.'?easypass='.$config_ini['useeasyauth_word'];
+    }
+}
+
 
 if( $online_avaiavle === 1 ){
+    
     print '<label>オンライン版接続先 URL<small>Wifiに接続しなくてもアクセスできるURLです</small></label>';
-    print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="http://'.urldecode($globalhost).'/" />';
+    print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="'.$globalurl.'" />';
 
 
 // オンライン版
@@ -87,12 +104,12 @@ print <<<EOT
   <div class="col-sm-12" class="text-center">
     <div class="text-center">
 EOT;
-      print 'http://'.urldecode($globalhost).'/ <br />';
+      print $globalurl.' <br />';
 print <<<EOT
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 EOT;
-print 'http://'.urldecode($globalhost).'/&qrsize='.$l_qrsize;
+print $globalurl.'/&qrsize='.$l_qrsize;
 print <<<EOT
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
@@ -148,6 +165,12 @@ require_once 'commonfunc.php';
 if(array_key_exists("wifipass", $config_ini)){
    print 'value="'.urldecode($config_ini["wifipass"])."\"\n";
 }
+$localipurl = 'http://'.$_SERVER["SERVER_ADDR"].'/';
+$localhosturl = 'http://'.$_SERVER["HTTP_HOST"].'/';
+if(  $config_ini['useeasyauth'] == 1 ){
+    $localipurl = $localipurl.'?easypass='.$config_ini['useeasyauth_word'];
+    $localhosturl = $localhosturl.'?easypass='.$config_ini['useeasyauth_word'];
+}
 ?>
 />
    </div>
@@ -161,8 +184,8 @@ if(array_key_exists("wifipass", $config_ini)){
 
  <div class="form-group">
 <label>接続先 URL</label>
-<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value=<?php echo 'http://'.$_SERVER["HTTP_HOST"];?>/>
-<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="<?php echo 'http://'.$_SERVER["SERVER_ADDR"].'/';?>" />
+<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value=<?php echo $localhosturl;?> />
+<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="<?php echo $localipurl;?>" />
 </div>
 <?php
   if(!empty($globalhost)){
@@ -170,7 +193,7 @@ if(array_key_exists("wifipass", $config_ini)){
       if( $ret == 'OK' ){
           $online_avaiavle = 1;
           print '<label>オンライン版接続先 URL<small>Wifiに接続しなくてもアクセスできるURLです</small></label>';
-          print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="http://'.urldecode($globalhost).'/" />';
+          print '<input type="text" name="toolurl" class="form-control input-lg toolinfo" size="100" value="'.$globalurl.'" />';
       }
   }
 ?>
@@ -179,24 +202,24 @@ if(array_key_exists("wifipass", $config_ini)){
   <div class="col-sm-<?php print $online_avaiavle ? 6 : 6 ;?>" class="text-center">
     <div class="text-center">
     <?php
-      print 'http://'.$_SERVER["HTTP_HOST"].'/ <br />'
+      print $localhosturl.' <br />'
     ?>
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 <?php
-print 'http://'.$_SERVER["HTTP_HOST"].'/&qrsize='.$l_qrsize;
+print $localhosturl.'&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
   <div class="col-sm-<?php print $online_avaiavle ? 6 : 6 ;?>" >
     <div class="text-center">
   <?php
-    print 'http://'.$_SERVER["SERVER_ADDR"].'/ <br />'
+    print $localipurl.' <br />'
   ?>
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 <?php
-print 'http://'.$_SERVER["SERVER_ADDR"].'/&qrsize='.$l_qrsize;
+print $localipurl.'&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>

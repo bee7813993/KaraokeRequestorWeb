@@ -1,5 +1,8 @@
 <?php
 require_once 'commonfunc.php';
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth -> do_eashauthcheck();
 if(array_key_exists("showid", $_REQUEST)) {
     $showid = $_REQUEST["showid"];
 }
