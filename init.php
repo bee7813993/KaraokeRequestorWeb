@@ -85,7 +85,7 @@ foreach($newconfig as $key => $value){
         foreach ($value as $roomno => $roomurl){
             if($key === 'roomurl') {
                 if(!empty($newconfig['roomno'][$roomno])){
-                    $newconfig['roomurl'][$newconfig['roomno'][$roomno]]=$roomurl;
+                    $newconfig['roomurl'][$newconfig['roomno'][$roomno]]=urlencode($roomurl);
                 }else{
                 }
                 if(array_key_exists("roomurlglobal", $newconfig)){
@@ -656,7 +656,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
       print 'value="'.$key.'"' ;
       print '    ></td>'."\n";
       print '    <td><input type="text" class="form-control input-normal" placeholder="部屋'.$roomcount.'のURL" name="roomurl[]"';
-      print 'value="'.$value.'"' ;
+      print 'value="'.urldecode($value).'"' ;
       print '    ></td>'."\n";
       print '    <td><input type="checkbox" class="form-control input-normal" placeholder="オンライン用URLかどうか？" name="roomurlglobal[]" value='.$roomcount;
       if(array_key_exists("roomurlglobal", $config_ini) && array_key_exists($key, $config_ini["roomurlglobal"]) && $config_ini["roomurlglobal"][$key] == 1){

@@ -109,7 +109,7 @@ print <<<EOT
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 EOT;
-print $globalurl.'/&qrsize='.$l_qrsize;
+print urlencode($globalurl).'&qrsize='.$l_qrsize;
 print <<<EOT
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
@@ -207,7 +207,7 @@ if(  $config_ini['useeasyauth'] == 1 ){
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 <?php
-print $localhosturl.'&qrsize='.$l_qrsize;
+print urlencode($localhosturl).'&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
@@ -219,7 +219,7 @@ print $localhosturl.'&qrsize='.$l_qrsize;
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 <?php
-print $localipurl.'&qrsize='.$l_qrsize;
+print urlencode($localipurl).'&qrsize='.$l_qrsize;
 ?>
 " alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
