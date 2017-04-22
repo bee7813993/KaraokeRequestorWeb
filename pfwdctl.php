@@ -8,6 +8,23 @@ class pfwd {
     
     public function readpfwdcfg(){
         $this->pfwdinifile = $this->pfwdpath.'\\pfwd.ini';
+        if(!file_exists($this->pfwdinifile)){
+            $file=fopen($this->pfwdinifile,"w");
+            $initpfwdini = <<<EOT
+[SSH]
+Host=ykr.moe
+Port=10090
+Compression=1
+ProtocolVersion=2
+PrivateKey=ykrnkkr.ppk
+User=nkkr
+Password=bgVuHC4bKRw=
+[FORWARD]
+01=R11080:localhost:80
+EOT;
+            fwrite($file,$initpfwdini);
+            fclose($file);
+        }
         $this->pfwdini = array();
         $file=fopen($this->pfwdinifile,"r");
         if($file){
@@ -17,6 +34,7 @@ class pfwd {
                 if(strlen($line) === 0 ) continue;
                 $this->pfwdini[]=$line;
             }
+            fclose($file);
         }
     }
 
