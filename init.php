@@ -315,6 +315,9 @@ print ' value="10" ';
     <label class="radio-inline">
       <input type="radio" name="usesimplelist" value="2" <?php print (!$usesimplelist)?'checked':' ' ?> /> 使用しない
     </label>
+  <label>
+  <a href="simplelist.php" > 公開用シンプルリクエストへのリンク </a>
+  </label>
   </div>
 
   <div class="form-group">
@@ -398,6 +401,25 @@ print 'value="'.urldecode($config_ini["max_filesize"]).'"';
 }
 ?>
 />
+  </div>
+  <?php
+      $usehaishin=false;
+      if(array_key_exists("usehaishin",$config_ini)){
+          if($config_ini["usehaishin"]==1 ){
+             $usehaishin=true;
+          }
+      }else {
+          $usehaishin=true;
+      }
+  ?>
+    <div class="form-group">
+    <label class="radio control-label">カラオケ配信リクエストを受け付ける </label>
+    <label class="radio-inline">
+      <input type="radio" name="usehaishin" value="1" <?php print ($usehaishin)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usehaishin" value="2" <?php print (!$usehaishin)?'checked':' ' ?> /> 使用しない
+    </label>
   </div>
   <div class="form-group">
     <label class="radio control-label">配信曲にビデオキャプチャデバイスを使用 </label>

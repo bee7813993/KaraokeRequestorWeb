@@ -134,10 +134,14 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
             $artist = $value->plaintext;
             // $artist = get_plaintext_parentonly($value);
             $artistinfo = $value->find( 'a' );
-            $artisturl ='';
+            $artisturl =  $artist;
             foreach($artistinfo as $ainfo){
-                $artisturl = $artisturl.'&nbsp;<a href="'.ansoninfo_getlocalurl_artist($ainfo->href,$ainfo->plaintext,$selectid).'">'.$ainfo->plaintext.'</a>';
-                $artist = preg_replace('/'.preg_quote($ainfo->plaintext,'/').'/','',$artist);
+                $artistlink = '<a href="'.ansoninfo_getlocalurl_artist($ainfo->href,$ainfo->plaintext,$selectid).'">'.$ainfo->plaintext.'</a>';
+                // $artisturl = $artisturl.'&nbsp;<a href="'.ansoninfo_getlocalurl_artist($ainfo->href,$ainfo->plaintext,$selectid).'">'.$ainfo->plaintext.'</a>';
+                $artisturl = preg_replace('/'.preg_quote($ainfo->plaintext,'/').'/',$artistlink,$artisturl);
+            }
+            if(empty(trim($artist))){
+                $artist = $value->plaintext;
             }
             }
             $value=$tr->find('td[headers=lyrics]',0);
@@ -163,7 +167,7 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
                                    'compose' => $compose,
                                    'arrange' => $arrange,
                                    'title' => $title,
-                                   'titleurl' => null,
+                                   'titleurl' => $title,
                                    'artisturl' => $artisturl
                                    );
             $results[]=$result_one;            
@@ -172,7 +176,7 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
     }elseif(strcmp("artist",$l_kind) == 0){
       $artist = $result_dom->find( 'div.subject' )[0]->plaintext;
       $searchinfo['artist'] = $artist;
-      $artisturl = '';
+      $artisturl = $artist;
       foreach( $result_dom->find( 'table.sorted' ) as $list ){
         foreach( $list->find( 'tr' ) as $tr ){
             $songtitle = null;
@@ -195,11 +199,12 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
             $value=$tr->find('td[headers=program]',0);
             if(isset($value)){
                 $program = $value->plaintext;
-                $titleurl ='';
+                $titleurl =$program;
                 $titleinfo = $value->find( 'a' );
                 foreach($titleinfo as $ainfo){
-                    $titleurl = $titleurl.'&nbsp;<a href="'.ansoninfo_getlocalurl_program($ainfo->href,$ainfo->plaintext,$selectid ).'">'.$ainfo->plaintext.'</a>';
-                    $program = preg_replace('/'.preg_quote($ainfo->plaintext,'/').'/','',$program);
+                    $titlelink = '<a href="'.ansoninfo_getlocalurl_program($ainfo->href,$ainfo->plaintext,$selectid ).'">'.$ainfo->plaintext.'</a>';
+                    // $titleurl = $titleurl.'&nbsp;<a href="'.ansoninfo_getlocalurl_program($ainfo->href,$ainfo->plaintext,$selectid ).'">'.$ainfo->plaintext.'</a>';
+                    $program = preg_replace('/'.preg_quote($ainfo->plaintext,'/').'/',$titlelink,$program);
                 }
             }
             $value=$tr->find('td[headers=oped]',0);
@@ -220,8 +225,8 @@ function ansoninfo_gettitlelist($url,$l_kind,$selectid = null){
                                    'date' => $date,
                                    'artist' => $artist , 
                                    'artisturl' => $artisturl,
-                                   'title' => $program,
-                                   'titleurl' => $titleurl
+                                   'title' => $titleurl,
+                                   'titleurl' => $program
                                    );
             $results[]=$result_one;            
         }
@@ -621,19 +626,28 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
                         echo ' <div >'.$sword.'<br>検索結果  ⇒'.$result_a["totalResults"].'件 </div>';
                     }
                 }
+                if (configbool("usehaishin", true) ) {
+                    $songinfo = '['.$value["artist"].']'.$checktitle.'_'.$value["title"];
+                    if(array_key_exists("oped",$value)){
+                        $songinfo=str_replace(array("\r\n", "\r", "\n"), ' ', $songinfo.$value["oped"]);
+                    }
+                    print '<p>';
+                    print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信で予約する＞ </a>';
+                    print '</p>';
+                }
                 echo "</td>"."\n";
                 echo '<td class="songtitle" >'."\n";
                 print ' '. $checktitle;
                 echo "</td>"."\n";
                 echo '<td class="title" >'."\n";
-                print ' '. $value["title"];
+                //print ' '. $value["title"];
                 print $value["titleurl"];
                 if(array_key_exists("oped",$value)){
                      print $value["oped"];
                 }
                 echo "</td>"."\n";
                 echo '<td class="artist" >'."\n";
-                print ' '. $value["artist"];
+                print ' ';
                 print $value["artisturl"];
                 echo "</td>"."\n";
                 echo '<td class="anisoninfo" >'."\n";

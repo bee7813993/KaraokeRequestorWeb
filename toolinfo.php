@@ -79,10 +79,10 @@ if(!empty($globalhost)){
 
 
 print '<div class="container">';
-// 認証パスワード表示
+// 認証キーワード表示
 if(  $config_ini['useeasyauth'] == 1 ){
     print '<div class="form-group">';
-    print '<label for="useeasyauth_word">認証パスワード <small> もし聞かれたらこれを入力してください </small></label>';
+    print '<label for="useeasyauth_word">認証キーワード <small> もし聞かれたらこれを入力してください </small></label>';
     print '<input type="text" class="form-control input-lg toolinfo" id="useeasyauth_word"  value="'.$config_ini['useeasyauth_word'].'">';
     print '</div>';
     if(isset($globalhost)) {

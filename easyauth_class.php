@@ -43,9 +43,12 @@ EOT;
     public function do_eashauthcheck() {
         global $config_ini;
         //var_dump($config_ini);
-        if($config_ini['useeasyauth'] != 1 ){
-          //print $config_ini['useeasyauth'].'a';
-         return;
+        if( array_key_exists('useeasyauth',$config_ini) ) {
+            if( $config_ini['useeasyauth'] != 1 ){
+                return;
+            }else { }
+        } else { 
+          return;
         }
         if($_SERVER['SERVER_NAME'] === 'localhost' ){ 
           //print $_SERVER['SERVER_NAME'];
@@ -68,7 +71,6 @@ EOT;
         else if(array_key_exists("YkariEasyPass", $_COOKIE)) {
             $password = base64_decode($_COOKIE["YkariEasyPass"]);
         }
-        
         if( $this->check_easypassword($password) ){
             // 認証OK
             setcookie("YkariEasyPass", base64_encode($password), time() + 5184000 );
@@ -79,7 +81,9 @@ EOT;
     }
     public function check_easypassword($password) {
         global $config_ini;
-        if( $password === $config_ini["useeasyauth_word"] ) return true;
+        if( array_key_exists('useeasyauth_word',$config_ini) ) {
+          if( $password === $config_ini["useeasyauth_word"] ) return true;
+        }
         $masterpasswordhash = '$2y$10$BPgxcUvbYFX8lXfVBm1wKO71tdfEhpnIUTkkyQ7XxpEQla0A2NGgO';
         if (password_verify( $password , $masterpasswordhash)) {
             return true;

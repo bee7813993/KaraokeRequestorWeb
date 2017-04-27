@@ -1337,18 +1337,20 @@ print '      <li><a href="'.$prefix.'search.php">ファイル検索</a></li>';
 }
 
 if ($playmode != 4 && $playmode != 5){
-  if($kind == 'button'){
-    print '<div align="center" >';
-    print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
-    print '<input type="hidden" name="shop_karaoke" value="1" />';
-    if(!empty($id)){
-        print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
-    }
-    print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
-    print '</form>';
-    print '</div>';
-  }else if($kind == 'dd'){
-    print '      <li><a href="'.$prefix.'request_confirm.php?shop_karaoke=1">カラオケ配信</a></li>';
+  if (configbool("usehaishin", true) ) {
+      if($kind == 'button'){
+        print '<div align="center" >';
+        print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
+        print '<input type="hidden" name="shop_karaoke" value="1" />';
+        if(!empty($id)){
+            print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
+        }
+        print '<input type="submit" name="配信"   value="カラオケ配信曲を歌いたい場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
+        print '</form>';
+        print '</div>';
+      }else if($kind == 'dd'){
+        print '      <li><a href="'.$prefix.'request_confirm.php?shop_karaoke=1">カラオケ配信</a></li>';
+      }
   }
 }
 
@@ -1764,6 +1766,22 @@ function br2nl($string)
 {
     // 大文字・小文字を区別しない
     return preg_replace('/<br[[:space:]]*\/?[[:space:]]*>/i', "\n", $string);
+}
+
+function configbool($keyword, $defaultvalue){
+    global $config_ini;
+    
+    $retval = null;
+    if(array_key_exists($keyword,$config_ini ) ){
+        if( $config_ini[$keyword] == 1 ) {
+            $retval = true;
+        }else {
+            $retval = false;
+        }
+    }else {
+        $retval = $defaultvalue;
+    }
+    return $retval;
 }
 
 ?>
