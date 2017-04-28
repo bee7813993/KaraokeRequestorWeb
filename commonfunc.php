@@ -162,7 +162,13 @@ function replace_obscure_words($word)
                      "!",
                      "！",
                      ':',
-                     '：'
+                     '：',
+                     '~',
+                     '・',
+                     '*',
+                     '_',
+                     '&quot;',
+                     '&amp;'
                      );
   // あいまい単語置換(スペースに)
   $resultwords = str_replace($obscure_list,' ',$resultwords);
