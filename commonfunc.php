@@ -1163,7 +1163,7 @@ EOD;
          reset($config_ini["roomurl"]);
          while($roominfo = each($config_ini["roomurl"])){
              if(!empty($roominfo["value"])) {
-                 print '      <li id="'.$roominfo["key"].'room" ><a href="'.$roominfo["value"].'">'.$roominfo["key"].'</a></li>'."\n";
+                 print '      <li id="'.$roominfo["key"].'room" ><a href="'.urldecode($roominfo["value"]).'">'.$roominfo["key"].'</a></li>'."\n";
 /**
                  print '<script type="text/javascript">'."\n";
                  print '$(document).ready( function(){'."\n";
