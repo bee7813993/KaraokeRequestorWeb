@@ -32,7 +32,6 @@ SelectDirLabel3=[name] をインストールするXAMPPをインストールしたフォルダ内のhtdo
 [Files]
 ;;Source: "package\xampp-win32-5.6.12-0-VC11-installer.exe"; DestDir: {tmp}; Components: xampp
 Source: "*.php"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
-Source: "*.php"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "version"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "*.bat"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "*.js"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
@@ -56,6 +55,7 @@ Source: ".htaccess"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "gitbase\.git\*"; DestDir: "{app}\.git"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "gitcmd\*"; DestDir: "{app}\gitcmd"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "l-smash\*"; DestDir: "{app}\gitcmd"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
+Source: "pfwd_forykr\*"; DestDir: "{app}\pfwd_forykr"; Flags: IgnoreVersion; Components: main
 
 [Run]
 ;;Filename: "{tmp}\xampp-win32-5.6.12-0-VC11-installer.exe";  StatusMsg: "Installing xampp..."

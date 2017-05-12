@@ -153,6 +153,7 @@ function replace_obscure_words($word)
   // 括弧削除 "/[ ]*\(.*?\)[ ]*/u";
   $resultwords = preg_replace("/[ ]*\(.*?\)[ ]*/u",' ',$word);
   // あいまい単語リスト
+/*** 外部ファイル ignorecharlist.txt に移動 
   $obscure_list = array(
                      "★",
                      "☆",
@@ -170,6 +171,8 @@ function replace_obscure_words($word)
                      '&quot;',
                      '&amp;'
                      );
+***/                     
+  $obscure_list = file ( "ignorecharlist.txt" , FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
   // あいまい単語置換(スペースに)
   $resultwords = str_replace($obscure_list,' ',$resultwords);
 

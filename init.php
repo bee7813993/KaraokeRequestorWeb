@@ -727,7 +727,7 @@ if(array_key_exists("request_automove",$config_ini)) {
 <!---- 縛り曲リストの設定 ----->
   <h3> <span data-toggle="tooltip" data-placement="top" title="検索予約メニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
   <?php 
-
+  if(array_key_exists("limitlistname",$config_ini)) {
   for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){
       if(empty($config_ini["limitlistname"][$i])) continue; 
       print '<div class="form-group">';
@@ -747,6 +747,7 @@ if(array_key_exists("request_automove",$config_ini)) {
       print '" />';
       print '</div>';
   
+  }
   }
   ?>
   <div class="form-group">
@@ -885,7 +886,8 @@ $(document).ready(function(){
         print urldecode($config_ini["globalhost"]);
     }
     $btnvalue='更新';
-    if( $pfwdhost !== urldecode($config_ini["globalhost"]) ){
+    
+    if( array_key_exists("globalhost",$config_ini) && $pfwdhost !== urldecode($config_ini["globalhost"]) ){
         $btnvalue=' 更新（押してください）';
     }
     ?>" />
