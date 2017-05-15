@@ -339,6 +339,38 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
 />
   </div>
   <div class="form-group">
+    <label class="radio control-label"> MPCのフルスクリーンボタン </label>
+    <label class="radio-inline">
+      <input type="radio" name="moviefullscreen" value="1" <?php print ($config_ini["moviefullscreen"]==1)?'checked':' ' ?> /> 有効
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="moviefullscreen" value="2" <?php print ($config_ini["moviefullscreen"]!=1)?'checked':' ' ?> /> 無効
+    </label>
+  </div>  
+
+<!---- キーチェンジ機能 ----->
+  <?php
+      $usekeychange=false;
+      if(array_key_exists("usekeychange",$config_ini)){
+          if($config_ini["usesimplelist"]==1 ){
+             $usekeychange=true;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <label class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title="Player画面にキー変更ボタンを表示します" >
+        MPCのキーチェンジ機能 <small>『要<a href="http://shinta.coresv.com/soft/EasyKeyChanger_JPN.html" > 簡易キーチェンジャー </a>のセットアップ』</small> </span>
+    </label>
+        
+    <label class="radio-inline">
+      <input type="radio" name="usekeychange" value="1" <?php print ($usekeychange)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usekeychange" value="2" <?php print (!$usekeychange)?'checked':' ' ?> /> 使用しない
+    </label>
+  </div>
+
+  <div class="form-group">
     <label class="radio control-label"><span data-toggle="tooltip" data-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。予約確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </label>
     <label class="radio-inline" data-toggle="tooltip" data-placement="top" title="予約確認画面に項目を追加するかどうか">
       <input type="radio" name="useotherplayer" value="1" <?php 
@@ -380,7 +412,7 @@ print 'value="'.urldecode($config_ini["otherplayer_path"]).'"';
     <input type="text" name="foobarpath" class="form-control" id="foobarpath" value="<?php echo urldecode($config_ini["foobarpath"]); ?>" />
   </div>
   <div class="form-group">
-    <label for="comment"> リクエスト画面の説明書き </label>
+    <label for="comment"> リクエスト画面、コメント欄の説明書き </label>
     <textarea class="form-control" name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
 <?php print htmlspecialchars(urldecode($config_ini["requestcomment"])); ?>
     </textarea>
@@ -557,15 +589,6 @@ print 'value="'.urldecode($config_ini["BGVCMDEND"]).'"';
     <label > ルーム名 (半角英数字8文字まで) <br />
     <input type="text" name="commentroom" MAXLENGTH="24" class="form-control" value="<?php echo urldecode($config_ini["commentroom"]); ?>" />
   </div>
-  <div class="form-group">
-    <label class="radio control-label"> MPC-BEのフルスクリーンボタン </label>
-    <label class="radio-inline">
-      <input type="radio" name="moviefullscreen" value="1" <?php print ($config_ini["moviefullscreen"]==1)?'checked':' ' ?> /> 有効
-    </label>
-    <label class="radio-inline">
-      <input type="radio" name="moviefullscreen" value="2" <?php print ($config_ini["moviefullscreen"]!=1)?'checked':' ' ?> /> 無効
-    </label>
-  </div>  
 
   <div class="form-group">
     <label >

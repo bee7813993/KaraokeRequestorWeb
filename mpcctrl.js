@@ -210,3 +210,11 @@ url=playerurl2 + "?cmd=" + cmdnum;
 request.open("GET", url, true);
 request.send("");
 }
+
+// keychange command
+function keychange(keycmd){
+var request = createXMLHttpRequest();
+url=playerurl2 + "?key=" + keycmd;
+request.open("GET", url, true);
+request.send("");
+}

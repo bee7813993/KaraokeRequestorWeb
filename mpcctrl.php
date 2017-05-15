@@ -3,14 +3,17 @@
       require_once 'mpcctrl_func.php';
   if( !empty($_REQUEST['songnext']) ){
       songnext();
+      die();
   }
 
   if(  array_key_exists('songstart',$_REQUEST) ){
       songstart();
+      die();
   }  
   
   if(  array_key_exists('fadeout',$_REQUEST) ){
       $v=volume_fadeout();
+      die();
   }  
 
   if(array_key_exists("cmd", $_REQUEST)) {
@@ -25,6 +28,12 @@
       }else {
           command_mpc($l_cmd);
       }
+      die();
+  }
+  if(array_key_exists("key", $_REQUEST)) {
+      $l_keycmd = $_REQUEST["key"];
+      keychange($l_keycmd);
+      die();
   }
 
 ?>
@@ -84,6 +93,27 @@ print '<button type="submit" value="字幕ONOFF(ソフトサブのみ)" class=" 
 print '</div >';
 print '<div class="col-xs-6">';
 print '<button type="submit" value="音声トラック変更" class=" pcmorefunc btn btn-default" onClick="song_changeaudio()" >音声トラック変更</button>';
+print '</div >';
+}
+
+/* 設定にてキーチェンジ機能が有効になっているかどうか */
+$usekeychange=false;
+if(array_key_exists("usekeychange",$config_ini)){
+    if($config_ini["usesimplelist"]==1 ){
+       $usekeychange=true;
+    }
+}
+if($usekeychange == true){
+print '<div class="row">';
+print '<div class="col-xs-4">';
+print '<button type="submit" value="キーダウン" class=" pcmorefunc btn btn-default" onClick="keychange(\'down\')" >キーダウン</button>';
+print '</div >';
+print '<div class="col-xs-4">';
+print '<button type="submit" value="原曲キー" class=" pcmorefunc btn btn-default" onClick="keychange(0)" >原曲キー</button>';
+print '</div >';
+print '<div class="col-xs-4">';
+print '<button type="submit" value="キーアップ" class=" pcmorefunc btn btn-default" onClick="keychange(\'up\')" >キーアップ</button>';
+print '</div >';
 print '</div >';
 }
 ?>

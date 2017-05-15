@@ -4,6 +4,24 @@ require_once 'commonfunc.php';
 
 $MPCCMDURL='http://localhost:13579/command.html';
 $MPCSTATUSURL='http://localhost:13579/status.html';
+$EASYKEYCHANGERURL='http://localhost:13580/command.html';
+
+  function timestring(){
+      $now = \DateTime::createFromFormat('U.u', sprintf('%6F', microtime(true)));
+      return $now->format('Y-m-d H:i:s.u');
+  }
+
+  function clientipue(){
+      return $_SERVER["HTTP_USER_AGENT"].$_SERVER["REMOTE_ADDR"];
+  }
+  
+  function mkclienthash($count = 0){
+      $hashbaseword = timestring().clientipue().$count;
+      // print 'DEBUG:'.$hashbaseword.'<br>';
+      $hashword = hash("md5", $hashbaseword, $raw_output = false);
+      // print 'DEBUG:'.$hashword.'<br>';
+      return substr($hashword,0,8);
+  }
 
 function songnext(){
       global  $db;
@@ -137,5 +155,15 @@ function volume_fadeout(){
     return $volume;
 }
 
+function keychange($keycmd){
+    global $EASYKEYCHANGERURL;
+    
+    $clienttoken=mkclienthash();
+
+    $res = TRUE;
+    $requesturl=$EASYKEYCHANGERURL.'?key='.$keycmd.'&token='.$clienttoken;
+    $res = file_get_html_with_retry($requesturl,1,1);
+    return $res;
+}
 
 ?>
