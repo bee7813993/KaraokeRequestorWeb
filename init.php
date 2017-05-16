@@ -352,7 +352,7 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
   <?php
       $usekeychange=false;
       if(array_key_exists("usekeychange",$config_ini)){
-          if($config_ini["usesimplelist"]==1 ){
+          if($config_ini["usekeychange"]==1 ){
              $usekeychange=true;
           }
       }

@@ -46,7 +46,11 @@ print_meta_header();
 <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
 <script type="text/javascript" charset="utf8" src="js/currency.js"></script>
 <script src="js/bootstrap.min.js"></script>
-
+<link href="js/video-js.min.css" rel="stylesheet">
+<script src="js/video.min.js"></script>
+<script>
+  videojs.options.flash.swf = "js/video-js.swf"
+</script>
 <?php
 /*
 if(!empty($word)){

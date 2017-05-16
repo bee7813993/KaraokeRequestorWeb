@@ -1731,10 +1731,17 @@ function make_preview_modal($filepath, $modalid) {
       return null;
   }
 
-  $previewpath = "http://" . $everythinghost . ":81/" . urlencode($filepath);
-
+  $previewpath[] = "http://" . $everythinghost . ":81/" . urlencode($filepath);
+  $filepath_url = str_replace('\\', '/', $filepath);
+  $previewpath[] = "http://" . $everythinghost . ":81/" . ($filepath_url);
   $button='<a href="#" data-toggle="modal" class="previewmodallink btn btn-default" data-target="#'.$modalid.'" > プレビュー </a>';
   
+  $previewsource = "";
+   foreach($previewpath as $previewurl ){
+     $previewsource = $previewsource.'<source src="'.$previewurl.'" '.$filetype.' />';
+   }
+
+
   $modaldg='<!-- 2.モーダルの配置 -->'.
 '<div class="modal" id="'.$modalid.'" tabindex="-1">'.
 '  <div class="modal-dialog">
@@ -1746,10 +1753,7 @@ function make_preview_modal($filepath, $modalid) {
         <h4 class="modal-title" id="modal-label">動画プレビュー</h4>
       </div>
       <div class="modal-body">
-        <video id="preview_video" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}" width="90%" height="90%" >
-        <source src="'.
-$previewpath.'" '.$filetype.
-'/>
+        <video id="preview_video" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}" width="90%" height="90%" >'.$previewsource.'
         </video>
       </div>
       <div class="modal-footer">

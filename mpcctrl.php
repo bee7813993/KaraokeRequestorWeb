@@ -99,7 +99,7 @@ print '</div >';
 /* 設定にてキーチェンジ機能が有効になっているかどうか */
 $usekeychange=false;
 if(array_key_exists("usekeychange",$config_ini)){
-    if($config_ini["usesimplelist"]==1 ){
+    if($config_ini["usekeychange"]==1 ){
        $usekeychange=true;
     }
 }

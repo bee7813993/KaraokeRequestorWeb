@@ -56,6 +56,11 @@ Source: "gitbase\.git\*"; DestDir: "{app}\.git"; Flags: IgnoreVersion recursesub
 Source: "gitcmd\*"; DestDir: "{app}\gitcmd"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "l-smash\*"; DestDir: "{app}\gitcmd"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "pfwd_forykr\*"; DestDir: "{app}\pfwd_forykr"; Flags: IgnoreVersion; Components: main
+Source: "fonts\*"; DestDir: "{app}\fonts"; Flags: IgnoreVersion; Components: main
+Source: "qrcode_php\*"; DestDir: "{app}\qrcode_php"; Flags: IgnoreVersion; Components: main
+Source: "l-smash\*"; DestDir: "{app}\l-smash"; Flags: IgnoreVersion; Components: main
+Source: "cmd\*"; DestDir: "{app}\cmd"; Flags: IgnoreVersion; Components: main
+Source: "ignorecharlist.txt"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 
 [Run]
 ;;Filename: "{tmp}\xampp-win32-5.6.12-0-VC11-installer.exe";  StatusMsg: "Installing xampp..."
