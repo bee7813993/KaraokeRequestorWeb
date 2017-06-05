@@ -45,6 +45,40 @@ function file_exist_check_japanese($filename){
  return FALSE;
 }
 
+function workcheck_pfwd(){
+   global $config_ini;
+   $usepfwdcheck = false;
+   
+   if(array_key_exists("usepfwdcheck",$config_ini)) {
+       $usepfwdcheck = $config_ini["usepfwdcheck"];
+   }
+   
+   /* disable check? */
+   if(array_key_exists("onlinechecktimeout",$config_ini)) {
+   }else {
+     return true;
+   }
+   if($config_ini["onlinechecktimeout"] == 0 ) return true;
+   /* 設定が2以下の場合2秒に設定する */
+   if($config_ini["onlinechecktimeout"] < 2 ) $config_ini["onlinechecktimeout"] = 2;
+   
+   $checkresult = check_online_available($config_ini['globalhost'], $config_ini["onlinechecktimeout"]);
+   if( $checkresult === "OK" ){
+       return true;
+   }
+   if( $checkresult === "now disabled online") {
+       return true;
+   }
+
+    logtocmd ('pfwdの通信断を検出。pfwdを再起動します:'.$checkresult) ;
+    $url = 'http://localhost/pfwd_exec.php?pfwdstop=1';
+    file_get_html_with_retry($url,1,5);
+    sleep(2);
+    $url = 'http://localhost/pfwd_exec.php?pfwdstart=1';
+    file_get_html_with_retry($url,1,5);
+    
+}
+
 function workcheck_andrestartxampp(){
 
     $xamppstop_cmd = '..\xampp_stop.exe';
@@ -328,6 +362,8 @@ function runningcheck_shop_karaoke($db,$id){
            break;
        }
        //logtocmd "DEBUG: Endtime: " . date("H.i.s", $endtime) . ", Now: ".date("H.i.s", time());
+       workcheck_pfwd();
+       workcheck_andrestartxampp();
        sleep(2);
    }
 }
@@ -370,6 +406,8 @@ function runningcheck_audio($db,$id,$playerchecktimes){
            //logtocmd "DEBUG: ".$statusarray["ITEM_PLAYING_POS"]. '/'. $statusarray["ITEM_PLAYING_LEN"] . "\n";
            break;
        }
+       workcheck_pfwd();
+       workcheck_andrestartxampp();
 
        sleep(2);
    }
@@ -751,6 +789,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
     $stat = 2;
     while($exit == 1)
     {
+       echo ".";
        // db statusを確認
        $stat = check_nowplaying_state ($db,$id);
        if($stat === 3 ){  // 停止中
@@ -774,11 +813,11 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
            continue;
        }
        if($loopflg == 1) {
-//       if($playmode == 2) {
            song_start_again($db,$id);
        }else {
            break;
        }
+       workcheck_pfwd();
        workcheck_andrestartxampp();
     }
     $stat = check_nowplaying_state ($db,$id);
@@ -853,6 +892,8 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
        
        if($playtime > 1 ) $startonce = true;
        // logtocmd "DEBUG : $mpsctat_array[2], $playtime : $totaltime \n";
+       workcheck_pfwd();
+       workcheck_andrestartxampp();
 
        sleep(1.0);
    }
@@ -1118,6 +1159,7 @@ while(1){
     
     if( $played === 5)
     logtocmd("no next song, waiting...<br>\n");
+    workcheck_pfwd();
     workcheck_andrestartxampp();
     sleep($played);
 //     break;

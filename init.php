@@ -813,18 +813,41 @@ if(array_key_exists("pfwdplace",$config_ini)) {
 />
   </div>  
   <!---- pfwd起動自動チェック ----->
+  <?php
+      $usepfwdcheck=false;
+      if(array_key_exists("usepfwdcheck",$config_ini)){
+          if($config_ini["usepfwdcheck"]==1 ){
+             $usepfwdcheck=true;
+          }
+      }
+  ?>
+
   <div class="form-group">
-    <label class="control-label"> pfwd 自動再起動チェック、タイムアウト時間 <small>0でチェック無効</small> </label>
-    <input type="text" name="pfwdchecktimeout" class="form-control"
+    <label class="radio control-label"> pfwd 自動再起動 <br /><small>通常時オンライン版接続確認でOKになる環境で使用する</small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="usepfwdcheck" value="1" <?php print ($usepfwdcheck)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usepfwdcheck" value="2" <?php print (!$usepfwdcheck)?'checked':' ' ?> /> 使用しない
+    </label>
+
+  </div>
+
+  <!---- オンラインチェック、タイムアウト時間 ----->
+  <div class="form-group">
+    <label class="control-label"> オンラインチェック、タイムアウト時間 <br /><small>ブラウザではオンライン接続できるのに下の「オンライン版接続確認」がOKにならない場合この数値を増やしてください。</small> </label>
+    <input type="text" name="onlinechecktimeout" class="form-control"
 <?php
-if(array_key_exists("pfwdchecktimeout",$config_ini)) {
-    print 'value="'.urldecode($config_ini["pfwdchecktimeout"]).'"';
+if(array_key_exists("onlinechecktimeout",$config_ini)) {
+    print 'value="'.urldecode($config_ini["onlinechecktimeout"]).'"';
 }else {
-    print 'value="0"';
+    print 'value="2"';
+    $config_ini["onlinechecktimeout"] = 2;
 }
 ?>
 />
   </div>
+
   
   <!---- 簡易認証設定 ----->
   <?php
@@ -919,7 +942,7 @@ $(document).ready(function(){
       if(!empty($config_ini['globalhost'])){
         print '<dl class="dl-horizontal">';
         print '<dt> オンライン版接続確認 </dt>';
-        $ret = check_online_available($config_ini['globalhost']);
+        $ret = check_online_available($config_ini['globalhost'],$config_ini["onlinechecktimeout"]);
        
         if( $ret == 'OK' ){
            print '<dd > <div class="bg-success" >'.$ret .'</div></dd>';
@@ -997,7 +1020,7 @@ var xmlhttp = createXMLHttpRequest();
     </div>
     </form>
   <div class="form-group">
-      <label class="control-label" >プログラム起動停止</label>
+      <label class="control-label" >pfwdプログラム起動停止</label>
       <button type="button" class="btn btn-default" onClick="start_pfwdcmd()" >起動</button>
       <button type="button" class="btn btn-default" onClick="stop_pfwdcmd()" >停止</button>
       
