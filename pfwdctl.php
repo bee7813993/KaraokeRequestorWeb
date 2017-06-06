@@ -7,6 +7,10 @@ class pfwd {
     public $pfwdcmd='pfwd.exe';
     
     public function readpfwdcfg(){
+        if(!file_exists($this->pfwdpath.'\\pfwd.exe')){
+            print 'pfwd.exeインストールフォルダ「'.$this->pfwdpath.'」が間違っています';
+            return false;
+        }
         $this->pfwdinifile = $this->pfwdpath.'\\pfwd.ini';
         if(!file_exists($this->pfwdinifile)){
             $file=fopen($this->pfwdinifile,"w");
@@ -36,6 +40,7 @@ EOT;
             }
             fclose($file);
         }
+        return true;
     }
 
     public function save_pfwdconfig($filename = 'none'){
@@ -52,6 +57,8 @@ EOT;
       }
       return true;
     }
+
+
 
     public function showpfwdcfg(){
         var_dump($this->pfwdini);

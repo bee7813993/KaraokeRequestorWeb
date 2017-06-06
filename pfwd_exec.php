@@ -11,7 +11,6 @@ if(array_key_exists("pfwdplace",$config_ini)) {
 }else {
     die();
 }
-
 $runmode = 0;
 if(array_key_exists("pfwdstart", $_REQUEST)) {
     $runmode = 1;
@@ -48,7 +47,7 @@ switch($runmode) {
         // check
         break;
 }
-
+$updateflag = false;
 if(array_key_exists("pfwdserverhost", $_REQUEST)) {
     $pfwdserverhostport = $_REQUEST["pfwdserverhost"];
     $hostport = explode(":",$pfwdserverhostport);
@@ -62,15 +61,24 @@ if(array_key_exists("pfwdserverhost", $_REQUEST)) {
         }
         $pfwdinfo->set_pfwdport($serverport);
         $pfwdinfo->save_pfwdconfig($pfwdinfo->pfwdpath.'\\pfwd.ini');
+        $updateflag = true;
     }
 }
 
 if(array_key_exists("pfwdserveropenport", $_REQUEST)) {
+print "comehere";
     $pfwdserveropenport = $_REQUEST["pfwdserveropenport"];
     if(!empty($pfwdserveropenport)){
         $pfwdinfo->set_pfwdopenport($pfwdserveropenport);
         $pfwdinfo->save_pfwdconfig($pfwdinfo->pfwdpath.'\\pfwd.ini');
+        $updateflag = true;
     }
+}
+if( $updateflag ){
+    $pfwdhost = $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdopenport();
+    $config_ini_new = array_merge($config_ini,array(globalhost => urlencode($pfwdhost)));
+    writeconfig2ini($config_ini_new,$configfile);
+
 }
 
 

@@ -808,6 +808,7 @@ if(array_key_exists("pfwdplace",$config_ini)) {
     print 'value="'.urldecode($config_ini["pfwdplace"]).'"';
 }else {
     print 'value="pfwd_forykr\\"';
+    $config_ini["pfwdplace"] = "pfwd_forykr\\";
 }
 ?>
 />
@@ -897,9 +898,12 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
   <hr />
 <hr />
 <?php
+
 require_once 'pfwdctl.php';
+$pfwdavailable = true;
 $pfwdinfo = new pfwd();
-$pfwdinfo->readpfwdcfg();
+$pfwdinfo->pfwdpath = urldecode($config_ini["pfwdplace"]);
+$pfwdavailable = $pfwdinfo->readpfwdcfg();
 ?>
 
 <div class="container bg-info">
@@ -924,18 +928,8 @@ $(document).ready(function(){
   <div class="form-group">
     <label class="control-label" >ホスト名</label>
     <input type="text" name="globalhost" class="form-control"  value="<?php
-    $pfwdhost = "";
-    if(!empty($pfwdinfo->get_pfwdhost()) && !empty($pfwdinfo->get_pfwdopenport())) {
-        $pfwdhost = $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdopenport();
-        print $pfwdhost;
-    }else if(array_key_exists("globalhost",$config_ini)) {
         print urldecode($config_ini["globalhost"]);
-    }
-    $btnvalue='更新';
-    
-    if( array_key_exists("globalhost",$config_ini) && $pfwdhost !== urldecode($config_ini["globalhost"]) ){
-        $btnvalue=' 更新（押してください）';
-    }
+        $btnvalue='更新';
     ?>" />
 <?php
     if(array_key_exists("globalhost",$config_ini)) {
@@ -1010,11 +1004,15 @@ var xmlhttp = createXMLHttpRequest();
   <div class="form-group">
       <label class="control-label" >接続ホスト名</label>
     <input type="text" name="pfwdserverhost" class="form-control"  value="<?php
-        print $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdport();
+        if($pfwdavailable){
+            print $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdport();
+        }
     ?>" />
       <label class="control-label" >ユーザー接続ポート</label>
     <input type="text" name="pfwdserveropenport" class="form-control"  value="<?php
-        print $pfwdinfo->get_pfwdopenport();
+        if($pfwdavailable){
+            print $pfwdinfo->get_pfwdopenport();
+        }
     ?>" />
     <input type="submit" class="btn btn-default" value="設定" />
     </div>
@@ -1025,7 +1023,10 @@ var xmlhttp = createXMLHttpRequest();
       <button type="button" class="btn btn-default" onClick="stop_pfwdcmd()" >停止</button>
       
       <?php
-          if($pfwdinfo->statpfwdcmd()){
+          if($pfwdavailable == false){
+              print '<span class="alert-danger" > 利用不可</span>';
+          }
+          else if($pfwdinfo->statpfwdcmd()){
               print '<span class="bg-success" > 起動中</span>';
           } else {
               print '<span class="alert-danger" >停止中</span>';
