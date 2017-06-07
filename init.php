@@ -928,7 +928,9 @@ $(document).ready(function(){
   <div class="form-group">
     <label class="control-label" >ホスト名</label>
     <input type="text" name="globalhost" class="form-control"  value="<?php
-        print urldecode($config_ini["globalhost"]);
+        if(array_key_exists("globalhost",$config_ini)) {
+            print urldecode($config_ini["globalhost"]);
+        }
         $btnvalue='更新';
     ?>" />
 <?php

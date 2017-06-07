@@ -3,7 +3,9 @@
 require_once 'commonfunc.php';
 require_once 'pfwdctl.php';
 
-
+var_dump( $_REQUEST);
+var_dump( $config_ini);
+print $config_ini["pfwdplace"];
 $pfwdinfo = new pfwd();
 $pfwdinfo->readpfwdcfg();
 if(array_key_exists("pfwdplace",$config_ini)) {
@@ -11,6 +13,7 @@ if(array_key_exists("pfwdplace",$config_ini)) {
 }else {
     die();
 }
+
 $runmode = 0;
 if(array_key_exists("pfwdstart", $_REQUEST)) {
     $runmode = 1;
@@ -74,11 +77,12 @@ print "comehere";
         $updateflag = true;
     }
 }
+var_dump( $updateflag);
 if( $updateflag ){
     $pfwdhost = $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdopenport();
-    $config_ini_new = array_merge($config_ini,array(globalhost => urlencode($pfwdhost)));
+    $config_ini_new = array_merge($config_ini,array('globalhost' => urlencode($pfwdhost)));
     writeconfig2ini($config_ini_new,$configfile);
-
+var_dump($config_ini_new);
 }
 
 
