@@ -274,6 +274,78 @@ if(is_numeric($selectid) ){
 ?>
 </dd>
 <dl>
+<?php
+/* キー変更 */
+if($config_ini['usekeychange'] ){
+    print <<<EOT
+<dl>
+<dt>キー変更</dt>
+<dd>
+<div class="btn-group" data-toggle="buttons">
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="-6" autocomplete="off" > -6
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="-5" autocomplete="off" > -5
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="-4" autocomplete="off" > -4
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="-3" autocomplete="off" > -3
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="-2" autocomplete="off" > -2
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="-1" autocomplete="off" > -1
+    </label>
+    <label class="btn btn-default active">
+        <input type="radio" name="keychange" value="0" autocomplete="off" checked > 原曲
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="1" autocomplete="off" > 1
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="2" autocomplete="off" > 2
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="3" autocomplete="off" > 3
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="4" autocomplete="off" > 4
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="5" autocomplete="off" > 5
+    </label>
+    <label class="btn btn-default">
+        <input type="radio" name="keychange" value="6" autocomplete="off" > 6
+    </label>
+</div>
+</dd>
+</dl>
+EOT;
+
+}
+/*
+    print <<<EOT
+<dl>
+<dt>トラック選択</dt>
+<dd>
+<select name="track" class="form-control">
+EOT;
+$maxtrack = 10;
+for($c = 0; $c < $maxtrack ; $c++ ){
+  print '  <option value="'.$c.'" >'.($c+1).'トラック目</option>'."\n";
+}
+    print <<<EOT
+</select>
+</dd>
+</dl>
+EOT;
+*/
+
+?>
 
 <!-----
 <select name="kind">

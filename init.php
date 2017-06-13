@@ -348,6 +348,29 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
     </label>
   </div>  
 
+<!---- 音量戻し ----->
+  <?php
+      $startvolume50=true;
+      if(array_key_exists("startvolume50",$config_ini)){
+          if($config_ini["startvolume50"]!=1 ){
+             $startvolume50=false;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <label class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title=" MPCの動画再生開始時に音量を５０％に戻す" >
+        MPCの再生開始時に音量を５０％に戻す <small></small> </span>
+    </label>
+        
+    <label class="radio-inline">
+      <input type="radio" name="startvolume50" value="1" <?php print ($startvolume50)?'checked':' ' ?> /> 有効
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="startvolume50" value="2" <?php print (!$startvolume50)?'checked':' ' ?> /> 無効
+    </label>
+  </div>
+
+
 <!---- キーチェンジ機能 ----->
   <?php
       $usekeychange=false;
@@ -500,6 +523,28 @@ print 'value="'.urldecode($config_ini["DeliveryCMDEND"]).'"';
 }
 ?>
 />
+  </div>
+
+<!---- キャプチャー時Direct3Dフルスクリーン切り替え ----->
+  <?php
+      $toggled3dfullscreen=false;
+      if(array_key_exists("toggled3dfullscreen",$config_ini)){
+          if($config_ini["toggled3dfullscreen"] == 1 ){
+             $toggled3dfullscreen=true;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <label class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title=" 通常再生時Direct3Dフルスクリーンを有効にしている際に有効にする" >
+        ビデオキャプチャデバイスを使用時にDirect3Dフルスクリーンの切り替え <small></small> </span>
+    </label>
+        
+    <label class="radio-inline">
+      <input type="radio" name="toggled3dfullscreen" value="1" <?php print ($toggled3dfullscreen)?'checked':' ' ?> /> 有効
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="toggled3dfullscreen" value="2" <?php print (!$toggled3dfullscreen)?'checked':' ' ?> /> 無効
+    </label>
   </div>
 
   <div class="form-group">

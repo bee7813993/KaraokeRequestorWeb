@@ -56,6 +56,23 @@ if(array_key_exists("otherplayer", $_REQUEST)) {
     }
 }
 
+$l_keychange = 0;
+if(array_key_exists("keychange", $_REQUEST)) {
+    $l_keychange = $_REQUEST["keychange"];
+    if(!is_numeric($l_keychange)){
+        $l_keychange = 0;
+    }
+}
+
+$l_track = 0;
+if(array_key_exists("track", $_REQUEST)) {
+    $l_track = $_REQUEST["track"];
+    if(!is_numeric($l_track)){
+        $l_track = 0;
+    }
+}
+
+
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
 }
@@ -100,7 +117,7 @@ if($request[0]['nowplaying'] === '再生中' || $request[0]['nowplaying'] === '�
 }
 
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying where id = ".$selectid;
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track where id = ".$selectid;
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -117,11 +134,13 @@ $arg = array(
 	':fp' => $l_fullpath,
 	':secret' => $l_secret,
 	':loop' => $l_loop,
-	':nowplaying' => $new_nowplaying
+	':nowplaying' => $new_nowplaying,
+	':keychange' => $l_keychange,
+	':track' => $l_track
 	);
 }else {
   try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop)";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track)";
     $stmt = $db->prepare($sql);
   } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -141,7 +160,9 @@ $arg = array(
 	':ip' => $l_clientip  ,
 	':ua' => $l_clientua ,
 	':secret' => $l_secret,
-	':loop' => $l_loop
+	':loop' => $l_loop,
+	':keychange' => $l_keychange,
+	':track' => $l_track
 	);
 }
 $ret = $stmt->execute($arg);

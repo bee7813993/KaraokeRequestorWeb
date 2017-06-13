@@ -207,6 +207,55 @@ function readconfig(
     //var_dump($config_ini);
 }
 
+function updatedb($db){
+    /* 追加した項目一覧 */
+    $newcolumnlist=array(
+                  array ( "name" => "fullpath" , "type" =>  "text") ,
+                  array ( "name" => "nowplaying" , "type" =>  "text") ,
+                  array ( "name" => "status" , "type" =>  "text") ,
+                  array ( "name" => "clientip" , "type" =>  "text") ,
+                  array ( "name" => "clientua" , "type" =>  "text") ,
+                  array ( "name" => "playtimes" , "type" =>  "INTEGER") ,
+                  array ( "name" => "secret" , "type" =>  "INTEGER") ,
+                  array ( "name" => "loop" , "type" =>  "text") ,
+                  array ( "name" => "keychange" , "type" =>  "INTEGER default 0") ,
+                  array ( "name" => "track" , "type" =>  "INTEGER default 0") 
+                  );
+    /* 現在の項目一覧取得 */
+    try {
+        $rowsdb = $db->query('PRAGMA table_info(requesttable)');
+        $rows = $rowsdb->fetchAll(PDO::FETCH_ASSOC);
+        $rowsdb->closeCursor();
+    } catch(PDOException $e) {
+        printf("DB PDO Error: %s\n", $e->getMessage());
+        return false;
+    }
+    
+    /* 追加項目がすでにあるかチェック */
+    foreach ($newcolumnlist as $nc ){
+        $foundflg = false;
+        foreach ($rows as $row) {
+            if(  $row['name'] == $nc['name'] ) {
+              //echo $row['name']."\n";
+                $foundflg = true;
+            }
+        }
+        if( ! $foundflg ){
+            $addcolumnsql = "ALTER TABLE requesttable ADD COLUMN ".$nc['name'].'['.$nc['type'].']';
+            echo $addcolumnsql;
+            echo "\n";
+            try {
+                $res = $db->exec($addcolumnsql);
+            } catch(PDOException $e) {
+                printf("DB PDO Error: %s\n", $e->getMessage());
+                return false;
+            }
+        }
+    }    
+    return true;
+}
+
+
 function initdb(&$db,$dbname)
 {
 
@@ -230,13 +279,16 @@ $sql = "create table IF NOT EXISTS requesttable (
  clientua text,
  playtimes INTEGER,
  secret INTEGER,
- loop INTEGER
+ loop INTEGER,
+ keychange INTEGER default 0,
+ track INTEGER default 0
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){
 	print("Create table 失敗しました。<br>");
 	die();
 }
+ updatedb($db);
  return($db);
 
 }

@@ -27,6 +27,7 @@ $MPCBESTATURL='http://localhost:13579/status.html';
 $MPCCMDURL='http://localhost:13579/command.html';
 $MPCFILEOPENURL='http://localhost:13579/browser.html?path=';
 $FOOBARSTATURL='http://localhost:82/karaokectrl/';
+$MPCKEYCHANGEURL='http://localhost/mpcctrl.php?key=';
 
 function file_exist_check_japanese($filename){
 /*
@@ -117,6 +118,10 @@ function logtocmd($msg){
   print(mb_convert_encoding("$msg\n","SJIS-win"));
 }
 
+function logtocmd_dbg($msg){
+  //print(mb_convert_encoding("$msg\n","SJIS-win"));
+}
+
 function mpcstop(){
    global $MPCCMDURL;
    global $playercommandname;
@@ -156,7 +161,7 @@ function mpcrunningcheck($playerpath){
    $pscheck_cmd='tasklist /fi "imagename eq '.$playercommandname.'"';
    //logtocmd $pscheck_cmd;
    exec($pscheck_cmd, $psresult );
-   sleep(1);
+   sleep(0.1);
    
    $process_found = FALSE;
    
@@ -231,17 +236,16 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
        
        $requesturl = $MPCFILEOPENURL.rawurlencode($playfilepath);
        // logtocmd $requesturl;
-       $mpcstat = file_get_contents($requesturl, 1);
+       $mpcstat = file_get_html_with_retry($requesturl, 1,2);
        
        if( $mpcstat === FALSE) {
            //var_dump($mpcstat);
-           sleep(1);
+           //sleep(0.1);
            continue;
        }else{
            break;
        }
     }
-    
 /*
     if( $playmode == 2) {
         //一時停止する
@@ -277,6 +281,7 @@ function captureviewstop(){
        }
      }
    }
+
    return false;
    
 }
@@ -302,7 +307,31 @@ function captureviewstart($playerpath,$waittime = 1){
          }
        }
      }else if($config_ini["usevideocapture"]==1 ){
+       $toggled3dfullscreen = false;
+       if(array_key_exists("toggled3dfullscreen", $config_ini)) {
+           if($config_ini["toggled3dfullscreen"] == 1){
+               $toggled3dfullscreen = true;
+           }
+       }
+       if($toggled3dfullscreen) {
+           global $MPCCMDURL;
+           $mpcstat = file_get_contents($MPCCMDURL."?wm_command=1023");
+       }
+     
        mpcdevicestart($playerpath, $waittime);
+       
+       // ビデオキャプチャーデバイスでは、画面を画面いっぱいに引きのばす(GV-USB2では縦長になるので)
+       $stretchvideo = true;
+       if(array_key_exists("stretchvideo", $config_ini)) {
+           if($config_ini["stretchvideo"] != 1){
+               $stretchvideo = false;
+           }
+       }
+       if($stretchvideo) {
+           global $MPCCMDURL;
+           $mpcstat = file_get_contents($MPCCMDURL."?wm_command=838");
+       }
+
        return true;
      }
   }
@@ -328,6 +357,31 @@ function mpcdevicestart($playerpath,$waittime = 1){
        }else{
            break;
        }
+    }
+}
+
+function mpc_keychange($changekey){
+    global $MPCKEYCHANGEURL;
+    global $config_ini;
+    
+    if(is_null($changekey)) return;
+    if($config_ini['usekeychange'] != 1){
+     file_get_html_with_retry('http://localhost/mpcctrl.php');
+     return;
+    }
+    $mpccmd = $MPCKEYCHANGEURL.$changekey;
+    file_get_html_with_retry($mpccmd);
+}
+
+function mpc_trackchange($changetrack){
+    global $MPCCMDURL;
+    global $config_ini;
+    
+    if(is_null($changetrack)) return;
+    if(!is_numeric ($changetrack)) return;
+    $mpccmd = $MPCCMDURL."?wm_command=952";
+    for($changecount=0 ; $changecount<$changetrack ; $changecount++){
+        file_get_contents($mpccmd);
     }
 }
 
@@ -590,6 +644,7 @@ function song_start_again($db,$id){
 function song_stop($kind, $stat = 'none'){
     global $MPCCMDURL;
     global $FOOBARSTATURL;
+    global $config_ini;
     if( $kind === 1 || $kind === 3){
         // case mpc
         
@@ -602,6 +657,15 @@ function song_stop($kind, $stat = 'none'){
         if($stat == 3){
           set_volume($volume);
           }
+        if(array_key_exists('startvolume50',$config_ini)){
+            if($config_ini['startvolume50'] != 1)  {
+            }else{
+                set_volume(50);
+            }
+        }else{
+            set_volume(50);
+        }
+        
         
     }else if( $kind === 2) {
         // case foobar
@@ -757,6 +821,24 @@ function start_song($db,$id,$addplaytimes = 0){
               }
               mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
             }
+            /**** ここに再生前にPlayer操作を行う処理を入れる ****/
+            /* key change */
+            global $MPCCMDURL;
+            global $MPCSTATURL;
+            // 一時停止
+            file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
+            file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+            file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+            file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
+//            file_get_html_with_retry($MPCCMDURL."?wm_command=888");
+            //sleep(5.5);
+            if(array_key_exists("keychange" , $row)){
+                mpc_keychange($row["keychange"]);
+            }
+            if(array_key_exists("track" , $row)){
+                mpc_trackchange($row["track"]);
+            }
+            /* track change */
             // BGVモードではmuteにする。
             $loop = check_request_loop($db,$id);
             if($loop == 1) {
@@ -769,6 +851,9 @@ function start_song($db,$id,$addplaytimes = 0){
                     exec($cmd);
                 }
             }
+            // 再生開始
+            file_get_html_with_retry($MPCCMDURL."?wm_command=887");
+
         }
     }
     $db->beginTransaction();
@@ -901,6 +986,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
 
 /******** ここからメイン処理 ********/
 while(1){
+    logtocmd_dbg( '全体ループ開始'."\n");
      //config 再読込
      readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);
      if(! empty($playerpath)){
@@ -913,6 +999,7 @@ while(1){
         $playerchecktimes = 3;
      }
      $playercommandname = basename($playerpath);
+    logtocmd_dbg( '全体ループ開始:config読み込み完了'."\n");
     
     
     $played = 5;  // 5:no next song wait sec. 1: played and next song wait sec.
@@ -1023,7 +1110,8 @@ while(1){
             $select->closeCursor();
         }
     }
-    
+    logtocmd_dbg( 'ファイル再生準備開始'."\n");
+
     if(count($rowall) > 0 ) {
     $row=$rowall[0];
     if ($nosong == 1 ) {
@@ -1078,11 +1166,37 @@ while(1){
           if( array_key_exists('DeliveryCMD',$config_ini) && !empty($config_ini['DeliveryCMD']) && array_key_exists('DeliveryCMDEND',$config_ini) && !empty($config_ini['DeliveryCMDEND']) ){
               $cmd = urldecode($config_ini['DeliveryCMDEND']);
               exec($cmd);
-          } else {
-          captureviewstop();
+          } 
+          if (array_key_exists('usevideocapture',$config_ini) )  {
+              if($config_ini['usevideocapture'] == 3 ){
+                 captureviewstop();
+              } else if($config_ini['usevideocapture'] == 1 ){
+                  // ビデオキャプチャーデバイスでは、画面を画面いっぱいに引きのばしたのを戻す(GV-USB2では縦長になるので)
+                  $stretchvideo = true;
+                  if(array_key_exists("stretchvideo", $config_ini)) {
+                      if($config_ini["stretchvideo"] != 1){
+                          $stretchvideo = false;
+                      }
+                  }
+                  if($stretchvideo) {
+                      global $MPCCMDURL;
+                      $mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=839",5,1);
+                  }
+                  $toggled3dfullscreen = false;
+                  if(array_key_exists("toggled3dfullscreen", $config_ini)) {
+                      if($config_ini["toggled3dfullscreen"] == 1){
+                          $toggled3dfullscreen = true;
+                      }
+                  }
+                  if($toggled3dfullscreen) {
+                      global $MPCCMDURL;
+                      $mpcstat = file_get_contents($MPCCMDURL."?wm_command=1023");
+                  }
+              }
           }
        }else
        {
+    logtocmd_dbg( 'カラオケ配信ではないファイル再生準備開始'."\n");
        $ft = check_filetype ($db,$l_id);
        if( $ft !== 3){
            $filepath = get_fullfilename($l_fullpath,$word,$filepath_utf8);
@@ -1101,7 +1215,9 @@ while(1){
            if($l_nowplaying === '再生中' ){
                    logtocmd("再生中を検出。現在の曲の終了待ち\n");
            }else{
+    logtocmd_dbg( 'ID指定ファイル再生開始'."\n");
                start_song($db,$l_id,1);
+    logtocmd_dbg( 'ID指定ファイル再生開始完了'."\n");
                if($filetype == 3){
                    sleep(10); // URL指定はさらに10秒待ち 
                } 
@@ -1129,7 +1245,9 @@ while(1){
                    exec($pscheck_cmd);
                }
            }else{
+               logtocmd_dbg( 'Enter check_end_song'."\n");
                check_end_song($db,$l_id,$playerchecktimes,$playmode);
+               logtocmd_dbg( 'Exit check_end_song'."\n");
            }
            //logtocmd 'running check finished 終了'."\n";
        
@@ -1140,6 +1258,7 @@ while(1){
 
         $sql = "UPDATE requesttable set nowplaying = \"再生済\" WHERE id = $l_id ";
 //     $sql = "UPDATE requesttable set nowplaying = \"未再生\" WHERE nowplaying = \"再生中\" AND songfile = '$word' ";
+        logtocmd_dbg( '再生済みに状態変更開始:'.$sql."\n");
         $ret = $db->exec($sql);
         if (! $ret ) {
             logtocmd("再生済への変更に失敗しました。<br>");
@@ -1150,6 +1269,7 @@ while(1){
         if (! $ret ) {
             logtocmd("再生済？ への変更に失敗しました。<br>");
         }
+        logtocmd_dbg( '再生済みに状態変更終了:'.$sql."\n");
 //     $db=null;
 //     sleep(1);
         $played=1;
@@ -1159,8 +1279,10 @@ while(1){
     
     if( $played === 5)
     logtocmd("no next song, waiting...<br>\n");
+    logtocmd_dbg( '全体ループラスト（プロセスチェック開始)'."\n");
     workcheck_pfwd();
     workcheck_andrestartxampp();
+    logtocmd_dbg( '全体ループラスト:'.$played."秒待ち\n");
     sleep($played);
 //     break;
 
