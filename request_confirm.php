@@ -1,5 +1,5 @@
 <?php
-
+$filename = "";
 if(array_key_exists("filename", $_REQUEST)) {
     $filename = $_REQUEST["filename"];
 }
@@ -41,8 +41,10 @@ if(array_key_exists("bgvfile", $_REQUEST)) {
 
 
 
-include 'kara_config.php';
+require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
+require_once 'func_audiotracklist.php';
+
 $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
 
@@ -85,7 +87,7 @@ function pickupsinger($rt, $moreuser = "")
    return $singerlist;
 }
 
-function selectedcheck($rt,$singer,$beforesinger = 'none' ){
+function selectedcheck_rc($rt,$singer,$beforesinger = 'none' ){
     $rt_i = array_reverse($rt);
 
     if($beforesinger == 'none'){
@@ -307,7 +309,7 @@ foreach($singerlist as $singer)
          print " selected ";
          $selectedcounter = $selectedcounter + 1 ;
       }
-  }else if( selectedcheck($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
+  }else if( selectedcheck_rc($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
   {
       print " selected ";
       $selectedcounter = $selectedcounter + 1 ;
@@ -420,6 +422,14 @@ EOT;
 
 }
 
+$fullpath_utf8 = "";
+$audiotracklist = array();
+get_fullfilename($fullpath,$filename,$fullpath_utf8);
+if(!empty($fullpath_utf8)) {
+    $audiotracklist = getaudiotracklist($fullpath_utf8);
+}
+
+if(! (count($audiotracklist) == 1)){
 
     print <<<EOT
 <dl>
@@ -427,16 +437,23 @@ EOT;
 <dd>
 <select name="track" class="form-control">
 EOT;
-$maxtrack = 10;
-for($c = 0; $c < $maxtrack ; $c++ ){
-  print '  <option value="'.$c.'" >'.($c+1).'トラック目</option>'."\n";
-}
+    if(empty($audiotracklist)){
+        $maxtrack = 3;
+        for($c = 0; $c < $maxtrack ; $c++ ){
+          print '  <option value="'.$c.'" >'.($c+1).'トラック目'.'</option>'."\n";
+        }
+    } else {
+        $maxtrack = count($audiotracklist);
+        for($c = 0; $c < $maxtrack ; $c++ ){
+          print '  <option value="'.$c.'" >'.($c+1).'トラック目：'.$audiotracklist[$c][1].'</option>'."\n";
+        }
+    }
     print <<<EOT
 </select>
 </dd>
 </dl>
 EOT;
-
+}
 
 ?>
 

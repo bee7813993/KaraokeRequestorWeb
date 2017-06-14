@@ -826,10 +826,22 @@ function start_song($db,$id,$addplaytimes = 0){
             global $MPCCMDURL;
             global $MPCSTATURL;
             // 一時停止
-            file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
+            // 一時停止が必要かチェック
+            $needpause = false ;
+
+            if(array_key_exists("keychange" , $row)){
+                if($row["keychange"] != 0 ) $needpause = true;
+            }
+            if(array_key_exists("track" , $row)){
+                if($row["track"] != 0 ) $needpause = true;
+            }
+            
+            if($needpause)
+                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
             file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
             file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-            file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
+            if($needpause)
+                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
 //            file_get_html_with_retry($MPCCMDURL."?wm_command=888");
             //sleep(5.5);
             if(array_key_exists("keychange" , $row)){

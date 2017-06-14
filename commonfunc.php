@@ -285,8 +285,8 @@ function check_access_from_online(){
     
 }
 
-function check_json_available_fromurl($url){
-    $jsonbase = file_get_html_with_retry($url);
+function check_json_available_fromurl($url,$timeout = 10){
+    $jsonbase = file_get_html_with_retry($url,5,$timeout);
     $result = json_decode($jsonbase);
     if($result === null ) return false;
     else return true;
