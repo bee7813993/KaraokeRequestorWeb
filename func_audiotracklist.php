@@ -42,13 +42,15 @@ function checktracktype($trackinfo){
 
 function getaudiotracklist($filename){
     $getID3 = new getID3();
+    $audiotracklist = array();
     $filename_host= mb_convert_encoding($filename, 'SJIS-win', 'UTF-8');
-    $res = file_exists($filename_host);
+    setlocale(LC_CTYPE, 'Japanese_Japan.932');
+    $res = file_exist_check_japanese($filename_host);
     if($res){
        $info = $getID3->analyze($filename_host);
-    }
+    } else return $audiotracklist;
+
     getid3_lib::CopyTagsToComments($info);
-    $audiotracklist = array();
     
     if(!array_key_exists('quicktime',$info) ){
        return $audiotracklist;
@@ -77,6 +79,7 @@ function getaudiotracklist($filename){
 // function from manage-mpc.php
 
 function file_exist_check_japanese($filename){
+ setlocale(LC_CTYPE, 'Japanese_Japan.932');
  $fileinfo = @fopen(addslashes($filename),'r');
  if($fileinfo != FALSE){
      fclose($fileinfo);
