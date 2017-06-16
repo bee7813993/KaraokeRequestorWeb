@@ -52,7 +52,9 @@ function workcheck_pfwd(){
    
    if(array_key_exists("usepfwdcheck",$config_ini)) {
        $usepfwdcheck = $config_ini["usepfwdcheck"];
+       if($usepfwdcheck != 1 ) return true;
    }
+   
    
    /* disable check? */
    if(array_key_exists("onlinechecktimeout",$config_ini)) {

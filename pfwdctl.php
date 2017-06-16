@@ -129,7 +129,7 @@ EOT;
 
 
     public function startpfwdcmd(){
-        $cmd = 'start "" '.$this->pfwdpath.$this->pfwdcmd;
+        $cmd = 'start "" '.$this->pfwdpath.'\\'.$this->pfwdcmd;
         $fp = popen($cmd,'r');
         pclose($fp);
     }
