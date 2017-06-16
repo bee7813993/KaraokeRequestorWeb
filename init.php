@@ -868,13 +868,31 @@ if(array_key_exists("pfwdplace",$config_ini)) {
       }
   ?>
 
-  <div class="form-group">
+<?php
+    $online_available_flg = false;
+    $ret = '設定無効';
+    if(array_key_exists('connectinternet',$config_ini ) && $config_ini["connectinternet"]==1 && array_key_exists('globalhost',$config_ini ) && array_key_exists('onlinechecktimeout',$config_ini ) ){
+        $ret = check_online_available($config_ini['globalhost'],$config_ini["onlinechecktimeout"]);
+       
+        if( $ret == 'OK' ){
+           $online_available_flg = true;
+        }
+    }
+?>
+  <div class="form-group" id="usepfwdcheck" >
     <label class="radio control-label"> pfwd 自動再起動 <br /><small>通常時オンライン版接続確認でOKになる環境で使用する</small> </label>
+<?php
+  if($online_available_flg == false) {
+      print '<div class="alert-danger" > オンライン版接続確認がNGの間は選択できません <br /> '.$ret ;
+      print '<button class="btn btn-default" role="button" onclick="location.reload();" >状態更新</button>'.'</div>';
+  } 
+
+?>
     <label class="radio-inline">
-      <input type="radio" name="usepfwdcheck" value="1" <?php print ($usepfwdcheck)?'checked':' ' ?> /> 使用する
+      <input type="radio" name="usepfwdcheck" value="1" <?php print ($usepfwdcheck)?'checked':' ';print ($online_available_flg == false)?' disabled':' '; ?> /> 使用する
     </label>
     <label class="radio-inline">
-      <input type="radio" name="usepfwdcheck" value="2" <?php print (!$usepfwdcheck)?'checked':' ' ?> /> 使用しない
+      <input type="radio" name="usepfwdcheck" value="2" <?php print (!$usepfwdcheck)?'checked':' ';print ($online_available_flg == false)?' ':' '; ?> /> 使用しない
     </label>
 
   </div>
@@ -1193,8 +1211,13 @@ var xmlhttp = createXMLHttpRequest();
         if(strchr($ips,':') !== false){
           $ips = '['.strchr($ips,'%',$before_needle=true).']';
         }
-        if(isset($ips)){
+        if(!empty($ips)){
            $link = 'http://'.$ips.'/';
+           if(array_key_exists('useeasyauth_word', $config_ini)){
+               if(!empty($config_ini['useeasyauth_word'])){
+                  $link = $link.'?easypass='.$config_ini['useeasyauth_word'];
+               }
+           }
            print '<a href='.$link.' > '.$link.'</a><br />';
         }
         }
