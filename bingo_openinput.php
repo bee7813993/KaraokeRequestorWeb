@@ -76,9 +76,18 @@ print '<th> 解放 </th>';
 print '</thead>';
 print '<tbody>';
 foreach( $list as $oneword ){
-    print '<tr> ';
+    //現在のIDでオープンされた項目かどうかのチェック
+    $thisidflg = false;
+    foreach ($oneword[3] as $oneid ){
+        if($id == $oneid ) $thisidflg = true;
+    }
+    
+    print '<tr ';
+    if($thisidflg) print 'class="success" ' ;
+    print '> ';
     print '  <td> ';
     print $oneword[0];
+     if($thisidflg) print '&nbsp;（現在の曲で開放） ' ;
     print '  </td>';
     print '  <td> ';
     if($oneword[2] == 1){

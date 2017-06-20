@@ -369,8 +369,21 @@ print htmlspecialchars($selectrequest[0]['comment']);
 </dd>
 <dl>
 <?php
+
+/* キー変更が有効かどうかのチェック */
+/* 配信→無効 */
+/* 設定で無効 → 無効 */
+/* 設定で有効 → 有効 */
+function keychangecheck($config_ini, $shop_karaoke){
+    if($shop_karaoke == 1) return false;
+    if(array_key_exists('usekeychange' ,$config_ini )) {
+        if( $config_ini['usekeychange'] == 1 ) return true;
+    }
+    return false;
+}
+
 /* キー変更 */
-if($config_ini['usekeychange'] ){
+if(keychangecheck($config_ini, $shop_karaoke)){
     print <<<EOT
 <dl>
 <dt>キー変更</dt>
@@ -429,7 +442,7 @@ if(!empty($fullpath_utf8)) {
     $audiotracklist = getaudiotracklist($fullpath_utf8);
 }
 
-if(! (count($audiotracklist) == 1)){
+if(! (count($audiotracklist) == 1) && $shop_karaoke != 1){
 
     print <<<EOT
 <dl>
@@ -472,7 +485,7 @@ EOT;
 </label>
 </div>
 <?php
-if($config_ini['usebgv'] == 1 ){
+if($config_ini['usebgv'] == 1 && $shop_karaoke != 1){
 print '<div class="checkbox">';
 print "<label>";
 print '<input type="checkbox" name="loop" value="1" ';

@@ -8,6 +8,7 @@ if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
 date_default_timezone_set('Asia/Tokyo');
 require_once 'commonfunc.php';
 require_once 'mpcctrl_func.php';
+require_once 'binngo_func.php';
 //require_once("getid3/getid3.php");
 
 if(empty($playerpath)){
@@ -117,11 +118,23 @@ function workcheck_andrestartxampp(){
 }
 
 function logtocmd($msg){
-  print(mb_convert_encoding("$msg\n","SJIS-win"));
+  if (!defined('PHP_VERSION_ID')) {
+    $version = explode('.', PHP_VERSION);
+
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+  }
+  
+  if(PHP_VERSION_ID < 70100){
+     $msg_out = mb_convert_encoding("$msg\n","SJIS-win");
+  }else {
+     $msg_out = "$msg\n";
+  }
+
+  print($msg_out);
 }
 
 function logtocmd_dbg($msg){
-  //print(mb_convert_encoding("$msg\n","SJIS-win"));
+//  logtocmd($msg);
 }
 
 function mpcstop(){
@@ -877,6 +890,7 @@ function start_song($db,$id,$addplaytimes = 0){
       logtocmd("再生中 への変更に失敗しました。<br>");
     }
     $db->commit();
+    autoopenbingo($id); 
     return true;
 }
 
@@ -996,6 +1010,25 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
 
        sleep(1.0);
    }
+}
+
+function autoopenbingo($id){
+    global $config_ini;
+    
+    $usebingo=false;
+    if(array_key_exists("usebingo",$config_ini)){
+        if($config_ini["usebingo"]==1 ){
+           $usebingo=true;
+        }
+    }
+    if(!$usebingo) return;
+    
+    $bingoinfo = new SongBingo();
+    $bingoinfo->initbingodb('songbingo.db'); 
+    $bingoinfo->autoopen( $id );
+    unset($bingoinfo);
+    return;
+      
 }
 
 /******** ここからメイン処理 ********/
@@ -1172,7 +1205,8 @@ while(1){
               if (! $ret ) {
               	logtocmd("再生中 への変更に失敗しました。<br>");
               }
-              $db->commit(); 
+              $db->commit();
+              autoopenbingo($l_id); 
           }        
           // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
           logtocmd("カラオケ配信終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n");
