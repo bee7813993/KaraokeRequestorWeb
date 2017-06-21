@@ -370,6 +370,17 @@ print htmlspecialchars($selectrequest[0]['comment']);
 <dl>
 <?php
 
+
+$fullpath_utf8 = "";
+$audiotracklist = array();
+get_fullfilename($fullpath,$filename,$fullpath_utf8);
+$filetype = extention_musiccheck($fullpath_utf8);
+
+if(!empty($fullpath_utf8) && $filetype == 1 ) {
+    $audiotracklist = getaudiotracklist($fullpath_utf8);
+}
+
+
 /* キー変更が有効かどうかのチェック */
 /* 配信→無効 */
 /* 設定で無効 → 無効 */
@@ -383,7 +394,7 @@ function keychangecheck($config_ini, $shop_karaoke){
 }
 
 /* キー変更 */
-if(keychangecheck($config_ini, $shop_karaoke)){
+if(keychangecheck($config_ini, $shop_karaoke) && $filetype == 1){
     print <<<EOT
 <dl>
 <dt>キー変更</dt>
@@ -435,14 +446,7 @@ EOT;
 
 }
 
-$fullpath_utf8 = "";
-$audiotracklist = array();
-get_fullfilename($fullpath,$filename,$fullpath_utf8);
-if(!empty($fullpath_utf8)) {
-    $audiotracklist = getaudiotracklist($fullpath_utf8);
-}
-
-if(! (count($audiotracklist) == 1) && $shop_karaoke != 1){
+if(! (count($audiotracklist) == 1) && $shop_karaoke != 1 && $filetype == 1){
 
     print <<<EOT
 <dl>
@@ -485,7 +489,7 @@ EOT;
 </label>
 </div>
 <?php
-if($config_ini['usebgv'] == 1 && $shop_karaoke != 1){
+if($config_ini['usebgv'] == 1 && $shop_karaoke != 1 && $filetype == 1){
 print '<div class="checkbox">';
 print "<label>";
 print '<input type="checkbox" name="loop" value="1" ';
