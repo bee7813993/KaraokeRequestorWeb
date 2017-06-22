@@ -370,16 +370,16 @@ print htmlspecialchars($selectrequest[0]['comment']);
 <dl>
 <?php
 
-
+/* ファイルの存在チェック */
 $fullpath_utf8 = "";
 $audiotracklist = array();
-get_fullfilename($fullpath,$filename,$fullpath_utf8);
-$filetype = extention_musiccheck($fullpath_utf8);
-
-if(!empty($fullpath_utf8) && $filetype == 1 ) {
-    $audiotracklist = getaudiotracklist($fullpath_utf8);
+if($shop_karaoke != 1 ){
+    get_fullfilename($fullpath,$filename,$fullpath_utf8);
+    $filetype = extention_musiccheck($fullpath_utf8);
+    if(!empty($fullpath_utf8) && $filetype == 1 ) {
+        $audiotracklist = getaudiotracklist($fullpath_utf8);
+    }
 }
-
 
 /* キー変更が有効かどうかのチェック */
 /* 配信→無効 */
