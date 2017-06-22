@@ -4,7 +4,7 @@
 // 処理記述部
 require_once 'commonfunc.php';
 print_meta_header();
-$res = true;
+$res = 2;
 if(array_key_exists("UPDATEVERSION", $_REQUEST)) {
   $res = update_fromgit(urldecode($_REQUEST["UPDATEVERSION"]),$errmsg);
 }
@@ -42,6 +42,8 @@ shownavigatioinbar();
 <?php
 if($res === false){
    print "<p> $errmsg </p>" ;
+} else if($res === true){
+   print '<p>アップデートに成功しました</p>';
 }
 
 $curver = get_git_version();

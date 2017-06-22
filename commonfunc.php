@@ -143,7 +143,6 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar
         print 'http connection error : '.$error_message . ' url : ' . $url . "\n";
     }
     return $contents;
-
 }
 
 /** あいまいな文字を+に置換する
@@ -1625,10 +1624,10 @@ function get_gittaglist(&$errmsg = 'none'){
           foreach($result_str as $line){
               $err_str_pos = mb_strstr($line, "unable to access");
               if( !$err_str_pos ) {
-                  $errmsg += "network access failed";
+                  $errmsg .= "network access failed";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg += "fetch unknown error: $line";
+                  $errmsg .= "fetch unknown error: $line";
                   $errorcnt ++;
               }
           }
@@ -1674,10 +1673,10 @@ function update_fromgit($version_str, &$errmsg){
           foreach($result_str as $line){
               $err_str_pos = mb_strstr($line, "unable to access");
               if( !$err_str_pos ) {
-                  $errmsg += "network access failed";
+                  $errmsg .= "network access failed";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg += "fetch unknown error: $line";
+                  $errmsg .= "fetch unknown error: $line";
                   $errorcnt ++;
               }
           }
@@ -1691,10 +1690,10 @@ function update_fromgit($version_str, &$errmsg){
           foreach($result_str as $line){
               $err_str_pos = mb_strstr($line, "unknown revision");
               if( !$err_str_pos ) {
-                  $errmsg += "no version : $version_str";
+                  $errmsg .= "no version : $version_str";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg += "reset --hard unknown error: $line";
+                  $errmsg .= "reset --hard unknown error: $line";
                   $errorcnt ++;
               }
           }
