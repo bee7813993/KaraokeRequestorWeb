@@ -134,7 +134,7 @@ if(!isset($l_url)  ) {
        $url = 'search_anisoninfo_list.php?m=mkr&q='.$list['searchinfo']['maker']['maker'];
         print '<dt>ブランド </dt><dd> <a href="'.$url.'" >'.$list['searchinfo']['maker']['maker'].'</a></dd>';
     }
-    anisoninfo_display_finallist($list['result'],$nexturlbase,$selectid);
+    anisoninfo_display_finallist2($list['result'],$nexturlbase,$selectid);
 }
 ?>
 

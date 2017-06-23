@@ -1671,8 +1671,8 @@ function update_fromgit($version_str, &$errmsg){
           set_time_limit (900);
           exec($execcmd,$result_str);
           foreach($result_str as $line){
-              $err_str_pos = mb_strstr($line, "unable to access");
-              if( !$err_str_pos ) {
+              $err_str_pos = mb_strpos($line, "unable to access");
+              if( $err_str_pos !== false ) {
                   $errmsg .= "network access failed";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
@@ -1688,8 +1688,8 @@ function update_fromgit($version_str, &$errmsg){
           $execcmd = $gitcmd.' reset --hard '.$version_str;
           exec($execcmd,$result_str);
           foreach($result_str as $line){
-              $err_str_pos = mb_strstr($line, "unknown revision");
-              if( !$err_str_pos ) {
+              $err_str_pos = mb_strpos($line, "unknown revision");
+              if( $err_str_pos  !== false) {
                   $errmsg .= "no version : $version_str";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
