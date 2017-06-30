@@ -367,7 +367,7 @@ print htmlspecialchars($selectrequest[0]['comment']);
   }
 ?>
 </dd>
-<dl>
+</dl>
 <?php
 
 /* ファイルの存在チェック */

@@ -27,7 +27,7 @@ if(array_key_exists("songfile", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' songfile = \''. $l_songfile . '\'';
+    $updatestring = $updatestring.' songfile = '. $db->quote($l_songfile) . ' ';
 }
 
 if(array_key_exists("singer", $_REQUEST)) {
@@ -35,7 +35,7 @@ if(array_key_exists("singer", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' singer = \''. $l_singer . '\'';
+    $updatestring = $updatestring.' singer = '. $db->quote($l_singer) . ' ';
 }
 
 if(array_key_exists("comment", $_REQUEST)) {
@@ -43,7 +43,7 @@ if(array_key_exists("comment", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' comment = \''. $l_comment . '\'';
+    $updatestring = $updatestring.' comment = '. $db->quote($l_comment) . ' ';
 }
 
 if(array_key_exists("kind", $_REQUEST)) {
@@ -51,7 +51,7 @@ if(array_key_exists("kind", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' kind = \''. $l_kind . '\'';
+    $updatestring = $updatestring.' kind = '. $db->quote($l_kind) . ' ';
 }
 
 if(array_key_exists("reqorder", $_REQUEST)) {
@@ -59,14 +59,14 @@ if(array_key_exists("reqorder", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' reqorder = \''. $l_reqorder . '\'';
+    $updatestring = $updatestring.' reqorder = '. $db->quote($l_reqorder) . ' ';
 }
 if(array_key_exists("fullpath", $_REQUEST)) {
     $l_fullpath = $_REQUEST["fullpath"];
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' fullpath = \''. $l_fullpath . '\'';
+    $updatestring = $updatestring.' fullpath = '. $db->quote($l_fullpath) . ' ';
 }
 
 if(array_key_exists("nowplaying", $_REQUEST)) {
@@ -74,7 +74,7 @@ if(array_key_exists("nowplaying", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' nowplaying = \''. $l_nowplaying . '\'';
+    $updatestring = $updatestring.' nowplaying = '. $db->quote($l_nowplaying) . ' ';
 }
 
 if(array_key_exists("status", $_REQUEST)) {
@@ -82,7 +82,7 @@ if(array_key_exists("status", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' status = \''. $l_status . '\'';
+    $updatestring = $updatestring.' status = '. $db->quote($l_status) . ' ';
 }
 
 if(array_key_exists("clientip", $_REQUEST)) {
@@ -90,7 +90,7 @@ if(array_key_exists("clientip", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' clientip = \''. $l_clientip . '\'';
+    $updatestring = $updatestring.' clientip = '. $db->quote($l_clientip) . ' ';
 }
 
 if(array_key_exists("clientua", $_REQUEST)) {
@@ -98,7 +98,7 @@ if(array_key_exists("clientua", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' clientua = \''. $l_clientua . '\'';
+    $updatestring = $updatestring.' clientua = '. $db->quote($l_clientua) . ' ';
 }
 
 if(array_key_exists("playtimes", $_REQUEST)) {
@@ -106,7 +106,7 @@ if(array_key_exists("playtimes", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' playtimes = \''. $l_playtimes . '\'';
+    $updatestring = $updatestring.' playtimes = '. $db->quote($l_playtimes) . ' ';
 }
 
 
@@ -116,7 +116,7 @@ if(array_key_exists("secret", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' secret = \''. $l_value . '\'';
+    $updatestring = $updatestring.' secret = '. $db->quote($l_value) . ' ';
 }
 
 $l_value = "";
@@ -125,7 +125,7 @@ if(array_key_exists("loop", $_REQUEST)) {
     if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
         $updatestring = $updatestring.' ,';
     }
-    $updatestring = $updatestring.' loop = \''. $l_value . '\'';
+    $updatestring = $updatestring.' loop = '. $db->quote($l_value) . ' ';
 }
 print  $updatestring;
 if(strlen($updatestring) > 0){

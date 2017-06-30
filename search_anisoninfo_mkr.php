@@ -38,8 +38,9 @@ function ansoninfo_gettitlelist_mkr($url,$l_m){
     
     $results = array();
     
+    set_time_limit(150);
     $result_dom=file_get_html($url);
-    
+    set_time_limit(30);
     if(strcmp ('pro',$l_m) == 0)
     {
         foreach( $result_dom->find( 'table.sorted' ) as $list ){
@@ -136,7 +137,8 @@ function ansoninfo_gettitlelist_mkr($url,$l_m){
             $nextlink=$nextlink_td->find('a' ,0)->href;
             $results['nextlink']=$nextlink;
         }
-    } 
+    }
+    $result_dom->clear();
     if(count($results) > 0 ) break;
     usleep(300000);
     }
