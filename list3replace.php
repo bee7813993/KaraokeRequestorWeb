@@ -70,10 +70,10 @@ if(empty($listurl)){
 
 $html=file_get_contents($listurl);
 
-$regstr = '/<td.*>.*?<\/td>/ui';
-$regstr_in = '/<td.*>(.*?)<\/td>/ui';
+$regstr = '/<td.*?>.*?<\/td>/ui';
+$regstr_in = '/<td.*?>(.*?)<\/td>/ui';
 $extcheck = '/\.mp4$|\.avi$|\.mkv$|\.mpg$|\.flv$|\.wmv$|\.mpeg$|\.ogm$|\.mov$/i';
-preg_match_all($regstr,$html,$regs);
+preg_match_all($regstr,$html,$regs,PREG_PATTERN_ORDER);
 foreach($regs[0] as $tdtag){
    if(preg_match($regstr_in,$tdtag,$internaltd)){
        $checkword = Trim($internaltd[1]);
