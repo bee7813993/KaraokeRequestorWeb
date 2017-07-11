@@ -14,7 +14,7 @@ if(array_key_exists("searchword", $_REQUEST)) {
 if(array_key_exists("order", $_REQUEST)) {
     $l_order = $_REQUEST["order"];
 }else{
-    $l_order = 'sort=size&ascending=0';
+    $l_order = '';
 }
 $selectid = '';
 if(array_key_exists("selectid", $_REQUEST)) {

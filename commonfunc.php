@@ -382,7 +382,7 @@ function search_order_priority($word,$start,$length)
     
     //  var_dump($prioritylist);
 //    die();
-    
+
     $r_length = $length;  // 残要求件数
     $r_start = $start;    // 残件開始位置
     $count_p = $start + 1 ;   // 
@@ -752,7 +752,7 @@ function PrintLocalFileListfromkeyword_ajax($word,$order = null, $tableid='searc
 {
     global $priority_db;
 //    searchlocalfilename($word,$result_a,$order);
-    searchlocalfilename_part($word,$result_a,$order);
+    searchlocalfilename_part($word,$result_a,0,10,$order);
     if(empty($bgvmode)){
         $bgvmode = 0;
     }
