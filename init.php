@@ -845,6 +845,27 @@ if(array_key_exists("request_automove",$config_ini)) {
     <a href ="bingo_input.php" class="btn btn-default" > ビンゴ項目入力画面 </a>
   </div>
 
+  <!---- xampp自動再起動の設定 ----->
+  <div class="form-group">
+  <?php
+      $xamppautorestart=true;
+      if(array_key_exists("xamppautorestart",$config_ini)){
+          if($config_ini["xamppautorestart"]==1 ){
+             $xamppautorestart=true;
+          }else {
+             $xamppautorestart=false;
+          }
+      }
+  ?>
+    <label class="radio control-label"> xampp自動再起動 <br /><small>ブラウザのボタンから自動再生が起動できない環境では「使用しない」にしてください</small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="xamppautorestart" value="1" <?php print ($xamppautorestart)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="xamppautorestart" value="2" <?php print (!$xamppautorestart)?'checked':' ' ?> /> 使用しない
+    </label>
+  </div>
+
   <div class="form-group">
     <label class="control-label"> pfwd.exeインストールフォルダ  </label>
     <input type="text" name="pfwdplace" class="form-control"

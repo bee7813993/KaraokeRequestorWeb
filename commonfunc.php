@@ -140,7 +140,8 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar
     }
     if ($loopcount === $retrytimes) {
         $error_message = curl_strerror($errno);
-        print 'http connection error : '.$error_message . ' url : ' . $url . "\n";
+        #throw new ErrorException( 'http connection error : '.$error_message . ' url : ' . $url . "\n");
+        
     }
     return $contents;
 }
@@ -382,7 +383,7 @@ function search_order_priority($word,$start,$length)
     
     //  var_dump($prioritylist);
 //    die();
-
+    
     $r_length = $length;  // 残要求件数
     $r_start = $start;    // 残件開始位置
     $count_p = $start + 1 ;   // 

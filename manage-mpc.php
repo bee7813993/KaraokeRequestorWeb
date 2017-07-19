@@ -85,6 +85,10 @@ function workcheck_pfwd(){
 
 function workcheck_andrestartxampp(){
 
+    if( configbool("xamppautorestart", true) === false ){
+        return;
+    }
+
     $xamppstop_cmd = '..\xampp_stop.exe';
     $xamppstart_cmd = '.\start_xampp_fromphp.bat';
 //    $xamppstart_cmd = '..\xampp_start.exe';
@@ -851,13 +855,13 @@ function start_song($db,$id,$addplaytimes = 0){
                 if($row["track"] != 0 ) $needpause = true;
             }
             
+            if($needpause) {
+                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888'); // 一時停止を投げてみる（まず失敗する）
+                file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+                file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+            }
             if($needpause)
-                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
-            file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-            file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-            if($needpause)
-                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888');
-//            file_get_html_with_retry($MPCCMDURL."?wm_command=888");
+                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888'); // 一時停止をもう一度投げてみる
             //sleep(5.5);
             if(array_key_exists("keychange" , $row)){
                 mpc_keychange($row["keychange"]);

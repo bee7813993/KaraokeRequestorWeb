@@ -95,6 +95,7 @@ print '<div class="col-xs-6">';
 print '<button type="submit" value="音声トラック変更" class=" pcmorefunc btn btn-default" onClick="song_changeaudio()" >音声トラック変更</button>';
 print '</div >';
 }
+print '</div>';
 
 /* 設定にてキーチェンジ機能が有効になっているかどうか */
 $usekeychange=false;
@@ -104,6 +105,8 @@ if(array_key_exists("usekeychange",$config_ini)){
     }
 }
 if($usekeychange == true){
+print '<div class="row" id="currentkey">';
+print '</div >';
 print '<div class="row">';
 print '<div class="col-xs-4">';
 print '<button type="submit" value="キーダウン" class=" pcmorefunc btn btn-default" onClick="keychange(\'down\')" >キーダウン</button>';

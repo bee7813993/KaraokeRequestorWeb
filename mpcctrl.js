@@ -1,10 +1,40 @@
 var playerurl  = "http://" + location.host + ":13579/command.html"
 var playerurl2 = "http://" + location.host + "/mpcctrl.php"
 
-//window.onload = function () {
+var EventSource = window.EventSource || window.MozEventSource;
+
+    function event_initial(){
+        if (!EventSource){
+            alert("EventSourceが利用できません。");
+            return;
+        }
+        var source = new EventSource('getcurrentkey_event.php');
+        source.onmessage = function(event){
+            if (event.data == "Bye"){
+                event.target.close();
+                alert('終了しました。');
+            }
+            temp = document.getElementById("currentkey");
+            nowkey = event.data;
+            if( nowkey ) {
+              if( nowkey == "None" ) {
+                  temp.innerHTML = "";
+              }
+              else {
+                if( nowkey > 0 ) {
+                  nowkey = "+" + nowkey;
+                }
+                temp.innerHTML = "現在のキー: " + nowkey;
+              }
+            }
+        };
+    }
+
+window.onload = function () {
 //    document.body.onclick  = setiframe();
 //    stop();
-//}
+    event_initial();
+}
 
 function setiframe(){
     var parentDocument = window.parent.document;
@@ -216,5 +246,35 @@ function keychange(keycmd){
 var request = createXMLHttpRequest();
 url=playerurl2 + "?key=" + keycmd;
 request.open("GET", url, true);
+request.onreadystatechange = function() {
+    if(request.readyState == 4) {
+        if (request.status === 200) {
+        showkey();
+        }
+    }
+}
 request.send("");
+}
+
+
+// Update Current Key
+function showkey(){
+var request_sk = createXMLHttpRequest();
+url="http://" + location.host + "/getcurrentkey.php";
+request_sk.open("GET", url, true);
+  request_sk.onreadystatechange = function() {
+    if(request_sk.readyState == 4) {
+      if (request_sk.status === 200) {
+        temp = document.getElementById("currentkey");
+        nowkey = request_sk.responseText;
+        if( nowkey ) {
+          if( nowkey > 0 ) {
+            nowkey = "+" + nowkey;
+          }
+          temp.innerHTML = "現在のキー: " + nowkey;
+        }
+      }
+    }
+  }    
+request_sk.send("");
 }
