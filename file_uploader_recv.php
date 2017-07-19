@@ -1,3 +1,10 @@
+<?php
+$jspost = false;
+if(array_key_exists("jspost", $_REQUEST)) {
+    $jspost = $_REQUEST["jspost"];
+}
+if($jspost === false) {
+print <<<EOT
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -27,6 +34,9 @@
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+EOT;
+}
+?>
 <div class="container">
 <p>
 <?php
@@ -108,5 +118,11 @@ print $_FILES['userfile']['name'].'のアップロードに成功';
 </form>
 </div>
 
+<?php
+if($jspost === false) {
+print <<<EOT
 </body>
 </html>
+EOT;
+}
+?>
