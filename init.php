@@ -267,6 +267,26 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
     </div>  
   </div>  
 
+  <!---- トップ画面即時リロードの設定 ----->
+  <div class="form-group">
+  <?php
+      $requestlistactivereload=true;
+      if(array_key_exists("requestlistactivereload",$config_ini)){
+          if($config_ini["requestlistactivereload"]!=1 ){
+             $requestlistactivereload=false;
+          }
+      }
+  ?>
+    <label class="radio control-label"> リクエスト一覧即時リロード <br /><small>リクエスト一覧がリスト更新時のみに即時リロードされます。定期的なリロードより通信量が削減できます。有効にすると定期的なリロードは無効になり、下の設定は無視されます。</small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="requestlistactivereload" value="1" <?php print ($requestlistactivereload)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="requestlistactivereload" value="2" <?php print (!$requestlistactivereload)?'checked':' ' ?> /> 使用しない
+    </label>
+  </div>
+
+
 <!---- トップ画面リクエストリストリロード時間 ----->
   <div class="form-group">
     <label for="reloadtime"> リクエスト一覧リロード時間 <small> 0 でリロード無効。数値を大きくするとオンライン接続時の通信量を減らせます </small> </label>

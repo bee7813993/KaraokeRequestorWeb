@@ -136,6 +136,53 @@ if(array_key_exists("reloadtime",$config_ini) ){
         },<?php echo $reload_interval; ?>);
     }
 
+// イベントキーで画面更新
+var EventSource = window.EventSource || window.MozEventSource;
+function event_initial(){
+    var reloadmethod = <?php 
+      if( configbool("requestlistactivereload",true)){
+         echo "true" ;
+         } else {
+         echo "false" ;
+         } ?>
+    
+    if (reloadmethod){
+
+      if (!EventSource){
+          alert("EventSourceが利用できません。");
+          return;
+      }
+      var source = new EventSource('requestlist_event.php?kind=requestlist');
+      var lastkey = 0;
+      source.onmessage = function(event){
+          if (event.data == "Bye"){
+              event.target.close();
+              alert('終了しました。');
+          }
+          nowkey = event.data;
+          if( nowkey ) {
+            if( nowkey == "None" ) {
+            }
+            else {
+                if(lastkey != nowkey){
+                    if($("[name=autoreload]").prop("checked")){
+                        var table = $('#request_table').DataTable();
+                        table.ajax.reload(null,false);
+                    }
+                    if($("[name=autoplayingsong]").prop("checked")){
+                            location.href = "#nowplayinghere";
+                    }
+                    lastkey = nowkey;
+                }
+            }
+          }
+      };
+    }
+    else {
+      tm();
+    }
+}    
+
 function reloadtable () {
     var table = $('#request_table').DataTable();
     table.ajax.reload(null,false);
@@ -144,7 +191,7 @@ function reloadtable () {
 </script>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
-<body <?php if($reload_interval != 0 ) print 'onLoad="tm()"'; ?> >
+<body <?php if($reload_interval != 0 ) print 'onLoad="event_initial()"'; ?> >
 <div class="container">
 <?php
 shownavigatioinbar();

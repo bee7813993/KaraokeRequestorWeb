@@ -116,7 +116,7 @@ function moverequestlist(myel,id,kind,songfile){
       }
   }
   request.send("");
-  
+  updaterequestlistnotice();
 }
 
 
@@ -138,6 +138,8 @@ function changerequeststatus(myel){
       if (request.readyState == 4 && request.status == 200) {
           table.ajax.reload();
           myel.setAttribute('disabled', false);
+          updaterequestlistnotice();
+
       }
   }
   request.send("");
@@ -177,6 +179,15 @@ function song_start(myel, id){
           myel.setAttribute('disabled', false);
       }
   }
+  request.send("");
+  return false;
+}
+
+function updaterequestlistnotice(){
+  var url;
+  url = "updaterequestlist.php";
+  var request = createXMLHttpRequest();
+  request.open("GET", url, true);
   request.send("");
   return false;
 }

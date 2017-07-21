@@ -224,6 +224,7 @@ function mpc_waiting_start($db, $id){
    }
    // logtocmd("DEBUG:再生開始待ち への変更。$id<br>");
    $db->commit(); 
+   file_get_contents("http://localhost/updaterequestlist.php");
 // status が 再生中になるのを待つ
    $state = 6;
    while($state == 6){
@@ -894,6 +895,7 @@ function start_song($db,$id,$addplaytimes = 0){
       logtocmd("再生中 への変更に失敗しました。<br>");
     }
     $db->commit();
+    file_get_contents("http://localhost/updaterequestlist.php");
     autoopenbingo($id); 
     return true;
 }
@@ -1210,6 +1212,7 @@ while(1){
               	logtocmd("再生中 への変更に失敗しました。<br>");
               }
               $db->commit();
+              file_get_contents("http://localhost/updaterequestlist.php");
               autoopenbingo($l_id); 
           }        
           // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
@@ -1322,6 +1325,7 @@ while(1){
             logtocmd("再生済？ への変更に失敗しました。<br>");
         }
         logtocmd_dbg( '再生済みに状態変更終了:'.$sql."\n");
+        file_get_contents("http://localhost/updaterequestlist.php");
 //     $db=null;
 //     sleep(1);
         $played=1;

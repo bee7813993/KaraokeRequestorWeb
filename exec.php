@@ -197,12 +197,13 @@ if(!empty($DEBUG))
     $list->save_allrequest($db);
     $db->exec("COMMIT;");
   }
-
+file_get_contents("http://localhost/updaterequestlist.php");
 
 if(!empty($DEBUG)){
     print("${l_filename} を追加しました。<br>");
     print("1秒後に登録ページに移動します<br>");
 }
+
 //print "きぬ";
 if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'){
    $newidnotice = '{"newid": '.$newid.'}';
