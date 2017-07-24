@@ -13,6 +13,7 @@
    $firstflg = true;
 
    if($cfg["usekeychange"] == 1) {
+       set_time_limit(300);
        $kc = new EasyKeychanger();
        while (1) {
            $newstatus = $kc->getstatus();
@@ -39,5 +40,6 @@
            flush();
            usleep(500000); /* サーバー側では0.5秒おきにチェック */
        }
+       set_time_limit(300);
    }
 ?>

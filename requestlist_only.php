@@ -149,7 +149,7 @@ function event_initial(){
     if (reloadmethod){
 
       if (!EventSource){
-          alert("EventSourceが利用できません。");
+          // alert("EventSourceが利用できません。");
           return;
       }
       var source = new EventSource('requestlist_event.php?kind=requestlist');
@@ -157,7 +157,7 @@ function event_initial(){
       source.onmessage = function(event){
           if (event.data == "Bye"){
               event.target.close();
-              alert('終了しました。');
+              // alert('終了しました。');
           }
           nowkey = event.data;
           if( nowkey ) {

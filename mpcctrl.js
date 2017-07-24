@@ -1,18 +1,20 @@
 var playerurl  = "http://" + location.host + ":13579/command.html"
-var playerurl2 = "http://" + location.host + "/mpcctrl.php"
+var url      = location.href.split(/#/)[0];
+var playerurlbase = url.substring(0, url.lastIndexOf("/"));
+var playerurl2 = playerurlbase + "/mpcctrl.php";
 
 var EventSource = window.EventSource || window.MozEventSource;
 
     function event_initial(){
         if (!EventSource){
-            alert("EventSourceが利用できません。");
+            // alert("EventSourceが利用できません。");
             return;
         }
         var source = new EventSource('getcurrentkey_event.php');
         source.onmessage = function(event){
             if (event.data == "Bye"){
                 event.target.close();
-                alert('終了しました。');
+                // alert('終了しました。');
             }
             temp = document.getElementById("currentkey");
             nowkey = event.data;
@@ -260,7 +262,7 @@ request.send("");
 // Update Current Key
 function showkey(){
 var request_sk = createXMLHttpRequest();
-url="http://" + location.host + "/getcurrentkey.php";
+url= playerurlbase + "/getcurrentkey.php";
 request_sk.open("GET", url, true);
   request_sk.onreadystatechange = function() {
     if(request_sk.readyState == 4) {

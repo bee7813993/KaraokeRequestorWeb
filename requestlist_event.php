@@ -22,7 +22,8 @@
    $un->initdb();
 
 
-   if(1 == 1) {   // config check
+   if(array_key_exists("requestlistactivereload", $cfg) && $cfg["requestlistactivereload"] == 1) {   // config check
+   set_time_limit(300);
        while (1) {
            $statusarray =  $un->show_all();
            if(array_key_exists($checkkind, $statusarray[0])) {
@@ -53,5 +54,6 @@
            flush();
            usleep(500000); /* サーバー側では0.5秒おきにチェック */
        }
+   set_time_limit(30);
    }
 ?>
