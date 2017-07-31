@@ -24,6 +24,32 @@
 <?php
 if(array_key_exists("nowplaying", $_REQUEST)) {
     $l_nowplaying = $_REQUEST["nowplaying"];
+    // 再生状況、数値対応
+    switch($_REQUEST["nowplaying"]) {
+        case 1:
+            $l_nowplaying = '未再生';
+            break;
+        case 2:
+            $l_nowplaying = '再生中';
+            break;
+        case 3:
+            $l_nowplaying = '停止中';
+            break;
+        case 4:
+            $l_nowplaying = '再生済';
+            break;
+        case 5:
+            $l_nowplaying = '再生済？';
+            break;
+        case 6:
+            $l_nowplaying = '再生開始待ち';
+            break;
+        case 7:
+            $l_nowplaying = '変更中';
+            break;
+        default:
+            $l_nowplaying = $_REQUEST["nowplaying"];
+    }
 }
 
 if(array_key_exists("songfile", $_REQUEST)) {

@@ -151,8 +151,8 @@ $playstatus_pf = <<<EOD
 <input type="hidden" name="id" value="%s" />
 <input type="hidden" name="songfile" value="%s" />
 <select name="nowplaying">
- <option value="未再生" selected >未再生 </option>
- <option value="再生済">再生済 </option>
+ <option value="1" selected >未再生 </option>
+ <option value="3" >再生済 </option>
 </select>
 <input type="submit" name="update" value="変更" onClick='changerequeststatus(this);return false;' />
 </form>
