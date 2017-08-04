@@ -617,6 +617,12 @@ function check_nowplaying_state ($db,$id){
         logtocmd ("ERROR : nowplaying of $id is none");
         return false;
     }
+    
+    // 項目が削除された際の処理
+    if(count($currentstatus) < 1){
+        logtocmd ("ERROR :  $id の項目は削除されました");
+        return false;
+    }
     $c_status = $currentstatus[0]['nowplaying'];
     
     if($c_status === '未再生'){
@@ -916,6 +922,8 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
        }else if( $stat === 7) { // 変更中
            logtocmd("再生中曲差し替えを検出\n");
            start_song($db,$id,0);
+       }else if( $stat === false ) {
+           break;
        }
        
        if( $kind === 1 || $kind === 3){
@@ -930,6 +938,8 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
            logtocmd("再生中曲差し替えを検出\n");
            start_song($db,$id,0);
            continue;
+       }else if( $stat === false ) {
+           break;
        }
        if($loopflg == 1) {
            song_start_again($db,$id);
@@ -972,6 +982,8 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
            break;
        }else if($stat === 4 ){
            break; //再生済
+       }else if( $stat === false ) {
+           break;
        }
        
        // MPCの状態取得3回チャレンジする
