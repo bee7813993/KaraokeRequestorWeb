@@ -76,8 +76,10 @@ function command_mpc($num){
         case 902:
         case 903:
         case 904:
-           $requesturl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"], 'update_playerprogress.php' );
+           $requesturl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . ':'. $_SERVER["SERVER_PORT"]. $_SERVER["REQUEST_URI"], 'update_playerprogress.php' );
            $res = file_get_html_with_retry($requesturl);
+           print $requesturl ;
+           print $res;
         break;
     }
     return $res;
@@ -112,7 +114,7 @@ function start_first_mpc(){
     $requesturl=$MPCCMDURL.'?wm_command=-1&percent=0';
     $res = file_get_html_with_retry($requesturl);
 
-    $requesturl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"], 'update_playerprogress.php' );
+    $requesturl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . ':'. $_SERVER["SERVER_PORT"]. $_SERVER["REQUEST_URI"], 'update_playerprogress.php' );
     $res = file_get_html_with_retry($requesturl);
 
     return $res;
@@ -185,7 +187,7 @@ function keychange($keycmd){
 function update_requestdb_key(){
     global $db;
     
-    $keyinfourl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"],"getcurrentkey.php");
+    $keyinfourl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . ':'. $_SERVER["SERVER_PORT"]. $_SERVER["REQUEST_URI"],"getcurrentkey.php");
 
     $res = file_get_html_with_retry($keyinfourl,2,2);
 
