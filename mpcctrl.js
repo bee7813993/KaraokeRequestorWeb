@@ -331,8 +331,12 @@ function progresstime_init(nowstate){
               playingtitle = playstat.playingtitle;
           
               cp=document.getElementById("time");
+              ttp=document.getElementById("total");
               titlename=document.getElementById("songtitle");
-              titlename.innerHTML = '<p>Now Playing... </p>' + playingtitle;
+              if(playingtitle.length > 0 ){
+                titlename.innerHTML = '<p>Now Playing... </p>' + playingtitle;
+              }
+              ttp.innerHTML = " "+secondsToTS(length,5,true)+" ";
               Live=(length<1);
               
               starttime = starttime-curpos;

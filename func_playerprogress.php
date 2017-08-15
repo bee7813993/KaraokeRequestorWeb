@@ -27,6 +27,8 @@ class PlayerProgress {
 
         if(!empty ($this->playingtitle) ){
             print '<div id="songtitle" > <p>Now Playing... </p>'. $this->playingtitle .'</div>';
+        }else {
+            print '<div id="songtitle" > </div>';
         }
         print '<div class="progress" style="margin-bottom: 2px;">';
         print '<div class="progress-bar" role="progressbar" style="width: '.$this->playtime*100/$this->totaltime .'%;" id = "divprogress" ></div>';
