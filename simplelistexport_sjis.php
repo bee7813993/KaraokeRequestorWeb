@@ -36,10 +36,10 @@ if(empty($dbname)){
   $csvarray = array();
   
   /* print csv header */
-  $csvarray[] = array( "順番" , "曲名（ファイル名）" ,  "歌った人" ,  "コメント" );
+  $csvarray[] = array( "順番" , "曲名（ファイル名）" ,"キー",  "歌った人" ,  "コメント" );
   
   foreach($allrequest as $row){
-    $csvarray[] = array( $num, $row["songfile"] ,  $row["singer"] ,  $row["comment"] );
+    $csvarray[] = array( $num, $row["songfile"] , $row["keychange"] ,$row["singer"] ,  $row["comment"] );
     $num++;
   }
   $stream = fopen('php://output', 'wb');

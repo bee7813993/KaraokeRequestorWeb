@@ -10,6 +10,8 @@
        $status = $kc->getstatus();
        if($status){
            print $status["currentkey"];
+       }else {
+               print "None";
        }
    }
 ?>

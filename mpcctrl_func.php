@@ -71,6 +71,15 @@ function command_mpc($num){
     $res = TRUE;
     $requesturl=$MPCCMDURL.'?wm_command='.$num;
     $res = file_get_html_with_retry($requesturl);
+    switch($num) {
+        case 901:
+        case 902:
+        case 903:
+        case 904:
+           $requesturl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"], 'update_playerprogress.php' );
+           $res = file_get_html_with_retry($requesturl);
+        break;
+    }
     return $res;
 }
 
@@ -102,6 +111,10 @@ function start_first_mpc(){
     $res = TRUE;
     $requesturl=$MPCCMDURL.'?wm_command=-1&percent=0';
     $res = file_get_html_with_retry($requesturl);
+
+    $requesturl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"], 'update_playerprogress.php' );
+    $res = file_get_html_with_retry($requesturl);
+
     return $res;
 }
 
@@ -163,7 +176,27 @@ function keychange($keycmd){
     $res = TRUE;
     $requesturl=$EASYKEYCHANGERURL.'?key='.$keycmd.'&token='.$clienttoken;
     $res = file_get_html_with_retry($requesturl,1,1);
+    update_requestdb_key();
     return $res;
 }
 
+
+
+function update_requestdb_key(){
+    global $db;
+    
+    $keyinfourl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"],"getcurrentkey.php");
+
+    $res = file_get_html_with_retry($keyinfourl,2,2);
+
+    if( $res === false ) return;
+    if( $res == "None" ) return;
+    if( !is_numeric($res) ) return;
+
+    $sql = 'UPDATE requesttable SET keychange='.$res.' WHERE nowplaying="再生中";';
+    $db->beginTransaction();
+    $ret = $db->exec($sql);
+    $db->commit();
+    
+}
 ?>

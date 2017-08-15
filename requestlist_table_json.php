@@ -59,8 +59,14 @@ foreach($allrequest as $value ){
         $songfilename = nl2br(htmlspecialchars($value['songfile']));
     }
     if($value['loop'] == 1){
-        $songfilename = '<b>'.htmlspecialchars('【ＢＧＶ】').'</b><br>'.$songfilename;
+        $songfilename = '<b>'.htmlspecialchars('【ＢＧＶ】').'</b>'.$songfilename;
     }
+    if(configbool('usekeychange', false) == true ){
+        if($value['keychange'] > 0){
+            $songfilename = $songfilename.'<br><div style="text-align: right;;font-weight: normal;"> キー変更：+'.$value['keychange'].'</div>';
+        }else if($value['keychange'] < 0){
+            $songfilename = $songfilename.'<br><div style="text-align: right;;font-weight: normal;"> キー変更： '.$value['keychange'].'</div>';
+        }    }
     if($value['nowplaying'] === '再生中'){
     $onerequset += array("filename" => '<div '.$playingid.' class="idmove" > '.  $songfilename.'<a name="nowplayinghere" class="nowplayinghere" >&nbsp</a></div>');
     }else{

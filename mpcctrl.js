@@ -32,10 +32,35 @@ var EventSource = window.EventSource || window.MozEventSource;
         };
     }
 
+    function event_initial_player(){
+        if (!EventSource){
+            // alert("EventSourceが利用できません。");
+            return;
+        }
+        var source_player = new EventSource('player_event.php');
+        source_player.onmessage = function(event){
+            if (event.data == "Bye"){
+                event.target.close();
+                // alert('終了しました。');
+            }
+            var playstatitem = JSON.parse(event.data);
+            if(typeof playstatitem.playerstatus !== "undefined") {
+                  progresstime_init();
+            }
+            if(typeof playstatitem.playerprogress !== "undefined") {
+                  progresstime_init();
+            }
+            if(typeof playstatitem.playerkind !== "undefined") {
+                  //location.href='playerctrl_portal.php';
+            }
+        };
+    }
+
 window.onload = function () {
 //    document.body.onclick  = setiframe();
 //    stop();
     event_initial();
+    event_initial_player();
 }
 
 function setiframe(){
@@ -82,6 +107,7 @@ url=playerurl + "?wm_command=889";
 url=playerurl2 + "?cmd=889";
 request.open("GET", url, true);
 request.send("");
+
 }
 
 //Volume Up 907
@@ -180,7 +206,6 @@ var request = createXMLHttpRequest();
 url=playerurl2 + "?cmd=start_first";
 request.open("GET", url, true);
 request.send("");
-
 }
 
 // fullscreen 830
@@ -279,4 +304,87 @@ request_sk.open("GET", url, true);
     }
   }    
 request_sk.send("");
+}
+
+var starttime = (new Date()).getTime();
+var curpos = 0;
+var length = 0;
+var state = 0;
+var pbr = 1;
+var playingtitle = "";
+function progresstime_init(nowstate){
+          
+     if(typeof nowstate !== "undefined") {
+        state = nowstate;
+     }
+     var request_playstat = createXMLHttpRequest();
+     url= playerurlbase + "/get_playingstatus_json.php";
+     request_playstat.open("GET", url, true);
+     request_playstat.onreadystatechange = function() {
+         if(request_playstat.readyState == 4) {
+           if (request_playstat.status === 200) {
+              var playstat = JSON.parse(request_playstat.responseText);
+              starttime = (new Date()).getTime();
+              curpos = playstat.playtime;
+              length = playstat.totaltime;
+              state = playstat.status;
+              playingtitle = playstat.playingtitle;
+          
+              cp=document.getElementById("time");
+              titlename=document.getElementById("songtitle");
+              titlename.innerHTML = '<p>Now Playing... </p>' + playingtitle;
+              Live=(length<1);
+              
+              starttime = starttime-curpos;
+              
+              if (state==2 && pbr!=0) progresstime_autoplay();
+              //return true;
+           }
+         }
+     }
+     request_playstat.send("");
+}
+
+function progresstime_autoplay(a)
+{
+  if(state == 2) 
+    AP=setTimeout('progresstime_autoplay()',1000);
+  var ct = (new Date()).getTime();
+  var cap=pbr*(ct-starttime);
+  cap=((cap>length && !Live)?length:(cap<0?0:cap))
+
+  var gg = " "+secondsToTS(cap,5,true)+" ";
+  cp.innerHTML = gg;
+  var percent = cap / length;
+  var divprogress = document.getElementById("divprogress");
+  divprogress.style.width = (percent * 100) + '%'; 
+  return true;
+}
+function pad(number, length)
+{
+	var str = '' + number;
+	while (str.length < length) str = '0' + str;
+	return str;
+}        
+function secondsToTS(a,b,c)
+{
+	var a1 = Math.floor(a/3600000);
+	var a2 = Math.floor(a/60000)%60;
+	var a3 = Math.floor(a/1000)%60;
+	var a4 = Math.floor(a)%1000;
+	var a1s = pad(a1.toString(),2);
+	var a2s = pad(a2.toString(),2);
+	var a3s = pad(a3.toString(),2);
+	var a4s = pad(a4.toString(),3);
+	switch (b){
+	case 1:	return a1s;
+	case 2:	return a2s;
+	case 3:	return a3s;
+	case 4:	return a4s;
+	case 5:	//return a1s+":"+a2s+":"+a3s+"."+a4s;
+	case 6:	//return ((a1>0?(a1s+":"):"")+a2s+":"+a3s+"."+a4s);
+	case 7:	return a1s+":"+a2s+":"+a3s;
+	default: return ((a1>0?(a1s+":"):"")+a2s+":"+a3s);
+	}
+	return "bahh";
 }

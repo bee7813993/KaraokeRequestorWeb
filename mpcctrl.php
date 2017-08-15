@@ -43,6 +43,17 @@
 <div class="container">
     <div align="center" class="playercontrol" id="playercontrol">
         <div class="row">
+        <?php
+          require_once 'func_playerprogress.php';
+          $playstat = new PlayerProgress;
+          if($playstat->getstatus()){
+              $playstat->show_progress_text();
+          }
+          
+          
+        ?>
+        </div>
+        <div class="row">
             <div class="col-xs-6">
             <button type="submit" value="曲の最初から" class="pcbuttom btn btn-default" onClick="song_startfirst()" >曲の最初から</button>
             </div >

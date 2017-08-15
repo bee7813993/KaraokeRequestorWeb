@@ -71,6 +71,11 @@ $select->closeCursor();
     print ' </td>';
     print ' <td>';
     print   $row["songfile"];
+if($row['keychange'] > 0){
+    print '<br><div style="text-align: right;;font-weight: normal;"> キー変更：+'.$row['keychange'].'</div>';
+}else if($row['keychange'] < 0){
+    print '<br><div style="text-align: right;;font-weight: normal;"> キー変更： '.$row['keychange'].'</div>';
+}
     print ' </td>';
     print ' <td>';
     print   $row["singer"];
