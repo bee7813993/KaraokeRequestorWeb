@@ -75,6 +75,76 @@ print_meta_header();
 <?php
 shownavigatioinbar();
 ?>
+<script type="text/javascript">
+function createXMLHttpRequest() {
+  if (window.XMLHttpRequest) {
+    return new XMLHttpRequest();
+  } else if (window.ActiveXObject) {
+    try {
+      return new ActiveXObject("Msxml2.XMLHTTP");
+    } catch (e) {
+      try {
+        return new ActiveXObject("Microsoft.XMLHTTP");
+      } catch (e2) {
+        return null;
+      }
+    }
+  } else {
+    return null;
+  }
+}
+
+function start_pfwdcmd(){
+var request = createXMLHttpRequest();
+url="pfwd_exec.php?pfwdstart=1";
+request.open("GET", url, true);
+request.onreadystatechange = function() {
+    if(request.readyState == 4) {
+        if (request.status === 200) {
+            var request2 = createXMLHttpRequest();
+            request2.open("GET", "pfwdstat.php", false);
+            request2.send(null);
+            var statvalue = JSON.parse(request2.responseText);
+            pfwdstat=document.getElementById("pfwdstatus");
+            if(statvalue.pfwdstat){
+                pfwdstat.innerHTML = "起動中";
+                pfwdstat.className = 'bg-success';
+            }else {
+                pfwdstat.innerHTML = "停止中";
+                pfwdstat.className = 'alert-danger';
+            }
+        }
+    }
+}
+request.send("");
+}
+
+function stop_pfwdcmd(){
+var request = createXMLHttpRequest();
+url="pfwd_exec.php?pfwdstop=1";
+request.open("GET", url, true);
+request.onreadystatechange = function() {
+    if(request.readyState == 4) {
+        if (request.status === 200) {
+            var request2 = createXMLHttpRequest();
+            request2.open("GET", "pfwdstat.php", false);
+            request2.send(null);
+            var statvalue = JSON.parse(request2.responseText);
+            pfwdstat=document.getElementById("pfwdstatus");
+            if(statvalue.pfwdstat){
+                pfwdstat.innerHTML = "起動中";
+                pfwdstat.className = 'bg-success';
+            }else {
+                pfwdstat.innerHTML = "停止中";
+                pfwdstat.className = 'alert-danger';
+            }
+        }
+    }
+}
+request.send("");
+}
+
+</script>
 <?php
 
 if($l_karaokeautorunaction == 'start'){
@@ -91,14 +161,21 @@ if($l_karaokeautorunaction == 'stop'){
     stopautoplaywithcheck();
 }
 
+require_once 'pfwdctl.php';
+$pfwdavailable = true;
+$pfwdinfo = new pfwd();
+$pfwdinfo->pfwdpath = urldecode($config_ini["pfwdplace"]);
+$pfwdavailable = $pfwdinfo->readpfwdcfg();
+
 $ap = checkautoplay();
 //var_dump ($ap);
+print '<div id="autoplaystatus ">';
 if($ap == 0){
-    print '自動再生停止中<br>';
+    print '自動再生停止中';
 }else{
-    print '自動再生実行中<br>';
+    print '自動再生実行中';
 }
-
+print '</div>';
 
 ?>
 
@@ -111,6 +188,29 @@ if($ap == 0){
 <input type="hidden" name="karaokeautorunaction" id="karaokeautorunaction"  value="stop" />
 <input type="submit" value="Stop" class="requestconfirm btn btn-default btn-lg"/>
 </form>
+
+<?php
+if($pfwdavailable){
+print <<<EOT
+  <div class="form-group">
+      <label class="control-label" >pfwdプログラム起動停止</label>
+      <button type="button" class="btn btn-default" onClick="start_pfwdcmd()" >起動</button>
+      <button type="button" class="btn btn-default" onClick="stop_pfwdcmd()" >停止</button>
+EOT;
+          if($pfwdavailable == false){
+              print '<span class="alert-danger" id="pfwdstatus" > 利用不可</span>';
+          }
+          else if($pfwdinfo->statpfwdcmd()){
+              print '<span class="bg-success" id="pfwdstatus" > 起動中</span>';
+          } else {
+              print '<span class="alert-danger" id="pfwdstatus" >停止中</span>';
+          }
+      
+print <<<EOT
+  </div>
+EOT;
+}
+?>
 
 </body>
 </html>
