@@ -452,18 +452,25 @@ if(! (count($audiotracklist) == 1) && $shop_karaoke != 1 && $filetype == 1){
 <dl>
 <dt>トラック選択</dt>
 <dd>
-<select name="track" class="form-control">
 EOT;
     if(empty($audiotracklist)){
+        print '<div >オーディオトラックが判別できなかったのでとりあえず3トラック表示しています </div>';
+        print '<select name="track" class="form-control">';
         $maxtrack = 3;
         for($c = 0; $c < $maxtrack ; $c++ ){
           print '  <option value="'.$c.'" >'.($c+1).'トラック目'.'</option>'."\n";
         }
     } else {
         $maxtrack = count($audiotracklist);
+        print '<select size="'. $maxtrack .'" name="track"  class="form-control">';
         for($c = 0; $c < $maxtrack ; $c++ ){
-          print '  <option value="'.$c.'" >'.($c+1).'トラック目：'.$audiotracklist[$c][1].'</option>'."\n";
+          if($c == 0 ){
+              print '  <option value="'.$c.'" selected >'.($c+1).'トラック目：'.$audiotracklist[$c][1].'</option>'."\n";
+          }else {
+              print '  <option value="'.$c.'" >'.($c+1).'トラック目：'.$audiotracklist[$c][1].'</option>'."\n";
+          }
         }
+        
     }
     print <<<EOT
 </select>
@@ -538,7 +545,7 @@ print '</div>';
 ?>
 <div CLASS="row" >
 <div CLASS="pushbtn col-xs-12 col-sm-8">
-<input type="submit" value="実行" class="requestconfirm btn btn-default btn-lg" />
+<input type="submit" value="実行" name="requestnow" class="requestconfirm btn btn-default btn-lg" />
 </div>
 </div>
 

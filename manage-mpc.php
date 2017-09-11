@@ -886,7 +886,14 @@ function start_song($db,$id,$addplaytimes = 0){
                 // BGV スタートコマンドを実行する。
                 if( array_key_exists('BGVCMDSTART',$config_ini) && !empty($config_ini['BGVCMDSTART']) ){
                     $cmd = urldecode($config_ini['BGVCMDSTART']);
-                    exec($cmd);
+                    if(strpbrk($cmd,'/:*?"><|')){
+                        logtocmd("BGV開始時実行コマンドにファイルに使用不可能な文字が含まれています:".$cmd);
+                    }else if(file_exists($cmd)){
+                        exec($cmd);
+                    }else {
+                        logtocmd("BGV開始時実行コマンドが見つかりません:".$cmd);
+                    }
+                    
                 }
             }
             // 再生開始
@@ -959,7 +966,13 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
         // BGV ストップコマンドを実行する。
         if( array_key_exists('BGVCMDEND',$config_ini) && !empty($config_ini['BGVCMDEND']) ){
             $cmd = urldecode($config_ini['BGVCMDEND']);
-            exec($cmd);
+            if(strpbrk($cmd,'/:*?"><|')){
+                logtocmd("BGV終了時実行コマンドにファイルに使用不可能な文字が含まれています:".$cmd);
+            }else if(file_exists($cmd)){
+                exec($cmd);
+            }else {
+                logtocmd("BGV終了時実行コマンドが見つかりません:".$cmd);
+            }
         }
     }
 
@@ -1212,7 +1225,13 @@ while(1){
           }else{
               if( array_key_exists('DeliveryCMD',$config_ini) && !empty($config_ini['DeliveryCMD']) ){
                   $cmd = urldecode($config_ini['DeliveryCMD']);
-                  exec($cmd);
+                  if(strpbrk($cmd,'/:*?"><|')){
+                      logtocmd("配信開始時実行コマンドにファイルに使用不可能な文字が含まれています:".$cmd);
+                  }else if(file_exists($cmd)){
+                      exec($cmd);
+                  }else {
+                      logtocmd("配信開始時実行コマンドが見つかりません:".$cmd);
+                  }
               }
               if( array_key_exists('usevideocapture',$config_ini) && ( $config_ini['usevideocapture'] == 1 || $config_ini['usevideocapture'] == 3)){ 
                   captureviewstart($playerpath,1);
@@ -1232,7 +1251,13 @@ while(1){
           runningcheck_shop_karaoke($db,$l_id);
           if( array_key_exists('DeliveryCMD',$config_ini) && !empty($config_ini['DeliveryCMD']) && array_key_exists('DeliveryCMDEND',$config_ini) && !empty($config_ini['DeliveryCMDEND']) ){
               $cmd = urldecode($config_ini['DeliveryCMDEND']);
-              exec($cmd);
+              if(strpbrk($cmd,'/:*?"><|')){
+                  logtocmd("配信終了時実行コマンドにファイルに使用不可能な文字が含まれています:".$cmd);
+              }else if(file_exists($cmd)){
+                  exec($cmd);
+              }else {
+                  logtocmd("配信終了時実行コマンドが見つかりません:".$cmd);
+              }
           } 
           if (array_key_exists('usevideocapture',$config_ini) )  {
               if($config_ini['usevideocapture'] == 3 ){
