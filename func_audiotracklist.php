@@ -1,6 +1,15 @@
 <?php
 require_once('modules/getid3/getid3.php');
 
+function getphpversion(){
+  if (!defined('PHP_VERSION_ID')) {
+    $version = explode('.', PHP_VERSION);
+
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+  }
+  return PHP_VERSION_ID;
+}
+
 function array_search_key($key,$value,$checkarray){
     foreach($checkarray as $k => $v ){
         if($v[$key] === $value ) return $k;
@@ -43,7 +52,12 @@ function checktracktype($trackinfo){
 function getaudiotracklist($filename){
     $getID3 = new getID3();
     $audiotracklist = array();
-    $filename_host= mb_convert_encoding($filename, 'SJIS-win', 'UTF-8');
+    $workencode = 'UTF-8';
+    
+    if(getphpversion() < 70100 ){
+       $workencode = 'SJIS-win';
+    }
+    $filename_host= mb_convert_encoding($filename, $workencode, 'UTF-8');
     setlocale(LC_CTYPE, 'Japanese_Japan.932');
     $res = file_exist_check_japanese($filename_host);
     if($res){
