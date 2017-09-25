@@ -1361,6 +1361,22 @@ if ($playmode != 4 && $playmode != 5){
         print '      <li><a href="'.$prefix.'request_confirm.php?shop_karaoke=1">カラオケ配信</a></li>';
       }
   }
+  global $user;
+  if (configbool("useuserpause", false) || ($user == 'admin' )) {
+      if($kind == 'button'){
+        print '<div align="center" >';
+        print '<form method="GET" action="request_confirm.php?shop_karaoke=1" >';
+        print '<input type="hidden" name="pause" value="1" />';
+        if(!empty($id)){
+            print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
+        }
+        print '<input type="submit" name="小休止"   value="小休止リクエスト" class="topbtn btn btn-default btn-lg"/> ';
+        print '</form>';
+        print '</div>';
+      }else if($kind == 'dd'){
+        print '      <li><a href="'.$prefix.'request_confirm.php?pause=1">小休止</a></li>';
+      }
+  }
 }
 
 if (!empty($config_ini["downloadfolder"]) && (check_access_from_online() === false) ){

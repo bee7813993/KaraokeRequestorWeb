@@ -712,7 +712,7 @@ function song_stop($kind, $stat = 'none'){
  */
 
 function check_request_loop($db,$id){
-    $sql = "SELECT loop FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
+    $sql = "SELECT loop, pause FROM requesttable  WHERE id = $id ORDER BY reqorder ASC ";
     $select = $db->query($sql);
     if($select === false) return false;
     $currentstatus = $select->fetchAll(PDO::FETCH_ASSOC);
@@ -723,6 +723,9 @@ function check_request_loop($db,$id){
         return false;
     }
     $c_status = $currentstatus[0]['loop'];
+    if($currentstatus[0]['pause']){
+        $c_status = $c_status + 2 ;
+    }
     return $c_status;
     
 }
@@ -948,7 +951,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
        }else if( $stat === false ) {
            break;
        }
-       if($loopflg == 1) {
+       if($loopflg >= 1) {
            song_start_again($db,$id);
        }else {
            break;
@@ -1286,6 +1289,26 @@ while(1){
                   }
               }
           }
+       }else if( (strcmp ($l_kind , "小休止") === 0))
+       {
+          global $config_ini;
+
+          if($l_nowplaying === '再生中' ){
+              logtocmd("再生中(小休止)を検出。終了待ち\n");
+          }else{
+              $db->beginTransaction();
+              $sql = "UPDATE requesttable set nowplaying = \"再生中\" WHERE id = $l_id ";
+              $ret = $db->exec($sql);
+              if (! $ret ) {
+              	logtocmd("再生中 への変更に失敗しました。<br>");
+              }
+              $db->commit();
+              file_get_contents("http://localhost/updaterequestlist.php");
+              autoopenbingo($l_id); 
+          }        
+          // 小休止になっている場合、リクエストのリストで再生済みに変更されるまで待機する
+          logtocmd("小休止終了待ち。「曲終了」ボタンを押すか、再生状況が「再生済」に変更されるまで停止\n");
+          runningcheck_shop_karaoke($db,$l_id);
        }else
        {
     logtocmd_dbg( 'カラオケ配信ではないファイル再生準備開始'."\n");

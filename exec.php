@@ -72,6 +72,14 @@ if(array_key_exists("track", $_REQUEST)) {
     }
 }
 
+$l_pause = 0;
+if(array_key_exists("pause", $_REQUEST)) {
+    $l_pause = $_REQUEST["pause"];
+    if(!is_numeric($l_pause)){
+        $l_pause = 0;
+    }
+}
+
 
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
@@ -117,7 +125,7 @@ if($request[0]['nowplaying'] === '再生中' || $request[0]['nowplaying'] === '�
 }
 
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track where id = ".$selectid;
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause where id = ".$selectid;
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -136,11 +144,12 @@ $arg = array(
 	':loop' => $l_loop,
 	':nowplaying' => $new_nowplaying,
 	':keychange' => $l_keychange,
-	':track' => $l_track
+	':track' => $l_track,
+	':pause' => $l_pause
 	);
 }else {
   try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track)";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track, pause) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track, :pause)";
     $stmt = $db->prepare($sql);
   } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -162,7 +171,8 @@ $arg = array(
 	':secret' => $l_secret,
 	':loop' => $l_loop,
 	':keychange' => $l_keychange,
-	':track' => $l_track
+	':track' => $l_track,
+	':pause' => $l_pause
 	);
 }
 $ret = $stmt->execute($arg);

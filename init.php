@@ -609,6 +609,19 @@ print 'value="'.urldecode($config_ini["BGVCMDEND"]).'"';
 />
     </div>
   </div>
+  <!---- 小休止の設定 ----->
+  <div class="form-group">
+  <?php
+      $useuserpause = configbool("useuserpause", false);
+  ?>
+    <label class="radio control-label"> 小休止リクエストを管理者以外に許可 <br /><small>一般ユーザーにも小休止リクエストができるようにします</small> </label>
+    <label class="radio-inline">
+      <input type="radio" name="useuserpause" value="1" <?php print ($useuserpause)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="useuserpause" value="2" <?php print (!$useuserpause)?'checked':' ' ?> /> 使用しない
+    </label>
+  </div>
 
 
   <div class="form-group">

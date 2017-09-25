@@ -25,6 +25,12 @@ if(array_key_exists("forcebgv", $_REQUEST)) {
     $forcebgv = $_REQUEST["forcebgv"];
 }
 
+$set_pause = 0;
+if(array_key_exists("pause", $_REQUEST)) {
+    $set_pause = $_REQUEST["pause"];
+}
+
+
 $selectid = 'none';
 if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
@@ -262,7 +268,14 @@ if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
       echo "$filename";
     }  
     echo "</textarea> ";
-
+}else if($set_pause == 1 ){
+    print 'placeholder="小休止時のリストに表示するメッセージ" >';
+    if (empty($filename)){
+      echo "";
+    }else{
+      echo "$filename";
+    }  
+    echo "</textarea> ";
 }else {
     print 'placeholder="曲名" disabled >';
 
@@ -298,7 +311,7 @@ if(is_numeric($selectid)){
 }
 $selectedcounter = 0;
 $singerlist = pickupsinger($allrequest,$YkariUsername);
-
+$pausecount = 0;
 foreach($singerlist as $singer)
 {
   print "<option value=\"";
@@ -317,6 +330,12 @@ foreach($singerlist as $singer)
   print "> ";
   print htmlspecialchars($singer);
   print "</option>";
+  if($singer == '小休止'){
+      $pausecount++;
+  }
+}
+if($set_pause && $pausecount == 0) {
+print '<option value="小休止">小休止</option>';
 }
 
 ?>
@@ -361,6 +380,9 @@ print htmlspecialchars($selectrequest[0]['comment']);
   }else if($set_directurl == 1){
       print 'URL指定'."\n";
       print '<input type="hidden" name="kind" id="kind"  value="URL指定" />'."\n";
+  }else if($set_pause == 1){
+      print '小休止'."\n";
+      print '<input type="hidden" name="kind" id="kind"  value="小休止" />'."\n";
   }else{
       print 'ファイル再生(動画/音楽)'."\n";
       print '<input type="hidden" name="kind" id="kind"  value="動画" />'."\n";
@@ -529,6 +551,18 @@ print '</label>';
 print '</div>';
 }
 
+if(configbool("useuserpause", false) || $user == 'admin' ){
+print '<div class="checkbox">';
+print "<label>";
+print '<input type="checkbox" name="pause" value="1" ';
+if($set_pause == 1 ){
+print 'checked';
+}
+print '/>';
+print '小休止リクエスト';
+print '</label>';
+print '</div>';
+}
 if(is_numeric($selectid)){
 print '<input type="hidden" name="selectid" id="selectid"  value='.$selectid.' />'."\n";
 }
