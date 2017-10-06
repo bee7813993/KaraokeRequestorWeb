@@ -248,7 +248,7 @@ EOD;
     if($value['nowplaying'] === '再生中'){
         // すべての場合に表示する
         $stopbtnmsg= '曲停止';
-        if($value['kind'] === 'カラオケ配信' || $value['kind'] === '動画_別プ'  || $value['pause'] == 1 || $value['kind'] != '小休止' ){ 
+        if($value['kind'] === 'カラオケ配信' || $value['kind'] === '動画_別プ'  || $value['pause'] == 1 || $value['kind'] == '小休止' ){ 
          $stopbtnmsg = '<small>曲停止</small><br /><strong>要次曲</strong>';
         }
         $songstop ='<button type="button" class="btn btn-default" onClick=\'song_end(this,'.$value["id"].');return false;\' >'.$stopbtnmsg.'</button>';
