@@ -144,7 +144,7 @@ function logtocmd_dbg($msg){
 function mpcstop(){
    global $MPCCMDURL;
    global $playercommandname;
-   $pscheck_cmd='tasklist /fi "imagename eq '.$playercommandname;
+   $pscheck_cmd='tasklist /fi "imagename eq '.$playercommandname.'"';
    exec($pscheck_cmd, $psresult );
    sleep(1);
    
@@ -167,6 +167,19 @@ function mpcstop(){
               sleep(1);
               continue;
           }else{
+              // finish check
+              for($checkcount = 0 ; $checkcount < 5 ; $checkcount ++){
+                  exec($pscheck_cmd, $psresult );
+                  foreach( $psresult as $psline ){
+                      $pos = strpos($psline,$playercommandname);
+                      if ( $pos === FALSE) {
+                          break;
+                      }else {
+                          sleep(1);
+                          continue;
+                      }
+                  }
+              }
               break;
           }
        }
@@ -337,6 +350,9 @@ function captureviewstart($playerpath,$waittime = 1){
            global $MPCCMDURL;
            $mpcstat = file_get_contents($MPCCMDURL."?wm_command=1023");
        }
+       // MPCを一度終了させる。（終了させる必要がない場合は以下2行をコメントアウト）
+       mpcstop();
+       sleep(1);
      
        mpcdevicestart($playerpath, $waittime);
        
