@@ -124,10 +124,16 @@ class MoveItem {
        
        return $neworder;
        
-****/       
+****/  
+       $beforeturn = array();
+       $beforeturn_1 = array();
+       $beforeturn_2 = array();
        ///以下古い処理
+       // 今まで自分の名前の入った一番新しいリクエストのorder番号を探す
+       $maxmyorder = $this->get_max_reqorder_from_name($newsinger,$id);
+       
        foreach($this->turnlist as $turnkey => $oneturn){
-       //print "<pre>";
+       //print "<pre> dump oneturn\n";
        //    var_dump($oneturn);
        //print "</pre>";
            // 1番最初のリクエスト
@@ -136,6 +142,18 @@ class MoveItem {
               //print "このターンは0でした<br>\n";
               return 1;
            }
+           $beforeturn_2 = $beforeturn_1;
+           $beforeturn_1 = $beforeturn;
+           $beforeturn = $oneturn;
+           // 自分の最新リクエストより前 -> 次のターン
+           if(count($oneturn) > 0 ){
+             if(array_key_exists('reqorder', $oneturn[0]) ){
+               // print '$oneturn[0][reqorder]:'.$oneturn[0]['reqorder'].'$maxmyorder:'.$maxmyorder.'<br>';
+               if($oneturn[0]['reqorder'] < $maxmyorder) continue;
+             }
+           }
+           
+
            // 未再生の場所を探す
            $startcheck = false;
            foreach($oneturn as $onerequest){
@@ -147,14 +165,10 @@ class MoveItem {
            }
            // 現在のターンに1つも未再生がない → 次のターンへ
            if($startcheck == false) {
-               $beforeturn_1 = $beforeturn;
-               $beforeturn = $oneturn;
                continue;
            }
            // 現在のターンに名前がある → 次のターンへ
            if($this->check_exists_mymember($oneturn,$newsinger,$id) === true){
-               $beforeturn_1 = $beforeturn;
-               $beforeturn = $oneturn;
                // print "このターンに自分の名前がありました".$newsinger." <br>\n";
                // var_dump($oneturn);
                // print " <br>\n";
@@ -165,7 +179,7 @@ class MoveItem {
            // 1つ前のターンで自分より前の人の名前のリストを取得
            $mynamefound = false;
            $beforesinger = array(); 
-           /**
+/**
        print "<pre>\n-------- beforeturn_1 list:\n";
        var_dump($beforeturn_1);print "</pre>";
            if(!empty($beforeturn_1)){
@@ -186,33 +200,43 @@ class MoveItem {
                }
            }
 **/
-           foreach( ($beforeturn) as $b_onerequest ){
-           // print $b_onerequest['songfile'].$b_onerequest['singer'].$newsinger."<br>\n";
-               if($mynamefound === false) {
-                   if($b_onerequest['singer'] === $newsinger ){
-                       $mynamefound = true;
+// var_dump($beforeturn_1);
+           if( $turnkey > 0 ) {
+           //  for( $i = $turnkey - 1 ; $i >= 0 ; $i-- ){
+               foreach( ($this->turnlist[$turnkey - 1]) as $b_onerequest ){
+               // print $b_onerequest['songfile'].$b_onerequest['singer'].$newsinger."<br>\n";
+                   if($mynamefound === false) {
+                       if($b_onerequest['singer'] === $newsinger ){
+                           $mynamefound = true;
+                           //array_push($beforesinger,$b_onerequest);
+                           continue;
+                       }else{
+                           // print $b_onerequest['singer'].$newsinger."<br>\n";
+                           array_push($beforesinger,$b_onerequest);
+                       }
+                   }else {
                        //array_push($beforesinger,$b_onerequest);
-                       continue;
-                   }else{
-                       // print $b_onerequest['singer'].$newsinger."<br>\n";
-                       array_push($beforesinger,$b_onerequest);
                    }
-               }else {
-                   //array_push($beforesinger,$b_onerequest);
                }
+           //  }
            }
            if($mynamefound === false) {
                $beforesinger = null;
            }
            // とりあえず現ターンの未再生の中の最後の順番にしておく
            $newreqorder = false;
-           if(empty($beforeturn)){
+           if(empty($this->turnlist[$turnkey - 1])){
                $newreqorder = $oneturn[count($oneturn)-1]['reqorder']+1;
+               //print 'now set'.$newreqorder;
            }else{
+           print '<pre>';
+           var_dump($oneturn);
+           print '</pre>';
            for($i = 0 ; $i < count($oneturn) ; $i++){
-            // print  $oneturn[$i]['id'].$oneturn[$i]['reqorder'];
+             // print  $oneturn[$i]['id'].$oneturn[$i]['reqorder'].'<br>';
                if($oneturn[$i]['nowplaying'] == '未再生' ){
                    $newreqorder = $oneturn[$i]['reqorder'];
+                   // print 'now set'.$newreqorder;
                    break;
                }
            }
@@ -277,6 +301,8 @@ class MoveItem {
                // print "ターンの一番後ろにしました";
                // そのターンの先頭にするときはコメントアウト
                $newreqorder = $oneturn[count($oneturn)-1]['reqorder']+1;
+             }else {
+                        $newreqorder = $newreqorder + 1;
              }
              
            }
@@ -389,6 +415,21 @@ class MoveItem {
            }
        }
        return false;
+   }
+   
+   /* $singerのリクエストした一番新しいreqourderを探す */
+   /* $woid : 対象としないid値  */
+   /* -1 : user not found  */
+   public function get_max_reqorder_from_name($newsinger,$woid) {
+       $maxreqorder = -1;
+       foreach($this->allrequest as $key => $row ){
+           if($row['id'] == $woid ) continue;
+           if($row['singer'] === $newsinger ) {
+               // print $newsinger . ' as '. $row['reqorder'] .'<br>';
+               $maxreqorder = max ( $maxreqorder , $row['reqorder'] );
+           }
+       }
+       return $maxreqorder;
    }
 }
 
