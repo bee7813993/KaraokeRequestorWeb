@@ -302,7 +302,7 @@ class MoveItem {
                // そのターンの先頭にするときはコメントアウト
                $newreqorder = $oneturn[count($oneturn)-1]['reqorder']+1;
              }else {
-                        $newreqorder = $newreqorder + 1;
+                        $newreqorder = $newreqorder;
              }
              
            }

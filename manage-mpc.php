@@ -353,7 +353,16 @@ function captureviewstart($playerpath,$waittime = 1){
        // MPCを一度終了させる。（終了させる必要がない場合は以下2行をコメントアウト）
        mpcstop();
        sleep(1);
-     
+       for($i = 0; $i < 10; $i++){
+         if(mpcrunningcheck($playerpath)===FALSE){
+          break;
+         }
+         mpcstop();
+         sleep(1);
+       }
+       if($i >= 10 ){
+           logtocmd ("captureviewstart: MPC Stop Failed");
+       }
        mpcdevicestart($playerpath, $waittime);
        
        // ビデオキャプチャーデバイスでは、画面を画面いっぱいに引きのばす(GV-USB2では縦長になるので)

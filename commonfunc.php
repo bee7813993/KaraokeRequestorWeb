@@ -785,7 +785,7 @@ $(document).ready(function(){
       $("html,body").animate({scrollTop:rect.top},100);
   },
   "bPaginate" : true,
-  "lengthMenu": [[50, 10, 100], [50, 10, 100]],
+  "lengthMenu": [[50, 10, 100, 1000], [50, 10, 100, 1000]],
   "bStateSave" : true,
   "stateSaveParams" : function (settings, data) {
     data.start = 0;
