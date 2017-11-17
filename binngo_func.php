@@ -309,7 +309,7 @@ class SongBingo {
                       $reqlist = $select->fetchAll(PDO::FETCH_ASSOC);
                       $select->closeCursor();
                       // print $onebingodata['requirement'].$reqlist[0]['songfile'];
-                      $existscount = mb_strpos($onebingodata['requirement'],$reqlist[0]['songfile'] );
+                      $existscount = mb_strpos($reqlist[0]['songfile'],$onebingodata['requirement'] );
                       // print $existscount.'<br />';
                       if($existscount !== FALSE) {
                           $openrequirement = $onebingodata['requirement'];
