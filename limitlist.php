@@ -50,7 +50,11 @@ if( !empty($_REQUEST['data']) ){
 }
 
 
-$url = 'http://localhost/'.$limitfilename;
+if( is_valid_url($limitfilename) ){
+    $url = $limitfilename;
+}else {
+    $url = 'http://localhost/'.$limitfilename;
+}
 $json = file_get_html_with_retry($url);
 if($json === NULL){
    print "<p> 曲リストが見つかりませんでした </p>";

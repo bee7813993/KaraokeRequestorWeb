@@ -42,7 +42,8 @@
 <p align="center" style="margin-bottom: 0;"> 動画再生用(Media Player Classic) </p>
 <div class="container">
     <div align="center" class="playercontrol" id="playercontrol">
-        <div class="row">
+        <div class="row" id="playerprogress" >
+        <div id="proglessbase" class="bg-info" >
         <?php
           require_once 'func_playerprogress.php';
           $playstat = new PlayerProgress;
@@ -52,6 +53,7 @@
           
           
         ?>
+        </div>
         </div>
         <div class="row">
             <div class="col-xs-6">

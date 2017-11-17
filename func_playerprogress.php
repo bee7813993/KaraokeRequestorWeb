@@ -12,6 +12,7 @@ class PlayerProgress {
     public $totaltime = "";
     public $status = 0;
     public $playingtitle = "";
+    public $playercommandname = "";
     
     
     public function show_progress_text(){
@@ -39,6 +40,9 @@ class PlayerProgress {
         print '<script language="javascript" type="text/javascript">progresstime_init();</script>';
     }
     public function getstatus() {
+        if($this->runningcheck_player() === FALSE) {
+            return false;
+        }
         $result = array();
     
         $status = file_get_html_with_retry($this->MPCVARIABLESURL);
@@ -75,6 +79,7 @@ class PlayerProgress {
     }
     
     public function getplaystatus_json() {
+    
         if( $this->getstatus() ){
         $ret = array();
         $ret += array('playtime_txt'=>$this->playtime_txt);
@@ -88,6 +93,25 @@ class PlayerProgress {
         }else {
           return false;
         }
+    }
+    
+    public function runningcheck_player() {
+        global $config_ini;
+        $this->playercommandname = basename(urldecode($config_ini["playerpath"]));
+        $pscheck_cmd='tasklist /fi "imagename eq '.$this->playercommandname.'"';
+        //print $pscheck_cmd;
+        exec($pscheck_cmd, $psresult );
+        // sleep(1);
+        
+        $process_found = false;
+        
+        foreach( $psresult as $psline ){
+          $pos = strpos($psline,$this->playercommandname);
+          if ( $pos !== FALSE) {
+             $process_found = true;
+          }
+        }
+        return $process_found;
     }
 }
 

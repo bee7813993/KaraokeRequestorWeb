@@ -109,6 +109,11 @@ function createUri( $base, $relationalPath )
 
 }
 
+function is_valid_url($url)
+{
+    return false !== filter_var($url, FILTER_VALIDATE_URL) && preg_match('@^https?+://@i', $url);
+}
+
 function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar = 4){
 
     $errno = 0;
@@ -121,6 +126,13 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeoutsec);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeoutsec);
         curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        //リダイレクト先追従
+        //Locationをたどる
+        curl_setopt($ch,CURLOPT_FOLLOWLOCATION,true);
+        //最大何回リダイレクトをたどるか
+        curl_setopt($ch,CURLOPT_MAXREDIRS,4);
+        //リダイレクトの際にヘッダのRefererを自動的に追加させる
+        curl_setopt($ch,CURLOPT_AUTOREFERER,true);
         if($ipvar == 6){
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6 );
         }else if($ipvar == 4){

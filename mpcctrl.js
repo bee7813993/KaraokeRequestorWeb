@@ -312,6 +312,7 @@ var length = 0;
 var state = 0;
 var pbr = 1;
 var playingtitle = "";
+var AP = 0;
 function progresstime_init(nowstate){
           
      if(typeof nowstate !== "undefined") {
@@ -323,12 +324,23 @@ function progresstime_init(nowstate){
      request_playstat.onreadystatechange = function() {
          if(request_playstat.readyState == 4) {
            if (request_playstat.status === 200) {
+              // console.log('responseText:' + request_playstat.responseText);
+              if(request_playstat.responseText.length === 0 ){
+                  return;
+              }
               var playstat = JSON.parse(request_playstat.responseText);
               starttime = (new Date()).getTime();
               curpos = playstat.playtime;
               length = playstat.totaltime;
               state = playstat.status;
               playingtitle = playstat.playingtitle;
+              
+              var pg = document.getElementById("proglessbase");
+              // console.log('pg.innerHTML:' + pg.innerHTML.replace(/[\t\s]/g, '').length);
+              if(pg.innerHTML.replace(/[\t\s]/g, '').length === 0){
+                  location.href='playerctrl_portal.php';
+                  return;
+              }
           
               cp=document.getElementById("time");
               ttp=document.getElementById("total");
@@ -340,7 +352,7 @@ function progresstime_init(nowstate){
               Live=(length<1);
               
               starttime = starttime-curpos;
-              
+              //  console.log('goto progresstime_autoplay state:' + state);
               if (state==2 && pbr!=0) progresstime_autoplay();
               //return true;
            }
@@ -351,14 +363,18 @@ function progresstime_init(nowstate){
 
 function progresstime_autoplay(a)
 {
-  if(state == 2) 
+ 
+  if(state == 2) {
+    clearTimeout(AP);
     AP=setTimeout('progresstime_autoplay()',1000);
+    }
   var ct = (new Date()).getTime();
   var cap=pbr*(ct-starttime);
   cap=((cap>length && !Live)?length:(cap<0?0:cap))
 
   var gg = " "+secondsToTS(cap,5,true)+" ";
   cp.innerHTML = gg;
+  // console.log('progresstime_autoplay updatenow gg:' + gg);
   var percent = cap / length;
   var divprogress = document.getElementById("divprogress");
   divprogress.style.width = (percent * 100) + '%'; 
