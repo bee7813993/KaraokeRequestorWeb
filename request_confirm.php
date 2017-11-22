@@ -484,8 +484,11 @@ EOT;
         }
     } else {
         $maxtrack = count($audiotracklist);
-        if(  $maxtrack == 1  &&   (  strlen($audiotracklist[0][1]) > 0 || strpos( $audiotracklist[0][1] , 'Sound Media Handler' ) !== false || strpos( $audiotracklist[0][1] , 'GPAC ISO Audio Handler' ) !== false )){
+        if(  $maxtrack == 1  &&   (  strlen($audiotracklist[0][1]) == 0 || strpos( $audiotracklist[0][1] , 'Sound Media Handler' ) !== false || strpos( $audiotracklist[0][1] , 'GPAC ISO Audio Handler' ) !== false || strpos( $audiotracklist[0][1] , 'SoundHandler' ) !== false )){
+//        print "<pre>".strlen($audiotracklist[0][1]).$audiotracklist[0][1].$maxtrack."</pre>";
+        print "<pre> 1トラックのみ </pre>";
         }else {
+//        print "<pre>".$audiotracklist[0][1].$maxtrack."</pre>";
         print '<select size="'. $maxtrack .'" name="track"  class="form-control">';
         for($c = 0; $c < $maxtrack ; $c++ ){
           if($c == 0 ){
