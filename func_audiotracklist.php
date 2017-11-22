@@ -93,8 +93,12 @@ function getaudiotracklist($filename){
 // function from manage-mpc.php
 
 function file_exist_check_japanese($filename){
- setlocale(LC_CTYPE, 'Japanese_Japan.932');
- $fileinfo = @fopen(addslashes($filename),'r');
+  $filename_check = $filename;
+  if(getphpversion() < 70100 ){
+   setlocale(LC_CTYPE, 'Japanese_Japan.932');
+   $filename_check =addslashes($filename);
+  }
+ $fileinfo = @fopen($filename_check,'r');
  if($fileinfo != FALSE){
      fclose($fileinfo);
      // logtocmd 'DEBUG : Success fopen' ;

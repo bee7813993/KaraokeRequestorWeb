@@ -468,7 +468,7 @@ EOT;
 
 }
 
-if(! (count($audiotracklist) == 1) && $shop_karaoke != 1 && $filetype == 1){
+if( $shop_karaoke != 1 && $filetype == 1){
 
     print <<<EOT
 <dl>
@@ -484,6 +484,8 @@ EOT;
         }
     } else {
         $maxtrack = count($audiotracklist);
+        if(  $maxtrack == 1  &&   (  strlen($audiotracklist[0][1]) > 0 || strpos( $audiotracklist[0][1] , 'Sound Media Handler' ) !== false || strpos( $audiotracklist[0][1] , 'GPAC ISO Audio Handler' ) !== false )){
+        }else {
         print '<select size="'. $maxtrack .'" name="track"  class="form-control">';
         for($c = 0; $c < $maxtrack ; $c++ ){
           if($c == 0 ){
@@ -491,6 +493,7 @@ EOT;
           }else {
               print '  <option value="'.$c.'" >'.($c+1).'トラック目：'.$audiotracklist[$c][1].'</option>'."\n";
           }
+        }
         }
         
     }
