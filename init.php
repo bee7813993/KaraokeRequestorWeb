@@ -78,7 +78,7 @@ print '</pre>';
 
 
 // to urlencode
-$new_roomurlglobal = array();
+$new_roomurlshow = array();
 foreach($newconfig as $key => $value){
     if(is_array($value)){
     $roomcount = 0;
@@ -88,11 +88,11 @@ foreach($newconfig as $key => $value){
                     $newconfig['roomurl'][$newconfig['roomno'][$roomno]]=urlencode($roomurl);
                 }else{
                 }
-                if(array_key_exists("roomurlglobal", $newconfig)){
-                  foreach($newconfig["roomurlglobal"] as $rv ){
+                if(array_key_exists("roomurlshow", $newconfig)){
+                  foreach($newconfig["roomurlshow"] as $rv ){
                     if( $rv == $roomcount ){
-                        print "now setting newconfig['roomurlglobal'][".$newconfig['roomno'][$roomno].']';
-                        $new_roomurlglobal += array( $newconfig['roomno'][$roomno] => 1 );
+                        print "now setting newconfig['roomurlshow'][".$newconfig['roomno'][$roomno].']';
+                        $new_roomurlshow += array( $newconfig['roomno'][$roomno] => 1 );
                     }else{
                     }
                   }
@@ -107,7 +107,7 @@ foreach($newconfig as $key => $value){
     }
 }
 
-if(!empty($newconfig) ) $newconfig['roomurlglobal'] = $new_roomurlglobal ;
+if(!empty($newconfig) ) $newconfig['roomurlshow'] = $new_roomurlshow ;
 // $config_ini['roomurl'] = array();
 $config_ini_new = array_merge($config_ini,$newconfig);
 
@@ -765,7 +765,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
     <tr>
       <th class="col-xs-3" >部屋番号</th>
       <th class="col-xs-8" >URL</th>
-      <th class="col-xs-1" >グローバル</th>
+      <th class="col-xs-1" >表示</th>
     </tr>
   </thead>
 <?php 
@@ -781,8 +781,8 @@ if(array_key_exists("downloadfolder",$config_ini)) {
       print '    <td><input type="text" class="form-control input-normal" placeholder="部屋'.$roomcount.'のURL" name="roomurl[]"';
       print 'value="'.urldecode($value).'"' ;
       print '    ></td>'."\n";
-      print '    <td><input type="checkbox" class="form-control input-normal" placeholder="オンライン用URLかどうか？" name="roomurlglobal[]" value='.$roomcount;
-      if(array_key_exists("roomurlglobal", $config_ini) && array_key_exists($key, $config_ini["roomurlglobal"]) && $config_ini["roomurlglobal"][$key] == 1){
+      print '    <td><input type="checkbox" class="form-control input-normal" placeholder="部屋メニューに表示するかどうか" name="roomurlshow[]" value='.$roomcount;
+      if(array_key_exists("roomurlshow", $config_ini) && array_key_exists($key, $config_ini["roomurlshow"]) && $config_ini["roomurlshow"][$key] == 1){
         print ' checked' ;
       }
       print '    ></td>'."\n";
@@ -794,7 +794,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
     ></td>
     <td><input type="text" class="form-control input-normal" placeholder="この部屋のURL" name="roomurl[]"
     ></td>
-    <td><input type="checkbox" class="form-control input-normal" placeholder="オンライン用URLかどうか？" name="roomurlglobal[]" value="<?php echo $roomcount;?>"
+    <td><input type="checkbox" class="form-control input-normal" placeholder="オンライン用URLかどうか？" name="roomurlshow[]" value="<?php echo $roomcount;?>"
     ></td>
   </tr>
   </table>
