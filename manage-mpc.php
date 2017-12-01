@@ -267,7 +267,7 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
 
     for($loopcount = 0 ; $loopcount < 1 ; $loopcount ++){
        
-       $requesturl = $MPCFILEOPENURL.rawurlencode($playfilepath);
+       $requesturl = $MPCFILEOPENURL.rawurlencode($playfilepath).'&redir=/info.html';
        // logtocmd $requesturl;
        $mpcstat = file_get_html_with_retry($requesturl, 1,2);
        
