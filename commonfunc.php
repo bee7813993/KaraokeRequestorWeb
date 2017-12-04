@@ -1178,7 +1178,7 @@ EOD;
          reset($config_ini["roomurl"]);
          while($roominfo = each($config_ini["roomurl"])){
              if(!empty($roominfo["value"])  ) {
-                 if(array_key_exists($roominfo["key"],$config_ini["roomurlshow"]) &&  $config_ini["roomurlshow"][$roominfo["key"]] == 1) {
+                 if(array_key_exists("roomurlshow",$config_ini) && array_key_exists($roominfo["key"],$config_ini["roomurlshow"]) &&  $config_ini["roomurlshow"][$roominfo["key"]] == 1) {
                    print '      <li id="'.$roominfo["key"].'room" ><a href="'.urldecode($roominfo["value"]).'">'.$roominfo["key"].'</a></li>'."\n";
                  }
 /**
@@ -1481,7 +1481,9 @@ function multiroomenabled(){
  $roomcounter = 0;
  foreach($config_ini["roomurl"] as $k => $i){
    if(!empty($i)){
-     $roomcounter++;
+     if(array_key_exists("roomurlshow",$config_ini) && array_key_exists($k,$config_ini["roomurlshow"]) &&  $config_ini["roomurlshow"][$k] == 1) {
+        $roomcounter++;
+     }
    }
 
  }
