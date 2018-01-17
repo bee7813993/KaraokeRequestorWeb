@@ -9,7 +9,7 @@ class EasyKeychanger {
         $url = $this->KeychangerURL.'command.html?help=ver';
         
         $res = @file_get_html_with_retry($url,2,$this->Keychangertimeout,4);
-        if($res === false) return $res;
+        if($res === false) return 'failed';
         
         return $this->build_result($res);
         
