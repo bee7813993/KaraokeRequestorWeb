@@ -1,4 +1,14 @@
 <?php
+session_cache_limiter('public');
+session_start();
+
+if (array_key_exists('HTTP_IF_MODIFIED_SINCE', $_SERVER) )  {
+  if($_SERVER['HTTP_IF_MODIFIED_SINCE']) {
+	header('HTTP/1.1 304 Not Modified');
+	flush();
+	die();
+  }
+} 
 /*** 
     外部リストその３
     なんでもいいのでURLから外部のHTMLを取得。
@@ -88,5 +98,7 @@ foreach($regs[0] as $tdtag){
        }
    }
 }
+$size = strlen($html);
+header("Content-Length: $size");
 print $html;
 ?>
