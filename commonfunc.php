@@ -1279,6 +1279,13 @@ EOD;
 //    print '    <p class="navbar-text navbar-right"> <a href="'.$helpurl.'" class="navbar-link">ヘルプ</a> </p>';
     print '</div>';
     print '</nav>';
+    
+    // 背景色変更
+    if(array_key_exists("bgcolor",$config_ini)){
+         print '<script type="text/javascript" >';
+         print 'document.body.style.backgroundColor = "'.urldecode($config_ini["bgcolor"]).'";';
+         print '</script>';
+    }
 }
 
 

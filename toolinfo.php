@@ -32,9 +32,20 @@ print_meta_header();
   <link type="text/css" rel="stylesheet" href="css/style.css" />
   <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
   <script src="js/bootstrap.min.js"></script>
+
+
+<?php 
+
+?>
 </head>
 <body>
 <?php
+    // 背景色変更
+    if(array_key_exists("bgcolor",$config_ini)){
+         print '<script type="text/javascript" >';
+         print 'document.body.style.backgroundColor = "'.urldecode($config_ini["bgcolor"]).'";';
+         print '</script>';
+    }
 // 処理記述部
 $online_avaiavle = 0;
 $change_counter = 0;

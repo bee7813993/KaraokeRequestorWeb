@@ -275,18 +275,22 @@ EOD;
        }
     }
     if($connectinternet == 1){
-    if($value['nowplaying'] === '再生中'){
-            $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
-    }
-    elseif($value['nowplaying'] === '未再生'){
-            $tweet_message = sprintf("「%s」は「%s」を歌います",$value['singer'],$public_songname);
-    }
-    else{
-            $tweet_message = sprintf("「%s」は「%s」を歌いました",$value['singer'],$value['songfile']);
-    }
-    $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" TARGET="_blank" > Tweetする </a>',urlencode($tweet_message));
+    $useposttwitter = configbool("useposttwitter", true);
+      $tweet_link = ' ';
+      if($useposttwitter) {
+        if($value['nowplaying'] === '再生中'){
+                $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
+        }
+        elseif($value['nowplaying'] === '未再生'){
+                $tweet_message = sprintf("「%s」は「%s」を歌います",$value['singer'],$public_songname);
+        }
+        else{
+                $tweet_message = sprintf("「%s」は「%s」を歌いました",$value['singer'],$value['songfile']);
+        }
+      $tweet_link = sprintf('<a href="https://twitter.com/intent/tweet?text=%s" TARGET="_blank" > Tweetする </a>',urlencode($tweet_message));
+      }
     }else {
-    $tweet_link = ' ';
+      $tweet_link = ' ';
     }
     $tweet_link = $songstop.$tweet_link;
     

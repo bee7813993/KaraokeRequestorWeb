@@ -36,7 +36,7 @@ if($shop_karaoke == 1 && is_numeric($selectid)){
     $forcebgv = 1;
 }
 
-include 'kara_config.php';
+require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
 $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
@@ -77,7 +77,7 @@ function pickupsinger($rt, $moreuser = "")
    return $singerlist;
 }
 
-function selectedcheck($rt,$singer,$beforesinger = 'none' ){
+function selectedcheck_request($rt,$singer,$beforesinger = 'none' ){
     $rt_i = array_reverse($rt);
 
     if($beforesinger == 'none'){
@@ -172,6 +172,9 @@ if(array_key_exists("YkariUsername", $_COOKIE)) {
     $YkariUsername = $_COOKIE["YkariUsername"];
 }
 ?>
+<?php
+shownavigatioinbar();
+?>
 <div class="container">
 <form method="post" action="exec.php" id="requestconfirm">
 <div class="form-group">
@@ -211,7 +214,7 @@ foreach($singerlist as $singer){
   print "<option value=\"";
   print $singer;
   print "\"";
-  if( selectedcheck($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
+  if( selectedcheck_request($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
   {
       print " selected ";
       $selectedcounter = $selectedcounter + 1 ;

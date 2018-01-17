@@ -238,6 +238,9 @@ if(array_key_exists("YkariUsername", $_COOKIE)) {
     $YkariUsername = $_COOKIE["YkariUsername"];
 }
 ?>
+<?php
+shownavigatioinbar();
+?>
 <div class="container">
 <form method="post" action="exec.php" id="requestconfirm">
 <div class="form-group">

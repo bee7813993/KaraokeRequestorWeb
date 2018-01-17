@@ -340,6 +340,31 @@ print ' value="10" ';
   </label>
   </div>
 
+<!---- ページ背景色設定 ----->
+  <?php
+      $bgcolor='#F8ECE0';
+      if(array_key_exists("bgcolor",$config_ini)){
+             $bgcolor=urldecode($config_ini["bgcolor"]);
+      }
+  ?>
+  <div class="form-group">
+    <label class="radio control-label"> ページ背景色  </label>
+    <input type="color" name="bgcolor" id="bgcolor" list="colors" value="<?php print $bgcolor ?>" />
+		<datalist id="colors">
+			<option value="#F8ECE0"></option>
+			<option value="#b7dbff"></option>
+			<option value="#ffddee"></option>
+			<option value="#ceffce"></option>
+		</datalist>
+  </div>
+  <script type="text/javascript">
+  $("#bgcolor").on("change", function(){
+      document.body.style.backgroundColor = $('#bgcolor').val();
+  });
+  </script>
+
+
+
   <div class="form-group">
     <label for="playerpath_select">MediaPlayerClassic PATH設定</label>
     <select  class="form-control" name="playerpath_select" id="playerpath_select" >  
@@ -642,6 +667,21 @@ print 'value="'.urldecode($config_ini["BGVCMDEND"]).'"';
       <input type="radio" name="connectinternet" value="2" <?php print ($config_ini["connectinternet"]!=1)?'checked':' ' ?> /> 使用しない
     </label>
   </div>
+
+<!---- twitter投稿リンク ----->
+  <div class="form-group">
+  <?php
+      $useposttwitter = configbool("useposttwitter", true);
+  ?>
+    <label class="radio control-label"> twitter投稿リンク </label>
+    <label class="radio-inline">
+      <input type="radio" name="useposttwitter" value="1" <?php print ($useposttwitter)?'checked':' ' ?> /> 表示する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="useposttwitter" value="2" <?php print (!$useposttwitter)?'checked':' ' ?> /> 表示しない
+    </label>
+  </div>
+
   <div class="form-group">
     <label title="検索結果がこの数を超えた場合、作品名や歌手名と一緒に検索結果を表示する" > anison.info 詳細検索表示件数 <small> 0で1件でもあれば表示</small> </label>
     <?php 
