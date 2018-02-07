@@ -93,6 +93,25 @@ function getnewid($db){
     
     return $count + 1;
 }
+
+// 書式チェック
+switch($l_kind) {
+     case '動画':
+     case 'カラオケ配信':
+     case '小休止':
+     case 'URL指定':
+     case '動画_別プ':
+         break;
+     default:
+         die();
+}
+
+if(mb_strlen($l_comment) > 512 ) die();
+if(mb_strlen($l_filename) > 2048 ) die();
+if(mb_strlen($l_singer) > 256 ) die();
+if(mb_strlen($l_freesinger) > 256 ) die();
+
+
 // print("${l_singer} さんの ${l_filename} を追加する予定。<br>");
 ?>
 
