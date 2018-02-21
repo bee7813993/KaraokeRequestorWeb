@@ -59,7 +59,8 @@ $p = stripslashes($p);
 
 	if($msg != ""){
 	//MYSQLに接続
-		$sql = "insert into dkniko values('".$room."','".$nm."','".$msg."',$sz,'".$col."',datetime('now', 'localtime'),0,null)";
+		$sql = "insert into dkniko values('".$room."','".$nm."',". $commentdb->quote($msg).",$sz,'".$col."',datetime('now', 'localtime'),0,null)";
+//		$sql = "insert into dkniko values('".$room."','".$nm."','".$msg."',$sz,'".$col."',datetime('now', 'localtime'),0,null)";
 //		$result_flag = mysql_query($sql);
         $result_flag = $commentdb->exec($sql);
         if( $result_flag === FALSE){
