@@ -6,6 +6,7 @@ $displaynum=80000;
 $draw = 1;
 $allcount = 0;
 
+
 $lister_dbpath = 'list\List.sqlite3';
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
@@ -33,6 +34,16 @@ if(array_key_exists("header", $_REQUEST)) {
     $header = $_REQUEST["header"];
 }
 
+if(array_key_exists("program_name", $_REQUEST)) {
+    $program_name = $_REQUEST["program_name"];
+}
+
+$filename = '*';
+if(array_key_exists("filename", $_REQUEST)) {
+    $filename = urldecode($_REQUEST["filename"]);
+}
+
+
 $select_orderby ="";
 if(array_key_exists("orderby", $_REQUEST)) {
     $select_orderby = $_REQUEST["orderby"];
@@ -55,14 +66,8 @@ if( !$listerdb ) {
 
 // 検索条件
 $select_where = "";
-if( !empty($header ) && !empty($category ) ) {
-    if($category === 'ISNULL' ){
-        $select_where = $select_where . ' WHERE found_head =' . $listerdb->quote($header) . ' AND program_category IS NULL';
-    }else {
-        $select_where = $select_where . ' WHERE found_head =' . $listerdb->quote($header) . ' AND program_category = '. $listerdb->quote($category);
-    }
-}else if( !empty($header ) ){
-    $select_where = $select_where . ' WHERE found_head =' . $listerdb->quote($header);
+if( $filename != '*'  ){
+    $select_where = $select_where . ' WHERE found_path LIKE ' . $listerdb->quote('%'.$filename.'%');
 }
 if (!empty($select_orderby) ){
     $select_where = $select_where .  ' ORDER BY '. $select_orderby . ' ' . $select_scending ;
@@ -71,27 +76,25 @@ if (!empty($select_orderby) ){
 
 
 // 総件数のみ取得
-$sql = 'SELECT COUNT(DISTINCT program_name) FROM t_found '. $select_where.';';
-$alldbdata =  $lister->select($sql);
+$sql = 'SELECT COUNT(*) FROM t_found '. $select_where.';';
+$alldbdata = $lister->select($sql);
 if(!$alldbdata){
      print $sql;
      die();
 }
 //var_dump($alldbdata);
-$totalrequest = $alldbdata[0]["COUNT(DISTINCT program_name)"];
+$totalrequest = $alldbdata[0]["COUNT(*)"];
 // print '<pre>';
 // print $totalrequest;
 // print '</pre>';
 
 
 
-$sql = 'select DISTINCT program_name from t_found '. $select_where_limit.';';
-$alldbdata =  $lister->select($sql);
+$sql = 'select * from t_found '. $select_where_limit.';';
+$alldbdata = $lister->select($sql);
 if(!$alldbdata){
      print $sql;
-     die();
 }
-$lister->closedb();
 
 $returnarray = array( "draw" => $draw, "recordsTotal" => $totalrequest,  "recordsFiltered" => $totalrequest, "data" => $alldbdata);
 $json = json_encode($returnarray,JSON_PRETTY_PRINT);

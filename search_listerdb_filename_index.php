@@ -2,7 +2,7 @@
 <head>
 <?php 
 
-$lister_dbpath = "List.sqlite3";
+$lister_dbpath = "\list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
 }
@@ -63,19 +63,6 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
 
 <?php
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_head_json.php?list=1&lister_dbpath='.$lister_dbpath;
-   $categorylist_json = file_get_contents($geturl);
-   if(!$categorylist_json) {
-      $errmsg = 'カテゴリーリストの取得に失敗';
-   }else {
-      $categorylist = json_decode($categorylist_json,true);
-   }
-   if(!$categorylist) {
-      $errmsg = 'カテゴリーリストのJSON parse 失敗';
-      print $geturl;
-      print $categorylist_json;
-   }
-
 ?>
 
 </head>
@@ -83,94 +70,34 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
 <div class="container  ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb.php" class="btn btn-primary center-block" >作品名 </a>
+      <a href="search_listerdb.php" class="btn btn-default center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
       <a href="" class="btn btn-default center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php" class="btn btn-default center-block" >ファイル名 </a>
+      <a href="search_listerdb_filename_index.php" class="btn btn-primary center-block" >ファイル名 </a>
     </div>
   </div>
 </div>
+
 <div class="container  ">
-<h1> 作品名インデックス検索 </h1>
-<?php
-if(!empty($errmsg)){
-  print $errmsg;
-  die();
-}
+<h1> ファイル名検索 </h1>
 
-foreach ($categorylist as $category ){
-$cur_category = $category["program_category"];
-$url = 'http://localhost/search_listerdb_head_json.php?program_category='.$category["program_category"].'&lister_dbpath='.$lister_dbpath;
-if($cur_category === NULL ) {
-  $cur_category = 'その他';
-  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL'.'&lister_dbpath='.$lister_dbpath;
-}
+<form action="search_listerdb_filename_songlist.php" method="GET" >
+  <div class="form-group">
+    <label>検索ワード （ファイル名の一部）</label>
+    <input type="test" name="filename" id="filename" class="form-control" placeholder="ファイル名の一部">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
 
-print '<h2> ' . $cur_category . '</h2>';
-$headlist_json = file_get_contents($url);
-if(!$headlist_json) {
-    '作品名Headerの取得に失敗';
-    die();
-}else {
-    
-}
-$headlist = json_decode($headlist_json,true);
-
-//var_dump($headlist);
-print '<div class="container bg-info ">';
-print '  <div class="row">';
-$count = 1;
-foreach ($kana_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
-// print $count;
-  if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1">&nbsp; </div>';
-    $count = 1;
-  }else{
-    $count++;
-  }
-}
-print '  </div>';
-print '  <div class="row">';
-$count = 1;
-foreach ($alpha_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
-// print $count;
-  if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1">&nbsp; </div>';
-    $count = 1;
-  }else{
-    $count++;
-  }
-}
-print '  </div>';
-
-print '  <div class="row">';
-$count = 1;
-foreach ($num_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
-// print $count;
-  if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1">&nbsp; </div>';
-    $count = 1;
-  }else{
-    $count++;
-  }
-}
-print '  </div>';
-print '  <div class="row">';
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink('その他', $headlist).'</div>';
-print '  </div>';
-
-print '</div>';
-}
-?>
 </div>
+
 </body>
 </html>
+
+
 <?php
 
 ?>

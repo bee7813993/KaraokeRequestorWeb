@@ -1,6 +1,8 @@
 <?php
 
-$lister_dbpath = "List.sqlite3";
+require_once('function_search_listerdb.php');
+
+$lister_dbpath = 'list\List.sqlite3';
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
 }
@@ -16,22 +18,20 @@ if(array_key_exists("list", $_REQUEST)) {
 }
 
 // DB初期化
-$listerdbfile = $lister_dbpath;
-$listerdb = new PDO('sqlite:'. $listerdbfile);
-
+$lister = new ListerDB();
+$lister->listerdbfile = $lister_dbpath;
+$listerdb = $lister->initdb();
+if( !$listerdb ) {
+    die();
+}
 
 if(!empty($list)) {
 
   $sql = 'select DISTINCT program_category from t_found ;';
-  $select = $listerdb->query($sql);
-  if(!$select){
-       print_r($listerdb->errorInfo());
-  }
-
-  $alldbdata = $select->fetchAll(PDO::FETCH_ASSOC);
-  $select->closeCursor();
+  $alldbdata =  $lister->select($sql);
   if(!$alldbdata){
-       print_r($db->errorInfo());
+       print 'failed :'.$sql;
+       die();
   }
 
   $returnarray = $alldbdata;
@@ -49,14 +49,10 @@ if(!empty($list)) {
   }
 
   $sql = 'select DISTINCT found_head from t_found '. $select_where.';';
-  $select = $listerdb->query($sql);
-  if(!$select){
-       print_r($listerdb->errorInfo());
-  }
-  $alldbdata = $select->fetchAll(PDO::FETCH_ASSOC);
-  $select->closeCursor();
+  $alldbdata =  $lister->select($sql);
   if(!$alldbdata){
-       print_r($db->errorInfo());
+     print $sql;
+     die();
   }
 
   $returnarray = array( "program_category" => $program_category, "data" => $alldbdata);

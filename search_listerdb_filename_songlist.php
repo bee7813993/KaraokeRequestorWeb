@@ -20,8 +20,8 @@ if(array_key_exists("category", $_REQUEST)) {
     $category = $_REQUEST["category"];
 }
 
-if(array_key_exists("program_name", $_REQUEST)) {
-    $program_name = $_REQUEST["program_name"];
+if(array_key_exists("filename", $_REQUEST)) {
+    $filename = $_REQUEST["filename"];
 }
 
 if(array_key_exists("start", $_REQUEST)) {
@@ -37,8 +37,7 @@ if(array_key_exists("draw", $_REQUEST)) {
 }
 
 // build query url
-$url = 'http://localhost/search_listerdb_songlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&category='.$category.'&program_name='.urlencode($program_name).'&lister_dbpath='.$lister_dbpath;;
-
+$url = 'http://localhost/search_listerdb_filename_songlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&filename='.urlencode($filename).'&lister_dbpath='.$lister_dbpath;
 ?>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -110,7 +109,7 @@ if(!empty($errmsg)){
 
 // var_dump($programlist);
 print '<div class="container">';
-print '<h2>「'.$category.'」「'.$program_name.'」の曲一覧 </h2>';
+print '<h2>ファイル名に「'.$filename.'」を含む曲一覧 </h2>';
 print '  <div class="row">';
 foreach ($programlist['data'] as $program ){
 print '<div class="container bg-info">';
@@ -167,7 +166,6 @@ print '  </div>';
 }
 print '  </div>';
 
-
 $urlparams = "";
 if( !empty($filename) ){
     $urlparams = $urlparams.'filename='.urlencode($filename);
@@ -203,20 +201,18 @@ print '  <div class="row ">';
 print '    <div class="col-xs-4 col-md-4  ">';
 if($displayfrom > 0 ) {
     $nextstart = (($displayfrom - $displaynum ) <= 0) ? 0 : $displayfrom - $displaynum;
-    print '      <a href="search_listerdb_songlist.php?'.$urlparams.'&start='.$nextstart.'&length='.$displaynum.'" class="btn btn-default center-block" >前の'.$displaynum.'件 </a>';
+    print '      <a href="search_listerdb_filename_songlist.php?'.$urlparams.'&start='.$nextstart.'&length='.$displaynum.'" class="btn btn-default center-block" >前の'.$displaynum.'件 </a>';
 }
 print '    </div>';
 print '    <div class="col-xs-4 col-md-4">';
 print '    </div>';
 print '    <div class="col-xs-4 col-md-4 ">';
 if($programlist['recordsTotal'] > ($displayfrom + $displaynum) ) {
-    print '      <a href="search_listerdb_songlist.php?'.$urlparams.'&start='.($displaynum+$displayfrom).'&length='.$displaynum.'" class="btn btn-default center-block" >次の'.$displaynum.'件</a>';
+    print '      <a href="search_listerdb_filename_songlist.php?'.$urlparams.'&start='.($displaynum+$displayfrom).'&length='.$displaynum.'" class="btn btn-default center-block" >次の'.$displaynum.'件</a>';
 }
 print '    </div>';
 print '  </div>';
 print '</div>';
-
-
 
 print '</div>';
 

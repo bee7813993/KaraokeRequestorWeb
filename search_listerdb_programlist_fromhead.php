@@ -104,14 +104,58 @@ print '    </div>';
 
 }
 print '  </div>';
+
+
+$urlparams = "";
+if( !empty($filename) ){
+    $urlparams = $urlparams.'filename='.urlencode($filename);
+}
+if( !empty($header) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'header='.$header;
+}
+if( !empty($category) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'category='.$category;
+}
+if( !empty($draw) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'draw='.$draw;
+}
+if( !empty($lister_dbpath) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'lister_dbpath='.$lister_dbpath;
+}
+
+
+print '<div class="container  ">';
+print '  <div class="row ">';
+print '    <div class="col-xs-4 col-md-4  ">';
+if($displayfrom > 0 ) {
+    $nextstart = (($displayfrom - $displaynum ) <= 0) ? 0 : $displayfrom - $displaynum;
+    print '      <a href="search_listerdb_programlist_fromhead.php?'.$urlparams.'&start='.$nextstart.'&length='.$displaynum.'" class="btn btn-default center-block" >前の'.$displaynum.'件 </a>';
+}
+print '    </div>';
+print '    <div class="col-xs-4 col-md-4">';
+print '    </div>';
+print '    <div class="col-xs-4 col-md-4 ">';
+if($programlist['recordsTotal'] > ($displayfrom + $displaynum) ) {
+    print '      <a href="search_listerdb_programlist_fromhead.php?'.$urlparams.'&start='.($displaynum+$displayfrom).'&length='.$displaynum.'" class="btn btn-default center-block" >次の'.$displaynum.'件</a>';
+}
+print '    </div>';
+print '  </div>';
 print '</div>';
 
-if($displayfrom > 0 ) {
-   print '<p>前の'.$displaynum.'件</p>';
-}
-if($programlist['recordsTotal'] > ($displayfrom + $displaynum) ) {
-   print '<p>次の'.$displaynum.'件</p>';
-}
+
+print '</div>';
 ?>
 
 </body>

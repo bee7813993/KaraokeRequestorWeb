@@ -1,9 +1,17 @@
 <?php
+require_once('function_search_listerdb.php');
 
 $displayfrom=0;
 $displaynum=80000;
 $draw = 1;
 $allcount = 0;
+
+
+$lister_dbpath = 'list\List.sqlite3';
+if(array_key_exists("lister_dbpath", $_REQUEST)) {
+    $lister_dbpath = $_REQUEST["lister_dbpath"];
+}
+
 if(array_key_exists("start", $_REQUEST)) {
     $displayfrom = $_REQUEST["start"];
 }
@@ -43,8 +51,12 @@ if(array_key_exists("scending", $_REQUEST)) {
 
 
 // DB初期化
-$listerdbfile = "List.sqlite3";
-$listerdb = new PDO('sqlite:'. $listerdbfile);
+$lister = new ListerDB();
+$lister->listerdbfile = $lister_dbpath;
+$listerdb = $lister->initdb();
+if( !$listerdb ) {
+    die();
+}
 
 // 検索条件
 $select_where = "";
@@ -65,16 +77,8 @@ if (!empty($select_orderby) ){
 
 // 総件数のみ取得
 $sql = 'SELECT COUNT(*) FROM t_found '. $select_where.';';
-$select = $listerdb->query($sql);
-if(!$select){
-     print_r($listerdb->errorInfo());
-     print $sql;
-     die();
-}
-$alldbdata = $select->fetchAll(PDO::FETCH_ASSOC);
-$select->closeCursor();
+$alldbdata = $lister->select($sql);
 if(!$alldbdata){
-     print_r($db->errorInfo());
      print $sql;
      die();
 }
@@ -87,14 +91,9 @@ $totalrequest = $alldbdata[0]["COUNT(*)"];
 
 
 $sql = 'select * from t_found '. $select_where_limit.';';
-$select = $listerdb->query($sql);
-if(!$select){
-     print_r($listerdb->errorInfo());
-}
-$alldbdata = $select->fetchAll(PDO::FETCH_ASSOC);
-$select->closeCursor();
+$alldbdata = $lister->select($sql);
 if(!$alldbdata){
-     print_r($db->errorInfo());
+     print $sql;
 }
 
 $returnarray = array( "draw" => $draw, "recordsTotal" => $totalrequest,  "recordsFiltered" => $totalrequest, "data" => $alldbdata);
