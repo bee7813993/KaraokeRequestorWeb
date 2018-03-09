@@ -28,11 +28,12 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
         
             // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
             $whereword = urlencode('found_head='.$value["found_head"]) ;
-            $url='<a href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.$searchcategory.'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
+            $url='<a class="btn btn-primary center-block" href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.$searchcategory.'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
             return $url;
         }
     }
-    return $oneheader;
+    $nolinkbtn = '<button type="button" class="btn btn-default btn-block" disabled="disabled" >'.$oneheader.'</button>';
+    return $nolinkbtn;
 }
 
 ?>
@@ -124,10 +125,10 @@ print '<div class="container bg-info ">';
 print '  <div class="row">';
 $count = 1;
 foreach ($kana_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1 center-block">'.checkandbuild_headerlink($kana, $headlist).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 center-block btn">&nbsp; </div>';
     $count = 1;
   }else{
     $count++;
@@ -140,7 +141,7 @@ foreach ($alpha_list as $kana) {
   print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
     $count = 1;
   }else{
     $count++;
@@ -154,7 +155,7 @@ foreach ($num_list as $kana) {
   print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
     $count = 1;
   }else{
     $count++;

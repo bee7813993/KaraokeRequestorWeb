@@ -96,10 +96,12 @@ print '  <div class="row bg-info">';
 foreach ($programlist['data'] as $program ){
 
 //var_dump($program);
-print '    <div class="col-xs-12 col-md-12" >';
-print '<a href="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.$category.'&lister_dbpath='.$lister_dbpath.'">';
+print '    <div class="col-xs-12 col-md-6" >';
+print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
+print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.$category.'&lister_dbpath='.$lister_dbpath.'">';
 print $program['program_name'];
 print '</a>';
+print '    </div>';
 print '    </div>';
 
 }
