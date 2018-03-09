@@ -88,11 +88,13 @@ function basename_jp($path){
 
 
 function create_requestconfirmlink($songinfo) {
+  global $lister_dbpath;
 
 $fullpath = $songinfo['found_path'];
 $filename = basename_jp($fullpath);
 
-$link = 'request_confirm.php?filename='.$filename.'&fullpath='.$fullpath;
+$link = 'request_confirm.php?filename='.urlencode($filename).'&fullpath='.urlencode($fullpath).'&lister_dbpath='.$lister_dbpath;
+
 return $link;
 
 }
