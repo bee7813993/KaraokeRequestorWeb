@@ -38,10 +38,21 @@ if(array_key_exists("program_name", $_REQUEST)) {
     $program_name = $_REQUEST["program_name"];
 }
 
+$filename = '*';
+if(array_key_exists("filename", $_REQUEST)) {
+    $filename = urldecode($_REQUEST["filename"]);
+}
+
 $artist = "";
 if(array_key_exists("artist", $_REQUEST)) {
     $artist = $_REQUEST["artist"];
 }
+
+$match = "";
+if(array_key_exists("match", $_REQUEST)) {
+    $match = $_REQUEST["match"];
+}
+
 
 
 $select_orderby ="";
@@ -66,23 +77,22 @@ if( !$listerdb ) {
 
 // 検索条件
 $select_where = "";
-if( !empty($program_name ) && !empty($category ) ) {
-    if($category === 'ISNULL' ){
-        $select_where = $select_where . ' WHERE program_name =' . $listerdb->quote($program_name) . ' AND program_category IS NULL';
+
+if ( $match === 'full' ) {
+    if( $artist === '*'  ){
+        $select_where = $select_where ;
+    }else if( empty($artist) ){
+        $select_where = $select_where ;
     }else {
-        $select_where = $select_where . ' WHERE program_name =' . $listerdb->quote($program_name) . ' AND program_category = '. $listerdb->quote($category);
-    }
-}else if( !empty($program_name ) ){
-    $select_where = $select_where . ' WHERE program_name =' . $listerdb->quote($program_name);
-}else if( !empty($header ) ){
-    // header 検索
-    $select_where = $select_where . ' WHERE found_head =' . $listerdb->quote($header);
-}else if( !empty($artist ) ){
-    // artist 検索
-    if($artist === 'ISNULL' ){
-        $select_where = $select_where . ' WHERE song_artist IS NULL';
-    } else {
         $select_where = $select_where . ' WHERE song_artist = ' . $listerdb->quote($artist);
+    }
+} else {
+    if( $artist === '*'  ){
+        $select_where = $select_where ;
+    }else if( empty($artist) ){
+        $select_where = $select_where ;
+    }else {
+        $select_where = $select_where . ' WHERE song_artist LIKE ' . $listerdb->quote('%'.$artist.'%');
     }
 }
 if (!empty($select_orderby) ){
@@ -90,23 +100,22 @@ if (!empty($select_orderby) ){
 }
     $select_where_limit = $select_where . ' LIMIT '. $displaynum .' OFFSET '. $displayfrom;
 
-
 // 総件数のみ取得
-$sql = 'SELECT COUNT(*) FROM t_found '. $select_where.';';
+$sql = 'SELECT COUNT(DISTINCT song_artist) FROM t_found '. $select_where.';';
 $alldbdata = $lister->select($sql);
 if(!$alldbdata){
      print $sql;
      die();
 }
 //var_dump($alldbdata);
-$totalrequest = $alldbdata[0]["COUNT(*)"];
+$totalrequest = $alldbdata[0]["COUNT(DISTINCT song_artist)"];
 // print '<pre>';
 // print $totalrequest;
 // print '</pre>';
 
 
 
-$sql = 'select * from t_found '. $select_where_limit.';';
+$sql = 'select DISTINCT song_artist from t_found '. $select_where_limit.';';
 $alldbdata = $lister->select($sql);
 if(!$alldbdata){
      print $sql;

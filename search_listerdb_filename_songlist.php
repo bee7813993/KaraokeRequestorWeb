@@ -24,6 +24,11 @@ if(array_key_exists("filename", $_REQUEST)) {
     $filename = $_REQUEST["filename"];
 }
 
+$artist = "";
+if(array_key_exists("artist", $_REQUEST)) {
+    $artist = $_REQUEST["artist"];
+}
+
 if(array_key_exists("start", $_REQUEST)) {
     $displayfrom = $_REQUEST["start"];
 }
@@ -129,13 +134,13 @@ print '    <dt>';
 print '作品名';
 print '    </dt>';
 print '    <dd>';
-print $program['program_name'];
+print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&lister_dbpath='.$lister_dbpath.'">' . $program['program_name'] .' </a>';
 print '    </dd>';
 print '    <dt>';
 print '歌い手';
 print '    </dt>';
 print '    <dd>';
-print $program['song_artist'];
+print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&lister_dbpath='.$lister_dbpath.'">' . $program['song_artist'] .' </a>';
 print '    </dd>';
 print '    <dt>';
 print 'ファイルサイズ';

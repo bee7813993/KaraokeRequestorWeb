@@ -24,6 +24,12 @@ if(array_key_exists("program_name", $_REQUEST)) {
     $program_name = $_REQUEST["program_name"];
 }
 
+$artist = "";
+if(array_key_exists("artist", $_REQUEST)) {
+    $artist = $_REQUEST["artist"];
+}
+
+
 if(array_key_exists("start", $_REQUEST)) {
     $displayfrom = $_REQUEST["start"];
 }
@@ -37,8 +43,14 @@ if(array_key_exists("draw", $_REQUEST)) {
 }
 
 // build query url
+if( !empty($program_name ) && !empty($category ) ) {
 $url = 'http://localhost/search_listerdb_songlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&category='.$category.'&program_name='.urlencode($program_name).'&lister_dbpath='.$lister_dbpath;;
-
+} else if(!empty($program_name) ){
+$url = 'http://localhost/search_listerdb_songlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&program_name='.urlencode($program_name).'&lister_dbpath='.$lister_dbpath;;
+} else if(!empty($artist) ){
+$url = 'http://localhost/search_listerdb_songlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&artist='.$artist.'&lister_dbpath='.$lister_dbpath;;
+} else {
+}
 ?>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -111,7 +123,13 @@ if(!empty($errmsg)){
 
 // var_dump($programlist);
 print '<div class="container">';
-print '<h2>「'.$category.'」「'.$program_name.'」の曲一覧 </h2>';
+if( !empty($program_name ) && !empty($category ) ) {
+    print '<h2>「'.$category.'」「'.$program_name.'」の曲一覧 </h2>';
+} else if(!empty($artist) ){
+    print '<h2>「'.$artist.'」の曲一覧 </h2>';
+} else {
+}
+
 print '  <div class="row">';
 foreach ($programlist['data'] as $program ){
 print '<div class="container bg-info">';
@@ -129,13 +147,15 @@ print '    <dt>';
 print '作品名';
 print '    </dt>';
 print '    <dd>';
-print $program['program_name'];
+print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&lister_dbpath='.$lister_dbpath.'">' . $program['program_name'] .' </a>';
+// http://localhost/search_listerdb_songlist.php?program_name=作品名&category=ISNULL&lister_dbpath=List.sqlite3
 print '    </dd>';
 print '    <dt>';
 print '歌い手';
 print '    </dt>';
 print '    <dd>';
-print $program['song_artist'];
+print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&lister_dbpath='.$lister_dbpath.'">' . $program['song_artist'] .' </a>';
+// http://localhost/search_listerdb_songlist.php?artist=歌手名&lister_dbpath=List.sqlite3
 print '    </dd>';
 print '    <dt>';
 print 'ファイルサイズ';

@@ -73,7 +73,7 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
       <a href="search_listerdb.php" class="btn btn-default center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
-      <a href="" class="btn btn-default center-block" >歌手名 </a>
+      <a href="search_listerdb_artist.php" class="btn btn-default center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
       <a href="search_listerdb_filename_index.php" class="btn btn-primary center-block" >ファイル名 </a>
