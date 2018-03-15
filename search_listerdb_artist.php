@@ -109,12 +109,12 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
   </div>
 </div>
 
-<h1> 歌い手名検索 </h1>
+<h1> 歌手名検索 </h1>
 
 <form action="search_listerdb_artistname_artistlist.php" method="GET" >
   <div class="form-group">
-    <label>検索ワード （歌い手名の一部）</label>
-    <input type="test" name="artist" id="artist" class="form-control" placeholder="歌い手名の一部">
+    <label>検索ワード （歌手名）</label>
+    <input type="test" name="artist" id="artist" class="form-control" placeholder="歌手名">
     <div class="btn-group" data-toggle="buttons">
 	<label class="btn btn-default active">
 		<input type="radio" name="match" value="part" autocomplete="off" checked> 部分一致

@@ -84,12 +84,12 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
 <div class="container  ">
 <h1> ファイル名検索 </h1>
 
-<form action="search_listerdb_filename_songlist.php" method="GET" >
+<form action="search_listerdb_songlist.php" method="GET" >
   <div class="form-group">
     <label>検索ワード （ファイル名の一部）</label>
     <input type="test" name="filename" id="filename" class="form-control" placeholder="ファイル名の一部">
   </div>
-  <button type="submit" class="btn btn-default">Submit</button>
+  <button type="submit" class="btn btn-default">検索</button>
 </form>
 
 </div>

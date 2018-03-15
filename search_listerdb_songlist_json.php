@@ -34,6 +34,11 @@ if(array_key_exists("header", $_REQUEST)) {
     $header = $_REQUEST["header"];
 }
 
+$filename = '';
+if(array_key_exists("filename", $_REQUEST)) {
+    $filename = urldecode($_REQUEST["filename"]);
+}
+
 if(array_key_exists("program_name", $_REQUEST)) {
     $program_name = $_REQUEST["program_name"];
 }
@@ -41,6 +46,11 @@ if(array_key_exists("program_name", $_REQUEST)) {
 $artist = "";
 if(array_key_exists("artist", $_REQUEST)) {
     $artist = $_REQUEST["artist"];
+}
+
+$worker = "";
+if(array_key_exists("worker", $_REQUEST)) {
+    $worker = $_REQUEST["worker"];
 }
 
 
@@ -52,9 +62,38 @@ if(array_key_exists("orderby", $_REQUEST)) {
 $select_scending = 'ASC';
 $select_scending ="";
 if(array_key_exists("scending", $_REQUEST)) {
-    $select_scending = $_REQUEST["scending"];
+    if( strcasecmp($_REQUEST["scending"]  , "DESC" ) == 0){
+        $select_scending = $_REQUEST["scending"];
+    }
 }
 
+$match = "";
+if(array_key_exists("match", $_REQUEST)) {
+    $match = $_REQUEST["match"];
+}
+
+function make_select_andsearch($db, $clm, $str){
+    $str_splitbase = mb_convert_kana($str ,'s');
+    $str_list = explode(' ', $str_splitbase );
+    $wherefilesearch = "";
+    foreach($str_list as $searchstr){
+        if(!empty($wherefilesearch) ){
+            $wherefilesearch = $wherefilesearch . ' AND ';
+        }
+        $wherefilesearch = $wherefilesearch . ' '. $clm .' LIKE ' .  $db->quote('%'.$searchstr.'%');
+    }
+    return $wherefilesearch;
+}
+
+function add_select_cond($baseselect, $addselect){
+    $return_select = "";
+    if(empty($baseselect) ){
+        $return_select = $addselect;
+    }else {
+        $return_select = $baseselect . ' AND ' . $addselect;
+    }
+    return $return_select;
+}
 
 // DB初期化
 $lister = new ListerDB();
@@ -66,28 +105,78 @@ if( !$listerdb ) {
 
 // 検索条件
 $select_where = "";
-if( !empty($program_name ) && !empty($category ) ) {
+
+// 作品名とカテゴリ名で検索
+if( !empty($category ) ) {
     if($category === 'ISNULL' ){
-        $select_where = $select_where . ' WHERE program_name =' . $listerdb->quote($program_name) . ' AND program_category IS NULL';
+        $select_where = add_select_cond($select_where,  ' program_category IS NULL');
+//        $select_where = $select_where . ' program_name =' . $listerdb->quote($program_name) . ' AND program_category IS NULL';
     }else {
-        $select_where = $select_where . ' WHERE program_name =' . $listerdb->quote($program_name) . ' AND program_category = '. $listerdb->quote($category);
+        $select_where = add_select_cond($select_where,  ' program_category = '. $listerdb->quote($category));
+//        $select_where = $select_where . ' program_name =' . $listerdb->quote($program_name) . ' AND program_category = '. $listerdb->quote($category);
     }
-}else if( !empty($program_name ) ){
-    $select_where = $select_where . ' WHERE program_name =' . $listerdb->quote($program_name);
-}else if( !empty($header ) ){
+// 作品名で検索
+}
+if( !empty($program_name ) ){
+    if($program_name === 'ISNULL' ){
+        $select_where = add_select_cond($select_where,  ' program_name IS NULL ');
+    }else {
+        $select_where = add_select_cond($select_where,  ' program_name = ' . $listerdb->quote($program_name));
+    }
+// 作品名headerで検索
+}
+if( !empty($header ) ){
     // header 検索
-    $select_where = $select_where . ' WHERE found_head =' . $listerdb->quote($header);
-}else if( !empty($artist ) ){
+    $select_where = add_select_cond($select_where,  ' found_head = ' . $listerdb->quote($header));
+// 歌手名で検索
+}
+if( !empty($artist ) ){
     // artist 検索
     if($artist === 'ISNULL' ){
-        $select_where = $select_where . ' WHERE song_artist IS NULL';
+        $select_where = add_select_cond($select_where, ' song_artist IS NULL');
+//        $select_where = $select_where . ' song_artist IS NULL';
     } else {
-        $select_where = $select_where . ' WHERE song_artist = ' . $listerdb->quote($artist);
+        if ( $match === 'part' ) {
+            $wherefilesearch = make_select_andsearch($listerdb,'song_artist', $artist);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+        }else {
+            // defaultは完全一致
+            $select_where = add_select_cond($select_where, ' song_artist = '.$listerdb->quote($artist));
+        }
     }
 }
+// 製作者名で検索
+  if(!empty($worker) ){
+        if ( $match === 'part' ) {
+            $wherefilesearch = make_select_andsearch($listerdb,'found_worker', $worker);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+        }else {
+            // defaultは完全一致
+            $select_where = add_select_cond($select_where,  ' found_worker = ' . $listerdb->quote($worker));
+        }
+  }
+// ファイル名で検索
+  if(!empty($filename) ){
+        if ( $match === 'full' ) {
+            // defaultは部分一致
+            $select_where = add_select_cond($select_where,  ' found_path = ' . $listerdb->quote($filename));
+        }else {
+            $wherefilesearch = make_select_andsearch($listerdb,'found_path', $filename);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+        }
+  }
+
+
+
 if (!empty($select_orderby) ){
     $select_where = $select_where .  ' ORDER BY '. $select_orderby . ' ' . $select_scending ;
 }
+
+if(!empty($select_where) ){
+    $select_where = ' WHERE ' . $select_where;
+}
+
+
     $select_where_limit = $select_where . ' LIMIT '. $displaynum .' OFFSET '. $displayfrom;
 
 
@@ -107,6 +196,7 @@ $totalrequest = $alldbdata[0]["COUNT(*)"];
 
 
 $sql = 'select * from t_found '. $select_where_limit.';';
+// print $sql;
 $alldbdata = $lister->select($sql);
 if(!$alldbdata){
      print $sql;
