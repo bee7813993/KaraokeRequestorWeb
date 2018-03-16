@@ -2,7 +2,7 @@
 <head>
 <?php 
 
-$lister_dbpath = "List.sqlite3";
+$lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
 }
@@ -98,13 +98,13 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
 <div class="container  ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb.php" class="btn btn-default center-block" >作品名 </a>
+      <a href="search_listerdb_program_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php" class="btn btn-primary center-block" >歌手名 </a>
+      <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php" class="btn btn-default center-block" >ファイル名 </a>
+      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >検索（ファイル名など） </a>
     </div>
   </div>
 </div>

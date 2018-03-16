@@ -126,7 +126,7 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8,$lister_dbpath=''){
       $songbasename = basename($l_fullpath);
       // ニコカラりすたーで検索
       if(!empty($lister_dbpath) ){
-         logtocmd ("fullpass file $winfillpath is not found. Search from NicokaraLister DB.: $songbasename\r\n");
+         logtocmd ("fullpass file $l_fullpath is not found. Search from NicokaraLister DB.: $songbasename\r\n");
          require_once('function_search_listerdb.php');
          // DB初期化
          $lister = new ListerDB();
@@ -187,7 +187,7 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8,$lister_dbpath=''){
 }
 function logtocmd($msg){
   //print(mb_convert_encoding("$msg\n","SJIS-win"));
-  error_log(print $msg."\n", 3, 'ykrdebug.log');
+  error_log($msg."\n", 3, 'ykrdebug.log');
 }
 
 ?>

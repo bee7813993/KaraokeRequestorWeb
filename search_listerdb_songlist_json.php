@@ -53,6 +53,19 @@ if(array_key_exists("worker", $_REQUEST)) {
     $worker = $_REQUEST["worker"];
 }
 
+$datestart = "";
+if(array_key_exists("datestart", $_REQUEST)) {
+    $datestart = $_REQUEST["datestart"];
+    $startdate_u =  strtotime($datestart);
+    $datestart = unixtojd($startdate_u);
+}
+
+$dateend = "";
+if(array_key_exists("dateend", $_REQUEST)) {
+    $dateend = $_REQUEST["dateend"];
+    $startdate_u =  strtotime($dateend);
+    $dateend = unixtojd($startdate_u);
+}
 
 $select_orderby ="";
 if(array_key_exists("orderby", $_REQUEST)) {
@@ -110,10 +123,10 @@ $select_where = "";
 if( !empty($category ) ) {
     if($category === 'ISNULL' ){
         $select_where = add_select_cond($select_where,  ' program_category IS NULL');
-//        $select_where = $select_where . ' program_name =' . $listerdb->quote($program_name) . ' AND program_category IS NULL';
+//        $select_where = $select_where . ' program_category IS NULL';
     }else {
         $select_where = add_select_cond($select_where,  ' program_category = '. $listerdb->quote($category));
-//        $select_where = $select_where . ' program_name =' . $listerdb->quote($program_name) . ' AND program_category = '. $listerdb->quote($category);
+//        $select_where = $select_where . ' program_category = '. $listerdb->quote($category);
     }
 // 作品名で検索
 }
@@ -121,7 +134,12 @@ if( !empty($program_name ) ){
     if($program_name === 'ISNULL' ){
         $select_where = add_select_cond($select_where,  ' program_name IS NULL ');
     }else {
-        $select_where = add_select_cond($select_where,  ' program_name = ' . $listerdb->quote($program_name));
+        if ( $match === 'part' ) {
+            $wherefilesearch = make_select_andsearch($listerdb,'program_name', $program_name);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+        } else {
+            $select_where = add_select_cond($select_where,  ' program_name = ' . $listerdb->quote($program_name));
+        }
     }
 // 作品名headerで検索
 }
@@ -165,6 +183,13 @@ if( !empty($artist ) ){
             $select_where = add_select_cond($select_where, $wherefilesearch);
         }
   }
+// 更新日で検索
+  if(!empty($datestart) ){
+      $select_where = add_select_cond($select_where,  ' found_last_write_time >= ' . $listerdb->quote($datestart));
+  }
+  if(!empty($dateend) ){
+      $select_where = add_select_cond($select_where,  ' found_last_write_time <= ' . $listerdb->quote($dateend));
+  }
 
 
 
@@ -189,6 +214,12 @@ if(!$alldbdata){
 }
 //var_dump($alldbdata);
 $totalrequest = $alldbdata[0]["COUNT(*)"];
+if($totalrequest == 0 ){
+    $returnarray = array( "draw" => $draw, "recordsTotal" => $totalrequest,  "recordsFiltered" => $totalrequest, "data" => $alldbdata);
+    $json = json_encode($returnarray,JSON_PRETTY_PRINT);
+    print $json;
+    die();
+}
 // print '<pre>';
 // print $totalrequest;
 // print '</pre>';

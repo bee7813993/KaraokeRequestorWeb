@@ -39,6 +39,17 @@ if(array_key_exists("filename", $_REQUEST)) {
     $filename = $_REQUEST["filename"];
 }
 
+$datestart = "";
+if(array_key_exists("datestart", $_REQUEST)) {
+    $datestart = $_REQUEST["datestart"];
+}
+
+$dateend = "";
+if(array_key_exists("dateend", $_REQUEST)) {
+    $dateend = $_REQUEST["dateend"];
+}
+
+
 $select_orderby ="";
 if (isset($_COOKIE['YukariListerDBOrderby'])) {
     $select_orderby = $_COOKIE['YukariListerDBOrderby'];
@@ -152,6 +163,19 @@ if(!empty($filename) ){
     $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>ファイル名</label><input type="text" class="form-control" name="filename" value="'.($filename).'" /></div>';
 }
 
+if(!empty($datestart) ){
+    $url = add_get_query($url , 'datestart='.$datestart );
+    $myformvalue = $myformvalue.'<input type="hidden" name="datestart" value="'.($datestart).'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>更新日範囲 始め</label><input type="date" class="form-control" name="datestart" value="'.($datestart).'" /></div>';
+}
+
+if(!empty($dateend) ){
+    $url = add_get_query($url , 'dateend='.$dateend );
+    $myformvalue = $myformvalue.'<input type="hidden" name="dateend" value="'.($dateend).'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>更新日範囲 終わり</label><input type="date" class="form-control" name="dateend" value="'.($dateend).'" /></div>';
+}
+
+
 if(!empty($match) ){
     $url = add_get_query($url , 'match='.urlencode($match) );
 }
@@ -197,14 +221,19 @@ if(!empty($url)){
    
    $programlist_json = file_get_contents($url);
    if(!$programlist_json) {
-      $errmsg = '作品の取得に失敗';
+      $errmsg = '検索結果リストの取得に失敗';
    }else {
       $programlist = json_decode($programlist_json,true);
    }
    if(!$programlist ){
+   print '<pre>';
+   print "url:\n";
       print $url;
+   print "\nprogramlist_json:\n";
       print $programlist_json;
+   print "\nprogramlist_dump:\n";
       var_dump($programlist);
+   print '</pre>';
    die();
    }  
 
@@ -236,6 +265,9 @@ function selected_check($checkstr, $selectedstr){
 
 </head>
 <body>
+<?php
+?>
+
 <div class="container  ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
@@ -292,6 +324,14 @@ print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
 print '</div>';
 
+if($programlist['recordsTotal'] == 0) {
+    print '<h3 class="text-warning">';
+    print '検索の結果ファイルが見つかりませんでした';
+    print '</h3>';
+    print '</body> </html>';
+    die();
+}
+
 print '<form method="GET" action="search_listerdb_songlist.php" class="form-inline" >';
 print '<div class="form-group">';
 print '<label for="orderby">項目</label>';
@@ -347,6 +387,9 @@ print '作品名';
 print '    </dt>';
 print '    <dd>';
 print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&lister_dbpath='.$lister_dbpath.'">' . $program['program_name'] .' </a>';
+if(!empty( $program['song_op_ed'])){
+    print '&nbsp;'.$program['song_op_ed'];
+}
 // http://localhost/search_listerdb_songlist.php?program_name=作品名&category=ISNULL&lister_dbpath=List.sqlite3
 print '    </dd>';
 print '    <dt>';
@@ -356,12 +399,15 @@ print '    <dd>';
 print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&lister_dbpath='.$lister_dbpath.'">' . $program['song_artist'] .' </a>';
 // http://localhost/search_listerdb_songlist.php?artist=歌手名&lister_dbpath=List.sqlite3
 print '    </dd>';
+print '    <div class="col-xs-4 col-md-4 " > ';
 print '    <dt>';
 print 'ファイルサイズ';
 print '    </dt>';
 print '    <dd>';
 print formatBytes($program['found_file_size']);
 print '    </dd>';
+print '    </div > ';
+print '    <div class="col-xs-4 col-md-4 " > ';
 print '    <dt>';
 print '最終更新日';
 print '    </dt>';
@@ -370,6 +416,8 @@ $updatetime = cal_from_jd($program['found_last_write_time'],CAL_GREGORIAN);
 //print strftime('%F %X', cal_from_jd($program['found_last_write_time'],CAL_GREGORIAN));
 print $updatetime['year'].'/'.$updatetime['month'].'/'.$updatetime['day'];
 print '    </dd>';
+print '    </div > ';
+print '    <div class="col-xs-4 col-md-4 " > ';
 print '    <dt>';
 print '動画制作者';
 print '    </dt>';
@@ -377,6 +425,7 @@ print '    <dd>';
 print '<a href ="search_listerdb_songlist.php?worker='.urlencode($program['found_worker']).'&lister_dbpath='.$lister_dbpath.'">' . $program['found_worker'] .' </a>';
 // print $program['found_worker'];
 print '    </dd>';
+print '    </div > ';
 print '    <dt>';
 print 'ファイル名';
 print '    </dt>';

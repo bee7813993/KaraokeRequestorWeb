@@ -2,7 +2,7 @@
 <head>
 <?php 
 
-$lister_dbpath = "\list\List.sqlite3";
+$lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
 }
@@ -70,19 +70,20 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
 <div class="container  ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb.php" class="btn btn-default center-block" >作品名 </a>
+      <a href="search_listerdb_program_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php" class="btn btn-default center-block" >歌手名 </a>
+      <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php" class="btn btn-primary center-block" >ファイル名 </a>
+      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" >検索（ファイル名など） </a>
     </div>
   </div>
 </div>
 
 <div class="container  ">
 <h1> ファイル名検索 </h1>
+<div class="bg-info" >
 
 <form action="search_listerdb_songlist.php" method="GET" >
   <div class="form-group">
@@ -92,6 +93,46 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
   <button type="submit" class="btn btn-default">検索</button>
 </form>
 
+</div>
+</div>
+
+<hr />
+<div class="container  ">
+<h1> 詳細検索 </h1>
+<div class="bg-info" >
+<form action="search_listerdb_songlist.php" method="GET" >
+  <div class="form-group">
+    <label>ファイル名</label>
+    <input type="test" name="filename" id="filename" class="form-control" placeholder="ファイル名">
+    <div class="form-group"><label>作品名</label><input type="text" class="form-control" name="program_name" value="" /></div>
+    <div class="form-group"><label>歌手名</label><input type="text" class="form-control" name="artist" value="" /></div>
+    <div class="form-group"><label>動画製作者</label><input type="text" class="form-control" name="worker" value="" /></div>
+    <div class="form-group">
+    <label>更新日範囲 始め</label>
+    <input type="date"  class="form-control" name="datestart" value="0" />
+    </div>
+    <div class="form-group">
+    <label>更新日範囲 終わり</label>
+    <input type="date"  class="form-control" name="dateend" value="0" />
+    </div>
+  </div>
+    <div class="btn-group" data-toggle="buttons">
+	<label class="btn btn-default active">
+		<input type="radio" name="match" value="part" autocomplete="off" checked> 部分一致
+	</label>
+	<label class="btn btn-default">
+		<input type="radio" name="match" value="full" autocomplete="off"> 完全一致
+	</label>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="btn btn-default">検索</button>
+    </div>
+
+</form>
+
+
+</div>
 </div>
 
 </body>
