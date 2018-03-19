@@ -271,13 +271,13 @@ function selected_check($checkstr, $selectedstr){
 <div class="container  ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb.php" class="btn btn-default center-block" >作品名 </a>
+      <a href="search_listerdb.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php" class="btn btn-default center-block" >歌手名 </a>
+      <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php" class="btn btn-default center-block" >ファイル名 </a>
+      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >ファイル名 </a>
     </div>
   </div>
 </div>
