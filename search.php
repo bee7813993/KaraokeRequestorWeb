@@ -99,9 +99,10 @@ EOD;
 
 <?php
 shownavigatioinbar('searchreserve.php');
-?>
-<div class="container">
-<?php
+
+print '<div class="container">';
+
+
  if(isset($word) ) {
  $nflink = "notfoundrequest/notfoundrequest.php?searchword=$word";
  }else {
@@ -114,7 +115,8 @@ shownavigatioinbar('searchreserve.php');
  if(!empty($word) ) {
      $result_count =  searchresultcount_fromkeyword($word);
  }
- 
+
+
  if(empty($word) || $result_count === 0 ) {
 // トップページメッセージ表示
 if(array_key_exists("noticeof_searchpage",$config_ini)) {
@@ -124,10 +126,38 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
       print '</div>';
     }
  }
- }
+}else {
+    print_everything_filenamesearch();
+    die();
+}
+?>
+<?php
+
+
+function print_listerdb_search(){
+    global $config_ini;
+
+
+    $includepage = 1;
+    if(array_key_exists("listerDBPATH", $config_ini)) {
+        $lister_dbpath = $config_ini['listerDBPATH'];
+    }
+    require 'search_listerdb_program_index.php';
+}
 ?>
 
+<?php
 
+function print_everything_filenamesearch() {
+    global $config_ini;
+    global $word;
+    global $selectid;
+    global $result_count;
+    global $l_order;
+    global $connectinternet;
+
+
+print <<<EOM
 <hr />
 <h2>ファイル名(曲名)検索 </h2>
   <form action="search.php" method="GET">
@@ -135,19 +165,15 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   <label>検索ワード(ファイル名) </label>
   
   <input type="text" name="searchword" id="filenamesearchword" class="searchtextbox" placeholder="歌手名作品名検索は下の外部DB連携で検索できます"
-
-  <?php
+EOM;
      if(!empty ($word)){
      print 'value="' . $word . '"';
      }
-  ?>
-   />
-  <?php
+print '   />';
   if(is_numeric($selectid)){
       print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
   }
-  ?>
-
+print <<<EOM
   <input type="submit" value="検索" id="filenamesearchsubmit" class="btn btn-default " />
   </div>
   </form>
@@ -157,7 +183,7 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   not検索はnotにしたい単語の先頭に!(半角)<br />
   全件検索は*(半角)でいけるっぽい。<br/ ><br />
   </div>
-  <?php
+EOM;
   	if ( empty ($word)){
   		
   	}else {
@@ -166,9 +192,7 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   	    
     PrintLocalFileListfromkeyword_ajax($word,$l_order,'searchresult',0,$selectid);
   	}
-  	?>
-<hr />
-<?php
+print '<hr />';
 if($connectinternet != 1){
 print <<<EOM
 <a href="requestlist_only.php" >トップに戻る </a>
@@ -178,8 +202,16 @@ print <<<EOM
 EOM;
 die();
 }
+} 
 ?>
+<?php
+function print_everything_anisoninfosearch() {
+    global $config_ini;
+    global $l_q;
+    global $selectid;
 
+
+print <<< EOM
 <div class="extsearch"> 
   <h2>歌手名、作品名、ブランド名検索 <small>外部データベース連携検索</small> </h2>
   <h3 id="searchanisoninfo" >anison.info連携検索モード </h3>
@@ -215,26 +247,35 @@ die();
   </div>
   <div class="form-group">
       <label >検索ワード (よみがなの一部でOK)<small>空白で年代指定でその年全検索</small> </label>
-      <INPUT name=q <?php if(isset($l_q)) echo 'value="'.$l_q.'"'; ?> class="searchtextbox" >
+EOM;
+$value_name = '';
+if(isset($l_q)) {
+    $value_name = 'value="'.$l_q.'"';
+}
+print '      <INPUT name=q '.$value_name .' class="searchtextbox" >';
+print <<< EOM
   </div>
-<?php
+EOM;
+
 if(!empty($selectid) ) {
   print '<input type="hidden" name="selectid" value="';
   print $selectid;
   print '" />';
 }
-?>
+print <<< EOM
 <div class="form-group form-inline">
   <div class="form-group ">
       <label > 放映／発売年指定 </label>
       <select class="form-control" name="year" >
           <option value="" > 放映／発売年指定 </option>
-<?php
+EOM;
+
   $year = date('Y');
   for( $i = $year + 1; $i >= 1953 ; $i-- ){
       print '<option value="'.$i.'"> '.$i.' </option>';
   }
-?>
+
+print <<< EOM
       </select>
   </div>
   <div class="form-group">
@@ -262,6 +303,17 @@ if(!empty($selectid) ) {
 </span>
 
 </FORM>
+</div> <!--- extsearch ---> 
+
+EOM;
+}
+?>
+<?php 
+function print_everything_banditsearch() {
+
+print <<< EOM
+<div class="extsearch"> 
+
   <h3 id="searchbandit" >banditの隠れ家連携検索モード </h3>
   
 
@@ -293,6 +345,69 @@ if(!empty($selectid) ) {
   (曲名の一部を含む別の曲とかも検索結果に出ちゃいます。ありがちな1単語の曲名だとたくさん結果に出てきてしまうので注意してね)<br />
   (網羅されてない新しい曲とか、特殊文字（★とか）が曲名に入っていると見つからない可能性があるので改めてファイル名検索してみて)
 </div> <!--- extsearch ---> 
+
+EOM;
+}
+?>
+
+
+<?php 
+$disp_search_order = array();
+$o_srt=$config_ini['searchitem_o'];
+asort($o_srt);
+foreach ( $o_srt as $value){
+
+  foreach ($config_ini['searchitem_o'] as $k => $v){
+      if($value == $v) {
+         $disp_search_order[] =  $k ;
+      }
+  }
+}
+
+
+foreach ($disp_search_order  as $v){
+
+    switch($v) {
+        case 0:
+            if(checkbox_check($config_ini['searchitem'], "listerDB" )) {
+                print_listerdb_search();
+            }
+            break;
+        case 1:
+            if(checkbox_check($config_ini['searchitem'], "filesearch_e" )) {
+                print_everything_filenamesearch();
+            }
+            break;
+        case 2:
+            if(checkbox_check($config_ini['searchitem'], "anisoninfo_e" )) {
+                print_everything_anisoninfosearch();
+            }
+            break;
+        case 3:
+            if(checkbox_check($config_ini['searchitem'], "bandit_e" )) {
+                print_everything_banditsearch();
+            }
+            break;
+    }
+}
+
+
+/****
+    if(checkbox_check($config_ini['searchitem'], "listerDB" )) {
+        print_listerdb_search();
+    }
+
+    if(checkbox_check($config_ini['searchitem'], "filesearch_e" )) {
+        print_everything_filenamesearch();
+    }
+    if(checkbox_check($config_ini['searchitem'], "anisoninfo_e" )) {
+        print_everything_anisoninfosearch();
+    }
+    if(checkbox_check($config_ini['searchitem'], "bandit_e" )) {
+        print_everything_banditsearch();
+    }
+****/
+?>
 </div>
 
 

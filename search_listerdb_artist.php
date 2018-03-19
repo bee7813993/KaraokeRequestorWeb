@@ -2,6 +2,9 @@
 <head>
 <?php 
 
+require_once 'commonfunc.php';
+
+
 $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
@@ -92,7 +95,9 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
 
 </head>
 <body>
-
+<?php
+shownavigatioinbar('searchreserve.php');
+?>
 <div class="container  ">
 
 <div class="container  ">

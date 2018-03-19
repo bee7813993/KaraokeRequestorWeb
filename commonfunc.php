@@ -1836,4 +1836,13 @@ function configbool($keyword, $defaultvalue){
     return $retval;
 }
 
+function checkbox_check($arr,$word){
+    $res = 0;
+    foreach($arr as $value){
+        if($value === $word) {
+            $res = 1;
+        }
+    }
+    return $res;
+}
 ?>

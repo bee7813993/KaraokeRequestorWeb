@@ -1,7 +1,12 @@
-<html>
-<head>
 <?php 
+require_once 'commonfunc.php';
+if(!isset($includepage) )
+$includepage = "";
 
+if(array_key_exists("includepage", $_REQUEST)) {
+    $includepage = $_REQUEST["includepage"];
+}
+if(!isset($lister_dbpath) )
 $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
@@ -16,8 +21,8 @@ $num_list = array( '1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,'0' );
 // かな配列
 $kana_list = array( 'あ' ,'い' ,'う' ,'え' ,'お' ,'か' ,'き' ,'く' ,'け' ,'こ' ,'さ' ,'し' ,'す' ,'せ' ,'そ' ,'た' ,'ち' ,'つ' ,'て' ,'と' ,'な' ,'に' ,'ぬ' ,'ね' ,'の' ,'は' ,'ひ' ,'ふ' ,'へ' ,'の' ,'ま' ,'み' ,'む' ,'め' ,'も' ,'や' ,'ゐ' ,'ゆ' ,'ゑ' ,'よ' ,'ら' ,'り' ,'る' ,'れ' ,'ろ' ,'わ' ,'を' ,'ん');
 
-function checkandbuild_headerlink( $oneheader, $headerlist ) {
-    global $lister_dbpath;
+function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
+//    global $lister_dbpath;
     foreach($headerlist['data']  as $key => $value) {
     //print $oneheader.$value["found_head"];
         if( $oneheader === $value["found_head"] ) {
@@ -36,8 +41,25 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
     return $nolinkbtn;
 }
 
-?>
+   $errmsg = "";
+   $geturl = 'http://localhost/search_listerdb_head_json.php?list=1&lister_dbpath='.$lister_dbpath;
+   $categorylist_json = file_get_contents($geturl);
+   if(!$categorylist_json) {
+      $errmsg = 'カテゴリーリストの取得に失敗';
+   }else {
+      $categorylist = json_decode($categorylist_json,true);
+   }
+   if(!$categorylist) {
+      $errmsg = 'カテゴリーリストのJSON parse 失敗';
+      print $geturl;
+      print $categorylist_json;
+   }
 
+
+if(empty($includepage)){
+print <<<EOM
+<html>
+<head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
@@ -61,27 +83,13 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
   <link type="text/css" rel="stylesheet" href="/css/style.css" />
   <script type="text/javascript" charset="utf8" src="/js/jquery.js"></script>
   <script src="js/bootstrap.min.js"></script>
-
-<?php
-   $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_head_json.php?list=1&lister_dbpath='.$lister_dbpath;
-   $categorylist_json = file_get_contents($geturl);
-   if(!$categorylist_json) {
-      $errmsg = 'カテゴリーリストの取得に失敗';
-   }else {
-      $categorylist = json_decode($categorylist_json,true);
-   }
-   if(!$categorylist) {
-      $errmsg = 'カテゴリーリストのJSON parse 失敗';
-      print $geturl;
-      print $categorylist_json;
-   }
-
-?>
-
 </head>
 <body>
-<div class="container  ">
+EOM;
+shownavigatioinbar('searchreserve.php');
+}
+?>
+<div class="container ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
       <a href="search_listerdb_program_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" >作品名 </a>
@@ -98,9 +106,9 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
 
 <h2> 新しく更新された動画 </h2>
 <div class="form-group">
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-1 month"));?>" role="button">過去1か月</a>
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-2 month"));?>" role="button">過去2か月</a>
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-3 month"));?>" role="button">過去3か月</a>
+<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-1 month"));?>&lister_dbpath=<?php echo $lister_dbpath;?>" role="button">過去1か月</a>
+<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-2 month"));?>&lister_dbpath=<?php echo $lister_dbpath;?>" role="button">過去2か月</a>
+<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-3 month"));?>&lister_dbpath=<?php echo $lister_dbpath;?>" role="button">過去3か月</a>
 </div>
 
 <h1> 作品名インデックス検索 </h1>
@@ -136,7 +144,7 @@ print '<div class="container bg-info ">';
 print '  <div class="row">';
 $count = 1;
 foreach ($kana_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1 center-block">'.checkandbuild_headerlink($kana, $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1 center-block">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
     print '    <div class="col-xs-2 col-md-1 center-block btn">&nbsp; </div>';
@@ -149,7 +157,7 @@ print '  </div>';
 print '  <div class="row">';
 $count = 1;
 foreach ($alpha_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
     print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
@@ -163,7 +171,7 @@ print '  </div>';
 print '  <div class="row">';
 $count = 1;
 foreach ($num_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
     print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
@@ -174,7 +182,7 @@ foreach ($num_list as $kana) {
 }
 print '  </div>';
 print '  <div class="row">';
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink('その他', $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
 print '  </div>';
 
 print '</div>';
@@ -200,7 +208,7 @@ print '<div class="container bg-info ">';
 print '  <div class="row">';
 $count = 1;
 foreach ($kana_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1 center-block">'.checkandbuild_headerlink($kana, $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1 center-block">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
     print '    <div class="col-xs-2 col-md-1 center-block btn">&nbsp; </div>';
@@ -213,7 +221,7 @@ print '  </div>';
 print '  <div class="row">';
 $count = 1;
 foreach ($alpha_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
     print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
@@ -227,7 +235,7 @@ print '  </div>';
 print '  <div class="row">';
 $count = 1;
 foreach ($num_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
     print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
@@ -238,7 +246,7 @@ foreach ($num_list as $kana) {
 }
 print '  </div>';
 print '  <div class="row">';
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink('その他', $headlist).'</div>';
+  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
 print '  </div>';
 
 print '</div>';
@@ -247,8 +255,12 @@ print '</div>';
 }
 ?>
 </div>
+<?php
+if(empty($includepage)){
+print <<<EOM
 </body>
 </html>
-<?php
+EOM;
+}
 
 ?>
