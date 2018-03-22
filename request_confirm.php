@@ -45,6 +45,10 @@ if(array_key_exists("bgvfile", $_REQUEST)) {
     if($forcebgv == 1) $fullpath=$bgvfile;
 }
 
+$lister_dbpath = '';
+if(array_key_exists("lister_dbpath", $_REQUEST)) {
+    $lister_dbpath = $_REQUEST["lister_dbpath"];
+}
 
 
 require_once 'commonfunc.php';
@@ -399,7 +403,7 @@ print htmlspecialchars($selectrequest[0]['comment']);
 $fullpath_utf8 = "";
 $audiotracklist = array();
 if($shop_karaoke != 1 ){
-    get_fullfilename($fullpath,$filename,$fullpath_utf8);
+    get_fullfilename($fullpath,$filename,$fullpath_utf8,$lister_dbpath);
     $filetype = extention_musiccheck($fullpath_utf8);
     if(!empty($fullpath_utf8) && $filetype == 1 ) {
         $audiotracklist = getaudiotracklist($fullpath_utf8);

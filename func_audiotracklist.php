@@ -108,7 +108,7 @@ function file_exist_check_japanese($filename){
  return FALSE;
 }
 
-function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
+function get_fullfilename($l_fullpath,$word,&$filepath_utf8,$lister_dbpath=''){
     $filepath_utf8 = "";
     // ファイル名のチェック
     if(empty($l_fullpath) && empty($word) ) return "";
@@ -124,6 +124,39 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
       $filepath = null;
       // まず フルパス中のbasenameで再検索
       $songbasename = basename($l_fullpath);
+      // ニコカラりすたーで検索
+      if(!empty($lister_dbpath) ){
+         logtocmd ("fullpass file $l_fullpath is not found. Search from NicokaraLister DB.: $songbasename\r\n");
+         require_once('function_search_listerdb.php');
+         // DB初期化
+         $lister = new ListerDB();
+         $lister->listerdbfile = $lister_dbpath;
+         $listerdb = $lister->initdb();
+         if( $listerdb ) {
+              $select_where = ' WHERE found_path LIKE ' . $listerdb->quote('%'.$songbasename.'%');
+              $sql = 'select * from t_found '. $select_where.';';
+              $alldbdata = $lister->select($sql);
+              if($alldbdata){
+                  $filepath_utf8 = $alldbdata[0]['found_path'];
+                  $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+                  logtocmd ($songbasename.'代わりに「'.$filepath_utf8.'」を再生します'."\n");
+                  return $filepath;
+              }
+              // 曲名で再検索
+              $select_where = ' WHERE found_path LIKE ' . $listerdb->quote('%'.$word.'%');
+              $sql = 'select * from t_found '. $select_where.';';
+              $alldbdata = $lister->select($sql);
+              if($alldbdata){
+                  $filepath_utf8 = $alldbdata[0]['found_path'];
+                  $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+                  logtocmd ($word.'代わりに「'.$filepath_utf8.'」を再生します'."\n");
+                  return $filepath;
+              }
+              
+         }         
+         
+      }
+      // Everythingで検索
       // logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
       $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($songbasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
       $json = file_get_html_with_retry($jsonurl, 5);
@@ -137,7 +170,7 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
           }
       }
       if(empty($filepath)){
-      // 曲名で再建策
+      // 曲名で再検索
           logtocmd ("fullpass basename $songbasename is not found. Search from Everything DB.: $word\r\n");
           $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
           // logtocmd $jsonurl;
@@ -154,6 +187,7 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
 }
 function logtocmd($msg){
   //print(mb_convert_encoding("$msg\n","SJIS-win"));
+  error_log($msg."\n", 3, 'ykrdebug.log');
 }
 
 ?>
