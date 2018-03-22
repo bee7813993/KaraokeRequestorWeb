@@ -35,7 +35,7 @@ if(array_key_exists("draw", $_REQUEST)) {
 }
 
 // build query url
-$url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.$header.'&category='.$category.'&lister_dbpath='.$lister_dbpath;
+$url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath;
 
 ?>
 
@@ -98,7 +98,7 @@ foreach ($programlist['data'] as $program ){
 //var_dump($program);
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
-print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.$category.'&lister_dbpath='.$lister_dbpath.'">';
+print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath.'">';
 print $program['program_name'];
 print '</a>';
 print '    </div>';
@@ -122,7 +122,7 @@ if( !empty($category) ){
     if(strlen($urlparams) > 0) {
          $urlparams = $urlparams.'&';
     }
-    $urlparams = $urlparams.'category='.$category;
+    $urlparams = $urlparams.'category='.urlencode($category);
 }
 if( !empty($draw) ){
     if(strlen($urlparams) > 0) {

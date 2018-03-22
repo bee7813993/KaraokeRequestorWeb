@@ -33,7 +33,7 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
         
             // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
             $whereword = urlencode('found_head='.$value["found_head"]) ;
-            $url='<a class="btn btn-primary center-block" href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.$searchcategory.'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
+            $url='<a class="btn btn-primary center-block" href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
             return $url;
         }
     }
@@ -121,7 +121,7 @@ if(!empty($errmsg)){
 $nullcategory_exists = 0;
 foreach ($categorylist as $category ){
 $cur_category = $category["program_category"];
-$url = 'http://localhost/search_listerdb_head_json.php?program_category='.$category["program_category"].'&lister_dbpath='.$lister_dbpath;
+$url = 'http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]).'&lister_dbpath='.$lister_dbpath;
 if($cur_category === NULL ) {
   $nullcategory_exists++;
   continue;

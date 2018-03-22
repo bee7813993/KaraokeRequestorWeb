@@ -362,6 +362,9 @@ print '>降順</option>';
 print '</select>';
 print $myformvalue;
 print '</div>';
+if(!empty($lister_dbpath)){
+    print '<input type="hidden" name="lister_dbpath" value="'.($lister_dbpath).'" />';
+}
 print '<button type="submit" class="btn btn-default mb-2">並び替え</button>';
 print '</form>';
 
@@ -454,7 +457,7 @@ if( !empty($category) ){
     if(strlen($urlparams) > 0) {
          $urlparams = $urlparams.'&';
     }
-    $urlparams = $urlparams.'category='.$category;
+    $urlparams = $urlparams.'category='.urlencode($category);
 }
 if( !empty($draw) ){
     if(strlen($urlparams) > 0) {
