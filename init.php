@@ -79,11 +79,36 @@ print '</pre>';
 
 // to urlencode
 $new_roomurlshow = array();
+$search_show_order = array();
+
 foreach($newconfig as $key => $value){
     if(is_array($value)){
       if($key == 'searchitem' ){
            $newconfig['searchitem'] = $value;
       }else if($key == 'searchitem_o' ){
+           $ordervalue = 0;
+           foreach($value as $k => $ordervalue){
+             if( ! is_numeric($ordervalue) ) {
+               if(empty($search_show_order) ){
+             print "comea";
+                   $ordervalue = 1;
+               }else {
+                   $ordervalue = max($search_show_order) + 1;
+               }
+             }else {
+              if(in_array($ordervalue, $search_show_order)){
+                if(empty($search_show_order) ){
+             print "comeb";
+                   $ordervalue = 1;
+                }else {
+                   $ordervalue = max($search_show_order) + 1;
+                }
+              }
+             }
+             print $ordervalue;
+             $value[$k] = $ordervalue;
+             $search_show_order[] = $ordervalue;
+           }
            $newconfig['searchitem_o'] = $value;
       }else {
         $roomcount = 0;
@@ -678,24 +703,29 @@ if(!array_key_exists('searchitem_o', $config_ini )){
     </tr>
   </thead>
     <tr>
-      <td>ニコカラりすたーDB検索 </td>
-      <td><input type="checkbox" name="searchitem[]" value="listerDB" <?php print checkbox_check($config_ini['searchitem'],"listerDB" )?'checked':' ' ?> > </td>
+      <td>ファイル名検索（りすたー） </td>
+      <td><input type="checkbox" name="searchitem[]" value="listerDB_file" <?php print checkbox_check($config_ini['searchitem'],"listerDB_file" )?'checked':' ' ?> > </td>
       <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][0]; ?>" placeholder="表示順" /> </td>
     </tr>
     <tr>
-      <td>ファイル検索（Everything） </td>
-      <td><input type="checkbox" name="searchitem[]" value="filesearch_e" <?php print checkbox_check($config_ini['searchitem'],"filesearch_e" )?'checked':' ' ?> > </td>
+      <td>りすたーDB検索 </td>
+      <td><input type="checkbox" name="searchitem[]" value="listerDB" <?php print checkbox_check($config_ini['searchitem'],"listerDB" )?'checked':' ' ?> > </td>
       <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][1]; ?>" placeholder="表示順" /> </td>
+    </tr>
+    <tr>
+      <td>ファイル名検索（Everything） </td>
+      <td><input type="checkbox" name="searchitem[]" value="filesearch_e" <?php print checkbox_check($config_ini['searchitem'],"filesearch_e" )?'checked':' ' ?> > </td>
+      <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][2]; ?>" placeholder="表示順" /> </td>
     </tr>
     <tr>
       <td>外部検索（anison.info）（Everything） </td>
       <td><input type="checkbox" name="searchitem[]" value="anisoninfo_e" <?php print checkbox_check($config_ini['searchitem'],"anisoninfo_e" )?'checked':' ' ?> > </td>
-      <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][2]; ?>" placeholder="表示順" /> </td>
+      <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][3]; ?>" placeholder="表示順" /> </td>
     </tr>
     <tr>
       <td>外部検索（banditの隠れ家）（Everything） </td>
       <td> <input type="checkbox" name="searchitem[]" value="bandit_e" <?php print checkbox_check($config_ini['searchitem'],"bandit_e" )?'checked':' ' ?> >  </td>
-      <td> <input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][3]; ?>" placeholder="表示順" /> </td>
+      <td> <input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][4]; ?>" placeholder="表示順" /> </td>
     </tr>
   </table>
 

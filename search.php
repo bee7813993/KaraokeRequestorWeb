@@ -144,6 +144,19 @@ function print_listerdb_search(){
     }
     require 'search_listerdb_program_index.php';
 }
+
+
+function print_listerdb_fileonly(){
+    global $config_ini;
+
+
+    $includepage = 1;
+    if(array_key_exists("listerDBPATH", $config_ini)) {
+        $lister_dbpath = $config_ini['listerDBPATH'];
+    }
+    $filesearch = 1;
+    require 'search_listerdb_filename_index.php';
+}
 ?>
 
 <?php
@@ -352,6 +365,13 @@ EOM;
 
 
 <?php 
+
+if(!array_key_exists("searchitem_o", $config_ini) || !array_key_exists("searchitem", $config_ini)) {
+    print_everything_filenamesearch();
+    print_everything_anisoninfosearch();
+    print_everything_banditsearch();
+    
+} else {
 $disp_search_order = array();
 $o_srt=$config_ini['searchitem_o'];
 asort($o_srt);
@@ -369,26 +389,33 @@ foreach ($disp_search_order  as $v){
 
     switch($v) {
         case 0:
+            if(checkbox_check($config_ini['searchitem'], "listerDB_file" )) {
+                print_listerdb_fileonly();
+                print '<hr />';
+            }
+            break;
+        case 1:
             if(checkbox_check($config_ini['searchitem'], "listerDB" )) {
                 print_listerdb_search();
             }
             break;
-        case 1:
+        case 2:
             if(checkbox_check($config_ini['searchitem'], "filesearch_e" )) {
                 print_everything_filenamesearch();
             }
             break;
-        case 2:
+        case 3:
             if(checkbox_check($config_ini['searchitem'], "anisoninfo_e" )) {
                 print_everything_anisoninfosearch();
             }
             break;
-        case 3:
+        case 4:
             if(checkbox_check($config_ini['searchitem'], "bandit_e" )) {
                 print_everything_banditsearch();
             }
             break;
     }
+}
 }
 
 
