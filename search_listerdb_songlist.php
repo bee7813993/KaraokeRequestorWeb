@@ -1,6 +1,7 @@
 <html>
 <head>
 <?php 
+require_once 'commonfunc.php';
 
 $displayfrom=0;
 $displaynum=50;
@@ -88,41 +89,7 @@ if(array_key_exists("draw", $_REQUEST)) {
 }
 
 
-/**
- * バイト数をフォーマットする
- * @param integer $bytes
- * @param integer $precision
- * @param array $units
- */
-function formatBytes($bytes, $precision = 2, array $units = null)
-{
-    if ( abs($bytes) < 1024 )
-    {
-        $precision = 0;
-    }
 
-    if ( is_array($units) === false )
-    {
-        $units = array('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
-    }
-
-    if ( $bytes < 0 )
-    {
-        $sign = '-';
-        $bytes = abs($bytes);
-    }
-    else
-    {
-        $sign = '';
-    }
-
-    $exp   = floor(log($bytes) / log(1024));
-    $exp   = 2;  // MB固定
-    $unit  = $units[$exp];
-    $bytes = $bytes / pow(1024, floor($exp));
-    $bytes = sprintf('%.'.$precision.'f', $bytes);
-    return $sign.$bytes.' '.$unit;
-}
 
 
 function add_get_query($baseurl,$addquery){
@@ -238,12 +205,6 @@ if(!empty($url)){
    }  
 
 
-function basename_jp($path){
-    $p_info = explode('\\', $path);
-    return end($p_info);
-}
-
-
 function create_requestconfirmlink($songinfo) {
   global $lister_dbpath;
 
@@ -266,6 +227,7 @@ function selected_check($checkstr, $selectedstr){
 </head>
 <body>
 <?php
+shownavigatioinbar('searchreserve.php');
 ?>
 
 <div class="container  ">
@@ -368,9 +330,13 @@ if(!empty($lister_dbpath)){
 print '<button type="submit" class="btn btn-default mb-2">並び替え</button>';
 print '</form>';
 
-
+if(($displayfrom + $displaynum) < $programlist['recordsTotal']) {
+  $displaylast = $displayfrom + $displaynum;
+}else {
+  $displaylast = $programlist['recordsTotal'];
+}
 print '    <div class="text-right">';
-print $displayfrom.'-'.($displayfrom+$displaynum).'（全'.$programlist['recordsTotal'].'件）';
+print $displayfrom.'-'.($displaylast).'（全'.$programlist['recordsTotal'].'件）';
 print '    </div>';
 print '  <div class="row">';
 foreach ($programlist['data'] as $program ){
@@ -459,6 +425,39 @@ if( !empty($category) ){
     }
     $urlparams = $urlparams.'category='.urlencode($category);
 }
+if( !empty($program_name) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'program_name='.urlencode($program_name);
+}
+if( !empty($artist) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'artist='.urlencode($artist);
+}
+if( !empty($worker) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'worker='.urlencode($worker);
+}
+
+if( !empty($datestart) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'datestart='.urlencode($datestart);
+}
+
+if( !empty($dateend) ){
+    if(strlen($urlparams) > 0) {
+         $urlparams = $urlparams.'&';
+    }
+    $urlparams = $urlparams.'dateend='.urlencode($dateend);
+}
+
 if( !empty($draw) ){
     if(strlen($urlparams) > 0) {
          $urlparams = $urlparams.'&';
@@ -482,7 +481,7 @@ if($displayfrom > 0 ) {
 }
 print '    </div>';
 print '    <div class="col-xs-4 col-md-4 text-center">';
-print $displayfrom.'-'.($displayfrom+$displaynum).'（全'.$programlist['recordsTotal'].'件）';
+print $displayfrom.'-'.($displaylast).'（全'.$programlist['recordsTotal'].'件）';
 print '    </div>';
 print '    <div class="col-xs-4 col-md-4 ">';
 if($programlist['recordsTotal'] > ($displayfrom + $displaynum) ) {

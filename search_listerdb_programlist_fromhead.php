@@ -1,7 +1,7 @@
 <html>
 <head>
 <?php 
-
+require_once 'commonfunc.php';
 
 $displayfrom=0;
 $displaynum=50;
@@ -88,7 +88,7 @@ if(!empty($errmsg)){
   print $errmsg;
   die();
 }
-
+shownavigatioinbar('searchreserve.php');
 // var_dump($programlist);
 print '<div class="container">';
 print '<h2>「'.$header.'」で始まる「'.$category.'」の作品名一覧 </h2>';
