@@ -74,12 +74,35 @@ function workcheck_pfwd(){
        return true;
    }
 
+   $lpcnt = 2;
+   while(true){
     logtocmd ('pfwdの通信断を検出。pfwdを再起動します:'.$checkresult) ;
+    if($lpcnt > 10) 
+     logtocmd ('おそらくネット接続先が変更になりました。再接続できるまでには時間がかかります:'.$lpcnt);
     $url = 'http://localhost/pfwd_exec.php?pfwdstop=1';
+    logtocmd("pwfd stopping..");
+    file_get_html_with_retry($url,1,5);
+    
+    logtocmd( "wait". $lpcnt ."sec");
+    sleep($lpcnt);
+
+    $url = 'http://localhost/pfwd_exec.php?pfwdstart=1';
+    logtocmd ("pwfd starting...");
     file_get_html_with_retry($url,1,5);
     sleep(2);
-    $url = 'http://localhost/pfwd_exec.php?pfwdstart=1';
-    file_get_html_with_retry($url,1,5);
+     $checkresult = check_online_available($config_ini['globalhost'], $config_ini["onlinechecktimeout"]);
+     if( $checkresult === "OK" ){
+       break;
+     }
+     if( $checkresult === "now disabled online") {
+       break;
+     }
+     $lpcnt+=8;
+    if($lpcnt > 80){
+     logtocmd ('ネット接続が切断されたままになっています。オフラインのまま継続します:'.$lpcnt);
+     break;
+    }
+   }
     
 }
 

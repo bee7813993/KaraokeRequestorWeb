@@ -128,14 +128,39 @@ EOT;
     }
 
 
+    public function startpfwdcmd_fg(){
+        $cmd = $this->pfwdpath.'\\'.$this->pfwdcmd;
+        exec($cmd);
+        $startstatus = false;
+        for ($i = 1; $i <= 10; $i++) {
+          sleep(1);
+          $startstatus = $this->statpfwdcmd();
+          if($startstatus) break;
+        }
+    }
+
+
     public function startpfwdcmd(){
         $cmd = 'start "" '.$this->pfwdpath.'\\'.$this->pfwdcmd;
         $fp = popen($cmd,'r');
         pclose($fp);
+        $startstatus = false;
+        for ($i = 1; $i <= 10; $i++) {
+          sleep(1);
+          $startstatus = $this->statpfwdcmd();
+          if($startstatus) break;
+        }
     }
     public function stoppfwdcmd(){
-        $cmd = 'taskkill /im "'.$this->pfwdcmd.'" -f';
-        exec($cmd);
+        $stopstatus = true;
+        for ($i = 1; $i <= 20; $i++) {
+          $cmd = 'taskkill /im "'.$this->pfwdcmd.'" -f';
+          exec($cmd);
+          $stopstatus = $this->statpfwdcmd();
+          if($stopstatus === false) break;
+          sleep(1);
+        }
+        
     }
     public function statpfwdcmd(){
         $cmd='tasklist /fi "imagename eq '.$this->pfwdcmd.'"';
