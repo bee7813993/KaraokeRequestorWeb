@@ -4,6 +4,10 @@
 require_once 'commonfunc.php';
 
 print_meta_header();
+
+// リスト表示名をファイル名とするか (今のところハードコーディング)
+$displayfilename_flg = false;
+
 ?>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
@@ -109,7 +113,13 @@ foreach($limitlist_array["category"] as $category1 ){
                 //  print '<div class="list-group">';
                 foreach($songinfo["file"] as $files){
                 // print '<pre>'.var_dump($files).'</pre>';
-                    $link = 'request_confirm.php?filename='.urlencode($songinfo["title"]);
+                    $displayfilename = urlencode($songinfo["title"]);
+                    if($displayfilename_flg) {
+                        if(array_key_exists("filename", $files)) {
+                            $displayfilename = urlencode($files["filename"]);
+                        }
+                    }
+                    $link = 'request_confirm.php?filename='.$displayfilename;
                     if(array_key_exists("filename", $files)) {
                         $link = $link.'&fullpath='.urlencode($files["filename"]);
                     }
