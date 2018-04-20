@@ -83,11 +83,21 @@ print "<h1>";
 print $limitlist_array["title"];
 print "</h1>";
 
-
+$catcount = 0;
 foreach($limitlist_array["category"] as $category1 ){
+    $catid = 'catid_'.$catcount;
+    $catcount++;
     print "<h2>";
+    print '<button type="button" class="btn btn-primary btn-block" data-toggle="collapse" data-target="#'.$catid.'">';
+    print "<strong>";
     print($category1["name"]);
+    print "</strong>";
+    print '</button>';
     print "</h2>";
+    print '<div id='.$catid.' class="collapse">';
+    print '   <div class="panel panel-default">';
+    print '      <div class="panel-body">';
+    
     if(!empty($category1["song"])){
         foreach($category1["song"] as $songinfo){
             print '<div class="divid0 panel panel-primary"> ';
@@ -165,6 +175,9 @@ foreach($limitlist_array["category"] as $category1 ){
         
         }
     }
+    print '</div>';
+    print '</div>';
+    print '</div>';
 }
 
 ?>
