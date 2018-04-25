@@ -83,6 +83,7 @@ print "<h1>";
 print $limitlist_array["title"];
 print "</h1>";
 
+print '<a class="btn btn-default" data-toggle="collapse" href=".llsonginfo"> 全曲表示 </a>';
 $catcount = 0;
 foreach($limitlist_array["category"] as $category1 ){
     $catid = 'catid_'.$catcount;
@@ -94,7 +95,7 @@ foreach($limitlist_array["category"] as $category1 ){
     print "</strong>";
     print '</button>';
     print "</h2>";
-    print '<div id='.$catid.' class="collapse">';
+    print '<div id='.$catid.' class="collapse llsonginfo">';
     print '   <div class="panel panel-default">';
     print '      <div class="panel-body">';
     
