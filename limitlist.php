@@ -6,7 +6,7 @@ require_once 'commonfunc.php';
 print_meta_header();
 
 // リスト表示名をファイル名とするか (今のところハードコーディング)
-$displayfilename_flg = false;
+$displayfilename_flg = true;
 
 ?>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />

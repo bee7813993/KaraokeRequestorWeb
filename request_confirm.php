@@ -50,6 +50,9 @@ if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
 }
 
+/** リクエスト者を毎回新規入力にするかどうか（共有端末用とか） **/
+/** (今のところハードコーディング) **/
+$blank_username = false;
 
 require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
@@ -324,7 +327,8 @@ foreach($singerlist as $singer)
   print "<option value=\"";
   print $singer;
   print "\"";
-  if(!empty($YkariUsername)){
+  if($blank_username){
+  }else if(!empty($YkariUsername)){
       if($singer === $YkariUsername){
          print " selected ";
          $selectedcounter = $selectedcounter + 1 ;
