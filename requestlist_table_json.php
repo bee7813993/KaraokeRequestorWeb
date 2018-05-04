@@ -210,6 +210,7 @@ $action_pf = <<<EOD
 <li> <a class="requestmove" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' > 次に再生</a> </li>
 %s
 <li> <a href="#" class="" data-toggle="modal" data-target="#act_modal_%s">削除</a> </li>
+<li> <a href="listerdb_input_songinfo.php" class="" >曲情報入力</a> </li>
 </ul>
 </div>
 <!--
