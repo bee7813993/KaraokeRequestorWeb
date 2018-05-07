@@ -2,7 +2,7 @@
 <head>
 <?php 
 require_once 'commonfunc.php';
-
+print_meta_header();
 $displayfrom=0;
 $displaynum=50;
 $draw = 1;
@@ -74,7 +74,7 @@ $url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfr
    }
    if(!$programlist ){
    print $url;
-   var_dump($programlist);
+   var_dump($programlist_json);
    die();
    }  
 
@@ -98,8 +98,9 @@ foreach ($programlist['data'] as $program ){
 //var_dump($program);
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
-print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath.'">';
+print '<a class="btn btn-primary btn-block indexbtnstr" href="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath.'">';
 print $program['program_name'];
+print '（'.$program['COUNT(program_name)'].'）';
 print '</a>';
 print '    </div>';
 print '    </div>';

@@ -52,6 +52,19 @@ if(array_key_exists("clearauth", $_REQUEST)) {
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+
+$(function(){
+	$('a[href^=#]').click(function() {
+		var speed = 400;
+		var href= $(this).attr("href");
+		var target = $(href == "#" || href == "" ? 'html' : href);
+		var headerHeight = 120; //固定ヘッダーの高さ
+		var position = target.offset().top - headerHeight; //ターゲットの座標からヘッダの高さ分引く
+		$('body,html').animate({scrollTop:position}, speed, 'swing');
+		return false;
+	});
+});
+
 </script>
 
 
@@ -59,11 +72,12 @@ $(function () {
 <title>設定画面</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
-<body>
+<body style="padding-top:0px;">
 <?php
 shownavigatioinbar();
 ?>
-
+<div style="height:100px;">
+</div>
 <?php
 $change_counter = 0;
 
@@ -172,7 +186,7 @@ print '</pre>';
 ?>
 
 <div class="container"  class="menulink">
-<div class="col-md-3 col-md-push-9 col-xs-12" style="margin-top: 50px;" >
+<div class="col-md-3 col-md-push-9 col-xs-12" style="" >
 <!--- メニュー --->
 <div class="panel panel-default">
   <div class="panel-heading">もくじ</div>

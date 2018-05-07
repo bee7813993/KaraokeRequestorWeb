@@ -247,13 +247,13 @@ div.menulink {
 }
 
 h1.menulink {
-    margin-top: -120px;
-    padding-top: 120px;
+    margin-top: 0px;
+    padding-top: 0px;
 }
 
 h3.menulink {
-    margin-top: -120px;
-    padding-top: 120px;
+    margin-top: 0px;
+    padding-top: 0px;
 }
 
 a.commentmodallink {
@@ -266,6 +266,21 @@ min-height: 1em;
 a.commentmodallink:link {
 color: #000000;
 text-decoration: none;
+}
+
+.indexbtn {
+    margin-bottom: 7px;
+    font-weight: bold;
+}
+
+.indexbtnstr {
+    font-weight: bold;
+    white-space: normal;
+}
+
+.indexbtnstr_lg {
+    font-weight: bold;
+    white-space: normal;
 }
 
 @media only screen and (max-width: 560px){
@@ -534,5 +549,18 @@ select.searchtextbox {
 div.searchtextbox {
 float : none;
 }
+
+.indexbtn {
+    margin-bottom: 7px;
+    font-weight: bold;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.indexbtnstr {
+    font-size:4vw;
+    font-weight: bold;
+}
+
 
 }

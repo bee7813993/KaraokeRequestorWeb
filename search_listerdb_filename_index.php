@@ -1,6 +1,6 @@
 <?php 
 require_once 'commonfunc.php';
-
+print_meta_header();
 if(!isset($includepage) )
 $includepage = "";
 
@@ -38,9 +38,11 @@ $kana_list = array( 'あ' ,'い' ,'う' ,'え' ,'お' ,'か' ,'き' ,'く' ,'け
    $errmsg = "";
 
 if(empty($includepage)){
+print '<html>';
+print '<head>';
+print_meta_header();
+
 print <<<EOM
-<html>
-<head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
@@ -82,8 +84,8 @@ if(empty($filesearch) )
     <div class="col-xs-4 col-md-4">
       <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >歌手名 </a>
     </div>
-    <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" >検索（ファイル名など） </a>
+    <div class="col-xs-4 col-md-4 " >
+      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" style="white-space: normal;">検索（ファイル名など） </a>
     </div>
   </div>
 </div>

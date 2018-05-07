@@ -68,6 +68,7 @@ if (!empty($select_orderby) ){
     $select_where = $select_where .  ' ORDER BY '. $select_orderby . ' ' . $select_scending ;
 }
     $select_where_limit = $select_where . ' LIMIT '. $displaynum .' OFFSET '. $displayfrom;
+    $select_limit = ' LIMIT '. $displaynum .' OFFSET '. $displayfrom;
 
 
 // 総件数のみ取得
@@ -85,13 +86,16 @@ $totalrequest = $alldbdata[0]["COUNT(DISTINCT program_name)"];
 
 
 
-$sql = 'select DISTINCT program_name from t_found '. $select_where_limit.';';
+$sql = 'select DISTINCT program_name , COUNT(program_name) from t_found  '. $select_where.' GROUP BY program_ruby '.$select_limit.';';
+// $sql = 'select program_name , COUNT(program_name) from t_found WHERE found_head =\'あ\' AND program_category = \'ゲーム\' GROUP BY program_name LIMIT 50 OFFSET 0 ;';
+//$sql = 'select DISTINCT program_name  from t_found '. $select_where_limit.';';
 $alldbdata =  $lister->select($sql);
 if(!$alldbdata){
      print $sql;
      die();
 }
 $lister->closedb();
+//var_dump($alldbdata);
 
 $returnarray = array( "draw" => $draw, "recordsTotal" => $totalrequest,  "recordsFiltered" => $totalrequest, "data" => $alldbdata);
 $json = json_encode($returnarray,JSON_PRETTY_PRINT);

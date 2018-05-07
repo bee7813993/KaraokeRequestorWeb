@@ -1,9 +1,6 @@
-<html>
-<head>
 <?php 
 
 require_once 'commonfunc.php';
-
 
 $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
@@ -49,7 +46,9 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
     $nolinkbtn = '<button type="button" class="btn btn-default btn-block" disabled="disabled" >'.$oneheader.'</button>';
     return $nolinkbtn;
 }
-
+print '<html>';
+print '<head>';
+print_meta_header();
 ?>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -108,8 +107,8 @@ shownavigatioinbar('searchreserve.php');
     <div class="col-xs-4 col-md-4">
       <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" >歌手名 </a>
     </div>
-    <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >検索（ファイル名など） </a>
+    <div class="col-xs-4 col-md-4 " >
+      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" style="white-space: normal;" >検索 （ファイル名など） </a>
     </div>
   </div>
 </div>
@@ -149,10 +148,10 @@ foreach ($artistmany['data'] as $artistname ){
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
 if(empty($artistname['song_artist']) ){
-    print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?artist='.'ISNULL'.'&lister_dbpath='.$lister_dbpath.'">';
+    print '<a class="btn btn-primary btn-block indexbtnstr" href="search_listerdb_songlist.php?artist='.'ISNULL'.'&lister_dbpath='.$lister_dbpath.'">';
     print '【歌手名未登録】'.'（'.$artistname['COUNT'].'）' ;
 }else {
-    print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?artist='.urlencode($artistname['song_artist']).'&lister_dbpath='.$lister_dbpath.'">';
+    print '<a class="btn btn-primary btn-block indexbtnstr_lg" href="search_listerdb_songlist.php?artist='.urlencode($artistname['song_artist']).'&lister_dbpath='.$lister_dbpath.'">';
     print $artistname['song_artist'].'（'.$artistname['COUNT'].'）' ;
 }
 print '</a>';

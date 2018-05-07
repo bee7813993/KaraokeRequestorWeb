@@ -33,11 +33,11 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
         
             // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
             $whereword = urlencode('found_head='.$value["found_head"]) ;
-            $url='<a class="btn btn-primary center-block" href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
+            $url='<a class="btn btn-primary center-block indexbtnstr"  href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
             return $url;
         }
     }
-    $nolinkbtn = '<button type="button" class="btn btn-default btn-block" disabled="disabled" >'.$oneheader.'</button>';
+    $nolinkbtn = '<button type="button" class="btn btn-default btn-block indexbtnstr" disabled="disabled" >'.$oneheader.'</button>';
     return $nolinkbtn;
 }
 
@@ -57,9 +57,13 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
 
 
 if(empty($includepage)){
+
+print '<html>';
+print '<head>';
+print_meta_header();
+
+
 print <<<EOM
-<html>
-<head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
@@ -98,7 +102,7 @@ shownavigatioinbar('searchreserve.php');
       <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >検索（ファイル名など） </a>
+      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" style="white-space: normal;">検索（ファイル名など） </a>
     </div>
   </div>
 </div>
@@ -144,37 +148,44 @@ print '<div class="container bg-info ">';
 print '  <div class="row">';
 $count = 1;
 foreach ($kana_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1 center-block">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-2 col-md-1 indexbtn center-block" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1 center-block btn">&nbsp; </div>';
-    $count = 1;
+    print '    <div class="col-xs-2 col-md-1 indexbtn center-block btn indexbtnstr" >&nbsp; </div>';
+   if( ($count % 10) == 0 ) {
+     $count = 1;
+     print '  </div>';
+     print '  <div class="row">';
+   }else{
+     $count++;
+   }
   }else{
     $count++;
   }
 }
 print '  </div>';
+print '  <hr />';
 print '  <div class="row">';
 $count = 1;
 foreach ($alpha_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-2 col-md-1 indexbtn" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
     $count = 1;
   }else{
     $count++;
   }
 }
 print '  </div>';
-
+print '  <hr />';
 print '  <div class="row">';
 $count = 1;
 foreach ($num_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-2 col-md-1 indexbtn" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
     $count = 1;
   }else{
     $count++;
@@ -182,7 +193,7 @@ foreach ($num_list as $kana) {
 }
 print '  </div>';
 print '  <div class="row">';
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-4 col-md-2 indexbtn" >'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
 print '  </div>';
 
 print '</div>';
@@ -208,10 +219,10 @@ print '<div class="container bg-info ">';
 print '  <div class="row">';
 $count = 1;
 foreach ($kana_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1 center-block">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-2 col-md-1 indexbtn center-block" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1 center-block btn">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 indexbtn center-block btn indexbtnstr" >&nbsp; </div>';
     $count = 1;
   }else{
     $count++;
@@ -221,10 +232,10 @@ print '  </div>';
 print '  <div class="row">';
 $count = 1;
 foreach ($alpha_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
     $count = 1;
   }else{
     $count++;
@@ -235,10 +246,10 @@ print '  </div>';
 print '  <div class="row">';
 $count = 1;
 foreach ($num_list as $kana) {
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
 // print $count;
   if( ($count % 5) == 0 ) {
-    print '    <div class="col-xs-2 col-md-1 btn">&nbsp; </div>';
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
     $count = 1;
   }else{
     $count++;
@@ -246,7 +257,7 @@ foreach ($num_list as $kana) {
 }
 print '  </div>';
 print '  <div class="row">';
-  print '    <div class="col-xs-2 col-md-1">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
+  print '    <div class="col-xs-4 col-md-2 indexbtn">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
 print '  </div>';
 
 print '</div>';

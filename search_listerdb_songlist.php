@@ -2,6 +2,7 @@
 <head>
 <?php 
 require_once 'commonfunc.php';
+print_meta_header();
 
 $displayfrom=0;
 $displaynum=50;
