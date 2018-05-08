@@ -247,8 +247,8 @@ print '</pre>';
 <div class="bg-info"  >
   <h1 id="listctrl" class="menulink" > リクエストリスト操作 </h1>
   <h3> リストのダウンロード </h3>
-  <a href ="listexport_sjis.php"  class="btn btn-default" > リクエストリストのダウンロード(SJIS) </a>
   <a href ="listexport.php"  class="btn btn-default" > リクエストリストのダウンロード(UTF-8) </a>
+  <a href ="listexport_sjis.php"  class="btn btn-default" > (SJIS) </a>
   <h3> リストのインポート(csvより) </h3>
   <form action="listimport.php" method="post" enctype="multipart/form-data">
     <label > 

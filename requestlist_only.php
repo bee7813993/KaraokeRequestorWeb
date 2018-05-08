@@ -263,7 +263,7 @@ if($user === "admin"){
 <script type="text/javascript" charset="utf8" src="js/requsetlist_ctrl.js"></script>
 <hr>
 
-<form method="get" action="simplelistexport_sjis.php">
+<form method="get" action="simplelistexport_utf8.php">
 <input type="submit" class="btn btn-primary" value="リクエストリスト(CSV)のダウンロード" class=" btn btn-default " />
 &nbsp;
 <a href="simplelist.php" class="btn btn-primary" > シンプルリクエストリスト表示(コピペ・公開用) </a>

@@ -15,6 +15,7 @@ if(empty($dbname)){
   header('Content-Disposition: attachment; filename='.$dbname.'.csv');
   
   $stream = fopen('php://output', 'w');
+  fwrite($stream, pack('C*',0xEF,0xBB,0xBF));//BOM書き込み
   foreach($allrequest as $row){
     fputcsv($stream, $row);
   }
