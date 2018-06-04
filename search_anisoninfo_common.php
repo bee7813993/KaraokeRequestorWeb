@@ -3,7 +3,8 @@
 // URLを叩いて検索ワード候補リクエスト用URL生成
 function ansoninfo_gettitlelisturl($m,$q,$fullparam,$year = '', $genre=''){
     if(isset($fullparam)){
-        $url="http://anison.info/data/".trim($fullparam,". \t\n\r\0\x0B");
+        $parammod = anisoninfolink($fullparam,"");
+        $url="http://anison.info/data/".trim($parammod,". \t\n\r\0\x0B");
     }else {
         $urlbase="http://anison.info/data/n.php?m=%s&q=%s&year=%s&genre=%s";
         $url=sprintf($urlbase,urlencode($m),$q,$year,$genre);
@@ -1011,5 +1012,13 @@ function anisoninfo_display_finallist2($list,$nexturlbase,$selectid = NULL)
     echo "</table>"."\n";
 
 }
-
+function anisoninfolink($getlink,$base){
+    # sample "javascript:link('program','20602')"
+    $ptn='/javascript:link\(\'(\w+)\',\'(\d+)\'\)/i';
+    $replacement='${1}/${2}';
+    
+    $ret = preg_replace($ptn,$replacement,$getlink);
+    if($getlink != $ret) $ret = $ret.'.html';
+    return $base.$ret;
+}
 ?>

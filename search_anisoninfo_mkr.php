@@ -15,6 +15,7 @@ if(array_key_exists("q", $_REQUEST)) {
 $l_fullparam = null;
 if(array_key_exists("url", $_REQUEST)) {
     $l_url = urldecode($_REQUEST["url"]);
+    $l_url = anisoninfolink($l_url,"");
 }
 
 $l_order = null;

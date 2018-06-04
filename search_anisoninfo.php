@@ -122,11 +122,15 @@ if(!isset($l_url)  ) {
 }else {
 // 検索ワード候補取得部分
    $nexturlbase = 'http://anison.info/data/';
-    $list = ansoninfo_gettitlelist($nexturlbase.$l_url,$l_kind,$selectid);
+    $list = ansoninfo_gettitlelist(anisoninfolink($l_url,$nexturlbase),$l_kind,$selectid);
     if(!empty($l_q )){
        print '<h1 > ';
        print $l_q;
        print ' の検索結果 </h1 > ';
+    }
+    
+    if($list === null){
+       print("failed:".anisoninfolink($l_url,$nexturlbase));
     }
     // var_dump($list['searchinfo']);
     // maker表示
