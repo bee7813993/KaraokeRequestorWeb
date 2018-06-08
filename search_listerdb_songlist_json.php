@@ -58,6 +58,7 @@ if(array_key_exists("datestart", $_REQUEST)) {
     $datestart = $_REQUEST["datestart"];
     $startdate_u =  strtotime($datestart);
     $datestart = unixtojd($startdate_u);
+    $datestart -= 2400000.5; // 修正ユリウス日化
 }
 
 $dateend = "";
@@ -65,6 +66,7 @@ if(array_key_exists("dateend", $_REQUEST)) {
     $dateend = $_REQUEST["dateend"];
     $startdate_u =  strtotime($dateend);
     $dateend = unixtojd($startdate_u);
+    $dateend -= 2400000.5; // 修正ユリウス日化
 }
 
 $select_orderby ="";

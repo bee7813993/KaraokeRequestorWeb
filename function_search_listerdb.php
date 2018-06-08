@@ -40,4 +40,12 @@ class ListerDB {
     }
 }
 
+function exceltime2unixtime ($exceltime){
+    return round( ($exceltime - 25569) * 60 * 60 * 24) ;
+    return round( $exceltime * (86400 + 25569) - 32400);
+}
+function unixtime2exceltime ($unixtime){
+    return ($unixtime + 32400) / 86400 + 25569 ;
+}
+
 ?>

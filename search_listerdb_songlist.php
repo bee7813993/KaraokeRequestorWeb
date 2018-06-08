@@ -348,7 +348,11 @@ if( empty($program['song_name']) ){
    $display_songname = basename_jp($program['found_path']);
 }
 print '    <div class="col-xs-12 col-md-12 bg-success" > ';
-print '<a href=/'.create_requestconfirmlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> </a>';
+print '<a href=/'.create_requestconfirmlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
+if(!empty($program['found_comment'])){
+print '<br />【'.$program['found_comment'].'】';
+}
+print '</a>';
 print '    </div>';
 print '    <div class="col-xs-12 col-md-12" >';
 print '    <dl class="dl-horizontal">';
@@ -369,6 +373,20 @@ print '    <dd>';
 print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&lister_dbpath='.$lister_dbpath.'">' . $program['song_artist'] .' </a>';
 // http://localhost/search_listerdb_songlist.php?artist=歌手名&lister_dbpath=List.sqlite3
 print '    </dd>';
+if(!empty($program['found_track'])){
+print '    <dt>';
+print 'トラック情報';
+print '    </dt>';
+print '    <dd>';
+if( $program['found_smart_track_on'] == 1) {
+print '&nbsp;<span class="label label-success" >OnVocal</span>';
+}
+if( $program['found_smart_track_off'] == 1) {
+print '&nbsp;<span class="label label-success" >OffVocal</span>';
+}
+print '&nbsp; 情報：'.$program['found_track'];
+}
+print '    </dd>';
 print '    <div class="col-xs-4 col-md-4 " > ';
 print '    <dt>';
 print 'ファイルサイズ';
@@ -384,6 +402,7 @@ print '    </dt>';
 print '    <dd>';
 $updatetime = cal_from_jd($program['found_last_write_time'],CAL_GREGORIAN);
 //print strftime('%F %X', cal_from_jd($program['found_last_write_time'],CAL_GREGORIAN));
+if($updatetime['year'] < 0 ) $updatetime = cal_from_jd(($program['found_last_write_time']+2400000.5),CAL_GREGORIAN);
 print $updatetime['year'].'/'.$updatetime['month'].'/'.$updatetime['day'];
 print '    </dd>';
 print '    </div > ';
@@ -399,9 +418,9 @@ print '    </div > ';
 print '    <dt>';
 print 'ファイル名';
 print '    </dt>';
-print '    <dd>';
+print '    <dd> <font size="-1" >';
 print $program['found_path'];
-print '    </dd>';
+print '    </font></dd>';
 print '    </dl>';
 print '    </div>';
 print '  </div>';
