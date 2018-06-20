@@ -283,6 +283,10 @@ text-decoration: none;
     white-space: normal;
 }
 
+button.returnbtn {
+    white-space: normal;
+}
+
 @media only screen and (max-width: 560px){
 #table{
 display: block;

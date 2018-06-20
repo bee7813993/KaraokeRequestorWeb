@@ -89,7 +89,7 @@ foreach($limitlist_array["category"] as $category1 ){
     $catid = 'catid_'.$catcount;
     $catcount++;
     print "<h2>";
-    print '<button type="button" class="btn btn-primary btn-block" data-toggle="collapse" data-target="#'.$catid.'">';
+    print '<button type="button" class="btn btn-primary btn-block returnbtn" data-toggle="collapse" data-target="#'.$catid.'">';
     print "<strong>";
     print($category1["name"]);
     print "</strong>";
