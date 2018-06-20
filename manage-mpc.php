@@ -848,7 +848,7 @@ function start_song($db,$id,$addplaytimes = 0){
         return $row;
     }
     
-    $filepath = get_fullfilename($row["fullpath"],$row["songfile"],$filepath_utf8);
+    $filepath = get_fullfilename2($row["fullpath"],$row["songfile"],$filepath_utf8);
     if( $filepath === false){
        logtocmd($word."<start_song>ファイルが見つかりませんでした、Skipします");
        return false;
@@ -1362,7 +1362,7 @@ while(1){
     logtocmd_dbg( 'カラオケ配信ではないファイル再生準備開始'."\n");
        $ft = check_filetype ($db,$l_id);
        if( $ft !== 3){
-           $filepath = get_fullfilename($l_fullpath,$word,$filepath_utf8);
+           $filepath = get_fullfilename2($l_fullpath,$word,$filepath_utf8);
     //logtocmd "Debug filepath: $filepath\r\n";
        }else {
             // logtocmd $l_kind;

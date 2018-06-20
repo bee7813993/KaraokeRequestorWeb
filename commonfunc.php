@@ -1845,4 +1845,116 @@ function checkbox_check($arr,$word){
     }
     return $res;
 }
+
+function getphpversion(){
+  if (!defined('PHP_VERSION_ID')) {
+    $version = explode('.', PHP_VERSION);
+
+    define('PHP_VERSION_ID', ($version[0] * 10000 + $version[1] * 100 + $version[2]));
+  }
+  return PHP_VERSION_ID;
+}
+
+function file_exist_check_japanese_cf($filename){
+  $filename_check = $filename;
+  if(getphpversion() < 70100 ){
+   setlocale(LC_CTYPE, 'Japanese_Japan.932');
+   $filename_check =addslashes($filename);
+  }
+ $fileinfo = @fopen($filename_check,'r');
+ if($fileinfo != FALSE){
+     fclose($fileinfo);
+     // logtocmd 'DEBUG : Success fopen' ;
+     return TRUE;
+ }
+ 
+ return FALSE;
+}
+
+function get_fullfilename2($l_fullpath,$word,&$filepath_utf8){
+    $filepath_utf8 = "";
+    // 引数チェック
+    if(empty($l_fullpath) && empty($word) ) return "";
+    // ファイル名のチェック
+    // logtocmd ("Debug l_fullpath: $l_fullpath\r\n");
+    global $config_ini;
+    $lister_dbpath='';
+    if (file_exist_check_japanese_cf(urldecode($config_ini['listerDBPATH'])) ){
+        $lister_dbpath=urldecode($config_ini['listerDBPATH']);
+    }
+    $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");
+    $fileinfo=file_exist_check_japanese_cf($winfillpath);
+    // logtocmd ("Debug#".$fileinfo);
+    if($fileinfo !== FALSE){
+        $filepath = $winfillpath;
+        $filepath_utf8=$l_fullpath;
+    }else{
+      $filepath = null;
+      // まず フルパス中のbasenameで再検索
+      $songbasename = basename($l_fullpath);
+      // ニコカラりすたーで検索
+      if(!empty($lister_dbpath) ){
+         logtocmd ("fullpass file $l_fullpath is not found. Search from NicokaraLister DB.: $songbasename\r\n");
+         require_once('function_search_listerdb.php');
+         // DB初期化
+         $lister = new ListerDB();
+         $lister->listerdbfile = $lister_dbpath;
+         $listerdb = $lister->initdb();
+         if( $listerdb ) {
+              $select_where = ' WHERE found_path LIKE ' . $listerdb->quote('%'.$songbasename.'%');
+              $sql = 'select * from t_found '. $select_where.';';
+              $alldbdata = $lister->select($sql);
+              if($alldbdata){
+                  $filepath_utf8 = $alldbdata[0]['found_path'];
+                  $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+                  logtocmd ($songbasename.'代わりに「'.$filepath_utf8.'」を再生します'."\n");
+                  return $filepath;
+              }
+              // 曲名で再検索
+              $select_where = ' WHERE found_path LIKE ' . $listerdb->quote('%'.$word.'%');
+              $sql = 'select * from t_found '. $select_where.';';
+              $alldbdata = $lister->select($sql);
+              if($alldbdata){
+                  $filepath_utf8 = $alldbdata[0]['found_path'];
+                  $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+                  logtocmd ($word.'代わりに「'.$filepath_utf8.'」を再生します'."\n");
+                  return $filepath;
+              }
+              
+         }         
+         
+      }
+      // Everythingで検索
+      // logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
+      $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($songbasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+      $json = file_get_html_with_retry($jsonurl, 5);
+      if($json != false){
+          $decode = json_decode($json, true);
+          if($decode != NULL && isset($decode{'results'}{'0'})){
+            if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
+                $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+                $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+            }
+          }
+      }
+      if(empty($filepath)){
+      // 曲名で再検索
+          logtocmd ("fullpass basename $songbasename is not found. Search from Everything DB.: $word\r\n");
+          $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+          // logtocmd_cf $jsonurl;
+          $json = file_get_html_with_retry($jsonurl, 5);
+          $decode = json_decode($json, true);
+          if( !isset($decode{'results'}{'0'}{'name'}) ) return false;
+          $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+          $filepath_utf8= $filepath;
+          $filepath = mb_convert_encoding($filepath,"cp932");
+          logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");
+      }
+    }
+    return $filepath;
+}
+function logtocmd_cf($msg){
+  //print(mb_convert_encoding("$msg\n","SJIS-win"));
+  error_log($msg."\n", 3, 'ykrdebug.log');
+}
 ?>

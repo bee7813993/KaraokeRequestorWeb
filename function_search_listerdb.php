@@ -38,6 +38,18 @@ class ListerDB {
         }
         return $alldbdata;
     }
+    public function startyklistercmd() {
+        $yukalisterpath= 'YukaLister\YukaLister.exe';
+        if (file_exist_check_japanese_cf($yukalisterpath) ){
+            $cmd = 'start "" '.$yukalisterpath;
+            $fp = popen($cmd,'r');
+            pclose($fp);
+        }
+    }
+    public function stopyklistercmd() {
+        $yukalistercmd= 'YukaLister.exe';
+        $cmd = 'taskkill /im "'.$yukalistercmd.'" -f';
+    }
 }
 
 function exceltime2unixtime ($exceltime){

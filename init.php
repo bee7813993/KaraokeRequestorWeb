@@ -1488,7 +1488,32 @@ var xmlhttp = createXMLHttpRequest();
   <p>
     <a href ="online_update.php" class="btn btn-default" > オンラインアップデート画面 </a>
   </p>
-
+<script type="text/javascript">
+function start_yklistercmd(){
+var request = createXMLHttpRequest();
+url="yklister_exec.php?start=1";
+request.open("GET", url, true);
+request.onreadystatechange = function() {
+    if(request.readyState == 4) {
+        if (request.status === 200) {
+        }
+    }
+}
+request.send("");
+}
+</script>
+  <p>
+<?php
+  $yukalisterpath= 'YukaLister\YukaLister.exe';
+  $addattr = '';
+  if (file_exist_check_japanese_cf($yukalisterpath) ){
+  $addattr = ' onClick="start_yklistercmd()"';
+  }else {
+  $addattr = ' disabled ';
+  }
+print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
+?>
+  </p>
 
   <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
 </div>

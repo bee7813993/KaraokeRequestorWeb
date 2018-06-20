@@ -58,6 +58,12 @@ require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
 require_once 'func_audiotracklist.php';
 
+if( empty($lister_dbpath) ){
+    if (file_exist_check_japanese_cf(urldecode($config_ini['listerDBPATH'])) ){
+        $lister_dbpath=urldecode($config_ini['listerDBPATH']);
+    }
+}
+
 $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
 

@@ -1,7 +1,7 @@
 <?php
 require_once('modules/getid3/getid3.php');
 
-function getphpversion(){
+function getphpversion_fa(){
   if (!defined('PHP_VERSION_ID')) {
     $version = explode('.', PHP_VERSION);
 
@@ -54,7 +54,7 @@ function getaudiotracklist($filename){
     $audiotracklist = array();
     $workencode = 'UTF-8';
     
-    if(getphpversion() < 70100 ){
+    if(getphpversion_fa() < 70100 ){
        $workencode = 'SJIS-win';
     }
     $filename_host= mb_convert_encoding($filename, $workencode, 'UTF-8');
@@ -94,7 +94,7 @@ function getaudiotracklist($filename){
 
 function file_exist_check_japanese($filename){
   $filename_check = $filename;
-  if(getphpversion() < 70100 ){
+  if(getphpversion_fa() < 70100 ){
    setlocale(LC_CTYPE, 'Japanese_Japan.932');
    $filename_check =addslashes($filename);
   }
