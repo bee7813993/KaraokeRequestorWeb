@@ -41,6 +41,38 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
     return $nolinkbtn;
 }
 
+//カテゴリーリストの並べ替え
+function sortcategorylist($categorylist){
+    $lister_config = parse_ini_file("listerdb_config.ini", true);
+    if( $lister_config === FALSE ){
+        // ファイルがない場合、DBの順番
+        return $categorylist;
+    }
+    $newcategorylist = array();
+    if(! array_key_exists("category_order",$lister_config) )  return $categorylist;
+    if(! array_key_exists("category_name",$lister_config["category_order"]) )  return $categorylist;
+    
+    foreach($lister_config["category_order"]["category_name"] as $ordercat ){
+        $foundkey = false;
+        foreach($categorylist as $key => $value ){
+           if($value["program_category"] == $ordercat ){
+               $foundkey = $key;
+               break;
+           }
+        }
+        if( $foundkey !== FALSE ){
+            $newcategorylist[] = array("program_category" => $ordercat);
+            $split = array_splice($categorylist,$foundkey,1);
+        }
+    }
+    
+    if(count($categorylist ) > 0 ) {
+        $result = array_merge($newcategorylist,$categorylist);
+        $newcategorylist = $result;
+    }
+    return $newcategorylist;
+}
+
    $errmsg = "";
    $geturl = 'http://localhost/search_listerdb_head_json.php?list=1&lister_dbpath='.$lister_dbpath;
    $categorylist_json = file_get_contents($geturl);
@@ -54,7 +86,7 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
       print $geturl;
       print $categorylist_json;
    }
-
+   $categorylist = sortcategorylist($categorylist);
 
 if(empty($includepage)){
 
@@ -264,6 +296,69 @@ print '</div>';
 
 
 }
+// カテゴリ分けしない全部表示
+  $cur_category = '全部';
+  $url = 'http://localhost/search_listerdb_head_json.php?lister_dbpath='.$lister_dbpath;
+
+print '<h2> ' . $cur_category . '</h2>';
+$headlist_json = file_get_contents($url);
+if(!$headlist_json) {
+    '作品名Headerの取得に失敗';
+    die();
+}else {
+    
+}
+$headlist = json_decode($headlist_json,true);
+
+//var_dump($headlist);
+print '<div class="container bg-info ">';
+print '  <div class="row">';
+$count = 1;
+foreach ($kana_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn center-block" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn center-block btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+print '  <div class="row">';
+$count = 1;
+foreach ($alpha_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+
+print '  <div class="row">';
+$count = 1;
+foreach ($num_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+print '  <div class="row">';
+  print '    <div class="col-xs-4 col-md-2 indexbtn">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
+print '  </div>';
+
+print '</div>';
+
+
 ?>
 </div>
 <?php
