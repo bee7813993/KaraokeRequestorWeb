@@ -41,6 +41,16 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
     return $nolinkbtn;
 }
 
+function headerlistcheck($oneheaderlist,$headerlist){
+   $headercount = 0;
+   foreach($oneheaderlist as $oneheader ){
+       foreach($headerlist as $header ){
+           if($oneheader == $header ) $headercount ++;
+       }
+   }
+   return $headercount;
+}
+
 //カテゴリーリストの並べ替え
 function sortcategorylist($categorylist){
     $lister_config = parse_ini_file("listerdb_config.ini", true);
@@ -48,11 +58,27 @@ function sortcategorylist($categorylist){
         // ファイルがない場合、DBの順番
         return $categorylist;
     }
+    $nullcategory_exists = 0;
+    $allcategory_exists = 0;
+    
     $newcategorylist = array();
     if(! array_key_exists("category_order",$lister_config) )  return $categorylist;
     if(! array_key_exists("category_name",$lister_config["category_order"]) )  return $categorylist;
     
     foreach($lister_config["category_order"]["category_name"] as $ordercat ){
+    // print $ordercat;
+        if($ordercat === "全部" ){
+            $newcategorylist[] = array("program_category" => $ordercat);
+            $allcategory_exists++;
+            continue;
+            
+        }
+        if($ordercat === "その他" ){
+//            $newcategorylist[] = array("program_category" => NULL);
+            $nullcategory_exists++;
+            $ordercat = NULL;
+        }
+
         $foundkey = false;
         foreach($categorylist as $key => $value ){
            if($value["program_category"] == $ordercat ){
@@ -66,9 +92,25 @@ function sortcategorylist($categorylist){
         }
     }
     
+
     if(count($categorylist ) > 0 ) {
         $result = array_merge($newcategorylist,$categorylist);
         $newcategorylist = $result;
+    }
+    if($nullcategory_exists == 0 ) {
+        $foundkey = false;
+        foreach($newcategorylist as $key => $value ){
+           if($value["program_category"] == NULL ){
+               $foundkey = $key;
+               break;
+           }
+        }
+        $split = array_splice($newcategorylist,$foundkey,1);
+        $newcategorylist[] = array("program_category" => NULL);
+    }
+    
+    if($allcategory_exists == 0 ) {
+        $newcategorylist[] = array("program_category" => '全部');
     }
     return $newcategorylist;
 }
@@ -87,6 +129,7 @@ function sortcategorylist($categorylist){
       print $categorylist_json;
    }
    $categorylist = sortcategorylist($categorylist);
+   //var_dump($categorylist);
 
 if(empty($includepage)){
 
@@ -155,12 +198,18 @@ if(!empty($errmsg)){
 }
 
 $nullcategory_exists = 0;
+$allcategory_exists = 0;
 foreach ($categorylist as $category ){
 $cur_category = $category["program_category"];
-$url = 'http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]).'&lister_dbpath='.$lister_dbpath;
+if($category["program_category"] == '全部'){
+  $url = 'http://localhost/search_listerdb_head_json.php?lister_dbpath='.$lister_dbpath;
+  $allcategory_exists ++;
+} else {
+    $url = 'http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]).'&lister_dbpath='.$lister_dbpath;
+}
 if($cur_category === NULL ) {
   $nullcategory_exists++;
-  continue;
+//  continue;
   $cur_category = 'その他';
   $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL'.'&lister_dbpath='.$lister_dbpath;
 }
@@ -168,14 +217,19 @@ if($cur_category === NULL ) {
 print '<h2> ' . $cur_category . '</h2>';
 $headlist_json = file_get_contents($url);
 if(!$headlist_json) {
-    '作品名Headerの取得に失敗';
+print     '作品名Headerの取得に失敗';
+print 'failed: '.$url;
     die();
 }else {
     
 }
 $headlist = json_decode($headlist_json,true);
-
-//var_dump($headlist);
+if($headlist === NULL) {
+print    '作品名Headerの取得に失敗';
+print 'failed: '.$url.$headlist_json;
+    die();
+}
+// var_dump($headlist_json);
 print '<div class="container bg-info ">';
 print '  <div class="row">';
 $count = 1;
@@ -196,6 +250,7 @@ foreach ($kana_list as $kana) {
   }
 }
 print '  </div>';
+if(headerlistcheck($alpha_list,$headlist) != 0 ){
 print '  <hr />';
 print '  <div class="row">';
 $count = 1;
@@ -210,6 +265,8 @@ foreach ($alpha_list as $kana) {
   }
 }
 print '  </div>';
+}
+if(headerlistcheck($num_list,$headlist) != 0 ){
 print '  <hr />';
 print '  <div class="row">';
 $count = 1;
@@ -224,6 +281,7 @@ foreach ($num_list as $kana) {
   }
 }
 print '  </div>';
+}
 print '  <div class="row">';
   print '    <div class="col-xs-4 col-md-2 indexbtn" >'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
 print '  </div>';
@@ -232,7 +290,7 @@ print '</div>';
 }
 
 // その他のカテゴリーは最後
-if($nullcategory_exists > 0 ){
+if($nullcategory_exists == 0 ){
   $cur_category = 'その他';
   $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL'.'&lister_dbpath='.$lister_dbpath;
 
@@ -296,6 +354,8 @@ print '</div>';
 
 
 }
+
+if($allcategory_exists == 0 ){
 // カテゴリ分けしない全部表示
   $cur_category = '全部';
   $url = 'http://localhost/search_listerdb_head_json.php?lister_dbpath='.$lister_dbpath;
@@ -357,7 +417,7 @@ print '  <div class="row">';
 print '  </div>';
 
 print '</div>';
-
+}
 
 ?>
 </div>

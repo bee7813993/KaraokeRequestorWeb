@@ -104,7 +104,7 @@ foreach($newconfig as $key => $value){
            foreach($value as $k => $ordervalue){
              if( ! is_numeric($ordervalue) ) {
                if(empty($search_show_order) ){
-             print "comea";
+//             print "comea";
                    $ordervalue = 1;
                }else {
                    $ordervalue = max($search_show_order) + 1;
@@ -112,14 +112,14 @@ foreach($newconfig as $key => $value){
              }else {
               if(in_array($ordervalue, $search_show_order)){
                 if(empty($search_show_order) ){
-             print "comeb";
+//             print "comeb";
                    $ordervalue = 1;
                 }else {
                    $ordervalue = max($search_show_order) + 1;
                 }
               }
              }
-             print $ordervalue;
+//             print $ordervalue;
              $value[$k] = $ordervalue;
              $search_show_order[] = $ordervalue;
            }
@@ -135,7 +135,7 @@ foreach($newconfig as $key => $value){
                 if(array_key_exists("roomurlshow", $newconfig)){
                   foreach($newconfig["roomurlshow"] as $rv ){
                     if( $rv == $roomcount ){
-                        print "now setting newconfig['roomurlshow'][".$newconfig['roomno'][$roomno].']';
+//                        print "now setting newconfig['roomurlshow'][".$newconfig['roomno'][$roomno].']';
                         $new_roomurlshow += array( $newconfig['roomno'][$roomno] => 1 );
                     }else{
                     }
