@@ -36,6 +36,8 @@ function checktracktype($trackinfo){
     // var_dump($mediainfo );
     
     // video check
+    if(!array_key_exists('audio_channels',$mediainfo )) return false;
+    
     if($mediainfo['audio_channels'] == 0 && $mediainfo['width'] > 0 &&  $mediainfo['height'] > 0 ) {
         return array(1, NULL);
     }
@@ -46,7 +48,7 @@ function checktracktype($trackinfo){
         
         return array(2, $trackname);
     }
-    return 0;
+    return false;
 }
 
 function getaudiotracklist($filename){
@@ -74,7 +76,7 @@ function getaudiotracklist($filename){
     foreach ($tracklist as $trackinfo){
        if($trackinfo['name'] !== 'trak' ) continue;
        $tracktype = checktracktype($trackinfo);
-       if($tracktype[0] == 2 ){
+       if(($tracktype != false) && ($tracktype[0] == 2) ){
            $audiotracklist[] = $tracktype;
        }
     }

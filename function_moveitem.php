@@ -44,6 +44,7 @@ class MoveItem {
    
    /* そのIDの新しい再生順を返す */
    public function get_new_reqorder($id,$notsingstart = 0){
+       $this->allrequest = getallrequest_fromdb($db);
        $beforeturn = array();
        $beforeturn_1 = array();
        $newsinger = $this->get_singer_fromid($id);
@@ -55,6 +56,19 @@ class MoveItem {
        if(count($this->allrequest) == 0){
            return 1;
        }
+       //現在の再生中の順番を探す
+       $playingorder = false;
+       foreach ($this->allrequest as $onerequest ){
+           if($onerequest['nowplaying'] ==='再生中' ){
+               $playingorder = $onerequest['reqorder'];
+               break;
+           }
+           // 再生中がない場合、最初に見つかる未再生の項目にする
+           if($onerequest['nowplaying'] !=='未再生' ){
+               $playingorder = $onerequest['reqorder'];
+           }
+       }
+       
 /**** 作りかけの新しい処理      
        $currentturn = $this->get_insert_turn($this->turnlist,$newsinger,$id);
        $beforesinger = array(); //前のターンリスト
@@ -305,6 +319,12 @@ class MoveItem {
                         $newreqorder = $newreqorder;
              }
              
+           }
+           // 再生中より下にないかチェック
+           if( $playingorder !== false ){
+              if( $playingorder > $newreqorder ) {
+                  return ($playingorder + 1);
+              }
            }
            return $newreqorder;
        }
