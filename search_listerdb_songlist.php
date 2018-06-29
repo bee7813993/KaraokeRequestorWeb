@@ -89,7 +89,13 @@ if(array_key_exists("draw", $_REQUEST)) {
     $draw = $_REQUEST["draw"];
 }
 
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
 
+$linkoption = 'lister_dbpath='.$lister_dbpath;
+if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 
 
@@ -155,7 +161,7 @@ if(!empty($select_orderby) ){
 
 
 if(!empty($url)){
-    $url = add_get_query($url , 'start='.$displayfrom.'&length='.$displaynum.'&lister_dbpath='.$lister_dbpath);
+    $url = add_get_query($url , 'start='.$displayfrom.'&length='.$displaynum.'&'.$linkoption);
     $url = 'http://localhost/search_listerdb_songlist_json.php'.$url;
 }
 ?>
@@ -207,12 +213,12 @@ if(!empty($url)){
 
 
 function create_requestconfirmlink($songinfo) {
-  global $lister_dbpath;
+  global $linkoption;
 
 $fullpath = $songinfo['found_path'];
 $filename = basename_jp($fullpath);
 
-$link = 'request_confirm.php?filename='.urlencode($filename).'&fullpath='.urlencode($fullpath).'&lister_dbpath='.$lister_dbpath;
+$link = 'request_confirm.php?filename='.urlencode($filename).'&fullpath='.urlencode($fullpath).'&'.$linkoption;
 return $link;
 
 }
@@ -234,13 +240,13 @@ shownavigatioinbar('searchreserve.php');
 <div class="container  ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >作品名 </a>
+      <a href="search_listerdb.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >歌手名 </a>
+      <a href="search_listerdb_artist.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >ファイル名 </a>
+      <a href="search_listerdb_filename_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >ファイル名 </a>
     </div>
   </div>
 </div>
@@ -328,6 +334,10 @@ print '</div>';
 if(!empty($lister_dbpath)){
     print '<input type="hidden" name="lister_dbpath" value="'.($lister_dbpath).'" />';
 }
+if(!empty($selectid)){
+    print '<input type="hidden" name="selectid" value="'.($selectid).'" />';
+}
+
 print '<button type="submit" class="btn btn-default mb-2">並び替え</button>';
 print '</form>';
 
@@ -360,7 +370,7 @@ print '    <dt>';
 print '作品名';
 print '    </dt>';
 print '    <dd>';
-print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&lister_dbpath='.$lister_dbpath.'">' . $program['program_name'] .' </a>';
+print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&'.$linkoption.'">' . $program['program_name'] .' </a>';
 if(!empty( $program['song_op_ed'])){
     print '&nbsp;'.$program['song_op_ed'];
 }
@@ -370,7 +380,7 @@ print '    <dt>';
 print '歌い手';
 print '    </dt>';
 print '    <dd>';
-print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&lister_dbpath='.$lister_dbpath.'">' . $program['song_artist'] .' </a>';
+print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&'.$linkoption.'">' . $program['song_artist'] .' </a>';
 // http://localhost/search_listerdb_songlist.php?artist=歌手名&lister_dbpath=List.sqlite3
 print '    </dd>';
 if(!empty($program['found_track'])){
@@ -388,14 +398,17 @@ print '&nbsp; 情報：'.$program['found_track'];
 }
 print '    </dd>';
 print '    <div class="col-xs-4 col-md-4 " > ';
+print '    <dl>';
 print '    <dt>';
 print 'ファイルサイズ';
 print '    </dt>';
 print '    <dd>';
 print formatBytes($program['found_file_size']);
 print '    </dd>';
+print '    </dl>';
 print '    </div > ';
 print '    <div class="col-xs-4 col-md-4 " > ';
+print '    <dl>';
 print '    <dt>';
 print '最終更新日';
 print '    </dt>';
@@ -405,16 +418,19 @@ $updatetime = cal_from_jd($program['found_last_write_time'],CAL_GREGORIAN);
 if($updatetime['year'] < 0 ) $updatetime = cal_from_jd(($program['found_last_write_time']+2400000.5),CAL_GREGORIAN);
 print $updatetime['year'].'/'.$updatetime['month'].'/'.$updatetime['day'];
 print '    </dd>';
+print '    </dl>';
 print '    </div > ';
 print '    <div class="col-xs-4 col-md-4 " > ';
+print '    <dl>';
 print '    <dt>';
 print '動画制作者';
 print '    </dt>';
 print '    <dd>';
-print '<a href ="search_listerdb_songlist.php?worker='.urlencode($program['found_worker']).'&lister_dbpath='.$lister_dbpath.'">' . $program['found_worker'] .' </a>';
+print '<a href ="search_listerdb_songlist.php?worker='.urlencode($program['found_worker']).'&'.$linkoption.'">' . $program['found_worker'] .' </a>';
 // print $program['found_worker'];
 print '    </dd>';
 print '    </div > ';
+print '    </dl>';
 print '    <dt>';
 print 'ファイル名';
 print '    </dt>';
@@ -488,7 +504,7 @@ if( !empty($lister_dbpath) ){
     if(strlen($urlparams) > 0) {
          $urlparams = $urlparams.'&';
     }
-    $urlparams = $urlparams.'lister_dbpath='.$lister_dbpath;
+    $urlparams = $urlparams.$linkoption;
 }
 
 

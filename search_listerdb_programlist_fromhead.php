@@ -33,6 +33,10 @@ if(array_key_exists("length", $_REQUEST)) {
 if(array_key_exists("draw", $_REQUEST)) {
     $draw = $_REQUEST["draw"];
 }
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
 
 // build query url
 $url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath;
@@ -89,6 +93,10 @@ if(!empty($errmsg)){
   die();
 }
 shownavigatioinbar('searchreserve.php');
+
+$linkoption = 'lister_dbpath='.$lister_dbpath;
+if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
+
 // var_dump($programlist);
 print '<div class="container">';
 print '<h2>「'.$header.'」で始まる「'.$category.'」の作品名一覧 </h2>';
@@ -98,7 +106,8 @@ foreach ($programlist['data'] as $program ){
 //var_dump($program);
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
-print '<a class="btn btn-primary btn-block indexbtnstr" href="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath.'">';
+  $linkurl = 'search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.urlencode($category).'&'.$linkoption;
+print '<a class="btn btn-primary btn-block indexbtnstr" href="'.$linkurl.'">';
 print $program['program_name'];
 print '（'.$program['COUNT(program_name)'].'）';
 print '</a>';
@@ -135,7 +144,7 @@ if( !empty($lister_dbpath) ){
     if(strlen($urlparams) > 0) {
          $urlparams = $urlparams.'&';
     }
-    $urlparams = $urlparams.'lister_dbpath='.$lister_dbpath;
+    $urlparams = $urlparams.$linkoption;
 }
 
 

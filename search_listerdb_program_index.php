@@ -11,6 +11,14 @@ $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
 }
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
+
+$linkoption = 'lister_dbpath='.$lister_dbpath;
+if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
+
 
 // アルファベット配列
 $alpha_list = array( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' );
@@ -23,6 +31,7 @@ $kana_list = array( 'あ' ,'い' ,'う' ,'え' ,'お' ,'か' ,'き' ,'く' ,'け
 
 function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
 //    global $lister_dbpath;
+    global $selectid;
     foreach($headerlist['data']  as $key => $value) {
     //print $oneheader.$value["found_head"];
         if( $oneheader === $value["found_head"] ) {
@@ -33,7 +42,9 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
         
             // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
             $whereword = urlencode('found_head='.$value["found_head"]) ;
-            $url='<a class="btn btn-primary center-block indexbtnstr"  href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
+            $linkurl = 'search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath;
+            if(!empty($selectid) ) $linkurl = $linkurl.'&selectid='.$selectid;
+            $url='<a class="btn btn-primary center-block indexbtnstr"  href="'.$linkurl.'"> '. $oneheader .'</a>';
             return $url;
         }
     }
@@ -144,7 +155,7 @@ print <<<EOM
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
 
     <!-- Bootstrap -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -159,8 +170,8 @@ print <<<EOM
     // ここに処理を記述します。
   </script>
   <title>リスターDB検索画面</title>
-  <link type="text/css" rel="stylesheet" href="/css/style.css" />
-  <script type="text/javascript" charset="utf8" src="/js/jquery.js"></script>
+  <link type="text/css" rel="stylesheet" href="css/style.css" />
+  <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
   <script src="js/bootstrap.min.js"></script>
 </head>
 <body>
@@ -171,13 +182,13 @@ shownavigatioinbar('searchreserve.php');
 <div class="container ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb_program_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" >作品名 </a>
+      <a href="search_listerdb_program_index.php?<?php echo $linkoption;?>" class="btn btn-primary center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >歌手名 </a>
+      <a href="search_listerdb_artist.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" style="white-space: normal;">検索（ファイル名など） </a>
+      <a href="search_listerdb_filename_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" style="white-space: normal;">検索（ファイル名など） </a>
     </div>
   </div>
 </div>
@@ -185,9 +196,9 @@ shownavigatioinbar('searchreserve.php');
 
 <h2> 新しく更新された動画 </h2>
 <div class="form-group">
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-1 month"));?>&lister_dbpath=<?php echo $lister_dbpath;?>" role="button">過去1か月</a>
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-2 month"));?>&lister_dbpath=<?php echo $lister_dbpath;?>" role="button">過去2か月</a>
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-3 month"));?>&lister_dbpath=<?php echo $lister_dbpath;?>" role="button">過去3か月</a>
+<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-1 month"));?>&<?php echo $linkoption;?>" role="button">過去1か月</a>
+<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-2 month"));?>&<?php echo $linkoption;?>" role="button">過去2か月</a>
+<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-3 month"));?>&<?php echo $linkoption;?>" role="button">過去3か月</a>
 </div>
 
 <h1> 作品名インデックス検索 </h1>
@@ -358,7 +369,7 @@ print '</div>';
 if($allcategory_exists == 0 ){
 // カテゴリ分けしない全部表示
   $cur_category = '全部';
-  $url = 'http://localhost/search_listerdb_head_json.php?lister_dbpath='.$lister_dbpath;
+  $url = 'http://localhost/search_listerdb_head_json.php?'.$linkoption;
 
 print '<h2> ' . $cur_category . '</h2>';
 $headlist_json = file_get_contents($url);

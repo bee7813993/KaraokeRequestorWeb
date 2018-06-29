@@ -17,6 +17,14 @@ if(array_key_exists("length", $_REQUEST)) {
     $displaynum = $_REQUEST["length"];
 }
 
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
+}
+
+$linkoption = 'lister_dbpath='.$lister_dbpath;
+if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
+
 
 // アルファベット配列
 $alpha_list = array( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' );
@@ -29,6 +37,8 @@ $kana_list = array( 'あ' ,'い' ,'う' ,'え' ,'お' ,'か' ,'き' ,'く' ,'け
 
 function checkandbuild_headerlink( $oneheader, $headerlist ) {
     global $lister_dbpath;
+    global $linkoption;
+    
     foreach($headerlist['data']  as $key => $value) {
     //print $oneheader.$value["found_head"];
         if( $oneheader === $value["found_head"] ) {
@@ -39,7 +49,7 @@ function checkandbuild_headerlink( $oneheader, $headerlist ) {
         
             // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
             $whereword = urlencode('found_head='.$value["found_head"]) ;
-            $url='<a class="btn btn-primary center-block" href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.urlencode($oneheader).'&lister_dbpath='.$lister_dbpath.'"> '. $oneheader .'</a>';
+            $url='<a class="btn btn-primary center-block" href="search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.urlencode($oneheader).'&'.$linkoption.'"> '. $oneheader .'</a>';
             return $url;
         }
     }
@@ -102,13 +112,13 @@ shownavigatioinbar('searchreserve.php');
 <div class="container  ">
   <div class="row ">
     <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb_program_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" >作品名 </a>
+      <a href="search_listerdb_program_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >作品名 </a>
     </div>
     <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-primary center-block" >歌手名 </a>
+      <a href="search_listerdb_artist.php?<?php echo $linkoption;?>" class="btn btn-primary center-block" >歌手名 </a>
     </div>
     <div class="col-xs-4 col-md-4 " >
-      <a href="search_listerdb_filename_index.php?lister_dbpath=<?php echo $lister_dbpath;?>" class="btn btn-default center-block" style="white-space: normal;" >検索 （ファイル名など） </a>
+      <a href="search_listerdb_filename_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" style="white-space: normal;" >検索 （ファイル名など） </a>
     </div>
   </div>
 </div>
@@ -148,10 +158,10 @@ foreach ($artistmany['data'] as $artistname ){
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
 if(empty($artistname['song_artist']) ){
-    print '<a class="btn btn-primary btn-block indexbtnstr" href="search_listerdb_songlist.php?artist='.'ISNULL'.'&lister_dbpath='.$lister_dbpath.'">';
+    print '<a class="btn btn-primary btn-block indexbtnstr" href="search_listerdb_songlist.php?artist='.'ISNULL'.'&'.$linkoption.'">';
     print '【歌手名未登録】'.'（'.$artistname['COUNT'].'）' ;
 }else {
-    print '<a class="btn btn-primary btn-block indexbtnstr_lg" href="search_listerdb_songlist.php?artist='.urlencode($artistname['song_artist']).'&lister_dbpath='.$lister_dbpath.'">';
+    print '<a class="btn btn-primary btn-block indexbtnstr_lg" href="search_listerdb_songlist.php?artist='.urlencode($artistname['song_artist']).'&'.$linkoption.'">';
     print $artistname['song_artist'].'（'.$artistname['COUNT'].'）' ;
 }
 print '</a>';
@@ -190,7 +200,7 @@ if( !empty($lister_dbpath) ){
     if(strlen($urlparams) > 0) {
          $urlparams = $urlparams.'&';
     }
-    $urlparams = $urlparams.'lister_dbpath='.$lister_dbpath;
+    $urlparams = $urlparams.$linkoption;
 }
 
 
