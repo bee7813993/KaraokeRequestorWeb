@@ -11,31 +11,40 @@ $displaynum=50;
 $draw = 1;
 $allcount = 0;
 
+$myrequestarray=array();
+
 $lister_dbpath = 'list\List.sqlite3';
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
     $lister_dbpath = $_REQUEST["lister_dbpath"];
 }
+$myrequestarray["lister_dbpath"] = $lister_dbpath;
+
 
 if(array_key_exists("header", $_REQUEST)) {
     $header = $_REQUEST["header"];
+    $myrequestarray["header"] = $header;
 }
 
 if(array_key_exists("category", $_REQUEST)) {
     $category = $_REQUEST["category"];
+    $myrequestarray["category"] = $category;
 }
 
 if(array_key_exists("program_name", $_REQUEST)) {
     $program_name = $_REQUEST["program_name"];
+    $myrequestarray["program_name"] = $program_name;
 }
 
 $artist = "";
 if(array_key_exists("artist", $_REQUEST)) {
     $artist = $_REQUEST["artist"];
+    $myrequestarray["song_artist"] = $artist;
 }
 
 if(empty($artist)){
 if(array_key_exists("song_artist", $_REQUEST)) {
     $artist = $_REQUEST["song_artist"];
+    $myrequestarray["song_artist"] = $artist;
 }
 }
 
@@ -43,26 +52,31 @@ if(array_key_exists("song_artist", $_REQUEST)) {
 $worker = "";
 if(array_key_exists("worker", $_REQUEST)) {
     $worker = $_REQUEST["worker"];
+    $myrequestarray["worker"] = $worker;
 }
 
 $filename = "";
 if(array_key_exists("filename", $_REQUEST)) {
     $filename = $_REQUEST["filename"];
+    $myrequestarray["filename"] = $filename;
 }
 
 $datestart = "";
 if(array_key_exists("datestart", $_REQUEST)) {
     $datestart = $_REQUEST["datestart"];
+    $myrequestarray["datestart"] = $datestart;
 }
 
 $dateend = "";
 if(array_key_exists("dateend", $_REQUEST)) {
     $dateend = $_REQUEST["dateend"];
+    $myrequestarray["dateend"] = $dateend;
 }
 
 $maker_name = "";
 if(array_key_exists("maker_name", $_REQUEST)) {
     $maker_name = $_REQUEST["maker_name"];
+    $myrequestarray["maker_name"] = $maker_name;
 }
 
 
@@ -203,7 +217,7 @@ if(!empty($url)){
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
 
     <!-- Bootstrap -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -218,8 +232,8 @@ if(!empty($url)){
     // ここに処理を記述します。
   </script>
   <title>作品名リストFromHeader</title>
-  <link type="text/css" rel="stylesheet" href="/css/style.css" />
-  <script type="text/javascript" charset="utf8" src="/js/jquery.js"></script>
+  <link type="text/css" rel="stylesheet" href="css/style.css" />
+  <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
   <script src="js/bootstrap.min.js"></script>
 
 <?php
@@ -538,7 +552,9 @@ print '  <div class="row ">';
 print '    <div class="col-xs-4 col-md-4  ">';
 if($displayfrom > 0 ) {
     $nextstart = (($displayfrom - $displaynum ) <= 0) ? 0 : $displayfrom - $displaynum;
-    print '      <a href="search_listerdb_songlist.php?'.$urlparams.'&start='.$nextstart.'&length='.$displaynum.'" class="btn btn-default center-block" >前の'.$displaynum.'件 </a>';
+    $myrequestarray["start"] = $nextstart;
+    $myrequestarray["length"] = $displaynum;
+    print '      <a href="search_listerdb_songlist.php?'.buildgetquery($myrequestarray).'" class="btn btn-default center-block" >前の'.$displaynum.'件 </a>';
 }
 print '    </div>';
 print '    <div class="col-xs-4 col-md-4 text-center">';
@@ -546,7 +562,9 @@ print $displayfrom.'-'.($displaylast).'（全'.$programlist['recordsTotal'].'件
 print '    </div>';
 print '    <div class="col-xs-4 col-md-4 ">';
 if($programlist['recordsTotal'] > ($displayfrom + $displaynum) ) {
-    print '      <a href="search_listerdb_songlist.php?'.$urlparams.'&start='.($displaynum+$displayfrom).'&length='.$displaynum.'" class="btn btn-default center-block" >次の'.$displaynum.'件</a>';
+    $myrequestarray["start"] = $displaynum+$displayfrom;
+    $myrequestarray["length"] = $displaynum;
+    print '      <a href="search_listerdb_songlist.php?'.buildgetquery($myrequestarray).'" class="btn btn-default center-block" >次の'.$displaynum.'件</a>';
 }
 print '    </div>';
 print '  </div>';
