@@ -18,6 +18,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
 
 $linkoption = 'lister_dbpath='.$lister_dbpath;
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
+require_once 'search_listerdb_commonfunc.php';
 
 
 // アルファベット配列
@@ -52,15 +53,6 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
     return $nolinkbtn;
 }
 
-function headerlistcheck($oneheaderlist,$headerlist){
-   $headercount = 0;
-   foreach($oneheaderlist as $oneheader ){
-       foreach($headerlist as $header ){
-           if($oneheader == $header ) $headercount ++;
-       }
-   }
-   return $headercount;
-}
 
 //カテゴリーリストの並べ替え
 function sortcategorylist($categorylist){
@@ -178,20 +170,9 @@ print <<<EOM
 EOM;
 shownavigatioinbar('searchreserve.php');
 }
+showuppermenu('program_name',$linkoption);
 ?>
-<div class="container ">
-  <div class="row ">
-    <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb_program_index.php?<?php echo $linkoption;?>" class="btn btn-primary center-block" >作品名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >歌手名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" style="white-space: normal;">検索（ファイル名など） </a>
-    </div>
-  </div>
-</div>
+
 <div class="container  ">
 
 <h2> 新しく更新された動画 </h2>

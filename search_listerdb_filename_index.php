@@ -1,5 +1,6 @@
 <?php 
 require_once 'commonfunc.php';
+require_once 'search_listerdb_commonfunc.php';
 print_meta_header();
 if(!isset($includepage) )
 $includepage = "";
@@ -80,21 +81,8 @@ EOM;
 if(empty($filesearch) )
     shownavigatioinbar('searchreserve.php');
 }
+    showuppermenu('filename',$linkoption);
 ?>
-
-<div class="container  ">
-  <div class="row ">
-    <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb_program_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >作品名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >歌手名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4 " >
-      <a href="search_listerdb_filename_index.php?<?php echo $linkoption;?>" class="btn btn-primary center-block" style="white-space: normal;">検索（ファイル名など） </a>
-    </div>
-  </div>
-</div>
 
 <?php
 function printfilenamesearch() {
@@ -138,6 +126,7 @@ print <<<EOM
     <input type="test" name="filename" id="filename" class="form-control" placeholder="ファイル名">
     <div class="form-group"><label>作品名</label><input type="text" class="form-control" name="program_name" value="" /></div>
     <div class="form-group"><label>歌手名</label><input type="text" class="form-control" name="artist" value="" /></div>
+    <div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="" /></div>
     <div class="form-group"><label>動画製作者</label><input type="text" class="form-control" name="worker" value="" /></div>
     <div class="form-group">
     <label>更新日範囲 始め</label>

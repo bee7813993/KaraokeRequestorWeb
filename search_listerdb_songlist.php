@@ -2,6 +2,8 @@
 <head>
 <?php 
 require_once 'commonfunc.php';
+require_once 'search_listerdb_commonfunc.php';
+
 print_meta_header();
 
 $displayfrom=0;
@@ -31,6 +33,13 @@ if(array_key_exists("artist", $_REQUEST)) {
     $artist = $_REQUEST["artist"];
 }
 
+if(empty($artist)){
+if(array_key_exists("song_artist", $_REQUEST)) {
+    $artist = $_REQUEST["song_artist"];
+}
+}
+
+
 $worker = "";
 if(array_key_exists("worker", $_REQUEST)) {
     $worker = $_REQUEST["worker"];
@@ -51,25 +60,40 @@ if(array_key_exists("dateend", $_REQUEST)) {
     $dateend = $_REQUEST["dateend"];
 }
 
+$maker_name = "";
+if(array_key_exists("maker_name", $_REQUEST)) {
+    $maker_name = $_REQUEST["maker_name"];
+}
 
-$select_orderby ="";
+
+$select_orderby_str ="song_name asc, found_file_size desc";
+
+$select_orderby = "";
+/*
 if (isset($_COOKIE['YukariListerDBOrderby'])) {
     $select_orderby = $_COOKIE['YukariListerDBOrderby'];
 }
+*/
 if(array_key_exists("orderby", $_REQUEST)) {
     $select_orderby = $_REQUEST["orderby"];
-    setcookie("YukariListerDBOrderby",  $select_orderby);
+//    setcookie("YukariListerDBOrderby",  $select_orderby);
 }
-
-$select_scending = 'ASC';
+// $select_scending = 'ASC';
 $select_scending ="";
+ /*
 if (isset($_COOKIE['YukariListerDBScending'])) {
     $select_scending = $_COOKIE['YukariListerDBScending'];
 }
+*/
 if(array_key_exists("scending", $_REQUEST)) {
     $select_scending = $_REQUEST["scending"];
-    setcookie("YukariListerDBScending",  $select_scending);
+//    setcookie("YukariListerDBScending",  $select_scending);
 }
+
+if(!empty($select_orderby) && !empty($select_scending) ) {
+   $select_orderby_str = $select_orderby . ' ' . $select_scending;
+}
+
 
 $match = "";
 if(array_key_exists("match", $_REQUEST)) {
@@ -137,6 +161,13 @@ if(!empty($filename) ){
     $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>ファイル名</label><input type="text" class="form-control" name="filename" value="'.($filename).'" /></div>';
 }
 
+if(!empty($maker_name) ){
+    $url = add_get_query($url , 'maker_name='.urlencode($maker_name) );
+    $myformvalue = $myformvalue.'<input type="hidden" name="maker_name" value="'.($maker_name).'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="'.($maker_name).'" /></div>';
+}
+
+
 if(!empty($datestart) ){
     $url = add_get_query($url , 'datestart='.$datestart );
     $myformvalue = $myformvalue.'<input type="hidden" name="datestart" value="'.($datestart).'" />';
@@ -155,8 +186,9 @@ if(!empty($match) ){
 }
 
 
-if(!empty($select_orderby) ){
-    $url = add_get_query($url , 'orderby='.$select_orderby.'&scending='.$select_scending );
+if(!empty($select_orderby_str) ){
+//    $url = add_get_query($url , 'orderby='.$select_orderby_str.'&scending='.$select_scending );
+    $url = add_get_query($url , 'orderby='.urlencode($select_orderby_str) );
 }
 
 
@@ -235,21 +267,10 @@ function selected_check($checkstr, $selectedstr){
 <body>
 <?php
 shownavigatioinbar('searchreserve.php');
+showuppermenu("",$linkoption);
+
 ?>
 
-<div class="container  ">
-  <div class="row ">
-    <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >作品名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >歌手名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4 ">
-      <a href="search_listerdb_filename_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >ファイル名 </a>
-    </div>
-  </div>
-</div>
 <?php
 if(!empty($errmsg)){
   print $errmsg;
@@ -374,6 +395,10 @@ print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program[
 if(!empty( $program['song_op_ed'])){
     print '&nbsp;'.$program['song_op_ed'];
 }
+if(!empty($program['maker_name'])){
+print '&nbsp;&nbsp; <a href ="search_listerdb_songlist.php?maker_name='.urlencode($program['maker_name']).'&'.$linkoption.'">【' . $program['maker_name'] .'】 </a>';
+}
+
 // http://localhost/search_listerdb_songlist.php?program_name=作品名&category=ISNULL&lister_dbpath=List.sqlite3
 print '    </dd>';
 print '    <dt>';

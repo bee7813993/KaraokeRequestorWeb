@@ -69,6 +69,12 @@ if(array_key_exists("dateend", $_REQUEST)) {
     $dateend -= 2400000.5; // 修正ユリウス日化
 }
 
+$maker_name = "";
+if(array_key_exists("maker_name", $_REQUEST)) {
+    $maker_name = $_REQUEST["maker_name"];
+}
+
+
 $select_orderby ="";
 if(array_key_exists("orderby", $_REQUEST)) {
     $select_orderby = $_REQUEST["orderby"];
@@ -191,6 +197,17 @@ if( !empty($artist ) ){
   }
   if(!empty($dateend) ){
       $select_where = add_select_cond($select_where,  ' found_last_write_time <= ' . $listerdb->quote($dateend));
+  }
+
+// 製作会社で検索
+  if(!empty($maker_name) ){
+        if ( $match === 'full' ) {
+            // defaultは部分一致
+            $select_where = add_select_cond($select_where,  ' maker_name = ' . $listerdb->quote($maker_name));
+        }else {
+            $wherefilesearch = make_select_andsearch($listerdb,'maker_name', $maker_name);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+        }
   }
 
 
