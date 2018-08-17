@@ -79,6 +79,12 @@ if(array_key_exists("maker_name", $_REQUEST)) {
     $myrequestarray["maker_name"] = $maker_name;
 }
 
+$tie_up_group_name = "";
+if(array_key_exists("tie_up_group_name", $_REQUEST)) {
+    $tie_up_group_name = $_REQUEST["tie_up_group_name"];
+    $myrequestarray["tie_up_group_name"] = $tie_up_group_name;
+}
+
 
 $select_orderby_str ="song_name asc, found_file_size desc";
 
@@ -179,6 +185,12 @@ if(!empty($maker_name) ){
     $url = add_get_query($url , 'maker_name='.urlencode($maker_name) );
     $myformvalue = $myformvalue.'<input type="hidden" name="maker_name" value="'.($maker_name).'" />';
     $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="'.($maker_name).'" /></div>';
+}
+
+if(!empty($tie_up_group_name) ){
+    $url = add_get_query($url , 'tie_up_group_name='.urlencode($tie_up_group_name) );
+    $myformvalue = $myformvalue.'<input type="hidden" name="tie_up_group_name" value="'.($tie_up_group_name).'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>シリーズ</label><input type="text" class="form-control" name="tie_up_group_name" value="'.($tie_up_group_name).'" /></div>';
 }
 
 
@@ -412,6 +424,11 @@ if(!empty( $program['song_op_ed'])){
 if(!empty($program['maker_name'])){
 print '&nbsp;&nbsp; <a href ="search_listerdb_songlist.php?maker_name='.urlencode($program['maker_name']).'&'.$linkoption.'">【' . $program['maker_name'] .'】 </a>';
 }
+
+if(!empty($program['tie_up_group_name'])){
+print '&nbsp;&nbsp; <a href ="search_listerdb_songlist.php?tie_up_group_name='.urlencode($program['tie_up_group_name']).'&'.$linkoption.'">[' . $program['tie_up_group_name'] .'] </a>シリーズ';
+}
+
 
 // http://localhost/search_listerdb_songlist.php?program_name=作品名&category=ISNULL&lister_dbpath=List.sqlite3
 print '    </dd>';

@@ -825,7 +825,7 @@ if(!array_key_exists('searchitem_o', $config_ini )){
   </table>
 
   <div class="form-group">
-    <h4  > ニコカラりすたーDBファイルパス  </h4>
+    <h4  > りすたーDBファイルパス  </h4>
     <?php 
         $listerDBPATH = 'list\List.sqlite3';
         if(array_key_exists("listerDBPATH",$config_ini)) {

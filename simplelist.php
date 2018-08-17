@@ -19,7 +19,9 @@
   </head>
   <body>
 <?php
-include 'kara_config.php';
+require_once('commonfunc.php');
+require_once('function_search_listerdb.php');
+
 $usesimplelist = false;
 if(array_key_exists("usesimplelist",$config_ini)){
     if($config_ini["usesimplelist"]==1 ){
@@ -32,38 +34,157 @@ if( $usesimplelist == false ){
     print "</html>";
     die();
 }
-?>
-  <div class="container">
-  <table class="table table-hover table-striped">
-  <thead  class="thead-inverse" >
-    <tr>
-      <th>順番</th>
-      <th>曲名（ファイル名）</th>
-      <th>歌った人</th>
-      <th>コメント</th>
-    </tr>
-  </thead>
-    <tbody>
-<?php
-//die();
 
+function getsonginfofromfilename($filename){
+  global $config_ini;
+
+  if(empty($filename)) return false;
+  // ListerDBのファイルの設定があるかどうかのチェック
+  $res = array_key_exists("listerDBPATH",$config_ini);
+  if ($res === false ) {
+     print( "config not found");
+     return false;
+  }
+  // ListerDBのファイルのがあるかどうかのチェック
+  if(!file_exists($config_ini["listerDBPATH"]) ){
+     print( "Listerdb file :". $config_ini['listerDBPATH']." not found");
+     return false;
+  }
+
+  $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
+  // DB初期化
+  $lister = new ListerDB();
+  $lister->listerdbfile = $lister_dbpath;
+  $listerdb = $lister->initdb();
+  if( !$listerdb ) {
+       return false;
+  }
+
+  $select_where = 'WHERE found_path LIKE '. $listerdb ->quote('%'.$filename.'%');
+  $sql = 'SELECT * FROM t_found '. $select_where.';';
+  @$songdbdata = $lister->select($sql);
+  if(!$songdbdata){
+//     print $sql;
+     return false;
+}
+return $songdbdata;
+}
+
+// 1つでもlisterDBに登録情報があるかどうかのチェック
+function listerdbfoundcheck($alldata){
+   foreach($alldata as $row){
+     $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
+     $songdataarray = $songdataarray_all[0];
+     if(!empty($songdataarray["song_name"]) ) {
+       return true;
+     }
+   }
+   return false;
+}
+?>
+
+<?php
+date_default_timezone_set('Asia/Tokyo');
 if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
     print('Locale not found: ja_JP.UTF-8');
     exit(1);
 }
-date_default_timezone_set('Asia/Tokyo');
 
 $sql = "SELECT * FROM requesttable WHERE nowplaying != '未再生' ORDER BY reqorder ASC";
 $select = $db->query($sql);
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 $select->closeCursor();
 
+if(listerdbfoundcheck($allrequest) ){
+// りすたーDBに登録された情報が1つでもある
+
+  print<<<EOL
+  <div class="container">
+  <table class="table table-hover table-striped">
+  <thead  class="thead-inverse" >
+    <tr>
+      <th>順番</th>
+      <th>曲名（ファイル名）</th>
+      <th>作品名</th>
+      <th>歌手名</th>
+      <th>歌った人</th>
+      <th>コメント</th>
+    </tr>
+  </thead>
+    <tbody>
+EOL;
+
   $num = 1;
   $csvarray = array();
   
   /* print csv header */
-  $csvarray[] = array( "順番" , "曲名（ファイル名）" ,  "歌った人" ,  "コメント" );
+  $csvarray[] = array( "順番" , "曲名（ファイル名）" , "作品名" ,"歌手名" , "歌った人" ,  "コメント" );
   
+  foreach($allrequest as $row){
+    $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
+    $songdataarray = $songdataarray_all[0];
+    print '<tr>';
+    print ' <td>';
+    print   $num;
+    print ' </td>';
+    print ' <td>';
+    if(!empty($songdataarray["song_name"] ) ){
+    print $songdataarray["song_name"] ;
+    }else {
+    print   $row["songfile"];
+    }
+    if(!empty($songdataarray["found_comment"] ) ){
+    print '【'.$songdataarray["found_comment"].'】' ;
+    }    
+if($row['keychange'] > 0){
+    print '<br><div style="text-align: right;;font-weight: normal;"> キー変更：+'.$row['keychange'].'</div>';
+}else if($row['keychange'] < 0){
+    print '<br><div style="text-align: right;;font-weight: normal;"> キー変更： '.$row['keychange'].'</div>';
+}
+    print ' </td>';
+    print ' <td>';
+    if(!empty($songdataarray["program_name"] ) ){
+    print $songdataarray["program_name"] ;
+    }else {
+    }
+    if(!empty($songdataarray["song_op_ed"] ) ){
+    print '&nbsp;'.$songdataarray["song_op_ed"] ;
+    }    print ' </td>';
+    print ' <td>';
+    if(!empty($songdataarray["song_artist"] ) ){
+    print $songdataarray["song_artist"] ;
+    }else {
+    }
+    print ' </td>';
+    print ' <td>';
+    print   $row["singer"];
+    print ' </td>';
+    print ' <td>';
+    print   $row["comment"];
+    print ' </td>';
+    print '</tr>';
+    //$csvarray[] = array( $num, $row["songfile"] ,  $row["singer"] ,  $row["comment"] );
+    $num++;
+  }
+}else {
+
+  print<<<EOL
+  <div class="container">
+  <table class="table table-hover table-striped">
+  <thead  class="thead-inverse" >
+    <tr>
+      <th>順番</th>
+      <th>曲名（ファイル名）</th>
+      <th>作品名</th>
+      <th>歌手名</th>
+      <th>歌った人</th>
+      <th>コメント</th>
+    </tr>
+  </thead>
+    <tbody>
+EOL;
+  $num = 1;
+
   foreach($allrequest as $row){
     print '<tr>';
     print ' <td>';
@@ -88,6 +209,8 @@ if($row['keychange'] > 0){
     $num++;
   }
 
+
+}
 ?>
     </tbody>
     </table>

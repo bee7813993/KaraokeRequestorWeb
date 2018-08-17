@@ -74,6 +74,11 @@ if(array_key_exists("maker_name", $_REQUEST)) {
     $maker_name = $_REQUEST["maker_name"];
 }
 
+$tie_up_group_name = "";
+if(array_key_exists("tie_up_group_name", $_REQUEST)) {
+    $tie_up_group_name = $_REQUEST["tie_up_group_name"];
+}
+
 
 $select_orderby ="";
 if(array_key_exists("orderby", $_REQUEST)) {
@@ -206,6 +211,17 @@ if( !empty($artist ) ){
             $select_where = add_select_cond($select_where,  ' maker_name = ' . $listerdb->quote($maker_name));
         }else {
             $wherefilesearch = make_select_andsearch($listerdb,'maker_name', $maker_name);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+        }
+  }
+
+// 製作会社で検索
+  if(!empty($tie_up_group_name) ){
+        if ( $match === 'full' ) {
+            // defaultは部分一致
+            $select_where = add_select_cond($select_where,  ' tie_up_group_name = ' . $listerdb->quote($tie_up_group_name));
+        }else {
+            $wherefilesearch = make_select_andsearch($listerdb,'tie_up_group_name', $tie_up_group_name);
             $select_where = add_select_cond($select_where, $wherefilesearch);
         }
   }

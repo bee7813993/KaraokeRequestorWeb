@@ -127,6 +127,7 @@ print <<<EOM
     <div class="form-group"><label>作品名</label><input type="text" class="form-control" name="program_name" value="" /></div>
     <div class="form-group"><label>歌手名</label><input type="text" class="form-control" name="artist" value="" /></div>
     <div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="" /></div>
+    <div class="form-group"><label>作品シリーズ名</label><input type="text" class="form-control" name="tie_up_group_name" value="" /></div>
     <div class="form-group"><label>動画製作者</label><input type="text" class="form-control" name="worker" value="" /></div>
     <div class="form-group">
     <label>更新日範囲 始め</label>

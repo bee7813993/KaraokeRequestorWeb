@@ -47,6 +47,11 @@ switch ($target){
         $columnname = "song_ruby";
         $searchitem = '曲名';
     break;
+    case "tie_up_group_name":
+        $column = 'substr(tie_up_group_ruby, 1, 1)';
+        $columnname = "tie_up_group_ruby";
+        $searchitem = 'シリーズ';
+    break;
     default:
         $column = 'substr(maker_ruby, 1, 1)';
         $columnname = "maker_ruby";
@@ -245,7 +250,7 @@ print '  </div>';
 print '</div>';
 
 if($target == "song_artist" ){
-  print '<a href="search_listerdb_artist.php" class="btn btn-primary" > 歌手名の多い順リスト </a>';
+  print '<a href="search_listerdb_artist.php" class="btn btn-primary" > 登録数の歌手名リスト </a>';
 }
 
 
