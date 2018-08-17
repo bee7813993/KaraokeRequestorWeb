@@ -74,6 +74,11 @@ if(array_key_exists("maker_name", $_REQUEST)) {
     $maker_name = $_REQUEST["maker_name"];
 }
 
+$song_name = "";
+if(array_key_exists("song_name", $_REQUEST)) {
+    $song_name = $_REQUEST["song_name"];
+}
+
 $tie_up_group_name = "";
 if(array_key_exists("tie_up_group_name", $_REQUEST)) {
     $tie_up_group_name = $_REQUEST["tie_up_group_name"];
@@ -214,8 +219,19 @@ if( !empty($artist ) ){
             $select_where = add_select_cond($select_where, $wherefilesearch);
         }
   }
+  
+// 曲名で検索
+  if(!empty($song_name) ){
+        if ( $match === 'full' ) {
+            // defaultは部分一致
+            $select_where = add_select_cond($select_where,  ' song_name = ' . $listerdb->quote($song_name));
+        }else {
+            $wherefilesearch = make_select_andsearch($listerdb,'song_name', $song_name);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+        }
+  }
 
-// 製作会社で検索
+// シリーズで検索
   if(!empty($tie_up_group_name) ){
         if ( $match === 'full' ) {
             // defaultは部分一致

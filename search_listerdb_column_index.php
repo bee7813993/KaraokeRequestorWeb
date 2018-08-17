@@ -250,7 +250,7 @@ print '  </div>';
 print '</div>';
 
 if($target == "song_artist" ){
-  print '<a href="search_listerdb_artist.php" class="btn btn-primary" > 登録数の歌手名リスト </a>';
+  print '<a href="search_listerdb_artist.php" class="btn btn-primary" > 登録数の多い順歌手名リスト </a>';
 }
 
 

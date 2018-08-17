@@ -1,6 +1,7 @@
 <?php 
 
 require_once 'commonfunc.php';
+require_once 'search_listerdb_commonfunc.php';
 
 $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("lister_dbpath", $_REQUEST)) {
@@ -106,22 +107,11 @@ print_meta_header();
 <body>
 <?php
 shownavigatioinbar('searchreserve.php');
+showuppermenu('song_artist',$linkoption);
 ?>
 <div class="container  ">
 
-<div class="container  ">
-  <div class="row ">
-    <div class="col-xs-4 col-md-4  ">
-      <a href="search_listerdb_program_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" >作品名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4">
-      <a href="search_listerdb_artist.php?<?php echo $linkoption;?>" class="btn btn-primary center-block" >歌手名 </a>
-    </div>
-    <div class="col-xs-4 col-md-4 " >
-      <a href="search_listerdb_filename_index.php?<?php echo $linkoption;?>" class="btn btn-default center-block" style="white-space: normal;" >検索 （ファイル名など） </a>
-    </div>
-  </div>
-</div>
+
 
 <h1> 歌手名検索 </h1>
 

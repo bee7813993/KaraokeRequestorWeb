@@ -55,7 +55,7 @@ print <<<EOM
   <meta http-equiv="Content-Script-Type" content="text/javascript" />
 
     <!-- Bootstrap -->
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -70,8 +70,8 @@ print <<<EOM
     // ここに処理を記述します。
   </script>
   <title>リスターDB検索画面</title>
-  <link type="text/css" rel="stylesheet" href="/css/style.css" />
-  <script type="text/javascript" charset="utf8" src="/js/jquery.js"></script>
+  <link type="text/css" rel="stylesheet" href="css/style.css" />
+  <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
   <script src="js/bootstrap.min.js"></script>
 
 

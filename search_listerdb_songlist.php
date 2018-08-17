@@ -79,6 +79,12 @@ if(array_key_exists("maker_name", $_REQUEST)) {
     $myrequestarray["maker_name"] = $maker_name;
 }
 
+$song_name = "";
+if(array_key_exists("song_name", $_REQUEST)) {
+    $song_name = $_REQUEST["song_name"];
+    $myrequestarray["song_name"] = $song_name;
+}
+
 $tie_up_group_name = "";
 if(array_key_exists("tie_up_group_name", $_REQUEST)) {
     $tie_up_group_name = $_REQUEST["tie_up_group_name"];
@@ -185,6 +191,12 @@ if(!empty($maker_name) ){
     $url = add_get_query($url , 'maker_name='.urlencode($maker_name) );
     $myformvalue = $myformvalue.'<input type="hidden" name="maker_name" value="'.($maker_name).'" />';
     $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="'.($maker_name).'" /></div>';
+}
+
+if(!empty($song_name) ){
+    $url = add_get_query($url , 'song_name='.urlencode($song_name) );
+    $myformvalue = $myformvalue.'<input type="hidden" name="song_name" value="'.($song_name).'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>曲名</label><input type="text" class="form-control" name="song_name" value="'.($song_name).'" /></div>';
 }
 
 if(!empty($tie_up_group_name) ){
