@@ -24,14 +24,14 @@ class ListerDB {
            print 'DB未初期化 : '.$this->ListerDBFD . "<br/>";
         }
         $select = $this->ListerDBFD->query($sql);
-        if(!$select){
+        if($select === false){
             print_r($this->ListerDBFD->errorInfo());
             print $sql;
             return false;
         }
         $alldbdata = $select->fetchAll(PDO::FETCH_ASSOC);
         $select->closeCursor();
-        if(!$alldbdata){
+        if($alldbdata === false){
             print_r($this->ListerDBFD->errorInfo());
             print $sql;
             return $alldbdata;
