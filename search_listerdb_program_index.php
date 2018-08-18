@@ -206,7 +206,6 @@ if($cur_category === NULL ) {
   $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL'.'&lister_dbpath='.$lister_dbpath;
 }
 
-print '<h2> ' . $cur_category . '</h2>';
 $headlist_json = file_get_contents($url);
 if(!$headlist_json) {
 print     '作品名Headerの取得に失敗';
@@ -221,7 +220,9 @@ print    '作品名Headerの取得に失敗';
 print 'failed: '.$url.$headlist_json;
     die();
 }
+if(empty($headlist['data'])) continue;
 // var_dump($headlist_json);
+print '<h2> ' . $cur_category . '</h2>';
 print '<div class="container bg-info ">';
 print '  <div class="row">';
 $count = 1;
@@ -286,7 +287,6 @@ if($nullcategory_exists == 0 ){
   $cur_category = 'その他';
   $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL'.'&lister_dbpath='.$lister_dbpath;
 
-print '<h2> ' . $cur_category . '</h2>';
 $headlist_json = file_get_contents($url);
 if(!$headlist_json) {
     '作品名Headerの取得に失敗';
@@ -295,6 +295,8 @@ if(!$headlist_json) {
     
 }
 $headlist = json_decode($headlist_json,true);
+if(!empty($headlist['data'])) {
+print '<h2> ' . $cur_category . '</h2>';
 
 //var_dump($headlist);
 print '<div class="container bg-info ">';
@@ -345,6 +347,7 @@ print '  </div>';
 print '</div>';
 
 
+}
 }
 
 if($allcategory_exists == 0 ){

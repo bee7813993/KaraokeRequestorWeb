@@ -417,7 +417,7 @@ if( empty($program['song_name']) ){
    $display_songname = basename_jp($program['found_path']);
 }
 print '    <div class="col-xs-12 col-md-12 bg-success" > ';
-print '<a href=/'.create_requestconfirmlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
+print '<a href='.create_requestconfirmlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
 if(!empty($program['found_comment'])){
 print '<br />【'.$program['found_comment'].'】';
 }

@@ -29,7 +29,7 @@ if(!empty($list)) {
 
   $sql = 'select DISTINCT program_category from t_found ;';
   $alldbdata =  $lister->select($sql);
-  if(!$alldbdata){
+  if($alldbdata === false){
        print 'failed :'.$sql;
        die();
   }
@@ -50,7 +50,7 @@ if(!empty($list)) {
 
   $sql = 'select DISTINCT found_head from t_found '. $select_where.';';
   $alldbdata =  $lister->select($sql);
-  if(!$alldbdata){
+  if($alldbdata === false){
      print $sql;
      die();
   }

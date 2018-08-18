@@ -45,13 +45,13 @@ function getsonginfofromfilename($filename){
      print( "config not found");
      return false;
   }
+  $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
   // ListerDBのファイルのがあるかどうかのチェック
-  if(!file_exists($config_ini["listerDBPATH"]) ){
-     print( "Listerdb file :". $config_ini['listerDBPATH']." not found");
+  if(!file_exists($lister_dbpath) ){
+     print( "Listerdb file :". $lister_dbpath." not found");
      return false;
   }
 
-  $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
   // DB初期化
   $lister = new ListerDB();
   $lister->listerdbfile = $lister_dbpath;

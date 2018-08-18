@@ -259,7 +259,7 @@ if(!empty($select_where) ){
 // 総件数のみ取得
 $sql = 'SELECT COUNT(*) FROM t_found '. $select_where.';';
 $alldbdata = $lister->select($sql);
-if(!$alldbdata){
+if($alldbdata === false){
      print $sql;
      die();
 }
@@ -280,7 +280,7 @@ if($totalrequest == 0 ){
 $sql = 'select * from t_found '. $select_where_limit.';';
 // print $sql;
 $alldbdata = $lister->select($sql);
-if(!$alldbdata){
+if($alldbdata === false){
      print $sql;
 }
 

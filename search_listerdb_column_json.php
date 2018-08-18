@@ -75,7 +75,7 @@ if (!empty($select_orderby) ){
 $countword = 'COUNT(DISTINCT  '.$column.')';
 $sql = 'SELECT '.$countword.' FROM t_found '. $select_where.';';
 $alldbdata = $lister->select($sql);
-if(!$alldbdata){
+if($alldbdata === false){
      print $sql;
      die();
 }
@@ -89,7 +89,7 @@ $totalrequest = $alldbdata[0][$countword];
 
 $sql = 'select '.$column.',COUNT(found_path) from t_found '. $select_where_limit.';';
 $alldbdata = $lister->select($sql);
-if(!$alldbdata){
+if($alldbdata === false){
      print $sql;
 }
 
