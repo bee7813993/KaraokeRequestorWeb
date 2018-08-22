@@ -45,7 +45,7 @@ if( strcmp($col, 'CUSTOM') == 0 ){
 if(!empty($nm) ) {
    $msg = $msg . ' by'.$nm;
 }
-$output=commentpost_v2($nm,$col,$size,$msg,$commenturl);
+$output=commentpost_v3($nm,$col,$size,$msg,$commenturl);
 
 
 if($output === false){

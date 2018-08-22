@@ -11,41 +11,35 @@ if(!isset($room)){
     if(array_key_exists("r", $_REQUEST)) {$room = $_REQUEST['r']; }
 }
 $room = stripslashes($room);
+if(!isset($cmsver)){ 
+    $cmsver="";
+    if(array_key_exists("v", $_REQUEST)) {$cmsver = $_REQUEST['v']; }
+}
 ?>
 
 <?php
-	//MYSQLに接続
-	
 	if(strlen($room) === 0){
 	   print('no room number');
 	   die();
 	}
 	
-//	$link = mysql_connect('接続先のMySQLサーバ', 'username', 'password');
-//	$db_selected = mysql_select_db('使用するDB名', $link);
     commentdb_init($commentdb,'comment.db');
     
 	$sql = "select * from dkniko where chk = 0 and room = '".$room."' order by regdate limit 1";
 	$select  = $commentdb->query($sql);
 	$allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 	$select->closeCursor();
-//	$result_flag = mysql_query($sql);
-	$buf = "";	
-
-//	if (mysql_num_rows($result_flag) != 0) {
+	$buf = "";
 	if (count($allrequest) != 0) {
-		// $row = mysql_fetch_assoc($result_flag);
-		// $buf = $row['size'].$row['col'].mb_convert_encoding($row['msg'], "SJIS", "auto");
-		$buf = $allrequest[0]['size'].$allrequest[0]['col'].mb_convert_encoding($allrequest[0]['msg'], "SJIS", "auto")."\t";
-		$sql = "update dkniko set chk = 1 where id=".$allrequest[0]['id'];
-		// $result_flag = mysql_query($sql);
-		$result_flag  = $commentdb->exec($sql);
-		
-	}else{
-		$buf = "nothing";
+		$buf = make_comment_buf($allrequest[0], $cmsver);
 	}
 
-	//print $buf.'                    <body><div id="xdomain_ad_468x60"></div>';
+	if (strlen($buf) === 0) {
+		$buf = "nothing";
+	} else {
+		$sql = "update dkniko set chk = 1 where id=".$allrequest[0]['id'];
+		$result_flag  = $commentdb->exec($sql);
+	}
+
 	print $buf;
-	//mysql_close($link);
 ?>

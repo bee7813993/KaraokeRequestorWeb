@@ -58,10 +58,26 @@ $p = stripslashes($p);
 //	$db_selected = mysql_select_db('使用するDB名', $link);
 
 	if($msg != ""){
-	//MYSQLに接続
+		// コメビューに POST 送信
+		$allrequest = array(
+			'size' => $sz,
+			'col' => $col,
+			'msg' => $msg,
+			'regdate' => date('Y-m-d H:i:s'),
+		);
+		$buf = make_comment_buf($allrequest, '3');
+		$data = array(
+			'Comment' => $buf,
+		);
+		$content = http_build_query($data);
+		$options = array('http' => array(
+			'method' => 'POST',
+			'content' => $content
+		));
+		file_get_contents('http://127.0.0.1:13581/', false, stream_context_create($options));
+		
+		//MYSQLに接続
 		$sql = "insert into dkniko values('".$room."','".$nm."',". $commentdb->quote($msg).",$sz,'".$col."',datetime('now', 'localtime'),0,null)";
-//		$sql = "insert into dkniko values('".$room."','".$nm."','".$msg."',$sz,'".$col."',datetime('now', 'localtime'),0,null)";
-//		$result_flag = mysql_query($sql);
         $result_flag = $commentdb->exec($sql);
         if( $result_flag === FALSE){
           print "コメント追加失敗  <br>\n";

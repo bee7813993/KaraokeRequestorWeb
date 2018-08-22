@@ -1392,8 +1392,7 @@ while(1){
                    $col = 'FFFFFF';
                    $size = 3;
 
-                   //commentpost_v1($nm,$col,$msg,$commenturl);
-                   commentpost_v2($nm,$col,$size,$msg,$commenturl);
+                   commentpost_v3($nm,$col,$size,$msg,$commenturl);
                }
            }
            if(mb_strstr($l_kind,'動画_別プ') != FALSE){

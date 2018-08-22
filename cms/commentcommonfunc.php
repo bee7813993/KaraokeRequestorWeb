@@ -29,4 +29,18 @@ if ($stmt === false ){
 
 }
 
+function make_comment_buf($data, $cmsver)
+{
+	$buf = "";
+
+	if (strlen($cmsver) === 0) {
+		$buf = $data['size'].$data['col'].mb_convert_encoding($cmsver.$data['msg'], "SJIS", "auto")."\t";
+	} else if ($cmsver == '3') {
+		$buf = 'X3'.$data['size'].$data['col'].$data['regdate']
+				.mb_convert_encoding($data['msg'], "UTF-8", "auto")."\t";
+	}
+	
+	return $buf;
+}
+
 ?>

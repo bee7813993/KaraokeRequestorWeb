@@ -64,7 +64,7 @@ die();
                   $col = '808080';
                   $size = 3;
                   
-                  commentpost_v2($nm,$col,$size,$msg,$commenturl);
+                  commentpost_v3($nm,$col,$size,$msg,$commenturl);
             //      print("コメントポスト実行");
             }else{
             //      print("コメントポスト実行されず $commenturl,$playingid,$l_id ");
