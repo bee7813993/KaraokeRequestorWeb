@@ -103,7 +103,74 @@ if(array_key_exists("match", $_REQUEST)) {
     $match = $_REQUEST["match"];
 }
 
+
+
+// 項目名とその読み仮名の対応表
+$column_kanatable = array();
+$column_kanatable['song_name'] = 'song_ruby';
+$column_kanatable['song_artist'] = 'found_artist_ruby';
+$column_kanatable['found_lyrist_name'] = 'found_lyrist_ruby';
+$column_kanatable['found_composer_name'] = 'found_composer_ruby';
+$column_kanatable['found_arranger_name'] = 'found_arranger_ruby';
+$column_kanatable['program_name'] = 'tie_up_ruby';
+$column_kanatable['tie_up_group_name'] = 'tie_up_group_ruby';
+$column_kanatable['maker_name'] = 'maker_ruby';
+
+
+function mb_strtr() {
+    $args = func_get_args();
+    if (!is_array($args[1])) {
+        list($str, $from, $to) = $args;
+        $encoding = isset($args[3]) ? $args[3] : mb_internal_encoding(); 
+        $replace_pairs = array();
+        $len = mb_strlen($from, $encoding);
+        for ($i =0; $i < $len; $i++) {
+            $k = mb_substr($from, $i, 1, $encoding);
+            $v = mb_substr($to, $i, 1, $encoding);
+            $replace_pairs[$k] = $v;
+        }
+        return $replace_pairs ? mb_strtr($str, $replace_pairs, $encoding) : $str;
+    }
+    list($str, $replace_pairs) = $args;
+    $tmp = mb_regex_encoding();
+    mb_regex_encoding(isset($args[2]) ? $args[2] : mb_internal_encoding());
+    uksort($replace_pairs, function ($a, $b) {
+        return strlen($b) - strlen($a);
+    });
+    $from = $to = array();
+    foreach ($replace_pairs as $f => $t) {
+        if ($f !== '') {
+            $from[] = '(' . mb_ereg_replace('[.\\\\+*?\\[^$(){}|]', '\\\\0', $f) . ')';
+            $to[] = $t;
+        }
+    }
+    $pattern = implode('|', $from);
+    $ret = mb_ereg_replace_callback($pattern, function ($from) use ($to) {
+        foreach ($to as $i => $t) {
+            if ($from[$i + 1] !== '') {
+                return $t;
+            }
+        }
+    }, $str);
+    mb_regex_encoding($tmp);
+    return $ret;
+}
+
+// 濁点外し＆小文字大文字化
+function kanabuild ($str) {
+   $from = 'ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポァィゥェォャュョッ';
+   $to   = 'カキクケコサシスセソタチツテトハヒフヘホハヒフヘホアイウエオヤユヨツ';
+   
+   //ひらがなをカタカナに
+   $temp = mb_convert_kana($str,"C");
+   //濁点、小文字をカタカナに
+   $temp = mb_strtr($temp,$from,$to);
+   return $temp;
+}
+
 function make_select_andsearch($db, $clm, $str){
+    global $column_kanatable;
+    
     $str_splitbase = mb_convert_kana($str ,'s');
     $str_list = explode(' ', $str_splitbase );
     $wherefilesearch = "";
@@ -111,7 +178,12 @@ function make_select_andsearch($db, $clm, $str){
         if(!empty($wherefilesearch) ){
             $wherefilesearch = $wherefilesearch . ' AND ';
         }
-        $wherefilesearch = $wherefilesearch . ' '. $clm .' LIKE ' .  $db->quote('%'.$searchstr.'%');
+        $wherefilesearch = $wherefilesearch . ' ('. $clm .' LIKE ' .  $db->quote('%'.$searchstr.'%');
+        if(!empty($column_kanatable[$clm]) ){
+            $wherefilesearch = $wherefilesearch . ' OR ';
+            $wherefilesearch = $wherefilesearch . ' '. $column_kanatable[$clm] .' LIKE ' .  $db->quote('%'.kanabuild($searchstr).'%');
+        }
+        $wherefilesearch = $wherefilesearch . ') ';
     }
     return $wherefilesearch;
 }

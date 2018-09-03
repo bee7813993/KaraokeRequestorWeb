@@ -74,6 +74,7 @@ return $songdbdata;
 function listerdbfoundcheck($alldata){
    foreach($alldata as $row){
      $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
+     if( $songdataarray_all === false ) return false;
      $songdataarray = $songdataarray_all[0];
      if(!empty($songdataarray["song_name"]) ) {
        return true;
@@ -90,12 +91,22 @@ if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
     exit(1);
 }
 
-$sql = "SELECT * FROM requesttable WHERE nowplaying != '未再生' ORDER BY reqorder ASC";
-$select = $db->query($sql);
-$allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
-$select->closeCursor();
+        $sql = "SELECT * FROM requesttable WHERE nowplaying != '未再生' ORDER BY reqorder ASC";
+        $select = $db->query($sql);
+        $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
+        $select->closeCursor();
 
-if(listerdbfoundcheck($allrequest) ){
+
+$listerdbenabled = false;
+if(array_key_exists("listerDBPATH",$config_ini) ) {
+    $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
+    if(!file_exists($lister_dbpath) ){
+        $listerdbenabled = true;
+    }
+}
+
+
+if($listerdbenabled && listerdbfoundcheck($allrequest) ){
 // りすたーDBに登録された情報が1つでもある
 
   print<<<EOL
