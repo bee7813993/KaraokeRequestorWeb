@@ -171,16 +171,62 @@ EOM;
 shownavigatioinbar('searchreserve.php');
 }
 showuppermenu('program_name',$linkoption);
+
+function printprogramnamesearch() {
+  global $lister_dbpath;
+  global $selectid;
+  
+print <<<EOM
+<h1> 作品名検索 </h1>
+<div class="bg-info" >
+
+<form action="search_listerdb_songlist.php" method="GET" >
+  <div class="form-group">
+    <label>検索ワード (作品名)</label>
+    <input type="test" name="program_name" id="program_name" class="form-control" placeholder="ファイル名の一部">
+EOM;
+if(!empty($lister_dbpath))
+    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
+if(!empty($selectid))
+    print '<input type="hidden" name="selectid" value='.$selectid.'" />';
+print <<<EOM
+  </div>
+  <div class="form-group">
+    <div class="btn-group" data-toggle="buttons">
+      <label class="btn btn-default active">
+        <input type="radio" name="match" value="part" autocomplete="off" checked=""> 部分一致
+      </label>
+      <label class="btn btn-default ">
+        <input type="radio" name="match" value="full" autocomplete="off"> 完全一致
+      </label>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-default">検索</button>
+</form>
+
+</div>
+EOM;
+}
+
+
 ?>
 
 <div class="container  ">
+ <div class="form-group">
+  <lavel class=" control-label"> <strong > 新しく更新された動画 </strong>
+  </lavel> 
+  <div class=" btn-toolbar">
+   <div class=" btn-group">
+    <a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-1 month"));?>&<?php echo $linkoption;?>" role="button">過去1か月</a>
+    <a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-2 month"));?>&<?php echo $linkoption;?>" role="button">過去2か月</a>
+    <a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-3 month"));?>&<?php echo $linkoption;?>" role="button">過去3か月</a>
+   </div>
+  </div>
+ </div>
 
-<h2> 新しく更新された動画 </h2>
-<div class="form-group">
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-1 month"));?>&<?php echo $linkoption;?>" role="button">過去1か月</a>
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-2 month"));?>&<?php echo $linkoption;?>" role="button">過去2か月</a>
-<a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-3 month"));?>&<?php echo $linkoption;?>" role="button">過去3か月</a>
-</div>
+<?php 
+printprogramnamesearch();
+?>
 
 <h1> 作品名インデックス検索 </h1>
 <?php
@@ -416,6 +462,8 @@ print '</div>';
 
 ?>
 </div>
+
+
 <?php
 if(empty($includepage)){
 print <<<EOM

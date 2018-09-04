@@ -86,7 +86,7 @@ $totalrequest = $alldbdata[0]["COUNT(DISTINCT program_name)"];
 
 
 
-$sql = 'select DISTINCT program_name , COUNT(program_name) from t_found  '. $select_where.' GROUP BY program_name '.$select_limit.';';
+$sql = 'select DISTINCT program_name , COUNT(DISTINCT song_name) from t_found  '. $select_where.' GROUP BY program_name '.$select_limit.';';
 // $sql = 'select program_name , COUNT(program_name) from t_found WHERE found_head =\'あ\' AND program_category = \'ゲーム\' GROUP BY program_name LIMIT 50 OFFSET 0 ;';
 //$sql = 'select DISTINCT program_name  from t_found '. $select_where_limit.';';
 $alldbdata =  $lister->select($sql);

@@ -18,6 +18,7 @@ if(array_key_exists("header", $_REQUEST)) {
     $header = $_REQUEST["header"];
 }
 
+$category='';
 if(array_key_exists("category", $_REQUEST)) {
     $category = $_REQUEST["category"];
 }
@@ -109,7 +110,7 @@ print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
   $linkurl = 'search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.urlencode($category).'&'.$linkoption;
 print '<a class="btn btn-primary btn-block indexbtnstr" href="'.$linkurl.'">';
 print $program['program_name'];
-print '（'.$program['COUNT(program_name)'].'）';
+print '（'.$program['COUNT(DISTINCT song_name)'].'）';
 print '</a>';
 print '    </div>';
 print '    </div>';

@@ -60,6 +60,25 @@ if(array_key_exists("searchitem", $_REQUEST)) {
     $myrequestarray["searchitem"] = $searchitem;
 }
 
+$maker_name = "";
+if(array_key_exists("maker_name", $_REQUEST)) {
+    $maker_name = $_REQUEST["maker_name"];
+    $myrequestarray["maker_name"] = $maker_name;
+}
+
+$tie_up_group_name = "";
+if(array_key_exists("tie_up_group_name", $_REQUEST)) {
+    $tie_up_group_name = $_REQUEST["tie_up_group_name"];
+    $myrequestarray["tie_up_group_name"] = $tie_up_group_name;
+}
+
+$nextsonglistflg = true;
+if( $searchcolumn == 'maker_name' || $searchcolumn == 'tie_up_group_name' ) {
+   // 制作会社検索かシリーズ検索の場合、次は作品名リストになる処理をここに書く
+    $nextsonglistflg = false;
+    if(!empty($maker_name)) {
+    }
+}
 
 
 // build query url
@@ -72,11 +91,18 @@ $getqueries['sqlwhere'] = $sqlwhere;
 if(!empty($category)){
 $getqueries['category'] = $category;
 }
+if(!empty($maker_name)){
+$getqueries['maker_name'] = $maker_name;
+}
+if(!empty($tie_up_group_name)){
+$getqueries['tie_up_group_name'] = $tie_up_group_name;
+}
 $getqueries['lister_dbpath'] = $lister_dbpath;
 
 
 buildgetquery($getqueries);
 $url = 'http://localhost/search_listerdb_column_json.php?'.buildgetquery($getqueries);
+//print $url;
 ?>
 
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -135,21 +161,38 @@ if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 // var_dump($columnlist);
 print '<div class="container">';
-if(!empty($searchitem)){
-print '<h2>「'.$header.'」で始まる「'.$searchitem.'」一覧 </h2>';
-}else {
-print '<h2>「'.$header.'」で始まる項目名一覧 </h2>';
+$searchtitle = "";
+if(!empty($header)){
+  $searchtitle = $searchtitle.'「'.$header.'」で始まる';
 }
+if(!empty($tie_up_group_name)){
+  $searchtitle = $searchtitle.'「'.$tie_up_group_name.'」の作品';
+}
+if(!empty($maker_name)){
+  $searchtitle = $searchtitle.'「'.$maker_name.'」の作品';
+}
+if(!empty($searchitem)){
+  $searchtitle = $searchtitle.'「'.$searchitem.'」一覧';
+}else {
+  $searchtitle = $searchtitle.'一覧';
+}
+print '<h2>'. $searchtitle . '</h2>';
+
 print '  <div class="row bg-info">';
 foreach ($columnlist['data'] as $column ){
 
 //var_dump($column);
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
+if($nextsonglistflg){
   $linkurl = 'search_listerdb_songlist.php?'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&category='.urlencode($category).'&'.$linkoption;
+}else {
+  $sqlwhere=$searchcolumn.'=\''.$column[$searchcolumn].'\'';
+  $linkurl = 'search_listerdb_column_list.php?searchcolumn=program_name&'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&sqlwhere='.urlencode($sqlwhere).'&'.'&category='.urlencode($category).'&'.$linkoption;
+}
 print '<a class="btn btn-primary btn-block indexbtnstr" href="'.$linkurl.'">';
 print $column[$searchcolumn];
-print '（'.$column['COUNT(found_path)'].'）';
+print '（'.$column['COUNT(DISTINCT song_name)'].'）';
 print '</a>';
 print '    </div>';
 print '    </div>';

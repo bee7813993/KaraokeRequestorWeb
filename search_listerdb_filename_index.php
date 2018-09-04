@@ -94,7 +94,7 @@ print <<<EOM
 <h1> ファイル名検索 </h1>
 <div class="bg-info" >
 
-<form action="search_listerdb_songlist.php" method="GET" >
+<form action="search_listerdb_filelist.php" method="GET" >
   <div class="form-group">
     <label>検索ワード （ファイル名の一部）</label>
     <input type="test" name="filename" id="filename" class="form-control" placeholder="ファイル名の一部">

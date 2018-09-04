@@ -87,7 +87,8 @@ $totalrequest = $alldbdata[0][$countword];
 
 
 
-$sql = 'select '.$column.',COUNT(found_path) from t_found '. $select_where_limit.';';
+$sql = 'select '.$column.',COUNT(DISTINCT song_name) from t_found '. $select_where_limit.';';
+//print $sql;
 $alldbdata = $lister->select($sql);
 if($alldbdata === false){
      print $sql;

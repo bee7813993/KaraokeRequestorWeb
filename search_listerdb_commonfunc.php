@@ -77,7 +77,7 @@ print 'btn-primary';
 }else {
 print 'btn-default';
 }
-print ' center-block" >検索 （ファイル名など） </a>';
+print ' center-block" >検索等</a>';
 print '    </div>';
 print '  </div>';
 print '</div>';

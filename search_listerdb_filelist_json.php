@@ -315,7 +315,7 @@ if( !empty($artist ) ){
   }
 
 //add groupby 
-$select_where = $select_where . ' GROUP BY song_name';
+$select_where = $select_where . ' GROUP BY song_name,found_file_size ';
 
 
 if (!empty($select_orderby) ){
@@ -327,14 +327,12 @@ if(!empty($select_where) ){
 }
 
 
-
     $select_where_limit = $select_where . ' LIMIT '. $displaynum .' OFFSET '. $displayfrom;
 
 $sqlall = 'select * from t_found '. $select_where;
 // 総件数のみ取得
-// $sql = 'SELECT COUNT(*) FROM t_found '. $select_where.';';
+//$sql = 'SELECT COUNT(*) FROM t_found '. $select_where.';';
 $sql = 'SELECT COUNT(*) FROM ( '.$sqlall .' ) dummy ;';
-//     print $sql;
 $alldbdata = $lister->select($sql);
 if($alldbdata === false){
      print $sql;
@@ -354,13 +352,12 @@ if($totalrequest == 0 ){
 
 
 
-$sql = 'select *, COUNT(*) from t_found '. $select_where_limit.';';
+$sql = 'select * from t_found '. $select_where_limit.';';
 // print $sql;
 $alldbdata = $lister->select($sql);
 if($alldbdata === false){
      print $sql;
 }
-//var_dump($alldbdata);
 
 $returnarray = array( "draw" => $draw, "recordsTotal" => $totalrequest,  "recordsFiltered" => $totalrequest, "data" => $alldbdata);
 $json = json_encode($returnarray,JSON_PRETTY_PRINT);

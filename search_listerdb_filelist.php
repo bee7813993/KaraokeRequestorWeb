@@ -232,7 +232,7 @@ if(!empty($select_orderby_str) ){
 
 if(!empty($url)){
     $url = add_get_query($url , 'start='.$displayfrom.'&length='.$displaynum.'&'.$linkoption);
-    $url = 'http://localhost/search_listerdb_songlist_json.php'.$url;
+    $url = 'http://localhost/search_listerdb_filelist_json.php'.$url;
 }
 ?>
 
@@ -263,7 +263,9 @@ if(!empty($url)){
 <?php
    $errmsg = "";
    
+// print $url;
    $programlist_json = file_get_contents($url);
+// print $programlist_json;
    if(!$programlist_json) {
       $errmsg = '検索結果リストの取得に失敗';
    }else {
@@ -282,44 +284,6 @@ if(!empty($url)){
    }  
 
 
-function create_filelistlink($songinfo) {
-  global $linkoption;
-
-$querystr = "";
-
-$clm = 'song_name';
-
-if(!empty($songinfo[$clm])){
-   if( !empty($querystr)){
-   $querystr = $querystr .'&';
-   }
-   $querystr = $querystr . $clm . '=' . urlencode($songinfo[$clm]);
-}
-
-$clm = 'program_name';
-
-if(!empty($songinfo[$clm])){
-   if( !empty($querystr)){
-   $querystr = $querystr .'&';
-   }
-   $querystr = $querystr . $clm . '=' . urlencode($songinfo[$clm]);
-}
-
-   if( !empty($querystr)){
-   $querystr = $querystr .'&';
-   }
-   $querystr = $querystr . $linkoption;
-
-
-$fullpath = $songinfo['found_path'];
-$filename = basename_jp($fullpath);
-
-
-$link = 'search_listerdb_filelist.php?'.$querystr;
-return $link;
-
-}
-
 function create_requestconfirmlink($songinfo) {
   global $linkoption;
 
@@ -330,7 +294,6 @@ $link = 'request_confirm.php?filename='.urlencode($filename).'&fullpath='.urlenc
 return $link;
 
 }
-
 
 function selected_check($checkstr, $selectedstr){
    if( $checkstr === $selectedstr ) {
@@ -354,7 +317,7 @@ if(!empty($errmsg)){
   die();
 }
 
-// var_dump($programlist);
+//var_dump($programlist);
 print '<div class="container">';
 if( !empty($program_name ) && !empty($category ) ) {
     print '<h2>「'.$category.'」「'.$program_name.'」の曲一覧 </h2>';
@@ -365,7 +328,7 @@ if( !empty($program_name ) && !empty($category ) ) {
 
 // 再検索フォーム設置 
 print '<div class="bg-info">';
-print '<form method="GET" action="search_listerdb_songlist.php" >';
+print '<form method="GET" action="search_listerdb_filelist.php" >';
 print $myformvalue_shown;
 print '<div class="form-group">';
 if(!empty($myformvalue_shown)) {
@@ -399,7 +362,7 @@ if($programlist['recordsTotal'] == 0) {
     die();
 }
 
-print '<form method="GET" action="search_listerdb_songlist.php" class="form-inline" >';
+print '<form method="GET" action="search_listerdb_filelist.php" class="form-inline" >';
 print '<div class="form-group">';
 print '<label for="orderby">項目</label>';
 print '<select class="form-control" id="orderby"  name="orderby" >';
@@ -449,21 +412,6 @@ print $displayfrom.'-'.($displaylast).'（全'.$programlist['recordsTotal'].'件
 print '    </div>';
 print '  <div class="row">';
 foreach ($programlist['data'] as $program ){
-$display_songname = $program['song_name'];
-
-print '    <div class="col-xs-12 col-md-6" >';
-print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
-  $linkurl = create_filelistlink($program);
-print '<a class="btn btn-primary btn-block indexbtnstr" href="'.$linkurl.'">';
-print $display_songname;
-print '（'.$program['COUNT(*)'].'）';
-print '</a>';
-print '    </div>';
-print '    </div>';
-
-
-/**** [OLD] Display All song Info 
-
 print '<div class="container bg-info">';
 //var_dump($program);
 $display_songname = $program['song_name'];
@@ -471,7 +419,7 @@ if( empty($program['song_name']) ){
    $display_songname = basename_jp($program['found_path']);
 }
 print '    <div class="col-xs-12 col-md-12 bg-success" > ';
-print '<a href='.create_filelistlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
+print '<a href='.create_requestconfirmlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
 if(!empty($program['found_comment'])){
 print '<br />【'.$program['found_comment'].'】';
 }
@@ -488,22 +436,25 @@ if(!empty( $program['song_op_ed'])){
     print '&nbsp;'.$program['song_op_ed'];
 }
 if(!empty($program['maker_name'])){
-print '&nbsp;&nbsp; <a href ="search_listerdb_songlist.php?maker_name='.urlencode($program['maker_name']).'&'.$linkoption.'">【' . $program['maker_name'] .'】 </a>';
+$sqlwhere = 'maker_name=\''.$program['maker_name'].'\'';
+print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&maker_name='.urlencode($program['maker_name']).'&'.$linkoption.'">【' . $program['maker_name'] .'】 </a>';
 }
 
 if(!empty($program['tie_up_group_name'])){
-print '&nbsp;&nbsp; <a href ="search_listerdb_songlist.php?tie_up_group_name='.urlencode($program['tie_up_group_name']).'&'.$linkoption.'">[' . $program['tie_up_group_name'] .'] </a>シリーズ';
+$sqlwhere = 'tie_up_group_name=\''.$program['tie_up_group_name'].'\'';
+print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&tie_up_group_name='.urlencode($program['tie_up_group_name']).'&'.$linkoption.'">[' . $program['tie_up_group_name'] .'] </a>シリーズ';
+//print '&nbsp;&nbsp; <a href ="search_listerdb_filelist.php?tie_up_group_name='.urlencode($program['tie_up_group_name']).'&'.$linkoption.'">[' . $program['tie_up_group_name'] .'] </a>シリーズ';
 }
 
 
-// http://localhost/search_listerdb_songlist.php?program_name=作品名&category=ISNULL&lister_dbpath=List.sqlite3
+// http://localhost/search_listerdb_filelist.php?program_name=作品名&category=ISNULL&lister_dbpath=List.sqlite3
 print '    </dd>';
 print '    <dt>';
 print '歌い手';
 print '    </dt>';
 print '    <dd>';
 print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&'.$linkoption.'">' . $program['song_artist'] .' </a>';
-// http://localhost/search_listerdb_songlist.php?artist=歌手名&lister_dbpath=List.sqlite3
+// http://localhost/search_listerdb_filelist.php?artist=歌手名&lister_dbpath=List.sqlite3
 print '    </dd>';
 if(!empty($program['found_track'])){
 print '    <dt>';
@@ -548,7 +499,7 @@ print '    <dt>';
 print '動画制作者';
 print '    </dt>';
 print '    <dd>';
-print '<a href ="search_listerdb_songlist.php?worker='.urlencode($program['found_worker']).'&'.$linkoption.'">' . $program['found_worker'] .' </a>';
+print '<a href ="search_listerdb_filelist.php?worker='.urlencode($program['found_worker']).'&'.$linkoption.'">' . $program['found_worker'] .' </a>';
 // print $program['found_worker'];
 print '    </dd>';
 print '    </div > ';
@@ -562,7 +513,7 @@ print '    </font></dd>';
 print '    </dl>';
 print '    </div>';
 print '  </div>';
-********/
+
 }
 print '  </div>';
 
@@ -637,7 +588,7 @@ if($displayfrom > 0 ) {
     $nextstart = (($displayfrom - $displaynum ) <= 0) ? 0 : $displayfrom - $displaynum;
     $myrequestarray["start"] = $nextstart;
     $myrequestarray["length"] = $displaynum;
-    print '      <a href="search_listerdb_songlist.php?'.buildgetquery($myrequestarray).'" class="btn btn-default center-block" >前の'.$displaynum.'件 </a>';
+    print '      <a href="search_listerdb_filelist.php?'.buildgetquery($myrequestarray).'" class="btn btn-default center-block" >前の'.$displaynum.'件 </a>';
 }
 print '    </div>';
 print '    <div class="col-xs-4 col-md-4 text-center">';
@@ -647,7 +598,7 @@ print '    <div class="col-xs-4 col-md-4 ">';
 if($programlist['recordsTotal'] > ($displayfrom + $displaynum) ) {
     $myrequestarray["start"] = $displaynum+$displayfrom;
     $myrequestarray["length"] = $displaynum;
-    print '      <a href="search_listerdb_songlist.php?'.buildgetquery($myrequestarray).'" class="btn btn-default center-block" >次の'.$displaynum.'件</a>';
+    print '      <a href="search_listerdb_filelist.php?'.buildgetquery($myrequestarray).'" class="btn btn-default center-block" >次の'.$displaynum.'件</a>';
 }
 print '    </div>';
 print '  </div>';

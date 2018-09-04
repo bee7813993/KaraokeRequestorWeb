@@ -74,7 +74,7 @@ return $songdbdata;
 function listerdbfoundcheck($alldata){
    foreach($alldata as $row){
      $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-     if( $songdataarray_all === false ) return false;
+     // if( $songdataarray_all === false ) return false;
      $songdataarray = $songdataarray_all[0];
      if(!empty($songdataarray["song_name"]) ) {
        return true;
@@ -100,11 +100,10 @@ if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
 $listerdbenabled = false;
 if(array_key_exists("listerDBPATH",$config_ini) ) {
     $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
-    if(!file_exists($lister_dbpath) ){
+    if(file_exists($lister_dbpath) ){
         $listerdbenabled = true;
     }
 }
-
 
 if($listerdbenabled && listerdbfoundcheck($allrequest) ){
 // りすたーDBに登録された情報が1つでもある
@@ -155,7 +154,11 @@ if($row['keychange'] > 0){
     print ' </td>';
     print ' <td>';
     if(!empty($songdataarray["program_name"] ) ){
-    print $songdataarray["program_name"] ;
+      if( $songdataarray["program_name"] == "その他" ) {
+        print '-';
+      } else {
+        print $songdataarray["program_name"] ;
+      }
     }else {
     }
     if(!empty($songdataarray["song_op_ed"] ) ){
@@ -186,8 +189,6 @@ if($row['keychange'] > 0){
     <tr>
       <th>順番</th>
       <th>曲名（ファイル名）</th>
-      <th>作品名</th>
-      <th>歌手名</th>
       <th>歌った人</th>
       <th>コメント</th>
     </tr>
