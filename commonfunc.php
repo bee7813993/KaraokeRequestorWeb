@@ -958,19 +958,100 @@ function singerfromip($rt)
     return " ";
 }
 
-function commentpost_v3($nm,$col,$size,$msg,$commenturl)
+
+
+function commentpost_v1($nm,$col,$msg,$commenturl)
 {
-    $commentmax=256;
-    if(mb_strlen($msg) > $commentmax){
-         $msg = mb_substr($msg,0,$commentmax);
+
+    $commentmax=18;
+    $msgarray = array();
+    if(mb_strlen($msg) >= $commentmax){
+         $lfarray = explode("\n", $msg);
+         $lfarray = array_map('trim', $lfarray);
+         $lfarray = array_filter($lfarray, 'strlen');
+         $lfarray = array_values($lfarray);
+         foreach($lfarray as $msgline)
+         {
+            for($i=0; ;$i=$i+$commentmax)
+            {
+                $tmpmsgline = mb_substr($msgline,$i,$commentmax);
+                $msgarray[] = $tmpmsgline;
+//                print mb_strlen($tmpmsgline);
+                if(mb_strlen($tmpmsgline) < $commentmax){
+                print mb_strlen($tmpmsgline);
+                    break;
+                }
+            }
+         }
+    }else {
+        $msgarray[] = $msg;
     }
+    
+    foreach($msgarray as $msgline)
+    {
+    
+    $POST_DATA = array(
+        'nm' => $nm,
+        'col' => $col,
+        'msg' => $msgline
+
+    );
+    //    print "$commenturl";
+
+    $curl=curl_init($commenturl);
+    curl_setopt($curl,CURLOPT_POST, TRUE);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
+    $output= curl_exec($curl);
+   
+    usleep(100000);
+    }
+
+    if($output === false){
+        return false;
+    }else{
+        return true;
+    }    
+}
+
+function commentpost_v2($nm,$col,$size,$msg,$commenturl)
+{
+
+    $commentmax=18;
+    $msgarray = array();
+    if(mb_strlen($msg) >= $commentmax){
+         $lfarray = explode("\n", $msg);
+         $lfarray = array_map('trim', $lfarray);
+         $lfarray = array_filter($lfarray, 'strlen');
+         $lfarray = array_values($lfarray);
+         foreach($lfarray as $msgline)
+         {
+            for($i=0; ;$i=$i+$commentmax)
+            {
+                $tmpmsgline = mb_substr($msgline,$i,$commentmax);
+                $msgarray[] = $tmpmsgline;
+//                print mb_strlen($tmpmsgline);
+                if(mb_strlen($tmpmsgline) < $commentmax){
+                print mb_strlen($tmpmsgline);
+                    break;
+                }
+            }
+         }
+    }else {
+        $msgarray[] = $msg;
+    }
+    
+    foreach($msgarray as $msgline)
+    {
     
     $POST_DATA = array(
         'nm' => $nm,
         'col' => $col,
         'sz' => $size,
-        'msg' => $msg
+        'msg' => $msgline
+
     );
+    //    print "$commenturl";
 
     $curl=curl_init(($commenturl));
     curl_setopt($curl,CURLOPT_POST, TRUE);
@@ -978,6 +1059,9 @@ function commentpost_v3($nm,$col,$size,$msg,$commenturl)
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
    
+    usleep(100000);
+    }
+
     if($output === false){
         return false;
     }else{
@@ -1696,6 +1780,13 @@ function make_preview_modal($filepath, $modalid) {
      $previewsource = $previewsource.'<source src="'.$previewurl.'" '.$filetype.' />';
    }
 
+$modaljs='<script>
+$(function () {
+$(\'#'.$modalid.'\').on(\'hidden.bs.modal\', function (event) {
+var myPlayer = videojs("preview_video_'.$modalid.'a");
+myPlayer.pause();
+});
+});</script>';
 
   $modaldg='<!-- 2.モーダルの配置 -->'.
 '<div class="modal" id="'.$modalid.'" tabindex="-1">'.
@@ -1708,7 +1799,7 @@ function make_preview_modal($filepath, $modalid) {
         <h4 class="modal-title" id="modal-label">動画プレビュー</h4>
       </div>
       <div class="modal-body">
-        <video id="preview_video" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}" width="90%" height="90%" >'.$previewsource.'
+        <video id="preview_video_'.$modalid.'a" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}" style="width: 320px; height: 180px;" >'.$previewsource.'
         </video>
       </div>
       <div class="modal-footer">
@@ -1718,7 +1809,7 @@ function make_preview_modal($filepath, $modalid) {
   </div>
 </div>';
 
-return $button."\n".$modaldg;
+return $button."\n".$modaljs.$modaldg;
 
 }
 

@@ -147,8 +147,6 @@ if(array_key_exists("selectid", $_REQUEST)) {
 $linkoption = 'lister_dbpath='.$lister_dbpath;
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
-
-
 function add_get_query($baseurl,$addquery){
     if( empty($baseurl) ){
         return '?'.$addquery;
@@ -156,6 +154,220 @@ function add_get_query($baseurl,$addquery){
         return $baseurl.'&'.$addquery;
     }
 }
+
+
+function isSocketListening($host, $port, $timeout = 30){
+	$sock = @fsockopen($host, $port, $errno, $errstr, $timeout);
+	if(!$sock){
+		return false;
+	}
+	fclose($sock);
+	return true;
+}
+
+// Listerのプレビューポートが空いているかの確認
+$listerpreviewportenable = false;
+$listerpreviewportenable = (!check_access_from_online()  && isSocketListening($_SERVER["SERVER_NAME"],13582,1));
+
+function make_preview_modal_listerdb($filepath, $modalid) {
+  global $_SERVER;
+  
+  $dlpathinfo = pathinfo($filepath);
+  if(array_key_exists('extension',$dlpathinfo)){
+  $filetype = '';
+  if($dlpathinfo['extension'] === 'mp4'){
+      $filetype = ' type="video/mp4"';
+  }else if($dlpathinfo['extension'] === 'flv'){
+      $filetype = ' type="video/x-flv"';
+  }else if($dlpathinfo['extension'] === 'avi'){
+      $filetype = ' type="video/x-msvideo"';
+      return null;
+  }else {
+      return null;
+      return "この動画形式はプレビューできません";
+  }  
+  }else {
+      return null;
+  }
+//var_dump ($_SERVER);
+//print  $_SERVER["SERVER_NAME"];
+  $previewpath[] = "http://" . $_SERVER["SERVER_NAME"] . ":13582/" . urlencode($filepath);
+//print $previewpath[0];
+  $filepath_url = str_replace('\\', '/', $filepath);
+  $previewpath[] = "http://" . $_SERVER["SERVER_NAME"] . ":13582/" . ($filepath_url);
+  $button='<a href="#" data-toggle="modal" class="previewmodallink btn btn-default" data-target="#'.$modalid.'" > プレビュー </a>';
+  
+  $previewsource = "";
+   foreach($previewpath as $previewurl ){
+     $previewsource = $previewsource.'<source src="'.$previewurl.'" '.$filetype.' />';
+   }
+
+$modaljs='<script>
+$(function () {
+$(\'#'.$modalid.'\').on(\'hidden.bs.modal\', function (event) {
+var myPlayer = videojs("preview_video_'.$modalid.'a");
+myPlayer.pause();
+//var v = document.getElementById("preview_video_'.$modalid.'a");
+//v.pause();
+});
+});</script>';
+
+  $modaldg='<!-- 2.モーダルの配置 -->'.
+'<div class="modal" id="'.$modalid.'" tabindex="-1">'.
+'  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">
+         <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="modal-label">動画プレビュー</h4>
+      </div>
+      <div class="modal-body">
+        <video id="preview_video_'.$modalid.'a" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}"  style="width: 320px; height: 180px;" >'.$previewsource.'
+        </video>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>';
+
+return $button."\n".$modaljs.$modaldg;
+
+}
+
+function get_first_clminfo($filelist , $clm){
+
+    $ret = "";
+    foreach($filelist as $fileinfo){
+        if(!empty($fileinfo[$clm])) return $fileinfo[$clm];
+    }
+    return $ret;
+
+}
+
+function filelistfromsong($filelist){
+    global $linkoption ;
+    global $listerpreviewportenable;
+  print '<div class="divid0 panel panel-primary"> ';
+    print '<div class="panel-heading " ><strong>';
+      print $filelist[0]['song_name'];
+    print "</strong></div>";
+    print '<div class="panel-body bg-info">';
+      print '<div class="container">';
+        print '<p>';
+      $str =   get_first_clminfo($filelist,'song_artist');
+      if(!empty($str)){
+          print '<strong>';
+      print '歌手名：';
+          print '</strong>';
+      print '<a href ="search_listerdb_songlist.php?artist='.urlencode($str).'&'.$linkoption.'">' . $str .' </a>';
+      }
+      $str =   get_first_clminfo($filelist,'program_name');
+      if(!empty($str)){
+      print '&nbsp;';
+          print '<strong>';
+      print '作品名：';
+          print '</strong>';
+      print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($str).'&'.$linkoption.'">' . $str .' </a>';
+      }
+      $str =   get_first_clminfo($filelist,'song_op_ed');
+      if(!empty($str)){
+      print '&nbsp;';
+      print $str;
+      }
+      $str =   get_first_clminfo($filelist,'maker_name');
+      if(!empty($str)){
+      $sqlwhere = 'maker_name=\''.$str.'\'';
+      print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&maker_name='.urlencode($str).'&'.$linkoption.'">【' . $str .'】 </a>';
+      }
+      $str =   get_first_clminfo($filelist,'tie_up_group_name');
+      if(!empty($str)){
+      $sqlwhere = 'tie_up_group_name=\''.$str.'\'';
+      print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&tie_up_group_name='.urlencode($str).'&'.$linkoption.'">[' . $str .'] </a>シリーズ';
+      }
+        print '</p>';
+      print '</div> ';//container
+      
+      foreach($filelist as $k => $fileinfo){
+      
+       print '<div class="list-group-item" >';
+        print '<div class="row">';
+		if($listerpreviewportenable )
+        print '<div class="col-md-10 col-xs-12">';
+        else
+        print '<div class="col-md-12 col-xs-12">';
+        print '<a href='.create_requestconfirmlink($fileinfo).' class=" divid10 btn btn-primary btn-lg btn-block" style="white-space: normal; overflow: auto; text-align: left; font-size: medium;" >';
+        if(!empty($fileinfo['found_comment'])){
+          print '<strong class="text-center">【';
+          print $fileinfo['found_comment'];
+          print '】</strong>';
+        print '<br />';
+        }
+          print '<strong>';
+        print ''.basename_jp($fileinfo['found_path']);
+          print '</strong>';
+        print '</a>'; //divid10
+        $fileintoexilts = false;
+        print '</div>'; //class="col-sm-10"
+		if($listerpreviewportenable ){
+        print '<div class="col-md-2 ">';
+        // preview 設置
+		     $fn = "";
+			 $previewpath = $fileinfo['found_path'];
+			 $previewmodal = make_preview_modal_listerdb($previewpath,$k); 
+			 $fn = $fn . "\n" . '<div Align="right">';
+			 $fn = $fn . $previewmodal;
+			 $fn = $fn . '</div>';
+		     print($fn);
+        print '</div>'; //class="col-sm-2"
+		}
+        print '</div>'; //class="row"
+
+        if(!empty($fileinfo['found_track'])){
+          print '<strong>';
+        print 'トラック情報：';
+          print '</strong>';
+        if( $fileinfo['found_smart_track_on'] == 1) {
+        print '&nbsp;<span class="label label-success" >OnVocal</span>';
+        }
+        if( $fileinfo['found_smart_track_off'] == 1) {
+        print '&nbsp;<span class="label label-success" >OffVocal</span>';
+        }
+        print '&nbsp; 情報：'.$fileinfo['found_track'];
+        $fileintoexilts = true;
+        }
+          print '<strong>';
+          if($fileintoexilts) print '&nbsp;&nbsp;';
+        print 'ファイルサイズ：';
+          print '</strong>';
+        print formatBytes($fileinfo['found_file_size']);
+          print '<strong>';
+        print '&nbsp;&nbsp;最終更新日：';
+          print '</strong>';
+        $updatetime = cal_from_jd($fileinfo['found_last_write_time'],CAL_GREGORIAN);
+        if($updatetime['year'] < 0 ) $updatetime = cal_from_jd(($fileinfo['found_last_write_time']+2400000.5),CAL_GREGORIAN);
+        print $updatetime['year'].'/'.$updatetime['month'].'/'.$updatetime['day'];
+        if(!empty($fileinfo['found_worker']) ){
+          print '<strong>';
+        print '&nbsp;&nbsp;';
+        print '動画制作者：';
+          print '</strong>';
+        print '<a href ="search_listerdb_filelist.php?worker='.urlencode($fileinfo['found_worker']).'&'.$linkoption.'">' . $fileinfo['found_worker'] .' </a>';
+        }
+        print '<div style="font-size: small;">';
+          print '<strong>';
+        print 'ファイルパス：';
+          print '</strong>';
+        print   $fileinfo["found_path"];
+        print '</div>';
+	   print '</div>'; //bg-info
+      }
+    print '</div> ';//panel-body
+    print '</div> ';//divid0
+}
+
 
 // build query url
 $url = "";
@@ -259,7 +471,11 @@ if(!empty($url)){
   <link type="text/css" rel="stylesheet" href="css/style.css" />
   <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
   <script src="js/bootstrap.min.js"></script>
-
+<link href="js/video-js.min.css" rel="stylesheet">
+<script src="js/video.min.js"></script>
+<script>
+  videojs.options.flash.swf = "js/video-js.swf"
+</script>
 <?php
    $errmsg = "";
    
@@ -300,6 +516,19 @@ function selected_check($checkstr, $selectedstr){
        return 'selected';
    }
    return "";
+}
+
+function song_name_num($filelist){
+$curfilename = "";
+$songcounter = 0;
+foreach($filelist as $fileinfo)
+{
+    if($curfilename !== $fileinfo['song_name']){
+        $curfilename = $fileinfo['song_name'];
+        $songcounter++;
+    }
+}
+return $songcounter;
 }
 ?>
 
@@ -411,7 +640,13 @@ print '    <div class="text-right">';
 print $displayfrom.'-'.($displaylast).'（全'.$programlist['recordsTotal'].'件）';
 print '    </div>';
 print '  <div class="row">';
-foreach ($programlist['data'] as $program ){
+
+// 曲名が単一かどうかの判別
+if (song_name_num($programlist['data']) == 1 ){
+print (filelistfromsong($programlist['data']));
+} else {
+
+foreach ($programlist['data'] as $k => $program ){
 print '<div class="container bg-info">';
 //var_dump($program);
 $display_songname = $program['song_name'];
@@ -424,6 +659,17 @@ if(!empty($program['found_comment'])){
 print '<br />【'.$program['found_comment'].'】';
 }
 print '</a>';
+		
+		 if(!check_access_from_online()){
+		     $fn = "";
+			 $previewpath = $program['found_path'];
+			 $previewmodal = make_preview_modal_listerdb($previewpath,$k); 
+			 $fn = $fn . "\n" . '<div Align="right">';
+			 $fn = $fn . $previewmodal;
+			 $fn = $fn . '</div>';
+		     print($fn);
+		 }
+
 print '    </div>';
 print '    <div class="col-xs-12 col-md-12" >';
 print '    <dl class="dl-horizontal">';
@@ -515,6 +761,7 @@ print '    </div>';
 print '  </div>';
 
 }
+} // if song_name_num
 print '  </div>';
 
 
