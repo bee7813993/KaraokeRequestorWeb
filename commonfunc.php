@@ -958,100 +958,19 @@ function singerfromip($rt)
     return " ";
 }
 
-
-
-function commentpost_v1($nm,$col,$msg,$commenturl)
+function commentpost_v3($nm,$col,$size,$msg,$commenturl)
 {
-
-    $commentmax=18;
-    $msgarray = array();
-    if(mb_strlen($msg) >= $commentmax){
-         $lfarray = explode("\n", $msg);
-         $lfarray = array_map('trim', $lfarray);
-         $lfarray = array_filter($lfarray, 'strlen');
-         $lfarray = array_values($lfarray);
-         foreach($lfarray as $msgline)
-         {
-            for($i=0; ;$i=$i+$commentmax)
-            {
-                $tmpmsgline = mb_substr($msgline,$i,$commentmax);
-                $msgarray[] = $tmpmsgline;
-//                print mb_strlen($tmpmsgline);
-                if(mb_strlen($tmpmsgline) < $commentmax){
-                print mb_strlen($tmpmsgline);
-                    break;
-                }
-            }
-         }
-    }else {
-        $msgarray[] = $msg;
+    $commentmax=256;
+    if(mb_strlen($msg) > $commentmax){
+         $msg = mb_substr($msg,0,$commentmax);
     }
-    
-    foreach($msgarray as $msgline)
-    {
-    
-    $POST_DATA = array(
-        'nm' => $nm,
-        'col' => $col,
-        'msg' => $msgline
-
-    );
-    //    print "$commenturl";
-
-    $curl=curl_init($commenturl);
-    curl_setopt($curl,CURLOPT_POST, TRUE);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
-    $output= curl_exec($curl);
-   
-    usleep(100000);
-    }
-
-    if($output === false){
-        return false;
-    }else{
-        return true;
-    }    
-}
-
-function commentpost_v2($nm,$col,$size,$msg,$commenturl)
-{
-
-    $commentmax=18;
-    $msgarray = array();
-    if(mb_strlen($msg) >= $commentmax){
-         $lfarray = explode("\n", $msg);
-         $lfarray = array_map('trim', $lfarray);
-         $lfarray = array_filter($lfarray, 'strlen');
-         $lfarray = array_values($lfarray);
-         foreach($lfarray as $msgline)
-         {
-            for($i=0; ;$i=$i+$commentmax)
-            {
-                $tmpmsgline = mb_substr($msgline,$i,$commentmax);
-                $msgarray[] = $tmpmsgline;
-//                print mb_strlen($tmpmsgline);
-                if(mb_strlen($tmpmsgline) < $commentmax){
-                print mb_strlen($tmpmsgline);
-                    break;
-                }
-            }
-         }
-    }else {
-        $msgarray[] = $msg;
-    }
-    
-    foreach($msgarray as $msgline)
-    {
     
     $POST_DATA = array(
         'nm' => $nm,
         'col' => $col,
         'sz' => $size,
-        'msg' => $msgline
-
+        'msg' => $msg
     );
-    //    print "$commenturl";
 
     $curl=curl_init(($commenturl));
     curl_setopt($curl,CURLOPT_POST, TRUE);
@@ -1059,9 +978,6 @@ function commentpost_v2($nm,$col,$size,$msg,$commenturl)
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
    
-    usleep(100000);
-    }
-
     if($output === false){
         return false;
     }else{
