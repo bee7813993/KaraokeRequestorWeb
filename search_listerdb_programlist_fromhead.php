@@ -109,7 +109,12 @@ print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
   $linkurl = 'search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&category='.urlencode($category).'&'.$linkoption;
 print '<a class="btn btn-primary btn-block indexbtnstr" href="'.$linkurl.'">';
-print $program['program_name'];
+if($program['program_name'] === 'その他'){
+  $displaygname = '未分類';
+} else  {
+  $displaygname = $program['program_name'];
+}
+print $displaygname;
 print '（'.$program['COUNT(DISTINCT song_name)'].'）';
 print '</a>';
 print '    </div>';

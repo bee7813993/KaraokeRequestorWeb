@@ -223,7 +223,7 @@ myPlayer.pause();
         <h4 class="modal-title" id="modal-label">動画プレビュー</h4>
       </div>
       <div class="modal-body">
-        <video id="preview_video_'.$modalid.'a" class="video-js vjs-default-skin" controls muted preload="none"  data-setup="{}"  style="width: 320px; height: 180px;" >'.$previewsource.'
+        <video id="preview_video_'.$modalid.'a" class="video-js vjs-default-skin" controls muted playsinline preload="none"  data-setup="{}"  style="width: 320px; height: 180px;" >'.$previewsource.'
         </video>
       </div>
       <div class="modal-footer">
@@ -523,6 +523,7 @@ $curfilename = "";
 $songcounter = 0;
 foreach($filelist as $fileinfo)
 {
+    if($fileinfo['song_name'] === NULL) continue;
     if($curfilename !== $fileinfo['song_name']){
         $curfilename = $fileinfo['song_name'];
         $songcounter++;

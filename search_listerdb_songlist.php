@@ -310,6 +310,11 @@ if(!empty($songinfo[$clm])){
    }
    $querystr = $querystr . $linkoption;
 
+   if( !empty($querystr)){
+   $querystr = $querystr .'&';
+   }
+   $querystr = $querystr . "match=full";
+
 
 $fullpath = $songinfo['found_path'];
 $filename = basename_jp($fullpath);
@@ -450,6 +455,7 @@ print '    </div>';
 print '  <div class="row">';
 foreach ($programlist['data'] as $program ){
 $display_songname = $program['song_name'];
+if(empty($display_songname)) $display_songname = '未分類';
 
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
