@@ -155,7 +155,7 @@ function print_listerdb_fileonly(){
         $lister_dbpath = $config_ini['listerDBPATH'];
     }
     $filesearch = 1;
-    require 'search_listerdb_filename_index.php';
+    require 'search_listerdb_anysearch_index.php';
 }
 ?>
 

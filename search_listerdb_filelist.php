@@ -55,6 +55,13 @@ if(array_key_exists("worker", $_REQUEST)) {
     $myrequestarray["worker"] = $worker;
 }
 
+$anyword = "";
+if(array_key_exists("anyword", $_REQUEST)) {
+    $anyword = $_REQUEST["anyword"];
+    $myrequestarray["anyword"] = $anyword;
+}
+
+
 $filename = "";
 if(array_key_exists("filename", $_REQUEST)) {
     $filename = $_REQUEST["filename"];
@@ -298,7 +305,7 @@ function filelistfromsong($filelist){
         print '<div class="col-md-10 col-xs-12">';
         else
         print '<div class="col-md-12 col-xs-12">';
-        print '<a href='.create_requestconfirmlink($fileinfo).' class=" divid10 btn btn-primary btn-lg btn-block" style="white-space: normal; overflow: auto; text-align: left; font-size: medium;" >';
+        print '<a href="'.create_requestconfirmlink($fileinfo).'" class=" divid10 btn btn-primary btn-lg btn-block" style="white-space: normal; overflow: auto; text-align: left; font-size: medium;" >';
         if(!empty($fileinfo['found_comment'])){
           print '<strong class="text-center">【';
           print $fileinfo['found_comment'];
@@ -312,7 +319,7 @@ function filelistfromsong($filelist){
         $fileintoexilts = false;
         print '</div>'; //class="col-sm-10"
 		if($listerpreviewportenable ){
-        print '<div class="col-md-2 ">';
+        print '<div class="col-md-2 col-xs-12">';
         // preview 設置
 		     $fn = "";
 			 $previewpath = $fileinfo['found_path'];
@@ -373,6 +380,13 @@ function filelistfromsong($filelist){
 $url = "";
 $myformvalue = "";
 $myformvalue_shown = "";
+
+if(!empty($anyword) ){
+    $url = add_get_query($url , 'anyword='.urlencode($anyword) );
+    $myformvalue = $myformvalue.'<input type="hidden" name="anyword" value="'.($anyword).'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>なんでも検索</label><input type="text" class="form-control" name="anyword" value="'.($anyword).'" /></div>';
+}
+
 if(!empty($category ) ) {
     $url = add_get_query($url , 'category='.urlencode($category) );
     $myformvalue = $myformvalue.'<input type="hidden" name="category" value="'.($category).'" />';
@@ -393,6 +407,7 @@ if(!empty($worker) ){
     $myformvalue = $myformvalue.'<input type="hidden" name="worker" value="'.($worker).'" />';
     $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>動画製作者</label><input type="text" class="form-control" name="worker" value="'.($worker).'" /></div>';
 }
+
 if(!empty($filename) ){
     $url = add_get_query($url , 'filename='.urlencode($filename) );
     $myformvalue = $myformvalue.'<input type="hidden" name="filename" value="'.($filename).'" />';

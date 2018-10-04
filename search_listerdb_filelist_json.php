@@ -34,6 +34,11 @@ if(array_key_exists("header", $_REQUEST)) {
     $header = $_REQUEST["header"];
 }
 
+$anyword = '';
+if(array_key_exists("anyword", $_REQUEST)) {
+    $anyword = urldecode($_REQUEST["anyword"]);
+}
+
 $filename = '';
 if(array_key_exists("filename", $_REQUEST)) {
     $filename = urldecode($_REQUEST["filename"]);
@@ -198,6 +203,17 @@ function add_select_cond($baseselect, $addselect){
     return $return_select;
 }
 
+function add_select_cond_or($baseselect, $addselect){
+    $return_select = "";
+    if(empty($baseselect) ){
+        $return_select = $addselect;
+    }else {
+        $return_select = $baseselect . ' OR ' . $addselect;
+    }
+    return $return_select;
+}
+
+
 // DB初期化
 $lister = new ListerDB();
 $lister->listerdbfile = $lister_dbpath;
@@ -209,8 +225,40 @@ if( !$listerdb ) {
 // 検索条件
 $select_where = "";
 
+// なんでも検索
+if( !empty($anyword ) ) {
+    // 作品名
+    $wherefilesearch = make_select_andsearch($listerdb,'program_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+    
+    // 歌手名
+    $wherefilesearch = make_select_andsearch($listerdb,'song_artist', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // 製作者名
+    // → 不要
+
+    // ファイル名
+    $wherefilesearch = make_select_andsearch($listerdb,'found_path', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // 製作会社
+    $wherefilesearch = make_select_andsearch($listerdb,'maker_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // 曲名
+    $wherefilesearch = make_select_andsearch($listerdb,'song_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // シリーズ
+    $wherefilesearch = make_select_andsearch($listerdb,'tie_up_group_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    
+}else {
+
 // 作品名とカテゴリ名で検索
-if( !empty($category ) ) {
+  if( !empty($category ) ) {
     if($category === 'ISNULL' ){
         $select_where = add_select_cond($select_where,  ' program_category IS NULL');
 //        $select_where = $select_where . ' program_category IS NULL';
@@ -219,8 +267,8 @@ if( !empty($category ) ) {
 //        $select_where = $select_where . ' program_category = '. $listerdb->quote($category);
     }
 // 作品名で検索
-}
-if( !empty($program_name ) ){
+  }
+  if( !empty($program_name ) ){
     if($program_name === 'ISNULL' ){
         $select_where = add_select_cond($select_where,  ' program_name IS NULL ');
     }else {
@@ -232,13 +280,13 @@ if( !empty($program_name ) ){
         }
     }
 // 作品名headerで検索
-}
-if( !empty($header ) ){
+  }
+  if( !empty($header ) ){
     // header 検索
     $select_where = add_select_cond($select_where,  ' found_head = ' . $listerdb->quote($header));
 // 歌手名で検索
-}
-if( !empty($artist ) ){
+  }
+  if( !empty($artist ) ){
     // artist 検索
     if($artist === 'ISNULL' ){
         $select_where = add_select_cond($select_where, ' song_artist IS NULL');
@@ -252,7 +300,7 @@ if( !empty($artist ) ){
             $select_where = add_select_cond($select_where, ' song_artist = '.$listerdb->quote($artist));
         }
     }
-}
+  }
 // 製作者名で検索
   if(!empty($worker) ){
         if ( $match === 'part' ) {
@@ -313,6 +361,8 @@ if( !empty($artist ) ){
             $select_where = add_select_cond($select_where, $wherefilesearch);
         }
   }
+
+} //else なんでも検索
 
 //add groupby 
 $select_where = $select_where . ' GROUP BY song_name,found_file_size ';

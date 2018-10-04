@@ -71,13 +71,13 @@ print 'btn-default';
 print ' center-block" >シリーズ </a>';
 print '    </div>';
 print '    <div class="col-xs-3 col-md-3 " >';
-print '      <a style="white-space: normal;" href="search_listerdb_filename_index.php?'.$linkoption.'" class="btn ';
+print '      <a style="white-space: normal;" href="search_listerdb_anysearch_index.php?'.$linkoption.'" class="btn ';
 if($target == 'filename' ) {
 print 'btn-primary';
 }else {
 print 'btn-default';
 }
-print ' center-block" >検索等</a>';
+print ' center-block" >詳細検索</a>';
 print '    </div>';
 print '  </div>';
 print '</div>';
