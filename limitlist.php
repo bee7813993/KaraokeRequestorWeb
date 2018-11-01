@@ -44,6 +44,11 @@ shownavigatioinbar();
 
 <?php
 
+function logtocmd($msg){
+  //print(mb_convert_encoding("$msg\n","SJIS-win"));
+  error_log($msg."\n", 3, 'ykrdebug.log');
+}
+
 $limitfilename = "";
 
 if( !empty($_REQUEST['data']) ){
@@ -123,6 +128,12 @@ foreach($limitlist_array["category"] as $category1 ){
             if(!empty($songinfo["file"])){
                 //  print '<div class="list-group">';
                 foreach($songinfo["file"] as $files){
+                    // Check File exists 
+                    $fullpath = fileexistcheck($files["filename"]);
+                    $classdisabled = "";
+                    if(empty($fullpath)) {
+                       $classdisabled = ' disabled ';
+                    }
                 // print '<pre>'.var_dump($files).'</pre>';
                     $displayfilename = urlencode($songinfo["title"]);
                     if($displayfilename_flg) {
@@ -138,6 +149,7 @@ foreach($limitlist_array["category"] as $category1 ){
                     foreach ($files["flags"] as $flagname ){
                        if( $flagname === "shop_karaoke" || $flagname === "配信" ){
                            $link = $link.'&shop_karaoke=1';
+                           $classdisabled = "";
                        }
                        if( $flagname === "BGV"  ){
                            $link = $link.'&forcebgv=1';
@@ -147,7 +159,11 @@ foreach($limitlist_array["category"] as $category1 ){
                        }
                        
                     }
+                    if(empty($classdisabled)) {
                     print '<a href='.$link.' class="list-group-item divid10" style="overflow: auto;" >';
+                    }else {
+                    print '<a  class="list-group-item divid10 disabled" style="overflow: auto;" >';
+                    }
 //                    print '<span class="col-xs-1 col-sm-1  " >'.$files["kind"].'</span>';
                     print '<span class="label label-primary " >'.$files["kind"].'</span>';
                     // print '<div class="col-xs-11 col-sm-11  divid11" ><span><a href='.($link).' class="btn btn-primary">リクエスト</a></span> ';

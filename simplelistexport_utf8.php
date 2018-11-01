@@ -1,6 +1,7 @@
 <?php
 /*** 仮作成 ***/
-include 'kara_config.php';
+require_once('commonfunc.php');
+require_once('function_search_listerdb.php');
 //die();
 function arr2csv($arr) {
     $fp = fopen('php://temp', 'r+b');
@@ -29,18 +30,117 @@ if(empty($dbname)){
 
 
 
+function getsonginfofromfilename($filename){
+  global $config_ini;
+
+  if(empty($filename)) return false;
+  // ListerDBのファイルの設定があるかどうかのチェック
+  $res = array_key_exists("listerDBPATH",$config_ini);
+  if ($res === false ) {
+     print( "config not found");
+     return false;
+  }
+  $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
+  // ListerDBのファイルのがあるかどうかのチェック
+  if(!file_exists($lister_dbpath) ){
+     print( "Listerdb file :". $lister_dbpath." not found");
+     return false;
+  }
+
+  // DB初期化
+  $lister = new ListerDB();
+  $lister->listerdbfile = $lister_dbpath;
+  $listerdb = $lister->initdb();
+  if( !$listerdb ) {
+       return false;
+  }
+
+  $select_where = 'WHERE found_path LIKE '. $listerdb ->quote('%'.$filename.'%');
+  $sql = 'SELECT * FROM t_found '. $select_where.';';
+  @$songdbdata = $lister->select($sql);
+  if(!$songdbdata){
+//     print $sql;
+     return false;
+}
+return $songdbdata;
+}
+
+// 1つでもlisterDBに登録情報があるかどうかのチェック
+function listerdbfoundcheck($alldata){
+   foreach($alldata as $row){
+     $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
+     // if( $songdataarray_all === false ) return false;
+     $songdataarray = $songdataarray_all[0];
+     if(!empty($songdataarray["song_name"]) ) {
+       return true;
+     }
+   }
+   return false;
+}
+
+$listerdbenabled = false;
+if(array_key_exists("listerDBPATH",$config_ini) ) {
+    $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
+    if(file_exists($lister_dbpath) ){
+        $listerdbenabled = true;
+    }
+}
+
+
   header('Content-Type: application/octet-stream');
   header('Content-Disposition: attachment; filename=list_'.$dbname.'.csv');
   
-  $num = 1;
+    $num = 1;
   $csvarray = array();
+
+  if($listerdbenabled && listerdbfoundcheck($allrequest) ){
+// りすたーDBに登録された情報が1つでもある
+    $csvarray[] = array( "順番" , "曲名（ファイル名）" ,"キー", "作品名" ,"歌手名" , "歌った人" ,  "コメント" );
+    foreach($allrequest as $row){
+    $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
+    $songdataarray = $songdataarray_all[0];
+    if(!empty($songdataarray["song_name"] ) ){
+        $songname=$songdataarray["song_name"] ;
+        if(!empty($songdataarray["found_comment"] ) ){
+            $songname=$songname.'【'.$songdataarray["found_comment"].'】' ;
+        }
+    }else{
+        $songname=$row["songfile"];
+    }
+    
+    $program_name='';
+    if(!empty($songdataarray["program_name"] ) ){
+      if( $songdataarray["program_name"] == "その他" ) {
+        $program_name='-';
+      } else {
+        $program_name=$songdataarray["program_name"];
+        if(!empty($songdataarray["song_op_ed"] ) ){
+          $program_name=$program_name.' '.$songdataarray["song_op_ed"];
+        }
+      }
+    }
+    
+    $artist = '';
+    if(!empty($songdataarray["song_artist"] ) ){
+        $artist = $songdataarray["song_artist"];
+    }
+    
+
+      $csvarray[] = array( $num, $songname , $row["keychange"],$program_name,$artist ,$row["singer"] ,  $row["comment"] );
+      $num++;
+    }
+      
+
+  }else {
   
-  /* print csv header */
-  $csvarray[] = array( "順番" , "曲名（ファイル名）" ,"キー",  "歌った人" ,  "コメント" );
-  
-  foreach($allrequest as $row){
-    $csvarray[] = array( $num, $row["songfile"] , $row["keychange"] ,$row["singer"] ,  $row["comment"] );
-    $num++;
+    $num = 1;
+    /* print csv header */
+    $csvarray[] = array( "順番" , "曲名（ファイル名）" ,"キー",  "歌った人" ,  "コメント" );
+    
+    foreach($allrequest as $row){
+      $csvarray[] = array( $num, $row["songfile"] , $row["keychange"] ,$row["singer"] ,  $row["comment"] );
+      $num++;
+    }
   }
   $stream = fopen('php://output', 'wb');
   fwrite($stream, pack('C*',0xEF,0xBB,0xBF));//BOM書き込み

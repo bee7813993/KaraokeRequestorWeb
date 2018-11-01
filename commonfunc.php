@@ -1794,6 +1794,41 @@ function file_exist_check_japanese_cf($filename){
  return FALSE;
 }
 
+function fileexistcheck($filebasename){
+    // ニコカラりすたーで検索
+    if(!empty($lister_dbpath) ){
+        require_once('function_search_listerdb.php');
+         // DB初期化
+         $lister = new ListerDB();
+         $lister->listerdbfile = $lister_dbpath;
+         $listerdb = $lister->initdb();
+         if( $listerdb ) {
+             $select_where = ' WHERE found_path LIKE ' . $listerdb->quote('%'.$filebasename.'%');
+             $sql = 'select * from t_found '. $select_where.';';
+             $alldbdata = $lister->select($sql);
+             if($alldbdata){
+                  $filepath_utf8 = $alldbdata[0]['found_path'];
+                  return $filepath_utf8;
+             }
+         }
+    }
+    // Everythingで検索
+      $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($filebasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
+      $json = file_get_html_with_retry($jsonurl, 5);
+      if($json != false){
+          $decode = json_decode($json, true);
+          if($decode != NULL && isset($decode{'results'}{'0'})){
+            if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
+                $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+                return $filepath_utf8;
+            }
+          }
+      }
+      return false;
+
+}
+
+
 function get_fullfilename2($l_fullpath,$word,&$filepath_utf8){
     $filepath_utf8 = "";
     // 引数チェック
