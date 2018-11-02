@@ -108,7 +108,10 @@ foreach($limitlist_array["category"] as $category1 ){
         foreach($category1["song"] as $songinfo){
             print '<div class="divid0 panel panel-primary"> ';
             print '<div class="panel-heading " ><strong>';
+            print '<a class="btn-primary" href="search_listerdb_filelist.php?anyword='.urlencode($songinfo["title"]).'"  >';
             print $songinfo["title"];
+            print '</a >';
+
             print "</strong></div>";
             print '<div class="panel-body">';
             print '<div class="container">';

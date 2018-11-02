@@ -1796,8 +1796,13 @@ function file_exist_check_japanese_cf($filename){
 
 function fileexistcheck($filebasename){
     // ニコカラりすたーで検索
+    global $config_ini;
+    $lister_dbpath='';
+    if (file_exist_check_japanese_cf(urldecode($config_ini['listerDBPATH'])) ){
+        $lister_dbpath=urldecode($config_ini['listerDBPATH']);
+    }
+    require_once('function_search_listerdb.php');
     if(!empty($lister_dbpath) ){
-        require_once('function_search_listerdb.php');
          // DB初期化
          $lister = new ListerDB();
          $lister->listerdbfile = $lister_dbpath;
