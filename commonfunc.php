@@ -309,6 +309,7 @@ function count_onepriority($word)
 {
     global $everythinghost;
     $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($word) . '&json=1&count=5';
+//print     $jsonurl.'<br/>';
     $json = file_get_html_with_retry($jsonurl, 5, 30);
     $result_array = json_decode($json, true);
     return $result_array['totalResults'];
@@ -401,6 +402,7 @@ function search_order_priority($word,$start,$length)
     $count_p = $start + 1 ;   // 
     
     $a = 0;
+//var_dump($word);
     
     foreach($prioritylist as $prioritylistone){
         $kerwords = ''.$word.' '.$prioritylistone['priorityword'];
@@ -427,6 +429,7 @@ function search_order_priority($word,$start,$length)
             $order = 'sort=size&ascending=0';
             
             $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $order . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $c_length . '&offset=' .$c_start.'';
+//print $jsonurl;
             $json = file_get_html_with_retry($jsonurl, 5, 30);
             $result_array = json_decode($json, true);
             // print '###   P:'.$prioritylistone['prioritynum'].' W:'.$prioritylistone['priorityword']."\n";
@@ -468,8 +471,21 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		if(array_key_exists("max_filesize", $config_ini)){
 		  if( $config_ini["max_filesize"] > 0 ){
 		      $filesizebyte = $config_ini["max_filesize"] * 1024 * 1024;
+		      $kwlist=preg_split('/[\s|\x{3000}]+/u', $kerwords);
+		      $wordpart = "";
+		      foreach($kwlist as $wd){
+		          if(!empty($wordpart)) {
+		          $wordpart = $wordpart.' ';
+		          }
+		          $wordpart = $wordpart.'path:'.$wd;
+		      }
+		      if( !empty($wordpart)) {
+		      $kerwords = $wordpart.' size:<='.$filesizebyte;
+		      }else {
 		      $kerwords = 'path:'.$kerwords.' size:<='.$filesizebyte;
-		  }
+		      }
+
+		      }
 		}
 		
 		$orderstr = 'sort=size&ascending=0';
@@ -526,6 +542,7 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		}
 		
         $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $orderstr . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $length . '&offset=' .$start.'';
+
         $json = file_get_html_with_retry($jsonurl, 5, 30);
         $result_array = json_decode($json, true);		
 }
