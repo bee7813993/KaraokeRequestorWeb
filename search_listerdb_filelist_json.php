@@ -89,6 +89,11 @@ if(array_key_exists("tie_up_group_name", $_REQUEST)) {
     $tie_up_group_name = $_REQUEST["tie_up_group_name"];
 }
 
+$uid = "";
+if(array_key_exists("uid", $_REQUEST)) {
+    $uid = $_REQUEST["uid"];
+}
+
 
 $select_orderby ="";
 if(array_key_exists("orderby", $_REQUEST)) {
@@ -362,6 +367,12 @@ if( !empty($anyword ) ) {
         }
   }
 
+// uidで検索
+  if(!empty($uid) ){
+  // uidは完全一致のみ
+            $wherefilesearch = make_select_andsearch($listerdb,'found_uid', $uid);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+  }
 } //else なんでも検索
 
 //add groupby 

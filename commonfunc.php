@@ -1403,15 +1403,19 @@ function writeconfig2ini($config_ini,$configfile)
   foreach ($config_ini as $k => $i){
       if(is_array($i)){
           foreach ($i as $key2 => $item2){
+              if(!empty($item2) ) {
               fputs($fp, $k.'['.$key2.']='.$item2."\n");
+              }
           }
       }else {
           fputs($fp, "$k=$i\n");
       }
   } 
   fclose($fp);
+  if( $configfile == "config.ini" ){
   inieolchange();
   iniroomchange($config_ini);
+  }
 }
 
 function multiroomenabled(){
