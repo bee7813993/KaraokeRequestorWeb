@@ -34,6 +34,17 @@ if(array_key_exists("header", $_REQUEST)) {
     $header = $_REQUEST["header"];
 }
 
+$listitem='song_name';
+if(array_key_exists("listitem", $_REQUEST)) {
+    $listitem = $_REQUEST["listitem"];
+}
+
+$anyword = '';
+if(array_key_exists("anyword", $_REQUEST)) {
+    $anyword = urldecode($_REQUEST["anyword"]);
+}
+
+
 $filename = '';
 if(array_key_exists("filename", $_REQUEST)) {
     $filename = urldecode($_REQUEST["filename"]);
@@ -197,6 +208,15 @@ function add_select_cond($baseselect, $addselect){
     }
     return $return_select;
 }
+function add_select_cond_or($baseselect, $addselect){
+    $return_select = "";
+    if(empty($baseselect) ){
+        $return_select = $addselect;
+    }else {
+        $return_select = $baseselect . ' OR ' . $addselect;
+    }
+    return $return_select;
+}
 
 // DB初期化
 $lister = new ListerDB();
@@ -209,6 +229,37 @@ if( !$listerdb ) {
 // 検索条件
 $select_where = "";
 
+// なんでも検索
+if( !empty($anyword ) ) {
+    // 作品名
+    $wherefilesearch = make_select_andsearch($listerdb,'program_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+    
+    // 歌手名
+    $wherefilesearch = make_select_andsearch($listerdb,'song_artist', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // 製作者名
+    // → 不要
+
+    // ファイル名
+    $wherefilesearch = make_select_andsearch($listerdb,'found_path', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // 製作会社
+    $wherefilesearch = make_select_andsearch($listerdb,'maker_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // 曲名
+    $wherefilesearch = make_select_andsearch($listerdb,'song_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    // シリーズ
+    $wherefilesearch = make_select_andsearch($listerdb,'tie_up_group_name', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
+    
+}else {
 // 作品名とカテゴリ名で検索
 if( !empty($category ) ) {
     if($category === 'ISNULL' ){
@@ -313,9 +364,18 @@ if( !empty($artist ) ){
             $select_where = add_select_cond($select_where, $wherefilesearch);
         }
   }
+// uidで検索
+  if(!empty($uid) ){
+  // uidは完全一致のみ
+            $wherefilesearch = make_select_andsearch($listerdb,'found_uid', $uid);
+            $select_where = add_select_cond($select_where, $wherefilesearch);
+  }
+} //else なんでも検索
 
 //add groupby 
-$select_where = $select_where . ' GROUP BY song_name';
+//$select_where = $select_where . ' GROUP BY '.$listitem;
+// 曲名とタイアップ名で抽出する
+$select_where = $select_where . ' GROUP BY song_name, program_name';
 
 
 if (!empty($select_orderby) ){
