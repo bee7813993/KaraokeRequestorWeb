@@ -252,14 +252,22 @@ if( !empty($anyword ) ) {
     $select_where = add_select_cond_or($select_where, $wherefilesearch);
 
     // 曲名
+    if($song_name == 'isnull' ) {
+        $wherefilesearch = $wherefilesearch . ' AND song_name IS NULL ';
+//        $select_where = $select_where . ' AND song_name IS NULL ';
+    }else {
     $wherefilesearch = make_select_andsearch($listerdb,'song_name', $anyword);
     $select_where = add_select_cond_or($select_where, $wherefilesearch);
+    }
 
     // シリーズ
     $wherefilesearch = make_select_andsearch($listerdb,'tie_up_group_name', $anyword);
     $select_where = add_select_cond_or($select_where, $wherefilesearch);
 
-    
+    // isnull追加
+    if($song_name == 'isnull' ) {
+       $select_where = '( ' . $select_where .' ) AND song_name IS NULL ';
+    }
 }else {
 
 // 作品名とカテゴリ名で検索
@@ -295,7 +303,7 @@ if( !empty($anyword ) ) {
     // artist 検索
     if($artist === 'ISNULL' ){
         $select_where = add_select_cond($select_where, ' song_artist IS NULL');
-//        $select_where = $select_where . ' song_artist IS NULL';
+//        $select_where = $select_where . ' AND '.'song_artist IS NULL ';
     } else {
         if ( $match === 'part' ) {
             $wherefilesearch = make_select_andsearch($listerdb,'song_artist', $artist);
