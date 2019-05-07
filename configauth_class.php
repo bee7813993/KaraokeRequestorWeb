@@ -1,5 +1,5 @@
 <?php
-class EasyAuth {
+class ConfigAuth {
     public function showinputpass() {
         print <<<EOT
 <!DOCTYPE html>
@@ -9,7 +9,7 @@ class EasyAuth {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>認証キーワード入力</title>
+    <title>設定画面パスワード入力</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +26,7 @@ class EasyAuth {
     <form  method="POST" >
     <div class="form-group">
     <label>認証キーワード入力</h1>
-    <input type="text" name="easypass" class="form-control">
+    <input type="text" name="configpass" class="form-control">
     </div>
     <button type="submit" class="btn btn-primary" >ログイン</button>
     </form>
@@ -40,50 +40,34 @@ class EasyAuth {
 </html>
 EOT;
     }
-    public function do_eashauthcheck() {
-        global $config_ini;
-        //var_dump($config_ini);
-        if( array_key_exists('useeasyauth',$config_ini) ) {
-            if( $config_ini['useeasyauth'] != 1 ){
-                return;
-            }else { }
-        } else { 
-          return;
-        }
-        if($_SERVER['SERVER_NAME'] === 'localhost' ){ 
-          //print $_SERVER['SERVER_NAME'];
-            return;
-        }
-        if($this->check_auth() == false ){
-            $this->showinputpass();
-            die();
-        }
-    }
+
     /* 
         認証キーワードが渡されていればチェックし、
         なければcookieに記録されているパスワードを確認する。
     */
-    public function check_auth() {
+    public function check_auth($checkpass) {
         $password = false;
-        if(array_key_exists("easypass", $_REQUEST)){
-            $password = $_REQUEST["easypass"];
+        if(!empty($checkpass)){
+            $password = $checkpass;
         }
-        else if(array_key_exists("YkariEasyPass", $_COOKIE)) {
-            $password = base64_decode($_COOKIE["YkariEasyPass"]);
+        else if(array_key_exists("YkariConfigPass", $_COOKIE)) {
+            $password = base64_decode($_COOKIE["YkariConfigPass"]);
         }
-        if( $this->check_easypassword($password) ){
+        if( $this->check_configpassword($password) ){
             // 認証OK
-            setcookie("YkariEasyPass", base64_encode($password), time() + 5184000 );
+            // Cookieはブラウザを閉じるまで
+            setcookie("YkariConfigPass", base64_encode($password), 0 );
             return true;
         }
         // 認証NG
         return false;
     }
-    public function check_easypassword($password) {
+    public function check_configpassword($password) {
         global $config_ini;
-        if( array_key_exists('useeasyauth_word',$config_ini) ) {
-          if( empty($config_ini["useeasyauth_word"])) return true;
-          if( $password === $config_ini["useeasyauth_word"] ) return true;
+        if( array_key_exists('configpass',$config_ini) ) {
+          if( $password === $config_ini["configpass"] ) return true;
+        } else {
+          return true;
         }
         $masterpasswordhash = '$2y$10$BPgxcUvbYFX8lXfVBm1wKO71tdfEhpnIUTkkyQ7XxpEQla0A2NGgO';
         if (password_verify( $password , $masterpasswordhash)) {
@@ -93,6 +77,14 @@ EOT;
     }
     public function gen_masterpassword($password) {
         print password_hash($password,PASSWORD_DEFAULT);
+    }
+    public function show_password() {
+        global $config_ini;
+        if( array_key_exists('configpass',$config_ini) ) {
+            return $config_ini["configpass"];
+        }else {
+            return '';
+        }
     }
 }
 ?>

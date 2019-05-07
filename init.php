@@ -1,16 +1,25 @@
 <?php
 
+require_once 'commonfunc.php';
+require_once 'configauth_class.php';
+$configauth = new ConfigAuth();
+
 if (!isset($_SERVER['PHP_AUTH_USER'])){
     header('WWW-Authenticate: Basic realm="Please use username admin to open Configuration page. "');
-    die('このページを見るにはログインが必要です');
+    die('設定画面の表示にはログインが必要です');
 }
 
 if ($_SERVER['PHP_AUTH_USER'] !== 'admin'){
-    header('WWW-Authenticate: Basic realm="You can use username only admin."');
-    die('このページを見るにはログインが必要です');
+    header('WWW-Authenticate: Basic realm="Configuration page authorization."');
+    die('設定画面の表示にはログインが必要です');
 }
 
-require_once 'commonfunc.php';
+if (! $configauth -> check_auth($_SERVER['PHP_AUTH_PW']) ){
+    header('WWW-Authenticate: Basic realm="Configuration page authorization."');
+    die('設定画面の表示にはログインが必要です');
+}
+
+
 require_once 'easyauth_class.php';
 $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
@@ -209,7 +218,7 @@ print '</pre>';
      <a href="#requestlist" class="menulink" > リクエスト一覧画面 </a>
     </li>
     <li class="menu">
-     <a href="#bgcolor" class="menulink" > ページ背景色 </a>
+     <a href="#bgcolor_t" class="menulink" > ページ背景色 </a>
     </li>
     <li class="menu">
      <a href="#movieplayer" class="menulink" > 動画プレーヤー </a>
@@ -283,6 +292,12 @@ print '</pre>';
 <div class="bg-info">
   <h1  id="workconfig"  class="menulink" >動作設定 </h1>
   <form name="allconfig" method="post" action="init.php">
+
+  <div class="form-group">
+    <h3 title="未設定でパスワードチェックを省略">設定画面パスワード</h3>
+    <input type="password" name="configpass" id="configpass" class="form-control" placeholder="未設定でパスワードチェックを省略"  value=<?php echo  $configauth -> show_password(); ?> >
+  </div>
+
   <div class="form-group">
     <h3>DBファイル名</h3>
     <input type="text" name="dbname" id="dbname" class="form-control" value=<?php echo  urldecode($config_ini["dbname"]); ?> >
@@ -464,7 +479,7 @@ print ' value="10" ';
       }
   ?>
   <div class="form-group">
-    <h3 id="bgcolor" class="radio control-label menulink"> ページ背景色  </h3>
+    <h3 id="bgcolor_t" class="radio control-label menulink"> ページ背景色  </h3>
     <input type="color" name="bgcolor" id="bgcolor" list="colors" value="<?php print $bgcolor ?>" />
 		<datalist id="colors">
 			<option value="#F8ECE0"></option>
@@ -798,7 +813,7 @@ if(!array_key_exists('searchitem_o', $config_ini )){
     </tr>
   </thead>
     <tr>
-      <td>ファイル名検索（りすたー） </td>
+      <td>キーワード検索（りすたー） </td>
       <td><input type="checkbox" name="searchitem[]" value="listerDB_file" <?php print checkbox_check($config_ini['searchitem'],"listerDB_file" )?'checked':' ' ?> > </td>
       <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][0]; ?>" placeholder="表示順" /> </td>
     </tr>
@@ -1023,6 +1038,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
         print ' checked' ;
       }
       print '    ></td>'."\n";
+      print '  </tr>'."\n";
       $roomcount ++;
   }
 ?>  
