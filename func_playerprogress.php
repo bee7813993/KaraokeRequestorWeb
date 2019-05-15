@@ -49,11 +49,23 @@ class PlayerProgress {
         if($status === FALSE) return $status;
         $status_array = preg_match_all("/\<p .*?>(.*?)<\/p>/", $status, $result);
         //var_dump($result);
-        $this->status = $result[1][4];
-        $this->playtime_txt = $result[1][7];
-        $this->totaltime_txt = $result[1][9];
-        $this->playtime = $result[1][6];
-        $this->totaltime = $result[1][8];
+        
+        // version check
+        if(strpos($result[1][7],':') !== false){
+           // before 1.5.2 MPC-BE
+            $this->status = $result[1][4];
+            $this->playtime_txt = $result[1][7];
+            $this->totaltime_txt = $result[1][9];
+            $this->playtime = $result[1][6];
+            $this->totaltime = $result[1][8];
+        }else {
+           // after 1.5.3 MPC-BE
+            $this->status = $result[1][5];
+            $this->playtime_txt = $result[1][8];
+            $this->totaltime_txt = $result[1][10];
+            $this->playtime = $result[1][7];
+            $this->totaltime = $result[1][9];
+        }
         
         $this->gettitle();
         
