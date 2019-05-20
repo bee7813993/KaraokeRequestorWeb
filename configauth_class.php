@@ -66,6 +66,7 @@ EOT;
         global $config_ini;
         if( array_key_exists('configpass',$config_ini) ) {
           if( $password === $config_ini["configpass"] ) return true;
+          if (empty($config_ini["configpass"] )) return true;
         } else {
           return true;
         }
