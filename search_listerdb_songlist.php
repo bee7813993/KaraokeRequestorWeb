@@ -392,6 +392,10 @@ if(!empty($myformvalue_shown)) {
 print '</div>';
 }
 print '</div>';
+if(!empty($lister_dbpath))
+    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
+if(!empty($selectid))
+    print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
 print '</div>';

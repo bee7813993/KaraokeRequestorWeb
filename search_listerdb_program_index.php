@@ -188,7 +188,7 @@ EOM;
 if(!empty($lister_dbpath))
     print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
-    print '<input type="hidden" name="selectid" value='.$selectid.'" />';
+    print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print <<<EOM
   </div>
   <div class="form-group">

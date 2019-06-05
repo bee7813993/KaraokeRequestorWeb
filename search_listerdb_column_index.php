@@ -162,6 +162,12 @@ showuppermenu($target,$linkoption);
 	</label>
     </div>
   </div>
+<?php
+if(!empty($lister_dbpath))
+    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
+if(!empty($selectid))
+    print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
+?>
     <button type="submit" class="btn btn-default">検索</button>
 </form>
 
@@ -250,7 +256,11 @@ print '  </div>';
 print '</div>';
 
 if($target == "song_artist" ){
+  if(empty($linkoption))
   print '<a href="search_listerdb_artist.php" class="btn btn-primary" > 登録数の多い順歌手名リスト </a>';
+  else 
+  print '<a href="search_listerdb_artist.php?'.$linkoption.'" class="btn btn-primary" > 登録数の多い順歌手名リスト </a>';
+  
 }
 
 
