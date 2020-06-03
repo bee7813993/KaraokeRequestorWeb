@@ -967,9 +967,11 @@ print 'value="名無しさん"';}
   <div class="form-group">
     <h3 >
     ニコニコ動画ダウンロード設定 
-    
     </h3>
-
+	<label >
+    <small>(ゆかりでの設定は不要になりました。MPC-BEにyoutube-dlの設定をしてください。<a href="https://github.com/bee7813993/KaraokeRequestorWeb/wiki/urlrequest"> https://github.com/bee7813993/KaraokeRequestorWeb/wiki/urlrequest </a> </small>
+	</label >    
+<!---
     <div class="form-group">
       <h4 > ログインID(メールアドレス) </h4>
       <input type="text" name="nicoid"  class="form-control" 
@@ -1001,7 +1003,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
 />
     </div>  
   </div>  
-
+---!>
 
   <div class="form-group">
     <h3 > プレイヤー動作監視開始待ち時間(秒) </h3>

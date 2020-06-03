@@ -16,6 +16,13 @@ if(empty($playerpath)){
 }else{
     $MPCPATH=$playerpath;
 }
+$mpcpath_parts = pathinfo($MPCPATH);
+//var_dump($mpcpath_parts);
+//echo $ADDPATHCMD."\n";
+$ORGPATH=getenv('PATH');
+$ADDPATHCMD='PATH='.$ORGPATH.';'.$mpcpath_parts['dirname'];
+//echo $ADDPATHCMD."\n";
+putenv($ADDPATHCMD);
 $playercommandname = basename($playerpath);
 // logtocmd $playercommandname;
 if(empty($foobarpath)){
@@ -880,14 +887,17 @@ function start_song($db,$id,$addplaytimes = 0){
             }
         }else{
             if($filetype == 3){
+              global $ADDPATHCMD;
               // とりあえず動画Playerを終了する。
               mpcstop();
               sleep(2);
               if ($config_ini['playmode'] == 2){
-                $execcmd="start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+                $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
               }else {
-                $execcmd="start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+                $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
               }
+              // system('echo %PATH%');
+              // echo $execcmd;
               //exec($execcmd);
               $fp = popen($execcmd,'r');
               pclose($fp);

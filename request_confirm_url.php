@@ -181,7 +181,7 @@ shownavigatioinbar();
 <label>
 URL
 </label>
-    <input type="text" name="fullpath" id="fullpath" style="width:100%" placeholder="直接再生できるURLを指定を入れてください(youtubeのURLもOK)" value=<?php echo '"'.$filename.'"'; ?> />
+    <input type="text" name="fullpath" id="fullpath" style="width:100%" placeholder="直接再生できるURLを指定を入れてください(youtubeやニコニコ動画のURLもOK)" value=<?php echo '"'.$filename.'"'; ?> />
 <label>
 曲名
 </label>
@@ -279,7 +279,7 @@ if(is_numeric($selectid) ){
 <dl>
 <?php
 /* キー変更 */
-if($config_ini['usekeychange'] ){
+if(isset($config_ini['usekeychange']) && $config_ini['usekeychange'] == 1 ){
     print <<<EOT
 <dl>
 <dt>キー変更</dt>
