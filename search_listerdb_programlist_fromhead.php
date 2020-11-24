@@ -154,7 +154,7 @@ if( !empty($lister_dbpath) ){
 }
 
 
-print '<div class="container  ">';
+print '<div class="container mb-1">';
 print '  <div class="row ">';
 print '    <div class="col-xs-4 col-md-4  ">';
 if($displayfrom > 0 ) {
@@ -175,7 +175,7 @@ print '</div>';
 
 print '</div>';
 ?>
-
+<div class="container">&emsp;  </div>
 </body>
 </html>
 <?php

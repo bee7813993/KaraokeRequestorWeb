@@ -99,32 +99,38 @@ if(array_key_exists("tie_up_group_name", $_REQUEST)) {
 }
 
 
-$select_orderby_str ="song_name asc, found_file_size desc";
+$select_orderby_str ="found_last_write_time desc";
 
 $select_orderby = "";
-/*
-if (isset($_COOKIE['YukariListerDBOrderby'])) {
-    $select_orderby = $_COOKIE['YukariListerDBOrderby'];
-}
-*/
 if(array_key_exists("orderby", $_REQUEST)) {
     $select_orderby = $_REQUEST["orderby"];
-//    setcookie("YukariListerDBOrderby",  $select_orderby);
+    $myrequestarray["orderby"] = $select_orderby;
+    setcookie("YukariListerDBOrderby",  $select_orderby);
 }
+else if (isset($_COOKIE['YukariListerDBOrderby'])) {
+    $select_orderby = $_COOKIE['YukariListerDBOrderby'];
+    $myrequestarray["orderby"] = $select_orderby;
+}
+
 // $select_scending = 'ASC';
 $select_scending ="";
- /*
-if (isset($_COOKIE['YukariListerDBScending'])) {
-    $select_scending = $_COOKIE['YukariListerDBScending'];
-}
-*/
 if(array_key_exists("scending", $_REQUEST)) {
     $select_scending = $_REQUEST["scending"];
-//    setcookie("YukariListerDBScending",  $select_scending);
+    $myrequestarray["scending"] = $select_scending;
+    setcookie("YukariListerDBScending",  $select_scending);
 }
+
+else if (isset($_COOKIE['YukariListerDBScending'])) {
+    $select_scending = $_COOKIE['YukariListerDBScending'];
+    $myrequestarray["orderby"] = $select_orderby;
+}
+
 
 if(!empty($select_orderby) && !empty($select_scending) ) {
    $select_orderby_str = $select_orderby . ' ' . $select_scending;
+}else {
+   $select_orderby  = "found_last_write_time";
+   $select_scending = "desc";
 }
 
 
@@ -877,6 +883,7 @@ print '</div>';
 print '</div>';
 
 ?>
+<div class="container">&emsp;  </div>
 
 </body>
 </html>
