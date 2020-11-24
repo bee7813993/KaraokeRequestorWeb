@@ -47,6 +47,8 @@ EOT;
     */
     public function check_auth($checkpass) {
         $password = false;
+        // localhostからのアクセスはチェックしない
+        if($_SERVER['HTTP_HOST'] === 'localhost' && ($_SERVER['REMOTE_ADDR'] === '127.0.0.1' or $_SERVER['REMOTE_ADDR'] === '::1' )  ) return true;
         if(!empty($checkpass)){
             $password = $checkpass;
         }
