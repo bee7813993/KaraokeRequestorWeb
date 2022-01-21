@@ -114,7 +114,7 @@ function is_valid_url($url)
     return false !== filter_var($url, FILTER_VALIDATE_URL) && preg_match('@^https?+://@i', $url);
 }
 
-function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar = 4){
+function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar = 4 ,$timeoutsec_ms = 0){
 
     $errno = 0;
 
@@ -123,8 +123,13 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar
         curl_setopt($ch, CURLOPT_HEADER, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko");
+        if($timeoutsec_ms == 0 ){
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeoutsec);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeoutsec);
+        }else {
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, $timeoutsec_ms);
+        curl_setopt($ch, CURLOPT_TIMEOUT_MS, $timeoutsec_ms);
+        }
         curl_setopt($ch, CURLOPT_FAILONERROR, true);
         //リダイレクト先追従
         //Locationをたどる

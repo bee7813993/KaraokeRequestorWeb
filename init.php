@@ -1080,6 +1080,33 @@ if(array_key_exists("request_automove",$config_ini)) {
     </label>
   </div>
 
+  <div class="form-group">
+    <h3 class="radio control-label"  > <span data-toggle="tooltip" data-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >ピッタリ移動_小休止時リセット </span ></h3> 
+    <label class="checkbox-inline">
+      <input type="radio" name="request_automove_reset" value="1" 
+<?php 
+if(array_key_exists("request_automove_reset",$config_ini)) {
+  print ($config_ini["request_automove_reset"]==1)?'checked':' ' ;
+}else{
+  print 'checked';
+}
+?>
+ />
+      有効 
+    </label>
+    <label class="checkbox-inline">
+      <input type="radio" name="request_automove_reset" value="2" 
+<?php 
+if(array_key_exists("request_automove_reset",$config_ini)) {
+  print ($config_ini["request_automove_reset"]!=1)?'checked':' ' ;
+}
+?>
+ /> 
+      無効
+    </label>
+  </div>
+
+
 <!---- 縛り曲リストの設定 ----->
   <h3> <span data-toggle="tooltip" data-placement="top" title="検索予約メニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
   <?php 

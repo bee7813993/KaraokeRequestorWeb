@@ -262,6 +262,9 @@ request.send("");
 
 // common command
 function mpccmd_num(cmdnum){
+if (cmdnum === undefined){
+   var cmdnum = document.getElementById('MPCCODE').value
+}
 var request = createXMLHttpRequest();
 url=playerurl2 + "?cmd=" + cmdnum;
 request.open("GET", url, true);

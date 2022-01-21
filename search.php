@@ -92,7 +92,13 @@ EOD;
 }
 */
 ?>
-  <title>動画検索TOP</title>
+  <title><?php 
+//print($config_ini['roomurl']);
+if(!empty($config_ini['roomurl']))
+{
+$roomnames=array_keys($config_ini['roomurl']);
+print($roomnames[0])."：";
+}?>動画検索TOP</title>
   <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>

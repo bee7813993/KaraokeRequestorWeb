@@ -35,7 +35,13 @@ $playerkind = getcurrentplayer();
     <![endif]-->
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<title>プレイヤーコントローラー</title>
+<title><?php 
+//print($config_ini['roomurl']);
+if(!empty($config_ini['roomurl']))
+{
+$roomnames=array_keys($config_ini['roomurl']);
+print($roomnames[0])."：";
+}?>プレイヤーコントローラー</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>

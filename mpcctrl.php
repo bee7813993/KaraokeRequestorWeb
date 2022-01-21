@@ -26,7 +26,8 @@
       }else if($l_cmd == "start_first"){
         start_first_mpc();
       }else {
-          command_mpc($l_cmd);
+          $r = command_mpc($l_cmd);
+          print $r;
       }
       die();
   }
@@ -150,17 +151,25 @@ print '</div >';
         <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
           <div class="panel-body">
             <div class="row">
+                <div class="col-xs-4 text-right"> ←映像を遅く←
+                </div >
+                <div class="col-xs-4 text-center"> 音ズレ修正
+                </div >
+                <div class="col-xs-4 text-left"> →映像を早く→
+                </div >
+            </div>
+            <div class="row">
                 <div class="col-xs-3">
-                <button type="submit" value="(-100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m100()" >(-100ms)<br>音ズレ修正</button>
+                <button type="submit" value="(-100ms)" class=" pcdelay btn btn-default" onClick="song_audiodelay_m100()" >(-100ms)</button>
                 </div >
                 <div class="col-xs-3">
-                <button type="submit" value="(-10ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_m10()" >(-10ms)<br>音ズレ修正</button>
+                <button type="submit" value="(-10ms)" class=" pcdelay btn btn-default" onClick="song_audiodelay_m10()" >(-10ms)</button>
                 </div >
                 <div class="col-xs-3">
-                <button type="submit" value="(+10ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_p10()" >(+10ms)<br>音ズレ修正</button>
+                <button type="submit" value="(+10ms)" class=" pcdelay btn btn-default" onClick="song_audiodelay_p10()" >(+10ms)</button>
                 </div >
                 <div class="col-xs-3">
-                <button type="submit" value="(+100ms)音ズレ修正" class=" pcdelay btn btn-default" onClick="song_audiodelay_p100()" >(+100ms)<br>音ズレ修正</button>
+                <button type="submit" value="(+100ms)" class=" pcdelay btn btn-default" onClick="song_audiodelay_p100()" >(+100ms)</button>
                 </div >
             </div>
             <div class="row">
@@ -191,6 +200,17 @@ print '</div >';
                 </div >
                 <div class="col-xs-4">
                 <button type="submit" value="ミュートOn/Off" class=" pcdelay btn btn-default" onClick="mpccmd_num('909')" >ミュートOn/Off</button>
+                </div >
+                <div class="col-xs-4">
+                <button type="submit" value="左右反転" class=" pcdelay btn btn-default" onClick="mpccmd_num(880)" >左右反転</button>
+                </div >
+            </div>
+            <div class="row">
+                <div class="col-xs-2">
+                <input type="text" id="MPCCODE">
+                </div >
+                <div class="col-xs-2">
+                <button type="submit" value="任意コード送出" class=" pcdelay btn btn-default" onClick="mpccmd_num()" >任意コード送出</button>
                 </div >
             </div>
             <div class="row">

@@ -64,8 +64,13 @@ function getsonginfofromfilename($filename){
   $sql = 'SELECT * FROM t_found '. $select_where.';';
   @$songdbdata = $lister->select($sql);
   if(!$songdbdata){
+      $select_where = 'WHERE found_path LIKE '. $listerdb ->quote('%'.basename($filename).'%');
+      $sql = 'SELECT * FROM t_found '. $select_where.';';
+      @$songdbdata = $lister->select($sql);
+      if(!$songdbdata){
 //     print $sql;
-     return false;
+         return false;
+      }
 }
 return $songdbdata;
 }
@@ -132,7 +137,7 @@ EOL;
   
   foreach($allrequest as $row){
     $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-    $songdataarray = $songdataarray_all[0];
+    if(isset($songdataarray)) $songdataarray = $songdataarray_all[0];
     print '<tr>';
     print ' <td>';
     print   $num;
@@ -144,7 +149,8 @@ EOL;
     print   $row["songfile"];
     }
     if(!empty($songdataarray["found_comment"] ) ){
-    print '【'.$songdataarray["found_comment"].'】' ;
+    $showcomment=preg_replace('#//\.\+\$#', "",$songdataarray["found_comment"]);
+    print '【'.$showcomment.'】' ;
     }    
 if($row['keychange'] > 0){
     print '<br><div style="text-align: right;;font-weight: normal;"> キー変更：+'.$row['keychange'].'</div>';

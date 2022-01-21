@@ -37,7 +37,14 @@ if(array_key_exists("username", $_REQUEST)) {
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
-<title>リクエスト一覧</title>
+<title>
+<?php 
+//print($config_ini['roomurl']);
+if(!empty($config_ini['roomurl']))
+{
+$roomnames=array_keys($config_ini['roomurl']);
+print($roomnames[0])."：";
+}?>リクエスト一覧</title>
 <link rel="stylesheet" type="text/css" href="css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script type="text/javascript" charset="utf8" src="js/jquery.dataTables.js"></script>
@@ -222,7 +229,6 @@ print <<<EOT
 EOT;
 }
 ?>
-
 <hr />
 
 <table id="request_table" class="cell-border">

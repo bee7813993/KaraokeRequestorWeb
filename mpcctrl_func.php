@@ -70,7 +70,7 @@ function command_mpc($num){
     
     $res = TRUE;
     $requesturl=$MPCCMDURL.'?wm_command='.$num;
-    $res = file_get_html_with_retry($requesturl);
+    $res = file_get_html_with_retry($requesturl,5,0,4,100);
     switch($num) {
         case 901:
         case 902:

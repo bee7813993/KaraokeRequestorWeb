@@ -171,10 +171,29 @@ function logtocmd_dbg($msg){
 //  logtocmd($msg);
 }
 
+function mpcpscheck(){
+   global $MPCCMDURL;
+   global $playercommandname;
+   $pscheck_cmd='tasklist /fi "imagename eq '.$playercommandname.'"';
+   exec($pscheck_cmd, $psresult );
+   sleep(1);
+   $process_found = 0;
+   
+   foreach( $psresult as $psline ){
+     $pos = strpos($psline,$playercommandname);
+     if ( $pos !== FALSE) {
+        $process_found = 1;
+     }
+   }
+   return $process_found;
+
+}
+
 function mpcstop(){
    global $MPCCMDURL;
    global $playercommandname;
    $pscheck_cmd='tasklist /fi "imagename eq '.$playercommandname.'"';
+   $pskill_cmd='TASKKILL /F /fi "imagename eq '.$playercommandname.'"';
    exec($pscheck_cmd, $psresult );
    sleep(1);
    
@@ -191,20 +210,23 @@ function mpcstop(){
        for($loopcount = 0 ; $loopcount < 2 ; $loopcount ++){
 //          $org_timeout = ini_get('default_socket_timeout');
 //          ini_set('default_socket_timeout', 2);
-          $mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=816", 5);
+          $mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=816", 10,0,4,500);
 //          ini_set('default_socket_timeout', $org_timeout);
           if( $mpcstat === FALSE) {
+              exec($pskill_cmd, $psresult );
               sleep(1);
               continue;
           }else{
               // finish check
-              for($checkcount = 0 ; $checkcount < 5 ; $checkcount ++){
+              for($checkcount = 0 ; $checkcount < 10 ; $checkcount ++){
                   exec($pscheck_cmd, $psresult );
                   foreach( $psresult as $psline ){
                       $pos = strpos($psline,$playercommandname);
                       if ( $pos === FALSE) {
                           break;
                       }else {
+                          //$mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=816",  10,0,4,500);
+                          exec($pskill_cmd, $psresult );
                           sleep(1);
                           continue;
                       }
@@ -285,13 +307,17 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
      global $MPCCMDURL;
      global $MPCFILEOPENURL;
 
+
     if( $playmode == 2) {
             mpc_waiting_start($db, $id);
     }
+
+
+
     if(mpcrunningcheck($playerpath)===FALSE){
         startmpcandwait($playerpath,$waittime);
     }
-
+   
    // wait mpc web 
    file_get_html_with_retry($MPCCMDURL);
 
@@ -309,6 +335,7 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
            break;
        }
     }
+
 /*
     if( $playmode == 2) {
         //一時停止する
@@ -890,7 +917,19 @@ function start_song($db,$id,$addplaytimes = 0){
               global $ADDPATHCMD;
               // とりあえず動画Playerを終了する。
               mpcstop();
-              sleep(2);
+			              $mpcpsflg = mpcpscheck();
+			              print("mpcps1:".$mpcpsflg);
+			              if($mpcpsflg){
+			              print("mpcps2:".$mpcpsflg);
+			               sleep(1);
+			               mpcstop();
+			               $mpcpsflg = mpcpscheck();
+			               if($mpcpsflg){
+			              print("mpcps3:".$mpcpsflg);
+			                sleep(1);
+			                mpcstop();
+			               }
+			              }
               if ($config_ini['playmode'] == 2){
                 $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
               }else {
@@ -906,7 +945,6 @@ function start_song($db,$id,$addplaytimes = 0){
               if(mpcrunningcheck($playerpath)===FALSE){
                   startmpcandwait($playerpath,1);
               }
-              mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
             }
             /**** ここに再生前にPlayer操作を行う処理を入れる ****/
             /* key change */
@@ -924,12 +962,41 @@ function start_song($db,$id,$addplaytimes = 0){
             }
             
             if($needpause) {
-                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888'); // 一時停止を投げてみる（まず失敗する）
-                file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-                file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+			   // start Playerをコマンドライン経由起動に一時的に変更する 
+			        if(true){
+			              global $ADDPATHCMD;
+			              // とりあえず動画Playerを終了する。
+			              mpcstop();
+			              $mpcpsflg = mpcpscheck();
+			              print("mpcps1:".$mpcpsflg);
+			              if($mpcpsflg){
+			              print("mpcps2:".$mpcpsflg);
+			               sleep(1);
+			               mpcstop();
+			               $mpcpsflg = mpcpscheck();
+			               if($mpcpsflg){
+			              print("mpcps3:".$mpcpsflg);
+			                sleep(1);
+			                mpcstop();
+			               }
+			              }
+			              
+			              $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+						$fp = popen($execcmd,'r');
+						pclose($fp);			              
+			        }else {
+						 mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
+						 file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888',50,0,4,100); // 一時停止を投げてみる（まず失敗する）
+						 file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+					 file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+                    }
+			   // end Playerをコマンドライン経由起動に一時的に変更する 
+			}else {
+				mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
+			   // end Playerをコマンドライン経由起動に一時的に変更する 
             }
             if($needpause)
-                file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888'); // 一時停止をもう一度投げてみる
+            //   file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888'); // 一時停止をもう一度投げてみる
             //sleep(5.5);
             if(array_key_exists("keychange" , $row)){
                 mpc_keychange($row["keychange"]);

@@ -59,8 +59,14 @@ function getsonginfofromfilename($filename){
   $sql = 'SELECT * FROM t_found '. $select_where.';';
   @$songdbdata = $lister->select($sql);
   if(!$songdbdata){
+      $select_where = 'WHERE found_path LIKE '. $listerdb ->quote('%'.basename($filename).'%');
+      $sql = 'SELECT * FROM t_found '. $select_where.';';
+      @$songdbdata = $lister->select($sql);
+      if(!$songdbdata){
 //     print $sql;
-     return false;
+         return false;
+      }
+
 }
 return $songdbdata;
 }
@@ -98,11 +104,12 @@ if(array_key_exists("listerDBPATH",$config_ini) ) {
     $csvarray[] = array( "順番" , "曲名（ファイル名）" ,"キー", "作品名" ,"歌手名" , "歌った人" ,  "コメント" );
     foreach($allrequest as $row){
     $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-    $songdataarray = $songdataarray_all[0];
+    if(isset($songdataarray)) $songdataarray = $songdataarray_all[0];
     if(!empty($songdataarray["song_name"] ) ){
         $songname=$songdataarray["song_name"] ;
         if(!empty($songdataarray["found_comment"] ) ){
-            $songname=$songname.'【'.$songdataarray["found_comment"].'】' ;
+            $showcomment=preg_replace('#//\.\+\$#', "",$songdataarray["found_comment"]);
+            $songname=$songname.'【'.$showcomment.'】' ;
         }
     }else{
         $songname=$row["songfile"];
