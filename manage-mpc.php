@@ -1004,6 +1004,7 @@ function start_song($db,$id,$addplaytimes = 0){
             if(array_key_exists("track" , $row)){
                 mpc_trackchange($row["track"]);
             }
+            commentpost_v4("rqlst", "0", $commenturl);
             /* track change */
             // BGVモードではmuteにする。
             $loop = check_request_loop($db,$id);
@@ -1149,7 +1150,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes,$commenturl){
        $totaltime_a =  explode(':', $etime_a[1] );
        $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
-       if($startonce && ( $playtime > ($totaltime - 4) ) ){
+       if($startonce && ( $playtime > ($totaltime - 2) ) ){
            commentpost_v4("rqlst", "1", $commenturl);
            print ($mpsctat_array[2]);
            echo ', ';
@@ -1158,7 +1159,7 @@ function runningcheck_mpc($db,$id,$playerchecktimes,$commenturl){
            print ($totaltime);
            echo "\n";
            if($totaltime != 0 ){
-               sleep(4);
+               sleep(2);
                break;
            }
        }
