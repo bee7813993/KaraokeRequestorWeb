@@ -995,7 +995,32 @@ function commentpost_v3($nm,$col,$size,$msg,$commenturl)
     );
 
     $curl=curl_init(($commenturl));
-    curl_setopt($curl,CURLOPT_POST, TRUE);
+    curl_setopt($curl, CURLOPT_POST, TRUE);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
+    $output= curl_exec($curl);
+   
+    if($output === false){
+        return false;
+    }else{
+        return true;
+    }    
+}
+
+function commentpost_v4($cmd,$msg,$commenturl)
+{
+    // $cmd は 5 文字固定でなくてはならない
+    if(mb_strlen($cmd) != 5) {
+        return false;
+    }
+
+    $POST_DATA = array(
+        'cmd' => $cmd,
+        'msg' => $msg
+    );
+
+    $curl=curl_init(($commenturl));
+    curl_setopt($curl, CURLOPT_POST, TRUE);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);

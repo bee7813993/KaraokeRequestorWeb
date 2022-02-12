@@ -28,6 +28,11 @@ if(!isset($sz)){
     if(array_key_exists("sz", $_REQUEST)) {$sz = $_REQUEST['sz']; }
 }
 
+if(!isset($cmd)){
+    $cmd="";
+    if(array_key_exists("cmd", $_REQUEST)) {$cmd = $_REQUEST['cmd']; }
+}
+
 if(!isset($p)){
     $p="";
     if(array_key_exists("p", $_REQUEST)) {$p = $_REQUEST['p']; }
@@ -42,6 +47,7 @@ $msg = stripslashes($msg);
 $nm = stripslashes($nm);
 $col = stripslashes($col);
 $sz = stripslashes($sz);
+$cmd = stripslashes($cmd);
 $room = stripslashes($room);
 $p = stripslashes($p);
 
@@ -59,13 +65,19 @@ $p = stripslashes($p);
 
 	if($msg != ""){
 		// コメビューに POST 送信
+		date_default_timezone_set('Asia/Tokyo');
 		$allrequest = array(
 			'size' => $sz,
 			'col' => $col,
 			'msg' => $msg,
+			'cmd' => $cmd,
 			'regdate' => date('Y-m-d H:i:s'),
 		);
-		$buf = make_comment_buf($allrequest, '3');
+		if($cmd == "") {
+			$buf = make_comment_buf($allrequest, '3');
+		} else {
+			$buf = make_comment_buf($allrequest, '4');
+		}
 		$data = array(
 			'Comment' => $buf,
 		);

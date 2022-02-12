@@ -3,3 +3,15 @@
 foobar2000/
 !foobar2000/foo_httpcontrol_data/karaokectrl/*
 gitcmd/*
+
+# 実行時に生成されるデータベース
+cms/comment.db
+prioritydb.db
+request.db
+updatenotice.db
+
+# ゆかりすたー 4 NEBULA により生成されるフォルダー
+list/
+
+# Visual Studio cache/options directory
+.vs/
