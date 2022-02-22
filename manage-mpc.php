@@ -1004,6 +1004,7 @@ function start_song($db,$id,$addplaytimes = 0){
             if(array_key_exists("track" , $row)){
                 mpc_trackchange($row["track"]);
             }
+            commentpost_v4("rqlst", "0", $commenturl);
             /* track change */
             // BGVモードではmuteにする。
             $loop = check_request_loop($db,$id);
@@ -1041,7 +1042,7 @@ function start_song($db,$id,$addplaytimes = 0){
     return true;
 }
 
-function check_end_song($db,$id,$playerchecktimes,$playmode){
+function check_end_song($db,$id,$playerchecktimes,$playmode,$commenturl){
 
     $exit = 1;
     $kind = check_filetype ($db,$id);
@@ -1062,7 +1063,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
        }
        
        if( $kind === 1 || $kind === 3){
-           runningcheck_mpc($db,$id,$playerchecktimes);
+           runningcheck_mpc($db,$id,$playerchecktimes,$commenturl);
        }else if( $kind === 2) {
            runningcheck_audio($db,$id,$playerchecktimes);
        }else {
@@ -1106,7 +1107,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode){
 
 }
 
-function runningcheck_mpc($db,$id,$playerchecktimes){
+function runningcheck_mpc($db,$id,$playerchecktimes,$commenturl){
 
    global $MPCSTATURL;
    // get MPC status
@@ -1149,15 +1150,16 @@ function runningcheck_mpc($db,$id,$playerchecktimes){
        $totaltime_a =  explode(':', $etime_a[1] );
        $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
-       if($startonce && ( $playtime > ($totaltime - 4) ) ){
-       print ($mpsctat_array[2]);
+       if($startonce && ( $playtime > ($totaltime - 2) ) ){
+           commentpost_v4("rqlst", "1", $commenturl);
+           print ($mpsctat_array[2]);
            echo ', ';
            print ($playtime);
            echo ':';
            print ($totaltime);
            echo "\n";
            if($totaltime != 0 ){
-               sleep(4);
+               sleep(2);
                break;
            }
        }
@@ -1485,7 +1487,7 @@ while(1){
                }
            }else{
                logtocmd_dbg( 'Enter check_end_song'."\n");
-               check_end_song($db,$l_id,$playerchecktimes,$playmode);
+               check_end_song($db,$l_id,$playerchecktimes,$playmode,$commenturl);
                logtocmd_dbg( 'Exit check_end_song'."\n");
            }
            //logtocmd 'running check finished 終了'."\n";
