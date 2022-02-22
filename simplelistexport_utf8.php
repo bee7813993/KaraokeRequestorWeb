@@ -103,8 +103,9 @@ if(array_key_exists("listerDBPATH",$config_ini) ) {
 // りすたーDBに登録された情報が1つでもある
     $csvarray[] = array( "順番" , "曲名（ファイル名）" ,"キー", "作品名" ,"歌手名" , "歌った人" ,  "コメント" );
     foreach($allrequest as $row){
+    $songdataarray = array();
     $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-    if(isset($songdataarray)) $songdataarray = $songdataarray_all[0];
+    if(isset($songdataarray_all[0])) $songdataarray = $songdataarray_all[0];
     if(!empty($songdataarray["song_name"] ) ){
         $songname=$songdataarray["song_name"] ;
         if(!empty($songdataarray["found_comment"] ) ){
