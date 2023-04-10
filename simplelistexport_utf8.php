@@ -109,7 +109,8 @@ if(array_key_exists("listerDBPATH",$config_ini) ) {
     if(!empty($songdataarray["song_name"] ) ){
         $songname=$songdataarray["song_name"] ;
         if(!empty($songdataarray["found_comment"] ) ){
-            $showcomment=preg_replace('#//\.\+\$#', "",$songdataarray["found_comment"]);
+            $showcomment=preg_replace('/\,\/\/.*/', "",$songdataarray["found_comment"]);
+            if(!empty($showcomment))
             $songname=$songname.'【'.$showcomment.'】' ;
         }
     }else{

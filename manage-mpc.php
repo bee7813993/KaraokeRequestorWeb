@@ -963,7 +963,7 @@ function start_song($db,$id,$addplaytimes = 0){
             
             if($needpause) {
 			   // start Playerをコマンドライン経由起動に一時的に変更する 
-			        if(true){
+			        if(false){
 			              global $ADDPATHCMD;
 			              // とりあえず動画Playerを終了する。
 			              mpcstop();
@@ -986,25 +986,25 @@ function start_song($db,$id,$addplaytimes = 0){
 						pclose($fp);			              
 			        }else {
 						 mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
-						 file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888',50,0,4,100); // 一時停止を投げてみる（まず失敗する）
 						 file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
 					 file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+						 file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888',50,0,4,100); // 一時停止を投げてみる（まず失敗する）
                     }
 			   // end Playerをコマンドライン経由起動に一時的に変更する 
 			}else {
 				mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
 			   // end Playerをコマンドライン経由起動に一時的に変更する 
             }
-            if($needpause)
-            //   file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888'); // 一時停止をもう一度投げてみる
-            //sleep(5.5);
+
             if(array_key_exists("keychange" , $row)){
                 mpc_keychange($row["keychange"]);
             }
             if(array_key_exists("track" , $row)){
                 mpc_trackchange($row["track"]);
             }
-            commentpost_v4("rqlst", "0", $commenturl);
+            if($needpause)
+               file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=start_first'); // 最初から再生しなおす
+            
             /* track change */
             // BGVモードではmuteにする。
             $loop = check_request_loop($db,$id);
@@ -1042,7 +1042,7 @@ function start_song($db,$id,$addplaytimes = 0){
     return true;
 }
 
-function check_end_song($db,$id,$playerchecktimes,$playmode,$commenturl){
+function check_end_song($db,$id,$playerchecktimes,$playmode){
 
     $exit = 1;
     $kind = check_filetype ($db,$id);
@@ -1063,7 +1063,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode,$commenturl){
        }
        
        if( $kind === 1 || $kind === 3){
-           runningcheck_mpc($db,$id,$playerchecktimes,$commenturl);
+           runningcheck_mpc($db,$id,$playerchecktimes);
        }else if( $kind === 2) {
            runningcheck_audio($db,$id,$playerchecktimes);
        }else {
@@ -1107,7 +1107,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode,$commenturl){
 
 }
 
-function runningcheck_mpc($db,$id,$playerchecktimes,$commenturl){
+function runningcheck_mpc($db,$id,$playerchecktimes){
 
    global $MPCSTATURL;
    // get MPC status
@@ -1150,16 +1150,15 @@ function runningcheck_mpc($db,$id,$playerchecktimes,$commenturl){
        $totaltime_a =  explode(':', $etime_a[1] );
        $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
-       if($startonce && ( $playtime > ($totaltime - 2) ) ){
-           commentpost_v4("rqlst", "1", $commenturl);
-           print ($mpsctat_array[2]);
+       if($startonce && ( $playtime > ($totaltime - 4) ) ){
+       print ($mpsctat_array[2]);
            echo ', ';
            print ($playtime);
            echo ':';
            print ($totaltime);
            echo "\n";
            if($totaltime != 0 ){
-               sleep(2);
+               sleep(4);
                break;
            }
        }
@@ -1487,7 +1486,7 @@ while(1){
                }
            }else{
                logtocmd_dbg( 'Enter check_end_song'."\n");
-               check_end_song($db,$l_id,$playerchecktimes,$playmode,$commenturl);
+               check_end_song($db,$l_id,$playerchecktimes,$playmode);
                logtocmd_dbg( 'Exit check_end_song'."\n");
            }
            //logtocmd 'running check finished 終了'."\n";

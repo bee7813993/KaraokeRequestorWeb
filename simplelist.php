@@ -150,8 +150,9 @@ EOL;
     print   $row["songfile"];
     }
     if(!empty($songdataarray["found_comment"] ) ){
-    $showcomment=preg_replace('#//\.\+\$#', "",$songdataarray["found_comment"]);
-    print '【'.$songdataarray["found_comment"].$showcomment.'】' ;
+    $showcomment=preg_replace('/\,\/\/.*/', "",$songdataarray["found_comment"]);
+    if(!empty($showcomment))
+    print '【'.$showcomment.'】' ;
     }    
 if($row['keychange'] > 0){
     print '<br><div style="text-align: right;;font-weight: normal;"> キー変更：+'.$row['keychange'].'</div>';
