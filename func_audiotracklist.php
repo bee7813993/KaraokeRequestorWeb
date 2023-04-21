@@ -72,6 +72,7 @@ function getaudiotracklist($filename){
        return $audiotracklist;
     }
 
+    //var_dump($info);
     $tracklist = $info['quicktime']['moov']['subatoms'];
     foreach ($tracklist as $trackinfo){
        if($trackinfo['name'] !== 'trak' ) continue;
@@ -164,9 +165,9 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8,$lister_dbpath=''){
       $json = file_get_html_with_retry($jsonurl, 5);
       if($json != false){
           $decode = json_decode($json, true);
-          if($decode != NULL && isset($decode{'results'}{'0'})){
-            if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
-                $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+          if($decode != NULL && isset($decode['results']['0'])){
+            if(array_key_exists('path',$decode['results']['0']) && array_key_exists('name',$decode['results']['0'])){
+                $filepath_utf8 = $decode['results']['0']['path'] . "\\" . $decode['results']['0']['name'];
                 $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
             }
           }
@@ -178,8 +179,8 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8,$lister_dbpath=''){
           // logtocmd $jsonurl;
           $json = file_get_html_with_retry($jsonurl, 5);
           $decode = json_decode($json, true);
-          if( !isset($decode{'results'}{'0'}{'name'}) ) return false;
-          $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+          if( !isset($decode['results']['0']['name']) ) return false;
+          $filepath = $decode['results']['0']['path'] . "\\" . $decode['results']['0']['name'];
           $filepath_utf8= $filepath;
           $filepath = mb_convert_encoding($filepath,"cp932");
           logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");

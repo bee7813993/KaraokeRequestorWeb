@@ -844,9 +844,9 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
       $json = file_get_html_with_retry($jsonurl, 5);
       if($json != false){
           $decode = json_decode($json, true);
-          if($decode != NULL && isset($decode{'results'}{'0'})){
-            if(array_key_exists('path',$decode{'results'}{'0'}) && array_key_exists('name',$decode{'results'}{'0'})){
-                $filepath_utf8 = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+          if($decode != NULL && isset($decode['results']['0'])){
+            if(array_key_exists('path',$decode['results']['0']) && array_key_exists('name',$decode['results']['0'])){
+                $filepath_utf8 = $decode['results']['0']['path'] . "\\" . $decode['results']['0']['name'];
                 $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
             }
           }
@@ -858,8 +858,8 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
           // logtocmd $jsonurl;
           $json = file_get_html_with_retry($jsonurl, 5);
           $decode = json_decode($json, true);
-          if( !isset($decode{'results'}{'0'}{'name'}) ) return false;
-          $filepath = $decode{'results'}{'0'}{'path'} . "\\" . $decode{'results'}{'0'}{'name'};
+          if( !isset($decode['results']['0']['name']) ) return false;
+          $filepath = $decode['results']['0']['path'] . "\\" . $decode['results']['0']['name'];
           $filepath_utf8= $filepath;
           $filepath = mb_convert_encoding($filepath,"cp932");
           logtocmd ('代わりに「'.$filepath_utf8.'」を再生します'."\n");

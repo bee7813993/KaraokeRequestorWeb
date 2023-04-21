@@ -19,7 +19,7 @@ function startautoplay()
 
 function checkautoplay()
 {
-  $pscheck_cmd='tasklist /FI "WINDOWTITLE eq karaokeautorun*" | find /c "cmd.exe"';
+  $pscheck_cmd='tasklist /FI "WINDOWTITLE eq karaokeautorun*" | find /c ".exe"';
   exec($pscheck_cmd, $psresult );
   return $psresult[0];
 }
