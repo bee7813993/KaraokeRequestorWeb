@@ -1148,28 +1148,7 @@ EOD;
                  }
              }
          }
-/**
-         
-         reset($config_ini["roomurl"]);
-         var_dump($config_ini["roomurl"]);
-         $roominfo = each($config_ini["roomurl"]);
-         
-         print '    <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown" href="">'.$roominfo["key"] .'部屋  <b class="caret"></b></a>';
-         print '    <ul class="dropdown-menu">';
-         reset($config_ini["roomurl"]);
-         while($roominfo = each($config_ini["roomurl"])){
-             if(!empty($roominfo["value"])  ) {
-                 if(array_key_exists("roomurlshow",$config_ini) && array_key_exists($roominfo["key"],$config_ini["roomurlshow"]) &&  $config_ini["roomurlshow"][$roominfo["key"]] == 1) {
-                   print '      <li id="'.$roominfo["key"].'room" ><a href="'.urldecode($roominfo["value"]).'">'.$roominfo["key"].'</a></li>'."\n";
-                 }
-                 print '<script type="text/javascript">'."\n";
-                 print '$(document).ready( function(){'."\n";
-                 print 'check_yukari_available(\''.$roominfo["value"].'\', "'.$roominfo["key"].'room" );'."\n";
-                 print '});'."\n";
-                 print '</script>'."\n";
-             }
-         }
-                 **/
+
          print '    </ul>';
          print '    </li>';         
          print '    <a class="navbar-brand" href="search.php">検索</a>';

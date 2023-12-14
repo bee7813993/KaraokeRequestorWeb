@@ -275,7 +275,10 @@ function filelistfromsong($filelist){
           print '<strong>';
       print '歌手名：';
           print '</strong>';
-      print '<a href ="search_listerdb_songlist.php?artist='.urlencode($str).'&'.$linkoption.'">' . $str .' </a>';
+          $artistlist = explode(",",$str);
+          foreach ( $artistlist as $v){
+              print '<a href ="search_listerdb_songlist.php?artist='.urlencode($v).'&'.$linkoption.'&match=part">' . $v .' </a>&nbsp;';
+          }
       }
       $str =   get_first_clminfo($filelist,'program_name');
       if(!empty($str)){
@@ -726,7 +729,11 @@ print '    <dt>';
 print '歌い手';
 print '    </dt>';
 print '    <dd>';
-print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&'.$linkoption.'">' . $program['song_artist'] .' </a>';
+$artistlist = explode(",",$program['song_artist']);
+foreach ( $artistlist as $v){
+print '<a href ="search_listerdb_songlist.php?artist='.urlencode($v).'&'.$linkoption.'&match=part">' . $v .' </a>&nbsp;';
+}
+//print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&'.$linkoption.'">' . $program['song_artist'] .' </a>';
 // http://localhost/search_listerdb_filelist.php?artist=歌手名&lister_dbpath=List.sqlite3
 print '    </dd>';
 if(!empty($program['found_track'])){
