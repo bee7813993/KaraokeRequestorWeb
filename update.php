@@ -127,6 +127,33 @@ if(array_key_exists("loop", $_REQUEST)) {
     }
     $updatestring = $updatestring.' loop = '. $db->quote($l_value) . ' ';
 }
+
+$l_value = "";
+if(array_key_exists("keychange", $_REQUEST)) {
+    $l_value = $_REQUEST["keychange"];
+    if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
+        $updatestring = $updatestring.' ,';
+    }
+    $updatestring = $updatestring.' keychange = '. $db->quote($l_value) . ' ';
+}
+
+$l_value = "";
+if(array_key_exists("track", $_REQUEST)) {
+    $l_value = $_REQUEST["track"];
+    if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
+        $updatestring = $updatestring.' ,';
+    }
+    $updatestring = $updatestring.' track = '. $db->quote($l_value) . ' ';
+}
+
+$l_value = "";
+if(array_key_exists("pause", $_REQUEST)) {
+    $l_value = $_REQUEST["pause"];
+    if(strlen($updatestring) > 0 ){  // 2項目目以降コンマが必要
+        $updatestring = $updatestring.' ,';
+    }
+    $updatestring = $updatestring.' pause = '. $db->quote($l_value) . ' ';
+}
 print  $updatestring;
 if(strlen($updatestring) > 0){
     try{

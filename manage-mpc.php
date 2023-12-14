@@ -471,8 +471,9 @@ function mpc_keychange($changekey){
      file_get_html_with_retry('http://localhost/mpcctrl.php');
      return;
     }
+//    sleep(1);
     $mpccmd = $MPCKEYCHANGEURL.$changekey;
-    file_get_html_with_retry($mpccmd);
+    file_get_html_with_retry($mpccmd,20,0,4,500);
 }
 
 function mpc_trackchange($changetrack){
@@ -996,11 +997,11 @@ function start_song($db,$id,$addplaytimes = 0){
 			   // end Playerをコマンドライン経由起動に一時的に変更する 
             }
 
-            if(array_key_exists("keychange" , $row)){
-                mpc_keychange($row["keychange"]);
-            }
             if(array_key_exists("track" , $row)){
                 mpc_trackchange($row["track"]);
+            }
+            if(array_key_exists("keychange" , $row)){
+                mpc_keychange($row["keychange"]);
             }
             commentpost_v4("rqlst", "0", $commenturl);
             if($needpause)

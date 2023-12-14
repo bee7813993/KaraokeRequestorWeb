@@ -75,7 +75,7 @@ return $songdbdata;
 function listerdbfoundcheck($alldata){
    foreach($alldata as $row){
      $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-     // if( $songdataarray_all === false ) return false;
+     if( $songdataarray_all === false ) continue;
      $songdataarray = $songdataarray_all[0];
      if(!empty($songdataarray["song_name"]) ) {
        return true;

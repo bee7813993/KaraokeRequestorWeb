@@ -154,6 +154,7 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar
         $errno = curl_errno($ch);
         // print $timeoutsec;
         curl_close($ch);
+        usleep(100000);
     }
     if ($loopcount === $retrytimes) {
         $error_message = curl_strerror($errno);
@@ -1133,7 +1134,24 @@ function check_yukari_available ( yukarihost , id ) {
 EOD;
          print '  <ul class="nav navbar-nav navbar-brand-dropdown">';
          print '    <li class="dropdown">';
+         
+         $displayonece = 0;
+         foreach($config_ini["roomurl"] as $key => $value ) {
+             if( $displayonece == 0) {
+                 print '    <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown" href="">'.$key .'部屋  <b class="caret"></b></a>';
+                 print '    <ul class="dropdown-menu">';
+                 $displayonece = 1;
+             }
+             if(!empty($value)  ) {
+                 if(array_key_exists("roomurlshow",$config_ini) && array_key_exists($key,$config_ini["roomurlshow"]) &&  $config_ini["roomurlshow"][$key] == 1) {
+                 print '      <li id="'.$key.'room" ><a href="'.urldecode($value).'">'.$key.'</a></li>'."\n";
+                 }
+             }
+         }
+/**
+         
          reset($config_ini["roomurl"]);
+         var_dump($config_ini["roomurl"]);
          $roominfo = each($config_ini["roomurl"]);
          
          print '    <a href="#" class="navbar-brand dropdown-toggle" data-toggle="dropdown" href="">'.$roominfo["key"] .'部屋  <b class="caret"></b></a>';
@@ -1144,15 +1162,14 @@ EOD;
                  if(array_key_exists("roomurlshow",$config_ini) && array_key_exists($roominfo["key"],$config_ini["roomurlshow"]) &&  $config_ini["roomurlshow"][$roominfo["key"]] == 1) {
                    print '      <li id="'.$roominfo["key"].'room" ><a href="'.urldecode($roominfo["value"]).'">'.$roominfo["key"].'</a></li>'."\n";
                  }
-/**
                  print '<script type="text/javascript">'."\n";
                  print '$(document).ready( function(){'."\n";
                  print 'check_yukari_available(\''.$roominfo["value"].'\', "'.$roominfo["key"].'room" );'."\n";
                  print '});'."\n";
                  print '</script>'."\n";
-                 **/
              }
          }
+                 **/
          print '    </ul>';
          print '    </li>';         
          print '    <a class="navbar-brand" href="search.php">検索</a>';

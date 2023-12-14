@@ -264,6 +264,10 @@ if( !empty($anyword ) ) {
     $wherefilesearch = make_select_andsearch($listerdb,'tie_up_group_name', $anyword);
     $select_where = add_select_cond_or($select_where, $wherefilesearch);
 
+    // コメント
+    $wherefilesearch = make_select_andsearch($listerdb,'found_comment', $anyword);
+    $select_where = add_select_cond_or($select_where, $wherefilesearch);
+
     // isnull追加
     if($song_name == 'isnull' ) {
        $select_where = '( ' . $select_where .' ) AND song_name IS NULL ';
