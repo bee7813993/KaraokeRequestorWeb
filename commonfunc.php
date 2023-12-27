@@ -472,7 +472,14 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
         $prioritylist = prioritydb_get($priority_db);
 		
 		// IPv6check
-	    $askeverythinghost = $everythinghost;
+		// IPv6check
+		if(isIPv4($everythinghost)){
+			$ipvar = 4;
+		}else{
+			$ipvar = 6;
+		}
+		
+		$askeverythinghost = $everythinghost;
 		
 		if(array_key_exists("max_filesize", $config_ini)){
 		  if( $config_ini["max_filesize"] > 0 ){
@@ -549,10 +556,23 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		
         $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $orderstr . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $length . '&offset=' .$start.'';
 
-        $json = file_get_html_with_retry($jsonurl, 5, 30);
+        $json = file_get_html_with_retry($jsonurl, 5, 30, $ipvar);
         $result_array = json_decode($json, true);		
 }
 
+function isIPv4($ip) {
+    if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        return true;
+    }
+    return false;
+}
+
+function isIPv6($ip) {
+    if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        return true;
+    }
+    return false;
+}
 
 // 検索ワードから検索結果一覧を取得する処理
 function searchlocalfilename($kerwords, &$result_array,$order = null, $path = null)
@@ -566,6 +586,11 @@ function searchlocalfilename($kerwords, &$result_array,$order = null, $path = nu
 		    $order = 'sort=size&ascending=0';
 		}
 		// IPv6check
+		if(isIPv4($everythinghost)){
+			$ipvar = 4;
+		}else{
+			$ipvar = 6;
+		}
 	    $askeverythinghost = $everythinghost;
 		
 		if(array_key_exists("max_filesize", $config_ini)){
@@ -576,7 +601,8 @@ function searchlocalfilename($kerwords, &$result_array,$order = null, $path = nu
 		}
   		$jsonurl = "http://" . $askeverythinghost . ":81/?search=" . urlencode($kerwords) . "&". $order . "&path=1&path_column=3&size_column=4&case=0&json=1";
 //  		echo $jsonurl;
-  		$json = file_get_html_with_retry($jsonurl, 5, 30);
+//		echo $ipvar;
+  		$json = file_get_html_with_retry($jsonurl, 5, 30,$ipvar);
 //  		echo $json;
   		$result_array = json_decode($json, true);
 
