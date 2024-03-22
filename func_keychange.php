@@ -8,9 +8,11 @@ class EasyKeychanger {
         
         $url = $this->KeychangerURL.'command.html?help=ver';
         
-        $res = @file_get_html_with_retry($url,2,$this->Keychangertimeout,4);
-        if($res === false) return 'failed';
-        
+        for ($i=0; $i<10; $i++) {
+            $res = @file_get_html_with_retry($url,2,$this->Keychangertimeout,4);
+            if($res !== false) break;
+        }
+        if($i == 10 ) return false;
         return $this->build_result($res);
         
     }
@@ -20,7 +22,11 @@ class EasyKeychanger {
             $url = $this->KeychangerURL.'command.html?key=up';
         else    
             $url = $this->KeychangerURL.'command.html?key=up&token='.$token;
-        file_get_contents($url);
+            
+        for ($i=0; $i<10; $i++) {
+            $res = file_get_contents($url);
+            if($res !== false) break;
+        }
     }
     
     public function keydown($token = "") {
@@ -28,7 +34,11 @@ class EasyKeychanger {
             $url = $this->KeychangerURL.'command.html?key=down';
         else    
             $url = $this->KeychangerURL.'command.html?key=down&token='.$token;
-        file_get_contents($url);
+
+        for ($i=0; $i<10; $i++) {
+            $res = file_get_contents($url);
+            if($res !== false) break;
+        }
     }
 
     public function keyset($key = 0, $token = "") {
@@ -36,7 +46,10 @@ class EasyKeychanger {
             $url = $this->KeychangerURL.'command.html?key='.$key;
         else    
             $url = $this->KeychangerURL.'command.html?key='.$key.'&token='.$token;
-        file_get_contents($url);
+        for ($i=0; $i<10; $i++) {
+            $res = file_get_contents($url);
+            if($res !== false) break;
+        }
     }
 
     public function build_result($str) {

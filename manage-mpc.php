@@ -987,9 +987,13 @@ function start_song($db,$id,$addplaytimes = 0){
 						pclose($fp);			              
 			        }else {
 						 mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
-						 file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-					 file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-						 file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888',50,0,4,100); // 一時停止を投げてみる（まず失敗する）
+//						file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+						for ($i=0; $i<10; $i++) {
+							$res = file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
+							if($res !== false) break;
+							usleep(100000);
+					 	}
+						file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888',50,0,4,100); // 一時停止を投げてみる（まず失敗する）
                     }
 			   // end Playerをコマンドライン経由起動に一時的に変更する 
 			}else {

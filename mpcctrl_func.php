@@ -177,7 +177,7 @@ function keychange($keycmd){
 
     $res = TRUE;
     $requesturl=$EASYKEYCHANGERURL.'?key='.$keycmd.'&token='.$clienttoken;
-    $res = file_get_html_with_retry($requesturl,1,1);
+    $res = file_get_html_with_retry($requesturl,5,1);
     update_requestdb_key();
     return $res;
 }
