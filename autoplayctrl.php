@@ -10,11 +10,13 @@ function stopautoplay()
 
 function startautoplay()
 {
-    global $config_ini;
-    $execcmd='start "karaokeautorun" '.urldecode($config_ini["autoplay_exec"]);
-    echo $execcmd;
-    exec($execcmd);
-
+    $result=checkautoplay();	//★
+    if($result == 0 ){	//★ 多重起動防止
+        global $config_ini;
+        $execcmd='start "karaokeautorun" '.urldecode($config_ini["autoplay_exec"]);
+        echo $execcmd;
+        exec($execcmd);
+    }	//★
 }
 
 function checkautoplay()
