@@ -61,6 +61,11 @@ foreach($allrequest as $value ){
     if($value['loop'] == 1){
         $songfilename = '<b>'.htmlspecialchars('【ＢＧＶ】').'</b>'.$songfilename;
     }
+    //★ 予約一覧にトラック選択番号を追加
+    if($value['kind'] === '動画' ){ //★
+        $trackno = (int)$value['track'] + 1; //★
+        $songfilename = $songfilename.'<br><div style="text-align: right;;font-weight: normal;"> トラック選択：'.$trackno; //★
+    } //★
     if(configbool('usekeychange', false) == true ){
         if($value['keychange'] > 0){
             $songfilename = $songfilename.'<br><div style="text-align: right;;font-weight: normal;"> キー変更：+'.$value['keychange'].'</div>';
@@ -247,9 +252,11 @@ EOD;
     $songstop = "";
     if($value['nowplaying'] === '再生中'){
         // すべての場合に表示する
-        $stopbtnmsg= '曲停止';
+//★        $stopbtnmsg= '曲停止';
+        $stopbtnmsg= '曲終了'; //★ 曲終了ボタン内のメッセージをメニュー「Player」と合わせる。
         if($value['kind'] === 'カラオケ配信' || $value['kind'] === '動画_別プ'  || $value['pause'] == 1 || $value['kind'] == '小休止' ){ 
-         $stopbtnmsg = '<small>曲停止</small><br /><strong>要次曲</strong>';
+//★         $stopbtnmsg = '<small>曲停止</small><br /><strong>要次曲</strong>';
+            $stopbtnmsg = '<strong>曲終了</strong>';//★ 「曲終了」を目立たせる。次曲がなくても予約待機になるため「要次曲」は削除。
         }
         $songstop ='<button type="button" class="btn btn-default" onClick=\'song_end(this,'.$value["id"].');return false;\' >'.$stopbtnmsg.'</button>';
     }
