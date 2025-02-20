@@ -72,6 +72,12 @@ if(array_key_exists("tie_up_group_name", $_REQUEST)) {
     $myrequestarray["tie_up_group_name"] = $tie_up_group_name;
 }
 
+$searchword = "";
+if(array_key_exists("searchword", $_REQUEST)) {
+    $tie_up_group_name = $_REQUEST["searchword"];
+    $myrequestarray["searchword"] = $tie_up_group_name;
+}
+
 $nextsonglistflg = true;
 if( $searchcolumn == 'maker_name' || $searchcolumn == 'tie_up_group_name' ) {
    // 制作会社検索かシリーズ検索の場合、次は作品名リストになる処理をここに書く
@@ -87,7 +93,6 @@ $getqueries = array();
 $getqueries['start'] = $displayfrom;
 $getqueries['length'] = $displaynum;
 $getqueries['column'] = $sqlcolumn;
-$getqueries['sqlwhere'] = $sqlwhere;
 if(!empty($category)){
 $getqueries['category'] = $category;
 }
@@ -96,7 +101,14 @@ $getqueries['maker_name'] = $maker_name;
 }
 if(!empty($tie_up_group_name)){
 $getqueries['tie_up_group_name'] = $tie_up_group_name;
+    if(empty($sqlwhere)) {
+    	if(!empty($tie_up_group_name)) 
+        $sqlwhere = "tie_up_group_ruby like '%".kanabuild($tie_up_group_name)."%' or tie_up_group_name like '%".$tie_up_group_name."%'";
+    }
 }
+if(!empty($sqlwhere))
+$getqueries['sqlwhere'] = $sqlwhere;
+
 $getqueries['lister_dbpath'] = $lister_dbpath;
 
 

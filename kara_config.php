@@ -7,8 +7,10 @@ function readconfig_array()
     global $configfile;
     $config_ini = array ();
     
-    if(file_exists($configfile)){
-        $config_ini = parse_ini_file($configfile);
+    $configinifile = $configfile."";
+    
+    if(file_exists($configinifile)){
+        $config_ini = parse_ini_file($configinifile);
     }else {
        // set initial value
     }
@@ -22,7 +24,7 @@ function readconfig_array()
         $config_ini = array_merge($config_ini,array("playmode" => $playmode));
     }
     if(!array_key_exists("playerpath_select", $config_ini)){
-        $playerpath_select = 'C:\Program Files (x86)\MPC-BE\mpc-be.exe';
+        $playerpath_select = 'C:\Program Files\MPC-BE\mpc-be64.exe';
         $config_ini = array_merge($config_ini,array("playerpath_select" => urlencode($playerpath_select)));
     }
     if(!array_key_exists("playerpath_any", $config_ini)){
@@ -62,11 +64,11 @@ function readconfig_array()
         $config_ini = array_merge($config_ini,array("connectinternet" => $connectinternet));
     }
     if(!array_key_exists("commenturl_base", $config_ini)){
-        $commenturl_base = "";
+        $commenturl_base = "http://localhost/cms/r.php";
         $config_ini = array_merge($config_ini,array("commenturl_base" => urlencode($commenturl_base)));
     }
     if(!array_key_exists("commentroom", $config_ini)){
-        $commentroom = "";
+        $commentroom = "1000";
         $config_ini = array_merge($config_ini,array("commentroom" => urlencode($commentroom)));            
     }
     if(!array_key_exists("moviefullscreen", $config_ini)){

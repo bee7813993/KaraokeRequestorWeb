@@ -14,6 +14,9 @@
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
+if (!defined('GETID3_INCLUDEPATH')) { // prevent path-exposing attacks that access modules directly on public webservers
+	exit;
+}
 getid3_lib::IncludeDependency(GETID3_INCLUDEPATH.'module.audio-video.riff.php', __FILE__, true);
 
 class getid3_real extends getid3_handler
@@ -44,8 +47,13 @@ class getid3_real extends getid3_handler
 					$info['audio']['bits_per_sample'] = $info['real']['old_ra_header']['bits_per_sample'];
 					$info['audio']['channels']        = $info['real']['old_ra_header']['channels'];
 
-					$info['playtime_seconds']         = 60 * ($info['real']['old_ra_header']['audio_bytes'] / $info['real']['old_ra_header']['bytes_per_minute']);
-					$info['audio']['bitrate']         =  8 * ($info['real']['old_ra_header']['audio_bytes'] / $info['playtime_seconds']);
+					if ($info['real']['old_ra_header']['bytes_per_minute']) {
+						$info['playtime_seconds']     = 60 * ($info['real']['old_ra_header']['audio_bytes'] / $info['real']['old_ra_header']['bytes_per_minute']);
+						$info['audio']['bitrate']     = 8 * ($info['real']['old_ra_header']['audio_bytes'] / $info['playtime_seconds']);
+					} else {
+						$info['playtime_seconds']     = 0;
+						$info['audio']['bitrate']     = 0;
+					}
 					$info['audio']['codec']           = $this->RealAudioCodecFourCClookup($info['real']['old_ra_header']['fourcc'], $info['audio']['bitrate']);
 
 					foreach ($info['real']['old_ra_header']['comments'] as $key => $valuearray) {
@@ -216,7 +224,8 @@ class getid3_real extends getid3_handler
 
 							case 'audio/x-pn-realaudio':
 							case 'audio/x-pn-multirate-realaudio':
-								$this->ParseOldRAheader($thisfile_real_chunks_currentchunk_typespecificdata, $thisfile_real_chunks_currentchunk['parsed_audio_data']);
+								$this->ParseOldRAheader($thisfile_real_chunks_currentchunk_typespecificdata, $parsedAudioData);
+								$thisfile_real_chunks_currentchunk['parsed_audio_data'] = &$parsedAudioData;
 
 								$info['audio']['sample_rate']     = $thisfile_real_chunks_currentchunk['parsed_audio_data']['sample_rate'];
 								$info['audio']['bits_per_sample'] = $thisfile_real_chunks_currentchunk['parsed_audio_data']['bits_per_sample'];
@@ -483,8 +492,9 @@ class getid3_real extends getid3_handler
 			$ParsedArray['fourcc'] = $ParsedArray['fourcc3'];
 
 		}
+		/** @var string[]|false[] $value */
 		foreach ($ParsedArray['comments'] as $key => $value) {
-			if ($ParsedArray['comments'][$key][0] === false) {
+			if ($value[0] === false) {
 				$ParsedArray['comments'][$key][0] = '';
 			}
 		}

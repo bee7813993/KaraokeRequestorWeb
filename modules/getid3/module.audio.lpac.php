@@ -14,6 +14,9 @@
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
+if (!defined('GETID3_INCLUDEPATH')) { // prevent path-exposing attacks that access modules directly on public webservers
+	exit;
+}
 getid3_lib::IncludeDependency(GETID3_INCLUDEPATH.'module.audio-video.riff.php', __FILE__, true);
 
 class getid3_lpac extends getid3_handler
@@ -31,6 +34,7 @@ class getid3_lpac extends getid3_handler
 			$this->error('Expected "LPAC" at offset '.$info['avdataoffset'].', found "'.$StreamMarker.'"');
 			return false;
 		}
+		$flags = array();
 		$info['avdataoffset'] += 14;
 
 		$info['fileformat']            = 'lpac';
@@ -80,7 +84,7 @@ class getid3_lpac extends getid3_handler
 		}
 
 		$getid3_temp = new getID3();
-		$getid3_temp->openfile($this->getid3->filename);
+		$getid3_temp->openfile($this->getid3->filename, $this->getid3->info['filesize'], $this->getid3->fp);
 		$getid3_temp->info = $info;
 		$getid3_riff = new getid3_riff($getid3_temp);
 		$getid3_riff->Analyze();
@@ -122,8 +126,8 @@ class getid3_lpac extends getid3_handler
 			}
 		}
 
-		$info['playtime_seconds'] = $info['lpac']['total_samples'] / $info['audio']['sample_rate'];
-		$info['audio']['bitrate'] = (($info['avdataend'] - $info['avdataoffset']) * 8) / $info['playtime_seconds'];
+		$info['playtime_seconds'] = getid3_lib::SafeDiv($info['lpac']['total_samples'], $info['audio']['sample_rate']);
+		$info['audio']['bitrate'] = getid3_lib::SafeDiv(($info['avdataend'] - $info['avdataoffset']) * 8, $info['playtime_seconds']);
 
 		return true;
 	}

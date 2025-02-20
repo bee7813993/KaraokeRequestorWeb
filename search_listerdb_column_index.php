@@ -26,7 +26,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
 $linkoption = 'lister_dbpath='.$lister_dbpath;
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
-$target="maker_name";
+$target="";
 if(array_key_exists("target", $_REQUEST)) {
     $target = $_REQUEST["target"];
 }
@@ -138,21 +138,29 @@ showuppermenu($target,$linkoption);
 
 <h1> <?php echo $searchitem;?> 検索 </h1>
 
+<div >
+<label>検索ワード (<?php echo $searchitem;?>)</label>
 
-<form action="search_listerdb_songlist.php" method="GET" >
-  <div class="form-group">
-    <label>検索ワード (<?php echo $searchitem;?>)</label>
 <?php
+    $linecounter = 0;
+    $formtext = "";
     if($target == "maker_name" ){
-        print '<input type="text" name="maker_name" id="maker_name" class="form-control" placeholder="'.$searchitem.'">';
+        $formtext = $formtext . ' <input type="text" name="maker_name" id="maker_name" class="form-control" placeholder="'.$searchitem.'">';
+        $linecounter++;
     }
     if($target == "song_artist" ){
-        print '<input type="text" name="artist" id="artist" class="form-control" placeholder="'.$searchitem.'">';
+        $formtext = $formtext . ' <input type="text" name="artist" id="artist" class="form-control" placeholder="'.$searchitem.'">';
+        $linecounter++;
     }
     if($target == "song_name" ){
-        print '<input type="text" name="filename" id="song_name" class="form-control" placeholder="'.$searchitem.'">';
+        $formtext = $formtext . ' <input type="text" name="filename" id="song_name" class="form-control" placeholder="'.$searchitem.'">';
+        $linecounter++;
     }
-?>
+    if($linecounter){
+        print '<form action="search_listerdb_songlist.php" method="GET" >';
+        print ' <div class="form-group"> ';
+        print $formtext;
+print <<<EOT
     <div class="btn-group" data-toggle="buttons">
 	<label class="btn btn-default active">
 		<input type="radio" name="match" value="part" autocomplete="off" checked> 部分一致
@@ -162,14 +170,40 @@ showuppermenu($target,$linkoption);
 	</label>
     </div>
   </div>
-<?php
+EOT;
 if(!empty($lister_dbpath))
     print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
-?>
+print <<<EOT
     <button type="submit" class="btn btn-default">検索</button>
 </form>
+EOT;
+    }
+?>
+
+<?php
+    if($target == "tie_up_group_name" ){
+print <<<EOT
+<form action="search_listerdb_column_list.php" method="GET" >
+  <div class="form-group">
+EOT;
+    print '<input type="text" name="tie_up_group_name" id="tie_up_group_name" class="form-control" placeholder="'.$searchitem.'">';
+    print '<input type="hidden" name="searchcolumn" value="tie_up_group_name" />';
+    print '<input type="hidden" name="searchitem" value="シリーズ" />';
+print <<<EOT
+  </div>
+EOT;
+if(!empty($lister_dbpath))
+    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
+if(!empty($selectid))
+    print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
+print <<<EOT
+    <button type="submit" class="btn btn-default">検索</button>
+</form>
+EOT;
+}
+?>
 
 </div>
 

@@ -14,6 +14,9 @@
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
+if (!defined('GETID3_INCLUDEPATH')) { // prevent path-exposing attacks that access modules directly on public webservers
+	exit;
+}
 getid3_lib::IncludeDependency(GETID3_INCLUDEPATH.'module.tag.id3v2.php', __FILE__, true);
 
 class getid3_dsf extends getid3_handler
@@ -112,7 +115,7 @@ class getid3_dsf extends getid3_handler
 		$info['audio']['sample_rate']       = $info['dsf']['fmt']['sample_rate'];
 		$info['audio']['channels']          = $info['dsf']['fmt']['channels'];
 		$info['audio']['bitrate']           = $info['audio']['bits_per_sample'] * $info['audio']['sample_rate'] * $info['audio']['channels'];
-		$info['playtime_seconds']           = ($info['dsf']['data']['data_chunk_size'] * 8) / $info['audio']['bitrate'];
+		$info['playtime_seconds']           = getid3_lib::SafeDiv($info['dsf']['data']['data_chunk_size'] * 8, $info['audio']['bitrate']);
 
 		return true;
 	}

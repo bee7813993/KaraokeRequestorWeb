@@ -23,6 +23,17 @@ function array_search_key($key,$value,$checkarray){
    0 : other
 */
 function checktracktype($trackinfo){
+
+    $typeafalse=0;
+    
+    $udtakey = array_search_key('name','udta',$trackinfo['subatoms'] );
+    if($udtakey === false ) $typeafalse = 1;
+    
+    if($typeafalse == 0 ){
+        $namekey = array_search_key('name','name',$trackinfo['subatoms'][$udtakey]['subatoms']);
+        if($namekey === false ) $typeafalse = 1;
+    }
+
     $mdiakey = array_search_key('name','mdia',$trackinfo['subatoms'] );
     if($mdiakey === false ) return array(false, NULL);
     $minfkey = array_search_key('name','minf',$trackinfo['subatoms'][$mdiakey]['subatoms'] );
@@ -41,6 +52,12 @@ function checktracktype($trackinfo){
     if($mediainfo['audio_channels'] == 0 && $mediainfo['width'] > 0 &&  $mediainfo['height'] > 0 ) {
         return array(1, NULL);
     }
+    if($typeafalse == 0 ){
+        $trackname = $trackinfo['subatoms'][$udtakey]["subatoms"][$namekey]['data'];
+    }else {
+        $trackname = $trackinfo['subatoms'][$mdiakey]['subatoms'][1]['component_name'];
+    }
+    
     // audio check
     if($mediainfo['audio_channels'] > 0  ) {
         $trackname = $mediainfo = $trackinfo['subatoms'][$mdiakey]['subatoms'][1]['component_name'];
@@ -53,6 +70,7 @@ function checktracktype($trackinfo){
 
 function getaudiotracklist($filename){
     $getID3 = new getID3();
+    $getID3->options_audiovideo_quicktime_ReturnAtomData = true;
     $audiotracklist = array();
     $workencode = 'UTF-8';
     
@@ -63,7 +81,11 @@ function getaudiotracklist($filename){
     setlocale(LC_CTYPE, 'Japanese_Japan.932');
     $res = file_exist_check_japanese($filename_host);
     if($res){
+       //★request_confirm.phpの再生方法とキー変更の間にWarningが表示されないよう対応
+       $error_level = error_reporting();	//★エラーレベルを退避
+       error_reporting($error_level-E_WARNING);	//★エラーレベルから警告を除外
        $info = $getID3->analyze($filename_host);
+       error_reporting($error_level);	//★エラーレベルを元に戻す
     } else return $audiotracklist;
 
     getid3_lib::CopyTagsToComments($info);
@@ -72,7 +94,6 @@ function getaudiotracklist($filename){
        return $audiotracklist;
     }
 
-    //var_dump($info);
     $tracklist = $info['quicktime']['moov']['subatoms'];
     foreach ($tracklist as $trackinfo){
        if($trackinfo['name'] !== 'trak' ) continue;
@@ -83,15 +104,6 @@ function getaudiotracklist($filename){
     }
     return $audiotracklist;
 }
-
-// for test
-//$audiotracklist = getaudiotracklist('C:\Users\y.higashi\Videos\[Aqours]ユメ語るよりユメ歌おう_ラブライブ！サンシャイン！！アニメED_[11tr]（On_Off_第2話_第4話_第5話_第6話_第7話_第8話_第10話_第11話_第3話＆第12話）.mp4');
-//$tracknum = 1;
-//foreach ($audiotracklist as $tracknameinfo){
-//    print mb_convert_encoding('track'.$tracknum.':'.$tracknameinfo[1]."\n", 'SJIS-win');
-//    $tracknum++;
-//}
-
 
 // function from manage-mpc.php
 

@@ -111,9 +111,6 @@ function selectedcheck_rc($rt,$singer,$beforesinger = 'none' ){
 
     if($beforesinger == 'none'){
       foreach($rt as $row){
-//      print '<script type="text/javascript">';
- //     print 'alart("'.var_dump($row).'")';
- //     print '</script>';
       
           if($row['singer'] === $singer){
             if($row['clientip'] === $_SERVER["REMOTE_ADDR"] ) {
@@ -129,9 +126,6 @@ function selectedcheck_rc($rt,$singer,$beforesinger = 'none' ){
         }
     }
     
-//    $singerlist = pickupsinger($rt);
-//    if ($singerlist[count($singerlist) - 1] === $singer )
-//        return TRUE;
     return FALSE;
 }
 
@@ -502,10 +496,8 @@ EOT;
     } else {
         $maxtrack = count($audiotracklist);
         if(  $maxtrack == 1  &&   (  strlen($audiotracklist[0][1]) == 0 || strpos( $audiotracklist[0][1] , 'Sound Media Handler' ) !== false || strpos( $audiotracklist[0][1] , 'GPAC ISO Audio Handler' ) !== false || strpos( $audiotracklist[0][1] , 'SoundHandler' ) !== false )){
-//        print "<pre>".strlen($audiotracklist[0][1]).$audiotracklist[0][1].$maxtrack."</pre>";
         print "<pre> 1トラックのみ </pre>";
         }else {
-//        print "<pre>".$audiotracklist[0][1].$maxtrack."</pre>";
         print '<select size="'. $maxtrack .'" name="track"  class="form-control">';
         for($c = 0; $c < $maxtrack ; $c++ ){
           if($c == 0 ){

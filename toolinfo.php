@@ -71,9 +71,14 @@ if(array_key_exists("globalhost", $_REQUEST)) {
 }
 
 
-$l_qrsize = 3;
+$LargeImage = false;
+$l_qrsize = 8;
 if(array_key_exists("qrsize", $_REQUEST)) {
     $l_qrsize = $_REQUEST["qrsize"];
+}
+if ($l_qrsize > 8 ){
+    $l_qrsize = 8;
+    $LargeImage = true;
 }
 
 if(  $change_counter > 0 ){
@@ -120,9 +125,10 @@ print <<<EOT
     </div>
 <img src="qrcode_php/outputqrimg.php?data=
 EOT;
-print urlencode($globalurl).'&qrsize='.$l_qrsize;
+print urlencode($globalurl).'&qrsize='.$l_qrsize.'" ';
+if($LargeImage) print ' width="50%"  height="50%" ';
 print <<<EOT
-" alt="QRコード" class="img-responsive center-block" /> <br />
+ alt="QRコード" class="img-responsive center-block" /> <br />
   </div>
 EOT;
 print '</div>'; //row
@@ -241,9 +247,9 @@ print urlencode($localipurl).'&qrsize='.$l_qrsize;
 <hr />
 <div class="row">
     <div class="btn-group btn-group-justified" role="group">
-	  <a href="?qrsize=3" class="btn btn-default" role="button">Small</a>
-	  <a href="?qrsize=5" class="btn btn-default" role="button">Middum</a>
-	  <a href="?qrsize=8" class="btn btn-default" role="button">Large</a>
+	  <a href="?qrsize=5" class="btn btn-default" role="button">小</a>
+	  <a href="?qrsize=8" class="btn btn-default" role="button">標準</a>
+	  <a href="?qrsize=16" class="btn btn-default" role="button">大</a>
     </div>
 </div>
 <a href="requestlist_only.php" > リクエストTOPに戻る </a>

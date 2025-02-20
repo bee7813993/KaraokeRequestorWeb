@@ -14,6 +14,9 @@
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
+if (!defined('GETID3_INCLUDEPATH')) { // prevent path-exposing attacks that access modules directly on public webservers
+	exit;
+}
 getid3_lib::IncludeDependency(GETID3_INCLUDEPATH.'module.tag.id3v1.php', __FILE__, true);
 
 class getid3_write_id3v1
@@ -77,7 +80,8 @@ class getid3_write_id3v1
 														(isset($this->tag_data['year']        ) ? $this->tag_data['year']         : ''),
 														(isset($this->tag_data['genreid']     ) ? $this->tag_data['genreid']      : ''),
 														(isset($this->tag_data['comment']     ) ? $this->tag_data['comment']      : ''),
-														(isset($this->tag_data['track_number']) ? $this->tag_data['track_number'] : ''));
+														$this->tag_data['track_number']
+				);
 				fwrite($fp_source, $new_id3v1_tag_data, 128);
 				fclose($fp_source);
 				return true;

@@ -14,6 +14,9 @@
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
+if (!defined('GETID3_INCLUDEPATH')) { // prevent path-exposing attacks that access modules directly on public webservers
+	exit;
+}
 
 class getid3_tta extends getid3_handler
 {
@@ -56,7 +59,7 @@ class getid3_tta extends getid3_handler
 				$info['tta']['samples_per_channel'] = getid3_lib::LittleEndian2Int(substr($ttaheader, 12,  4));
 
 				$info['audio']['encoder_options']   = '-e'.$info['tta']['compression_level'];
-				$info['playtime_seconds']           = $info['tta']['samples_per_channel'] / $info['tta']['sample_rate'];
+				$info['playtime_seconds']           = getid3_lib::SafeDiv($info['tta']['samples_per_channel'], $info['tta']['sample_rate']);
 				break;
 
 			case '2': // TTA v2.x
@@ -72,7 +75,7 @@ class getid3_tta extends getid3_handler
 				$info['tta']['data_length']         = getid3_lib::LittleEndian2Int(substr($ttaheader, 16,  4));
 
 				$info['audio']['encoder_options']   = '-e'.$info['tta']['compression_level'];
-				$info['playtime_seconds']           = $info['tta']['data_length'] / $info['tta']['sample_rate'];
+				$info['playtime_seconds']           = getid3_lib::SafeDiv($info['tta']['data_length'], $info['tta']['sample_rate']);
 				break;
 
 			case '1': // TTA v3.x
@@ -88,20 +91,19 @@ class getid3_tta extends getid3_handler
 				$info['tta']['crc32_footer']        =                              substr($ttaheader, 18,  4);
 				$info['tta']['seek_point']          = getid3_lib::LittleEndian2Int(substr($ttaheader, 22,  4));
 
-				$info['playtime_seconds']           = $info['tta']['data_length'] / $info['tta']['sample_rate'];
+				$info['playtime_seconds']           = getid3_lib::SafeDiv($info['tta']['data_length'], $info['tta']['sample_rate']);
 				break;
 
 			default:
 				$this->error('This version of getID3() ['.$this->getid3->version().'] only knows how to handle TTA v1 and v2 - it may not work correctly with this file which appears to be TTA v'.$ttaheader[3]);
 				return false;
-				break;
 		}
 
 		$info['audio']['encoder']         = 'TTA v'.$info['tta']['major_version'];
 		$info['audio']['bits_per_sample'] = $info['tta']['bits_per_sample'];
 		$info['audio']['sample_rate']     = $info['tta']['sample_rate'];
 		$info['audio']['channels']        = $info['tta']['channels'];
-		$info['audio']['bitrate']         = (($info['avdataend'] - $info['avdataoffset']) * 8) / $info['playtime_seconds'];
+		$info['audio']['bitrate']         = getid3_lib::SafeDiv(($info['avdataend'] - $info['avdataoffset']) * 8, $info['playtime_seconds']);
 
 		return true;
 	}

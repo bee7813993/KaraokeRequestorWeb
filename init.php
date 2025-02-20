@@ -514,6 +514,7 @@ print ' value="10" ';
     <h3 id="movieplayer" class="menulink" > 動画プレーヤー設定 </h3>
     <h4 for="playerpath_select">MediaPlayerClassic PATH設定</h4>
     <select  class="form-control" name="playerpath_select" id="playerpath_select" >  
+      <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be64.exe",urldecode($config_ini["playerpath_select"])); ?> value="C:\Program Files\MPC-BE\mpc-be64.exe" >C:\Program Files\MPC-BE\mpc-be64.exe (現在のMPC-BE:64bit版のデフォルト)</option>
       <option <?php print selectedcheck("C:\Program Files (x86)\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath_select"])); ?> value="C:\Program Files (x86)\MPC-BE\mpc-be.exe" >C:\Program Files (x86)\MPC-BE\mpc-be.exe (MPC-BE:64bitOSで32bit版)</option>
       <option <?php print selectedcheck("C:\Program Files\MPC-BE\mpc-be.exe",urldecode($config_ini["playerpath_select"])); ?> value="C:\Program Files\MPC-BE\mpc-be.exe" >C:\Program Files\MPC-BE\mpc-be.exe (32bitOSでMPC-BE32bit版)</option>
       <option <?php print selectedcheck("C:\Program Files\MPC-BE x64\mpc-be64.exe",urldecode($config_ini["playerpath_select"])); ?> value="C:\Program Files\MPC-BE x64\mpc-be64.exe" >C:\Program Files\MPC-BE x64\mpc-be64.exe (64bitOSでMPC-BE64bit版)</option>
@@ -549,8 +550,14 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
       }
   ?>
   <div class="form-group">
+<!--★削除★
     <h4 class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title=" MPCの動画再生開始時に音量を５０％に戻す" >
         MPCの再生開始時に音量を５０％に戻す <small></small> </span>
+★-->
+<!--★追加★-->
+    <h4 class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title="MPCの動画再生開始時に音量を戻す" >
+        MPCの再生開始時に音量を戻す <small></small> </span>
+<!--★追加★-->
     </h4>
         
     <label class="radio-inline">
@@ -559,6 +566,16 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
     <label class="radio-inline">
       <input type="radio" name="startvolume50" value="2" <?php print (!$startvolume50)?'checked':' ' ?> /> 無効
     </label>
+<!--★追加★-->
+    <h5> <span data-toggle="tooltip" data-placement="top">戻す音量 (％) </span></h5>
+    <input type="number" name="startvolume" min="0" max="100" class="startvolume" 
+<?php
+if(array_key_exists("startvolume",$config_ini)) {
+print 'value="'.urldecode($config_ini["startvolume"]).'"';
+}
+?>
+/>
+<!--★追加★-->
   </div>
 
 

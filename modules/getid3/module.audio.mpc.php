@@ -14,6 +14,9 @@
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
+if (!defined('GETID3_INCLUDEPATH')) { // prevent path-exposing attacks that access modules directly on public webservers
+	exit;
+}
 
 class getid3_mpc extends getid3_handler
 {
@@ -45,7 +48,7 @@ class getid3_mpc extends getid3_handler
 			// this is SV7
 			return $this->ParseMPCsv7();
 
-		} elseif (preg_match('/^[\x00\x01\x10\x11\x40\x41\x50\x51\x80\x81\x90\x91\xC0\xC1\xD0\xD1][\x20-37][\x00\x20\x40\x60\x80\xA0\xC0\xE0]/s', $MPCheaderData)) {
+		} elseif (preg_match('#^[\x00\x01\x10\x11\x40\x41\x50\x51\x80\x81\x90\x91\xC0\xC1\xD0\xD1][\x20-37][\x00\x20\x40\x60\x80\xA0\xC0\xE0]#s', $MPCheaderData)) {
 
 			// this is SV4 - SV6, handle seperately
 			return $this->ParseMPCsv6();
@@ -134,7 +137,7 @@ class getid3_mpc extends getid3_handler
 					$info['audio']['channels']    = $thisPacket['channels'];
 					$info['audio']['sample_rate'] = $thisPacket['sample_frequency'];
 					$info['playtime_seconds'] = $thisPacket['sample_count'] / $thisPacket['sample_frequency'];
-					$info['audio']['bitrate'] = (($info['avdataend'] - $info['avdataoffset']) * 8) / $info['playtime_seconds'];
+					$info['audio']['bitrate'] = getid3_lib::SafeDiv(($info['avdataend'] - $info['avdataoffset']) * 8, $info['playtime_seconds']);
 					break;
 
 				case 'RG': // Replay Gain
@@ -200,7 +203,6 @@ class getid3_mpc extends getid3_handler
 				default:
 					$this->error('Found unhandled key type "'.$thisPacket['key'].'" at offset '.$thisPacket['offset']);
 					return false;
-					break;
 			}
 			if (!empty($thisPacket)) {
 				$info['mpc']['packets'][] = $thisPacket;
@@ -280,7 +282,7 @@ class getid3_mpc extends getid3_handler
 		$info['audio']['sample_rate'] = $thisfile_mpc_header['sample_rate'];
 		$thisfile_mpc_header['samples']       = ((($thisfile_mpc_header['frame_count'] - 1) * 1152) + $thisfile_mpc_header['last_frame_length']) * $info['audio']['channels'];
 
-		$info['playtime_seconds']     = ($thisfile_mpc_header['samples'] / $info['audio']['channels']) / $info['audio']['sample_rate'];
+		$info['playtime_seconds']     = getid3_lib::SafeDiv($thisfile_mpc_header['samples'], $info['audio']['channels'] * $info['audio']['sample_rate']);
 		if ($info['playtime_seconds'] == 0) {
 			$this->error('Corrupt MPC file: playtime_seconds == zero');
 			return false;
@@ -346,6 +348,7 @@ class getid3_mpc extends getid3_handler
 		$info['avdataoffset'] += $thisfile_mpc_header['size'];
 
 		// Most of this code adapted from Jurgen Faul's MPEGplus source code - thanks Jurgen! :)
+		$HeaderDWORD = array();
 		$HeaderDWORD[0] = getid3_lib::LittleEndian2Int(substr($MPCheaderData, 0, 4));
 		$HeaderDWORD[1] = getid3_lib::LittleEndian2Int(substr($MPCheaderData, 4, 4));
 
@@ -382,7 +385,6 @@ class getid3_mpc extends getid3_handler
 				$info['error'] = 'Expecting 4, 5 or 6 in version field, found '.$thisfile_mpc_header['stream_version_major'].' instead';
 				unset($info['mpc']);
 				return false;
-				break;
 		}
 
 		if (($thisfile_mpc_header['stream_version_major'] > 4) && ($thisfile_mpc_header['block_size'] != 1)) {

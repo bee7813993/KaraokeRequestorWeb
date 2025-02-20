@@ -5,6 +5,10 @@ if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
     exit(1);
 }
 
+// 時間デバッグをする際はこちらをコピーする。
+// echo "\n".date("H時i分s秒" )."function ".__LINE__;
+
+
 date_default_timezone_set('Asia/Tokyo');
 require_once 'commonfunc.php';
 require_once 'mpcctrl_func.php';
@@ -36,6 +40,15 @@ $MPCCMDURL='http://localhost:13579/command.html';
 $MPCFILEOPENURL='http://localhost:13579/browser.html?path=';
 $FOOBARSTATURL='http://localhost:82/karaokectrl/';
 $MPCKEYCHANGEURL='http://localhost/mpcctrl.php?key=';
+
+//★ phpファイルコール時にMPCを起動（※事前にMPCを最大化して終了しておくこと！）
+$mpcpsflg = mpcpscheck();	//★
+if(!$mpcpsflg){	//★
+    $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /fullscreen \" > NUL \n";	//★
+//    $fp = popen($execcmd,'r');	//★
+//    pclose($fp);	//★
+    sleep(2);	//★
+}	//★
 
 function file_exist_check_japanese($filename){
 /*
@@ -121,7 +134,6 @@ function workcheck_andrestartxampp(){
 
     $xamppstop_cmd = '..\xampp_stop.exe';
     $xamppstart_cmd = '.\start_xampp_fromphp.bat';
-//    $xamppstart_cmd = '..\xampp_start.exe';
     $url = 'http://localhost/requestlist_table_json.php';
     
     $workedcheck = true;
@@ -208,10 +220,7 @@ function mpcstop(){
    
    if($process_found == 1){
        for($loopcount = 0 ; $loopcount < 2 ; $loopcount ++){
-//          $org_timeout = ini_get('default_socket_timeout');
-//          ini_set('default_socket_timeout', 2);
           $mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=816", 10,0,4,500);
-//          ini_set('default_socket_timeout', $org_timeout);
           if( $mpcstat === FALSE) {
               exec($pskill_cmd, $psresult );
               sleep(1);
@@ -225,7 +234,6 @@ function mpcstop(){
                       if ( $pos === FALSE) {
                           break;
                       }else {
-                          //$mpcstat = file_get_html_with_retry($MPCCMDURL."?wm_command=816",  10,0,4,500);
                           exec($pskill_cmd, $psresult );
                           sleep(1);
                           continue;
@@ -303,7 +311,7 @@ function mpc_waiting_start($db, $id){
 }
 
 
-function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db, $id){
+function mpcplaylocalfile($playerpath,$playfilepath,$playmode, $db, $id, $waittime = 1){
      global $MPCCMDURL;
      global $MPCFILEOPENURL;
 
@@ -336,13 +344,6 @@ function mpcplaylocalfile($playerpath,$playfilepath,$playmode,$waittime = 1, $db
        }
     }
 
-/*
-    if( $playmode == 2) {
-        //一時停止する
-        sleep($waittime);
-        file_get_html_with_retry($MPCCMDURL."?wm_command=888");
-    }
-*/
 }
 
 // Capture viewerソフトを終了させる
@@ -467,11 +468,11 @@ function mpc_keychange($changekey){
     global $config_ini;
     
     if(is_null($changekey)) return;
+    if($changekey == 0) return;
     if($config_ini['usekeychange'] != 1){
      file_get_html_with_retry('http://localhost/mpcctrl.php');
      return;
     }
-//    sleep(1);
     $mpccmd = $MPCKEYCHANGEURL.$changekey;
     file_get_html_with_retry($mpccmd,20,0,4,500);
 }
@@ -479,12 +480,14 @@ function mpc_keychange($changekey){
 function mpc_trackchange($changetrack){
     global $MPCCMDURL;
     global $config_ini;
-    
+
     if(is_null($changetrack)) return;
     if(!is_numeric ($changetrack)) return;
     $mpccmd = $MPCCMDURL."?wm_command=952";
-    for($changecount=0 ; $changecount<$changetrack ; $changecount++){
+    $changecount=0;//★
+    while($changecount<$changetrack){	//★
         file_get_contents($mpccmd);
+        ++$changecount;	//★
     }
 }
 
@@ -758,24 +761,19 @@ function song_stop($kind, $stat = 'none'){
         // case mpc
         
         if($stat == 3)
+        {  //★
           $volume = volume_fadeout();
+          readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);  //★
+          commentpost_v4("rqlst", "1", $commenturl);  //★
+        }  //★
         
         $requesturl=$MPCCMDURL.'?wm_command=888';
         $res = file_get_html_with_retry($requesturl);
         
         if($stat == 3){
           set_volume($volume);
-          }
-        if(array_key_exists('startvolume50',$config_ini)){
-            if($config_ini['startvolume50'] != 1)  {
-            }else{
-                set_volume(50);
-            }
-        }else{
-            set_volume(50);
+          file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=start_first'); //★ 先頭へ巻き戻す
         }
-        
-        
     }else if( $kind === 2) {
         // case foobar
         $requesturl=$FOOBARSTATURL.'?cmd=PlayOrPause&param1=0';
@@ -827,11 +825,21 @@ function onerequestinfo_fromid($db,$id){
     return $currentrequest[0];
 }
 
-function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
+
+//★ ファイル名チェックログ出力なし関数追加
+function get_fullfilename2_local($l_fullpath,$word,&$filepath_utf8){
+    $filepath_utf8 = "";
+    // 引数チェック
+    if(empty($l_fullpath) && empty($word) ) return "";
     // ファイル名のチェック
     // logtocmd ("Debug l_fullpath: $l_fullpath\r\n");
+    global $config_ini;
+    $lister_dbpath='';
+    if (file_exist_check_japanese_cf(urldecode($config_ini['listerDBPATH'])) ){
+        $lister_dbpath=urldecode($config_ini['listerDBPATH']);
+    }
     $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");
-    $fileinfo=file_exist_check_japanese($winfillpath);
+    $fileinfo=file_exist_check_japanese_cf($winfillpath);
     // logtocmd ("Debug#".$fileinfo);
     if($fileinfo !== FALSE){
         $filepath = $winfillpath;
@@ -840,6 +848,39 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
       $filepath = null;
       // まず フルパス中のbasenameで再検索
       $songbasename = basename($l_fullpath);
+      // ニコカラりすたーで検索
+      if(!empty($lister_dbpath) ){
+         //logtocmd ("fullpass file $l_fullpath is not found. Search from NicokaraLister DB.: $songbasename\r\n");
+         require_once('function_search_listerdb.php');
+         // DB初期化
+         $lister = new ListerDB();
+         $lister->listerdbfile = $lister_dbpath;
+         $listerdb = $lister->initdb();
+         if( $listerdb ) {
+              $select_where = ' WHERE found_path LIKE ' . $listerdb->quote('%'.$songbasename.'%');
+              $sql = 'select * from t_found '. $select_where.';';
+              $alldbdata = $lister->select($sql);
+              if($alldbdata){
+                  $filepath_utf8 = $alldbdata[0]['found_path'];
+                  $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+                  //logtocmd ($songbasename.'代わりに「'.$filepath_utf8.'」を再生します'."\n");
+                  return $filepath;
+              }
+              // 曲名で再検索
+              $select_where = ' WHERE found_path LIKE ' . $listerdb->quote('%'.$word.'%');
+              $sql = 'select * from t_found '. $select_where.';';
+              $alldbdata = $lister->select($sql);
+              if($alldbdata){
+                  $filepath_utf8 = $alldbdata[0]['found_path'];
+                  $filepath = mb_convert_encoding($filepath_utf8,"cp932","UTF-8");
+                  logtocmd ($word.'代わりに「'.$filepath_utf8.'」を再生します'."\n");
+                  return $filepath;
+              }
+              
+         }         
+         
+      }
+      // Everythingで検索
       // logtocmd ("fullpass file $winfillpath is not found. Search from Everything DB.: $songbasename\r\n");
       $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($songbasename) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
       $json = file_get_html_with_retry($jsonurl, 5);
@@ -853,10 +894,10 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
           }
       }
       if(empty($filepath)){
-      // 曲名で再建策
+      // 曲名で再検索
           logtocmd ("fullpass basename $songbasename is not found. Search from Everything DB.: $word\r\n");
           $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
-          // logtocmd $jsonurl;
+          // logtocmd_cf $jsonurl;
           $json = file_get_html_with_retry($jsonurl, 5);
           $decode = json_decode($json, true);
           if( !isset($decode['results']['0']['name']) ) return false;
@@ -868,13 +909,12 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8){
     }
     return $filepath;
 }
+//★
 
 function start_song($db,$id,$addplaytimes = 0){
-
     global $FOOBARPATH;
     global $MPCPATH;
     global $config_ini;
-
 
     readconfig($dbname,$playmode,$playerpath,$foobarpath,$requestcomment,$usenfrequset,$historylog,$waitplayercheckstart,$playerchecktimes,$connectinternet,$usevideocapture,$moviefullscreen,$helpurl,$commenturl_base,$commentroot,$commenturl);
 
@@ -882,16 +922,16 @@ function start_song($db,$id,$addplaytimes = 0){
     if( $row === false){
         return $row;
     }
-    
-    $filepath = get_fullfilename2($row["fullpath"],$row["songfile"],$filepath_utf8);
+
+    //★ $filepath = get_fullfilename2($row["fullpath"],$row["songfile"],$filepath_utf8);
+    $filepath = get_fullfilename2_local($row["fullpath"],$row["songfile"],$filepath_utf8);  //★
     if( $filepath === false){
-       logtocmd($word."<start_song>ファイルが見つかりませんでした、Skipします");
-       return false;
+        logtocmd($word."<start_song>ファイルが見つかりませんでした、Skipします");
+        return false;
     }
     // var_dump($row);
     $filetype = check_filetype ($db,$id);
     if( $filetype == 2 ){
-    
         // とりあえず動画Playerを終了する。
         mpcstop();
         // audio file
@@ -900,12 +940,11 @@ function start_song($db,$id,$addplaytimes = 0){
             sleep(0.5);
             exec("start  \"\" \"".mb_convert_encoding($FOOBARPATH,"SJIS")."\"" . " /pause \n");
         }
-    }
-    else{
+    }else{
         // video file
         //logtocmd 'MPC fileopen start '."\n";
         if(mb_strstr($row['kind'],'動画_別プ') != FALSE){
-        // web経由でファイル再生
+            // web経由でファイル再生
             if(array_key_exists("otherplayer_path",$config_ini) && !empty($config_ini["otherplayer_path"]) ){
                 // とりあえず動画Playerを終了する。
                 mpcstop();
@@ -915,102 +954,73 @@ function start_song($db,$id,$addplaytimes = 0){
             }
         }else{
             if($filetype == 3){
-              global $ADDPATHCMD;
-              // とりあえず動画Playerを終了する。
-              mpcstop();
-			              $mpcpsflg = mpcpscheck();
-			              print("mpcps1:".$mpcpsflg);
-			              if($mpcpsflg){
-			              print("mpcps2:".$mpcpsflg);
-			               sleep(1);
-			               mpcstop();
-			               $mpcpsflg = mpcpscheck();
-			               if($mpcpsflg){
-			              print("mpcps3:".$mpcpsflg);
-			                sleep(1);
-			                mpcstop();
-			               }
-			              }
-              if ($config_ini['playmode'] == 2){
-                $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
-              }else {
-                $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
-              }
-              // system('echo %PATH%');
-              // echo $execcmd;
-              //exec($execcmd);
-              $fp = popen($execcmd,'r');
-              pclose($fp);
+                global $ADDPATHCMD;
+                // とりあえず動画Playerを終了する。
+                mpcstop();
+                $mpcpsflg = mpcpscheck();
+                print("mpcps1:".$mpcpsflg);
+                if($mpcpsflg){
+                    print("mpcps2:".$mpcpsflg);
+                    sleep(1);
+                    mpcstop();
+                    $mpcpsflg = mpcpscheck();
+                    if($mpcpsflg){
+                        print("mpcps3:".$mpcpsflg);
+                        sleep(1);
+                        mpcstop();
+                    }
+                }
+                if ($config_ini['playmode'] == 2){
+                    $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
+                }else {
+                    $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /play \"$filepath\"\n";
+                }
+                // system('echo %PATH%');
+                // echo $execcmd;
+                //exec($execcmd);
+                $fp = popen($execcmd,'r');
+                pclose($fp);
             }else{
-              // MPC起動チェック
-              if(mpcrunningcheck($playerpath)===FALSE){
-                  startmpcandwait($playerpath,1);
-              }
+                //★movie指定
+//★                // MPC起動チェック
+//★                if(mpcrunningcheck($playerpath)===FALSE){
+//★                    startmpcandwait($playerpath,1);
+//★                }
             }
             /**** ここに再生前にPlayer操作を行う処理を入れる ****/
             /* key change */
             global $MPCCMDURL;
             global $MPCSTATURL;
-            // 一時停止
-            // 一時停止が必要かチェック
-            $needpause = false ;
+                    //★ 一時停止状態でファイルを開く。
+                    global $ADDPATHCMD;  //★
+                    $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath_utf8\"\n";  //★
+                    $fp = popen($execcmd,'r');
+                    pclose($fp);
 
-            if(array_key_exists("keychange" , $row)){
-                if($row["keychange"] != 0 ) $needpause = true;
-            }
-            if(array_key_exists("track" , $row)){
-                if($row["track"] != 0 ) $needpause = true;
-            }
-            
-            if($needpause) {
-			   // start Playerをコマンドライン経由起動に一時的に変更する 
-			        if(false){
-			              global $ADDPATHCMD;
-			              // とりあえず動画Playerを終了する。
-			              mpcstop();
-			              $mpcpsflg = mpcpscheck();
-			              print("mpcps1:".$mpcpsflg);
-			              if($mpcpsflg){
-			              print("mpcps2:".$mpcpsflg);
-			               sleep(1);
-			               mpcstop();
-			               $mpcpsflg = mpcpscheck();
-			               if($mpcpsflg){
-			              print("mpcps3:".$mpcpsflg);
-			                sleep(1);
-			                mpcstop();
-			               }
-			              }
-			              
-			              $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath\"\n";
-						$fp = popen($execcmd,'r');
-						pclose($fp);			              
-			        }else {
-						 mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
-//						file_get_contents('http://localhost/mpcctrl.php'); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-						for ($i=0; $i<10; $i++) {
-							$res = file_get_contents($MPCSTATURL); // なぜか数回Webアクセスしないと次のアクセスが空振りするのでその対策
-							if($res !== false) break;
-							usleep(100000);
-					 	}
-						file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=888',50,0,4,100); // 一時停止を投げてみる（まず失敗する）
-                    }
-			   // end Playerをコマンドライン経由起動に一時的に変更する 
-			}else {
-				mpcplaylocalfile($config_ini['playerpath'],$filepath_utf8,$config_ini['playmode'],1,$db,$id);
-			   // end Playerをコマンドライン経由起動に一時的に変更する 
-            }
-
+            //★ MPCの再生開始時に音量を指定値に戻す（設定で有効にしている場合）
+            if(array_key_exists('startvolume50',$config_ini)){	//★
+                if($config_ini['startvolume50'] != 1)  {	//★
+                }else{	//★
+                    set_volume($config_ini["startvolume"]);	//★
+                }	//★
+            }else{	//★
+                set_volume($config_ini["startvolume"]);	//★
+            }	//★
+            //★ 音声トラックの切替が無いor１回の場合、再生開始を遅延させる。
+            if($row["track"] == 0){  //★
+              sleep(1);  //★
+            }  //★
+            if($row["track"] == 1){  //★
+              sleep(1);  //★
+            }  //★
             if(array_key_exists("track" , $row)){
                 mpc_trackchange($row["track"]);
             }
             if(array_key_exists("keychange" , $row)){
                 mpc_keychange($row["keychange"]);
             }
-            commentpost_v4("rqlst", "0", $commenturl);
-            if($needpause)
-               file_get_html_with_retry('http://localhost/mpcctrl.php?cmd=start_first'); // 最初から再生しなおす
-            
+echo "\n".date("H時i分s秒" )."sleep ".__LINE__;
+
             /* track change */
             // BGVモードではmuteにする。
             $loop = check_request_loop($db,$id);
@@ -1028,19 +1038,21 @@ function start_song($db,$id,$addplaytimes = 0){
                     }else {
                         logtocmd("BGV開始時実行コマンドが見つかりません:".$cmd);
                     }
-                    
                 }
             }
             // 再生開始
+            print($filepath_utf8."を再生します。\n\n");  //★
+            sleep(2);  //★
+            commentpost_v4("rqlst", "0", $commenturl);  //★
+            sleep(1);  //★
             file_get_html_with_retry($MPCCMDURL."?wm_command=887");
-
         }
     }
     $db->beginTransaction();
     $sql = "UPDATE requesttable set nowplaying = \"再生中\", playtimes = ".($row["playtimes"] + $addplaytimes )."  WHERE id = $id ";
     $ret = $db->exec($sql);
     if (! $ret ) {
-      logtocmd("再生中 への変更に失敗しました。<br>");
+        logtocmd("再生中 への変更に失敗しました。<br>");
     }
     $db->commit();
     file_get_contents("http://localhost/updaterequestlist.php");
@@ -1056,7 +1068,7 @@ function check_end_song($db,$id,$playerchecktimes,$playmode,$commenturl){
     $stat = 2;
     while($exit == 1)
     {
-       echo ".";
+       //★ echo ".";
        // db statusを確認
        $stat = check_nowplaying_state ($db,$id);
        if($stat === 3 ){  // 停止中
@@ -1156,25 +1168,20 @@ function runningcheck_mpc($db,$id,$playerchecktimes,$commenturl){
        $totaltime_a =  explode(':', $etime_a[1] );
        $playtime = $playtime_a[0]*60*60 + $playtime_a[1]*60 + $playtime_a[2];
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
-       if($startonce && ( $playtime > ($totaltime - 2) ) ){
-           commentpost_v4("rqlst", "1", $commenturl);
-           print ($mpsctat_array[2]);
-           echo ', ';
-           print ($playtime);
-           echo ':';
-           print ($totaltime);
-           echo "\n";
-           if($totaltime != 0 ){
-               sleep(2);
-               break;
-           }
-       }
-       
+       //★ 終了時間を丁度に変更
+       if($startonce && ( $playtime == $totaltime ) ){  //★
+echo "\n".date("H時i分s秒" )."sleep ".__LINE__;
+           sleep(2);
+           commentpost_v4("rqlst", "1", $commenturl);  //★
+           break;  //★
+       }  //★
+
        if($playtime > 1 ) $startonce = true;
        // logtocmd "DEBUG : $mpsctat_array[2], $playtime : $totaltime \n";
        workcheck_pfwd();
        workcheck_andrestartxampp();
 
+echo "\n".date("H時i分s秒" )."sleep ".__LINE__;
        sleep(1.0);
    }
 }
@@ -1447,7 +1454,8 @@ while(1){
     logtocmd_dbg( 'カラオケ配信ではないファイル再生準備開始'."\n");
        $ft = check_filetype ($db,$l_id);
        if( $ft !== 3){
-           $filepath = get_fullfilename2($l_fullpath,$word,$filepath_utf8);
+           //★ $filepath = get_fullfilename2($l_fullpath,$word,$filepath_utf8);
+           $filepath = get_fullfilename2_local($l_fullpath,$word,$filepath_utf8);
     //logtocmd "Debug filepath: $filepath\r\n";
        }else {
             // logtocmd $l_kind;
@@ -1464,7 +1472,11 @@ while(1){
                    logtocmd("再生中を検出。現在の曲の終了待ち\n");
            }else{
     logtocmd_dbg( 'ID指定ファイル再生開始'."\n");
+               //★ 予約を入れたときに予約一覧を表示する。（消えている場合があるため。）
+               commentpost_v4("rqlst", "1", $commenturl);  //★
+echo "\n".date("H時i分s秒" )."start song start ".__LINE__;
                start_song($db,$l_id,1);
+echo "\n".date("H時i分s秒" )."start song stop ".__LINE__;
     logtocmd_dbg( 'ID指定ファイル再生開始完了'."\n");
                if($filetype == 3){
                    sleep(10); // URL指定はさらに10秒待ち 
@@ -1523,10 +1535,17 @@ while(1){
         $played=1;
 
 //        break;
+        //★ 曲終了時は常に予約画面を表示する。
+        commentpost_v4("rqlst", "1", $commenturl);  //★
     }
     
     if( $played === 5)
-    logtocmd("no next song, waiting...<br>\n");
+    {  //★
+    //★ logtocmd("no next song, waiting...<br>\n");
+        logtocmd(date("Y/m/d H:i:s")."：次の曲がありません。 予約待機中です...\n");  //★
+        commentpost_v4("rqlst", "1", $commenturl);  //★待機中は常に予約一覧を表示
+        //commentpost_v4("rqlst", "0", $commenturl);  //★予約一覧をすぐに消す（デバッグ用）
+    }  //★
     logtocmd_dbg( '全体ループラスト（プロセスチェック開始)'."\n");
     workcheck_pfwd();
     workcheck_andrestartxampp();

@@ -362,8 +362,8 @@ function filelistfromsong($filelist){
           print '<strong>';
         print '&nbsp;&nbsp;最終更新日：';
           print '</strong>';
-        $updatetime = cal_from_jd($fileinfo['found_last_write_time'],CAL_GREGORIAN);
-        if($updatetime['year'] < 0 ) $updatetime = cal_from_jd(($fileinfo['found_last_write_time']+2400000.5),CAL_GREGORIAN);
+        $updatetime = cal_from_jd((int)$fileinfo['found_last_write_time'],CAL_GREGORIAN);
+        if($updatetime['year'] < 0 ) $updatetime = cal_from_jd((int)($fileinfo['found_last_write_time']+2400000.5),CAL_GREGORIAN);
         print $updatetime['year'].'/'.$updatetime['month'].'/'.$updatetime['day'];
         if(!empty($fileinfo['found_worker']) ){
           print '<strong>';
@@ -686,7 +686,8 @@ if( empty($program['song_name']) ){
 print '    <div class="col-xs-12 col-md-12 bg-success" > ';
 print '<a href='.create_requestconfirmlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
 if(!empty($program['found_comment'])){
-print '<br />【'.$program['found_comment'].'】';
+    $showcomment=preg_replace('/\,\/\/.*/', "",$program['found_comment']);
+    print '<br />【'.$showcomment.'】';
 }
 print '</a>';
 		
@@ -766,9 +767,9 @@ print '    <dt>';
 print '最終更新日';
 print '    </dt>';
 print '    <dd>';
-$updatetime = cal_from_jd($program['found_last_write_time'],CAL_GREGORIAN);
+$updatetime = cal_from_jd((int)$program['found_last_write_time'],CAL_GREGORIAN);
 //print strftime('%F %X', cal_from_jd($program['found_last_write_time'],CAL_GREGORIAN));
-if($updatetime['year'] < 0 ) $updatetime = cal_from_jd(($program['found_last_write_time']+2400000.5),CAL_GREGORIAN);
+if($updatetime['year'] < 0 ) $updatetime = cal_from_jd((int)($program['found_last_write_time']+2400000.5),CAL_GREGORIAN);
 print $updatetime['year'].'/'.$updatetime['month'].'/'.$updatetime['day'];
 print '    </dd>';
 print '    </dl>';

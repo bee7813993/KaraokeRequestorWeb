@@ -14,6 +14,9 @@
 //                                                            ///
 /////////////////////////////////////////////////////////////////
 
+if (!defined('GETID3_INCLUDEPATH')) { // prevent path-exposing attacks that access modules directly on public webservers
+	exit;
+}
 
 class getid3_rkau extends getid3_handler
 {
@@ -72,7 +75,7 @@ class getid3_rkau extends getid3_handler
 		$info['audio']['sample_rate']     = $info['rkau']['sample_rate'];
 
 		$info['playtime_seconds']         = $info['rkau']['source_bytes'] / ($info['rkau']['sample_rate'] * $info['rkau']['channels'] * ($info['rkau']['bits_per_sample'] / 8));
-		$info['audio']['bitrate']         = ($info['rkau']['compressed_bytes'] * 8) / $info['playtime_seconds'];
+		$info['audio']['bitrate']         = getid3_lib::SafeDiv($info['rkau']['compressed_bytes'] * 8, $info['playtime_seconds']);
 
 		return true;
 
