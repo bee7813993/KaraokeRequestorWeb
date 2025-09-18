@@ -482,8 +482,9 @@ if( empty($program['song_name']) ){
 }
 print '    <div class="col-xs-12 col-md-12 bg-success" > ';
 print '<a href='.create_filelistlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
-if(!empty($program['found_comment'])){
-print '<br />【'.$program['found_comment'].'】';
+$showcomment=preg_replace('/\,\/\/.*/', "",$program['found_comment']);
+if(!empty($showcomment)){
+print '<br />【'.$showcomment.'】';
 }
 print '</a>';
 print '    </div>';

@@ -315,9 +315,9 @@ function filelistfromsong($filelist){
         else
         print '<div class="col-md-12 col-xs-12">';
         print '<a href="'.create_requestconfirmlink($fileinfo).'" class=" divid10 btn btn-primary btn-lg btn-block" style="white-space: normal; overflow: auto; text-align: left; font-size: medium;" >';
-        if(!empty($fileinfo['found_comment'])){
+        $showcomment=preg_replace('/\,\/\/.*/', "",$fileinfo['found_comment']);
+        if(!empty($showcomment)){
           print '<strong class="text-center">【';
-          print $fileinfo['found_comment'];
           print '】</strong>';
         print '<br />';
         }
@@ -685,8 +685,8 @@ if( empty($program['song_name']) ){
 }
 print '    <div class="col-xs-12 col-md-12 bg-success" > ';
 print '<a href='.create_requestconfirmlink($program).' class="btn btn-primary btn-lg btn-block"  style="white-space: normal;" ><strong> '. $display_songname.'</strong> ';
-if(!empty($program['found_comment'])){
-    $showcomment=preg_replace('/\,\/\/.*/', "",$program['found_comment']);
+$showcomment=preg_replace('/\,\/\/.*/', "",$program['found_comment']);
+if(!empty($showcomment)){
     print '<br />【'.$showcomment.'】';
 }
 print '</a>';

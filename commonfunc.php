@@ -276,18 +276,26 @@ function get_prioritytable()
 }
 
 function get_globalipv4(){
-    // IP取得URL （どこかいいサイトがあったら教えて）
-    $checkglobakurl = 'http://vps.pcgame-r18.jp/ddns/checkip.php';
-
-    return file_get_html_with_retry($checkglobakurl);
+    // IP取得URL （外部サイト2つ、閉鎖されたら別のものを探す）
+    $checkglobakurl = 'http://icanhazip.com';
+    
+    $myv4ip=file_get_html_with_retry($checkglobakurl,1,1);
+    if( $myv4ip !== false)
+    return $myv4ip;
+    
+    $checkglobakurl = 'http://ifconfig.me/ip';
+    return file_get_html_with_retry($checkglobakurl,1,1);
 }
 
 function check_online_available($host,$timeout = 2){
     global $config_ini;
     if($config_ini["connectinternet"] == 1){
-      $checkurl = 'http://vps.pcgame-r18.jp/ddns/online_yukari_check.php?host='.$host.'&timeout='.$timeout;
+      $checkurl = 'http://'.urldecode($host);
       $ret = file_get_html_with_retry($checkurl,2,4);
-      return $ret;
+      if($ret === false)
+        return 'NG';
+      else
+        return 'OK';
     }
     return "now disabled online";
 }

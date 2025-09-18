@@ -33,7 +33,7 @@ class getid3_lib
 		$returnstring = '';
 		for ($i = 0; $i < strlen($string); $i++) {
 			if ($hex) {
-				$returnstring .= str_pad(dechex(ord($string[$i])), 2, '0', STR_PAD_LEFT);
+				$returnstring .= str_pad(dechex(ord((string)$string[$i])), 2, '0', STR_PAD_LEFT);
 			} else {
 				$returnstring .= ' '.(preg_match("#[\x20-\x7E]#", $string[$i]) ? $string[$i] : '¤');
 			}
