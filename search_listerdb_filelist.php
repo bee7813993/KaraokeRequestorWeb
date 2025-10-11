@@ -318,6 +318,7 @@ function filelistfromsong($filelist){
         $showcomment=preg_replace('/\,\/\/.*/', "",$fileinfo['found_comment']);
         if(!empty($showcomment)){
           print '<strong class="text-center">【';
+          print $showcomment;
           print '】</strong>';
         print '<br />';
         }
