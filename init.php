@@ -274,7 +274,7 @@ print '</pre>';
 
   <h3> リスト未再生化 </h3>
   <form method="post" action="delete.php">
-    <input type="submit" name="resettsatus" value="全て未再生化" class="btn btn-default" />
+    <input type="submit" name="resetstatus" value="全て未再生化" class="btn btn-default" />
   </form>
 
   <h3> BGMモード用再生回数操作 </h3>
