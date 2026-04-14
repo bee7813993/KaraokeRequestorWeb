@@ -1,7 +1,11 @@
 <?php
-$id=99999;
-if(array_key_exists("id", $_REQUEST)) {
-    $id = $_REQUEST["id"];
+// id は整数のみ受け付ける
+$id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($id === false || $id === null) {
+    $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+}
+if ($id === false || $id === null) {
+    $id = 99999;
 }
 
 require_once 'commonfunc.php';
@@ -9,10 +13,11 @@ require_once 'binngo_func.php';
 mb_language("Japanese");
 
 global $db;
-$sql = 'SELECT * FROM requesttable WHERE id = '.$id.' ORDER BY reqorder DESC';
-$select = $db->query($sql);
-$allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
-$select->closeCursor();
+$stmt = $db->prepare('SELECT * FROM requesttable WHERE id = :id ORDER BY reqorder DESC');
+$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+$stmt->execute();
+$allrequest = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->closeCursor();
 
 ?>
 
@@ -57,7 +62,11 @@ $bingoinfo->initbingodb('songbingo.db');
 $list = $bingoinfo->wordkey_readdata();
 
 print '<p>';
-print '「'.$allrequest[0]['songfile'].'」のビンゴ番号入力';
+if (!empty($allrequest)) {
+    print '「'.htmlspecialchars((string)$allrequest[0]['songfile'], ENT_QUOTES, 'UTF-8').'」のビンゴ番号入力';
+} else {
+    print '(該当するリクエストが見つかりません)';
+}
 print '</p>';
 
 ?>
@@ -82,17 +91,18 @@ foreach( $list as $oneword ){
         if($id == $oneid ) $thisidflg = true;
     }
     
+    $esc_requirement = htmlspecialchars((string)$oneword[0], ENT_QUOTES, 'UTF-8');
     print '<tr ';
     if($thisidflg) print 'class="success" ' ;
     print '> ';
     print '  <td> ';
-    print $oneword[0];
+    print $esc_requirement;
      if($thisidflg) print '&nbsp;（現在の曲で開放） ' ;
     print '  </td>';
     print '  <td> ';
     if($oneword[2] == 1){
       foreach( $oneword[1] as $onenum ){
-        print $onenum.' ';
+        print htmlspecialchars((string)$onenum, ENT_QUOTES, 'UTF-8').' ';
       }
     }else{
         print "未開放";
@@ -100,11 +110,11 @@ foreach( $list as $oneword ){
     print '  </td>';
     print '  <td> ';
     print '  <form action="bingo_opennum.php" method="POST" class="bingoinput" >';
-    print '    <input type="hidden" name="requirement" value="'.$oneword[0].'" class="form-control">';
+    print '    <input type="hidden" name="requirement" value="'.$esc_requirement.'" class="form-control">';
     $togglevalue = $oneword[2]==0 ? 1 : 0;
     $toggleword = $oneword[2]==0 ? 'open' : 'close';
     print '    <input type="hidden" name="toopened" value="'.$togglevalue.'" class="form-control">';
-    print '    <input type="hidden" name="id" value="'.$id.'" class="form-control">';
+    print '    <input type="hidden" name="id" value="'.(int)$id.'" class="form-control">';
     print '    <button type="submit">'.$toggleword.'</button>';
     print '  </form>';
     print '  </td>';

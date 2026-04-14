@@ -11,12 +11,16 @@ if(empty($dbname)){
 $l_times = 0;
 
 if(array_key_exists("times", $_REQUEST)) {
-    $l_times = $_REQUEST["times"];
+    $l_times = filter_var($_REQUEST["times"], FILTER_VALIDATE_INT);
+    if ($l_times === false) {
+        $l_times = 0;
+    }
 }
 
 
-$sql = "UPDATE requesttable set playtimes = $l_times";
-$retval = $db->exec($sql);
+$stmt = $db->prepare("UPDATE requesttable SET playtimes = :times");
+$stmt->bindValue(':times', $l_times, PDO::PARAM_INT);
+$retval = $stmt->execute();
 if (! $retval ) {
         echo "\nPDO::errorInfo():\n";
         print_r($db->errorInfo());
@@ -38,7 +42,7 @@ if (! $retval ) {
   <link type="text/css" rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-<p> 再生回数<?php echo $l_times; ?>クリア完了 </p>
+<p> 再生回数<?php echo htmlspecialchars((string)$l_times, ENT_QUOTES, 'UTF-8'); ?>クリア完了 </p>
 <a href="requestlist_only.php" >トップに戻る </a>
 </body>
 </html>
