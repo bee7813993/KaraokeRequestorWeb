@@ -1,84 +1,56 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  
-<META http-equiv="refresh" content="1; url=notfoundrequest.php">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>見つからなかったリスト更新中</title>
-<link type="text/css" rel="stylesheet" href="../css/style.css" />
-</head>
-<body>
-
-
-<a href="notfoundrequest.php" > 見つからなかったリストに戻る </a><br>
-
 <?php
 $db = null;
 include 'notfound_commonfunc.php';
 init_notfounddb($db,"notfoundrequest.db");
 
-if(array_key_exists("id", $_REQUEST)) {
-    $l_id = $_REQUEST["id"];
-}else {
+$l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($l_id === false || $l_id === null) {
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+}
+if ($l_id === false || $l_id === null) {
+    http_response_code(400);
     printf("No ID");
     die();
 }
-$itemcount = 0;
-    $sql_u = 'UPDATE notfoundtable set ';
+
+$set_clauses = array();
+$params = array();
 
 if(array_key_exists("requesttext", $_REQUEST)) {
-    $l_requesttext = $_REQUEST["requesttext"];
-    $sql_u = $sql_u .' requesttext = \''. $l_requesttext . '\'';
-    $itemcount++;
+    $set_clauses[] = 'requesttext = :requesttext';
+    $params[':requesttext'] = $_REQUEST["requesttext"];
 }
 
 if(array_key_exists("status", $_REQUEST)) {
-    $l_status = $_REQUEST["status"];
-    if($itemcount > 0) {
-        $sql_u = $sql_u . ', ';
-    }
-    $sql_u = $sql_u .' status = '.$l_status;
-    $itemcount++;
+    $l_status = filter_var($_REQUEST["status"], FILTER_VALIDATE_INT);
+    if ($l_status === false) $l_status = 0;
+    $set_clauses[] = 'status = :status';
+    $params[':status'] = $l_status;
 }
 
 if(array_key_exists("reply", $_REQUEST)) {
-    $l_reply = $_REQUEST["reply"];
-    if($itemcount > 0) {
-        $sql_u = $sql_u . ', ';
-    }
-    $sql_u = $sql_u .' reply = \''. $l_reply . '\'';
-    $itemcount++;
+    $set_clauses[] = 'reply = :reply';
+    $params[':reply'] = $_REQUEST["reply"];
 }
 
 if(array_key_exists("searchword", $_REQUEST)) {
-    $l_searchword = $_REQUEST["searchword"];
-    if($itemcount > 0) {
-        $sql_u = $sql_u . ', ';
+    $set_clauses[] = 'searchword = :searchword';
+    $params[':searchword'] = $_REQUEST["searchword"];
+}
+
+if(count($set_clauses) > 0){
+    $sql_u = 'UPDATE notfoundtable SET ' . implode(', ', $set_clauses) . ' WHERE id = :id';
+    $params[':id'] = $l_id;
+    try{
+        $stmt = $db->prepare($sql_u);
+        $stmt->execute($params);
+    }catch(PDOException $e) {
+        printf("Error: %s\n", $e->getMessage());
+        die();
     }
-    $sql_u = $sql_u .' searchword = \''. $l_searchword . '\'';
-    $itemcount++;
 }
 
+$db = null;
 
-if($itemcount > 0 ){
-     $sql_u = $sql_u . ' WHERE id = '. $l_id;
-     // print "DEBUG : $sql_u";
-     try{
-         $ret = $db->query($sql_u);
-     }catch(PDOException $e) {
-         printf("Error: %s\n", $e->getMessage());
-         die();
-     }
-     print('更新完了。');
-
-}else {
-   print('更新する項目はありません。');
-}
-
-
-?>
-&nbsp;
-<a href="../requestlist_only.php" >トップに戻る </a>
-
-</body>
-</html>
+header('Location: notfoundrequest.php');
+exit;
