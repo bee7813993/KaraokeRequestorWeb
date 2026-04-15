@@ -176,8 +176,10 @@ class SongBingo {
         
         foreach($requirementlist as $onerequirement){
         //var_dump($onerequirement);
-            $sql = 'select * FROM bingotable WHERE requirement="'.$onerequirement["requirement"].'";';
-            $select = $this->bingodb->query($sql);
+            $stmt2 = $this->bingodb->prepare('SELECT * FROM bingotable WHERE requirement = :req');
+            $stmt2->bindValue(':req', (string)$onerequirement["requirement"], PDO::PARAM_STR);
+            $stmt2->execute();
+            $select = $stmt2;
             if($select === false){
                 print_r($this->bingodb->errorInfo());
                 break;
@@ -205,8 +207,10 @@ class SongBingo {
         $result=array();
         
         foreach($numberlist as $onerequirement){
-            $sql = 'select * FROM bingotable WHERE number="'.$onerequirement["number"].'";';
-            $select = $this->bingodb->query($sql);
+            $stmt2 = $this->bingodb->prepare('SELECT * FROM bingotable WHERE number = :num');
+            $stmt2->bindValue(':num', (int)$onerequirement["number"], PDO::PARAM_INT);
+            $stmt2->execute();
+            $select = $stmt2;
             if($select === false){
                 print_r($this->bingodb->errorInfo());
                 break;
@@ -248,20 +252,22 @@ class SongBingo {
     }
     
     public function updateopened($requirement, $toopened = 1 , $id = 99999){
-        $sql = 'UPDATE bingotable SET opened = '.$toopened.', reqid = '.$id.'  WHERE requirement ="'.$requirement.'";';
-        // print '<pre>'.$sql.'</pre>';
-        $retval = $this->bingodb->exec($sql);
-        // print '<pre> Update '.$retval.' lines</pre>';
+        $stmt = $this->bingodb->prepare('UPDATE bingotable SET opened = :opened, reqid = :reqid WHERE requirement = :requirement');
+        $stmt->bindValue(':opened', (int)$toopened, PDO::PARAM_INT);
+        $stmt->bindValue(':reqid', (int)$id, PDO::PARAM_INT);
+        $stmt->bindValue(':requirement', (string)$requirement, PDO::PARAM_STR);
+        $retval = $stmt->execute();
         if (! $retval ) {
             echo "\nPDO::errorInfo():\n";
             print_r($this->bingodb->errorInfo());
-            //print "<br>dbname : $dbname \n<br>";
         }
     }
     
     public function getnumfromid( $id ){
-        $sql = 'select number,opened FROM bingotable WHERE reqid = '.$id.' ORDER BY number';
-        $select = $this->bingodb->query($sql);
+        $stmt = $this->bingodb->prepare('SELECT number, opened FROM bingotable WHERE reqid = :reqid ORDER BY number');
+        $stmt->bindValue(':reqid', (int)$id, PDO::PARAM_INT);
+        $stmt->execute();
+        $select = $stmt;
         
         $result=array();
 
@@ -304,10 +310,11 @@ class SongBingo {
                   if($onebingodata['opened'] == 0 ) {
                       require_once 'kara_config.php';
                       global $db;
-                      $sql = 'SELECT songfile from requesttable where id = '.$id;
-                      $select = $db->query($sql);
-                      $reqlist = $select->fetchAll(PDO::FETCH_ASSOC);
-                      $select->closeCursor();
+                      $stmt = $db->prepare('SELECT songfile FROM requesttable WHERE id = :id');
+                      $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+                      $stmt->execute();
+                      $reqlist = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                      $stmt->closeCursor();
                       // print $onebingodata['requirement'].$reqlist[0]['songfile'];
                       $existscount = mb_strpos($reqlist[0]['songfile'],$onebingodata['requirement'] );
                       // print $existscount.'<br />';
@@ -328,10 +335,11 @@ class SongBingo {
                   if($onebingodata['opened'] == 0 ) {
                       require_once 'kara_config.php';
                       global $db;
-                      $sql = 'SELECT songfile from requesttable where id = '.$id;
-                      $select = $db->query($sql);
-                      $reqlist = $select->fetchAll(PDO::FETCH_ASSOC);
-                      $select->closeCursor();
+                      $stmt = $db->prepare('SELECT songfile FROM requesttable WHERE id = :id');
+                      $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+                      $stmt->execute();
+                      $reqlist = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                      $stmt->closeCursor();
                       if( mb_strlen($onebingodata['requirement']) != mb_strlen($reqlist[0]['songfile'])) continue;
                       $existscount = mb_strpos($onebingodata['requirement'],$reqlist[0]['songfile'] );
                       if($existscount !== FALSE) {

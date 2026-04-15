@@ -14,9 +14,12 @@ $db = null;
 
 include 'kara_config.php';
 
-if(array_key_exists("id", $_REQUEST)) {
-    $l_id = $_REQUEST["id"];
-}else {
+$l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($l_id === false || $l_id === null) {
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+}
+if ($l_id === false || $l_id === null) {
+    http_response_code(400);
     printf("No ID");
     die();
 }
@@ -154,11 +157,9 @@ if(array_key_exists("pause", $_REQUEST)) {
     }
     $updatestring = $updatestring.' pause = '. $db->quote($l_value) . ' ';
 }
-print  $updatestring;
 if(strlen($updatestring) > 0){
     try{
-    $sql_u = 'UPDATE requesttable set '. $updatestring . ' WHERE id = '. $l_id;
-    print  "SQL\n<br />".$sql_u."<br />\n";
+    $sql_u = 'UPDATE requesttable set '. $updatestring . ' WHERE id = '. (int)$l_id;
 if(!empty($DEBUG))
 print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
@@ -187,7 +188,7 @@ try{
 		die();
 } 
 
-print "<a href=\"change.php?id=$l_id\" > 戻る </a>";
+print "<a href=\"change.php?id=".(int)$l_id."\" > 戻る </a>";
 
 ?>
 &nbsp;

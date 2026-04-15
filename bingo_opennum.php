@@ -10,11 +10,17 @@ if(array_key_exists("requirement", $_REQUEST)) {
 }
 $toopened = 1;
 if(array_key_exists("toopened", $_REQUEST)) {
-    $toopened = $_REQUEST["toopened"];
+    $toopened = filter_var($_REQUEST["toopened"], FILTER_VALIDATE_INT);
+    if ($toopened === false || !in_array($toopened, array(0, 1), true)) {
+        $toopened = 1;
+    }
 }
 $id = 99999;
 if(array_key_exists("id", $_REQUEST)) {
-    $id = $_REQUEST["id"];
+    $tmp = filter_var($_REQUEST["id"], FILTER_VALIDATE_INT);
+    if ($tmp !== false && $tmp !== null) {
+        $id = $tmp;
+    }
 }
 
 
