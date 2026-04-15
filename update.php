@@ -1,14 +1,3 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<META http-equiv="refresh" content="1; url=requestlist_only.php" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>項目修正実行</title>
-</head>
-<body>
-
-
-<a href="requestlist_only.php" > リクエストページに戻る <a><br>
-
 <?php
 $db = null;
 
@@ -160,8 +149,6 @@ if(array_key_exists("pause", $_REQUEST)) {
 if(strlen($updatestring) > 0){
     try{
     $sql_u = 'UPDATE requesttable set '. $updatestring . ' WHERE id = '. (int)$l_id;
-if(!empty($DEBUG))
-print "DEBUG:".$sql_u.'<br />';
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
 		printf("Error: %s\n", $e->getMessage());
@@ -170,29 +157,7 @@ print "DEBUG:".$sql_u.'<br />';
 
 }
 
+$db = null;
 
-print("現在の登録状況<br>");
-
-$sql = "SELECT * FROM requesttable ORDER BY id DESC";
-try{
-    $select = $db->query($sql);
-
-    while($row = $select->fetch(PDO::FETCH_ASSOC)){
-	    echo implode("|", $row) . "\n<br>";
-    }
-
-    $db = null;
-
-}catch(PDOException $e) {
-		printf("Error: %s\n", $e->getMessage());
-		die();
-} 
-
-print "<a href=\"change.php?id=".(int)$l_id."\" > 戻る </a>";
-
-?>
-&nbsp;
-<a href="requestlist_only.php" >トップに戻る </a>
-
-</body>
-</html>
+header('Location: requestlist_only.php');
+exit;
