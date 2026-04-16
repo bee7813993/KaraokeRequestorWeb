@@ -23,8 +23,8 @@ if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
-if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
+$linkoption = '';
+if(!empty($selectid) ) $linkoption = 'selectid='.$selectid;
 
 $target="";
 if(array_key_exists("target", $_REQUEST)) {
@@ -71,20 +71,17 @@ $num_list = array( '1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,'0' );
 $kana_list = array( 'あ' ,'い' ,'う' ,'え' ,'お' ,'か' ,'き' ,'く' ,'け' ,'こ' ,'さ' ,'し' ,'す' ,'せ' ,'そ' ,'た' ,'ち' ,'つ' ,'て' ,'と' ,'な' ,'に' ,'ぬ' ,'ね' ,'の' ,'は' ,'ひ' ,'ふ' ,'へ' ,'ほ' ,'ま' ,'み' ,'む' ,'め' ,'も' ,'や' ,'ゐ' ,'ゆ' ,'ゑ' ,'よ' ,'ら' ,'り' ,'る' ,'れ' ,'ろ' ,'わ' ,'を' ,'ん');
 
 function checkandbuild_headerlink( $oneheader, $headerlist, $columnname, $columnname_ruby , $lister_dbpath ) {
-    global $lister_dbpath;
     global $linkoption;
     global $searchitem;
-    
+
     //substr(maker_ruby, 1, 1)
     $headerkey='substr('.$columnname_ruby.', 1, 1)';
     foreach($headerlist['data']  as $key => $value) {
-    //print $oneheader.$value[$headerkey];
     $katakana_oneheader = mb_convert_kana($oneheader,'C');
         if( $oneheader === $value[$headerkey] || $katakana_oneheader === $value[$headerkey]) {
-            // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
-            // search_listerdb_column_json.php?list=1&lister_dbpath='.$lister_dbpath.'&start='.$displayfrom.'&length='.$displaynum.'&searchcolumn='.urlencode($column);
-            $whereword = urlencode($columnname_ruby.' like \''.$value[$headerkey].'%\'');
-            $url='<a class="btn btn-primary center-block indexbtnstr" href="search_listerdb_column_list.php?start=0&length=50&header='.urlencode($value[$headerkey]).'&searchcolumn='.$columnname.'&sqlwhere='.$whereword.'&searchitem='.urlencode($searchitem).'&'.$linkoption.'"> '. $oneheader .'</a>';
+            $linkparams = 'start=0&length=50&header='.urlencode($value[$headerkey]).'&searchcolumn='.$columnname.'&searchitem='.urlencode($searchitem);
+            if(!empty($linkoption)) $linkparams = $linkparams.'&'.$linkoption;
+            $url='<a class="btn btn-primary center-block indexbtnstr" href="search_listerdb_column_list.php?'.$linkparams.'"> '. $oneheader .'</a>';
             return $url;
         }
     }
@@ -171,8 +168,6 @@ print <<<EOT
     </div>
   </div>
 EOT;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print <<<EOT
@@ -194,8 +189,6 @@ EOT;
 print <<<EOT
   </div>
 EOT;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print <<<EOT
@@ -217,7 +210,7 @@ if(!empty($errmsg)){
 
 // 項目ヘッダリスト取得
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_column_json.php?list=1&lister_dbpath='.$lister_dbpath.'&start='.$displayfrom.'&length='.$displaynum.'&column='.urlencode($column);
+   $geturl = 'http://localhost/search_listerdb_column_json.php?start='.$displayfrom.'&length='.$displaynum.'&column='.urlencode($column);
    $columnlist_json = file_get_contents($geturl);
    if(!$columnlist_json) {
       $errmsg = '項目リストの取得に失敗';
@@ -226,8 +219,6 @@ if(!empty($errmsg)){
    }
    if(!$columnmany) {
       $errmsg = '項目リストのJSON parse 失敗';
-      print $geturl;
-      print $columnlist_json;
    }
 //    print '<pre>';
 // var_dump($columnlist_json);

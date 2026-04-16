@@ -24,7 +24,12 @@ if(array_key_exists("draw", $_REQUEST)) {
     $draw = (int)$_REQUEST["draw"];
 }
 
-$valid_columns = array('maker_name', 'tie_up_group_name', 'program_name');
+$valid_columns = array(
+    'maker_name', 'tie_up_group_name', 'program_name',
+    'maker_ruby', 'found_artist_ruby', 'song_ruby', 'tie_up_group_ruby',
+    'substr(maker_ruby, 1, 1)', 'substr(found_artist_ruby, 1, 1)',
+    'substr(song_ruby, 1, 1)', 'substr(tie_up_group_ruby, 1, 1)',
+);
 $column = "";
 if(array_key_exists("column", $_REQUEST)) {
     $column = $_REQUEST["column"];
@@ -32,6 +37,11 @@ if(array_key_exists("column", $_REQUEST)) {
 if(!in_array($column, $valid_columns)) {
     http_response_code(400);
     die();
+}
+
+$header = "";
+if(array_key_exists("header", $_REQUEST)) {
+    $header = $_REQUEST["header"];
 }
 
 $maker_name = "";
@@ -54,6 +64,9 @@ if( !$listerdb ) {
 
 // 検索条件を構造化パラメータから構築
 $where_conditions = array();
+if(!empty($header)) {
+    $where_conditions[] = $column . ' LIKE ' . $listerdb->quote($header . '%');
+}
 if(!empty($maker_name)) {
     $where_conditions[] = 'maker_name = ' . $listerdb->quote($maker_name);
 }

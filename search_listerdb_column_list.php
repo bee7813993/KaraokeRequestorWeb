@@ -22,7 +22,7 @@ if(array_key_exists("header", $_REQUEST)) {
     $myrequestarray["header"] = $header;
 }
 
-$valid_searchcolumns = array('maker_name', 'tie_up_group_name', 'program_name');
+$valid_searchcolumns = array('maker_name', 'tie_up_group_name', 'program_name', 'maker_ruby', 'found_artist_ruby', 'song_ruby', 'tie_up_group_ruby');
 if(array_key_exists("searchcolumn", $_REQUEST) && in_array($_REQUEST["searchcolumn"], $valid_searchcolumns)) {
     $searchcolumn = $_REQUEST["searchcolumn"];
     $myrequestarray["searchcolumn"] = $searchcolumn;
@@ -92,15 +92,15 @@ $getqueries['column'] = $sqlcolumn;
 if(!empty($category)){
 $getqueries['category'] = $category;
 }
+if(!empty($header)){
+$getqueries['header'] = $header;
+}
 if(!empty($maker_name)){
 $getqueries['maker_name'] = $maker_name;
 }
 if(!empty($tie_up_group_name)){
 $getqueries['tie_up_group_name'] = $tie_up_group_name;
 }
-
-$getqueries['lister_dbpath'] = $lister_dbpath;
-
 
 buildgetquery($getqueries);
 $url = 'http://localhost/search_listerdb_column_json.php?'.buildgetquery($getqueries);
@@ -156,8 +156,8 @@ if(!empty($errmsg)){
 }
 shownavigatioinbar('searchreserve.php');
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
-if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
+$linkoption = '';
+if(!empty($selectid) ) $linkoption = 'selectid='.$selectid;
 
 // var_dump($columnlist);
 print '<div class="container">';
@@ -184,10 +184,11 @@ foreach ($columnlist['data'] as $column ){
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
 if($nextsonglistflg){
-  $linkurl = 'search_listerdb_songlist.php?'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&category='.urlencode($category).'&'.$linkoption;
+  $linkurl = 'search_listerdb_songlist.php?'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&category='.urlencode($category);
 }else {
-  $linkurl = 'search_listerdb_column_list.php?searchcolumn=program_name&'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&category='.urlencode($category).'&'.$linkoption;
+  $linkurl = 'search_listerdb_column_list.php?searchcolumn=program_name&'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&category='.urlencode($category);
 }
+if(!empty($linkoption)) $linkurl = $linkurl.'&'.$linkoption;
 print '<a class="btn btn-primary btn-block indexbtnstr" href="'.$linkurl.'">';
 print htmlspecialchars($column[$searchcolumn], ENT_QUOTES, 'UTF-8');
 print '（'.(int)$column['COUNT(DISTINCT song_name)'].'）';
