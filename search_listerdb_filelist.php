@@ -137,6 +137,12 @@ if(array_key_exists("match", $_REQUEST)) {
     $match = $_REQUEST["match"];
 }
 
+$recommendation = 'on';
+if(array_key_exists("recommendation", $_REQUEST) && in_array($_REQUEST["recommendation"], array('on','off'))) {
+    $recommendation = $_REQUEST["recommendation"];
+}
+$myrequestarray["recommendation"] = $recommendation;
+
 
 if(array_key_exists("start", $_REQUEST)) {
     $displayfrom = $_REQUEST["start"];
@@ -512,6 +518,10 @@ if(!empty($url)){
    die();
    }
 
+if ($recommendation === 'on') {
+    usort($programlist['data'], 'custom_sort');
+}
+
 
 function create_requestconfirmlink($songinfo) {
   global $linkoption;
@@ -543,6 +553,37 @@ foreach($filelist as $fileinfo)
     }
 }
 return $songcounter;
+}
+
+function custom_sort($a, $b) {
+    $priority = array(
+        "つぼはち" => 1,
+        "つぼはち(Live映像)" => 2,
+        "つぼはち(アニメ公式MV)" => 2,
+        "つぼはち(公式MV-本人映像)" => 3,
+    );
+
+    $a_priority = 999;
+    $b_priority = 999;
+
+    foreach ($priority as $keyword => $value) {
+        if (strpos($a['found_worker'], $keyword) !== false) {
+            $a_priority = $value;
+            break;
+        }
+    }
+
+    foreach ($priority as $keyword => $value) {
+        if (strpos($b['found_worker'], $keyword) !== false) {
+            $b_priority = $value;
+            break;
+        }
+    }
+
+    if ($a_priority != $b_priority) {
+        return $a_priority - $b_priority;
+    }
+    return $b['found_last_write_time'] - $a['found_last_write_time'];
 }
 ?>
 
@@ -629,6 +670,17 @@ print '>歌手名</option>';
 print '</select>';
 print '</div>';
 print '<div class="form-group">';
+print '<label for="recommendation">おすすめ順</label>';
+print '<select class="form-control" id="recommendation" name="recommendation">';
+print '<option value="on" ';
+print selected_check("on", $recommendation);
+print '>有効</option>';
+print '<option value="off" ';
+print selected_check("off", $recommendation);
+print '>無効</option>';
+print '</select>';
+print '</div>';
+print '<div class="form-group">';
 print '<label for="scending">順番</label>';
 print '<select class="form-control" id="scending" name="scending" >';
 print '<option value="ASC" ';
@@ -655,7 +707,7 @@ if(($displayfrom + $displaynum) < $programlist['recordsTotal']) {
 }else {
   $displaylast = $programlist['recordsTotal'];
 }
-print '    <div class="text-right">';
+print '    <div style="text-align: right;">';
 print $displayfrom.'-'.($displaylast).'（全'.$programlist['recordsTotal'].'件）';
 print '    </div>';
 print '  <div class="row">';
