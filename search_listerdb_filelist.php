@@ -100,28 +100,27 @@ if(array_key_exists("tie_up_group_name", $_REQUEST)) {
 
 $select_orderby_str ="found_last_write_time desc";
 
+$valid_orderby_cols = array('found_file_size', 'found_last_write_time', 'song_name', 'song_artist');
 $select_orderby = "";
-if(array_key_exists("orderby", $_REQUEST)) {
+if(array_key_exists("orderby", $_REQUEST) && in_array($_REQUEST["orderby"], $valid_orderby_cols)) {
     $select_orderby = $_REQUEST["orderby"];
     $myrequestarray["orderby"] = $select_orderby;
     setcookie("YukariListerDBOrderby",  $select_orderby);
 }
-else if (isset($_COOKIE['YukariListerDBOrderby'])) {
+else if (isset($_COOKIE['YukariListerDBOrderby']) && in_array($_COOKIE['YukariListerDBOrderby'], $valid_orderby_cols)) {
     $select_orderby = $_COOKIE['YukariListerDBOrderby'];
     $myrequestarray["orderby"] = $select_orderby;
 }
 
-// $select_scending = 'ASC';
 $select_scending ="";
-if(array_key_exists("scending", $_REQUEST)) {
-    $select_scending = $_REQUEST["scending"];
+if(array_key_exists("scending", $_REQUEST) && in_array(strtoupper($_REQUEST["scending"]), array('ASC','DESC'))) {
+    $select_scending = strtoupper($_REQUEST["scending"]);
     $myrequestarray["scending"] = $select_scending;
     setcookie("YukariListerDBScending",  $select_scending);
 }
-
-else if (isset($_COOKIE['YukariListerDBScending'])) {
-    $select_scending = $_COOKIE['YukariListerDBScending'];
-    $myrequestarray["orderby"] = $select_orderby;
+else if (isset($_COOKIE['YukariListerDBScending']) && in_array(strtoupper($_COOKIE['YukariListerDBScending']), array('ASC','DESC'))) {
+    $select_scending = strtoupper($_COOKIE['YukariListerDBScending']);
+    $myrequestarray["scending"] = $select_scending;
 }
 
 

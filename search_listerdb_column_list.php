@@ -22,16 +22,13 @@ if(array_key_exists("header", $_REQUEST)) {
     $myrequestarray["header"] = $header;
 }
 
-if(array_key_exists("searchcolumn", $_REQUEST)) {
+$valid_searchcolumns = array('maker_name', 'tie_up_group_name', 'program_name');
+if(array_key_exists("searchcolumn", $_REQUEST) && in_array($_REQUEST["searchcolumn"], $valid_searchcolumns)) {
     $searchcolumn = $_REQUEST["searchcolumn"];
     $myrequestarray["searchcolumn"] = $searchcolumn;
 }
 
 $category = "";
-if(array_key_exists("sqlwhere", $_REQUEST)) {
-    $sqlwhere = $_REQUEST["sqlwhere"];
-    $myrequestarray["sqlwhere"] = $sqlwhere;
-}
 
 if(array_key_exists("start", $_REQUEST)) {
     $displayfrom = $_REQUEST["start"];
@@ -100,13 +97,7 @@ $getqueries['maker_name'] = $maker_name;
 }
 if(!empty($tie_up_group_name)){
 $getqueries['tie_up_group_name'] = $tie_up_group_name;
-    if(empty($sqlwhere)) {
-    	if(!empty($tie_up_group_name)) 
-        $sqlwhere = "tie_up_group_ruby like '%".kanabuild($tie_up_group_name)."%' or tie_up_group_name like '%".$tie_up_group_name."%'";
-    }
 }
-if(!empty($sqlwhere))
-$getqueries['sqlwhere'] = $sqlwhere;
 
 $getqueries['lister_dbpath'] = $lister_dbpath;
 
@@ -150,10 +141,8 @@ $url = 'http://localhost/search_listerdb_column_json.php?'.buildgetquery($getque
       $columnlist = json_decode($columnlist_json,true);
    }
    if(!$columnlist ){
-   print $url;
-   var_dump($columnlist_json);
    die();
-   }  
+   }
 
 ?>
 
@@ -174,16 +163,16 @@ if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 print '<div class="container">';
 $searchtitle = "";
 if(!empty($header)){
-  $searchtitle = $searchtitle.'「'.$header.'」で始まる';
+  $searchtitle = $searchtitle.'「'.htmlspecialchars($header, ENT_QUOTES, 'UTF-8').'」で始まる';
 }
 if(!empty($tie_up_group_name)){
-  $searchtitle = $searchtitle.'「'.$tie_up_group_name.'」の作品';
+  $searchtitle = $searchtitle.'「'.htmlspecialchars($tie_up_group_name, ENT_QUOTES, 'UTF-8').'」の作品';
 }
 if(!empty($maker_name)){
-  $searchtitle = $searchtitle.'「'.$maker_name.'」の作品';
+  $searchtitle = $searchtitle.'「'.htmlspecialchars($maker_name, ENT_QUOTES, 'UTF-8').'」の作品';
 }
 if(!empty($searchitem)){
-  $searchtitle = $searchtitle.'「'.$searchitem.'」一覧';
+  $searchtitle = $searchtitle.'「'.htmlspecialchars($searchitem, ENT_QUOTES, 'UTF-8').'」一覧';
 }else {
   $searchtitle = $searchtitle.'一覧';
 }
@@ -192,18 +181,16 @@ print '<h2>'. $searchtitle . '</h2>';
 print '  <div class="row bg-info">';
 foreach ($columnlist['data'] as $column ){
 
-//var_dump($column);
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
 if($nextsonglistflg){
   $linkurl = 'search_listerdb_songlist.php?'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&category='.urlencode($category).'&'.$linkoption;
 }else {
-  $sqlwhere=$searchcolumn.'=\''.$column[$searchcolumn].'\'';
-  $linkurl = 'search_listerdb_column_list.php?searchcolumn=program_name&'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&sqlwhere='.urlencode($sqlwhere).'&'.'&category='.urlencode($category).'&'.$linkoption;
+  $linkurl = 'search_listerdb_column_list.php?searchcolumn=program_name&'.$searchcolumn.'='.urlencode($column[$searchcolumn]).'&category='.urlencode($category).'&'.$linkoption;
 }
 print '<a class="btn btn-primary btn-block indexbtnstr" href="'.$linkurl.'">';
-print $column[$searchcolumn];
-print '（'.$column['COUNT(DISTINCT song_name)'].'）';
+print htmlspecialchars($column[$searchcolumn], ENT_QUOTES, 'UTF-8');
+print '（'.(int)$column['COUNT(DISTINCT song_name)'].'）';
 print '</a>';
 print '    </div>';
 print '    </div>';

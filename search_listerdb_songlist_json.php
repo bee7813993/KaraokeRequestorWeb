@@ -14,11 +14,11 @@ if(array_key_exists("listerDBPATH", $config_ini)) {
 }
 
 if(array_key_exists("start", $_REQUEST)) {
-    $displayfrom = $_REQUEST["start"];
+    $displayfrom = (int)$_REQUEST["start"];
 }
 
 if(array_key_exists("length", $_REQUEST)) {
-    $displaynum = $_REQUEST["length"];
+    $displaynum = (int)$_REQUEST["length"];
 }
 
 if(array_key_exists("draw", $_REQUEST)) {
@@ -97,12 +97,20 @@ if(array_key_exists("tie_up_group_name", $_REQUEST)) {
 }
 
 
+$valid_orderby = array(
+    'found_last_write_time desc', 'found_last_write_time asc',
+    'found_file_size desc', 'found_file_size asc',
+    'song_name asc', 'song_name desc',
+    'song_artist asc', 'song_artist desc',
+    'song_name asc, found_file_size desc',
+);
 $select_orderby ="";
 if(array_key_exists("orderby", $_REQUEST)) {
-    $select_orderby = $_REQUEST["orderby"];
+    if(in_array(strtolower($_REQUEST["orderby"]), $valid_orderby)) {
+        $select_orderby = $_REQUEST["orderby"];
+    }
 }
 
-$select_scending = 'ASC';
 $select_scending ="";
 if(array_key_exists("scending", $_REQUEST)) {
     if( strcasecmp($_REQUEST["scending"]  , "DESC" ) == 0){
