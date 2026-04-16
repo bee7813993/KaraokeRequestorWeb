@@ -131,7 +131,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
+$linkoption = '';
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 

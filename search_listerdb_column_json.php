@@ -26,6 +26,7 @@ if(array_key_exists("draw", $_REQUEST)) {
 
 $valid_columns = array(
     'maker_name', 'tie_up_group_name', 'program_name',
+    'song_artist', 'song_name',
     'maker_ruby', 'found_artist_ruby', 'song_ruby', 'tie_up_group_ruby',
     'substr(maker_ruby, 1, 1)', 'substr(found_artist_ruby, 1, 1)',
     'substr(song_ruby, 1, 1)', 'substr(tie_up_group_ruby, 1, 1)',

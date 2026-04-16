@@ -40,7 +40,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
 }
 
 // build query url
-$url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath;
+$url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category);
 
 ?>
 
@@ -95,7 +95,7 @@ if(!empty($errmsg)){
 }
 shownavigatioinbar('searchreserve.php');
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
+$linkoption = '';
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 // var_dump($programlist);

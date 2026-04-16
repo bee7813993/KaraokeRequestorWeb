@@ -155,7 +155,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
+$linkoption = '';
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 function add_get_query($baseurl,$addquery){
@@ -293,13 +293,11 @@ function filelistfromsong($filelist){
       }
       $str =   get_first_clminfo($filelist,'maker_name');
       if(!empty($str)){
-      $sqlwhere = 'maker_name=\''.$str.'\'';
-      print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&maker_name='.urlencode($str).'&'.$linkoption.'">【' . $str .'】 </a>';
+      print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&maker_name='.urlencode($str).'">【' . htmlspecialchars($str, ENT_QUOTES, 'UTF-8') .'】 </a>';
       }
       $str =   get_first_clminfo($filelist,'tie_up_group_name');
       if(!empty($str)){
-      $sqlwhere = 'tie_up_group_name=\''.$str.'\'';
-      print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&tie_up_group_name='.urlencode($str).'&'.$linkoption.'">[' . $str .'] </a>シリーズ';
+      print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&tie_up_group_name='.urlencode($str).'">[' . htmlspecialchars($str, ENT_QUOTES, 'UTF-8') .'] </a>シリーズ';
       }
         print '</p>';
       print '</div> ';//container
@@ -712,13 +710,11 @@ if(!empty( $program['song_op_ed'])){
     print '&nbsp;'.$program['song_op_ed'];
 }
 if(!empty($program['maker_name'])){
-$sqlwhere = 'maker_name=\''.$program['maker_name'].'\'';
-print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&maker_name='.urlencode($program['maker_name']).'&'.$linkoption.'">【' . $program['maker_name'] .'】 </a>';
+print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&maker_name='.urlencode($program['maker_name']).'">【' . htmlspecialchars($program['maker_name'], ENT_QUOTES, 'UTF-8') .'】 </a>';
 }
 
 if(!empty($program['tie_up_group_name'])){
-$sqlwhere = 'tie_up_group_name=\''.$program['tie_up_group_name'].'\'';
-print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&sqlwhere='.urlencode($sqlwhere).'&tie_up_group_name='.urlencode($program['tie_up_group_name']).'&'.$linkoption.'">[' . $program['tie_up_group_name'] .'] </a>シリーズ';
+print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&tie_up_group_name='.urlencode($program['tie_up_group_name']).'">[' . htmlspecialchars($program['tie_up_group_name'], ENT_QUOTES, 'UTF-8') .'] </a>シリーズ';
 //print '&nbsp;&nbsp; <a href ="search_listerdb_filelist.php?tie_up_group_name='.urlencode($program['tie_up_group_name']).'&'.$linkoption.'">[' . $program['tie_up_group_name'] .'] </a>シリーズ';
 }
 

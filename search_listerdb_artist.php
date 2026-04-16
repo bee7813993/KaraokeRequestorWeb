@@ -23,7 +23,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
+$linkoption = '';
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 
@@ -88,7 +88,7 @@ print_meta_header();
 
 <?php
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_artistmany_json.php?list=1&lister_dbpath='.$lister_dbpath.'&start='.$displayfrom.'&length='.$displaynum;
+   $geturl = 'http://localhost/search_listerdb_artistmany_json.php?list=1&start='.$displayfrom.'&length='.$displaynum;
    $artistmanylist_json = file_get_contents($geturl);
    if(!$artistmanylist_json) {
       $errmsg = '歌手名リストの取得に失敗';

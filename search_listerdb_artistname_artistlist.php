@@ -45,7 +45,7 @@ if(array_key_exists("draw", $_REQUEST)) {
 }
 
 // build query url
-$url = 'http://localhost/search_listerdb_artistlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&artist='.$artist.'&match='.$match.'&lister_dbpath='.$lister_dbpath;
+$url = 'http://localhost/search_listerdb_artistlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&artist='.$artist.'&match='.$match;
 
 ?>
 
@@ -110,10 +110,10 @@ foreach ($list['data'] as $artist ){
 print '    <div class="col-xs-12 col-md-6" >';
 print '    <div class="btn-toolbar" style="margin-bottom: 5px" >';
 if(empty($artist['song_artist'])){
-    print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?artist='.'ISNULL'.'&match="full"&lister_dbpath='.$lister_dbpath.'">';
+    print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?artist='.'ISNULL'.'&match="full"">';
     print '【歌手名なし】';
 }else {
-    print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?artist='.urlencode($artist['song_artist']).'&match="full"&lister_dbpath='.$lister_dbpath.'">';
+    print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?artist='.urlencode($artist['song_artist']).'&match="full"">';
     print $artist['song_artist'];
 }
 print '</a>';
@@ -146,14 +146,6 @@ if( !empty($draw) ){
     }
     $urlparams = $urlparams.'draw='.$draw;
 }
-if( !empty($lister_dbpath) ){
-    if(strlen($urlparams) > 0) {
-         $urlparams = $urlparams.'&';
-    }
-    $urlparams = $urlparams.'lister_dbpath='.$lister_dbpath;
-}
-
-
 print '<div class="container  ">';
 print '  <div class="row ">';
 print '    <div class="col-xs-4 col-md-4  ">';

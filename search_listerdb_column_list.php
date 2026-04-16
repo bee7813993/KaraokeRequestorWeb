@@ -22,7 +22,12 @@ if(array_key_exists("header", $_REQUEST)) {
     $myrequestarray["header"] = $header;
 }
 
-$valid_searchcolumns = array('maker_name', 'tie_up_group_name', 'program_name', 'maker_ruby', 'found_artist_ruby', 'song_ruby', 'tie_up_group_ruby');
+$valid_searchcolumns = array(
+    'maker_name', 'tie_up_group_name', 'program_name',
+    'song_artist', 'song_name',
+    'maker_ruby', 'found_artist_ruby', 'song_ruby', 'tie_up_group_ruby',
+);
+$searchcolumn = '';
 if(array_key_exists("searchcolumn", $_REQUEST) && in_array($_REQUEST["searchcolumn"], $valid_searchcolumns)) {
     $searchcolumn = $_REQUEST["searchcolumn"];
     $myrequestarray["searchcolumn"] = $searchcolumn;
@@ -222,7 +227,7 @@ if( !empty($draw) ){
     }
     $urlparams = $urlparams.'draw='.$draw;
 }
-if( !empty($lister_dbpath) ){
+if( !empty($linkoption) ){
     if(strlen($urlparams) > 0) {
          $urlparams = $urlparams.'&';
     }
