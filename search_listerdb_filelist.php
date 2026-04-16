@@ -577,7 +577,7 @@ function custom_sort($a, $b) {
 
     if (!empty($a['found_worker'])) {
         foreach ($custom_sort_priorities as $rule) {
-            if (strpos($a['found_worker'], $rule['keyword']) !== false) {
+            if ($a['found_worker'] === $rule['keyword']) {
                 $a_priority = $rule['priority'];
                 break;
             }
@@ -586,7 +586,7 @@ function custom_sort($a, $b) {
 
     if (!empty($b['found_worker'])) {
         foreach ($custom_sort_priorities as $rule) {
-            if (strpos($b['found_worker'], $rule['keyword']) !== false) {
+            if ($b['found_worker'] === $rule['keyword']) {
                 $b_priority = $rule['priority'];
                 break;
             }
