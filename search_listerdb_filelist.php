@@ -519,12 +519,7 @@ if(!empty($url)){
    }
 
 $priority_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'search_sort_priority.json';
-$custom_sort_priorities = [
-    ['keyword' => 'つぼはち', 'priority' => 1],
-    ['keyword' => 'つぼはち(Live映像)', 'priority' => 2],
-    ['keyword' => 'つぼはち(アニメ公式MV)', 'priority' => 2],
-    ['keyword' => 'つぼはち(公式MV-本人映像)', 'priority' => 3],
-];
+$custom_sort_priorities = [];
 if (file_exists($priority_file)) {
     $loaded = json_decode(file_get_contents($priority_file), true);
     if (is_array($loaded)) {

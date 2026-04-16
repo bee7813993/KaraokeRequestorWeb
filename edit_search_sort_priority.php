@@ -3,19 +3,12 @@ require_once 'commonfunc.php';
 
 $priority_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'search_sort_priority.json';
 
-$default_priorities = [
-    ['keyword' => 'つぼはち', 'priority' => 1],
-    ['keyword' => 'つぼはち(Live映像)', 'priority' => 2],
-    ['keyword' => 'つぼはち(アニメ公式MV)', 'priority' => 2],
-    ['keyword' => 'つぼはち(公式MV-本人映像)', 'priority' => 3],
-];
-
-function load_sort_priorities($file, $defaults) {
+function load_sort_priorities($file) {
     if (file_exists($file)) {
         $data = json_decode(file_get_contents($file), true);
         if (is_array($data)) return $data;
     }
-    return $defaults;
+    return [];
 }
 
 function save_sort_priorities($file, $priorities) {
@@ -27,11 +20,11 @@ $message_type = 'success';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = isset($_POST['action']) ? $_POST['action'] : '';
-    $priorities = load_sort_priorities($priority_file, $default_priorities);
+    $priorities = load_sort_priorities($priority_file);
 
     if ($action === 'add') {
         $keyword = isset($_POST['keyword']) ? trim($_POST['keyword']) : '';
-        $priority = isset($_POST['priority']) ? intval($_POST['priority']) : 999;
+        $priority = isset($_POST['priority']) ? intval($_POST['priority']) : 0;
         if ($keyword !== '' && $priority > 0) {
             $priorities[] = ['keyword' => $keyword, 'priority' => $priority];
             usort($priorities, function($a, $b) { return $a['priority'] - $b['priority']; });
@@ -48,13 +41,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             save_sort_priorities($priority_file, $priorities);
             $message = '削除しました';
         }
-    } elseif ($action === 'reset') {
-        save_sort_priorities($priority_file, $default_priorities);
-        $message = 'デフォルトに戻しました';
+    } elseif ($action === 'clear') {
+        save_sort_priorities($priority_file, []);
+        $message = '全ルールを削除しました';
     }
 }
 
-$priorities = load_sort_priorities($priority_file, $default_priorities);
+$priorities = load_sort_priorities($priority_file);
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -73,10 +66,38 @@ $priorities = load_sort_priorities($priority_file, $default_priorities);
 <?php shownavigatioinbar(); ?>
 <div class="container">
   <h1>おすすめ順 優先度設定</h1>
-  <p class="text-muted">
-    検索結果の「おすすめ順」で使用する、動画制作者名 (found_worker) の優先度ルールを設定します。<br>
-    数値が小さいほど上位に表示されます。キーワードに一致しない制作者は自動的に最下位となります。
-  </p>
+
+  <div class="panel panel-info">
+    <div class="panel-heading"><strong>「おすすめ順」の動作について</strong></div>
+    <div class="panel-body">
+      <p>検索結果画面に表示される「おすすめ順」を有効にすると、動画制作者名（found_worker）をもとに
+      このページで設定したルールに従って並べ替えます。</p>
+      <table class="table table-condensed table-bordered" style="background:#fff;">
+        <thead><tr><th>条件</th><th>表示位置</th></tr></thead>
+        <tbody>
+          <tr><td>ルールのキーワードに一致する動画制作者</td><td>設定した優先度順（数値が小さいほど上位）</td></tr>
+          <tr><td>いずれのキーワードにも一致しない動画制作者</td><td>一致した制作者の後ろ</td></tr>
+          <tr><td>動画制作者が未設定（空欄）</td><td>最後尾</td></tr>
+        </tbody>
+      </table>
+      <ul class="list-unstyled" style="margin-bottom:0;">
+        <li>・同じ優先度が複数設定されている場合、その中では検索画面の「項目」「順番」設定の順で表示されます。</li>
+        <li>・ルールが1件も設定されていない場合は「おすすめ順」を有効にしても効果はなく、通常のソート順で表示されます。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>この画面の使い方</strong></div>
+    <div class="panel-body">
+      <ol>
+        <li>「ルール追加」フォームに <strong>キーワード</strong>（動画制作者名の一部）と <strong>優先度</strong>（1以上の整数）を入力して「追加」ボタンを押します。</li>
+        <li>キーワードは<strong>部分一致</strong>で判定されます。例えば「ABC制作」と入力すると「ABC制作(Live映像)」にも一致します。より具体的なキーワードを別の優先度で追加することで細かく分類できます。</li>
+        <li>同じ優先度を複数設定することができます（例：同じグループの複数の制作者を同じ順位にまとめる）。</li>
+        <li>ルールを削除するには一覧の「削除」ボタンを押します。</li>
+      </ol>
+    </div>
+  </div>
 
   <?php if (!empty($message)): ?>
   <div class="alert alert-<?php echo htmlspecialchars($message_type, ENT_QUOTES, 'UTF-8'); ?>">
@@ -109,7 +130,7 @@ $priorities = load_sort_priorities($priority_file, $default_priorities);
       <?php endforeach; ?>
       <?php if (empty($priorities)): ?>
       <tr>
-        <td colspan="3" class="text-center text-muted">ルールがありません（全件デフォルト順で表示）</td>
+        <td colspan="3" class="text-center text-muted">ルールが設定されていません</td>
       </tr>
       <?php endif; ?>
     </tbody>
@@ -120,7 +141,7 @@ $priorities = load_sort_priorities($priority_file, $default_priorities);
     <input type="hidden" name="action" value="add">
     <div class="form-group">
       <label for="keyword">キーワード&nbsp;</label>
-      <input type="text" name="keyword" id="keyword" class="form-control" placeholder="例: つぼはち" style="width:300px;">
+      <input type="text" name="keyword" id="keyword" class="form-control" placeholder="動画制作者名（部分一致）" style="width:300px;">
     </div>
     &nbsp;
     <div class="form-group">
@@ -134,9 +155,9 @@ $priorities = load_sort_priorities($priority_file, $default_priorities);
   <hr>
 
   <form method="post" action="edit_search_sort_priority.php"
-        onsubmit="return confirm('デフォルト設定に戻しますか？現在のルールは上書きされます。');">
-    <input type="hidden" name="action" value="reset">
-    <button type="submit" class="btn btn-warning">デフォルトに戻す</button>
+        onsubmit="return confirm('全ルールを削除しますか？');">
+    <input type="hidden" name="action" value="clear">
+    <button type="submit" class="btn btn-warning">全ルールを削除</button>
   </form>
 
   <hr>
