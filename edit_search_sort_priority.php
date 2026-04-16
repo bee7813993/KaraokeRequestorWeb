@@ -67,38 +67,6 @@ $priorities = load_sort_priorities($priority_file);
 <div class="container">
   <h1>おすすめ順 優先度設定</h1>
 
-  <div class="panel panel-info">
-    <div class="panel-heading"><strong>「おすすめ順」の動作について</strong></div>
-    <div class="panel-body">
-      <p>検索結果画面に表示される「おすすめ順」を有効にすると、動画制作者名（found_worker）をもとに
-      このページで設定したルールに従って並べ替えます。</p>
-      <table class="table table-condensed table-bordered" style="background:#fff;">
-        <thead><tr><th>条件</th><th>表示位置</th></tr></thead>
-        <tbody>
-          <tr><td>ルールのキーワードに一致する動画制作者</td><td>設定した優先度順（数値が小さいほど上位）</td></tr>
-          <tr><td>いずれのキーワードにも一致しない動画制作者</td><td>一致した制作者の後ろ</td></tr>
-          <tr><td>動画制作者が未設定（空欄）</td><td>最後尾</td></tr>
-        </tbody>
-      </table>
-      <ul class="list-unstyled" style="margin-bottom:0;">
-        <li>・同じ優先度が複数設定されている場合、その中では検索画面の「項目」「順番」設定の順で表示されます。</li>
-        <li>・ルールが1件も設定されていない場合は「おすすめ順」を有効にしても効果はなく、通常のソート順で表示されます。</li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="panel panel-default">
-    <div class="panel-heading"><strong>この画面の使い方</strong></div>
-    <div class="panel-body">
-      <ol>
-        <li>「ルール追加」フォームに <strong>キーワード</strong>（動画制作者名の一部）と <strong>優先度</strong>（1以上の整数）を入力して「追加」ボタンを押します。</li>
-        <li>キーワードは<strong>部分一致</strong>で判定されます。例えば「ABC制作」と入力すると「ABC制作(Live映像)」にも一致します。より具体的なキーワードを別の優先度で追加することで細かく分類できます。</li>
-        <li>同じ優先度を複数設定することができます（例：同じグループの複数の制作者を同じ順位にまとめる）。</li>
-        <li>ルールを削除するには一覧の「削除」ボタンを押します。</li>
-      </ol>
-    </div>
-  </div>
-
   <?php if (!empty($message)): ?>
   <div class="alert alert-<?php echo htmlspecialchars($message_type, ENT_QUOTES, 'UTF-8'); ?>">
     <?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?>
@@ -110,7 +78,7 @@ $priorities = load_sort_priorities($priority_file);
     <thead>
       <tr>
         <th class="col-xs-1">優先度</th>
-        <th class="col-xs-9">キーワード（動画制作者名の部分一致）</th>
+        <th class="col-xs-9">動画制作者名</th>
         <th class="col-xs-2">操作</th>
       </tr>
     </thead>
@@ -140,8 +108,8 @@ $priorities = load_sort_priorities($priority_file);
   <form method="post" action="edit_search_sort_priority.php" class="form-inline">
     <input type="hidden" name="action" value="add">
     <div class="form-group">
-      <label for="keyword">キーワード&nbsp;</label>
-      <input type="text" name="keyword" id="keyword" class="form-control" placeholder="動画制作者名（部分一致）" style="width:300px;">
+      <label for="keyword">動画制作者名&nbsp;</label>
+      <input type="text" name="keyword" id="keyword" class="form-control" placeholder="動画制作者名" style="width:300px;">
     </div>
     &nbsp;
     <div class="form-group">
@@ -153,6 +121,37 @@ $priorities = load_sort_priorities($priority_file);
   </form>
 
   <hr>
+
+  <div class="panel panel-default">
+    <div class="panel-heading"><strong>この画面の使い方</strong></div>
+    <div class="panel-body">
+      <ol>
+        <li>「ルール追加」フォームに <strong>動画制作者名</strong> と <strong>優先度</strong>（1以上の整数）を入力して「追加」ボタンを押します。</li>
+        <li>入力した名前は<strong>部分一致</strong>で判定されます。例えば「こな」と登録すると「ここな」にも一致します。これは意図した動作です。</li>
+        <li>「こな」と「こな（ゲーム）」を同じ扱いにしたい場合は、同じ優先度で両方を登録してください。</li>
+        <li>ルールを削除するには一覧の「削除」ボタンを押します。</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="panel panel-info">
+    <div class="panel-heading"><strong>「おすすめ順」の動作について</strong></div>
+    <div class="panel-body">
+      <p>検索結果画面の「おすすめ順」を有効にすると、このページで設定したルールに従って並べ替えます。</p>
+      <table class="table table-condensed table-bordered" style="background:#fff;">
+        <thead><tr><th>条件</th><th>表示位置</th></tr></thead>
+        <tbody>
+          <tr><td>ルールに一致する動画制作者</td><td>設定した優先度順（数値が小さいほど上位）</td></tr>
+          <tr><td>いずれのルールにも一致しない動画制作者</td><td>一致した制作者の後ろ</td></tr>
+          <tr><td>動画制作者が未設定（空欄）</td><td>最後尾</td></tr>
+        </tbody>
+      </table>
+      <ul class="list-unstyled" style="margin-bottom:0;">
+        <li>・同じ優先度が複数ある場合、その中では検索画面の「項目」「順番」設定の順で表示されます。</li>
+        <li>・ルールが1件も設定されていない場合、「おすすめ順」を有効にしても効果はありません。</li>
+      </ul>
+    </div>
+  </div>
 
   <form method="post" action="edit_search_sort_priority.php"
         onsubmit="return confirm('全ルールを削除しますか？');">
