@@ -205,6 +205,9 @@ print '</pre>';
      <a href="#listctrl" class="menulink" > リクエストリスト操作 </a>
     </li>
     <li class="menu">
+     <a href="#opbuttom" class="menulink" > 操作ボタン（設定・アップデート） </a>
+    </li>
+    <li class="menu">
      <a href="#workconfig" class="menulink" > 動作設定 </a>
     </li>
     <ul>
@@ -241,9 +244,6 @@ print '</pre>';
     </ul>
     <li class="menu">
      <a href="#hostname" class="menulink" > 接続設定（オンライン、ホスト名） </a>
-    </li>
-    <li class="menu">
-     <a href="#opbuttom" class="menulink" > 操作ボタン（アップデート、ログアウト） </a>
     </li>
     <li class="menu">
      <a href="#myiplist" class="menulink" > 自IP一覧 </a>
@@ -284,6 +284,57 @@ print '</pre>';
   <li>
     <a href ="listtimesclear.php?times=1" class="btn btn-default" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
   </li>
+</div>
+
+<hr />
+
+<div class="bg-info">
+  <p>
+  <h1 id="opbuttom" class="menulink">各種操作ボタン </h1>
+  <h3>ログイン情報クリア </h3>
+    <a href ="init.php?clearauth=1" class="btn btn-default" > ログイン情報クリア (対応ブラウザのみ)</a>
+  </p>
+  <p>
+  <h3>製作者優先表示設定 <small>（りすたーDB検索のみ有効）</small></h3>
+    <a href="edit_search_sort_priority.php" class="btn btn-default" > 製作者優先表示設定 </a>
+  </p>
+  <p>
+  <h3>表示優先度設定 <small>（Everything検索のみ有効）</small></h3>
+    <a href="edit_priority.php" class="btn btn-default" > 表示優先度設定 (Everything) </a>
+  </p>
+
+  <h3>オンラインアップデート画面 </h3>
+  <p>
+    <a href ="online_update.php" class="btn btn-default" > オンラインアップデート画面 </a>
+  </p>
+<script type="text/javascript">
+function start_yklistercmd(){
+var request = createXMLHttpRequest();
+url="yklister_exec.php?start=1";
+request.open("GET", url, true);
+request.onreadystatechange = function() {
+    if(request.readyState == 4) {
+        if (request.status === 200) {
+        }
+    }
+}
+request.send("");
+}
+</script>
+  <p>
+<?php
+  $yukalisterpath= 'YukaLister\YukaLister.exe';
+  $addattr = '';
+  if (file_exist_check_japanese_cf($yukalisterpath) ){
+  $addattr = ' onClick="start_yklistercmd()"';
+  }else {
+  $addattr = ' disabled ';
+  }
+print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
+?>
+  </p>
+
+  <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
 </div>
 
 <hr />
@@ -1532,59 +1583,6 @@ var xmlhttp = createXMLHttpRequest();
   </div>
   </form>
 </div>
-
-  <hr />
-
-<div class="bg-info">
-  <p>
-  <h1 id="opbuttom" class="menulink">各種操作ボタン </h1>
-  <h3>ログイン情報クリア </h3>
-    <a href ="init.php?clearauth=1" class="btn btn-default" > ログイン情報クリア (対応ブラウザのみ)</a>
-  </p>
-  <p>
-  <h3>表示優先度設定 </h3>
-    <a href="edit_priority.php" class="btn btn-default" > 表示優先度設定 </a>
-  </p>
-  <p>
-  <h3>おすすめ順 優先度設定 </h3>
-    <a href="edit_search_sort_priority.php" class="btn btn-default" > おすすめ順 優先度設定 </a>
-  </p>
-
-  <h3>オンラインアップデート画面 </h3>
-  <p>
-    <a href ="online_update.php" class="btn btn-default" > オンラインアップデート画面 </a>
-  </p>
-<script type="text/javascript">
-function start_yklistercmd(){
-var request = createXMLHttpRequest();
-url="yklister_exec.php?start=1";
-request.open("GET", url, true);
-request.onreadystatechange = function() {
-    if(request.readyState == 4) {
-        if (request.status === 200) {
-        }
-    }
-}
-request.send("");
-}
-</script>
-  <p>
-<?php
-  $yukalisterpath= 'YukaLister\YukaLister.exe';
-  $addattr = '';
-  if (file_exist_check_japanese_cf($yukalisterpath) ){
-  $addattr = ' onClick="start_yklistercmd()"';
-  }else {
-  $addattr = ' disabled ';
-  }
-print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
-?>
-  </p>
-
-  <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
-</div>
-
-<hr />
 
 <div class="bg-info">
   <h1 id="myiplist" class="menulink"> 自IP一覧 </h1>
