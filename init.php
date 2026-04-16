@@ -1545,6 +1545,10 @@ var xmlhttp = createXMLHttpRequest();
   <h3>表示優先度設定 </h3>
     <a href="edit_priority.php" class="btn btn-default" > 表示優先度設定 </a>
   </p>
+  <p>
+  <h3>おすすめ順 優先度設定 </h3>
+    <a href="edit_search_sort_priority.php" class="btn btn-default" > おすすめ順 優先度設定 </a>
+  </p>
 
   <h3>オンラインアップデート画面 </h3>
   <p>

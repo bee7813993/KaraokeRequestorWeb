@@ -518,6 +518,20 @@ if(!empty($url)){
    die();
    }
 
+$priority_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'search_sort_priority.json';
+$custom_sort_priorities = [
+    ['keyword' => 'つぼはち', 'priority' => 1],
+    ['keyword' => 'つぼはち(Live映像)', 'priority' => 2],
+    ['keyword' => 'つぼはち(アニメ公式MV)', 'priority' => 2],
+    ['keyword' => 'つぼはち(公式MV-本人映像)', 'priority' => 3],
+];
+if (file_exists($priority_file)) {
+    $loaded = json_decode(file_get_contents($priority_file), true);
+    if (is_array($loaded)) {
+        $custom_sort_priorities = $loaded;
+    }
+}
+
 if ($recommendation === 'on') {
     usort($programlist['data'], 'custom_sort');
 }
@@ -556,26 +570,21 @@ return $songcounter;
 }
 
 function custom_sort($a, $b) {
-    $priority = array(
-        "つぼはち" => 1,
-        "つぼはち(Live映像)" => 2,
-        "つぼはち(アニメ公式MV)" => 2,
-        "つぼはち(公式MV-本人映像)" => 3,
-    );
+    global $custom_sort_priorities;
 
     $a_priority = 999;
     $b_priority = 999;
 
-    foreach ($priority as $keyword => $value) {
-        if (strpos($a['found_worker'], $keyword) !== false) {
-            $a_priority = $value;
+    foreach ($custom_sort_priorities as $rule) {
+        if (strpos($a['found_worker'], $rule['keyword']) !== false) {
+            $a_priority = $rule['priority'];
             break;
         }
     }
 
-    foreach ($priority as $keyword => $value) {
-        if (strpos($b['found_worker'], $keyword) !== false) {
-            $b_priority = $value;
+    foreach ($custom_sort_priorities as $rule) {
+        if (strpos($b['found_worker'], $rule['keyword']) !== false) {
+            $b_priority = $rule['priority'];
             break;
         }
     }
