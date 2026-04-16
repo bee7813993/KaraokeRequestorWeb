@@ -45,11 +45,6 @@ if(array_key_exists("bgvfile", $_REQUEST)) {
     if($forcebgv == 1) $fullpath=$bgvfile;
 }
 
-$lister_dbpath = '';
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
-}
-
 /** リクエスト者を毎回新規入力にするかどうか（共有端末用とか） **/
 /** (今のところハードコーディング) **/
 $blank_username = false;
@@ -58,10 +53,9 @@ require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
 require_once 'func_audiotracklist.php';
 
-if( empty($lister_dbpath) ){
-    if (file_exist_check_japanese_cf(urldecode($config_ini['listerDBPATH'])) ){
-        $lister_dbpath=urldecode($config_ini['listerDBPATH']);
-    }
+$lister_dbpath = '';
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 
 $easyauth = new EasyAuth();

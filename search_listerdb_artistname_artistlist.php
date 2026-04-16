@@ -1,7 +1,7 @@
 <html>
 <head>
-<?php 
-
+<?php
+require_once 'commonfunc.php';
 
 $displayfrom=0;
 $displaynum=50;
@@ -9,8 +9,8 @@ $draw = 1;
 $allcount = 0;
 
 $lister_dbpath = "List.sqlite3";
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 
 

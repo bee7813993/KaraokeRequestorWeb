@@ -4,8 +4,8 @@ require_once 'commonfunc.php';
 require_once 'search_listerdb_commonfunc.php';
 
 $lister_dbpath = "list\List.sqlite3";
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 
 $displayfrom=0;
