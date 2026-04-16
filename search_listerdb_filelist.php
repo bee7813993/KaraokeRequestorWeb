@@ -263,7 +263,7 @@ function filelistfromsong($filelist){
     global $listerpreviewportenable;
   print '<div class="divid0 panel panel-primary"> ';
     print '<div class="panel-heading " ><strong>';
-      print $filelist[0]['song_name'];
+      print htmlspecialchars($filelist[0]['song_name'], ENT_QUOTES, 'UTF-8');
     print "</strong></div>";
     print '<div class="panel-body bg-info">';
       print '<div class="container">';
@@ -275,7 +275,7 @@ function filelistfromsong($filelist){
           print '</strong>';
           $artistlist = explode(",",$str);
           foreach ( $artistlist as $v){
-              print '<a href ="search_listerdb_songlist.php?artist='.urlencode($v).'&'.$linkoption.'&match=part">' . $v .' </a>&nbsp;';
+              print '<a href ="search_listerdb_songlist.php?artist='.urlencode($v).'&'.$linkoption.'&match=part">' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') .' </a>&nbsp;';
           }
       }
       $str =   get_first_clminfo($filelist,'program_name');
@@ -284,12 +284,12 @@ function filelistfromsong($filelist){
           print '<strong>';
       print '作品名：';
           print '</strong>';
-      print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($str).'&'.$linkoption.'">' . $str .' </a>';
+      print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($str).'&'.$linkoption.'">' . htmlspecialchars($str, ENT_QUOTES, 'UTF-8') .' </a>';
       }
       $str =   get_first_clminfo($filelist,'song_op_ed');
       if(!empty($str)){
       print '&nbsp;';
-      print $str;
+      print htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
       }
       $str =   get_first_clminfo($filelist,'maker_name');
       if(!empty($str)){
@@ -314,7 +314,7 @@ function filelistfromsong($filelist){
         $showcomment=preg_replace('/\,\/\/.*/', "",$fileinfo['found_comment']);
         if(!empty($showcomment)){
           print '<strong class="text-center">【';
-          print $showcomment;
+          print htmlspecialchars($showcomment, ENT_QUOTES, 'UTF-8');
           print '】</strong>';
         print '<br />';
         }
@@ -373,7 +373,7 @@ function filelistfromsong($filelist){
           print '<strong>';
         print 'ファイルパス：';
           print '</strong>';
-        print   $fileinfo["found_path"];
+        print htmlspecialchars($fileinfo["found_path"], ENT_QUOTES, 'UTF-8');
         print '</div>';
 	   print '</div>'; //bg-info
       }
@@ -389,66 +389,66 @@ $myformvalue_shown = "";
 
 if(!empty($anyword) ){
     $url = add_get_query($url , 'anyword='.urlencode($anyword) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="anyword" value="'.($anyword).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>なんでも検索</label><input type="text" class="form-control" name="anyword" value="'.($anyword).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="anyword" value="'.htmlspecialchars($anyword, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>なんでも検索</label><input type="text" class="form-control" name="anyword" value="'.htmlspecialchars($anyword, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($category ) ) {
     $url = add_get_query($url , 'category='.urlencode($category) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="category" value="'.($category).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>カテゴリー</label><input type="text" class="form-control" name="category" value="'.($category).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="category" value="'.htmlspecialchars($category, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>カテゴリー</label><input type="text" class="form-control" name="category" value="'.htmlspecialchars($category, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 if(!empty($program_name) ){
     $url = add_get_query($url , 'program_name='.urlencode($program_name) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="program_name" value="'.($program_name).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>作品名</label><input type="text" class="form-control" name="program_name" value="'.($program_name).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="program_name" value="'.htmlspecialchars($program_name, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>作品名</label><input type="text" class="form-control" name="program_name" value="'.htmlspecialchars($program_name, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 if(!empty($artist) ){
     $url = add_get_query($url , 'artist='.urlencode($artist) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="artist" value="'.($artist).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>歌手名</label><input type="text" class="form-control" name="artist" value="'.($artist).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="artist" value="'.htmlspecialchars($artist, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>歌手名</label><input type="text" class="form-control" name="artist" value="'.htmlspecialchars($artist, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 if(!empty($worker) ){
     $url = add_get_query($url , 'worker='.urlencode($worker) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="worker" value="'.($worker).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>動画製作者</label><input type="text" class="form-control" name="worker" value="'.($worker).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="worker" value="'.htmlspecialchars($worker, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>動画製作者</label><input type="text" class="form-control" name="worker" value="'.htmlspecialchars($worker, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($filename) ){
     $url = add_get_query($url , 'filename='.urlencode($filename) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="filename" value="'.($filename).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>ファイル名</label><input type="text" class="form-control" name="filename" value="'.($filename).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>ファイル名</label><input type="text" class="form-control" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($maker_name) ){
     $url = add_get_query($url , 'maker_name='.urlencode($maker_name) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="maker_name" value="'.($maker_name).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="'.($maker_name).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="maker_name" value="'.htmlspecialchars($maker_name, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="'.htmlspecialchars($maker_name, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($song_name) ){
     $url = add_get_query($url , 'song_name='.urlencode($song_name) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="song_name" value="'.($song_name).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>曲名</label><input type="text" class="form-control" name="song_name" value="'.($song_name).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="song_name" value="'.htmlspecialchars($song_name, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>曲名</label><input type="text" class="form-control" name="song_name" value="'.htmlspecialchars($song_name, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($tie_up_group_name) ){
     $url = add_get_query($url , 'tie_up_group_name='.urlencode($tie_up_group_name) );
-    $myformvalue = $myformvalue.'<input type="hidden" name="tie_up_group_name" value="'.($tie_up_group_name).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>シリーズ</label><input type="text" class="form-control" name="tie_up_group_name" value="'.($tie_up_group_name).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="tie_up_group_name" value="'.htmlspecialchars($tie_up_group_name, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>シリーズ</label><input type="text" class="form-control" name="tie_up_group_name" value="'.htmlspecialchars($tie_up_group_name, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 
 if(!empty($datestart) ){
     $url = add_get_query($url , 'datestart='.$datestart );
-    $myformvalue = $myformvalue.'<input type="hidden" name="datestart" value="'.($datestart).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>更新日範囲 始め</label><input type="date" class="form-control" name="datestart" value="'.($datestart).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="datestart" value="'.htmlspecialchars($datestart, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>更新日範囲 始め</label><input type="date" class="form-control" name="datestart" value="'.htmlspecialchars($datestart, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($dateend) ){
     $url = add_get_query($url , 'dateend='.$dateend );
-    $myformvalue = $myformvalue.'<input type="hidden" name="dateend" value="'.($dateend).'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>更新日範囲 終わり</label><input type="date" class="form-control" name="dateend" value="'.($dateend).'" /></div>';
+    $myformvalue = $myformvalue.'<input type="hidden" name="dateend" value="'.htmlspecialchars($dateend, ENT_QUOTES, 'UTF-8').'" />';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>更新日範囲 終わり</label><input type="date" class="form-control" name="dateend" value="'.htmlspecialchars($dateend, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 
@@ -509,16 +509,8 @@ if(!empty($url)){
       $programlist = json_decode($programlist_json,true);
    }
    if(!$programlist ){
-   print '<pre>';
-   print "url:\n";
-      print $url;
-   print "\nprogramlist_json:\n";
-      print $programlist_json;
-   print "\nprogramlist_dump:\n";
-      var_dump($programlist);
-   print '</pre>';
    die();
-   }  
+   }
 
 
 function create_requestconfirmlink($songinfo) {
@@ -705,9 +697,9 @@ print '    <dt>';
 print '作品名';
 print '    </dt>';
 print '    <dd>';
-print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&'.$linkoption.'">' . $program['program_name'] .' </a>';
+print '<a href ="search_listerdb_songlist.php?program_name='.urlencode($program['program_name']).'&'.$linkoption.'">' . htmlspecialchars($program['program_name'], ENT_QUOTES, 'UTF-8') .' </a>';
 if(!empty( $program['song_op_ed'])){
-    print '&nbsp;'.$program['song_op_ed'];
+    print '&nbsp;'.htmlspecialchars($program['song_op_ed'], ENT_QUOTES, 'UTF-8');
 }
 if(!empty($program['maker_name'])){
 print '&nbsp;&nbsp; <a href ="search_listerdb_column_list.php?searchcolumn=program_name&maker_name='.urlencode($program['maker_name']).'">【' . htmlspecialchars($program['maker_name'], ENT_QUOTES, 'UTF-8') .'】 </a>';
@@ -727,7 +719,7 @@ print '    </dt>';
 print '    <dd>';
 $artistlist = explode(",",$program['song_artist']);
 foreach ( $artistlist as $v){
-print '<a href ="search_listerdb_songlist.php?artist='.urlencode($v).'&'.$linkoption.'&match=part">' . $v .' </a>&nbsp;';
+print '<a href ="search_listerdb_songlist.php?artist='.urlencode($v).'&'.$linkoption.'&match=part">' . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') .' </a>&nbsp;';
 }
 //print '<a href ="search_listerdb_songlist.php?artist='.urlencode($program['song_artist']).'&'.$linkoption.'">' . $program['song_artist'] .' </a>';
 // http://localhost/search_listerdb_filelist.php?artist=歌手名&lister_dbpath=List.sqlite3
@@ -775,8 +767,7 @@ print '    <dt>';
 print '動画制作者';
 print '    </dt>';
 print '    <dd>';
-print '<a href ="search_listerdb_filelist.php?worker='.urlencode($program['found_worker']).'&'.$linkoption.'">' . $program['found_worker'] .' </a>';
-// print $program['found_worker'];
+print '<a href ="search_listerdb_filelist.php?worker='.urlencode($program['found_worker']).'&'.$linkoption.'">' . htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8') .' </a>';
 print '    </dd>';
 print '    </div > ';
 print '    </dl>';
@@ -784,7 +775,7 @@ print '    <dt>';
 print 'ファイル名';
 print '    </dt>';
 print '    <dd> <font size="-1" >';
-print $program['found_path'];
+print htmlspecialchars($program['found_path'], ENT_QUOTES, 'UTF-8');
 print '    </font></dd>';
 print '    </dl>';
 print '    </div>';

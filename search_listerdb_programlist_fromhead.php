@@ -78,10 +78,8 @@ $url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfr
       $programlist = json_decode($programlist_json,true);
    }
    if(!$programlist ){
-   print $url;
-   var_dump($programlist_json);
    die();
-   }  
+   }
 
 ?>
 
@@ -114,7 +112,7 @@ if($program['program_name'] === 'その他'){
 } else  {
   $displaygname = $program['program_name'];
 }
-print $displaygname;
+print htmlspecialchars($displaygname, ENT_QUOTES, 'UTF-8');
 print '（'.$program['COUNT(DISTINCT song_name)'].'）';
 print '</a>';
 print '    </div>';

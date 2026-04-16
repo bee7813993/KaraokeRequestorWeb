@@ -83,10 +83,8 @@ $url = 'http://localhost/search_listerdb_artistlist_json.php?start='.$displayfro
       $list = json_decode($list_json,true);
    }
    if(!$list ){
-   print $url;
-   var_dump($list);
    die();
-   }  
+   }
 
 ?>
 
@@ -114,7 +112,7 @@ if(empty($artist['song_artist'])){
     print '【歌手名なし】';
 }else {
     print '<a class="btn btn-primary btn-block" href="search_listerdb_songlist.php?artist='.urlencode($artist['song_artist']).'&match="full"">';
-    print $artist['song_artist'];
+    print htmlspecialchars($artist['song_artist'], ENT_QUOTES, 'UTF-8');
 }
 print '</a>';
 print '    </div>';

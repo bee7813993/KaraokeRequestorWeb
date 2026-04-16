@@ -97,8 +97,6 @@ print_meta_header();
    }
    if(!$artistmany) {
       $errmsg = '歌手名リストのJSON parse 失敗';
-      print $geturl;
-      print $artistmanylist_json;
    }
 
 ?>
@@ -158,7 +156,7 @@ if(empty($artistname['song_artist']) ){
     print '【歌手名未登録】'.'（'.$artistname['COUNT'].'）' ;
 }else {
     print '<a class="btn btn-primary btn-block indexbtnstr_lg" href="search_listerdb_songlist.php?artist='.urlencode($artistname['song_artist']).'&'.$linkoption.'">';
-    print $artistname['song_artist'].'（'.$artistname['COUNT'].'）' ;
+    print htmlspecialchars($artistname['song_artist'], ENT_QUOTES, 'UTF-8').'（'.$artistname['COUNT'].'）' ;
 }
 print '</a>';
 print '    </div>';

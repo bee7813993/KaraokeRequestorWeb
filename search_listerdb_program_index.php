@@ -128,8 +128,6 @@ function sortcategorylist($categorylist){
    }
    if(!$categorylist) {
       $errmsg = 'カテゴリーリストのJSON parse 失敗';
-      print $geturl;
-      print $categorylist_json;
    }
    $categorylist = sortcategorylist($categorylist);
    //var_dump($categorylist);
