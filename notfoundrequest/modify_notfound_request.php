@@ -22,19 +22,25 @@ print_meta_header();
 
 <?php
 
-if(array_key_exists("id", $_REQUEST)) {
-    $l_id = $_REQUEST["id"];
+// id は整数のみ受け付ける
+$l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($l_id === false || $l_id === null) {
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 }
-
-
+if ($l_id === false || $l_id === null) {
+    http_response_code(400);
+    print("不正なIDです。<br>");
+    die();
+}
 
 
 print("現在の登録状況<br>");
 try{
-    $sql = "SELECT * FROM notfoundtable WHERE id = $l_id ORDER BY id DESC";
-    $select = $db->query($sql);
+    $stmt = $db->prepare("SELECT * FROM notfoundtable WHERE id = :id ORDER BY id DESC");
+    $stmt->bindValue(':id', $l_id, PDO::PARAM_INT);
+    $stmt->execute();
 
-    while($row = $select->fetch(PDO::FETCH_ASSOC)){
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
         echo "<hr />";
         echo "<form action=\"update_notfound_request.php\" >";
         echo '<table class="modifytable">';
@@ -44,7 +50,7 @@ try{
         echo '</td>';
         echo '<td>';
         echo '<input type="text" name="id" id="id" value="';
-        echo $row['id'];
+        echo htmlspecialchars((string)$row['id'], ENT_QUOTES, 'UTF-8');
         echo '" />';
         echo '</td>';
         echo '</tr>';
@@ -55,7 +61,7 @@ try{
         echo '</td>';
         echo '<td>';
         print '<textarea name="requesttext" id="requesttext" rows="4" wrap="soft" style="width:100%" >';
-        print $row['requesttext'];
+        print htmlspecialchars((string)$row['requesttext'], ENT_QUOTES, 'UTF-8');
         print '</textarea>';
         echo '</td>';
         echo '</tr>';
@@ -82,7 +88,7 @@ try{
         echo '</td>';
         echo '<td>';
         print '<textarea name="reply" id="reply" rows="4" wrap="soft" style="width:100%" >';
-        print $row['reply'];
+        print htmlspecialchars((string)$row['reply'], ENT_QUOTES, 'UTF-8');
         print '</textarea>';
         echo '</td>';
         echo '</tr>';
@@ -92,7 +98,7 @@ try{
         echo '</td>';
         echo '<td>';
         print '<textarea name="searchword" id="searchword" rows="4" wrap="soft" style="width:100%" >';
-        print $row['searchword'];
+        print htmlspecialchars((string)$row['searchword'], ENT_QUOTES, 'UTF-8');
         print '</textarea>';
         echo '</td>';
         echo '</tr>';

@@ -22,8 +22,11 @@
 <body>
 
 <?php
+// 許可する再生状況の値 (ホワイトリスト)
+$allowed_nowplaying = array('未再生','再生中','停止中','再生済','再生済？','再生開始待ち','変更中');
+
+$l_nowplaying = null;
 if(array_key_exists("nowplaying", $_REQUEST)) {
-    $l_nowplaying = $_REQUEST["nowplaying"];
     // 再生状況、数値対応
     switch($_REQUEST["nowplaying"]) {
         case 1:
@@ -52,12 +55,22 @@ if(array_key_exists("nowplaying", $_REQUEST)) {
     }
 }
 
-if(array_key_exists("songfile", $_REQUEST)) {
-    $l_songfile = $_REQUEST["songfile"];
+// ホワイトリストチェック
+if ($l_nowplaying === null || !in_array($l_nowplaying, $allowed_nowplaying, true)) {
+    http_response_code(400);
+    print("不正な再生状況です。<br>");
+    die();
 }
 
-if(array_key_exists("id", $_REQUEST)) {
-    $l_id = $_REQUEST["id"];
+// id は整数のみ受け付ける
+$l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($l_id === false || $l_id === null) {
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+}
+if ($l_id === false || $l_id === null) {
+    http_response_code(400);
+    print("不正なIDです。<br>");
+    die();
 }
 
 
@@ -67,17 +80,18 @@ require_once 'commonfunc.php';
 shownavigatioinbar();
 
 
-$sql = "UPDATE requesttable set nowplaying = \"$l_nowplaying\" WHERE id = $l_id ";
-print $sql;
- $db->beginTransaction();
- $stmt = $db->prepare($sql);
- $ret = $db->query($sql);
- $db->commit();
- if (! $ret ) {
-	print("$l_nowplaying への変更に失敗しました。<br>");
+$db->beginTransaction();
+$stmt = $db->prepare("UPDATE requesttable SET nowplaying = :nowplaying WHERE id = :id");
+$stmt->bindValue(':nowplaying', $l_nowplaying, PDO::PARAM_STR);
+$stmt->bindValue(':id', $l_id, PDO::PARAM_INT);
+$ret = $stmt->execute();
+if (! $ret ) {
+	$db->rollBack();
+	print(htmlspecialchars($l_nowplaying, ENT_QUOTES, 'UTF-8')." への変更に失敗しました。<br>");
 	print("順番入れ替えと競合した可能性があるのでもう一度試してください<br>");
 	die();
- }
+}
+$db->commit();
 
 print("1秒後に登録ページに移動します<br>");
 

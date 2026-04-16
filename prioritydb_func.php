@@ -31,15 +31,16 @@ if ($stmt === false ){
 
 function prioritydb_add($priority_db, $kind, $priorityword, $prioritynum){
     global $kind_num;
-    
+
     $res = true;
-    $sql = sprintf("INSERT INTO prioritytable (kind, priorityword, prioritynum) VALUES (%d, '%s', %d)",$kind_num[$kind], $priorityword, $prioritynum);
-    $res = $priority_db->query($sql);
+    $stmt = $priority_db->prepare("INSERT INTO prioritytable (kind, priorityword, prioritynum) VALUES (:kind, :priorityword, :prioritynum)");
+    $stmt->bindValue(':kind', (int)$kind_num[$kind], PDO::PARAM_INT);
+    $stmt->bindValue(':priorityword', (string)$priorityword, PDO::PARAM_STR);
+    $stmt->bindValue(':prioritynum', (int)$prioritynum, PDO::PARAM_INT);
+    $res = $stmt->execute();
     if($res === false ){
         print("INSERT 失敗しました。<br>");
-        print("sql : ".$sql);
         print_r($priority_db->errorInfo());
-        //die();
     }
     return $res;
 }

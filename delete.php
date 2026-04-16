@@ -14,7 +14,7 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-    
+
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <title>1項目移動・削除</title>
@@ -32,59 +32,71 @@ $tmpid=9999;
 /**
  * 行を上に移動
  * @param integer $id
- * @param db $db
+ * @param PDO $db
  */
 function dbup($id, $db)
 {
 	global $tmpid;
 // 対象のreqorderを取得
 
-$sql = "SELECT * FROM requesttable where id = $id ";
-$select = $db->query($sql);
-$row = $select->fetch(PDO::FETCH_ASSOC);
+$stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :id");
+$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+$stmt->execute();
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+if ($row === false) {
+    print("id={$id} のレコードが見つかりません。<br>");
+    return;
+}
 $targetorder = $row['reqorder'];
 
  $nextorder = $targetorder + 1 ;
- 
- 
- $sql = "SELECT * FROM requesttable where reqorder = $nextorder ";
- $select = $db->query($sql);
- $row = $select->fetch(PDO::FETCH_ASSOC);
+
+
+ $stmt = $db->prepare("SELECT * FROM requesttable WHERE reqorder = :nextorder");
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $stmt->execute();
+ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
  if(  $row !== false ){
  // 移動先のreqorder値の項目があったら
- $sql = "UPDATE requesttable set reqorder = $tmpid WHERE reqorder = $nextorder ";
  $db->beginTransaction();
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :tmpid WHERE reqorder = :nextorder");
+ $stmt->bindValue(':tmpid', $tmpid, PDO::PARAM_INT);
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
+	$db->rollBack();
 	print("$nextorder から $tmpid への移動にしっぱいしました。<br>");
-	$db->commit();
 	die();
  }
- $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :nextorder WHERE id = :id");
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
-	print("${id} の $nextorder への移動にしっぱいしました。<br>");
-	$db->commit();
+	$db->rollBack();
+	print("{$id} の $nextorder への移動にしっぱいしました。<br>");
 	die();
  }
- $sql = "UPDATE requesttable set reqorder = $targetorder WHERE reqorder = $tmpid ";
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :targetorder WHERE reqorder = :tmpid");
+ $stmt->bindValue(':targetorder', $targetorder, PDO::PARAM_INT);
+ $stmt->bindValue(':tmpid', $tmpid, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
+	$db->rollBack();
 	print("$tmpid から $targetorder への移動にしっぱいしました。<br>");
-	$db->commit();
 	die();
  }
  $db->commit();
  }else{
- print "ここきた";
-
- $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
  $db->beginTransaction();
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :nextorder WHERE id = :id");
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
-	print("${id} から $nextid への移動にしっぱいしました。<br>");
-	$db->commit();
+	$db->rollBack();
+	print("{$id} から $nextorder への移動にしっぱいしました。<br>");
 	die();
  }
  $db->commit();
@@ -94,7 +106,7 @@ $targetorder = $row['reqorder'];
 /**
  * 行を下に移動
  * @param integer $id
- * @param db $db
+ * @param PDO $db
  */
 function dbdown($id, $db)
 {
@@ -102,9 +114,14 @@ function dbdown($id, $db)
 
 
 // 対象のreqorderを取得
-$sql = "SELECT * FROM requesttable where id = $id ";
-$select = $db->query($sql);
-$row = $select->fetch(PDO::FETCH_ASSOC);
+$stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :id");
+$stmt->bindValue(':id', $id, PDO::PARAM_INT);
+$stmt->execute();
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+if ($row === false) {
+    print("id={$id} のレコードが見つかりません。<br>");
+    return;
+}
 $targetorder = $row['reqorder'];
 
  $nextorder = $targetorder - 1 ;
@@ -113,59 +130,63 @@ $targetorder = $row['reqorder'];
     print("すでに一番下<br>");
  }else{
 
- 
- $sql = "SELECT * FROM requesttable where reqorder = $nextorder ";
- $select = $db->query($sql);
- $row = $select->fetch(PDO::FETCH_ASSOC);
+
+ $stmt = $db->prepare("SELECT * FROM requesttable WHERE reqorder = :nextorder");
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $stmt->execute();
+ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 // var_dump($row);
  if(  $row !== false ){
  // 移動先のreqorder値の項目があったら
- $sql = "UPDATE requesttable set reqorder = $tmpid WHERE reqorder = $nextorder ";
  $db->beginTransaction();
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :tmpid WHERE reqorder = :nextorder");
+ $stmt->bindValue(':tmpid', $tmpid, PDO::PARAM_INT);
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
+	$db->rollBack();
 	print("$targetorder から $tmpid  への移動にしっぱいしました。<br>");
-	$db->commit();
 	return false;
-	die();
  }
- $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :nextorder WHERE id = :id");
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
-	print("${id} の $nextorder への移動にしっぱいしました。<br>");
-	$db->commit();
+	$db->rollBack();
+	print("{$id} の $nextorder への移動にしっぱいしました。<br>");
 	return false;
-	die();
  }
- $sql = "UPDATE requesttable set reqorder = $targetorder WHERE reqorder = $tmpid ";
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :targetorder WHERE reqorder = :tmpid");
+ $stmt->bindValue(':targetorder', $targetorder, PDO::PARAM_INT);
+ $stmt->bindValue(':tmpid', $tmpid, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
+	$db->rollBack();
 	print("$tmpid から $targetorder への移動にしっぱいしました。<br>");
-	$db->commit();
 	return false;
-	die();
  }
  $db->commit();
  }else{
- $sql = "UPDATE requesttable set reqorder = $nextorder WHERE id = $id ";
  $db->beginTransaction();
- $stmt = $db->prepare($sql);
- $ret = $db->query($sql);
+ $stmt = $db->prepare("UPDATE requesttable SET reqorder = :nextorder WHERE id = :id");
+ $stmt->bindValue(':nextorder', $nextorder, PDO::PARAM_INT);
+ $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+ $ret = $stmt->execute();
  if (! $ret ) {
-	print("${id} の  $nextorder への移動にしっぱいしました。<br>");
-	$db->commit();
+	$db->rollBack();
+	print("{$id} の  $nextorder への移動にしっぱいしました。<br>");
 	return false;
-	die();
  }
  $db->commit();
  }
- } 
+ }
 }
 
 /**
  * 未再生の直後まで移動
  * @param integer $id
- * @param db $db
+ * @param PDO $db
  */
 function warikomi($id, $db)
 {
@@ -173,15 +194,21 @@ function warikomi($id, $db)
     $ret = true;
     while($ret){
         // 対象のreqorderを取得
-        $sql = "SELECT * FROM requesttable where id = $id ";
-        $select = $db->query($sql);
-        $row = $select->fetch(PDO::FETCH_ASSOC);
+        $stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :id");
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            print("id={$id} のレコードが見つかりません。<br>");
+            return;
+        }
         $targetorder = $row['reqorder'];
-        $select->closeCursor();
-        
+        $stmt->closeCursor();
+
         // 自分より優先が早いリクエストを2つ取得する
-        $sql = "SELECT * FROM requesttable where reqorder < $targetorder ORDER BY reqorder DESC ";
-        $select = $db->query($sql);
+        $select = $db->prepare("SELECT * FROM requesttable WHERE reqorder < :targetorder ORDER BY reqorder DESC");
+        $select->bindValue(':targetorder', $targetorder, PDO::PARAM_INT);
+        $select->execute();
         while($ret){
             $row = $select->fetch(PDO::FETCH_ASSOC);
             if($row === FALSE){
@@ -212,7 +239,7 @@ function warikomi($id, $db)
             continue;
         }
         if($ret === false) break;
-        
+
         //2つ目を探す
         while($ret){
             $row = $select->fetch(PDO::FETCH_ASSOC);
@@ -231,22 +258,31 @@ function warikomi($id, $db)
                 break;
             }
         }
-        
-        
-        
+
+
+
     }
-    
+
 }
 
 
-if( !empty($_POST['resettsatus']) ){
-     $sql = "UPDATE requesttable set nowplaying = \"未再生\" ";
+if( !empty($_POST['resetstatus']) ){
      $db->beginTransaction();
-     $ret = $db->query($sql);
+     $ret = $db->exec("UPDATE requesttable SET nowplaying = '未再生'");
      $db->commit();
 
 }else{
-    $l_id=$_REQUEST['id'];
+    // id は整数のみ受け付ける
+    $l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+    if ($l_id === false || $l_id === null) {
+        $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    }
+    if ($l_id === false || $l_id === null) {
+        http_response_code(400);
+        print("不正なIDです。<br>");
+        die();
+    }
+
     $l_action='delete';
     if( !empty($_REQUEST['up']) )
      {$l_action = 'up';}
@@ -266,14 +302,15 @@ if( !empty($_POST['resettsatus']) ){
         warikomi($l_id,$db);
     }else {
 
-        $sql = "DELETE FROM requesttable where id = $l_id";
-        $ret = $db->query($sql);
+        $stmt = $db->prepare("DELETE FROM requesttable WHERE id = :id");
+        $stmt->bindValue(':id', $l_id, PDO::PARAM_INT);
+        $ret = $stmt->execute();
         if (! $ret ) {
-        	print("${l_id} を削除に失敗しました。<br>");
+        	print("{$l_id} を削除に失敗しました。<br>");
         	die();
         }
 
-        print("${l_id} を削除しました。<br>");
+        print("{$l_id} を削除しました。<br>");
     }
 }
 print("1秒後に登録ページに移動します<br>");
@@ -291,7 +328,7 @@ try{
     }catch(PDOException $e) {
 		printf("Error: %s\n", $e->getMessage());
 		die();
-    } 
+    }
     $db = null;
 }
 ?>

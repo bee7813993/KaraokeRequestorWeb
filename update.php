@@ -1,22 +1,14 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<META http-equiv="refresh" content="1; url=requestlist_only.php" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>項目修正実行</title>
-</head>
-<body>
-
-
-<a href="requestlist_only.php" > リクエストページに戻る <a><br>
-
 <?php
 $db = null;
 
 include 'kara_config.php';
 
-if(array_key_exists("id", $_REQUEST)) {
-    $l_id = $_REQUEST["id"];
-}else {
+$l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($l_id === false || $l_id === null) {
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+}
+if ($l_id === false || $l_id === null) {
+    http_response_code(400);
     printf("No ID");
     die();
 }
@@ -154,13 +146,9 @@ if(array_key_exists("pause", $_REQUEST)) {
     }
     $updatestring = $updatestring.' pause = '. $db->quote($l_value) . ' ';
 }
-print  $updatestring;
 if(strlen($updatestring) > 0){
     try{
-    $sql_u = 'UPDATE requesttable set '. $updatestring . ' WHERE id = '. $l_id;
-    print  "SQL\n<br />".$sql_u."<br />\n";
-if(!empty($DEBUG))
-print "DEBUG:".$sql_u.'<br />';
+    $sql_u = 'UPDATE requesttable set '. $updatestring . ' WHERE id = '. (int)$l_id;
     $ret = $db->query($sql_u);
     }catch(PDOException $e) {
 		printf("Error: %s\n", $e->getMessage());
@@ -169,29 +157,7 @@ print "DEBUG:".$sql_u.'<br />';
 
 }
 
+$db = null;
 
-print("現在の登録状況<br>");
-
-$sql = "SELECT * FROM requesttable ORDER BY id DESC";
-try{
-    $select = $db->query($sql);
-
-    while($row = $select->fetch(PDO::FETCH_ASSOC)){
-	    echo implode("|", $row) . "\n<br>";
-    }
-
-    $db = null;
-
-}catch(PDOException $e) {
-		printf("Error: %s\n", $e->getMessage());
-		die();
-} 
-
-print "<a href=\"change.php?id=$l_id\" > 戻る </a>";
-
-?>
-&nbsp;
-<a href="requestlist_only.php" >トップに戻る </a>
-
-</body>
-</html>
+header('Location: requestlist_only.php');
+exit;

@@ -1,4 +1,5 @@
 <?php
+require_once 'commonfunc.php';
 require_once('function_search_listerdb.php');
 
 $displayfrom=0;
@@ -7,16 +8,16 @@ $draw = 1;
 $allcount = 0;
 
 $lister_dbpath = 'list\List.sqlite3';
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 
 if(array_key_exists("start", $_REQUEST)) {
-    $displayfrom = $_REQUEST["start"];
+    $displayfrom = (int)$_REQUEST["start"];
 }
 
 if(array_key_exists("length", $_REQUEST)) {
-    $displaynum = $_REQUEST["length"];
+    $displaynum = (int)$_REQUEST["length"];
 }
 
 if(array_key_exists("draw", $_REQUEST)) {
@@ -34,15 +35,7 @@ if(array_key_exists("header", $_REQUEST)) {
 }
 
 $select_orderby ="";
-if(array_key_exists("orderby", $_REQUEST)) {
-    $select_orderby = $_REQUEST["orderby"];
-}
-
-$select_scending = 'ASC';
 $select_scending ="";
-if(array_key_exists("scending", $_REQUEST)) {
-    $select_scending = $_REQUEST["scending"];
-}
 
 
 // DB初期化

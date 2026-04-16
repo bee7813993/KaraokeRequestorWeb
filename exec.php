@@ -112,7 +112,7 @@ if(mb_strlen($l_singer) > 256 ) die();
 if(mb_strlen($l_freesinger) > 256 ) die();
 
 
-// print("${l_singer} さんの ${l_filename} を追加する予定。<br>");
+// print("{$l_singer} さんの {$l_filename} を追加する予定。<br>");
 ?>
 
 <?php
@@ -128,10 +128,11 @@ if(is_numeric($selectid)){
 // print($displayfilename);
 
 try {
-    $sql = "SELECT * FROM requesttable where id = '".$selectid."' ORDER BY id DESC";
-    $select = $db->query($sql);
-    $request = $select->fetchAll(PDO::FETCH_ASSOC);
-    $select->closeCursor();
+    $stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :selectid ORDER BY id DESC");
+    $stmt->bindValue(':selectid', (int)$selectid, PDO::PARAM_INT);
+    $stmt->execute();
+    $request = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->closeCursor();
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
 }
@@ -144,7 +145,7 @@ if($request[0]['nowplaying'] === '再生中' || $request[0]['nowplaying'] === '�
 }
 
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause where id = ".$selectid;
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause where id = :selectid";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -164,7 +165,8 @@ $arg = array(
 	':nowplaying' => $new_nowplaying,
 	':keychange' => $l_keychange,
 	':track' => $l_track,
-	':pause' => $l_pause
+	':pause' => $l_pause,
+	':selectid' => (int)$selectid
 	);
 }else {
   try {
@@ -196,7 +198,7 @@ $arg = array(
 }
 $ret = $stmt->execute($arg);
 if (! $ret ) {
-	print("${l_filename} を追加にしっぱいしました。");
+	print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加にしっぱいしました。");
 	die();
 }
 
@@ -229,7 +231,7 @@ if(!empty($DEBUG))
 file_get_contents("http://localhost/updaterequestlist.php");
 
 if(!empty($DEBUG)){
-    print("${l_filename} を追加しました。<br>");
+    print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加しました。<br>");
     print("1秒後に登録ページに移動します<br>");
 }
 

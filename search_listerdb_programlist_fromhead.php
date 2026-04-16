@@ -9,8 +9,8 @@ $draw = 1;
 $allcount = 0;
 
 $lister_dbpath = "List.sqlite3";
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 
 
@@ -40,7 +40,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
 }
 
 // build query url
-$url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category).'&lister_dbpath='.$lister_dbpath;
+$url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category);
 
 ?>
 
@@ -78,10 +78,8 @@ $url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfr
       $programlist = json_decode($programlist_json,true);
    }
    if(!$programlist ){
-   print $url;
-   var_dump($programlist_json);
    die();
-   }  
+   }
 
 ?>
 
@@ -95,7 +93,7 @@ if(!empty($errmsg)){
 }
 shownavigatioinbar('searchreserve.php');
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
+$linkoption = '';
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 // var_dump($programlist);
@@ -114,7 +112,7 @@ if($program['program_name'] === 'その他'){
 } else  {
   $displaygname = $program['program_name'];
 }
-print $displaygname;
+print htmlspecialchars($displaygname, ENT_QUOTES, 'UTF-8');
 print '（'.$program['COUNT(DISTINCT song_name)'].'）';
 print '</a>';
 print '    </div>';

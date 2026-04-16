@@ -46,11 +46,13 @@ $select = $db->query($sql);
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 $select->closeCursor();
 
+$selectrequest = array();
 if(is_numeric($selectid)){
-    $sql = "SELECT * FROM requesttable where id = ". $selectid;
-    $select = $db->query($sql);
-    $selectrequest = $select->fetchAll(PDO::FETCH_ASSOC);
-    $select->closeCursor();
+    $stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :id");
+    $stmt->bindValue(':id', (int)$selectid, PDO::PARAM_INT);
+    $stmt->execute();
+    $selectrequest = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->closeCursor();
 }
 
 
@@ -181,7 +183,7 @@ shownavigatioinbar();
 <label>
 URL
 </label>
-    <input type="text" name="fullpath" id="fullpath" style="width:100%" placeholder="直接再生できるURLを指定を入れてください(youtubeやニコニコ動画のURLもOK)" value=<?php echo '"'.$filename.'"'; ?> />
+    <input type="text" name="fullpath" id="fullpath" style="width:100%" placeholder="直接再生できるURLを指定を入れてください(youtubeやニコニコ動画のURLもOK)" value="<?php echo htmlspecialchars((string)$filename, ENT_QUOTES, 'UTF-8'); ?>" />
 <label>
 曲名
 </label>
@@ -189,7 +191,7 @@ URL
 </textarea>
 
 <?php
-if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+if(is_numeric($selectid) && !empty($selectrequest) && $selectrequest[0]['kind'] == "カラオケ配信"){
 //    print '<dt> BGV曲名 </dt>';
 //    print '<dd>'. $filename.' <dd>';
 }
@@ -204,7 +206,7 @@ if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
 $num = 1;
 
 $beforesinger = 'none';
-if(is_numeric($selectid)){
+if(is_numeric($selectid) && !empty($selectrequest)){
   $beforesinger = $selectrequest[0]['singer'];
 }
 $selectedcounter = 0;
@@ -212,7 +214,7 @@ $singerlist = pickupsinger($allrequest,$YkariUsername);
 foreach($singerlist as $singer){
 {
   print "<option value=\"";
-  print $singer;
+  print htmlspecialchars((string)$singer, ENT_QUOTES, 'UTF-8');
   print "\"";
   if( selectedcheck_request($allrequest,$singer,$beforesinger) && $selectedcounter === 0 ) 
   {
@@ -220,7 +222,7 @@ foreach($singerlist as $singer){
       $selectedcounter = $selectedcounter + 1 ;
   }
   print "> ";
-  print htmlspecialchars($singer);
+  print htmlspecialchars((string)$singer, ENT_QUOTES, 'UTF-8');
   print "</option>";
 }
 }
@@ -242,13 +244,13 @@ print('<span style="visibility:hidden;">');
 
 <div CLASS="form-group">
 <label>コメント</label>
-<textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
+<textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars((string)$requestcomment, ENT_QUOTES, 'UTF-8');?>" style="width:100%" >
 <?php
-if(is_numeric($selectid) ){
-    print htmlspecialchars($selectrequest[0]['comment']);
+if(is_numeric($selectid) && !empty($selectrequest)){
+    print htmlspecialchars((string)$selectrequest[0]['comment'], ENT_QUOTES, 'UTF-8');
     if($selectrequest[0]['kind'] == "カラオケ配信"){
       print "\n";
-      print $selectrequest[0]['songfile'];
+      print htmlspecialchars((string)$selectrequest[0]['songfile'], ENT_QUOTES, 'UTF-8');
     }
 }
 ?>
@@ -260,9 +262,10 @@ if(is_numeric($selectid) ){
 <dt>再生方法</dt>
 <dd>
 <?php 
-  if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
-      print $selectrequest[0]['kind'].'＋URL指定';
-      print '<input type="hidden" name="kind" id="kind"  value="'.$selectrequest[0]['kind'].'＋URL指定" />'."\n";
+  if(is_numeric($selectid) && !empty($selectrequest) && $selectrequest[0]['kind'] == "カラオケ配信"){
+      $esc_kind = htmlspecialchars((string)$selectrequest[0]['kind'], ENT_QUOTES, 'UTF-8');
+      print $esc_kind.'＋URL指定';
+      print '<input type="hidden" name="kind" id="kind"  value="'.$esc_kind.'＋URL指定" />'."\n";
       $forcebgv = 1;
   }else if($shop_karaoke == 1){
       print 'カラオケ配信'."\n";
@@ -376,8 +379,8 @@ print '</label>';
 print '</div>';
 }
 if(is_numeric($selectid)){
-print '<input type="hidden" name="selectid" id="selectid"  value='.$selectid.' />'."\n";
-print '<input type="hidden" name="urlreq" id="urlreq"  value=1 />'."\n";
+print '<input type="hidden" name="selectid" id="selectid"  value="'.(int)$selectid.'" />'."\n";
+print '<input type="hidden" name="urlreq" id="urlreq"  value="1" />'."\n";
 }
 ?>
 <div CLASS="row" >

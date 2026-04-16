@@ -45,11 +45,6 @@ if(array_key_exists("bgvfile", $_REQUEST)) {
     if($forcebgv == 1) $fullpath=$bgvfile;
 }
 
-$lister_dbpath = '';
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
-}
-
 /** リクエスト者を毎回新規入力にするかどうか（共有端末用とか） **/
 /** (今のところハードコーディング) **/
 $blank_username = false;
@@ -58,10 +53,9 @@ require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
 require_once 'func_audiotracklist.php';
 
-if( empty($lister_dbpath) ){
-    if (file_exist_check_japanese_cf(urldecode($config_ini['listerDBPATH'])) ){
-        $lister_dbpath=urldecode($config_ini['listerDBPATH']);
-    }
+$lister_dbpath = '';
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 
 $easyauth = new EasyAuth();
@@ -71,16 +65,18 @@ if($shop_karaoke == 1 && is_numeric($selectid)){
     $forcebgv = 1;
 }
 
-$sql = "SELECT * FROM requesttable ORDER BY reqorder DESC";
-$select = $db->query($sql);
-$allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
-$select->closeCursor();
+$stmt = $db->prepare("SELECT * FROM requesttable ORDER BY reqorder DESC");
+$stmt->execute();
+$allrequest = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->closeCursor();
 
+$selectrequest = array();
 if(is_numeric($selectid)){
-    $sql = "SELECT * FROM requesttable where id = ". $selectid;
-    $select = $db->query($sql);
-    $selectrequest = $select->fetchAll(PDO::FETCH_ASSOC);
-    $select->closeCursor();
+    $stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :id");
+    $stmt->bindValue(':id', (int)$selectid, PDO::PARAM_INT);
+    $stmt->execute();
+    $selectrequest = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->closeCursor();
 }
 
 function pickupsinger($rt, $moreuser = "")
@@ -137,7 +133,7 @@ function extention_musiccheck($fn){
     if(empty($fn)) return 0;
     $extension = pathinfo($fn, PATHINFO_EXTENSION);
     if( empty($extension) ){
-        logtocmd ("ERROR : File of $id has no extension : $filepath");
+        logtocmd ("ERROR : File has no extension : $fn");
         return false;
     // Audio File
     }elseif( strcasecmp($extension,"mp3") == 0 ){
@@ -256,35 +252,35 @@ shownavigatioinbar();
 </label>
 <textarea name="filename" id="filename" class="form-control" rows="4" wrap="soft" style="width:100%" 
 <?php
-if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+if(is_numeric($selectid) && !empty($selectrequest) && $selectrequest[0]['kind'] == "カラオケ配信"){
     echo "> ";
-    print $selectrequest[0]['songfile'];
+    print htmlspecialchars($selectrequest[0]['songfile'], ENT_QUOTES, 'UTF-8');
     echo "</textarea> ";
-}else if($shop_karaoke == 1){ 
+}else if($shop_karaoke == 1){
     print 'placeholder="後でセットリスト作成の参考のためにできれば曲名を入れておいてください" >';
 
     if (empty($filename)){
       echo "";
     }else{
-      echo "$filename";
-    }  
-    
+      echo htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
+    }
+
     echo "</textarea> ";
 }else if($set_directurl == 1 ){
     print 'placeholder="直接再生できるURLを指定を入れてください(youtubeのURLもOK)" >';
     if (empty($filename)){
       echo "";
     }else{
-      echo "$filename";
-    }  
+      echo htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
+    }
     echo "</textarea> ";
 }else if($set_pause == 1 ){
     print 'placeholder="小休止時のリストに表示するメッセージ" >';
     if (empty($filename)){
       echo "";
     }else{
-      echo "$filename";
-    }  
+      echo htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
+    }
     echo "</textarea> ";
 }else {
     print 'placeholder="曲名" disabled >';
@@ -292,18 +288,18 @@ if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
     if (empty($filename)){
       echo "";
     }else{
-      echo "$filename";
+      echo htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
     }
     echo "</textarea> ";
-    print '<input type="hidden" name="filename" id="filename" style="width:100%" value="'.$filename.'"  />';
+    print '<input type="hidden" name="filename" id="filename" style="width:100%" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'"  />';
     }
 ?>
 
-    <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value=<?php echo '"'.$fullpath.'"'; ?> />
+    <input type="hidden" name="fullpath" id="fullpath" style="width:100%" value="<?php echo htmlspecialchars($fullpath, ENT_QUOTES, 'UTF-8'); ?>" />
 <?php
-if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
+if(is_numeric($selectid) && !empty($selectrequest) && $selectrequest[0]['kind'] == "カラオケ配信"){
     print '<dt> BGV曲名 </dt>';
-    print '<dd>'. $filename.' <dd>';
+    print '<dd>'. htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').' <dd>';
 }
 ?>
 </div>
@@ -316,7 +312,7 @@ if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
 $num = 1;
 
 $beforesinger = 'none';
-if(is_numeric($selectid)){
+if(is_numeric($selectid) && !empty($selectrequest)){
   $beforesinger = $selectrequest[0]['singer'];
 }
 $selectedcounter = 0;
@@ -325,7 +321,7 @@ $pausecount = 0;
 foreach($singerlist as $singer)
 {
   print "<option value=\"";
-  print $singer;
+  print htmlspecialchars($singer, ENT_QUOTES, 'UTF-8');
   print "\"";
   if($blank_username){
   }else if(!empty($YkariUsername)){
@@ -369,7 +365,7 @@ print('<span style="visibility:hidden;">');
 <label>コメント</label>
 <textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
 <?php
-if(is_numeric($selectid) ){
+if(is_numeric($selectid) && !empty($selectrequest) ){
 print htmlspecialchars($selectrequest[0]['comment']);
 }
 ?>
@@ -381,9 +377,9 @@ print htmlspecialchars($selectrequest[0]['comment']);
 <dt>再生方法</dt>
 <dd>
 <?php 
-  if(is_numeric($selectid) && $selectrequest[0]['kind'] == "カラオケ配信"){
-      print $selectrequest[0]['kind'];
-      print '<input type="hidden" name="kind" id="kind"  value="'.$selectrequest[0]['kind'].'" />'."\n";
+  if(is_numeric($selectid) && !empty($selectrequest) && $selectrequest[0]['kind'] == "カラオケ配信"){
+      print htmlspecialchars($selectrequest[0]['kind'], ENT_QUOTES, 'UTF-8');
+      print '<input type="hidden" name="kind" id="kind"  value="'.htmlspecialchars($selectrequest[0]['kind'], ENT_QUOTES, 'UTF-8').'" />'."\n";
       $forcebgv = 1;
   }else if($shop_karaoke == 1){
       print 'カラオケ配信'."\n";

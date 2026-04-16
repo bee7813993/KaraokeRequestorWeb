@@ -17,18 +17,24 @@ $db = null;
 include 'notfound_commonfunc.php';
 init_notfounddb($db,"notfoundrequest.db");
 
-if(array_key_exists("id", $_REQUEST)) {
-    $l_id = $_REQUEST["id"];
-}else {
+// id は整数のみ受け付ける
+$l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($l_id === false || $l_id === null) {
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+}
+if ($l_id === false || $l_id === null) {
+    http_response_code(400);
     printf("No ID");
     die();
 }
-        $sql = "DELETE FROM notfoundtable where id = $l_id";
-        $ret = $db->query($sql);
-        if (! $ret ) {
-        	print("${l_id} を削除に失敗しました。<br>");
-        	die();
-        }
+
+$stmt = $db->prepare("DELETE FROM notfoundtable WHERE id = :id");
+$stmt->bindValue(':id', $l_id, PDO::PARAM_INT);
+$ret = $stmt->execute();
+if (! $ret ) {
+    print(htmlspecialchars((string)$l_id, ENT_QUOTES, 'UTF-8')." を削除に失敗しました。<br>");
+    die();
+}
 
 ?>
 &nbsp;

@@ -8,15 +8,15 @@ if(array_key_exists("includepage", $_REQUEST)) {
 }
 if(!isset($lister_dbpath) )
 $lister_dbpath = "list\List.sqlite3";
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 $selectid = '';
 if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
+$linkoption = '';
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 require_once 'search_listerdb_commonfunc.php';
 
@@ -43,7 +43,7 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
         
             // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
             $whereword = urlencode('found_head='.$value["found_head"]) ;
-            $linkurl = 'search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader.'&lister_dbpath='.$lister_dbpath;
+            $linkurl = 'search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader;
             if(!empty($selectid) ) $linkurl = $linkurl.'&selectid='.$selectid;
             $url='<a class="btn btn-primary center-block indexbtnstr"  href="'.$linkurl.'"> '. $oneheader .'</a>';
             return $url;
@@ -119,7 +119,7 @@ function sortcategorylist($categorylist){
 }
 
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_head_json.php?list=1&lister_dbpath='.$lister_dbpath;
+   $geturl = 'http://localhost/search_listerdb_head_json.php?list=1';
    $categorylist_json = file_get_contents($geturl);
    if(!$categorylist_json) {
       $errmsg = 'カテゴリーリストの取得に失敗';
@@ -128,8 +128,6 @@ function sortcategorylist($categorylist){
    }
    if(!$categorylist) {
       $errmsg = 'カテゴリーリストのJSON parse 失敗';
-      print $geturl;
-      print $categorylist_json;
    }
    $categorylist = sortcategorylist($categorylist);
    //var_dump($categorylist);
@@ -240,16 +238,16 @@ $allcategory_exists = 0;
 foreach ($categorylist as $category ){
 $cur_category = $category["program_category"];
 if($category["program_category"] == '全部'){
-  $url = 'http://localhost/search_listerdb_head_json.php?lister_dbpath='.$lister_dbpath;
+  $url = 'http://localhost/search_listerdb_head_json.php';
   $allcategory_exists ++;
 } else {
-    $url = 'http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]).'&lister_dbpath='.$lister_dbpath;
+    $url = 'http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]);
 }
 if($cur_category === NULL ) {
   $nullcategory_exists++;
 //  continue;
   $cur_category = 'その他';
-  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL'.'&lister_dbpath='.$lister_dbpath;
+  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
 }
 
 $headlist_json = file_get_contents($url);
@@ -331,7 +329,7 @@ print '</div>';
 // その他のカテゴリーは最後
 if($nullcategory_exists == 0 ){
   $cur_category = 'その他';
-  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL'.'&lister_dbpath='.$lister_dbpath;
+  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
 
 $headlist_json = file_get_contents($url);
 if(!$headlist_json) {

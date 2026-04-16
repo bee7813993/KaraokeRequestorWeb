@@ -4,8 +4,8 @@ require_once 'commonfunc.php';
 require_once 'search_listerdb_commonfunc.php';
 
 $lister_dbpath = "list\List.sqlite3";
-if(array_key_exists("lister_dbpath", $_REQUEST)) {
-    $lister_dbpath = $_REQUEST["lister_dbpath"];
+if(array_key_exists("listerDBPATH", $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
 
 $displayfrom=0;
@@ -23,7 +23,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
     $selectid = $_REQUEST["selectid"];
 }
 
-$linkoption = 'lister_dbpath='.$lister_dbpath;
+$linkoption = '';
 if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
 
@@ -88,7 +88,7 @@ print_meta_header();
 
 <?php
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_artistmany_json.php?list=1&lister_dbpath='.$lister_dbpath.'&start='.$displayfrom.'&length='.$displaynum;
+   $geturl = 'http://localhost/search_listerdb_artistmany_json.php?list=1&start='.$displayfrom.'&length='.$displaynum;
    $artistmanylist_json = file_get_contents($geturl);
    if(!$artistmanylist_json) {
       $errmsg = '歌手名リストの取得に失敗';
@@ -97,8 +97,6 @@ print_meta_header();
    }
    if(!$artistmany) {
       $errmsg = '歌手名リストのJSON parse 失敗';
-      print $geturl;
-      print $artistmanylist_json;
    }
 
 ?>
@@ -158,7 +156,7 @@ if(empty($artistname['song_artist']) ){
     print '【歌手名未登録】'.'（'.$artistname['COUNT'].'）' ;
 }else {
     print '<a class="btn btn-primary btn-block indexbtnstr_lg" href="search_listerdb_songlist.php?artist='.urlencode($artistname['song_artist']).'&'.$linkoption.'">';
-    print $artistname['song_artist'].'（'.$artistname['COUNT'].'）' ;
+    print htmlspecialchars($artistname['song_artist'], ENT_QUOTES, 'UTF-8').'（'.$artistname['COUNT'].'）' ;
 }
 print '</a>';
 print '    </div>';

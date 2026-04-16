@@ -18,7 +18,7 @@ print_meta_header();
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
-    
+
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
@@ -29,204 +29,63 @@ print_meta_header();
 
 shownavigatioinbar();
 
-if(array_key_exists("songfile", $_REQUEST)) {
-    $l_songfile = $_REQUEST["songfile"];
+// id は整数のみ受け付ける
+$l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+if ($l_id === false || $l_id === null) {
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 }
-
-if(array_key_exists("id", $_REQUEST)) {
-    $l_id = $_REQUEST["id"];
+if ($l_id === false || $l_id === null) {
+    http_response_code(400);
+    print("不正なIDです。<br>");
+    die();
 }
 
 
 
 print("現在の登録状況<br>");
 try{
-    $sql = "SELECT * FROM requesttable WHERE id = $l_id ORDER BY id DESC";
-    $select = $db->query($sql);
-    $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
-    $select->closeCursor();
-    
-    echo "<form action=\"update.php\" >";
+    $stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :id ORDER BY id DESC");
+    $stmt->bindValue(':id', $l_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $allrequest = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt->closeCursor();
 
-    foreach($allrequest[0] as $key => $value ){
-    
-        print '<div class="form-group">';
-        if($key === 'nowplaying' ) {
-            print "<label>$key</label>";
-            echo '<select  name="nowplaying" id="nowplaying" >';
-            $v='未再生';
-            echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
-            $v='再生中';
-            echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
-            $v='再生開始中';
-            echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
-            $v='停止中';
-            echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
-            $v='再生済';
-            echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
-            $v='再生済？';
-            echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
-            echo '</select>';
-        }else {
-            print "<label>$key</label>";
-            print '<input type="text" name="'.$key.'" class="form-control" value="'.$value.'" />';
+    if (count($allrequest) === 0) {
+        print("id={$l_id} のレコードが見つかりません。<br>");
+    } else {
+        echo "<form action=\"update.php\" >";
+
+        foreach($allrequest[0] as $key => $value ){
+
+            $esc_key = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
+            print '<div class="form-group">';
+            if($key === 'nowplaying' ) {
+                print "<label>{$esc_key}</label>";
+                echo '<select  name="nowplaying" id="nowplaying" >';
+                $v='未再生';
+                echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
+                $v='再生中';
+                echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
+                $v='再生開始中';
+                echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
+                $v='停止中';
+                echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
+                $v='再生済';
+                echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
+                $v='再生済？';
+                echo '<option value='.$v.' '.selectedcheck($v,$value).' >'. $v .'</option>';
+                echo '</select>';
+            }else {
+                $esc_value = htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+                print "<label>{$esc_key}</label>";
+                print '<input type="text" name="'.$esc_key.'" class="form-control" value="'.$esc_value.'" />';
+            }
+            print '</div>';
+
         }
-        print '</div>';
-
-
-//     while($row = $select->fetch(PDO::FETCH_ASSOC)){
-//         echo "<hr />";
-//         echo '<table  class="modifytable">';
-//         echo '<tr>';
-//         echo '<td>';
-//         echo 'id';
-//         echo '</td>';
-//         echo '<td>';
-//         echo '<input type="text" name="id" id="id" value="';
-//         echo $row['id'];
-//         echo '" />';
-//         echo '</td>';
-//         echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'songfile';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="songfile" id="songfile" maxlength="4096" value="';
-//        echo $row['songfile'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'singer';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="singer" id="singer" value="';
-//        echo $row['singer'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'comment';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="comment" id="comment" value="';
-//        echo $row['comment'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//        
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'kind';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="kind" id="kind" value="';
-//        echo $row['kind'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'fullpath';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="test" name="fullpath" id="fullpath" maxlength="4096" value="';
-//        echo $row['fullpath'];
-//        echo '" />';
-////        echo '<input type="file" name="fullpath_mod" id="fullpath" value="';
-////        echo $row['fullpath'];
-////        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-// 
-//         echo '<tr>';
-//        echo '<td>';
-//        echo 'nowplaying';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<select  name="nowplaying" id="nowplaying" >';
-//        $v='未再生';
-//        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
-//        $v='再生済';
-//        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
-//        $v='再生中';
-//        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
-//        $v='再生済？';
-//        echo '<option value='.$v.' '.selectedcheck($v,$row['nowplaying']).' >'. $v .'</option>';
-////        echo '<input type="text" name="nowplaying" id="nowplaying" value="';
-//        echo $row['nowplaying'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'reqorder';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="reqorder" id="reqorder" value="';
-//        echo $row['reqorder'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'status';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="status" id="status" value="';
-//        echo $row['status'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//        
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'IP';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="clientip" id="clientip" value="';
-//        echo $row['clientip'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'UserAgent';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="clientua" id="clientua" value="';
-//        echo $row['clientua'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '<tr>';
-//        echo '<td>';
-//        echo 'playtimes';
-//        echo '</td>';
-//        echo '<td>';
-//        echo '<input type="text" name="playtimes" id="playtimes" value="';
-//        echo $row['playtimes'];
-//        echo '" />';
-//        echo '</td>';
-//        echo '</tr>';
-//
-//        echo '</table>';}
-
-    }
         print "<input type=\"submit\" name=\"update\" value=\"変更\"/>";
         echo '</form>';
+    }
 
 
     }catch(PDOException $e) {
