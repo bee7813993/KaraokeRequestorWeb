@@ -533,6 +533,10 @@ if (file_exists($priority_file)) {
 }
 
 if ($recommendation === 'on') {
+    foreach ($programlist['data'] as $idx => &$item) {
+        $item['_sort_idx'] = $idx;
+    }
+    unset($item);
     usort($programlist['data'], 'custom_sort');
 }
 
@@ -572,27 +576,33 @@ return $songcounter;
 function custom_sort($a, $b) {
     global $custom_sort_priorities;
 
-    $a_priority = 999;
-    $b_priority = 999;
+    // found_worker が空なら最後尾、キーワード不一致なら 999、一致なら設定値
+    $a_priority = empty($a['found_worker']) ? 9999 : 999;
+    $b_priority = empty($b['found_worker']) ? 9999 : 999;
 
-    foreach ($custom_sort_priorities as $rule) {
-        if (strpos($a['found_worker'], $rule['keyword']) !== false) {
-            $a_priority = $rule['priority'];
-            break;
+    if (!empty($a['found_worker'])) {
+        foreach ($custom_sort_priorities as $rule) {
+            if (strpos($a['found_worker'], $rule['keyword']) !== false) {
+                $a_priority = $rule['priority'];
+                break;
+            }
         }
     }
 
-    foreach ($custom_sort_priorities as $rule) {
-        if (strpos($b['found_worker'], $rule['keyword']) !== false) {
-            $b_priority = $rule['priority'];
-            break;
+    if (!empty($b['found_worker'])) {
+        foreach ($custom_sort_priorities as $rule) {
+            if (strpos($b['found_worker'], $rule['keyword']) !== false) {
+                $b_priority = $rule['priority'];
+                break;
+            }
         }
     }
 
     if ($a_priority != $b_priority) {
         return $a_priority - $b_priority;
     }
-    return $b['found_last_write_time'] - $a['found_last_write_time'];
+    // 同じ優先度内では元の「項目・順番」設定の順を維持（stable sort）
+    return $a['_sort_idx'] - $b['_sort_idx'];
 }
 ?>
 
@@ -662,6 +672,17 @@ if($programlist['recordsTotal'] == 0) {
 
 print '<form method="GET" action="search_listerdb_filelist.php" class="form-inline" >';
 print '<div class="form-group">';
+print '<label for="recommendation">おすすめ順</label>';
+print '<select class="form-control" id="recommendation" name="recommendation">';
+print '<option value="on" ';
+print selected_check("on", $recommendation);
+print '>有効</option>';
+print '<option value="off" ';
+print selected_check("off", $recommendation);
+print '>無効</option>';
+print '</select>';
+print '</div>';
+print '<div class="form-group">';
 print '<label for="orderby">項目</label>';
 print '<select class="form-control" id="orderby"  name="orderby" >';
 print '<option value="found_file_size" ';
@@ -676,17 +697,6 @@ print '>曲名</option>';
 print '<option value="song_artist"';
 print selected_check("song_artist", $select_orderby );
 print '>歌手名</option>';
-print '</select>';
-print '</div>';
-print '<div class="form-group">';
-print '<label for="recommendation">おすすめ順</label>';
-print '<select class="form-control" id="recommendation" name="recommendation">';
-print '<option value="on" ';
-print selected_check("on", $recommendation);
-print '>有効</option>';
-print '<option value="off" ';
-print selected_check("off", $recommendation);
-print '>無効</option>';
 print '</select>';
 print '</div>';
 print '<div class="form-group">';
