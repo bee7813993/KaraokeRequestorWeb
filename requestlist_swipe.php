@@ -100,7 +100,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   cursor: default;
 }
 .request-card.swipe-open .card-main {
-  transform: translateX(-210px);
+  transform: translateX(-240px);
 }
 
 /* ドラッグハンドル */
@@ -127,13 +127,13 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   line-height: 1.4;
 }
 .card-meta {
-  font-size: 12px;
-  color: #888;
+  font-size: 14px;
+  color: #666;
   margin-top: 3px;
 }
 .card-label {
-  color: #bbb;
-  font-size: 11px;
+  color: #aaa;
+  font-size: 12px;
 }
 
 /* 右カラム（バッジ＋曲終了ボタン） */
@@ -155,8 +155,8 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 /* コメント欄 */
 .card-comment-area {
-  font-size: 12px;
-  color: #666;
+  font-size: 13px;
+  color: #555;
   cursor: pointer;
   padding: 2px 0;
   min-height: 18px;
@@ -360,11 +360,12 @@ function createCardHTML(item) {
     var replaceLabel = (item.kind === 'カラオケ配信' && USE_BGV) ? 'BGV選択' : '曲差し替え';
 
     // コメント欄
-    var commentHtml = '<div class="card-comment-area" data-id="' + item.id + '" data-comment="' + esc(item.comment) + '">';
+    var commentHtml = '<div class="card-comment-area" data-id="' + item.id + '" data-comment="' + esc(item.comment) + '">'
+        + '<span class="card-label">コメント：</span>';
     if (item.comment) {
         commentHtml += esc(item.comment) + ' <small>&#9998;</small>';
     } else {
-        commentHtml += '<span class="card-comment-placeholder">コメントを追加...</span>';
+        commentHtml += '<span class="card-comment-placeholder">（なし）</span>';
     }
     commentHtml += '</div>';
 
@@ -510,7 +511,7 @@ function initSwipe() {
         var main = card.querySelector('.card-main');
         if (!main) return;
 
-        var OPEN_WIDTH = 210; // px：アクション幅（3ボタン×70px）
+        var OPEN_WIDTH = 240; // px：アクション幅（3ボタン×80px）
         var DIR_THR   = 10;  // px：方向判定閾値
         var SNAP_THR  = 60;  // px：スナップ閾値
 
