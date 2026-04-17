@@ -217,19 +217,20 @@ function esc(str) {
         .replace(/"/g, '&quot;');
 }
 
-var STATUS_MAP = {
-    '1': ['未再生',     'default'],
-    '2': ['再生中',     'success'],
-    '3': ['停止中',     'warning'],
-    '4': ['再生済',     'info'],
-    '5': ['再生済？',   'info'],
-    '6': ['再生待ち',   'warning'],
-    '7': ['変更中',     'danger']
+var STATUS_CLASS = {
+    '未再生':       'default',
+    '再生中':       'success',
+    '停止中':       'warning',
+    '再生済':       'info',
+    '再生済？':     'info',
+    '再生開始待ち': 'warning',
+    '変更中':       'danger'
 };
 
 function statusBadge(nowplaying) {
-    var info  = STATUS_MAP[String(nowplaying)] || ['不明', 'default'];
-    return '<span class="label label-' + info[1] + '">' + info[0] + '</span>';
+    if (!nowplaying) return '';
+    var cls = STATUS_CLASS[nowplaying] || 'default';
+    return '<span class="label label-' + cls + '">' + esc(nowplaying) + '</span>';
 }
 
 // ---- カード HTML 生成 ----
