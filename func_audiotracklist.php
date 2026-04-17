@@ -132,7 +132,7 @@ function getvideodetails($filename) {
     }
 
     if (!empty($info['video']['frame_rate'])) {
-        $details['frame_rate'] = $info['video']['frame_rate'];
+        $details['frame_rate'] = round($info['video']['frame_rate'], 2);
     }
 
     return $details;
