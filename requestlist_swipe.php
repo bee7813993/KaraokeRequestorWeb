@@ -123,17 +123,17 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .card-title {
   font-size: 15px;
   font-weight: bold;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-all;
+  line-height: 1.4;
 }
 .card-meta {
   font-size: 12px;
   color: #888;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 2px;
+  margin-top: 3px;
+}
+.card-label {
+  color: #bbb;
+  font-size: 11px;
 }
 
 /* 右カラム（バッジ＋曲終了ボタン） */
@@ -282,12 +282,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
       <div class="modal-body">
         <select class="form-control" id="status-select">
           <option value="未再生">未再生</option>
-          <option value="再生中">再生中</option>
-          <option value="停止中">停止中</option>
           <option value="再生済">再生済</option>
-          <option value="再生済？">再生済？</option>
-          <option value="再生開始待ち">再生開始待ち</option>
-          <option value="変更中">変更中</option>
         </select>
       </div>
       <div class="modal-footer">
@@ -422,7 +417,7 @@ function createCardHTML(item) {
         '    <span class="drag-handle">&#8942;</span>',
         '    <div class="card-info">',
         '      <div class="card-title">' + esc(item.display_name) + '</div>',
-        '      <div class="card-meta">'  + esc(item.singer)       + '</div>',
+        '      <div class="card-meta"><span class="card-label">登録者：</span>' + esc(item.singer) + '　<span class="card-label">再生方法：</span>' + esc(item.kind) + '</div>',
         '      ' + commentHtml,
         '      ' + tweetHtml,
         '    </div>',
