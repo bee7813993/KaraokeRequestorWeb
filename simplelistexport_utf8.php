@@ -36,6 +36,7 @@ $all_columns_def = [
     'artist'       => '歌手名',
     'singer'       => '歌った人',
     'comment'      => 'コメント',
+    'worker'       => '動画制作者',
 ];
 
 // 列設定ファイル読み込み
@@ -168,6 +169,12 @@ foreach ($allrequest as $row) {
         $artist = $songdataarray["song_artist"];
     }
 
+    // 動画制作者
+    $worker = '';
+    if (!empty($songdataarray["found_worker"])) {
+        $worker = $songdataarray["found_worker"];
+    }
+
     // 列設定に従って行データを生成
     $row_data = [];
     foreach ($active_columns as $col_id) {
@@ -179,6 +186,7 @@ foreach ($allrequest as $row) {
             case 'artist':       $row_data[] = $artist; break;
             case 'singer':       $row_data[] = $row["singer"]; break;
             case 'comment':      $row_data[] = $row["comment"]; break;
+            case 'worker':       $row_data[] = $worker; break;
         }
     }
     $csvarray[] = $row_data;

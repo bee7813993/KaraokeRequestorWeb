@@ -11,6 +11,7 @@ $all_columns_def = [
     ['id' => 'artist',       'label' => '歌手名'],
     ['id' => 'singer',       'label' => '歌った人'],
     ['id' => 'comment',      'label' => 'コメント'],
+    ['id' => 'worker',       'label' => '動画制作者'],
 ];
 
 function load_csv_columns($config_file, $all_columns_def) {
