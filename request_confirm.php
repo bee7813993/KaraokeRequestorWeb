@@ -329,6 +329,12 @@ foreach($singerlist as $singer)
           print " selected ";
           $selectedcounter = $selectedcounter + 1;
       }
+  } else if(is_numeric($selectid) && !empty($selectrequest)) {
+      // 差し替えモード: 元のリクエスト者を優先
+      if($singer === $beforesinger && $selectedcounter === 0) {
+          print " selected ";
+          $selectedcounter = $selectedcounter + 1;
+      }
   } else if($blank_username){
   } else if(!empty($YkariUsername)){
       if($singer === $YkariUsername){
