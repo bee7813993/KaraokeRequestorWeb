@@ -22,6 +22,7 @@ $connectinternet = isset($config_ini['connectinternet']) ? (int)$config_ini['con
 $useposttwitter  = configbool('useposttwitter', true);
 $playmode        = isset($config_ini['playmode']) ? (int)$config_ini['playmode'] : 3;
 $usebgv          = isset($config_ini['usebgv']) ? (int)$config_ini['usebgv'] : 2;
+$isAdmin         = ($user === 'admin');
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -231,6 +232,13 @@ if (!empty($config_ini['noticeof_listpage'])) {
 <div id="request-list"></div>
 <div id="empty-msg" style="display:none">リクエストはありません</div>
 
+<hr>
+<form method="get" action="simplelistexport_utf8.php">
+  <input type="submit" class="btn btn-primary" value="リクエストリスト(CSV)のダウンロード">
+  &nbsp;
+  <a href="simplelist.php" class="btn btn-primary">シンプルリクエストリスト表示(コピペ・公開用)</a>
+</form>
+
 </div><!-- /.container -->
 
 <!-- コメント編集モーダル -->
@@ -303,6 +311,7 @@ var CONNECT_INTERNET   = <?php echo $connectinternet; ?>;
 var USE_POST_TWITTER   = <?php echo $useposttwitter ? 'true' : 'false'; ?>;
 var PLAYMODE           = <?php echo $playmode; ?>;
 var USE_BGV            = <?php echo ($usebgv == 1) ? 'true' : 'false'; ?>;
+var IS_ADMIN           = <?php echo $isAdmin ? 'true' : 'false'; ?>;
 
 // ---- 状態 ----
 var openCard   = null;
@@ -369,6 +378,16 @@ function createCardHTML(item) {
     }
     commentHtml += '</div>';
 
+    // 管理者用「変更」ボタン
+    var changeBtn = '';
+    if (IS_ADMIN) {
+        changeBtn = '<form method="post" action="change.php" style="margin:0">'
+            + '<input type="hidden" name="id" value="' + item.id + '">'
+            + '<input type="hidden" name="songfile" value="' + esc(item.songfile) + '">'
+            + '<button type="submit" class="btn btn-default btn-xs card-ctrl-btn">変更</button>'
+            + '</form>';
+    }
+
     // 曲終了 / 曲開始ボタン
     var ctrlBtn = '';
     if (isPlaying(item.nowplaying)) {
@@ -430,6 +449,7 @@ function createCardHTML(item) {
         '        ' + statusBadge(item.nowplaying),
         '      </span>',
         '      ' + ctrlBtn,
+        '      ' + changeBtn,
         '    </div>',
         '  </div>',
         '</div>'
