@@ -295,6 +295,10 @@ print '</pre>';
     <a href ="init.php?clearauth=1" class="btn btn-default" > ログイン情報クリア (対応ブラウザのみ)</a>
   </p>
   <p>
+  <h3>CSV出力列設定</h3>
+    <a href="edit_csv_columns.php" class="btn btn-default" > CSV出力列設定 </a>
+  </p>
+  <p>
   <h3>製作者優先表示設定 <small>（りすたーDB検索のみ有効）</small></h3>
     <a href="edit_search_sort_priority.php" class="btn btn-default" > 製作者優先表示設定 </a>
   </p>
