@@ -218,19 +218,24 @@ function esc(str) {
 }
 
 var STATUS_CLASS = {
-    '未再生':       'default',
-    '再生中':       'success',
-    '停止中':       'warning',
-    '再生済':       'info',
-    '再生済？':     'info',
-    '再生開始待ち': 'warning',
-    '変更中':       'danger'
+    // 数値コード
+    '1': 'default',  '2': 'success', '3': 'warning',
+    '4': 'info',     '5': 'info',    '6': 'warning',  '7': 'danger',
+    // 日本語テキスト（既存DBとの互換）
+    '未再生': 'default', '再生中': 'success',    '停止中': 'warning',
+    '再生済': 'info',    '再生済？': 'info',     '再生開始待ち': 'warning',
+    '変更中': 'danger'
+};
+var STATUS_LABEL = {
+    '1': '未再生', '2': '再生中',    '3': '停止中',
+    '4': '再生済', '5': '再生済？',  '6': '再生開始待ち', '7': '変更中'
 };
 
 function statusBadge(nowplaying) {
     if (!nowplaying) return '';
-    var cls = STATUS_CLASS[nowplaying] || 'default';
-    return '<span class="label label-' + cls + '">' + esc(nowplaying) + '</span>';
+    var cls   = STATUS_CLASS[String(nowplaying)] || 'default';
+    var label = STATUS_LABEL[String(nowplaying)] || nowplaying; // 数値なら日本語に変換、テキストはそのまま
+    return '<span class="label label-' + cls + '">' + esc(label) + '</span>';
 }
 
 // ---- カード HTML 生成 ----
