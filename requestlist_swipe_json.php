@@ -35,7 +35,7 @@ foreach ($rows as $row) {
         'singer'       => $row['singer'] ?? '',
         'comment'      => $row['comment'] ?? '',
         'kind'         => $row['kind'] ?? '',
-        'nowplaying'   => $row['nowplaying'] ?? '1',
+        'nowplaying'   => !empty($row['nowplaying']) ? $row['nowplaying'] : '1',
     ];
 }
 
