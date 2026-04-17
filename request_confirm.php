@@ -512,6 +512,34 @@ EOT;
 EOT;
 }
 
+if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
+    $videodetails = getvideodetails($fullpath_utf8);
+    if (!empty($videodetails)) {
+        print '<div class="panel panel-default" style="margin-top:8px;">'."\n";
+        print '<div class="panel-heading" role="tab" id="videoDetailsHeading">'."\n";
+        print '<h4 class="panel-title">'."\n";
+        print '<a role="button" data-toggle="collapse" data-target="#videoDetailsCollapse" '.
+              'aria-expanded="false" aria-controls="videoDetailsCollapse" class="collapsed">'."\n";
+        print '動画詳細情報 ▼'."\n";
+        print '</a>'."\n";
+        print '</h4>'."\n";
+        print '</div>'."\n";
+        print '<div id="videoDetailsCollapse" class="panel-collapse collapse" role="tabpanel">'."\n";
+        print '<div class="panel-body">'."\n";
+        print '<dl class="dl-horizontal" style="margin-bottom:0;">'."\n";
+        if (isset($videodetails['duration'])) {
+            print '<dt>曲の長さ</dt><dd>'.htmlspecialchars($videodetails['duration']).'</dd>'."\n";
+        }
+        if (isset($videodetails['frame_rate'])) {
+            print '<dt>フレームレート</dt><dd>'.htmlspecialchars($videodetails['frame_rate']).' fps</dd>'."\n";
+        }
+        print '</dl>'."\n";
+        print '</div>'."\n";
+        print '</div>'."\n";
+        print '</div>'."\n";
+    }
+}
+
 ?>
 
 

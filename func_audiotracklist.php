@@ -105,6 +105,39 @@ function getaudiotracklist($filename){
     return $audiotracklist;
 }
 
+function getvideodetails($filename) {
+    $getID3 = new getID3();
+    $details = array();
+    $workencode = 'UTF-8';
+
+    if (getphpversion_fa() < 70100) {
+        $workencode = 'SJIS-win';
+    }
+    $filename_host = mb_convert_encoding($filename, $workencode, 'UTF-8');
+    setlocale(LC_CTYPE, 'Japanese_Japan.932');
+    if (!file_exist_check_japanese($filename_host)) return $details;
+
+    $error_level = error_reporting();
+    error_reporting($error_level - E_WARNING);
+    $info = $getID3->analyze($filename_host);
+    error_reporting($error_level);
+
+    getid3_lib::CopyTagsToComments($info);
+
+    if (!empty($info['playtime_seconds'])) {
+        $total_seconds = (int)round($info['playtime_seconds']);
+        $minutes = (int)($total_seconds / 60);
+        $secs = $total_seconds % 60;
+        $details['duration'] = sprintf('%d:%02d', $minutes, $secs);
+    }
+
+    if (!empty($info['video']['frame_rate'])) {
+        $details['frame_rate'] = round($info['video']['frame_rate'], 2);
+    }
+
+    return $details;
+}
+
 // function from manage-mpc.php
 
 function file_exist_check_japanese($filename){
