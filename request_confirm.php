@@ -276,10 +276,10 @@ if(is_numeric($selectid) && !empty($selectrequest) && $selectrequest[0]['kind'] 
     echo "</textarea> ";
 }else if($set_pause == 1 ){
     print 'placeholder="小休止時のリストに表示するメッセージ" >';
-    if (empty($filename)){
-      echo "";
-    }else{
+    if (!empty($filename)){
       echo htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
+    }else if(!empty($config_ini['pause_default_filename'])){
+      echo htmlspecialchars(urldecode($config_ini['pause_default_filename']), ENT_QUOTES, 'UTF-8');
     }
     echo "</textarea> ";
 }else {
@@ -379,7 +379,9 @@ print('<span style="visibility:hidden;">');
 <textarea name="comment" id="comment" class="form-control" rows="4" wrap="soft" placeholder="<?php print htmlspecialchars($requestcomment);?>" style="width:100%" >
 <?php
 if(is_numeric($selectid) && !empty($selectrequest) ){
-print htmlspecialchars($selectrequest[0]['comment']);
+    print htmlspecialchars($selectrequest[0]['comment']);
+}else if($set_pause == 1 && !empty($config_ini['pause_default_comment'])){
+    print htmlspecialchars(urldecode($config_ini['pause_default_comment']), ENT_QUOTES, 'UTF-8');
 }
 ?>
 </textarea>

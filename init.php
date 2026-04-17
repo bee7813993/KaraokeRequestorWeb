@@ -957,6 +957,16 @@ if(!array_key_exists('searchitem_o', $config_ini )){
       <input type="radio" name="useuserpause" value="2" <?php print (!$useuserpause)?'checked':' ' ?> /> 使用しない
     </label>
   </div>
+  <div class="form-group">
+    <h4>小休止リクエスト時のファイル名初期値</h4>
+    <input type="text" name="pause_default_filename" class="form-control"
+      value="<?php echo htmlspecialchars(urldecode($config_ini['pause_default_filename']), ENT_QUOTES, 'UTF-8'); ?>" />
+  </div>
+  <div class="form-group">
+    <h4>小休止リクエスト時のコメント初期値</h4>
+    <input type="text" name="pause_default_comment" class="form-control"
+      value="<?php echo htmlspecialchars(urldecode($config_ini['pause_default_comment']), ENT_QUOTES, 'UTF-8'); ?>" />
+  </div>
 
 
   <div class="form-group ">
