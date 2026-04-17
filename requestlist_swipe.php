@@ -127,13 +127,13 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   line-height: 1.4;
 }
 .card-meta {
-  font-size: 14px;
-  color: #666;
-  margin-top: 3px;
+  font-size: 16px;
+  color: #555;
+  margin-top: 4px;
 }
 .card-label {
   color: #aaa;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* 右カラム（バッジ＋曲終了ボタン） */
@@ -365,7 +365,7 @@ function createCardHTML(item) {
     if (item.comment) {
         commentHtml += esc(item.comment) + ' <small>&#9998;</small>';
     } else {
-        commentHtml += '<span class="card-comment-placeholder">（なし）</span>';
+        commentHtml += '<span class="card-comment-placeholder">コメントを追加...</span>';
     }
     commentHtml += '</div>';
 
