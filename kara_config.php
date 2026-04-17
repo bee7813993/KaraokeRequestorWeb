@@ -89,7 +89,13 @@ function readconfig_array()
     }
     if(!array_key_exists("nonameusername", $config_ini)){
         $nonameusername = "名無しさん";
-        $config_ini = array_merge($config_ini,array("nonameusername" => urlencode($nonameusername)));            
+        $config_ini = array_merge($config_ini,array("nonameusername" => urlencode($nonameusername)));
+    }
+    if(!array_key_exists("pause_default_filename", $config_ini)){
+        $config_ini = array_merge($config_ini,array("pause_default_filename" => ""));
+    }
+    if(!array_key_exists("pause_default_comment", $config_ini)){
+        $config_ini = array_merge($config_ini,array("pause_default_comment" => ""));
     }
 
     if(!array_key_exists("roomurl", $config_ini)){

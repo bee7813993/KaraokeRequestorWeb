@@ -1,6 +1,5 @@
 <?php
 
-
 function getallrequest_fromdb($db) {
     $sql = "SELECT * FROM requesttable ORDER BY reqorder ASC";
     $select = $db->query($sql);
@@ -9,453 +8,291 @@ function getallrequest_fromdb($db) {
     return $allrequest;
 }
 
-// 予約位置適切移動機能
-// 
+/*
+ * リクエスト順番自動調整クラス
+ *
+ * 仕様:
+ *  - 未再生アイテムのみ移動対象（再生中・再生済みより前には入らない）
+ *  - 1周目: 入れた順番（ターン[0]末尾に追加）
+ *  - 同一人物が2つ入れていても別の人は1周目扱い（ターン[0]末尾）
+ *  - 2周目以降: 1つ前の周と同じ順番
+ *  - 2周目以降の新規参加者: 未再生先頭へ
+ *  - reset_on_pause=true時: 最後の小休止以降を1周目扱いに
+ */
 class MoveItem {
-   // 周期リスト
-   // turn = array ( 'id1' => 'name1', 'id2' => 'name2', 'id3' => 'name3' ...);
-   // array_push(turnlist,turn);
-   public $turnlist = array();
-   public $allrequest = array();
-   public $allrequest_new = array();
-   public $max_reqorder = 0;
-   public $db = null;
-   
-   /* 各ターン一覧を作成。同じ人が次に現れたところで次のターンが始まるということにする */
-   public function getturnlist($db){
-       $this->db = $db;
-       $this->allrequest = getallrequest_fromdb($db);
-       $this->allrequest_new = $this->allrequest;
-       $this->recountreqorder();
-       $turnlist = array();
-       $oneturn = array();
-       foreach($this->allrequest_new as $value ){
-           if($this->max_reqorder < $value['reqorder'] ) $this->max_reqorder = $value['reqorder'] + 1;
-           if($this->check_exists_mymember($oneturn,$value['singer']) === true){
-             // goto next turn
-             array_push($turnlist,$oneturn);
-             $oneturn = array();
-           }
-           array_push($oneturn,$value);
-       }
-       if(count($oneturn) > 0 ){
-           array_push($turnlist,$oneturn);
-       }
-       $this->turnlist = $turnlist;
-   }
-   
-   /* そのIDの新しい再生順を返す */
-   public function get_new_reqorder($id,$notsingstart = 0){
-       $beforeturn = array();
-       $beforeturn_1 = array();
-       $newsinger = $this->get_singer_fromid($id);
-       if($newsinger === false) {
-           return false;
-       }
-       
-       // 1番最初のリクエスト
-       if(count($this->allrequest) == 0){
-           return 1;
-       }
-       //現在の再生中の順番を探す
-       $playingorder = false;
-       if(!empty ($this->db ) ) {
-       $this->allrequest = getallrequest_fromdb($this->db);
-       foreach ($this->allrequest as $onerequest ){
-           if($onerequest['nowplaying'] ==='再生中' ){
-               $playingorder = $onerequest['reqorder'];
-               break;
-           }
-           // 再生中がない場合、最初に見つかる未再生の項目にする
-           if($onerequest['nowplaying'] !=='未再生' ){
-               $playingorder = $onerequest['reqorder'];
-               break;
-           }
-       }
-       }
-       
-/**** 作りかけの新しい処理      
-       $currentturn = $this->get_insert_turn($this->turnlist,$newsinger,$id);
-       $beforesinger = array(); //前のターンリスト
-       $findmynameflg = false;
-       // 1つ前のターンで自分より前の人の名前のリストを取得
-       if($currentturn > 0 ){
-           foreach( $this->turnlist[$currentturn-1] as $b_onerequest ){
-               if($b_onerequest['singer'] === $newsinger ){
-                 // 自分の名前が見つかる以降リストアップ
-                 $findmynameflg = true;
-               }else{
-                 if($findmynameflg === false) 
-                 array_push($beforesinger,$b_onerequest);
-               }
-           }
-       }
-       // 最初のターン(前のターンがない)→現ターンの一番後ろに追加
-       if(count($beforesinger) == 0){
-           $turnlast = end($this->turnlist[$currentturn]);
-           reset($this->turnlist[$currentturn]);
-           return $turnlast['reqorder'] + 1;
-       }
-       
-       //array_unshift($beforesinger,
-       
-       $insertreqest_key = false;
-       // 前ターンリスト最優先から順番にチェック
-       foreach ($beforesinger as $beforeorder){
-           //今ターンの中をチェック
-           foreach( $this->turnlist[$currentturn] as $key => $onerequest){
-               // 名前が見つかる
-               if($onerequest['singer'] === $beforeorder['singer']){
-                  $insertreqest_key = $key;
-                  break;
-               }
-           }
-           if($insertreqest_key !== false ) break;
-       }
+    public $turnlist = array();
+    public $allrequest = array();
+    public $allrequest_new = array();
+    public $max_reqorder = 0;
+    public $db = null;
+    private $reset_on_pause = false;
 
-       print '<pre>';
-       var_dump($beforesinger );
-       print 'insertreqest_key'.$insertreqest_key;
-       print '</pre>';
+    public function getturnlist($db) {
+        $this->db = $db;
+        global $config_ini;
+        if (array_key_exists('request_automove_reset', $config_ini)) {
+            $this->reset_on_pause = ($config_ini['request_automove_reset'] == 1);
+        }
+        $this->allrequest = getallrequest_fromdb($db);
+        $this->allrequest_new = $this->allrequest;
+        $this->_rebuild_turnlist();
+    }
 
-       //もし見つからなかったら、今ターンの最初
-       if($insertreqest_key === false ){
-         $insertreqest_key = 0;
-       }
+    private function _rebuild_turnlist() {
+        $this->turnlist = array();
+        $this->max_reqorder = 0;
+        $cur_turn = array();
+        $cur_singers = array();
+        foreach ($this->allrequest_new as $r) {
+            if ($this->max_reqorder < $r['reqorder']) {
+                $this->max_reqorder = $r['reqorder'];
+            }
+            if (in_array($r['singer'], $cur_singers)) {
+                $this->turnlist[] = $cur_turn;
+                $cur_turn = array();
+                $cur_singers = array();
+            }
+            $cur_turn[] = $r;
+            $cur_singers[] = $r['singer'];
+        }
+        if (!empty($cur_turn)) {
+            $this->turnlist[] = $cur_turn;
+        }
+    }
 
-       print '<pre>';
-        print 'insertreqest_key'.$insertreqest_key;
-        print '</pre>';
-   
-       //挿入した場所が未再生でなかったら後ろにずらす
-       foreach( $this->turnlist[$currentturn] as $key => $onerequest){
+    public function get_new_reqorder($newid) {
+        $this->allrequest = getallrequest_fromdb($this->db);
+        $this->allrequest_new = $this->allrequest;
 
-       print '<pre>';
-       var_dump($onerequest );
-        print '</pre>';
+        $newsinger = null;
+        $newkind = null;
+        foreach ($this->allrequest as $r) {
+            if ($r['id'] == $newid) {
+                $newsinger = $r['singer'];
+                $newkind = $r['kind'];
+                break;
+            }
+        }
+        if ($newsinger === null) return false;
 
-         if($key < $insertreqest_key ) continue;
-         $neworder = $onerequest['reqorder'] ;
-         if($onerequest['nowplaying'] ==='未再生' ){
-            break;
-         }
-       }
-       
-       return $neworder;
-       
-****/  
-       $beforeturn = array();
-       $beforeturn_1 = array();
-       $beforeturn_2 = array();
-       ///以下古い処理
-       // 今まで自分の名前の入った一番新しいリクエストのorder番号を探す
-       $maxmyorder = $this->get_max_reqorder_from_name($newsinger,$id);
-       
-       foreach($this->turnlist as $turnkey => $oneturn){
-       //print "<pre> dump oneturn\n";
-       //    var_dump($oneturn);
-       //print "</pre>";
-           // 1番最初のリクエスト
-           //print "ターンに入ります<br>\n";
-           if(count($oneturn) == 0){
-              //print "このターンは0でした<br>\n";
-              return 1;
-           }
-           $beforeturn_2 = $beforeturn_1;
-           $beforeturn_1 = $beforeturn;
-           $beforeturn = $oneturn;
-           // 自分の最新リクエストより前 -> 次のターン
-           if(count($oneturn) > 0 ){
-             if(array_key_exists('reqorder', $oneturn[0]) ){
-               // print '$oneturn[0][reqorder]:'.$oneturn[0]['reqorder'].'$maxmyorder:'.$maxmyorder.'<br>';
-               if($oneturn[0]['reqorder'] < $maxmyorder) continue;
-             }
-           }
-           
+        // 再生済み・再生中の最大reqorder（この位置より前には挿入不可）
+        $played_max = 0;
+        foreach ($this->allrequest as $r) {
+            if ($r['id'] == $newid) continue;
+            if ($r['nowplaying'] !== '未再生') {
+                $played_max = max($played_max, $r['reqorder']);
+            }
+        }
 
-           // 未再生の場所を探す
-           $startcheck = false;
-           foreach($oneturn as $onerequest){
-               if($onerequest['nowplaying'] == '未再生' ){
-                   $startcheck = true;
-                   // print "このターンに未再生がありました".$onerequest['reqorder']." <br>\n";
-                   break;
-               }
-           }
-           // 現在のターンに1つも未再生がない → 次のターンへ
-           if($startcheck == false) {
-               continue;
-           }
-           // 現在のターンに名前がある → 次のターンへ
-           if($this->check_exists_mymember($oneturn,$newsinger,$id) === true){
-               // print "このターンに自分の名前がありました".$newsinger." <br>\n";
-               // var_dump($oneturn);
-               // print " <br>\n";
-               continue;
-           }
-           // 1つ前のターンの順番に従いreqorderを決める
+        // 小休止は常に未再生の末尾へ
+        if ($newkind === '小休止') {
+            $last_req = $played_max;
+            foreach ($this->allrequest as $r) {
+                if ($r['id'] == $newid) continue;
+                if ($r['nowplaying'] === '未再生') {
+                    $last_req = max($last_req, $r['reqorder']);
+                }
+            }
+            return $last_req + 1;
+        }
 
-           // 1つ前のターンで自分より前の人の名前のリストを取得
-           $mynamefound = false;
-           $beforesinger = array(); 
-/**
-       print "<pre>\n-------- beforeturn_1 list:\n";
-       var_dump($beforeturn_1);print "</pre>";
-           if(!empty($beforeturn_1)){
-               foreach( ($beforeturn_1) as $b_onerequest ){
-                print $b_onerequest['songfile'].$b_onerequest['singer'].$newsinger."<br>\n";
-                   if($mynamefound === false) {
-                       if($b_onerequest['singer'] === $newsinger ){
-                           $mynamefound = false;
-                           //array_push($beforesinger,$b_onerequest);
-                           continue;
-                       }else{
-                           // print $b_onerequest['singer'].$newsinger."<br>\n";
-                           array_push($beforesinger,$b_onerequest);
-                       }
-                   }else {
-                       //array_push($beforesinger,$b_onerequest);
-                   }
-               }
-           }
-**/
-// var_dump($beforeturn_1);
-           if( $turnkey > 0 ) {
-           //  for( $i = $turnkey - 1 ; $i >= 0 ; $i-- ){
-               foreach( ($this->turnlist[$turnkey - 1]) as $b_onerequest ){
-               // print $b_onerequest['songfile'].$b_onerequest['singer'].$newsinger."<br>\n";
-                   if($mynamefound === false) {
-                       if($b_onerequest['singer'] === $newsinger ){
-                           $mynamefound = true;
-                           //array_push($beforesinger,$b_onerequest);
-                           continue;
-                       }else{
-                           // print $b_onerequest['singer'].$newsinger."<br>\n";
-                           array_push($beforesinger,$b_onerequest);
-                       }
-                   }else {
-                       //array_push($beforesinger,$b_onerequest);
-                   }
-               }
-           //  }
-           }
-           if($mynamefound === false) {
-               $beforesinger = null;
-           }
-           // とりあえず現ターンの未再生の中の最後の順番にしておく
-           $newreqorder = false;
-           if(empty($this->turnlist[$turnkey - 1])){
-               $newreqorder = $oneturn[count($oneturn)-1]['reqorder']+1;
-               //print 'now set'.$newreqorder;
-           }else{
-           print '<pre>';
-           var_dump($oneturn);
-           print '</pre>';
-           for($i = 0 ; $i < count($oneturn) ; $i++){
-             // print  $oneturn[$i]['id'].$oneturn[$i]['reqorder'].'<br>';
-               if($oneturn[$i]['nowplaying'] == '未再生' ){
-                   $newreqorder = $oneturn[$i]['reqorder'];
-                   // print 'now set'.$newreqorder;
-                   break;
-               }
-           }
-           }
-           if($newreqorder === false) break;
-           // print " $newreqorder";
-//           print "<pre>\n-------- before singer list:\n";
-//           var_dump($beforesinger);print "</pre>";
-//           print "<pre>\n-------- oneturn list:\n";
-//           var_dump($oneturn);print "</pre>";
-           if(!empty($beforesinger)){
-               // 前ターンの自分の前の人がいたらその人の次にする
-               $cheekedreqorder= $oneturn[count($oneturn)-1]['reqorder']+1;;
-               foreach( $oneturn as $onerequest){
-                 if($onerequest['nowplaying']==='未再生'){
-                     $cheekedreqorder= $onerequest['reqorder'];
-                     break;
-                 }
-               }
-               $setvalue = false;
-               // 差し込むべきIDを探す。
-               $insertid = null;
-               foreach( array_reverse ($oneturn) as $key => $onerequest){
-                   $cheekedreqorder = $onerequest['reqorder'] + 1;
-                   foreach (($beforesinger) as $beforeorder){
-                       // print $cheekedreqorder.'onerequest:'.$onerequest['singer'].$onerequest['reqorder'].' beforeorder:'.$beforeorder['singer'].$beforeorder['reqorder']."<br>\n";
-                       if($onerequest['singer'] == $beforeorder['singer']){
-                           if( $cheekedreqorder == $onerequest['reqorder']){
-                               $newreqorder = $cheekedreqorder + 1 ;
-                           }else {
-                               $newreqorder = $cheekedreqorder ;
-                           }
-                           
-                           // 再生中or再生済みチェック
-                           for($i=$key ;$i<count($oneturn); $i++){
-                          // print "<pre>".$newreqorder;var_dump($oneturn[$i]);print "</pre>";
-                             if(array_key_exists($i,$oneturn) && $oneturn[$i]['nowplaying'] !=='未再生' ){
-                                   if($newreqorder <= $oneturn[$i]['reqorder']){
-                            //   print "<pre>".$newreqorder;print $oneturn[$i]['reqorder'];print "</pre>";
-                                       $newreqorder = $oneturn[$i]['reqorder'] + 1;
-                                   }
-                             }
-                           }
-                          //  print "reqorderを".$newreqorder.'にしました';
-                           $setvalue = true;
-                           break;
-                       }
-                       
-                       //print $cheekedreqorder;
-                   }
-                   // print $oneturn[0]['reqorder'];
-                   if($setvalue === true){
-                       break;
-                   }
-                   if($onerequest['nowplaying']==='未再生'){
-                       $cheekedreqorder=$onerequest['reqorder'] ;
-                   }
-               }
-           }else{
-             // 最初のターンの場合そのターンの一番後ろにする
-             if($newreqorder == 1 ){
-               // print "ターンの一番後ろにしました";
-               // そのターンの先頭にするときはコメントアウト
-               $newreqorder = $oneturn[count($oneturn)-1]['reqorder']+1;
-             }else {
-                        $newreqorder = $newreqorder;
-             }
-             
-           }
-           // 再生中より下にないかチェック
-           if( $playingorder !== false ){
-              if( $playingorder > $newreqorder ) {
-                  return ($playingorder + 1);
-              }
-           }
-           return $newreqorder;
-       }
-       // print "come max_reqorder".$this->max_reqorder;
-       return $this->max_reqorder + 1;
-   }
+        // 小休止リセット: 未再生の小休止アイテムの最後のreqorderを境界にする
+        $pause_boundary = 0;
+        if ($this->reset_on_pause) {
+            foreach ($this->allrequest as $r) {
+                if ($r['id'] == $newid) continue;
+                if ($r['nowplaying'] === '未再生' && $r['kind'] === '小休止') {
+                    $pause_boundary = max($pause_boundary, $r['reqorder']);
+                }
+            }
+        }
 
+        $scope_start = max($played_max, $pause_boundary);
 
-   
-   //ターン一覧から、挿入すべきターン番号を返す 
-   public function get_insert_turn($turnlist,$newsinger,$id){
-       foreach($turnlist as $turnkey => $oneturn){
-           foreach($oneturn as $onerequest){
-               if($onerequest['nowplaying'] == '未再生' ){
-                   // print "このターンに未再生がありました".$onerequest['reqorder']." <br>\n";
-                   // このターンに自分の名前があるかどうかのチェック
-                   // 現在のターンに名前がある → 次のターンへ
-                   if($this->check_exists_mymember($oneturn,$newsinger,$id) === true){
-                     continue;
-                   }                   
-                   return $turnkey;
-                   break;
-               }
-           }
-       }
-       return false;
-   }
-   
-   public function get_singer_fromid($id){
-       foreach($this->allrequest_new as $value ){
-           //print $value['id'].':'.$id."\n";
-           if($value['id'] == $id){
-               return $value['singer'];
-           }
-       }
-       return false;
-   }
-   
-   public function recountreqorder(){
-       $currentreqorder = 1;
-       for($i=0;$i < count($this->allrequest_new) ; $i++){
-           $this->allrequest_new[$i]['reqorder']= $currentreqorder;
-           $currentreqorder ++;
-       }
-   }
-   
-   public function insertreqorder($id,$reqorder){
-       $currentreqorder = 1;
-       for($i=0;$i < count($this->allrequest_new) ; $i++){
-           if($this->allrequest_new[$i]['id'] == $id ){
-       // print $this->allrequest_new[$i]['id'].':'.$id.':'.$reqorder."<br />";;
-               $this->allrequest_new[$i]['reqorder'] = $reqorder;
-               continue;
-           }
-           if($currentreqorder == $reqorder) {
-               $currentreqorder ++;
-           }else if($this->allrequest_new[$i]['reqorder'] == $reqorder){
-               $currentreqorder ++;
-           }
-           $this->allrequest_new[$i]['reqorder']= $currentreqorder;
-           $currentreqorder ++;
-       }
-       
-   }
-   
-   public function save_allrequest($db){
-       foreach($this->allrequest as $key => $row ){
-           $idlist[$key] = $row['id'];
-       }
-       array_multisort($idlist, SORT_ASC, $this->allrequest);
-       
-       // table drop
-       for($i=0;$i<count($this->allrequest_new);$i++){
-          if($this->allrequest_new[$i]['reqorder'] !== $this->allrequest[$i]['reqorder']){
-              $sql = 'UPDATE requesttable set reqorder="'.$this->allrequest_new[$i]['reqorder'].'" where id = "'.$this->allrequest_new[$i]['id'].'"';
-              //print $sql."<br />\n";
-              $count = $db->exec($sql);
-              if($count !== 1) {
-               //   print "reqorderを$count 件修正しました。".$this->allrequest[$i]['reqorder'].' to '.$this->allrequest_new[$i]['reqorder']."\n";
-               }
-          }
-       }
-   }
-   
+        // contextアイテム: scope_startより後の全アイテム（新アイテム・小休止除外）
+        $context = array();
+        foreach ($this->allrequest as $r) {
+            if ($r['id'] == $newid) continue;
+            if ($r['reqorder'] <= $scope_start) continue;
+            if ($r['kind'] === '小休止') continue;
+            $context[] = $r;
+        }
 
+        if (empty($context)) {
+            return $scope_start + 1;
+        }
 
-   public function addrequest_andsetreqorder($id){
-       $allrequest = getallrequest_fromdb($db);
-       $reqorderlist = array();
-       foreach($allrequest as $value ){
-           array_push($reqorderlist,array( $value['reqorder'] => $value['id']) );
-       }
-       return $reqorderlist;
-   }
-   
-   public function get_current_reqorderlist($db){
-       
-   }
-   
-   /* ターンの中に$singer で与えられた名前があるかどうか。$idを指定するとそのIDは除外する */
-   public function check_exists_mymember($oneturn,$singer,$id='none'){
-       foreach($oneturn as $value){
-           //print "check_exists_mymember :".$value['singer'].':'.$singer."<br>\n";
-           if($value['id'] == $id) continue;
-           if($value['singer'] === $singer){
-               // exists same turn
-               return true;
-           }
-       }
-       return false;
-   }
-   
-   /* $singerのリクエストした一番新しいreqourderを探す */
-   /* $woid : 対象としないid値  */
-   /* -1 : user not found  */
-   public function get_max_reqorder_from_name($newsinger,$woid) {
-       $maxreqorder = -1;
-       foreach($this->allrequest as $key => $row ){
-           if($row['id'] == $woid ) continue;
-           if($row['singer'] === $newsinger ) {
-               // print $newsinger . ' as '. $row['reqorder'] .'<br>';
-               $maxreqorder = max ( $maxreqorder , $row['reqorder'] );
-           }
-       }
-       return $maxreqorder;
-   }
+        // contextからターン構築（同じ歌い手が再登場 → 次のターン開始）
+        $turns = array();
+        $cur_turn = array();
+        $cur_singers = array();
+        foreach ($context as $r) {
+            if (in_array($r['singer'], $cur_singers)) {
+                $turns[] = $cur_turn;
+                $cur_turn = array();
+                $cur_singers = array();
+            }
+            $cur_turn[] = $r;
+            $cur_singers[] = $r['singer'];
+        }
+        if (!empty($cur_turn)) {
+            $turns[] = $cur_turn;
+        }
+
+        // 挿入ターン: 新歌い手を含まない最初のターン
+        $target_idx = count($turns);
+        foreach ($turns as $idx => $turn) {
+            $has = false;
+            foreach ($turn as $r) {
+                if ($r['singer'] === $newsinger) { $has = true; break; }
+            }
+            if (!$has) {
+                $target_idx = $idx;
+                break;
+            }
+        }
+
+        // 全ターンに既に存在 → 末尾に追加
+        if ($target_idx >= count($turns)) {
+            $last = end($context);
+            reset($context);
+            return $last['reqorder'] + 1;
+        }
+
+        $target_turn = $turns[$target_idx];
+
+        if ($target_idx == 0) {
+            // 新歌い手（どのターンにも存在しない）
+            // rule5 vs rule2/3の判定: turn[0]に「常連」がいるか
+            // 常連 = contextの外（再生済み等）で同じ歌い手がいる
+            // ただしreset_on_pause=trueの場合は常に1周目扱い
+            if (!$this->reset_on_pause && $this->_turn_has_veteran($turns[0])) {
+                // rule5: 2周目以降の新規参加者 → 未再生先頭へ
+                return $this->_first_unplayed_reqorder($context);
+            }
+            // rule2/3: 1周目 → ターン[0]末尾へ
+            return $this->_end_of_turn_unplayed_reqorder($target_turn) + 1;
+        }
+
+        // target_idx >= 1: rule4 - 1つ前のターンと同じ順番
+        $prev_turn = $turns[$target_idx - 1];
+
+        // 前ターンで自分より後にいる歌い手リスト
+        $after_singers = array();
+        $found_self = false;
+        foreach ($prev_turn as $r) {
+            if ($r['singer'] === $newsinger) {
+                $found_self = true;
+                continue;
+            }
+            if ($found_self) {
+                $after_singers[] = $r['singer'];
+            }
+        }
+
+        // 挿入ターンの未再生アイテムで、最初に「後の人」が見つかった位置に挿入
+        foreach ($target_turn as $r) {
+            if ($r['nowplaying'] !== '未再生') continue;
+            if (in_array($r['singer'], $after_singers)) {
+                return $r['reqorder'];
+            }
+        }
+
+        // 「後の人」が見つからなければターン末尾
+        return $this->_end_of_turn_unplayed_reqorder($target_turn) + 1;
+    }
+
+    // turn内の歌い手がcontextの外（再生済み等）に存在するか判定
+    private function _turn_has_veteran($turn) {
+        foreach ($turn as $t) {
+            foreach ($this->allrequest as $r) {
+                if ($r['singer'] === $t['singer'] && $r['nowplaying'] !== '未再生') {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // context内の最初の未再生アイテムのreqorderを返す
+    private function _first_unplayed_reqorder($context) {
+        foreach ($context as $r) {
+            if ($r['nowplaying'] === '未再生') {
+                return $r['reqorder'];
+            }
+        }
+        $last = end($context);
+        reset($context);
+        return $last['reqorder'] + 1;
+    }
+
+    // ターン内の最後の未再生アイテムのreqorderを返す（なければ最後のアイテム）
+    private function _end_of_turn_unplayed_reqorder($turn) {
+        $last_unplayed = -1;
+        $last_any = -1;
+        foreach ($turn as $r) {
+            if ($r['reqorder'] > $last_any) $last_any = $r['reqorder'];
+            if ($r['nowplaying'] === '未再生' && $r['reqorder'] > $last_unplayed) {
+                $last_unplayed = $r['reqorder'];
+            }
+        }
+        return ($last_unplayed >= 0) ? $last_unplayed : $last_any;
+    }
+
+    public function insertreqorder($id, $reqorder) {
+        $currentreqorder = 1;
+        for ($i = 0; $i < count($this->allrequest_new); $i++) {
+            if ($this->allrequest_new[$i]['id'] == $id) {
+                $this->allrequest_new[$i]['reqorder'] = $reqorder;
+                continue;
+            }
+            if ($currentreqorder == $reqorder) {
+                $currentreqorder++;
+            } elseif ($this->allrequest_new[$i]['reqorder'] == $reqorder) {
+                $currentreqorder++;
+            }
+            $this->allrequest_new[$i]['reqorder'] = $currentreqorder;
+            $currentreqorder++;
+        }
+    }
+
+    public function save_allrequest($db) {
+        $old_orders = array();
+        foreach ($this->allrequest as $r) {
+            $old_orders[$r['id']] = $r['reqorder'];
+        }
+        foreach ($this->allrequest_new as $r) {
+            $id = (int)$r['id'];
+            $new_req = (int)$r['reqorder'];
+            if (!array_key_exists($id, $old_orders) || $old_orders[$id] !== $new_req) {
+                $db->exec('UPDATE requesttable SET reqorder=' . $new_req . ' WHERE id=' . $id);
+            }
+        }
+    }
+
+    // 互換性のために残す
+    public function check_exists_mymember($oneturn, $singer, $id = 'none') {
+        foreach ($oneturn as $value) {
+            if ($value['id'] == $id) continue;
+            if ($value['singer'] === $singer) return true;
+        }
+        return false;
+    }
+
+    public function get_singer_fromid($id) {
+        foreach ($this->allrequest_new as $value) {
+            if ($value['id'] == $id) return $value['singer'];
+        }
+        return false;
+    }
+
+    public function recountreqorder() {
+        $currentreqorder = 1;
+        for ($i = 0; $i < count($this->allrequest_new); $i++) {
+            $this->allrequest_new[$i]['reqorder'] = $currentreqorder;
+            $currentreqorder++;
+        }
+    }
 }
 
 ?>
