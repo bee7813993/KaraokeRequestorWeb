@@ -137,6 +137,12 @@ if(array_key_exists("match", $_REQUEST)) {
     $match = $_REQUEST["match"];
 }
 
+$recommendation = 'on';
+if(array_key_exists("recommendation", $_REQUEST) && in_array($_REQUEST["recommendation"], array('on','off'))) {
+    $recommendation = $_REQUEST["recommendation"];
+}
+$myrequestarray["recommendation"] = $recommendation;
+
 
 if(array_key_exists("start", $_REQUEST)) {
     $displayfrom = $_REQUEST["start"];
@@ -512,6 +518,23 @@ if(!empty($url)){
    die();
    }
 
+$priority_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'search_sort_priority.json';
+$custom_sort_priorities = [];
+if (file_exists($priority_file)) {
+    $loaded = json_decode(file_get_contents($priority_file), true);
+    if (is_array($loaded)) {
+        $custom_sort_priorities = $loaded;
+    }
+}
+
+if ($recommendation === 'on') {
+    foreach ($programlist['data'] as $idx => &$item) {
+        $item['_sort_idx'] = $idx;
+    }
+    unset($item);
+    usort($programlist['data'], 'custom_sort');
+}
+
 
 function create_requestconfirmlink($songinfo) {
   global $linkoption;
@@ -543,6 +566,38 @@ foreach($filelist as $fileinfo)
     }
 }
 return $songcounter;
+}
+
+function custom_sort($a, $b) {
+    global $custom_sort_priorities;
+
+    // found_worker が空なら最後尾、キーワード不一致なら 999、一致なら設定値
+    $a_priority = empty($a['found_worker']) ? 9999 : 999;
+    $b_priority = empty($b['found_worker']) ? 9999 : 999;
+
+    if (!empty($a['found_worker'])) {
+        foreach ($custom_sort_priorities as $rule) {
+            if ($a['found_worker'] === $rule['keyword']) {
+                $a_priority = $rule['priority'];
+                break;
+            }
+        }
+    }
+
+    if (!empty($b['found_worker'])) {
+        foreach ($custom_sort_priorities as $rule) {
+            if ($b['found_worker'] === $rule['keyword']) {
+                $b_priority = $rule['priority'];
+                break;
+            }
+        }
+    }
+
+    if ($a_priority != $b_priority) {
+        return $a_priority - $b_priority;
+    }
+    // 同じ優先度内では元の「項目・順番」設定の順を維持（stable sort）
+    return $a['_sort_idx'] - $b['_sort_idx'];
 }
 ?>
 
@@ -612,6 +667,17 @@ if($programlist['recordsTotal'] == 0) {
 
 print '<form method="GET" action="search_listerdb_filelist.php" class="form-inline" >';
 print '<div class="form-group">';
+print '<label for="recommendation">おすすめ順</label>';
+print '<select class="form-control" id="recommendation" name="recommendation">';
+print '<option value="on" ';
+print selected_check("on", $recommendation);
+print '>有効</option>';
+print '<option value="off" ';
+print selected_check("off", $recommendation);
+print '>無効</option>';
+print '</select>';
+print '</div>';
+print '<div class="form-group">';
 print '<label for="orderby">項目</label>';
 print '<select class="form-control" id="orderby"  name="orderby" >';
 print '<option value="found_file_size" ';
@@ -655,7 +721,7 @@ if(($displayfrom + $displaynum) < $programlist['recordsTotal']) {
 }else {
   $displaylast = $programlist['recordsTotal'];
 }
-print '    <div class="text-right">';
+print '    <div style="text-align: right;">';
 print $displayfrom.'-'.($displaylast).'（全'.$programlist['recordsTotal'].'件）';
 print '    </div>';
 print '  <div class="row">';
