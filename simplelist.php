@@ -59,6 +59,63 @@
     /* PC ではアコーディオンボタンを非表示 */
     .mobile-accordion-btn { display: none; }
 
+    /* ===== フィルターバー ===== */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .filter-icon {
+      color: #aaa;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+    .filter-bar input[type="text"] {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.97rem;
+      padding: 0;
+      background: transparent;
+      min-width: 0;
+    }
+    .filter-clear-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #bbb;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0 2px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .filter-clear-btn:hover { color: #666; }
+    .filter-count {
+      font-size: 0.82em;
+      color: #aaa;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .is-filtered-out { display: none !important; }
+    .filter-no-results {
+      display: none;
+      text-align: center;
+      padding: 24px;
+      color: #aaa;
+      font-size: 0.95em;
+      background: #fff;
+      border-radius: 6px;
+      border: 1px solid #eee;
+      margin-top: 4px;
+    }
+
     /* ===== スマホスタイル (767px 以下) ===== */
     @media (max-width: 767px) {
       body { padding: 8px; }
@@ -244,6 +301,13 @@ $use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
 ?>
 <div class="simplelist-container">
   <h2 class="page-title">再生曲リスト</h2>
+  <div class="filter-bar">
+    <span class="filter-icon">&#128269;</span>
+    <input type="text" id="filter-input" placeholder="曲名・作品名・歌った人などで絞り込み…" autocomplete="off">
+    <button type="button" class="filter-clear-btn" id="filter-clear">&#x2715;</button>
+    <span class="filter-count" id="filter-count"></span>
+  </div>
+  <div class="filter-no-results" id="filter-no-results">該当する曲が見つかりませんでした</div>
   <table class="simplelist-table">
 <?php if($use_listerdb): ?>
     <thead>
@@ -286,8 +350,13 @@ $use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
 
         $artistname = !empty($songdataarray["song_artist"])
             ? htmlspecialchars($songdataarray["song_artist"]) : '';
+
+        $filter_text = mb_strtolower(implode(' ', [
+            strip_tags($songname), strip_tags($programname),
+            strip_tags($artistname), $row["singer"], $row["comment"]
+        ]), 'UTF-8');
       ?>
-      <tr>
+      <tr data-filter-text="<?= htmlspecialchars($filter_text) ?>">
         <td class="col-no"><?= $num ?></td>
         <td class="col-song">
           <?= $songname ?><?= $foundcomment ?>
@@ -316,8 +385,12 @@ $use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
         $keychange = '';
         if($row['keychange'] > 0)      $keychange = 'キー変更：+' . $row['keychange'];
         elseif($row['keychange'] < 0)  $keychange = 'キー変更：'  . $row['keychange'];
+
+        $filter_text = mb_strtolower(implode(' ', [
+            $row["songfile"], $row["singer"], $row["comment"]
+        ]), 'UTF-8');
       ?>
-      <tr>
+      <tr data-filter-text="<?= htmlspecialchars($filter_text) ?>">
         <td class="col-no"><?= $num ?></td>
         <td class="col-song">
           <?= htmlspecialchars($row["songfile"]) ?>
@@ -337,12 +410,40 @@ $use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
     <script src="js/bootstrap.min.js"></script>
     <script>
     $(function() {
+      // アコーディオン
       $('.mobile-accordion-btn').on('click', function() {
         var $tr = $(this).closest('tr');
         $tr.toggleClass('is-expanded');
         var open = $tr.hasClass('is-expanded');
         $(this).text(open ? '閉じる ▲' : '詳細を見る ▼');
         $(this).toggleClass('is-open', open);
+      });
+
+      // フィルタリング
+      var $rows = $('.simplelist-table tbody tr');
+      var totalCount = $rows.length;
+
+      function updateCount(visible) {
+        var q = $('#filter-input').val();
+        $('#filter-count').text(q === '' ? '全' + totalCount + '件' : visible + ' / ' + totalCount + '件');
+      }
+      updateCount(totalCount);
+
+      $('#filter-input').on('input', function() {
+        var query = $(this).val().toLowerCase().trim();
+        $('#filter-clear').toggle(query !== '');
+        var visibleCount = 0;
+        $rows.each(function() {
+          var match = query === '' || ($(this).data('filter-text') || '').indexOf(query) !== -1;
+          $(this).toggleClass('is-filtered-out', !match);
+          if (match) visibleCount++;
+        });
+        $('#filter-no-results').toggle(visibleCount === 0 && query !== '');
+        updateCount(visibleCount);
+      });
+
+      $('#filter-clear').on('click', function() {
+        $('#filter-input').val('').trigger('input').focus();
       });
     });
     </script>
