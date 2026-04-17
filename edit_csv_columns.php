@@ -4,14 +4,14 @@ require_once 'commonfunc.php';
 $config_file = 'csv_export_columns.json';
 
 $all_columns_def = [
-    ['id' => 'num',          'label' => '順番'],
-    ['id' => 'songfile',     'label' => '曲名（ファイル名）'],
-    ['id' => 'keychange',    'label' => 'キー'],
-    ['id' => 'program_name', 'label' => '作品名'],
-    ['id' => 'artist',       'label' => '歌手名'],
-    ['id' => 'singer',       'label' => '歌った人'],
-    ['id' => 'comment',      'label' => 'コメント'],
-    ['id' => 'worker',       'label' => '動画制作者'],
+    ['id' => 'num',          'label' => '順番',           'default' => true],
+    ['id' => 'songfile',     'label' => '曲名（ファイル名）', 'default' => true],
+    ['id' => 'program_name', 'label' => '作品名',          'default' => true],
+    ['id' => 'artist',       'label' => '歌手名',          'default' => true],
+    ['id' => 'singer',       'label' => '歌った人',         'default' => true],
+    ['id' => 'comment',      'label' => 'コメント',         'default' => true],
+    ['id' => 'keychange',    'label' => 'キー',            'default' => false],
+    ['id' => 'worker',       'label' => '動画制作者',       'default' => false],
 ];
 
 function load_csv_columns($config_file, $all_columns_def) {
@@ -22,14 +22,14 @@ function load_csv_columns($config_file, $all_columns_def) {
             $saved_ids = array_column($saved, 'id');
             foreach ($all_columns_def as $col) {
                 if (!in_array($col['id'], $saved_ids)) {
-                    $saved[] = ['id' => $col['id'], 'label' => $col['label'], 'enabled' => true];
+                    $saved[] = ['id' => $col['id'], 'label' => $col['label'], 'enabled' => $col['default']];
                 }
             }
             return $saved;
         }
     }
     return array_map(function($col) {
-        return ['id' => $col['id'], 'label' => $col['label'], 'enabled' => true];
+        return ['id' => $col['id'], 'label' => $col['label'], 'enabled' => $col['default']];
     }, $all_columns_def);
 }
 
