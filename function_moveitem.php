@@ -65,9 +65,11 @@ class MoveItem {
         $this->allrequest_new = $this->allrequest;
 
         $newsinger = null;
+        $newkind = null;
         foreach ($this->allrequest as $r) {
             if ($r['id'] == $newid) {
                 $newsinger = $r['singer'];
+                $newkind = $r['kind'];
                 break;
             }
         }
@@ -80,6 +82,18 @@ class MoveItem {
             if ($r['nowplaying'] !== '未再生') {
                 $played_max = max($played_max, $r['reqorder']);
             }
+        }
+
+        // 小休止は常に未再生の末尾へ
+        if ($newkind === '小休止') {
+            $last_req = $played_max;
+            foreach ($this->allrequest as $r) {
+                if ($r['id'] == $newid) continue;
+                if ($r['nowplaying'] === '未再生') {
+                    $last_req = max($last_req, $r['reqorder']);
+                }
+            }
+            return $last_req + 1;
         }
 
         // 小休止リセット: 未再生の小休止アイテムの最後のreqorderを境界にする
