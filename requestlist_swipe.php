@@ -17,6 +17,11 @@ $bgcolor = '#F8ECE0';
 if (!empty($config_ini['bgcolor'])) {
     $bgcolor = urldecode($config_ini['bgcolor']);
 }
+
+$connectinternet = isset($config_ini['connectinternet']) ? (int)$config_ini['connectinternet'] : 1;
+$useposttwitter  = configbool('useposttwitter', true);
+$playmode        = isset($config_ini['playmode']) ? (int)$config_ini['playmode'] : 3;
+$usebgv          = isset($config_ini['usebgv']) ? (int)$config_ini['usebgv'] : 2;
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -76,9 +81,10 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   padding: 0;
 }
 .action-btn:active { opacity: 0.8; }
-.action-next   { background: #e67e22; }
-.action-delete { background: #e74c3c; }
-.action-icon   { font-size: 18px; }
+.action-replace { background: #27ae60; }
+.action-next    { background: #e67e22; }
+.action-delete  { background: #e74c3c; }
+.action-icon    { font-size: 18px; }
 
 /* カード本体（スワイプで左にスライド） */
 .card-main {
@@ -94,7 +100,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   cursor: default;
 }
 .request-card.swipe-open .card-main {
-  transform: translateX(-160px);
+  transform: translateX(-210px);
 }
 
 /* ドラッグハンドル */
@@ -130,10 +136,42 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   margin-top: 2px;
 }
 
-/* 再生状況バッジ */
-.card-status {
+/* 右カラム（バッジ＋曲終了ボタン） */
+.card-right {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  min-width: 64px;
 }
+.status-badge-btn {
+  cursor: pointer;
+}
+.status-badge-btn:hover .label { opacity: 0.8; }
+.card-ctrl-btn {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+/* コメント欄 */
+.card-comment-area {
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  padding: 2px 0;
+  min-height: 18px;
+}
+.card-comment-area:hover { color: #337ab7; text-decoration: underline; }
+.card-comment-placeholder { color: #bbb; font-style: italic; }
+/* Tweet リンク */
+.card-tweet-link {
+  font-size: 11px;
+  color: #1da1f2;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 2px;
+}
+.card-tweet-link:hover { text-decoration: underline; color: #0c85d0; }
 
 /* SortableJS */
 .sortable-ghost {
@@ -195,12 +233,81 @@ if (!empty($config_ini['noticeof_listpage'])) {
 
 </div><!-- /.container -->
 
+<!-- コメント編集モーダル -->
+<div class="modal fade" id="comment-modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">コメントへのレス＆編集</h4>
+      </div>
+      <div class="modal-body">
+        <form id="comment-edit-form">
+          <div class="form-group">
+            <label>コメント修正</label>
+            <textarea class="form-control" id="comment-edit-text" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-default pull-right">修正</button>
+        </form>
+        <div class="clearfix" style="margin-bottom:10px;"></div>
+        <hr>
+        <form id="comment-reply-form">
+          <div class="form-group">
+            <label>レス <small>再生中にコメントするとその場で流れます</small></label>
+            <input type="text" class="form-control" id="comment-reply-text" placeholder="レス(コメントへの)">
+          </div>
+          <div class="form-group">
+            <label>名前</label>
+            <input type="text" class="form-control" id="comment-reply-name" placeholder="名前">
+          </div>
+          <button type="submit" class="btn btn-primary pull-right">送信</button>
+        </form>
+        <div class="clearfix"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 再生状況変更モーダル -->
+<div class="modal fade" id="status-modal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">再生状況を変更</h4>
+      </div>
+      <div class="modal-body">
+        <select class="form-control" id="status-select">
+          <option value="未再生">未再生</option>
+          <option value="再生中">再生中</option>
+          <option value="停止中">停止中</option>
+          <option value="再生済">再生済</option>
+          <option value="再生済？">再生済？</option>
+          <option value="再生開始待ち">再生開始待ち</option>
+          <option value="変更中">変更中</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-primary" id="status-submit">変更</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 $(function () { $('[data-toggle="tooltip"]').tooltip(); });
 
 // ---- 設定値（PHP から埋め込み） ----
-var USE_ACTIVE_RELOAD = <?php echo $useActiveReload ? 'true' : 'false'; ?>;
-var RELOAD_INTERVAL   = <?php echo $reloadInterval; ?> * 1000;
+var USE_ACTIVE_RELOAD  = <?php echo $useActiveReload ? 'true' : 'false'; ?>;
+var RELOAD_INTERVAL    = <?php echo $reloadInterval; ?> * 1000;
+var CONNECT_INTERNET   = <?php echo $connectinternet; ?>;
+var USE_POST_TWITTER   = <?php echo $useposttwitter ? 'true' : 'false'; ?>;
+var PLAYMODE           = <?php echo $playmode; ?>;
+var USE_BGV            = <?php echo ($usebgv == 1) ? 'true' : 'false'; ?>;
 
 // ---- 状態 ----
 var openCard   = null;
@@ -239,12 +346,67 @@ function statusBadge(nowplaying) {
 }
 
 // ---- カード HTML 生成 ----
+function getUsernameFromCookie() {
+    var m = document.cookie.match(/(?:^|; )YkariUsername=([^;]*)/);
+    return m ? decodeURIComponent(m[1]) : '';
+}
+
+function isPlaying(nowplaying) {
+    return nowplaying === '再生中' || nowplaying === '2';
+}
+function isWaiting(nowplaying) {
+    return nowplaying === '再生開始待ち' || nowplaying === '6';
+}
+function isUnplayed(nowplaying) {
+    return nowplaying === '未再生' || nowplaying === '1';
+}
+
 function createCardHTML(item) {
-    var meta = esc(item.singer);
-    if (item.comment) meta += ' &middot; ' + esc(item.comment);
+    var replaceLabel = (item.kind === 'カラオケ配信' && USE_BGV) ? 'BGV選択' : '曲差し替え';
+
+    // コメント欄
+    var commentHtml = '<div class="card-comment-area" data-id="' + item.id + '" data-comment="' + esc(item.comment) + '">';
+    if (item.comment) {
+        commentHtml += esc(item.comment) + ' <small>&#9998;</small>';
+    } else {
+        commentHtml += '<span class="card-comment-placeholder">コメントを追加...</span>';
+    }
+    commentHtml += '</div>';
+
+    // 曲終了 / 曲開始ボタン
+    var ctrlBtn = '';
+    if (isPlaying(item.nowplaying)) {
+        ctrlBtn = '<button class="btn btn-warning btn-xs card-ctrl-btn song-end-btn">曲終了</button>';
+    } else if (isWaiting(item.nowplaying) && item.kind === '動画') {
+        ctrlBtn = '<button class="btn btn-success btn-xs card-ctrl-btn song-start-btn">曲開始</button>';
+    }
+
+    // Tweet リンク
+    var tweetHtml = '';
+    if (CONNECT_INTERNET && USE_POST_TWITTER) {
+        var msg;
+        if (isPlaying(item.nowplaying)) {
+            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌っています';
+        } else if (isUnplayed(item.nowplaying)) {
+            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌います';
+        } else {
+            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌いました';
+        }
+        tweetHtml = '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '" target="_blank" class="card-tweet-link">&#x1F426; Tweetする</a>';
+    }
+
     return [
-        '<div class="request-card" data-id="' + item.id + '" data-songfile="' + esc(item.songfile) + '">',
+        '<div class="request-card"',
+        '     data-id="'       + item.id              + '"',
+        '     data-songfile="' + esc(item.songfile)   + '"',
+        '     data-kind="'     + esc(item.kind)       + '"',
+        '     data-nowplaying="' + esc(item.nowplaying) + '">',
         '  <div class="card-actions">',
+        '    <button class="action-btn action-replace"',
+        '            data-id="'       + item.id              + '"',
+        '            data-songfile="' + esc(item.songfile)   + '">',
+        '      <span class="action-icon">&#8635;</span>' + replaceLabel,
+        '    </button>',
         '    <button class="action-btn action-next"',
         '            data-id="'       + item.id              + '"',
         '            data-songfile="' + esc(item.songfile)   + '">',
@@ -260,9 +422,19 @@ function createCardHTML(item) {
         '    <span class="drag-handle">&#8942;</span>',
         '    <div class="card-info">',
         '      <div class="card-title">' + esc(item.display_name) + '</div>',
-        '      <div class="card-meta">'  + meta                   + '</div>',
+        '      <div class="card-meta">'  + esc(item.singer)       + '</div>',
+        '      ' + commentHtml,
+        '      ' + tweetHtml,
         '    </div>',
-        '    <div class="card-status">' + statusBadge(item.nowplaying) + '</div>',
+        '    <div class="card-right">',
+        '      <span class="status-badge-btn"',
+        '            data-id="'         + item.id              + '"',
+        '            data-songfile="'   + esc(item.songfile)   + '"',
+        '            data-nowplaying="' + esc(item.nowplaying) + '">',
+        '        ' + statusBadge(item.nowplaying),
+        '      </span>',
+        '      ' + ctrlBtn,
+        '    </div>',
         '  </div>',
         '</div>'
     ].join('\n');
@@ -343,7 +515,7 @@ function initSwipe() {
         var main = card.querySelector('.card-main');
         if (!main) return;
 
-        var OPEN_WIDTH = 160; // px：アクション幅
+        var OPEN_WIDTH = 210; // px：アクション幅（3ボタン×70px）
         var DIR_THR   = 10;  // px：方向判定閾値
         var SNAP_THR  = 60;  // px：スナップ閾値
 
@@ -459,6 +631,82 @@ function initSwipe() {
 }
 
 // ---- アクション実行 ----
+
+// 曲差し替え
+function replaceSong(id) {
+    if (openCard) closeCard(openCard);
+    location.href = 'searchreserve.php?id=' + id;
+}
+
+// 曲終了
+function songEnd() {
+    fetch('playerctrl_portal.php?songnext=1').then(loadList);
+}
+
+// 曲開始
+function songStart() {
+    fetch('playerctrl_portal.php?songstart=1').then(loadList);
+}
+
+// コメントモーダル
+var currentCommentId = null;
+function openCommentModal(id, comment) {
+    currentCommentId = id;
+    document.getElementById('comment-edit-text').value  = comment || '';
+    document.getElementById('comment-reply-text').value = '';
+    document.getElementById('comment-reply-name').value = getUsernameFromCookie();
+    $('#comment-modal').modal('show');
+}
+
+document.getElementById('comment-edit-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!currentCommentId) return;
+    var comment = document.getElementById('comment-edit-text').value;
+    fetch('update.php?id=' + currentCommentId + '&comment=' + encodeURIComponent(comment) + '&edit=edit')
+        .then(function () { $('#comment-modal').modal('hide'); loadList(); });
+});
+
+document.getElementById('comment-reply-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!currentCommentId) return;
+    var reply = document.getElementById('comment-reply-text').value;
+    var name  = document.getElementById('comment-reply-name').value;
+    fetch('commentedit.php?id=' + currentCommentId + '&addcomment=' + encodeURIComponent(reply) + '&name=' + encodeURIComponent(name) + '&add=add')
+        .then(function () { $('#comment-modal').modal('hide'); loadList(); });
+});
+
+// 再生状況変更モーダル
+var currentStatusId      = null;
+var currentStatusSongfile = null;
+function openStatusModal(id, songfile, nowplaying) {
+    currentStatusId       = id;
+    currentStatusSongfile = songfile;
+    var sel = document.getElementById('status-select');
+    // STATUS_LABEL を使って日本語ラベルに正規化してから選択
+    var label = STATUS_LABEL[String(nowplaying)] || nowplaying;
+    sel.value = label;
+    if (!sel.value) sel.value = '未再生';
+    $('#status-modal').modal('show');
+}
+
+document.getElementById('status-submit').addEventListener('click', function () {
+    if (!currentStatusId) return;
+    var val = document.getElementById('status-select').value;
+    fetch('changeplaystatus.php?id=' + currentStatusId + '&songfile=' + encodeURIComponent(currentStatusSongfile) + '&nowplaying=' + encodeURIComponent(val))
+        .then(function () { $('#status-modal').modal('hide'); loadList(); });
+});
+
+// モーダル表示中は自動リロードを抑制
+var storedAutoReload = true;
+$('#comment-modal, #status-modal').on('show.bs.modal', function () {
+    var cb = document.getElementById('autoreload');
+    storedAutoReload = cb ? cb.checked : true;
+    if (cb) cb.checked = false;
+}).on('hide.bs.modal', function () {
+    var cb = document.getElementById('autoreload');
+    if (cb) cb.checked = storedAutoReload;
+});
+
 function playNext(id, songfile) {
     fetch('delete.php?id=' + id + '&warikomi=warikomi&songfile=' + encodeURIComponent(songfile))
         .then(function () {
@@ -482,14 +730,34 @@ function deleteItem(id, songfile) {
         .catch(function (e) { console.error('deleteItem error:', e); });
 }
 
-// ---- イベント委譲（アクションボタン） ----
+// ---- イベント委譲 ----
 document.getElementById('request-list').addEventListener('click', function (e) {
+    // スワイプアクションボタン
     var btn = e.target.closest('.action-btn');
-    if (!btn) return;
-    var id       = parseInt(btn.dataset.id, 10);
-    var songfile = btn.dataset.songfile;
-    if (btn.classList.contains('action-next'))   playNext(id, songfile);
-    if (btn.classList.contains('action-delete')) deleteItem(id, songfile);
+    if (btn) {
+        var id       = parseInt(btn.dataset.id, 10);
+        var songfile = btn.dataset.songfile;
+        if (btn.classList.contains('action-replace')) replaceSong(id);
+        if (btn.classList.contains('action-next'))    playNext(id, songfile);
+        if (btn.classList.contains('action-delete'))  deleteItem(id, songfile);
+        return;
+    }
+    // コメント欄タップ
+    var ca = e.target.closest('.card-comment-area');
+    if (ca) {
+        openCommentModal(parseInt(ca.dataset.id, 10), ca.dataset.comment);
+        return;
+    }
+    // 再生状況バッジタップ
+    var sb = e.target.closest('.status-badge-btn');
+    if (sb) {
+        openStatusModal(parseInt(sb.dataset.id, 10), sb.dataset.songfile, sb.dataset.nowplaying);
+        return;
+    }
+    // 曲終了ボタン
+    if (e.target.closest('.song-end-btn'))   { songEnd();   return; }
+    // 曲開始ボタン
+    if (e.target.closest('.song-start-btn')) { songStart(); return; }
 });
 
 // ---- 更新ボタン ----
