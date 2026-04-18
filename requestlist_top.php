@@ -10,6 +10,9 @@ if (array_key_exists('easypass', $_REQUEST)) {
 if (array_key_exists('showid', $_REQUEST) && ctype_digit($_REQUEST['showid'])) {
     $params[] = 'showid=' . $_REQUEST['showid'];
 }
+if (array_key_exists('username', $_REQUEST)) {
+    $params[] = 'username=' . urlencode($_REQUEST['username']);
+}
 if (!empty($params)) {
     $target .= '?' . implode('&', $params);
 }
