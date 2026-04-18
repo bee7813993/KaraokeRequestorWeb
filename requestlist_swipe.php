@@ -208,9 +208,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 #count-select {
   width: auto;
   display: inline-block;
-  margin-left: 10px;
-  padding-left: 10px;
-  border-left: 1px solid #ccc;
+  margin-left: auto;
 }
 
 @keyframes playing-pulse {
@@ -364,6 +362,33 @@ var sortable        = null;
 var currentLimit    = REQUESTLIST_NUM; // 0 = ALL
 var shownCount      = 0;
 var totalCount      = 0;
+
+// ---- 件数選択のcookie保存/復元 ----
+function getCountCookie() {
+    var m = document.cookie.match(/(?:^|; )swipe_count_limit=([^;]*)/);
+    if (!m) return null;
+    var v = parseInt(decodeURIComponent(m[1]), 10);
+    return isNaN(v) ? null : v;
+}
+function setCountCookie(val) {
+    var d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
+    document.cookie = 'swipe_count_limit=' + encodeURIComponent(val)
+        + '; expires=' + d.toUTCString() + '; path=/';
+}
+(function applyCountCookie() {
+    if (REQUESTLIST_NUM <= 0) return; // 全件設定時はスキップ
+    var saved = getCountCookie();
+    if (saved === null) return;
+    var sel = document.getElementById('count-select');
+    if (!sel) return;
+    // 選択肢に存在する値のみ適用
+    var opts = Array.prototype.map.call(sel.options, function (o) { return parseInt(o.value, 10); });
+    if (opts.indexOf(saved) !== -1) {
+        currentLimit = saved;
+        sel.value = String(saved);
+    }
+})();
 
 // ---- ユーティリティ ----
 function esc(str) {
@@ -926,6 +951,7 @@ var countSelect = document.getElementById('count-select');
 if (countSelect) {
     countSelect.addEventListener('change', function () {
         currentLimit = parseInt(this.value, 10);
+        setCountCookie(currentLimit);
         loadList(true);
     });
 }
