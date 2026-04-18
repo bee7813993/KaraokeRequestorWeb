@@ -218,6 +218,14 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   border-left: 1px solid #ccc;
 }
 
+@keyframes playing-pulse {
+  0%, 100% { box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  40%       { box-shadow: 0 0 0 4px rgba(230,126,34,0.6); }
+}
+.highlight-playing {
+  animation: playing-pulse 0.7s ease 3;
+}
+
 #empty-msg {
   text-align: center;
   color: #aaa;
@@ -258,6 +266,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
   <div class="toolbar-left">
     <h4>現在の登録状況</h4>
     <button class="btn btn-default btn-xs" id="refresh-btn">更新</button>
+    <button class="btn btn-warning btn-xs" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
     <a href="simplelistexport_utf8.php" class="btn btn-default btn-xs">リクエストリストCSV</a>
@@ -865,8 +874,54 @@ document.getElementById('request-list').addEventListener('click', function (e) {
     if (e.target.closest('.song-start-btn')) { songStart(); return; }
 });
 
+// ---- 再生中カードを探すセレクタ ----
+var PLAYING_SEL = [
+    '[data-nowplaying="再生中"]',
+    '[data-nowplaying="2"]',
+    '[data-nowplaying="再生開始待ち"]',
+    '[data-nowplaying="6"]'
+].join(',');
+
+function scrollToPlayingCard() {
+    var card = document.querySelector(PLAYING_SEL);
+    if (!card) return false;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove('highlight-playing');
+    // リフロー強制してアニメーションをリセット
+    void card.offsetWidth;
+    card.classList.add('highlight-playing');
+    card.addEventListener('animationend', function () {
+        card.classList.remove('highlight-playing');
+    }, { once: true });
+    return true;
+}
+
+function goToPlaying() {
+    if (scrollToPlayingCard()) return;
+    // 表示されていない場合は全件ロードして探す
+    var prevLimit = currentLimit;
+    currentLimit = 0;
+    var countSel = document.getElementById('count-select');
+    if (countSel) countSel.value = '0';
+    fetch(buildUrl(0, 0))
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
+        .then(function (data) {
+            renderList(data.items, data.total, data.has_more);
+            if (!scrollToPlayingCard()) {
+                // 再生中なし：元の件数に戻す
+                currentLimit = prevLimit;
+                if (countSel) countSel.value = String(prevLimit);
+                loadList(true);
+            }
+        })
+        .catch(function (e) { console.error('goToPlaying error:', e); });
+}
+
 // ---- 更新ボタン ----
 document.getElementById('refresh-btn').addEventListener('click', function () { loadList(true); });
+
+// ---- 再生中へボタン ----
+document.getElementById('goto-playing-btn').addEventListener('click', goToPlaying);
 
 // ---- もっと見るボタン ----
 document.getElementById('load-more-btn').addEventListener('click', function () { loadList(false); });
