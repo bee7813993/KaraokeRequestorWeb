@@ -261,7 +261,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
       <option value="0">ALL</option>
     </select>
 <?php endif; ?>
-    <a href="simplelistexport_utf8.php" class="btn btn-default btn-xs">CSV</a>
+    <a href="simplelistexport_utf8.php" class="btn btn-default btn-xs">リクエストリストCSV</a>
     <a href="simplelist.php" class="btn btn-default btn-xs">シンプルリスト</a>
   </div>
 </div>
