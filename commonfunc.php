@@ -1199,16 +1199,12 @@ EOD;
 
 
 
-    $requestlist_page = 'requestlist_only.php';
-    if(array_key_exists('usenewrequestlist', $config_ini) && $config_ini['usenewrequestlist'] == 1){
-        $requestlist_page = 'requestlist_swipe.php';
-    }
     print '     <li ';
-    if($page == 'requestlist_only.php' || $page == 'requestlist_swipe.php')
+    if($page == 'requestlist_only.php' || $page == 'requestlist_swipe.php' || $page == 'requestlist_top.php')
     {
         print 'class="active" ';
     }
-    print '><a href="'.$prefix.$requestlist_page.'">予約一覧 </a></li>';
+    print '><a href="'.$prefix.'requestlist_top.php">予約一覧 </a></li>';
 //    print '     <li ';
     print '     <li class="dropdown "';
     if($page == 'searchreserve.php')

@@ -159,5 +159,5 @@ if(strlen($updatestring) > 0){
 
 $db = null;
 
-header('Location: requestlist_only.php');
+header('Location: requestlist_top.php');
 exit;

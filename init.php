@@ -338,7 +338,7 @@ print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'>
 ?>
   </p>
 
-  <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
+  <a href="requestlist_top.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
 </div>
 
 <hr />

@@ -84,7 +84,7 @@ $db = null;
 
 print_meta_header();
 if($addcommentsuccessflg == 1){
-  print '<META http-equiv="refresh" content="1; url=requestlist_only.php">';
+  print '<META http-equiv="refresh" content="1; url=requestlist_top.php">';
 }
 ?>
 <link type="text/css" rel="stylesheet" href="css/style.css" />

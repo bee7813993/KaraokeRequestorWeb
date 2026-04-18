@@ -314,7 +314,7 @@ $priorities = load_sort_priorities($priority_file);
   <p>
     <a href="init.php" class="btn btn-default">設定画面に戻る</a>
     &nbsp;
-    <a href="requestlist_only.php" class="btn btn-default">トップに戻る</a>
+    <a href="requestlist_top.php" class="btn btn-default">トップに戻る</a>
   </p>
 </div>
 </body>

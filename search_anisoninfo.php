@@ -146,7 +146,7 @@ if(!isset($l_url)  ) {
 通常検索に戻る
 </button> 
 
-<button type="button" onclick="location.href='requestlist_only.php' " class="btn btn-default " >
+<button type="button" onclick="location.href='requestlist_top.php' " class="btn btn-default " >
 トップに戻る
 </button> 
 </body>

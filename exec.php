@@ -243,7 +243,7 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUE
    print<<<EOT
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<META http-equiv="refresh" content="1; url=requestlist_only.php" />
+<META http-equiv="refresh" content="1; url=requestlist_top.php" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>DB登録中</title>
 </head>
@@ -254,7 +254,7 @@ EOT;
    print<<<EOT
 </pre>
 
-<a href="requestlist_only.php" > リクエストページに戻る <a><br>
+<a href="requestlist_top.php" > リクエストページに戻る <a><br>
 EOT;
     $sql = "SELECT * FROM requesttable ORDER BY id DESC";
     if(!empty($DEBUG)){

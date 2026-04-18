@@ -85,6 +85,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .action-replace { background: #27ae60; }
 .action-next    { background: #e67e22; }
 .action-delete  { background: #e74c3c; }
+.action-change  { background: #7f8c8d; }
 .action-icon    { font-size: 18px; }
 
 /* カード本体（スワイプで左にスライド） */
@@ -102,6 +103,9 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 .request-card.swipe-open .card-main {
   transform: translateX(-240px);
+}
+.request-card.admin-card.swipe-open .card-main {
+  transform: translateX(-320px);
 }
 
 /* ドラッグハンドル */
@@ -378,16 +382,6 @@ function createCardHTML(item) {
     }
     commentHtml += '</div>';
 
-    // 管理者用「変更」ボタン
-    var changeBtn = '';
-    if (IS_ADMIN) {
-        changeBtn = '<form method="post" action="change.php" style="margin:0">'
-            + '<input type="hidden" name="id" value="' + item.id + '">'
-            + '<input type="hidden" name="songfile" value="' + esc(item.songfile) + '">'
-            + '<button type="submit" class="btn btn-default btn-xs card-ctrl-btn">変更</button>'
-            + '</form>';
-    }
-
     // 曲終了 / 曲開始ボタン
     var ctrlBtn = '';
     if (isPlaying(item.nowplaying)) {
@@ -410,8 +404,16 @@ function createCardHTML(item) {
         tweetHtml = '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '" target="_blank" class="card-tweet-link">&#x1F426; Tweetする</a>';
     }
 
+    var adminChangeBtnHtml = IS_ADMIN ? [
+        '    <button class="action-btn action-change"',
+        '            data-id="'       + item.id              + '"',
+        '            data-songfile="' + esc(item.songfile)   + '">',
+        '      <span class="action-icon">&#9998;</span>変更',
+        '    </button>'
+    ].join('\n') : '';
+
     return [
-        '<div class="request-card"',
+        '<div class="request-card' + (IS_ADMIN ? ' admin-card' : '') + '"',
         '     data-id="'       + item.id              + '"',
         '     data-songfile="' + esc(item.songfile)   + '"',
         '     data-kind="'     + esc(item.kind)       + '"',
@@ -432,6 +434,7 @@ function createCardHTML(item) {
         '            data-songfile="' + esc(item.songfile)   + '">',
         '      <span class="action-icon">&#10005;</span>削除',
         '    </button>',
+        adminChangeBtnHtml,
         '  </div>',
         '  <div class="card-main">',
         '    <span class="drag-handle">&#8942;</span>',
@@ -449,7 +452,6 @@ function createCardHTML(item) {
         '        ' + statusBadge(item.nowplaying),
         '      </span>',
         '      ' + ctrlBtn,
-        '      ' + changeBtn,
         '    </div>',
         '  </div>',
         '</div>'
@@ -531,7 +533,7 @@ function initSwipe() {
         var main = card.querySelector('.card-main');
         if (!main) return;
 
-        var OPEN_WIDTH = 240; // px：アクション幅（3ボタン×80px）
+        var OPEN_WIDTH = card.classList.contains('admin-card') ? 320 : 240; // 管理者は4ボタン×80px
         var DIR_THR   = 10;  // px：方向判定閾値
         var SNAP_THR  = 60;  // px：スナップ閾値
 
@@ -654,6 +656,22 @@ function replaceSong(id) {
     location.href = 'searchreserve.php?id=' + id;
 }
 
+// 管理者用変更
+function changeItem(id, songfile) {
+    if (openCard) closeCard(openCard);
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'change.php';
+    var fid = document.createElement('input');
+    fid.type = 'hidden'; fid.name = 'id'; fid.value = id;
+    var fsong = document.createElement('input');
+    fsong.type = 'hidden'; fsong.name = 'songfile'; fsong.value = songfile;
+    form.appendChild(fid);
+    form.appendChild(fsong);
+    document.body.appendChild(form);
+    form.submit();
+}
+
 // 曲終了
 function songEnd() {
     fetch('playerctrl_portal.php?songnext=1').then(loadList);
@@ -756,6 +774,7 @@ document.getElementById('request-list').addEventListener('click', function (e) {
         if (btn.classList.contains('action-replace')) replaceSong(id);
         if (btn.classList.contains('action-next'))    playNext(id, songfile);
         if (btn.classList.contains('action-delete'))  deleteItem(id, songfile);
+        if (btn.classList.contains('action-change'))  changeItem(id, songfile);
         return;
     }
     // コメント欄タップ
