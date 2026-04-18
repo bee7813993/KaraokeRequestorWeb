@@ -190,20 +190,15 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 
 /* ヘッダ行 */
 .list-toolbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
   margin-bottom: 4px;
 }
 .toolbar-left {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 1;
-  min-width: 0;
+  margin-bottom: 6px;
 }
-.toolbar-left h4 { margin: 0; white-space: nowrap; }
+.toolbar-left h4 { margin: 0; flex: 1; }
 .toolbar-right {
   display: flex;
   align-items: center;
