@@ -6,11 +6,20 @@ $easyauth->do_eashauthcheck();
 
 header('Content-Type: application/json; charset=utf-8');
 
+$limit  = isset($_GET['limit'])  && ctype_digit($_GET['limit'])  ? (int)$_GET['limit']  : 0;
+$offset = isset($_GET['offset']) && ctype_digit($_GET['offset']) ? (int)$_GET['offset'] : 0;
+
 try {
-    $stmt = $db->prepare(
-        "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret " .
-        "FROM requesttable ORDER BY reqorder DESC"
-    );
+    $total = (int)$db->query("SELECT COUNT(*) FROM requesttable")->fetchColumn();
+
+    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret FROM requesttable ORDER BY reqorder DESC";
+    if ($limit > 0) {
+        $stmt = $db->prepare($sql . " LIMIT :limit OFFSET :offset");
+        $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    } else {
+        $stmt = $db->prepare($sql);
+    }
     $stmt->execute();
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $stmt->closeCursor();
@@ -22,7 +31,7 @@ try {
 
 $items = [];
 foreach ($rows as $row) {
-    $songfile = $row['songfile'];
+    $songfile     = $row['songfile'];
     $display_name = $songfile;
     if (!empty($row['secret']) && $row['secret'] == 1) {
         $display_name = mb_substr($songfile, 0, 1) . '***';
@@ -39,4 +48,10 @@ foreach ($rows as $row) {
     ];
 }
 
-echo json_encode($items, JSON_UNESCAPED_UNICODE);
+$has_more = ($limit > 0) && (($offset + count($items)) < $total);
+
+echo json_encode([
+    'items'    => $items,
+    'total'    => $total,
+    'has_more' => $has_more,
+], JSON_UNESCAPED_UNICODE);

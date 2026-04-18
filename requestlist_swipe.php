@@ -23,6 +23,7 @@ $useposttwitter  = configbool('useposttwitter', true);
 $playmode        = isset($config_ini['playmode']) ? (int)$config_ini['playmode'] : 3;
 $usebgv          = isset($config_ini['usebgv']) ? (int)$config_ini['usebgv'] : 2;
 $isAdmin         = ($user === 'admin');
+$requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['requestlist_num'] : 10;
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -188,18 +189,38 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 
 /* ヘッダ行 */
-.list-header {
+.list-toolbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-bottom: 4px;
 }
-.list-header h4 { margin: 0; }
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.toolbar-left h4 { margin: 0; white-space: nowrap; }
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+#count-select { width: auto; display: inline-block; }
 
 #empty-msg {
   text-align: center;
   color: #aaa;
   padding: 30px 0;
   font-size: 15px;
+}
+#load-more-wrap {
+  text-align: center;
+  padding: 12px 0 4px;
 }
 </style>
 </head>
@@ -227,21 +248,29 @@ if (!empty($config_ini['noticeof_listpage'])) {
 
 <hr>
 
-<div class="list-header">
-  <h4>現在の登録状況</h4>
-  &nbsp;
-  <button class="btn btn-default btn-xs" id="refresh-btn">更新</button>
+<div class="list-toolbar">
+  <div class="toolbar-left">
+    <h4>現在の登録状況</h4>
+    <button class="btn btn-default btn-xs" id="refresh-btn">更新</button>
+  </div>
+  <div class="toolbar-right">
+<?php if ($requestlist_num > 0): ?>
+    <select id="count-select" class="form-control input-sm">
+      <option value="<?php echo $requestlist_num; ?>"><?php echo $requestlist_num; ?>件</option>
+      <option value="<?php echo $requestlist_num * 2; ?>"><?php echo $requestlist_num * 2; ?>件</option>
+      <option value="0">ALL</option>
+    </select>
+<?php endif; ?>
+    <a href="simplelistexport_utf8.php" class="btn btn-default btn-xs">CSV</a>
+    <a href="simplelist.php" class="btn btn-default btn-xs">シンプルリスト</a>
+  </div>
 </div>
 
 <div id="request-list"></div>
+<div id="load-more-wrap" style="display:none">
+  <button class="btn btn-default" id="load-more-btn">もっと見る</button>
+</div>
 <div id="empty-msg" style="display:none">リクエストはありません</div>
-
-<hr>
-<form method="get" action="simplelistexport_utf8.php">
-  <input type="submit" class="btn btn-primary" value="リクエストリスト(CSV)のダウンロード">
-  &nbsp;
-  <a href="simplelist.php" class="btn btn-primary">シンプルリクエストリスト表示(コピペ・公開用)</a>
-</form>
 
 </div><!-- /.container -->
 
@@ -316,11 +345,15 @@ var USE_POST_TWITTER   = <?php echo $useposttwitter ? 'true' : 'false'; ?>;
 var PLAYMODE           = <?php echo $playmode; ?>;
 var USE_BGV            = <?php echo ($usebgv == 1) ? 'true' : 'false'; ?>;
 var IS_ADMIN           = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+var REQUESTLIST_NUM    = <?php echo $requestlist_num; ?>;
 
 // ---- 状態 ----
-var openCard   = null;
-var isDragging = false;
-var sortable   = null;
+var openCard        = null;
+var isDragging      = false;
+var sortable        = null;
+var currentLimit    = REQUESTLIST_NUM; // 0 = ALL
+var shownCount      = 0;
+var totalCount      = 0;
 
 // ---- ユーティリティ ----
 function esc(str) {
@@ -459,26 +492,56 @@ function createCardHTML(item) {
 }
 
 // ---- データ読み込みと描画 ----
-function loadList() {
-    fetch('requestlist_swipe_json.php')
-        .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
-        .then(function (items) { renderList(items); })
-        .catch(function (e)   { console.error('loadList error:', e); });
+function buildUrl(limit, offset) {
+    return 'requestlist_swipe_json.php?limit=' + limit + '&offset=' + offset;
 }
 
-function renderList(items) {
-    var container = document.getElementById('request-list');
-    var emptyMsg  = document.getElementById('empty-msg');
+// reset=true: 最初から描画し直す / reset=false: 追加読み込み
+function loadList(reset) {
+    if (reset === undefined || reset === true) {
+        var limit  = currentLimit;
+        var offset = 0;
+        fetch(buildUrl(limit, offset))
+            .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
+            .then(function (data) { renderList(data.items, data.total, data.has_more); })
+            .catch(function (e)   { console.error('loadList error:', e); });
+    } else {
+        // もっと見る: 現在表示分をまとめて再取得して全置き換え
+        var newLimit = (currentLimit > 0) ? shownCount + currentLimit : 0;
+        fetch(buildUrl(newLimit, 0))
+            .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
+            .then(function (data) { renderList(data.items, data.total, data.has_more); })
+            .catch(function (e)   { console.error('loadMore error:', e); });
+    }
+}
 
-    if (items.length === 0) {
+function renderList(items, total, hasMore) {
+    var container   = document.getElementById('request-list');
+    var emptyMsg    = document.getElementById('empty-msg');
+    var loadMoreWrap = document.getElementById('load-more-wrap');
+
+    totalCount = total || 0;
+
+    if (items.length === 0 && totalCount === 0) {
         container.innerHTML = '';
         emptyMsg.style.display = '';
+        loadMoreWrap.style.display = 'none';
         if (sortable) { sortable.destroy(); sortable = null; }
         return;
     }
 
     emptyMsg.style.display = 'none';
+    shownCount = items.length;
     container.innerHTML = items.map(createCardHTML).join('');
+
+    var remaining = totalCount - shownCount;
+    if (hasMore && remaining > 0) {
+        document.getElementById('load-more-btn').textContent = 'もっと見る（残り' + remaining + '件）';
+        loadMoreWrap.style.display = '';
+    } else {
+        loadMoreWrap.style.display = 'none';
+    }
+
     initSortable();
     initSwipe();
 }
@@ -529,7 +592,8 @@ function closeCard(card) {
 }
 
 function initSwipe() {
-    document.querySelectorAll('.request-card').forEach(function (card) {
+    document.querySelectorAll('.request-card:not([data-swipe])').forEach(function (card) {
+        card.setAttribute('data-swipe', '1');
         var main = card.querySelector('.card-main');
         if (!main) return;
 
@@ -796,7 +860,19 @@ document.getElementById('request-list').addEventListener('click', function (e) {
 });
 
 // ---- 更新ボタン ----
-document.getElementById('refresh-btn').addEventListener('click', loadList);
+document.getElementById('refresh-btn').addEventListener('click', function () { loadList(true); });
+
+// ---- もっと見るボタン ----
+document.getElementById('load-more-btn').addEventListener('click', function () { loadList(false); });
+
+// ---- 件数選択 ----
+var countSelect = document.getElementById('count-select');
+if (countSelect) {
+    countSelect.addEventListener('change', function () {
+        currentLimit = parseInt(this.value, 10);
+        loadList(true);
+    });
+}
 
 // ---- 自動リロード ----
 function shouldAutoReload() {
@@ -813,7 +889,7 @@ function initAutoReload() {
             // フォールバック：タイマー
             if (RELOAD_INTERVAL > 0) {
                 setInterval(function () {
-                    if (!isDragging && shouldAutoReload()) loadList();
+                    if (!isDragging && shouldAutoReload()) reloadCurrent();
                 }, RELOAD_INTERVAL);
             }
             return;
@@ -824,19 +900,28 @@ function initAutoReload() {
             if (e.data === 'Bye') { source.close(); return; }
             var nowkey = e.data;
             if (nowkey && nowkey !== 'None' && lastkey !== nowkey) {
-                if (!isDragging && shouldAutoReload()) loadList();
+                if (!isDragging && shouldAutoReload()) reloadCurrent();
                 lastkey = nowkey;
             }
         };
     } else {
         setInterval(function () {
-            if (!isDragging && shouldAutoReload()) loadList();
+            if (!isDragging && shouldAutoReload()) reloadCurrent();
         }, RELOAD_INTERVAL);
     }
 }
 
+// auto-reload: 現在表示中の件数で再取得（追加ロード分も含む）
+function reloadCurrent() {
+    var limit = (currentLimit > 0 && shownCount > 0) ? shownCount : currentLimit;
+    fetch(buildUrl(limit, 0))
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
+        .then(function (data) { renderList(data.items, data.total, data.has_more); })
+        .catch(function (e)   { console.error('reload error:', e); });
+}
+
 // ---- 初期化 ----
-loadList();
+loadList(true);
 initAutoReload();
 </script>
 </body>
