@@ -116,7 +116,7 @@ try{
 
 
 ?>
-<a href="../requestlist_only.php" > リクエストページに戻る <a><br>
+<a href="../requestlist_top.php" > リクエストページに戻る <a><br>
 
 </body>
 </html>

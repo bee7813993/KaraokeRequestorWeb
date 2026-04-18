@@ -338,7 +338,7 @@ print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'>
 ?>
   </p>
 
-  <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
+  <a href="requestlist_top.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
 </div>
 
 <hr />
@@ -524,6 +524,29 @@ print ' value="10" ';
   <label>
   <a href="simplelist.php" > 公開用シンプルリクエストへのリンク </a>
   </label>
+  </div>
+
+<!---- スワイプ操作対応リクエスト一覧UI ----->
+  <?php
+      $usenewrequestlist = false;
+      if(array_key_exists("usenewrequestlist",$config_ini)){
+          if($config_ini["usenewrequestlist"] == 1 ){
+             $usenewrequestlist = true;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <h4 class="radio control-label"> スワイプ操作対応リクエスト一覧UI </h4>
+    <label class="radio control-label"><small>ドラッグハンドルで並べ替え・左スワイプでアクションメニューを表示するリクエスト一覧画面を使用します。</small></label>
+    <label class="radio-inline">
+      <input type="radio" name="usenewrequestlist" value="1" <?php print ($usenewrequestlist)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usenewrequestlist" value="2" <?php print (!$usenewrequestlist)?'checked':' ' ?> /> 使用しない
+    </label>
+    <label>
+      <a href="requestlist_swipe.php"> スワイプUIリクエスト一覧へのリンク </a>
+    </label>
   </div>
 
 <!---- ページ背景色設定 ----->

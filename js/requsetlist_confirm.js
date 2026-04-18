@@ -47,9 +47,9 @@ $(document).ready(function()
             success : function( data ) {
                 try{
                   newid = JSON.parse(data);
-                  window.location.href = 'requestlist_only.php?username=' + newname + '&showid=' + newid.newid;
+                  window.location.href = 'requestlist_top.php?username=' + newname + '&showid=' + newid.newid;
                 } catch(e){
-                  window.location.href = 'requestlist_only.php?username=' + newname;
+                  window.location.href = 'requestlist_top.php?username=' + newname;
                 }
             },
             // 応答後

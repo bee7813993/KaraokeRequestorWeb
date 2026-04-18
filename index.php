@@ -1,10 +1,8 @@
 <?php
-$password = false;
-$locationurl='requestlist_only.php';
-if(array_key_exists("easypass", $_REQUEST)){
-    $password = $_REQUEST["easypass"];
-    $locationurl = $locationurl.'?easypass='.$password;
+$locationurl = 'requestlist_top.php';
+if (array_key_exists("easypass", $_REQUEST)) {
+    $locationurl .= '?easypass=' . urlencode($_REQUEST["easypass"]);
 }
- header('location: '.$locationurl);
- exit();
+header('location: ' . $locationurl);
+exit();
 ?>
