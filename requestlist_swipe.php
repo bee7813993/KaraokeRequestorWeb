@@ -210,7 +210,13 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   gap: 6px;
   flex-wrap: wrap;
 }
-#count-select { width: auto; display: inline-block; }
+#count-select {
+  width: auto;
+  display: inline-block;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #ccc;
+}
 
 #empty-msg {
   text-align: center;
@@ -254,6 +260,8 @@ if (!empty($config_ini['noticeof_listpage'])) {
     <button class="btn btn-default btn-xs" id="refresh-btn">更新</button>
   </div>
   <div class="toolbar-right">
+    <a href="simplelistexport_utf8.php" class="btn btn-default btn-xs">リクエストリストCSV</a>
+    <a href="simplelist.php" class="btn btn-default btn-xs">シンプルリスト</a>
 <?php if ($requestlist_num > 0): ?>
     <select id="count-select" class="form-control input-sm">
       <option value="<?php echo $requestlist_num; ?>"><?php echo $requestlist_num; ?>件</option>
@@ -261,8 +269,6 @@ if (!empty($config_ini['noticeof_listpage'])) {
       <option value="0">ALL</option>
     </select>
 <?php endif; ?>
-    <a href="simplelistexport_utf8.php" class="btn btn-default btn-xs">リクエストリストCSV</a>
-    <a href="simplelist.php" class="btn btn-default btn-xs">シンプルリスト</a>
   </div>
 </div>
 
