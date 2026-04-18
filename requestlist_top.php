@@ -7,6 +7,9 @@ $params = [];
 if (array_key_exists('easypass', $_REQUEST)) {
     $params[] = 'easypass=' . urlencode($_REQUEST['easypass']);
 }
+if (array_key_exists('showid', $_REQUEST) && ctype_digit($_REQUEST['showid'])) {
+    $params[] = 'showid=' . $_REQUEST['showid'];
+}
 if (!empty($params)) {
     $target .= '?' . implode('&', $params);
 }

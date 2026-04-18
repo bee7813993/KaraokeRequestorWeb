@@ -218,6 +218,13 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .highlight-playing {
   animation: playing-pulse 0.7s ease 3;
 }
+@keyframes new-item-pulse {
+  0%, 100% { box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+  40%       { box-shadow: 0 0 0 4px rgba(39,174,96,0.7); }
+}
+.highlight-new {
+  animation: new-item-pulse 0.7s ease 4;
+}
 
 #empty-msg {
   text-align: center;
@@ -579,6 +586,10 @@ function renderList(items, total, hasMore) {
 
     initSortable();
     initSwipe();
+
+    var cb = afterRenderCallback;
+    afterRenderCallback = null;
+    if (cb) cb();
 }
 
 // ---- SortableJS（ドラッグ並べ替え） ----
@@ -894,6 +905,17 @@ document.getElementById('request-list').addEventListener('click', function (e) {
     if (e.target.closest('.song-start-btn')) { songStart(); return; }
 });
 
+// ---- カードハイライト共通処理 ----
+function highlightCard(card, cssClass) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove(cssClass);
+    void card.offsetWidth; // アニメーションリセット
+    card.classList.add(cssClass);
+    card.addEventListener('animationend', function () {
+        card.classList.remove(cssClass);
+    }, { once: true });
+}
+
 // ---- 再生中カードを探すセレクタ ----
 var PLAYING_SEL = [
     '[data-nowplaying="再生中"]',
@@ -905,15 +927,36 @@ var PLAYING_SEL = [
 function scrollToPlayingCard() {
     var card = document.querySelector(PLAYING_SEL);
     if (!card) return false;
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    card.classList.remove('highlight-playing');
-    // リフロー強制してアニメーションをリセット
-    void card.offsetWidth;
-    card.classList.add('highlight-playing');
-    card.addEventListener('animationend', function () {
-        card.classList.remove('highlight-playing');
-    }, { once: true });
+    highlightCard(card, 'highlight-playing');
     return true;
+}
+
+// ---- 新規追加アイテムへのスクロール ----
+var SHOW_ID = (function () {
+    var m = window.location.search.match(/[?&]showid=(\d+)/);
+    return m ? parseInt(m[1], 10) : null;
+})();
+
+var afterRenderCallback = null;
+
+function scrollToShowId() {
+    var card = document.querySelector('.request-card[data-id="' + SHOW_ID + '"]');
+    if (card) {
+        highlightCard(card, 'highlight-new');
+        return;
+    }
+    // ページ外の場合は全件ロードして探す
+    currentLimit = 0;
+    var countSel = document.getElementById('count-select');
+    if (countSel) countSel.value = '0';
+    fetch(buildUrl(0, 0))
+        .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
+        .then(function (data) {
+            renderList(data.items, data.total, data.has_more);
+            var c = document.querySelector('.request-card[data-id="' + SHOW_ID + '"]');
+            if (c) highlightCard(c, 'highlight-new');
+        })
+        .catch(function (e) { console.error('scrollToShowId error:', e); });
 }
 
 function goToPlaying() {
@@ -1003,6 +1046,7 @@ function reloadCurrent() {
 }
 
 // ---- 初期化 ----
+if (SHOW_ID) afterRenderCallback = scrollToShowId;
 loadList(true);
 initAutoReload();
 </script>
