@@ -231,7 +231,8 @@ function updatedb($db){
                   array ( "name" => "loop" , "type" =>  "text") ,
                   array ( "name" => "keychange" , "type" =>  "INTEGER default 0") ,
                   array ( "name" => "track" , "type" =>  "INTEGER default 0") ,
-                  array ( "name" => "pause" , "type" =>  "INTEGER default 0") 
+                  array ( "name" => "pause" , "type" =>  "INTEGER default 0") ,
+                  array ( "name" => "audiodelay" , "type" =>  "INTEGER default 0")
                   );
     /* 現在の項目一覧取得 */
     try {
@@ -294,7 +295,8 @@ $sql = "create table IF NOT EXISTS requesttable (
  loop INTEGER,
  keychange INTEGER default 0,
  track INTEGER default 0,
- pause INTEGER default 0
+ pause INTEGER default 0,
+ audiodelay INTEGER default 0
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){

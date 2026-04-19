@@ -1019,7 +1019,14 @@ function start_song($db,$id,$addplaytimes = 0){
             if(array_key_exists("keychange" , $row)){
                 mpc_keychange($row["keychange"]);
             }
-echo "\n".date("H時i分s秒" )."sleep ".__LINE__;
+            if(array_key_exists("audiodelay" , $row) && intval($row["audiodelay"]) !== 0){
+                $delay_steps = intval($row["audiodelay"]) / 100;
+                if($delay_steps > 0){
+                    for($di = 0; $di < $delay_steps; $di++) delay_plus100_mpc();
+                } else {
+                    for($di = 0; $di < abs($delay_steps); $di++) delay_minus100_mpc();
+                }
+            }
 
             /* track change */
             // BGVモードではmuteにする。
@@ -1170,7 +1177,6 @@ function runningcheck_mpc($db,$id,$playerchecktimes,$commenturl){
        $totaltime = $totaltime_a[0]*60*60 + $totaltime_a[1]*60 + $totaltime_a[2];
        //★ 終了時間を丁度に変更
        if($startonce && ( $playtime == $totaltime ) ){  //★
-echo "\n".date("H時i分s秒" )."sleep ".__LINE__;
            sleep(2);
            commentpost_v4("rqlst", "1", $commenturl);  //★
            break;  //★
@@ -1181,7 +1187,6 @@ echo "\n".date("H時i分s秒" )."sleep ".__LINE__;
        workcheck_pfwd();
        workcheck_andrestartxampp();
 
-echo "\n".date("H時i分s秒" )."sleep ".__LINE__;
        sleep(1.0);
    }
 }

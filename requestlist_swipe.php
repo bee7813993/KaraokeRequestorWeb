@@ -487,6 +487,24 @@ function createCardHTML(item) {
         '    </button>'
     ].join('\n') : '';
 
+    // トラック・キー・音ズレ（デフォルト値と異なる場合のみ表示）
+    var extras = [];
+    var track = parseInt(item.track, 10);
+    var keychange = parseInt(item.keychange, 10);
+    var audiodelay = parseInt(item.audiodelay, 10);
+    if (track > 0) {
+        extras.push('<span class="card-label">トラック：</span>' + (track + 1));
+    }
+    if (keychange !== 0) {
+        extras.push('<span class="card-label">キー：</span>' + (keychange > 0 ? '+' : '') + keychange);
+    }
+    if (audiodelay !== 0) {
+        extras.push('<span class="card-label">音ズレ：</span>' + (audiodelay > 0 ? '+' : '') + audiodelay + 'ms');
+    }
+    var extraMetaHtml = extras.length > 0
+        ? '<div class="card-meta" style="font-size:12px;">' + extras.join('　') + '</div>'
+        : '';
+
     return [
         '<div class="request-card' + (IS_ADMIN ? ' admin-card' : '') + '"',
         '     data-id="'       + item.id              + '"',
@@ -516,6 +534,7 @@ function createCardHTML(item) {
         '    <div class="card-info">',
         '      <div class="card-title">' + esc(item.display_name) + '</div>',
         '      <div class="card-meta"><span class="card-label">登録者：</span>' + esc(item.singer) + '　<span class="card-label">再生方法：</span>' + esc(item.kind) + '</div>',
+        '      ' + extraMetaHtml,
         '      ' + commentHtml,
         '      ' + tweetHtml,
         '    </div>',

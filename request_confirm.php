@@ -527,6 +527,7 @@ EOT;
 EOT;
 }
 
+$videodetails = array();
 if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
     $videodetails = getvideodetails($fullpath_utf8);
     if (!empty($videodetails)) {
@@ -555,8 +556,74 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
     }
 }
 
+// 制作者別音ズレデフォルト値を取得（ListerDB の found_worker と完全一致で判定）
+$audiodelay_init = 0;
+if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
+    $delay_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'creator_audiodelay.json';
+    if (file_exists($delay_file)) {
+        $delay_rules = json_decode(file_get_contents($delay_file), true);
+        if (is_array($delay_rules) && !empty($delay_rules)) {
+            // ListerDB から found_worker を取得
+            $found_worker = '';
+            if (!empty($lister_dbpath)) {
+                require_once('function_search_listerdb.php');
+                $lister = new ListerDB();
+                $lister->listerdbfile = $lister_dbpath;
+                $listerdb = $lister->initdb();
+                if ($listerdb) {
+                    $songbasename = basename($fullpath_utf8);
+                    $sql = 'SELECT found_worker FROM t_found WHERE found_path LIKE '
+                         . $listerdb->quote('%' . $songbasename . '%') . ' LIMIT 1';
+                    $rows = $lister->select($sql);
+                    if (!empty($rows) && isset($rows[0]['found_worker'])) {
+                        $found_worker = $rows[0]['found_worker'];
+                    }
+                }
+            }
+            if ($found_worker !== '') {
+                $vd_fps = isset($videodetails['frame_rate']) ? floatval($videodetails['frame_rate']) : null;
+                foreach ($delay_rules as $drule) {
+                    $dk = isset($drule['keyword']) ? $drule['keyword'] : '';
+                    if ($dk === '') continue;
+                    if ($found_worker !== $dk) continue;
+                    if (!empty($drule['fps']) && $vd_fps !== null) {
+                        $rule_fps  = floatval($drule['fps']);
+                        $fps_cond  = isset($drule['fps_cond']) ? $drule['fps_cond'] : '以下';
+                        if ($fps_cond === '以上') {
+                            if ($vd_fps < $rule_fps) continue;
+                        } else {
+                            if ($vd_fps > $rule_fps) continue;
+                        }
+                    }
+                    $audiodelay_init = isset($drule['delay']) ? intval($drule['delay']) : 0;
+                    break;
+                }
+            }
+        }
+    }
+}
 ?>
-
+<?php if ($shop_karaoke != 1 && $filetype == 1): ?>
+<div style="margin-top:8px; margin-bottom:4px; color:#888;">
+  <small>音ズレ補正：
+  <button type="button" class="btn btn-default btn-xs" onclick="changeAudioDelay(-100)">-100ms</button>
+  <span id="audiodelay_disp" style="display:inline-block; min-width:65px; text-align:center;"><?php echo intval($audiodelay_init); ?> ms</span>
+  <button type="button" class="btn btn-default btn-xs" onclick="changeAudioDelay(100)">+100ms</button>
+  <input type="hidden" name="audiodelay" id="audiodelay_val" value="<?php echo intval($audiodelay_init); ?>" />
+  </small>
+</div>
+<script>
+function changeAudioDelay(delta){
+  var inp = document.getElementById('audiodelay_val');
+  var disp = document.getElementById('audiodelay_disp');
+  var v = parseInt(inp.value, 10) + delta;
+  if(v < -9900) v = -9900;
+  if(v > 9900) v = 9900;
+  inp.value = v;
+  disp.textContent = v + ' ms';
+}
+</script>
+<?php endif; ?>
 
 <!-----
 <select name="kind">

@@ -12,7 +12,7 @@ $offset = isset($_GET['offset']) && ctype_digit($_GET['offset']) ? (int)$_GET['o
 try {
     $total = (int)$db->query("SELECT COUNT(*) FROM requesttable")->fetchColumn();
 
-    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret FROM requesttable ORDER BY reqorder DESC";
+    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret, track, keychange, audiodelay FROM requesttable ORDER BY reqorder DESC";
     if ($limit > 0) {
         $stmt = $db->prepare($sql . " LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
@@ -45,6 +45,9 @@ foreach ($rows as $row) {
         'comment'      => $row['comment'] ?? '',
         'kind'         => $row['kind'] ?? '',
         'nowplaying'   => !empty($row['nowplaying']) ? $row['nowplaying'] : '1',
+        'track'        => (int)($row['track']      ?? 0),
+        'keychange'    => (int)($row['keychange']   ?? 0),
+        'audiodelay'   => (int)($row['audiodelay']  ?? 0),
     ];
 }
 

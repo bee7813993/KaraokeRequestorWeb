@@ -80,6 +80,14 @@ if(array_key_exists("pause", $_REQUEST)) {
     }
 }
 
+$l_audiodelay = 0;
+if(array_key_exists("audiodelay", $_REQUEST)) {
+    $l_audiodelay = intval($_REQUEST["audiodelay"]);
+    if($l_audiodelay < -9900 || $l_audiodelay > 9900){
+        $l_audiodelay = 0;
+    }
+}
+
 
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
@@ -145,7 +153,7 @@ if($request[0]['nowplaying'] === '再生中' || $request[0]['nowplaying'] === '�
 }
 
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause where id = :selectid";
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause, audiodelay=:audiodelay where id = :selectid";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -166,11 +174,12 @@ $arg = array(
 	':keychange' => $l_keychange,
 	':track' => $l_track,
 	':pause' => $l_pause,
+	':audiodelay' => $l_audiodelay,
 	':selectid' => (int)$selectid
 	);
 }else {
   try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track, pause) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track, :pause)";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track, pause, audiodelay) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track, :pause, :audiodelay)";
     $stmt = $db->prepare($sql);
   } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -193,7 +202,8 @@ $arg = array(
 	':loop' => $l_loop,
 	':keychange' => $l_keychange,
 	':track' => $l_track,
-	':pause' => $l_pause
+	':pause' => $l_pause,
+	':audiodelay' => $l_audiodelay
 	);
 }
 $ret = $stmt->execute($arg);
