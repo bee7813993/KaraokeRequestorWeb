@@ -588,7 +588,13 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
                     if ($dk === '') continue;
                     if ($found_worker !== $dk) continue;
                     if (!empty($drule['fps']) && $vd_fps !== null) {
-                        if (abs(floatval($drule['fps']) - $vd_fps) > 0.5) continue;
+                        $rule_fps  = floatval($drule['fps']);
+                        $fps_cond  = isset($drule['fps_cond']) ? $drule['fps_cond'] : '以下';
+                        if ($fps_cond === '以上') {
+                            if ($vd_fps < $rule_fps) continue;
+                        } else {
+                            if ($vd_fps > $rule_fps) continue;
+                        }
                     }
                     $audiodelay_init = isset($drule['delay']) ? intval($drule['delay']) : 0;
                     break;

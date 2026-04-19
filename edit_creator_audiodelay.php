@@ -34,6 +34,29 @@ function is_local_access_cd() {
     return in_array($remote, ['127.0.0.1', '::1', $server], true);
 }
 
+// りすたーDBから制作者一覧を取得
+$creator_list = [];
+$lister_dbpath = '';
+if (array_key_exists('listerDBPATH', $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+}
+if (!empty($lister_dbpath)) {
+    require_once('function_search_listerdb.php');
+    $lister_tmp = new ListerDB();
+    $lister_tmp->listerdbfile = $lister_dbpath;
+    $listerdb_tmp = $lister_tmp->initdb();
+    if ($listerdb_tmp) {
+        $rows = $lister_tmp->select("SELECT DISTINCT found_worker FROM t_found WHERE found_worker != '' ORDER BY found_worker");
+        if (is_array($rows)) {
+            foreach ($rows as $row) {
+                if (!empty($row['found_worker'])) {
+                    $creator_list[] = $row['found_worker'];
+                }
+            }
+        }
+    }
+}
+
 $auth_data     = load_delay_auth($auth_file);
 $password_set  = !empty($auth_data['password_hash']);
 $authenticated = false;
@@ -98,11 +121,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rules  = load_creator_delays($delay_file);
 
     if ($action === 'add') {
-        $keyword = isset($_POST['keyword']) ? trim($_POST['keyword']) : '';
-        $delay   = isset($_POST['delay'])   ? intval($_POST['delay']) : 0;
-        $fps     = isset($_POST['fps'])     ? trim($_POST['fps'])     : '';
+        $keyword  = isset($_POST['keyword'])   ? trim($_POST['keyword'])   : '';
+        $delay    = isset($_POST['delay'])     ? intval($_POST['delay'])   : 0;
+        $fps      = isset($_POST['fps'])       ? trim($_POST['fps'])       : '';
+        $fps_cond = isset($_POST['fps_cond'])  ? trim($_POST['fps_cond'])  : '以下';
+        if (!in_array($fps_cond, ['以上', '以下'], true)) $fps_cond = '以下';
+
         if ($keyword === '') {
-            $message      = 'キーワード（制作者名）を入力してください';
+            $message      = '制作者名を入力してください';
             $message_type = 'danger';
         } elseif ($delay % 100 !== 0) {
             $message      = '音ズレは100ms単位で指定してください';
@@ -112,8 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message_type = 'danger';
         } else {
             $rule = ['keyword' => $keyword, 'delay' => $delay];
-            if ($fps !== '' && is_numeric($fps)) {
-                $rule['fps'] = floatval($fps);
+            if ($fps !== '' && is_numeric($fps) && floatval($fps) > 0) {
+                $rule['fps']      = floatval($fps);
+                $rule['fps_cond'] = $fps_cond;
             }
             $rules[] = $rule;
             save_creator_delays($delay_file, $rules);
@@ -177,6 +204,7 @@ $rules = load_creator_delays($delay_file);
 <?php shownavigatioinbar(); ?>
 <div class="container">
   <h1>制作者別音ズレ初期値設定</h1>
+  <p class="text-muted">※ りすたーDB使用時のみ有効です。</p>
 
   <?php if (!empty($message)): ?>
   <div class="alert alert-<?php echo htmlspecialchars($message_type, ENT_QUOTES, 'UTF-8'); ?>">
@@ -188,8 +216,8 @@ $rules = load_creator_delays($delay_file);
   <table class="table table-striped table-bordered">
     <thead>
       <tr>
-        <th class="col-xs-5">制作者名（found_worker）</th>
-        <th class="col-xs-2">FPS条件</th>
+        <th class="col-xs-4">制作者名</th>
+        <th class="col-xs-3">FPS条件</th>
         <th class="col-xs-3">音ズレ初期値</th>
         <th class="col-xs-2">操作</th>
       </tr>
@@ -198,7 +226,14 @@ $rules = load_creator_delays($delay_file);
       <?php foreach ($rules as $i => $rule): ?>
       <tr>
         <td><?php echo htmlspecialchars($rule['keyword'], ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo isset($rule['fps']) ? htmlspecialchars($rule['fps'], ENT_QUOTES, 'UTF-8').' fps' : '<span class="text-muted">指定なし</span>'; ?></td>
+        <td>
+          <?php if (isset($rule['fps'])): ?>
+            <?php $cond = isset($rule['fps_cond']) ? $rule['fps_cond'] : '以下'; ?>
+            <?php echo htmlspecialchars($rule['fps'], ENT_QUOTES, 'UTF-8'); ?> fps <?php echo htmlspecialchars($cond, ENT_QUOTES, 'UTF-8'); ?>
+          <?php else: ?>
+            <span class="text-muted">指定なし</span>
+          <?php endif; ?>
+        </td>
         <td><?php echo htmlspecialchars($rule['delay'], ENT_QUOTES, 'UTF-8'); ?> ms</td>
         <td>
           <form method="post" action="edit_creator_audiodelay.php" style="margin:0;">
@@ -220,11 +255,25 @@ $rules = load_creator_delays($delay_file);
   <h3>ルール追加</h3>
   <form method="post" action="edit_creator_audiodelay.php">
     <input type="hidden" name="action" value="add">
+
     <div class="form-group">
-      <label>制作者名（found_worker）</label>
-      <input type="text" name="keyword" class="form-control" placeholder="ListerDB の found_worker の値" style="max-width:400px;">
-      <p class="help-block">りすたーDB（ListerDB）の <code>found_worker</code> フィールドと<strong>完全一致</strong>で判定されます。検索画面の制作者名リンクに表示される名前を入力してください。</p>
+      <label>制作者名</label>
+      <?php if (!empty($creator_list)): ?>
+      <select id="creator_select" class="form-control" style="max-width:400px; margin-bottom:6px;"
+              onchange="if(this.value !== '') { document.getElementById('keyword').value = this.value; }">
+        <option value="">-- プルダウンから選択 --</option>
+        <?php foreach ($creator_list as $c): ?>
+        <option value="<?php echo htmlspecialchars($c, ENT_QUOTES, 'UTF-8'); ?>">
+          <?php echo htmlspecialchars($c, ENT_QUOTES, 'UTF-8'); ?>
+        </option>
+        <?php endforeach; ?>
+      </select>
+      <?php endif; ?>
+      <input type="text" name="keyword" id="keyword" class="form-control"
+             placeholder="制作者名を直接入力することもできます" style="max-width:400px;">
+      <p class="help-block">検索画面の制作者名と完全一致で判定されます。</p>
     </div>
+
     <div class="form-group">
       <label>音ズレ初期値 (ms)</label>
       <div class="input-group" style="max-width:200px;">
@@ -233,14 +282,21 @@ $rules = load_creator_delays($delay_file);
       </div>
       <p class="help-block">100ms単位で指定。正の値で映像を遅らせる（音が早い場合）、負の値で音を遅らせる（映像が早い場合）。</p>
     </div>
+
     <div class="form-group">
       <label>FPS条件 <small class="text-muted">（任意）</small></label>
-      <div class="input-group" style="max-width:200px;">
-        <input type="number" name="fps" class="form-control" placeholder="例: 29.97" step="0.01" min="0">
-        <span class="input-group-addon">fps</span>
+      <div style="display:flex; align-items:center; gap:6px; max-width:320px;">
+        <input type="number" name="fps" class="form-control" placeholder="例: 30" step="0.01" min="0" style="max-width:120px;">
+        <span>fps</span>
+        <select name="fps_cond" class="form-control" style="max-width:80px;">
+          <option value="以下">以下</option>
+          <option value="以上">以上</option>
+        </select>
+        <span>の動画に適用</span>
       </div>
-      <p class="help-block">入力した場合、動画のFPSが一致する場合のみ適用されます。空欄にするとFPSに関わらず適用。</p>
+      <p class="help-block">入力した場合、動画のFPSが条件を満たす場合のみ適用されます。空欄にするとFPSに関わらず適用。</p>
     </div>
+
     <button type="submit" class="btn btn-primary">追加</button>
   </form>
 
@@ -250,10 +306,11 @@ $rules = load_creator_delays($delay_file);
     <div class="panel-heading"><strong>この画面の使い方</strong></div>
     <div class="panel-body">
       <ol>
-        <li>制作者名はりすたーDB（ListerDB）の <code>found_worker</code> フィールドと<strong>完全一致</strong>で判定されます。検索画面の制作者名リンクに表示される名前を入力してください。</li>
-        <li>ListerDB を使用していない環境ではこの機能は動作しません（初期値は 0ms になります）。</li>
+        <li>制作者名は検索画面に表示される制作者名と<strong>完全一致</strong>で判定されます。<br>
+            <small class="text-muted">りすたーDBを使用している場合のみ動作します。りすたーDB未使用時は初期値は 0ms になります。</small></li>
         <li>複数のルールが一致する場合、リストの上から順に最初に一致したルールが使用されます。</li>
-        <li>FPS条件を指定すると、動画のフレームレートが一致する場合のみ適用されます（±0.5fps 以内で一致判定）。</li>
+        <li>FPS条件を指定すると、動画のフレームレートが条件を満たす場合のみ適用されます。<br>
+            例：「30fps 以下」と指定すると 30fps 以下の動画にのみ適用されます。</li>
         <li>設定した音ズレ値は予約確認画面の初期値として表示されます。ユーザーが変更することもできます。</li>
         <li>音ズレ値は 100ms 単位で、-9900ms ～ +9900ms の範囲で設定できます。</li>
       </ol>
