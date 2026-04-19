@@ -527,6 +527,7 @@ EOT;
 EOT;
 }
 
+$videodetails = array();
 if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
     $videodetails = getvideodetails($fullpath_utf8);
     if (!empty($videodetails)) {
@@ -555,8 +556,50 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
     }
 }
 
+<?php
+// 制作者別音ズレデフォルト値を取得
+$audiodelay_init = 0;
+if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
+    $delay_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'creator_audiodelay.json';
+    if (file_exists($delay_file)) {
+        $delay_rules = json_decode(file_get_contents($delay_file), true);
+        if (is_array($delay_rules)) {
+            $vd_fps = isset($videodetails['frame_rate']) ? floatval($videodetails['frame_rate']) : null;
+            foreach ($delay_rules as $drule) {
+                $dk = isset($drule['keyword']) ? $drule['keyword'] : '';
+                if ($dk === '') continue;
+                if (mb_strpos($fullpath_utf8, $dk) === false) continue;
+                if (!empty($drule['fps']) && $vd_fps !== null) {
+                    if (abs(floatval($drule['fps']) - $vd_fps) > 0.5) continue;
+                }
+                $audiodelay_init = isset($drule['delay']) ? intval($drule['delay']) : 0;
+                break;
+            }
+        }
+    }
+}
 ?>
-
+<?php if ($shop_karaoke != 1 && $filetype == 1): ?>
+<div style="margin-top:8px; margin-bottom:4px; color:#888;">
+  <small>音ズレ補正：
+  <button type="button" class="btn btn-default btn-xs" onclick="changeAudioDelay(-100)">-100ms</button>
+  <span id="audiodelay_disp" style="display:inline-block; min-width:65px; text-align:center;"><?php echo intval($audiodelay_init); ?> ms</span>
+  <button type="button" class="btn btn-default btn-xs" onclick="changeAudioDelay(100)">+100ms</button>
+  <input type="hidden" name="audiodelay" id="audiodelay_val" value="<?php echo intval($audiodelay_init); ?>" />
+  </small>
+</div>
+<script>
+function changeAudioDelay(delta){
+  var inp = document.getElementById('audiodelay_val');
+  var disp = document.getElementById('audiodelay_disp');
+  var v = parseInt(inp.value, 10) + delta;
+  if(v < -9900) v = -9900;
+  if(v > 9900) v = 9900;
+  inp.value = v;
+  disp.textContent = v + ' ms';
+}
+</script>
+<?php endif; ?>
 
 <!-----
 <select name="kind">
