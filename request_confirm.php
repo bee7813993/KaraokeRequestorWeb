@@ -557,23 +557,42 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
 }
 
 <?php
-// 制作者別音ズレデフォルト値を取得
+// 制作者別音ズレデフォルト値を取得（ListerDB の found_worker と完全一致で判定）
 $audiodelay_init = 0;
 if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
     $delay_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'creator_audiodelay.json';
     if (file_exists($delay_file)) {
         $delay_rules = json_decode(file_get_contents($delay_file), true);
-        if (is_array($delay_rules)) {
-            $vd_fps = isset($videodetails['frame_rate']) ? floatval($videodetails['frame_rate']) : null;
-            foreach ($delay_rules as $drule) {
-                $dk = isset($drule['keyword']) ? $drule['keyword'] : '';
-                if ($dk === '') continue;
-                if (mb_strpos($fullpath_utf8, $dk) === false) continue;
-                if (!empty($drule['fps']) && $vd_fps !== null) {
-                    if (abs(floatval($drule['fps']) - $vd_fps) > 0.5) continue;
+        if (is_array($delay_rules) && !empty($delay_rules)) {
+            // ListerDB から found_worker を取得
+            $found_worker = '';
+            if (!empty($lister_dbpath)) {
+                require_once('function_search_listerdb.php');
+                $lister = new ListerDB();
+                $lister->listerdbfile = $lister_dbpath;
+                $listerdb = $lister->initdb();
+                if ($listerdb) {
+                    $songbasename = basename($fullpath_utf8);
+                    $sql = 'SELECT found_worker FROM t_found WHERE found_path LIKE '
+                         . $listerdb->quote('%' . $songbasename . '%') . ' LIMIT 1';
+                    $rows = $lister->select($sql);
+                    if (!empty($rows) && isset($rows[0]['found_worker'])) {
+                        $found_worker = $rows[0]['found_worker'];
+                    }
                 }
-                $audiodelay_init = isset($drule['delay']) ? intval($drule['delay']) : 0;
-                break;
+            }
+            if ($found_worker !== '') {
+                $vd_fps = isset($videodetails['frame_rate']) ? floatval($videodetails['frame_rate']) : null;
+                foreach ($delay_rules as $drule) {
+                    $dk = isset($drule['keyword']) ? $drule['keyword'] : '';
+                    if ($dk === '') continue;
+                    if ($found_worker !== $dk) continue;
+                    if (!empty($drule['fps']) && $vd_fps !== null) {
+                        if (abs(floatval($drule['fps']) - $vd_fps) > 0.5) continue;
+                    }
+                    $audiodelay_init = isset($drule['delay']) ? intval($drule['delay']) : 0;
+                    break;
+                }
             }
         }
     }

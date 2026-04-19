@@ -188,7 +188,7 @@ $rules = load_creator_delays($delay_file);
   <table class="table table-striped table-bordered">
     <thead>
       <tr>
-        <th class="col-xs-5">制作者名キーワード</th>
+        <th class="col-xs-5">制作者名（found_worker）</th>
         <th class="col-xs-2">FPS条件</th>
         <th class="col-xs-3">音ズレ初期値</th>
         <th class="col-xs-2">操作</th>
@@ -221,9 +221,9 @@ $rules = load_creator_delays($delay_file);
   <form method="post" action="edit_creator_audiodelay.php">
     <input type="hidden" name="action" value="add">
     <div class="form-group">
-      <label>制作者名キーワード</label>
-      <input type="text" name="keyword" class="form-control" placeholder="ファイルパスに含まれる制作者名" style="max-width:400px;">
-      <p class="help-block">動画ファイルのフルパスにこのキーワードが含まれる場合に適用されます。</p>
+      <label>制作者名（found_worker）</label>
+      <input type="text" name="keyword" class="form-control" placeholder="ListerDB の found_worker の値" style="max-width:400px;">
+      <p class="help-block">りすたーDB（ListerDB）の <code>found_worker</code> フィールドと<strong>完全一致</strong>で判定されます。検索画面の制作者名リンクに表示される名前を入力してください。</p>
     </div>
     <div class="form-group">
       <label>音ズレ初期値 (ms)</label>
@@ -250,7 +250,8 @@ $rules = load_creator_delays($delay_file);
     <div class="panel-heading"><strong>この画面の使い方</strong></div>
     <div class="panel-body">
       <ol>
-        <li>制作者名キーワードは動画ファイルの<strong>フルパスに含まれる文字列</strong>で判定されます（部分一致）。</li>
+        <li>制作者名はりすたーDB（ListerDB）の <code>found_worker</code> フィールドと<strong>完全一致</strong>で判定されます。検索画面の制作者名リンクに表示される名前を入力してください。</li>
+        <li>ListerDB を使用していない環境ではこの機能は動作しません（初期値は 0ms になります）。</li>
         <li>複数のルールが一致する場合、リストの上から順に最初に一致したルールが使用されます。</li>
         <li>FPS条件を指定すると、動画のフレームレートが一致する場合のみ適用されます（±0.5fps 以内で一致判定）。</li>
         <li>設定した音ズレ値は予約確認画面の初期値として表示されます。ユーザーが変更することもできます。</li>
