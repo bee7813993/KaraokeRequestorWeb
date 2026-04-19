@@ -556,7 +556,6 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
     }
 }
 
-<?php
 // 制作者別音ズレデフォルト値を取得（ListerDB の found_worker と完全一致で判定）
 $audiodelay_init = 0;
 if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
