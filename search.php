@@ -124,14 +124,16 @@ print '<div class="container">';
 
 
  if(empty($word) || $result_count === 0 ) {
-// トップページメッセージ表示
-if(array_key_exists("noticeof_searchpage",$config_ini)) {
-    if(!empty($config_ini["noticeof_searchpage"])){
-      print '<div class="well">';
-      print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_searchpage"]));
-      print '</div>';
+// トップページメッセージ表示 (searchitem_o未設定時の後方互換)
+if(!array_key_exists("searchitem_o", $config_ini)) {
+    if(array_key_exists("noticeof_searchpage",$config_ini)) {
+        if(!empty($config_ini["noticeof_searchpage"])){
+          print '<div class="well">';
+          print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_searchpage"]));
+          print '</div>';
+        }
     }
- }
+}
 }else {
     print_everything_filenamesearch();
     die();
@@ -418,6 +420,15 @@ foreach ($disp_search_order  as $v){
         case 4:
             if(checkbox_check($config_ini['searchitem'], "bandit_e" )) {
                 print_everything_banditsearch();
+            }
+            break;
+        case 5:
+            if(checkbox_check($config_ini['searchitem'], "searchmessage" )) {
+                if(array_key_exists("noticeof_searchpage", $config_ini) && !empty($config_ini["noticeof_searchpage"])) {
+                    print '<div class="well">';
+                    print str_replace('#yukarihost#', $_SERVER["HTTP_HOST"], urldecode($config_ini["noticeof_searchpage"]));
+                    print '</div>';
+                }
             }
             break;
     }
