@@ -378,8 +378,17 @@ if(!array_key_exists("searchitem_o", $config_ini) || !array_key_exists("searchit
     print_everything_filenamesearch();
     print_everything_anisoninfosearch();
     print_everything_banditsearch();
-    
+
 } else {
+
+// 既存設定へのマイグレーション: searchmessageが未追加の場合、先頭に有効状態で追加
+if(!isset($config_ini['searchitem_o'][5])) {
+    $config_ini['searchitem_o'][5] = 0;
+    if(!in_array('searchmessage', $config_ini['searchitem'])) {
+        $config_ini['searchitem'][] = 'searchmessage';
+    }
+}
+
 $disp_search_order = array();
 $o_srt=$config_ini['searchitem_o'];
 asort($o_srt);

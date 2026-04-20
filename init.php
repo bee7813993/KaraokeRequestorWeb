@@ -64,7 +64,7 @@ $(function () {
 })
 
 $(function(){
-	$('a[href^=#]').click(function() {
+	$('a[href^=#]').not('[data-toggle]').click(function() {
 		var speed = 400;
 		var href= $(this).attr("href");
 		var target = $(href == "#" || href == "" ? 'html' : href);
@@ -895,6 +895,14 @@ if(!array_key_exists('searchitem', $config_ini )){
 if(!array_key_exists('searchitem_o', $config_ini )){
     // 表示順: searchmessage=1位, listerDB_file=2位, listerDB=3位, filesearch_e=4位, anisoninfo_e=5位, bandit_e=6位
     $config_ini['searchitem_o'] = array("2", "3", "4", "5", "6", "1");
+}
+
+// 既存設定へのマイグレーション: searchmessageが未追加の場合、先頭に有効状態で追加
+if(!isset($config_ini['searchitem_o'][5])) {
+    $config_ini['searchitem_o'][5] = 0;
+    if(!in_array('searchmessage', $config_ini['searchitem'])) {
+        $config_ini['searchitem'][] = 'searchmessage';
+    }
 }
 
 $searchitem_defs = array(
