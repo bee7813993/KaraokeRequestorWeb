@@ -889,11 +889,12 @@ print 'value="'.urldecode($config_ini["max_filesize"]).'"';
 <?php
 
 if(!array_key_exists('searchitem', $config_ini )){
-    $config_ini['searchitem'] = array("filesearch_e", "anisoninfo_e", "bandit_e");
+    $config_ini['searchitem'] = array("searchmessage", "listerDB_file", "listerDB", "filesearch_e");
 }
 
 if(!array_key_exists('searchitem_o', $config_ini )){
-    $config_ini['searchitem_o'] = array("1", "2", "3", "4", "5", "6");
+    // 表示順: searchmessage=1位, listerDB_file=2位, listerDB=3位, filesearch_e=4位, anisoninfo_e=5位, bandit_e=6位
+    $config_ini['searchitem_o'] = array("2", "3", "4", "5", "6", "1");
 }
 
 $searchitem_defs = array(
