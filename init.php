@@ -57,13 +57,14 @@ if(array_key_exists("clearauth", $_REQUEST)) {
     
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
 <script type="text/javascript" >
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
 
 $(function(){
-	$('a[href^=#]').click(function() {
+	$('a[href^=#]').not('[data-toggle]').click(function() {
 		var speed = 400;
 		var href= $(this).attr("href");
 		var target = $(href == "#" || href == "" ? 'html' : href);
@@ -277,6 +278,11 @@ print '</pre>';
     <input type="submit" name="resetstatus" value="全て未再生化" class="btn btn-default" />
   </form>
 
+  <h3> 曲の長さ一括更新 </h3>
+  <a href="update_duration_all.php" class="btn btn-default" onclick="return confirm('リクエストリスト内の全曲の長さを取得し直します。曲数が多い場合は時間がかかります。実行しますか？')">
+    曲の長さを全件登録し直す
+  </a>
+
   <h3> BGMモード用再生回数操作 </h3>
   <li>
     <a href ="listtimesclear.php?times=0" class="btn btn-default" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
@@ -299,8 +305,10 @@ print '</pre>';
     <a href="edit_csv_columns.php" class="btn btn-default" > CSV出力列設定 </a>
   </p>
   <p>
-  <h3>製作者優先表示設定 <small>（りすたーDB検索のみ有効）</small></h3>
+  <h3>製作者別設定 <small>（りすたーDB検索のみ有効）</small></h3>
     <a href="edit_search_sort_priority.php" class="btn btn-default" > 製作者優先表示設定 </a>
+    &nbsp;
+    <a href="edit_creator_audiodelay.php" class="btn btn-default" > 制作者別音ズレ初期値設定 </a>
   </p>
   <p>
   <h3>表示優先度設定 <small>（Everything検索のみ有効）</small></h3>
@@ -338,7 +346,7 @@ print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'>
 ?>
   </p>
 
-  <a href="requestlist_only.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
+  <a href="requestlist_top.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
 </div>
 
 <hr />
@@ -524,6 +532,29 @@ print ' value="10" ';
   <label>
   <a href="simplelist.php" > 公開用シンプルリクエストへのリンク </a>
   </label>
+  </div>
+
+<!---- スワイプ操作対応リクエスト一覧UI ----->
+  <?php
+      $usenewrequestlist = false;
+      if(array_key_exists("usenewrequestlist",$config_ini)){
+          if($config_ini["usenewrequestlist"] == 1 ){
+             $usenewrequestlist = true;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <h4 class="radio control-label"> スワイプ操作対応リクエスト一覧UI </h4>
+    <label class="radio control-label"><small>ドラッグハンドルで並べ替え・左スワイプでアクションメニューを表示するリクエスト一覧画面を使用します。</small></label>
+    <label class="radio-inline">
+      <input type="radio" name="usenewrequestlist" value="1" <?php print ($usenewrequestlist)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usenewrequestlist" value="2" <?php print (!$usenewrequestlist)?'checked':' ' ?> /> 使用しない
+    </label>
+    <label>
+      <a href="requestlist_swipe.php"> スワイプUIリクエスト一覧へのリンク </a>
+    </label>
   </div>
 
 <!---- ページ背景色設定 ----->
@@ -863,53 +894,57 @@ print 'value="'.urldecode($config_ini["max_filesize"]).'"';
 <?php
 
 if(!array_key_exists('searchitem', $config_ini )){
-    $config_ini['searchitem'] = array("filesearch_e", "anisoninfo_e", "bandit_e");
+    $config_ini['searchitem'] = array("searchmessage", "listerDB_file", "listerDB", "filesearch_e");
 }
 
 if(!array_key_exists('searchitem_o', $config_ini )){
-    $config_ini['searchitem_o'] = array("1", "2", "3", "4");
+    // 表示順: searchmessage=1位, listerDB_file=2位, listerDB=3位, filesearch_e=4位, anisoninfo_e=5位, bandit_e=6位
+    $config_ini['searchitem_o'] = array("2", "3", "4", "5", "6", "1");
 }
+
+// 既存設定へのマイグレーション: searchmessageが未追加の場合、先頭に有効状態で追加
+if(!isset($config_ini['searchitem_o'][5])) {
+    $config_ini['searchitem_o'][5] = 0;
+    if(!in_array('searchmessage', $config_ini['searchitem'])) {
+        $config_ini['searchitem'][] = 'searchmessage';
+    }
+}
+
+$searchitem_defs = array(
+    array('id' => 'listerDB_file',  'label' => 'キーワード検索（りすたー）'),
+    array('id' => 'listerDB',       'label' => 'りすたーDB検索'),
+    array('id' => 'filesearch_e',   'label' => 'ファイル名検索（Everything）'),
+    array('id' => 'anisoninfo_e',   'label' => '外部検索（anison.info）（Everything）'),
+    array('id' => 'bandit_e',       'label' => '外部検索（banditの隠れ家）（Everything）'),
+    array('id' => 'searchmessage',  'label' => '検索画面表示メッセージ'),
+);
+
+$si_order_map = array();
+foreach ($searchitem_defs as $idx => $def) {
+    $si_order_map[$idx] = isset($config_ini['searchitem_o'][$idx]) ? (int)$config_ini['searchitem_o'][$idx] : ($idx + 1);
+}
+asort($si_order_map);
+$si_sorted_indices = array_keys($si_order_map);
 
 ?>
 
-
   <div class="form-group">
      <h4 class=""> 検索画面に表示する項目 </h4>
+     <small>ドラッグで表示順を変更できます</small>
 
-  <table class="table table-striped table-bordered table-condensed">
-  <thead>
-    <tr>
-      <th class="col-xs-6" >項目</th>
-      <th class="col-xs-1" >表示</th>
-      <th class="col-xs-5" >表示順</th>
-    </tr>
-  </thead>
-    <tr>
-      <td>キーワード検索（りすたー） </td>
-      <td><input type="checkbox" name="searchitem[]" value="listerDB_file" <?php print checkbox_check($config_ini['searchitem'],"listerDB_file" )?'checked':' ' ?> > </td>
-      <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][0]; ?>" placeholder="表示順" /> </td>
-    </tr>
-    <tr>
-      <td>りすたーDB検索 </td>
-      <td><input type="checkbox" name="searchitem[]" value="listerDB" <?php print checkbox_check($config_ini['searchitem'],"listerDB" )?'checked':' ' ?> > </td>
-      <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][1]; ?>" placeholder="表示順" /> </td>
-    </tr>
-    <tr>
-      <td>ファイル名検索（Everything） </td>
-      <td><input type="checkbox" name="searchitem[]" value="filesearch_e" <?php print checkbox_check($config_ini['searchitem'],"filesearch_e" )?'checked':' ' ?> > </td>
-      <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][2]; ?>" placeholder="表示順" /> </td>
-    </tr>
-    <tr>
-      <td>外部検索（anison.info）（Everything） </td>
-      <td><input type="checkbox" name="searchitem[]" value="anisoninfo_e" <?php print checkbox_check($config_ini['searchitem'],"anisoninfo_e" )?'checked':' ' ?> > </td>
-      <td><input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][3]; ?>" placeholder="表示順" /> </td>
-    </tr>
-    <tr>
-      <td>外部検索（banditの隠れ家）（Everything） </td>
-      <td> <input type="checkbox" name="searchitem[]" value="bandit_e" <?php print checkbox_check($config_ini['searchitem'],"bandit_e" )?'checked':' ' ?> >  </td>
-      <td> <input type="text" name="searchitem_o[]" size="100" class="form-control"  value="<?php print $config_ini['searchitem_o'][4]; ?>" placeholder="表示順" /> </td>
-    </tr>
-  </table>
+  <div id="searchitem-sortable" style="max-width:600px; margin-top:8px;">
+<?php foreach ($si_sorted_indices as $si_sorted_pos => $idx) {
+    $def = $searchitem_defs[$idx];
+    $checked = checkbox_check($config_ini['searchitem'], $def['id']) ? 'checked' : '';
+?>
+    <div class="searchitem-row" data-index="<?php echo $idx; ?>" style="display:flex; align-items:center; padding:6px 10px; margin-bottom:4px; border:1px solid #ddd; background:#f9f9f9; border-radius:3px;">
+      <span class="searchitem-drag-handle" style="cursor:grab; color:#aaa; font-size:20px; padding:0 10px 0 0; line-height:1; user-select:none; touch-action:none;">&#8942;</span>
+      <input type="checkbox" name="searchitem[]" value="<?php echo $def['id']; ?>" <?php echo $checked; ?> style="margin-right:8px;">
+      <span><?php echo $def['label']; ?></span>
+      <input type="hidden" name="searchitem_o[<?php echo $idx; ?>]" value="<?php echo $si_sorted_pos + 1; ?>" class="searchitem-order-input">
+    </div>
+<?php } ?>
+  </div>
 
   <div class="form-group">
     <h4  > りすたーDBファイルパス  </h4>
@@ -1636,7 +1671,24 @@ var xmlhttp = createXMLHttpRequest();
 
 </div>
 
-<hr />  
+<hr />
+
+<script>
+(function() {
+    var container = document.getElementById('searchitem-sortable');
+    if (!container) return;
+    Sortable.create(container, {
+        handle: '.searchitem-drag-handle',
+        animation: 150,
+        onEnd: function() {
+            var rows = container.querySelectorAll('.searchitem-row');
+            for (var i = 0; i < rows.length; i++) {
+                rows[i].querySelector('.searchitem-order-input').value = i + 1;
+            }
+        }
+    });
+})();
+</script>
 
 </body>
 </html>

@@ -120,7 +120,7 @@ if(!count($allrequest) == 0 ){
 ?>
 </tbody>
 </table>
-<a href="../requestlist_only.php" >トップに戻る </a>
+<a href="../requestlist_top.php" >トップに戻る </a>
 
 </body>
 </html>

@@ -126,6 +126,7 @@ function getvideodetails($filename) {
 
     if (!empty($info['playtime_seconds'])) {
         $total_seconds = (int)round($info['playtime_seconds']);
+        $details['duration_seconds'] = $total_seconds;
         $minutes = (int)($total_seconds / 60);
         $secs = $total_seconds % 60;
         $details['duration'] = sprintf('%d:%02d', $minutes, $secs);

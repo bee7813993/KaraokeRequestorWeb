@@ -139,7 +139,10 @@ function readconfig_array()
     if(!array_key_exists("usebgv", $config_ini)){
         $usebgv = 2;
         $config_ini = array_merge($config_ini,array("usebgv" => $usebgv));
-    }    
+    }
+    if(!array_key_exists("usenewrequestlist", $config_ini)){
+        $config_ini = array_merge($config_ini,array("usenewrequestlist" => 2));
+    }
 
     if($config_ini["playerpath_select"] == urlencode("その他PATH指定" )) {
         $config_ini = array_merge($config_ini,array("playerpath" => ($config_ini["playerpath_any"])));
@@ -228,7 +231,9 @@ function updatedb($db){
                   array ( "name" => "loop" , "type" =>  "text") ,
                   array ( "name" => "keychange" , "type" =>  "INTEGER default 0") ,
                   array ( "name" => "track" , "type" =>  "INTEGER default 0") ,
-                  array ( "name" => "pause" , "type" =>  "INTEGER default 0") 
+                  array ( "name" => "pause" , "type" =>  "INTEGER default 0") ,
+                  array ( "name" => "audiodelay" , "type" =>  "INTEGER default 0") ,
+                  array ( "name" => "duration"   , "type" =>  "INTEGER default 0")
                   );
     /* 現在の項目一覧取得 */
     try {
@@ -291,7 +296,9 @@ $sql = "create table IF NOT EXISTS requesttable (
  loop INTEGER,
  keychange INTEGER default 0,
  track INTEGER default 0,
- pause INTEGER default 0
+ pause INTEGER default 0,
+ audiodelay INTEGER default 0,
+ duration INTEGER default 0
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){

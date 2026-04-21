@@ -1200,11 +1200,11 @@ EOD;
 
 
     print '     <li ';
-    if($page == 'requestlist_only.php')
+    if($page == 'requestlist_only.php' || $page == 'requestlist_swipe.php' || $page == 'requestlist_top.php')
     {
         print 'class="active" ';
     }
-    print '><a href="'.$prefix.'requestlist_only.php">予約一覧 </a></li>';
+    print '><a href="'.$prefix.'requestlist_top.php">予約一覧 </a></li>';
 //    print '     <li ';
     print '     <li class="dropdown "';
     if($page == 'searchreserve.php')

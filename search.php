@@ -124,14 +124,16 @@ print '<div class="container">';
 
 
  if(empty($word) || $result_count === 0 ) {
-// トップページメッセージ表示
-if(array_key_exists("noticeof_searchpage",$config_ini)) {
-    if(!empty($config_ini["noticeof_searchpage"])){
-      print '<div class="well">';
-      print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_searchpage"]));
-      print '</div>';
+// トップページメッセージ表示 (searchitem_o未設定時の後方互換)
+if(!array_key_exists("searchitem_o", $config_ini)) {
+    if(array_key_exists("noticeof_searchpage",$config_ini)) {
+        if(!empty($config_ini["noticeof_searchpage"])){
+          print '<div class="well">';
+          print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_searchpage"]));
+          print '</div>';
+        }
     }
- }
+}
 }else {
     print_everything_filenamesearch();
     die();
@@ -214,7 +216,7 @@ EOM;
 print '<hr />';
 if($connectinternet != 1){
 print <<<EOM
-<a href="requestlist_only.php" >トップに戻る </a>
+<a href="requestlist_top.php" >トップに戻る </a>
 
 </body>
 </html>
@@ -376,8 +378,17 @@ if(!array_key_exists("searchitem_o", $config_ini) || !array_key_exists("searchit
     print_everything_filenamesearch();
     print_everything_anisoninfosearch();
     print_everything_banditsearch();
-    
+
 } else {
+
+// 既存設定へのマイグレーション: searchmessageが未追加の場合、先頭に有効状態で追加
+if(!isset($config_ini['searchitem_o'][5])) {
+    $config_ini['searchitem_o'][5] = 0;
+    if(!in_array('searchmessage', $config_ini['searchitem'])) {
+        $config_ini['searchitem'][] = 'searchmessage';
+    }
+}
+
 $disp_search_order = array();
 $o_srt=$config_ini['searchitem_o'];
 asort($o_srt);
@@ -418,6 +429,15 @@ foreach ($disp_search_order  as $v){
         case 4:
             if(checkbox_check($config_ini['searchitem'], "bandit_e" )) {
                 print_everything_banditsearch();
+            }
+            break;
+        case 5:
+            if(checkbox_check($config_ini['searchitem'], "searchmessage" )) {
+                if(array_key_exists("noticeof_searchpage", $config_ini) && !empty($config_ini["noticeof_searchpage"])) {
+                    print '<div class="well">';
+                    print str_replace('#yukarihost#', $_SERVER["HTTP_HOST"], urldecode($config_ini["noticeof_searchpage"]));
+                    print '</div>';
+                }
             }
             break;
     }

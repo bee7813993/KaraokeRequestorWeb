@@ -303,7 +303,8 @@ $use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
   <h2 class="page-title">再生曲リスト</h2>
   <div class="filter-bar">
     <span class="filter-icon">&#128269;</span>
-    <input type="text" id="filter-input" placeholder="曲名・作品名・歌った人などで絞り込み…" autocomplete="off">
+    <input type="text" id="filter-input" placeholder="曲名・作品名・歌った人などで絞り込み…" autocomplete="off"
+      value="<?= htmlspecialchars(trim($_GET['q'] ?? ''), ENT_QUOTES) ?>">
     <button type="button" class="filter-clear-btn" id="filter-clear">&#x2715;</button>
     <span class="filter-count" id="filter-count"></span>
   </div>
@@ -445,6 +446,11 @@ $use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
       $('#filter-clear').on('click', function() {
         $('#filter-input').val('').trigger('input').focus();
       });
+
+      // GETパラメータ ?q= による初期絞り込み
+      if ($('#filter-input').val() !== '') {
+        $('#filter-input').trigger('input');
+      }
     });
     </script>
   </body>

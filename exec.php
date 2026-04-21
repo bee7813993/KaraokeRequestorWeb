@@ -80,6 +80,20 @@ if(array_key_exists("pause", $_REQUEST)) {
     }
 }
 
+$l_audiodelay = 0;
+if(array_key_exists("audiodelay", $_REQUEST)) {
+    $l_audiodelay = intval($_REQUEST["audiodelay"]);
+    if($l_audiodelay < -9900 || $l_audiodelay > 9900){
+        $l_audiodelay = 0;
+    }
+}
+
+$l_duration = 0;
+if(array_key_exists("duration", $_REQUEST)) {
+    $l_duration = intval($_REQUEST["duration"]);
+    if($l_duration < 0) $l_duration = 0;
+}
+
 
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
@@ -145,7 +159,7 @@ if($request[0]['nowplaying'] === '再生中' || $request[0]['nowplaying'] === '�
 }
 
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause where id = :selectid";
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause, audiodelay=:audiodelay, duration=:duration where id = :selectid";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -166,11 +180,13 @@ $arg = array(
 	':keychange' => $l_keychange,
 	':track' => $l_track,
 	':pause' => $l_pause,
+	':audiodelay' => $l_audiodelay,
+	':duration' => $l_duration,
 	':selectid' => (int)$selectid
 	);
 }else {
   try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track, pause) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track, :pause)";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track, pause, audiodelay, duration) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track, :pause, :audiodelay, :duration)";
     $stmt = $db->prepare($sql);
   } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -193,7 +209,9 @@ $arg = array(
 	':loop' => $l_loop,
 	':keychange' => $l_keychange,
 	':track' => $l_track,
-	':pause' => $l_pause
+	':pause' => $l_pause,
+	':audiodelay' => $l_audiodelay,
+	':duration' => $l_duration
 	);
 }
 if (is_numeric($selectid)) {
@@ -243,7 +261,7 @@ if(isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUE
    print<<<EOT
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<META http-equiv="refresh" content="1; url=requestlist_only.php" />
+<META http-equiv="refresh" content="1; url=requestlist_top.php?showid=$newid" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>DB登録中</title>
 </head>
@@ -254,7 +272,7 @@ EOT;
    print<<<EOT
 </pre>
 
-<a href="requestlist_only.php" > リクエストページに戻る <a><br>
+<a href="requestlist_top.php" > リクエストページに戻る <a><br>
 EOT;
     $sql = "SELECT * FROM requesttable ORDER BY id DESC";
     if(!empty($DEBUG)){

@@ -252,7 +252,7 @@ print urlencode($localipurl).'&qrsize='.$l_qrsize;
 	  <a href="?qrsize=16" class="btn btn-default" role="button">大</a>
     </div>
 </div>
-<a href="requestlist_only.php" > リクエストTOPに戻る </a>
+<a href="requestlist_top.php" > リクエストTOPに戻る </a>
 </div>
 </body>
 </html>
