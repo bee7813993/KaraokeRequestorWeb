@@ -528,9 +528,14 @@ EOT;
 }
 
 $videodetails = array();
-if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
+$duration_seconds = 0;
+if ($shop_karaoke != 1 && !empty($fullpath_utf8) && ($filetype == 1 || $filetype == 2)) {
     $videodetails = getvideodetails($fullpath_utf8);
-    if (!empty($videodetails)) {
+    if (isset($videodetails['duration_seconds'])) {
+        $duration_seconds = $videodetails['duration_seconds'];
+    }
+}
+if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8) && !empty($videodetails)) {
         print '<div class="panel panel-default" style="margin-top:8px;">'."\n";
         print '<div class="panel-heading" role="tab" id="videoDetailsHeading">'."\n";
         print '<h4 class="panel-title">'."\n";
@@ -553,8 +558,8 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
         print '</div>'."\n";
         print '</div>'."\n";
         print '</div>'."\n";
-    }
 }
+echo '<input type="hidden" name="duration" value="' . (int)$duration_seconds . '" />' . "\n";
 
 // 制作者別音ズレデフォルト値を取得（ListerDB の found_worker と完全一致で判定）
 $audiodelay_init = 0;
@@ -601,6 +606,10 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
             }
         }
     }
+}
+// 差し替えモードの場合は元のリクエストの音ズレ値を優先
+if (is_numeric($selectid) && !empty($selectrequest)) {
+    $audiodelay_init = intval($selectrequest[0]['audiodelay']);
 }
 ?>
 <?php if ($shop_karaoke != 1 && $filetype == 1): ?>

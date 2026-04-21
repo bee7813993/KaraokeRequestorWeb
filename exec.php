@@ -88,6 +88,12 @@ if(array_key_exists("audiodelay", $_REQUEST)) {
     }
 }
 
+$l_duration = 0;
+if(array_key_exists("duration", $_REQUEST)) {
+    $l_duration = intval($_REQUEST["duration"]);
+    if($l_duration < 0) $l_duration = 0;
+}
+
 
 if(!empty($l_freesinger)){
 $l_singer=$l_freesinger;
@@ -153,7 +159,7 @@ if($request[0]['nowplaying'] === '再生中' || $request[0]['nowplaying'] === '�
 }
 
 try {
-    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause, audiodelay=:audiodelay where id = :selectid";
+    $sql = "UPDATE requesttable set songfile=:fn, singer=:sing, comment=:comment, kind=:kind, fullpath=:fp, secret=:secret, loop=:loop, nowplaying=:nowplaying, keychange=:keychange, track=:track, pause=:pause, audiodelay=:audiodelay, duration=:duration where id = :selectid";
     $stmt = $db->prepare($sql);
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -175,11 +181,12 @@ $arg = array(
 	':track' => $l_track,
 	':pause' => $l_pause,
 	':audiodelay' => $l_audiodelay,
+	':duration' => $l_duration,
 	':selectid' => (int)$selectid
 	);
 }else {
   try {
-    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track, pause, audiodelay) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track, :pause, :audiodelay)";
+    $sql = "INSERT INTO requesttable (songfile, singer, comment, kind, fullpath, nowplaying, status, clientip, clientua, playtimes, secret, loop, keychange, track, pause, audiodelay, duration) VALUES (:fn, :sing, :comment, :kind, :fp, :np, :status, :ip, :ua, 0 ,:secret,:loop, :keychange, :track, :pause, :audiodelay, :duration)";
     $stmt = $db->prepare($sql);
   } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
@@ -203,7 +210,8 @@ $arg = array(
 	':keychange' => $l_keychange,
 	':track' => $l_track,
 	':pause' => $l_pause,
-	':audiodelay' => $l_audiodelay
+	':audiodelay' => $l_audiodelay,
+	':duration' => $l_duration
 	);
 }
 $ret = $stmt->execute($arg);
@@ -228,7 +236,7 @@ if(!empty($DEBUG))
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
 }
-  if($config_ini["request_automove"] == 1){
+  if($config_ini["request_automove"] == 1 && !is_numeric($selectid)){
     require_once('function_moveitem.php');
     $db->exec("BEGIN DEFERRED;");
     $list = new MoveItem;

@@ -12,7 +12,15 @@ $offset = isset($_GET['offset']) && ctype_digit($_GET['offset']) ? (int)$_GET['o
 try {
     $total = (int)$db->query("SELECT COUNT(*) FROM requesttable")->fetchColumn();
 
-    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret, track, keychange, audiodelay FROM requesttable ORDER BY reqorder DESC";
+    $remaining_count = (int)$db->query(
+        "SELECT COUNT(*) FROM requesttable WHERE nowplaying IN ('未再生', '1')"
+    )->fetchColumn();
+
+    $remaining_seconds = (int)$db->query(
+        "SELECT COALESCE(SUM(duration), 0) FROM requesttable WHERE nowplaying IN ('未再生', '1') AND duration > 0"
+    )->fetchColumn();
+
+    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret, track, keychange, audiodelay, duration FROM requesttable ORDER BY reqorder DESC";
     if ($limit > 0) {
         $stmt = $db->prepare($sql . " LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
@@ -30,7 +38,7 @@ try {
 }
 
 $items = [];
-foreach ($rows as $row) {
+foreach ($rows as $idx => $row) {
     $songfile     = $row['songfile'];
     $display_name = $songfile;
     if (!empty($row['secret']) && $row['secret'] == 1) {
@@ -48,13 +56,17 @@ foreach ($rows as $row) {
         'track'        => (int)($row['track']      ?? 0),
         'keychange'    => (int)($row['keychange']   ?? 0),
         'audiodelay'   => (int)($row['audiodelay']  ?? 0),
+        'duration'     => (int)($row['duration']    ?? 0),
+        'position'     => $total - $offset - $idx,
     ];
 }
 
 $has_more = ($limit > 0) && (($offset + count($items)) < $total);
 
 echo json_encode([
-    'items'    => $items,
-    'total'    => $total,
-    'has_more' => $has_more,
+    'items'             => $items,
+    'total'             => $total,
+    'has_more'          => $has_more,
+    'remaining_count'   => $remaining_count,
+    'remaining_seconds' => $remaining_seconds,
 ], JSON_UNESCAPED_UNICODE);
