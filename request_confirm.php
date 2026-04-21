@@ -607,6 +607,10 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
         }
     }
 }
+// 差し替えモードの場合は元のリクエストの音ズレ値を優先
+if (is_numeric($selectid) && !empty($selectrequest)) {
+    $audiodelay_init = intval($selectrequest[0]['audiodelay']);
+}
 ?>
 <?php if ($shop_karaoke != 1 && $filetype == 1): ?>
 <div style="margin-top:8px; margin-bottom:4px; color:#888;">
