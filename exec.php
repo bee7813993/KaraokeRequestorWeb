@@ -236,7 +236,7 @@ if(!empty($DEBUG))
 } catch (PDOException $e) {
 	echo 'Connection failed: ' . $e->getMessage();
 }
-  if($config_ini["request_automove"] == 1){
+  if($config_ini["request_automove"] == 1 && !is_numeric($selectid)){
     require_once('function_moveitem.php');
     $db->exec("BEGIN DEFERRED;");
     $list = new MoveItem;

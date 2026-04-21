@@ -278,6 +278,11 @@ print '</pre>';
     <input type="submit" name="resetstatus" value="全て未再生化" class="btn btn-default" />
   </form>
 
+  <h3> 曲の長さ一括更新 </h3>
+  <a href="update_duration_all.php" class="btn btn-default" onclick="return confirm('リクエストリスト内の全曲の長さを取得し直します。曲数が多い場合は時間がかかります。実行しますか？')">
+    曲の長さを全件登録し直す
+  </a>
+
   <h3> BGMモード用再生回数操作 </h3>
   <li>
     <a href ="listtimesclear.php?times=0" class="btn btn-default" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
