@@ -236,6 +236,42 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   text-align: center;
   padding: 12px 0 4px;
 }
+
+/* 統計バー */
+#stats-bar {
+  font-size: 13px;
+  color: #555;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.stats-item { white-space: nowrap; }
+.stats-val   { font-weight: bold; color: #333; }
+
+/* カード左側（番号＋ドラッグハンドル） */
+.card-left {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 28px;
+}
+.card-num {
+  font-size: 10px;
+  color: #ccc;
+  line-height: 1;
+  font-weight: bold;
+}
+.card-duration {
+  color: #888;
+  font-size: 13px;
+}
 </style>
 </head>
 <body>
@@ -279,6 +315,12 @@ if (!empty($config_ini['noticeof_listpage'])) {
     </select>
 <?php endif; ?>
   </div>
+</div>
+
+<div id="stats-bar">
+  <span class="stats-item">総件数：<span class="stats-val" id="stat-total">-</span>件</span>
+  <span class="stats-item">残り：<span class="stats-val" id="stat-remaining">-</span>件</span>
+  <span class="stats-item">残り時間：<span class="stats-val" id="stat-remaining-time">-</span></span>
 </div>
 
 <div id="request-list"></div>
@@ -444,7 +486,7 @@ function isUnplayed(nowplaying) {
     return nowplaying === '未再生' || nowplaying === '1';
 }
 
-function createCardHTML(item) {
+function createCardHTML(item, idx) {
     var replaceLabel = (item.kind === 'カラオケ配信' && USE_BGV) ? 'BGV選択' : '曲差し替え';
 
     // コメント欄
@@ -486,6 +528,18 @@ function createCardHTML(item) {
         '      <span class="action-icon">&#9998;</span>変更',
         '    </button>'
     ].join('\n') : '';
+
+    // 曲の長さ（データがある場合のみ）
+    var durationHtml = '';
+    if (item.duration && item.duration > 0) {
+        var dm = Math.floor(item.duration / 60);
+        var ds = item.duration % 60;
+        durationHtml = '<span class="card-duration">　' + dm + ':' + ('0' + ds).slice(-2) + '</span>';
+    }
+
+    // 番号（先頭からの件数）
+    var position = item.position != null ? item.position : (totalCount - idx);
+    var numHtml = '<span class="card-num">' + position + '</span>';
 
     // トラック・キー・音ズレ（デフォルト値と異なる場合のみ表示）
     var extras = [];
@@ -530,10 +584,13 @@ function createCardHTML(item) {
         adminChangeBtnHtml,
         '  </div>',
         '  <div class="card-main">',
-        '    <span class="drag-handle">&#8942;</span>',
+        '    <div class="card-left">',
+        '      ' + numHtml,
+        '      <span class="drag-handle">&#8942;</span>',
+        '    </div>',
         '    <div class="card-info">',
         '      <div class="card-title">' + esc(item.display_name) + '</div>',
-        '      <div class="card-meta"><span class="card-label">登録者：</span>' + esc(item.singer) + '　<span class="card-label">再生方法：</span>' + esc(item.kind) + '</div>',
+        '      <div class="card-meta"><span class="card-label">登録者：</span>' + esc(item.singer) + '　<span class="card-label">再生方法：</span>' + esc(item.kind) + durationHtml + '</div>',
         '      ' + extraMetaHtml,
         '      ' + commentHtml,
         '      ' + tweetHtml,
@@ -564,24 +621,43 @@ function loadList(reset) {
         var offset = 0;
         fetch(buildUrl(limit, offset))
             .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
-            .then(function (data) { renderList(data.items, data.total, data.has_more); })
+            .then(function (data) { renderList(data.items, data.total, data.has_more, data); })
             .catch(function (e)   { console.error('loadList error:', e); });
     } else {
         // もっと見る: 現在表示分をまとめて再取得して全置き換え
         var newLimit = (currentLimit > 0) ? shownCount + currentLimit : 0;
         fetch(buildUrl(newLimit, 0))
             .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
-            .then(function (data) { renderList(data.items, data.total, data.has_more); })
+            .then(function (data) { renderList(data.items, data.total, data.has_more, data); })
             .catch(function (e)   { console.error('loadMore error:', e); });
     }
 }
 
-function renderList(items, total, hasMore) {
+function formatRemainingTime(secs) {
+    if (!secs || secs <= 0) return '-';
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor((secs % 3600) / 60);
+    if (h > 0) return h + '時間' + m + '分';
+    return m + '分';
+}
+
+function updateStats(data) {
+    var el;
+    el = document.getElementById('stat-total');
+    if (el) el.textContent = data.total || 0;
+    el = document.getElementById('stat-remaining');
+    if (el) el.textContent = data.remaining_count != null ? data.remaining_count : '-';
+    el = document.getElementById('stat-remaining-time');
+    if (el) el.textContent = formatRemainingTime(data.remaining_seconds);
+}
+
+function renderList(items, total, hasMore, data) {
     var container   = document.getElementById('request-list');
     var emptyMsg    = document.getElementById('empty-msg');
     var loadMoreWrap = document.getElementById('load-more-wrap');
 
     totalCount = total || 0;
+    if (data) updateStats(data);
 
     if (items.length === 0 && totalCount === 0) {
         container.innerHTML = '';
@@ -593,7 +669,9 @@ function renderList(items, total, hasMore) {
 
     emptyMsg.style.display = 'none';
     shownCount = items.length;
-    container.innerHTML = items.map(createCardHTML).join('');
+    container.innerHTML = items.map(function (item, idx) {
+        return createCardHTML(item, idx);
+    }).join('');
 
     var remaining = totalCount - shownCount;
     if (hasMore && remaining > 0) {
@@ -971,7 +1049,7 @@ function scrollToShowId() {
     fetch(buildUrl(0, 0))
         .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
         .then(function (data) {
-            renderList(data.items, data.total, data.has_more);
+            renderList(data.items, data.total, data.has_more, data);
             var c = document.querySelector('.request-card[data-id="' + SHOW_ID + '"]');
             if (c) highlightCard(c, 'highlight-new');
         })
@@ -988,7 +1066,7 @@ function goToPlaying() {
     fetch(buildUrl(0, 0))
         .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
         .then(function (data) {
-            renderList(data.items, data.total, data.has_more);
+            renderList(data.items, data.total, data.has_more, data);
             if (!scrollToPlayingCard()) {
                 // 再生中なし：元の件数に戻す
                 currentLimit = prevLimit;
@@ -1060,7 +1138,7 @@ function reloadCurrent() {
     var limit = (currentLimit > 0 && shownCount > 0) ? shownCount : currentLimit;
     fetch(buildUrl(limit, 0))
         .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
-        .then(function (data) { renderList(data.items, data.total, data.has_more); })
+        .then(function (data) { renderList(data.items, data.total, data.has_more, data); })
         .catch(function (e)   { console.error('reload error:', e); });
 }
 
