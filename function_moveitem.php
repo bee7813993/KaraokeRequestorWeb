@@ -240,19 +240,26 @@ class MoveItem {
     }
 
     public function insertreqorder($id, $reqorder) {
-        $currentreqorder = 1;
+        // allrequest_newはreqorder昇順ソート済みの前提
+        // target_reqorderより小さいreqorderを持つアイテム数 = 新アイテムの前に来るアイテム数
+        $items_before = 0;
+        foreach ($this->allrequest_new as $r) {
+            if ($r['id'] == $id) continue;
+            if ($r['reqorder'] < $reqorder) $items_before++;
+        }
+        $new_position = $items_before + 1;
+
+        // 全アイテムを連番で振り直す（隙間も吸収）
+        // 新アイテムはnew_positionに配置し、それ以外は前後に詰める
+        $pos = 1;
         for ($i = 0; $i < count($this->allrequest_new); $i++) {
             if ($this->allrequest_new[$i]['id'] == $id) {
-                $this->allrequest_new[$i]['reqorder'] = $reqorder;
+                $this->allrequest_new[$i]['reqorder'] = $new_position;
                 continue;
             }
-            if ($currentreqorder == $reqorder) {
-                $currentreqorder++;
-            } elseif ($this->allrequest_new[$i]['reqorder'] == $reqorder) {
-                $currentreqorder++;
-            }
-            $this->allrequest_new[$i]['reqorder'] = $currentreqorder;
-            $currentreqorder++;
+            if ($pos == $new_position) $pos++;
+            $this->allrequest_new[$i]['reqorder'] = $pos;
+            $pos++;
         }
     }
 

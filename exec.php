@@ -196,38 +196,38 @@ $arg = array(
 	':pause' => $l_pause
 	);
 }
-$ret = $stmt->execute($arg);
-if (! $ret ) {
-	print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加にしっぱいしました。");
-	die();
-}
-
-$sql = "SELECT * FROM requesttable where status = 'new' ORDER BY id DESC";
-try {
-if(!empty($DEBUG))
-    print $sql.'<br />';
-    $select = $db->query($sql);
-    while($row = $select->fetch(PDO::FETCH_ASSOC)){
-    $newid=$row['id'];
-    $sql_u = 'UPDATE requesttable set reqorder = '. $newid . ', status = \'OK\' WHERE id = '. $newid;
-if(!empty($DEBUG))
-    print $sql_u.'<br />';
-    $ret = $db->query($sql_u);
+if (is_numeric($selectid)) {
+    // 差し替え: UPDATEのみ実行、reqorderは変更しない
+    $newid = (int)$selectid;
+    $ret = $stmt->execute($arg);
+    if (!$ret) {
+        print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加にしっぱいしました。");
+        die();
     }
-
-} catch (PDOException $e) {
-	echo 'Connection failed: ' . $e->getMessage();
-}
-  if($config_ini["request_automove"] == 1){
-    require_once('function_moveitem.php');
-    $db->exec("BEGIN DEFERRED;");
-    $list = new MoveItem;
-    $turnlist = $list->getturnlist($db);
-    $newreq = $list->get_new_reqorder($newid);
-    $list->insertreqorder($newid,$newreq);
-    $list->save_allrequest($db);
+} else {
+    // 新規追加: BEGIN IMMEDIATEで同時アクセス競合を防ぎ、INSERT〜reqorder割り当て〜自動整列を一括処理
+    $db->exec("BEGIN IMMEDIATE;");
+    $ret = $stmt->execute($arg);
+    if (!$ret) {
+        $db->exec("ROLLBACK;");
+        print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加にしっぱいしました。");
+        die();
+    }
+    $newid = (int)$db->lastInsertId();
+    $sql_u = 'UPDATE requesttable SET reqorder = ' . $newid . ', status = \'OK\' WHERE id = ' . $newid;
+    if (!empty($DEBUG))
+        print $sql_u . '<br />';
+    $db->exec($sql_u);
+    if ($config_ini["request_automove"] == 1) {
+        require_once('function_moveitem.php');
+        $list = new MoveItem;
+        $list->getturnlist($db);
+        $newreq = $list->get_new_reqorder($newid);
+        $list->insertreqorder($newid, $newreq);
+        $list->save_allrequest($db);
+    }
     $db->exec("COMMIT;");
-  }
+}
 file_get_contents("http://localhost/updaterequestlist.php");
 
 if(!empty($DEBUG)){
