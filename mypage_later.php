@@ -1,0 +1,91 @@
+<html>
+<head>
+<?php
+require_once 'commonfunc.php';
+require_once 'mypage_class.php';
+print_meta_header();
+?>
+<title>後で歌う - マイページ</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<script src="js/jquery.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</head>
+<body>
+<?php
+shownavigatioinbar('mypage_later.php');
+
+if (!configbool("usemypage", true)) {
+    print '<div class="container" style="margin-top:80px;"><p>マイページ機能は無効です。</p></div>';
+    print '</body></html>';
+    exit;
+}
+
+$mypage = new MypageUser($db);
+
+// 削除処理
+if (isset($_POST['action']) && $_POST['action'] === 'remove' && !empty($_POST['fullpath'])) {
+    $mypage->removeLater($_POST['fullpath']);
+    header('Location: mypage_later.php');
+    exit;
+}
+
+$list = $mypage->getLaterList();
+?>
+<div class="container" style="margin-top:80px;">
+  <h2>後で歌う</h2>
+  <p><a href="mypage.php">&laquo; マイページへ戻る</a></p>
+
+  <?php if (empty($list)): ?>
+  <p class="text-muted">リストに曲がありません。<br>
+    検索結果の画面で「後で歌う」リンクを押すと追加できます。
+  </p>
+  <?php else: ?>
+  <table class="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th>曲名</th>
+        <th>追加日時</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($list as $row):
+        $songfile = $row['songfile'];
+        $fullpath = $row['fullpath'];
+        $kind     = $row['kind'];
+        $added_dt = date('Y/m/d H:i', $row['added_at']);
+
+        $status     = MypageUser::checkFileStatus($fullpath, $songfile);
+        $req_url    = MypageUser::makeRequestConfirmUrl($fullpath, $songfile, $kind);
+        $search_url = MypageUser::makeSearchFallbackUrl($songfile);
+    ?>
+      <tr>
+        <td>
+          <?php echo htmlspecialchars($songfile, ENT_QUOTES, 'UTF-8'); ?>
+          <?php if ($status['status'] === 'notfound'): ?>
+            <br><span class="text-danger" style="font-size:small;">[!] ファイルが見つかりません</span>
+          <?php endif; ?>
+        </td>
+        <td><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
+        <td>
+          <?php if ($status['status'] === 'ok'): ?>
+            <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-xs">リクエスト</a>
+          <?php else: ?>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-xs">キーワードで検索</a>
+          <?php endif; ?>
+          &nbsp;
+          <form method="POST" action="mypage_later.php" style="display:inline;"
+                onsubmit="return confirm('リストから削除しますか？');">
+            <input type="hidden" name="action" value="remove" />
+            <input type="hidden" name="fullpath" value="<?php echo htmlspecialchars($fullpath, ENT_QUOTES, 'UTF-8'); ?>" />
+            <button type="submit" class="btn btn-danger btn-xs">削除</button>
+          </form>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+  <?php endif; ?>
+</div>
+</body>
+</html>

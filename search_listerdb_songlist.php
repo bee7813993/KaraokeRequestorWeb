@@ -322,6 +322,7 @@ function selected_check($checkstr, $selectedstr){
    }
    return "";
 }
+mypage_action_script();
 ?>
 
 </head>
@@ -377,6 +378,10 @@ if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
+if (!empty($song_name)) {
+    $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    print mypage_save_keyword_link($song_name, 'listerdb_songlist', $sp);
+}
 print '</div>';
 
 if($programlist['recordsTotal'] == 0) {

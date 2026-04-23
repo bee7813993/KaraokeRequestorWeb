@@ -328,6 +328,7 @@ function filelistfromsong($filelist){
         print ''.basename_jp($fileinfo['found_path']);
           print '</strong>';
         print '</a>'; //divid10
+        print mypage_action_links($fileinfo['found_path'], basename_jp($fileinfo['found_path']));
         $fileintoexilts = false;
         print '</div>'; //class="col-sm-10"
 		if($listerpreviewportenable ){
@@ -599,6 +600,7 @@ function custom_sort($a, $b) {
     // 同じ優先度内では元の「項目・順番」設定の順を維持（stable sort）
     return $a['_sort_idx'] - $b['_sort_idx'];
 }
+mypage_action_script();
 ?>
 
 </head>
@@ -655,6 +657,10 @@ if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
+if (!empty($song_name)) {
+    $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    print mypage_save_keyword_link($song_name, 'listerdb_filelist', $sp);
+}
 print '</div>';
 
 if($programlist['recordsTotal'] == 0) {
@@ -745,6 +751,7 @@ if(!empty($showcomment)){
     print '<br />【'.$showcomment.'】';
 }
 print '</a>';
+print mypage_action_links($program['found_path'], $display_songname);
 		
 		 if(!check_access_from_online()){
 		     $fn = "";

@@ -1219,6 +1219,14 @@ EOD;
          print '    </ul>';
     print '</li>';
 
+    if (configbool("usemypage", true)) {
+        print '     <li ';
+        if(strpos($page, 'mypage') === 0) {
+            print 'class="active" ';
+        }
+        print '><a href="'.$prefix.'mypage.php">マイページ</a></li>';
+    }
+
     print '     <li  ';
     if($page == 'playerctrl_portal.php')
     {
@@ -1999,5 +2007,95 @@ function get_fullfilename2($l_fullpath,$word,&$filepath_utf8){
 function logtocmd_cf($msg){
   //print(mb_convert_encoding("$msg\n","SJIS-win"));
   error_log($msg."\n", 3, 'ykrdebug.log');
+}
+
+/**
+ * マイページ: 「後で歌う」「お気に入り」登録リンクを出力する
+ * $fullpath, $songfile は htmlspecialchars せずに渡す (内部でエスケープ)
+ */
+function mypage_action_links($fullpath, $songfile, $kind = '') {
+    global $config_ini;
+    if (!configbool("usemypage", true)) return '';
+
+    $fp_enc  = urlencode($fullpath);
+    $sf_enc  = urlencode($songfile);
+    $k_enc   = urlencode($kind);
+
+    $links = '<span class="mypage-actions" style="font-size:small;">';
+    $links .= ' [<a href="mypage_api.php?action=add_later'
+            . '&fullpath=' . $fp_enc
+            . '&songfile=' . $sf_enc
+            . '&kind=' . $k_enc
+            . '" onclick="mypageAction(this,\'later\');return false;"'
+            . '>後で歌う</a>]';
+    $links .= ' [<a href="mypage_api.php?action=add_favorite_song'
+            . '&fullpath=' . $fp_enc
+            . '&songfile=' . $sf_enc
+            . '&kind=' . $k_enc
+            . '" onclick="mypageAction(this,\'fav\');return false;"'
+            . '>お気に入り</a>]';
+    $links .= '</span>';
+    return $links;
+}
+
+/**
+ * マイページ: お気に入り検索ワード保存リンクを出力する
+ */
+function mypage_save_keyword_link($keyword, $search_type, $search_params = '') {
+    global $config_ini;
+    if (!configbool("usemypage", true)) return '';
+    if (empty(trim($keyword))) return '';
+
+    $url = 'mypage_api.php?action=add_favorite_keyword'
+         . '&keyword=' . urlencode($keyword)
+         . '&search_type=' . urlencode($search_type)
+         . '&search_params=' . urlencode($search_params);
+
+    return ' [<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '"'
+         . ' onclick="mypageSaveKeyword(this);return false;"'
+         . '>検索ワードを保存</a>]';
+}
+
+/**
+ * マイページ用 JS (fetch + フィードバック表示) を出力する
+ * <head> または <body> 内に一度だけ出力する
+ */
+function mypage_action_script() {
+    if (!configbool("usemypage", true)) return;
+    echo <<<'JS'
+<script>
+function mypageSaveKeyword(el) {
+    var url = el.getAttribute('href');
+    fetch(url, {method:'GET'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var notice = document.createElement('span');
+        notice.style.color = '#090';
+        notice.textContent = ' (保存しました)';
+        el.parentNode.appendChild(notice);
+        setTimeout(function(){if(notice.parentNode)notice.parentNode.removeChild(notice);}, 3000);
+      })
+      .catch(function(){});
+}
+function mypageAction(el, type) {
+    var url = el.getAttribute('href');
+    fetch(url, {method:'GET'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var msg = (type === 'later') ? '後で歌うに追加しました' : 'お気に入りに追加しました';
+        if (d.status === 'removed') {
+            msg = (type === 'later') ? '後で歌うから削除しました' : 'お気に入りから削除しました';
+        }
+        var span = el.parentNode;
+        var notice = document.createElement('span');
+        notice.style.color = '#090';
+        notice.textContent = ' (' + msg + ')';
+        span.appendChild(notice);
+        setTimeout(function(){if(notice.parentNode)notice.parentNode.removeChild(notice);}, 3000);
+      })
+      .catch(function(){});
+}
+</script>
+JS;
 }
 ?>

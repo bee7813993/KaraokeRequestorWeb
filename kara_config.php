@@ -143,6 +143,9 @@ function readconfig_array()
     if(!array_key_exists("usenewrequestlist", $config_ini)){
         $config_ini = array_merge($config_ini,array("usenewrequestlist" => 2));
     }
+    if(!array_key_exists("usemypage", $config_ini)){
+        $config_ini = array_merge($config_ini,array("usemypage" => 1));
+    }
 
     if($config_ini["playerpath_select"] == urlencode("その他PATH指定" )) {
         $config_ini = array_merge($config_ini,array("playerpath" => ($config_ini["playerpath_any"])));

@@ -262,6 +262,7 @@ function ansoninfo_gettitlelist_list($url,$l_m){
 <body>
 <?php
 shownavigatioinbar('searchreserve.php');
+mypage_action_script();
 ?>
 
 <FORM name=f action=search_anisoninfo_list.php method=get>
@@ -302,6 +303,11 @@ if(!empty($selectid) ) {
 </span>
 
 </FORM>
+<?php
+if (!empty($l_q)) {
+    echo mypage_save_keyword_link($l_q, 'anisoninfo');
+}
+?>
 
 
 <?php
