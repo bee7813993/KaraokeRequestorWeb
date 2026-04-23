@@ -1219,14 +1219,6 @@ EOD;
          print '    </ul>';
     print '</li>';
 
-    if (configbool("usemypage", true)) {
-        print '     <li ';
-        if(strpos($page, 'mypage') === 0) {
-            print 'class="active" ';
-        }
-        print '><a href="'.$prefix.'mypage.php">マイページ</a></li>';
-    }
-
     print '     <li  ';
     if($page == 'playerctrl_portal.php')
     {
@@ -1252,7 +1244,16 @@ EOD;
         print '    </p>';
     }
     
-    print '    <li class="dropdown navbar-right">';
+    print '    </ul>';
+    print '    <ul class="nav navbar-nav navbar-right">';
+    if (configbool("usemypage", true)) {
+        $mypage_active = (strpos($page, 'mypage') === 0) ? 'border:2px solid #fff;' : '';
+        print '    <li><a href="'.$prefix.'mypage.php" title="マイページ" style="padding:7px 10px;">'
+            . '<span style="display:inline-block;width:32px;height:32px;line-height:32px;'
+            . 'border-radius:50%;background:#555;text-align:center;font-size:11px;'
+            . 'font-weight:bold;color:#fff;' . $mypage_active . '">MY</span></a></li>';
+    }
+    print '    <li class="dropdown">';
     print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
 
     print '    <ul class="dropdown-menu">';

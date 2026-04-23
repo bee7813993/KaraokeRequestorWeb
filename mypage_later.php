@@ -54,25 +54,33 @@ $list = $mypage->getLaterList();
         $fullpath = $row['fullpath'];
         $kind     = $row['kind'];
         $added_dt = date('Y/m/d H:i', $row['added_at']);
+        $basename = !empty($fullpath) ? basename($fullpath) : $songfile;
 
         $status     = MypageUser::checkFileStatus($fullpath, $songfile);
-        $req_url    = MypageUser::makeRequestConfirmUrl($fullpath, $songfile, $kind);
+        $req_fullpath = ($status['status'] === 'relocated') ? $status['fullpath'] : $fullpath;
+        $req_url    = MypageUser::makeRequestConfirmUrl($req_fullpath, $songfile, $kind);
         $search_url = MypageUser::makeSearchFallbackUrl($songfile);
     ?>
       <tr>
         <td>
           <?php echo htmlspecialchars($songfile, ENT_QUOTES, 'UTF-8'); ?>
+          <?php if ($basename !== $songfile): ?>
+            <br><span class="text-muted" style="font-size:x-small;"><?php echo htmlspecialchars($basename, ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php endif; ?>
           <?php if ($status['status'] === 'notfound'): ?>
             <br><span class="text-danger" style="font-size:small;">[!] ファイルが見つかりません</span>
+          <?php elseif ($status['status'] === 'relocated'): ?>
+            <br><span class="text-warning" style="font-size:small;">[!] 別フォルダで見つかりました</span>
           <?php endif; ?>
         </td>
         <td><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
         <td>
-          <?php if ($status['status'] === 'ok'): ?>
+          <?php if ($status['status'] === 'ok' || $status['status'] === 'relocated'): ?>
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-xs">リクエスト</a>
           <?php else: ?>
-            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-xs">キーワードで検索</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-xs">曲名で再検索</a>
           <?php endif; ?>
+          <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-default btn-xs">曲名で再検索</a>
           &nbsp;
           <form method="POST" action="mypage_later.php" style="display:inline;"
                 onsubmit="return confirm('リストから削除しますか？');">

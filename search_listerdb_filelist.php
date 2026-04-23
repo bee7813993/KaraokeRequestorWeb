@@ -657,9 +657,14 @@ if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
-if (!empty($song_name)) {
+// 使われた検索ワードを特定して保存リンクを表示
+$_kw_save = !empty($anyword) ? $anyword
+    : (!empty($song_name) ? $song_name
+    : (!empty($artist) ? $artist
+    : (!empty($program_name) ? $program_name : '')));
+if (!empty($_kw_save)) {
     $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
-    print mypage_save_keyword_link($song_name, 'listerdb_filelist', $sp);
+    print mypage_save_keyword_link($_kw_save, 'listerdb_filelist', $sp);
 }
 print '</div>';
 

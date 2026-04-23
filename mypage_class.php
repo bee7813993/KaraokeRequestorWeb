@@ -347,12 +347,40 @@ class MypageUser {
     // ---- ファイル存在確認 + フォールバック検索 ----
 
     /**
-     * @return array ['status' => 'ok'|'notfound'|'renamed', 'fullpath' => ..., 'songfile' => ...]
+     * ファイルの存在を確認し、見つからない場合は同じファイル名を
+     * Everything HTTP API で検索して別フォルダのパスを返す。
+     *
+     * @return array [
+     *   'status'   => 'ok'|'relocated'|'notfound',
+     *   'fullpath' => string,   // 有効なパス（relocatedの場合は新パス）
+     *   'songfile' => string,
+     * ]
      */
     public static function checkFileStatus($fullpath, $songfile) {
         if (file_exists($fullpath)) {
             return ['status' => 'ok', 'fullpath' => $fullpath, 'songfile' => $songfile];
         }
+
+        // 元のファイルが見つからない場合、同名ファイルを Everything で検索
+        $basename = basename($fullpath);
+        if (!empty($basename)) {
+            $everythinghost = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'localhost';
+            // IPv6 アドレスはブラケットで囲む
+            if (substr_count($everythinghost, ':') > 0 && strpos($everythinghost, '[') === false) {
+                $everythinghost = '[' . $everythinghost . ']';
+            }
+            $jsonurl = 'http://' . $everythinghost . ':81/?search='
+                     . urlencode($basename) . '&json=1&count=1&path=1&path_column=3&size_column=4';
+            $json = @file_get_contents($jsonurl);
+            if ($json !== false) {
+                $data = json_decode($json, true);
+                if (!empty($data['results'][0]['name'])) {
+                    $newpath = $data['results'][0]['path'] . '\\' . $data['results'][0]['name'];
+                    return ['status' => 'relocated', 'fullpath' => $newpath, 'songfile' => $songfile];
+                }
+            }
+        }
+
         return ['status' => 'notfound', 'fullpath' => $fullpath, 'songfile' => $songfile];
     }
 
@@ -360,20 +388,21 @@ class MypageUser {
      * リクエスト確認画面へのリンクURLを生成する
      */
     public static function makeRequestConfirmUrl($fullpath, $songfile, $kind = '') {
-        $filename = basename($fullpath);
-        $url = 'request_confirm.php?filename=' . urlencode($filename)
-             . '&fullpath=' . urlencode($fullpath);
         if (!empty($kind) && $kind === 'カラオケ配信') {
-            $url = 'request_confirm.php?shop_karaoke=1&filename=' . urlencode($songfile);
+            return 'request_confirm.php?shop_karaoke=1&filename=' . urlencode($songfile);
         }
-        return $url;
+        $filename = basename($fullpath);
+        return 'request_confirm.php?filename=' . urlencode($filename)
+             . '&fullpath=' . urlencode($fullpath);
     }
 
     /**
-     * 検索画面へのフォールバックURL (songfile をキーワードにして再検索)
+     * 曲名で再検索するURLを生成する (ファイルが見つからない場合のフォールバック)
+     * anyword 検索 (search_listerdb_filelist) を使う
      */
     public static function makeSearchFallbackUrl($songfile) {
+        // 拡張子を除いた表示名をキーワードに
         $keyword = pathinfo($songfile, PATHINFO_FILENAME);
-        return 'search.php?searchword=' . urlencode($keyword);
+        return 'search_listerdb_filelist.php?anyword=' . urlencode($keyword);
     }
 }
