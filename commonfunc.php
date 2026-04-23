@@ -1195,7 +1195,31 @@ EOD;
 EOD;
     
     print '<div id="gnavi" class="collapse navbar-collapse">';
+    // マイページアイコン変数を準備
+    $mypage_active_border = '';
+    $mypage_icon_url = 'images/mypage_icon_default.svg';
+    if (configbool("usemypage", true)) {
+        $mypage_active_border = (strpos($page, 'mypage') === 0) ? 'border:3px solid #fff;' : '';
+        $mypage_icon_path = 'images/mypage_icon_default.svg';
+        if (!empty($_COOKIE['YkariUserIcon'])) {
+            $c = $_COOKIE['YkariUserIcon'];
+            // 安全なパスのみ許可
+            if (preg_match('#^images/mypage_icons/[a-f0-9\-]+\.\w{2,5}$#', $c) && @file_exists($c)) {
+                $mypage_icon_path = $c;
+            }
+        }
+        $mypage_icon_url = htmlspecialchars($mypage_icon_path, ENT_QUOTES, 'UTF-8');
+    }
     print '    <ul class="nav navbar-nav">';
+    // スマホ用：コラプスメニューの先頭にマイページリンクを表示
+    if (configbool("usemypage", true)) {
+        print '    <li class="visible-xs">'
+            . '<a href="'.$prefix.'mypage.php" style="padding:8px 15px;">'
+            . '<img src="'.$mypage_icon_url.'" alt="マイページ" '
+            . 'style="width:40px;height:40px;border-radius:50%;vertical-align:middle;'.$mypage_active_border.'">'
+            . '&nbsp;マイページ'
+            . '</a></li>';
+    }
 
 
 
@@ -1246,13 +1270,7 @@ EOD;
     
     print '    </ul>';
     print '    <ul class="nav navbar-nav navbar-right">';
-    if (configbool("usemypage", true)) {
-        $mypage_active = (strpos($page, 'mypage') === 0) ? 'border:2px solid #fff;' : '';
-        print '    <li><a href="'.$prefix.'mypage.php" title="マイページ" style="padding:7px 10px;">'
-            . '<span style="display:inline-block;width:32px;height:32px;line-height:32px;'
-            . 'border-radius:50%;background:#555;text-align:center;font-size:11px;'
-            . 'font-weight:bold;color:#fff;' . $mypage_active . '">MY</span></a></li>';
-    }
+    // PC用：Help等ドロップダウンの右にマイページアイコンを表示（hidden-xs でスマホでは非表示）
     print '    <li class="dropdown">';
     print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
 
@@ -1276,6 +1294,12 @@ EOD;
     print '      </li>';
     print '    </ul>';
     print '    </li>';
+    if (configbool("usemypage", true)) {
+        print '    <li class="hidden-xs"><a href="'.$prefix.'mypage.php" title="マイページ" style="padding:5px 8px;">'
+            . '<img src="'.$mypage_icon_url.'" alt="マイページ" '
+            . 'style="width:44px;height:44px;border-radius:50%;vertical-align:middle;'.$mypage_active_border.'">'
+            . '</a></li>';
+    }
     print '    </ul>';
     
 //    print '    <p class="navbar-text navbar-right"> <a href="'.$helpurl.'" class="navbar-link">ヘルプ</a> </p>';
@@ -1995,8 +2019,9 @@ function get_fullfilename2($l_fullpath,$word,&$filepath_utf8){
           $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
           // logtocmd_cf $jsonurl;
           $json = file_get_html_with_retry($jsonurl, 5);
+          if (empty($json)) return false;
           $decode = json_decode($json, true);
-          if( !isset($decode['results']['0']['name']) ) return false;
+          if (empty($decode) || !isset($decode['results']['0']['name'])) return false;
           $filepath = $decode['results']['0']['path'] . "\\" . $decode['results']['0']['name'];
           $filepath_utf8= $filepath;
           $filepath = mb_convert_encoding($filepath,"cp932");

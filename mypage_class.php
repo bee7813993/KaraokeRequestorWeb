@@ -24,6 +24,7 @@ class MypageUser {
             "CREATE TABLE IF NOT EXISTS mypage_user (
                 userid      TEXT PRIMARY KEY,
                 displayname TEXT DEFAULT '',
+                icon_path   TEXT DEFAULT '',
                 created_at  INTEGER NOT NULL
             )",
             "CREATE TABLE IF NOT EXISTS mypage_history (
@@ -69,6 +70,12 @@ class MypageUser {
         ];
         foreach ($sqls as $sql) {
             $this->db->exec($sql);
+        }
+        // Migrate existing tables: add icon_path if missing
+        try {
+            $this->db->exec("ALTER TABLE mypage_user ADD COLUMN icon_path TEXT DEFAULT ''");
+        } catch (Exception $e) {
+            // Column already exists; ignore
         }
     }
 
@@ -140,6 +147,59 @@ class MypageUser {
         $stmt->execute([$name, $this->userid]);
         // YkariUsername Cookie も同期
         setcookie('YkariUsername', $name, time() + 86400 * 60, '/');
+    }
+
+    // ---- アイコン ----
+
+    public function getIconPath() {
+        $stmt = $this->db->prepare(
+            "SELECT icon_path FROM mypage_user WHERE userid = ?"
+        );
+        $stmt->execute([$this->userid]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row && !empty($row['icon_path']) && @file_exists($row['icon_path'])) {
+            return $row['icon_path'];
+        }
+        return 'images/mypage_icon_default.svg';
+    }
+
+    public function updateIconPath($file_array) {
+        if (empty($file_array) || $file_array['error'] !== UPLOAD_ERR_OK) {
+            return false;
+        }
+        $allowed_mime = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'];
+        $mime = mime_content_type($file_array['tmp_name']);
+        if (!in_array($mime, $allowed_mime)) {
+            return false;
+        }
+        $ext_map = [
+            'image/jpeg'   => 'jpg',
+            'image/png'    => 'png',
+            'image/gif'    => 'gif',
+            'image/svg+xml'=> 'svg',
+            'image/webp'   => 'webp',
+        ];
+        $ext = $ext_map[$mime] ?? 'jpg';
+
+        $dir = 'images/mypage_icons/';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        // 既存アイコンを削除
+        foreach (glob($dir . $this->userid . '.*') as $old) {
+            @unlink($old);
+        }
+        $dest = $dir . $this->userid . '.' . $ext;
+        if (!move_uploaded_file($file_array['tmp_name'], $dest)) {
+            return false;
+        }
+        $stmt = $this->db->prepare(
+            "UPDATE mypage_user SET icon_path = ? WHERE userid = ?"
+        );
+        $stmt->execute([$dest, $this->userid]);
+        setcookie('YkariUserIcon', $dest, time() + 86400 * 365, '/');
+        $_COOKIE['YkariUserIcon'] = $dest;
+        return $dest;
     }
 
     // ---- 選曲履歴 ----
@@ -357,26 +417,52 @@ class MypageUser {
      * ]
      */
     public static function checkFileStatus($fullpath, $songfile) {
-        if (file_exists($fullpath)) {
+        // ファイル存在確認 (SJISパスにも対応)
+        $winfullpath = mb_convert_encoding($fullpath, 'SJIS-win', 'UTF-8');
+        if (function_exists('file_exist_check_japanese_cf')) {
+            $found = @file_exist_check_japanese_cf($winfullpath);
+        } else {
+            $found = @file_exists($winfullpath) ? $winfullpath : (@file_exists($fullpath) ? $fullpath : false);
+        }
+        if ($found !== false) {
             return ['status' => 'ok', 'fullpath' => $fullpath, 'songfile' => $songfile];
         }
 
-        // 元のファイルが見つからない場合、同名ファイルを Everything で検索
+        // 同じファイル名を ListerDB で検索（別フォルダ対応）
         $basename = basename($fullpath);
         if (!empty($basename)) {
-            $everythinghost = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : 'localhost';
-            // IPv6 アドレスはブラケットで囲む
-            if (substr_count($everythinghost, ':') > 0 && strpos($everythinghost, '[') === false) {
-                $everythinghost = '[' . $everythinghost . ']';
+            global $config_ini;
+            $lister_dbpath = '';
+            if (!empty($config_ini['listerDBPATH'])) {
+                $decoded = urldecode($config_ini['listerDBPATH']);
+                $win_dbpath = mb_convert_encoding($decoded, 'SJIS-win', 'UTF-8');
+                if (function_exists('file_exist_check_japanese_cf')) {
+                    $db_found = @file_exist_check_japanese_cf($win_dbpath);
+                } else {
+                    $db_found = @file_exists($decoded);
+                }
+                if ($db_found !== false) {
+                    $lister_dbpath = $decoded;
+                }
             }
-            $jsonurl = 'http://' . $everythinghost . ':81/?search='
-                     . urlencode($basename) . '&json=1&count=1&path=1&path_column=3&size_column=4';
-            $json = @file_get_contents($jsonurl);
-            if ($json !== false) {
-                $data = json_decode($json, true);
-                if (!empty($data['results'][0]['name'])) {
-                    $newpath = $data['results'][0]['path'] . '\\' . $data['results'][0]['name'];
-                    return ['status' => 'relocated', 'fullpath' => $newpath, 'songfile' => $songfile];
+            if (!empty($lister_dbpath)) {
+                try {
+                    require_once 'function_search_listerdb.php';
+                    $lister = new ListerDB();
+                    $lister->listerdbfile = $lister_dbpath;
+                    $listerdb = $lister->initdb();
+                    if ($listerdb) {
+                        $stmt = $listerdb->prepare(
+                            "SELECT found_path FROM t_found WHERE found_path LIKE ? LIMIT 1"
+                        );
+                        $stmt->execute(['%' . $basename . '%']);
+                        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($row) {
+                            return ['status' => 'relocated', 'fullpath' => $row['found_path'], 'songfile' => $songfile];
+                        }
+                    }
+                } catch (Exception $e) {
+                    // ListerDB 利用不可、notfound として扱う
                 }
             }
         }
