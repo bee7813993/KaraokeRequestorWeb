@@ -378,12 +378,21 @@ if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
-$_kw_save = !empty($song_name) ? $song_name
-    : (!empty($artist) ? $artist
-    : (!empty($program_name) ? $program_name : ''));
+if (!empty($song_name)) {
+    $_kw_save = $song_name;   $_kw_param = 'song_name';
+} elseif (!empty($artist)) {
+    $_kw_save = $artist;      $_kw_param = 'artist';
+} elseif (!empty($program_name)) {
+    $_kw_save = $program_name; $_kw_param = 'program_name';
+} elseif (!empty($maker_name)) {
+    $_kw_save = $maker_name;  $_kw_param = 'maker_name';
+} else {
+    $_kw_save = ''; $_kw_param = 'song_name';
+}
 if (!empty($_kw_save)) {
     $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
-    print mypage_save_keyword_link($_kw_save, 'listerdb_songlist', $sp);
+    $kw_sp = 'param=' . $_kw_param . (!empty($sp) ? '&' . $sp : '');
+    print mypage_save_keyword_link($_kw_save, 'listerdb_songlist', $kw_sp);
 }
 print '</div>';
 

@@ -424,7 +424,7 @@ if(!empty($worker) ){
 if(!empty($filename) ){
     $url = add_get_query($url , 'filename='.urlencode($filename) );
     $myformvalue = $myformvalue.'<input type="hidden" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>ファイル名</label><input type="text" class="form-control" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" /></div>';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>曲名</label><input type="text" class="form-control" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($maker_name) ){
@@ -662,10 +662,14 @@ if (!empty($anyword)) {
     $_kw_save  = $anyword;  $_kw_param = 'anyword';
 } elseif (!empty($song_name)) {
     $_kw_save  = $song_name;  $_kw_param = 'song_name';
+} elseif (!empty($filename)) {
+    $_kw_save  = $filename;  $_kw_param = 'filename';
 } elseif (!empty($artist)) {
     $_kw_save  = $artist;  $_kw_param = 'artist';
 } elseif (!empty($program_name)) {
     $_kw_save  = $program_name;  $_kw_param = 'program_name';
+} elseif (!empty($maker_name)) {
+    $_kw_save  = $maker_name;  $_kw_param = 'maker_name';
 } else {
     $_kw_save  = '';  $_kw_param = 'song_name';
 }

@@ -52,8 +52,12 @@ function build_search_url($keyword, $search_type, $search_params) {
             }
             return $url;
         case 'listerdb_songlist':
-            return 'search_listerdb_songlist.php?song_name=' . urlencode($keyword)
-                 . (!empty($params['lister_dbpath']) ? '&lister_dbpath=' . urlencode($params['lister_dbpath']) : '');
+            $param = !empty($params['param']) ? $params['param'] : 'song_name';
+            $url = 'search_listerdb_songlist.php?' . $param . '=' . urlencode($keyword);
+            if (!empty($params['lister_dbpath'])) {
+                $url .= '&lister_dbpath=' . urlencode($params['lister_dbpath']);
+            }
+            return $url;
         case 'anisoninfo':
             return 'search_anisoninfo_common.php?searchword=' . urlencode($keyword);
         case 'search':
