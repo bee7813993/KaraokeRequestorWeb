@@ -81,7 +81,7 @@ class MypageUser {
         $row = $this->db->query(
             "SELECT sql FROM sqlite_master WHERE type='table' AND name='mypage_favorite_keyword'"
         )->fetchColumn();
-        if ($row !== false && strpos($row, 'search_params') === false) {
+        if ($row !== false && strpos($row, 'UNIQUE(userid, keyword, search_type, search_params)') === false) {
             $this->db->exec("
                 CREATE TABLE IF NOT EXISTS mypage_favorite_keyword_v2 (
                     id          INTEGER PRIMARY KEY AUTOINCREMENT,
