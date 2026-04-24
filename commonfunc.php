@@ -2,7 +2,8 @@
 
 require_once 'kara_config.php';
 require_once 'prioritydb_func.php';
-//require_once("getid3/getid3.php");
+
+date_default_timezone_set('Asia/Tokyo');
 
 $showsonglengthflag = 0;
 
