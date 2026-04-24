@@ -60,7 +60,7 @@ class MypageUser {
                 search_type TEXT NOT NULL DEFAULT '',
                 search_params TEXT NOT NULL DEFAULT '',
                 added_at    INTEGER NOT NULL,
-                UNIQUE(userid, keyword, search_type)
+                UNIQUE(userid, keyword, search_type, search_params)
             )",
             "CREATE TABLE IF NOT EXISTS mypage_pair_code (
                 code        TEXT PRIMARY KEY,
@@ -76,6 +76,31 @@ class MypageUser {
             $this->db->exec("ALTER TABLE mypage_user ADD COLUMN icon_path TEXT DEFAULT ''");
         } catch (Exception $e) {
             // Column already exists; ignore
+        }
+        // Migrate: expand UNIQUE constraint on mypage_favorite_keyword to include search_params
+        $row = $this->db->query(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='mypage_favorite_keyword'"
+        )->fetchColumn();
+        if ($row !== false && strpos($row, 'search_params') === false) {
+            $this->db->exec("
+                CREATE TABLE IF NOT EXISTS mypage_favorite_keyword_v2 (
+                    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    userid      TEXT NOT NULL,
+                    keyword     TEXT NOT NULL,
+                    search_type TEXT NOT NULL DEFAULT '',
+                    search_params TEXT NOT NULL DEFAULT '',
+                    added_at    INTEGER NOT NULL,
+                    UNIQUE(userid, keyword, search_type, search_params)
+                )
+            ");
+            $this->db->exec("
+                INSERT OR IGNORE INTO mypage_favorite_keyword_v2
+                    (id, userid, keyword, search_type, search_params, added_at)
+                SELECT id, userid, keyword, search_type, search_params, added_at
+                FROM mypage_favorite_keyword
+            ");
+            $this->db->exec("DROP TABLE mypage_favorite_keyword");
+            $this->db->exec("ALTER TABLE mypage_favorite_keyword_v2 RENAME TO mypage_favorite_keyword");
         }
     }
 
