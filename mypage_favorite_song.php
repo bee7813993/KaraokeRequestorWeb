@@ -54,7 +54,8 @@ $list = $mypage->getFavoriteSongs();
         $fullpath = $row['fullpath'];
         $kind     = $row['kind'];
         $added_dt = date('Y/m/d H:i', $row['added_at']);
-        $basename = !empty($fullpath) ? basename_jp($fullpath) : $songfile;
+        $basename  = !empty($fullpath) ? basename_jp($fullpath) : $songfile;
+        $songname  = makesongnamefromfilename($basename);
 
         $status     = MypageUser::checkFileStatus($fullpath, $songfile);
         $req_fullpath = ($status['status'] === 'relocated') ? $status['fullpath'] : $fullpath;
@@ -63,8 +64,8 @@ $list = $mypage->getFavoriteSongs();
     ?>
       <tr>
         <td>
-          <?php echo htmlspecialchars($songfile, ENT_QUOTES, 'UTF-8'); ?>
-          <?php if ($basename !== $songfile): ?>
+          <?php echo htmlspecialchars($songname, ENT_QUOTES, 'UTF-8'); ?>
+          <?php if ($basename !== $songname): ?>
             <br><span class="text-muted" style="font-size:x-small;"><?php echo htmlspecialchars($basename, ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
           <?php if ($status['status'] === 'notfound'): ?>

@@ -74,7 +74,8 @@ function sort_link($label, $sort_key, $cur_sort, $cur_order) {
         $kind     = $row['kind'];
         $times    = (int)$row['times'];
         $last_dt  = date('Y/m/d H:i', $row['last_requested_at']);
-        $basename = !empty($fullpath) ? basename_jp($fullpath) : $songfile;
+        $basename  = !empty($fullpath) ? basename_jp($fullpath) : $songfile;
+        $songname  = makesongnamefromfilename($basename);
 
         $status = MypageUser::checkFileStatus($fullpath, $songfile);
         // relocated の場合は新パスでリクエスト
@@ -84,8 +85,8 @@ function sort_link($label, $sort_key, $cur_sort, $cur_order) {
     ?>
       <tr>
         <td>
-          <?php echo htmlspecialchars($songfile, ENT_QUOTES, 'UTF-8'); ?>
-          <?php if ($basename !== $songfile): ?>
+          <?php echo htmlspecialchars($songname, ENT_QUOTES, 'UTF-8'); ?>
+          <?php if ($basename !== $songname): ?>
             <br><span class="text-muted" style="font-size:x-small;"><?php echo htmlspecialchars($basename, ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
           <?php if ($status['status'] === 'notfound'): ?>
