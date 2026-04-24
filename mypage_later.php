@@ -55,9 +55,8 @@ $list = $mypage->getLaterList();
         $kind     = $row['kind'];
         $added_dt = date('Y/m/d H:i', $row['added_at']);
         $basename  = !empty($fullpath) ? basename_jp($fullpath) : $songfile;
-        $songname  = makesongnamefromfilename($basename);
-
         $status     = MypageUser::checkFileStatus($fullpath, $songfile);
+        $songname  = !empty($status['song_name']) ? $status['song_name'] : makesongnamefromfilename($basename);
         $req_fullpath = ($status['status'] === 'relocated') ? $status['fullpath'] : $fullpath;
         $req_url    = MypageUser::makeRequestConfirmUrl($req_fullpath, $songfile, $kind);
         $search_url = MypageUser::makeSearchFallbackUrl($songfile);

@@ -442,6 +442,42 @@ class MypageUser {
      * ]
      */
     public static function checkFileStatus($fullpath, $songfile) {
+        // ListerDB接続を先に準備（song_name取得とrelocated検索に共用）
+        $listerdb = null;
+        global $config_ini;
+        if (!empty($config_ini['listerDBPATH'])) {
+            $decoded = urldecode($config_ini['listerDBPATH']);
+            $win_dbpath = mb_convert_encoding($decoded, 'SJIS-win', 'UTF-8');
+            if (function_exists('file_exist_check_japanese_cf')) {
+                $db_ok = @file_exist_check_japanese_cf($win_dbpath);
+            } else {
+                $db_ok = @file_exists($decoded);
+            }
+            if ($db_ok !== false) {
+                try {
+                    require_once 'function_search_listerdb.php';
+                    $lister = new ListerDB();
+                    $lister->listerdbfile = $decoded;
+                    $listerdb = $lister->initdb();
+                } catch (Exception $e) {
+                    $listerdb = null;
+                }
+            }
+        }
+
+        // ListerDB から song_name を exact match で取得
+        $song_name = '';
+        if ($listerdb) {
+            try {
+                $stmt = $listerdb->prepare(
+                    "SELECT song_name FROM t_found WHERE found_path = ? LIMIT 1"
+                );
+                $stmt->execute([$fullpath]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) $song_name = $row['song_name'];
+            } catch (Exception $e) {}
+        }
+
         // ファイル存在確認 (SJISパスにも対応)
         $winfullpath = mb_convert_encoding($fullpath, 'SJIS-win', 'UTF-8');
         if (function_exists('file_exist_check_japanese_cf')) {
@@ -450,49 +486,25 @@ class MypageUser {
             $found = @file_exists($winfullpath) ? $winfullpath : (@file_exists($fullpath) ? $fullpath : false);
         }
         if ($found !== false) {
-            return ['status' => 'ok', 'fullpath' => $fullpath, 'songfile' => $songfile];
+            return ['status' => 'ok', 'fullpath' => $fullpath, 'songfile' => $songfile, 'song_name' => $song_name];
         }
 
         // 同じファイル名を ListerDB で検索（別フォルダ対応）
         $basename = basename($fullpath);
-        if (!empty($basename)) {
-            global $config_ini;
-            $lister_dbpath = '';
-            if (!empty($config_ini['listerDBPATH'])) {
-                $decoded = urldecode($config_ini['listerDBPATH']);
-                $win_dbpath = mb_convert_encoding($decoded, 'SJIS-win', 'UTF-8');
-                if (function_exists('file_exist_check_japanese_cf')) {
-                    $db_found = @file_exist_check_japanese_cf($win_dbpath);
-                } else {
-                    $db_found = @file_exists($decoded);
+        if (!empty($basename) && $listerdb) {
+            try {
+                $stmt = $listerdb->prepare(
+                    "SELECT found_path, song_name FROM t_found WHERE found_path LIKE ? LIMIT 1"
+                );
+                $stmt->execute(['%' . $basename . '%']);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row) {
+                    return ['status' => 'relocated', 'fullpath' => $row['found_path'], 'songfile' => $songfile, 'song_name' => $row['song_name']];
                 }
-                if ($db_found !== false) {
-                    $lister_dbpath = $decoded;
-                }
-            }
-            if (!empty($lister_dbpath)) {
-                try {
-                    require_once 'function_search_listerdb.php';
-                    $lister = new ListerDB();
-                    $lister->listerdbfile = $lister_dbpath;
-                    $listerdb = $lister->initdb();
-                    if ($listerdb) {
-                        $stmt = $listerdb->prepare(
-                            "SELECT found_path FROM t_found WHERE found_path LIKE ? LIMIT 1"
-                        );
-                        $stmt->execute(['%' . $basename . '%']);
-                        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                        if ($row) {
-                            return ['status' => 'relocated', 'fullpath' => $row['found_path'], 'songfile' => $songfile];
-                        }
-                    }
-                } catch (Exception $e) {
-                    // ListerDB 利用不可、notfound として扱う
-                }
-            }
+            } catch (Exception $e) {}
         }
 
-        return ['status' => 'notfound', 'fullpath' => $fullpath, 'songfile' => $songfile];
+        return ['status' => 'notfound', 'fullpath' => $fullpath, 'songfile' => $songfile, 'song_name' => ''];
     }
 
     /**
