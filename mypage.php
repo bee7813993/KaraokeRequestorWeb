@@ -150,6 +150,33 @@ $icon_path = $mypage->getIconPath();
     </div>
   </div>
 
+  <?php
+  global $config_ini;
+  $google_link_row = null;
+  if (configbool("usemypage", true)) {
+      $google_link_row = $mypage->getGoogleLink();
+  }
+  $google_configured = (!empty($config_ini['google_client_id']) && !empty($config_ini['google_relay_secret']));
+  if ($google_configured):
+  ?>
+  <div class="panel panel-default" style="margin-top:10px;">
+    <div class="panel-heading"><h4 class="panel-title">Google同期</h4></div>
+    <div class="panel-body">
+      <?php if ($google_link_row): ?>
+      <p>
+        <span class="glyphicon glyphicon-ok text-success"></span>
+        Googleアカウント（<?php echo htmlspecialchars($google_link_row['google_email'], ENT_QUOTES, 'UTF-8'); ?>）と連携中
+      </p>
+      <?php else: ?>
+      <p class="text-muted">未連携</p>
+      <?php endif; ?>
+      <a href="mypage_google_sync.php" class="btn btn-default btn-sm">
+        <span class="glyphicon glyphicon-cloud"></span> Google同期の設定
+      </a>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <hr>
   <p>
     <a href="mypage_link_device.php">別の端末でも同じマイページを使う（デバイスリンク）</a>

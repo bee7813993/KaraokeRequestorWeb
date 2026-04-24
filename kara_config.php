@@ -146,6 +146,26 @@ function readconfig_array()
     if(!array_key_exists("usemypage", $config_ini)){
         $config_ini = array_merge($config_ini,array("usemypage" => 1));
     }
+    if(!array_key_exists("google_client_id", $config_ini)){
+        $config_ini["google_client_id"] = "";
+    } else {
+        $config_ini["google_client_id"] = urldecode($config_ini["google_client_id"]);
+    }
+    if(!array_key_exists("google_client_secret", $config_ini)){
+        $config_ini["google_client_secret"] = "";
+    } else {
+        $config_ini["google_client_secret"] = urldecode($config_ini["google_client_secret"]);
+    }
+    if(!array_key_exists("google_relay_url", $config_ini)){
+        $config_ini["google_relay_url"] = "https://ykr.moe/mypage_google_callback.php";
+    } else {
+        $config_ini["google_relay_url"] = urldecode($config_ini["google_relay_url"]);
+    }
+    if(!array_key_exists("google_relay_secret", $config_ini)){
+        $config_ini["google_relay_secret"] = "";
+    } else {
+        $config_ini["google_relay_secret"] = urldecode($config_ini["google_relay_secret"]);
+    }
 
     if($config_ini["playerpath_select"] == urlencode("その他PATH指定" )) {
         $config_ini = array_merge($config_ini,array("playerpath" => ($config_ini["playerpath_any"])));

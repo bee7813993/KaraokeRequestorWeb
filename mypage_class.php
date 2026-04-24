@@ -67,6 +67,16 @@ class MypageUser {
                 userid      TEXT NOT NULL,
                 expires_at  INTEGER NOT NULL
             )",
+            "CREATE TABLE IF NOT EXISTS mypage_google_link (
+                userid          TEXT PRIMARY KEY,
+                google_sub      TEXT NOT NULL UNIQUE,
+                google_email    TEXT NOT NULL DEFAULT '',
+                access_token    TEXT NOT NULL DEFAULT '',
+                refresh_token   TEXT NOT NULL DEFAULT '',
+                token_expires_at INTEGER NOT NULL DEFAULT 0,
+                last_synced_at  INTEGER NOT NULL DEFAULT 0,
+                linked_at       INTEGER NOT NULL
+            )",
         ];
         foreach ($sqls as $sql) {
             $this->db->exec($sql);
@@ -657,5 +667,48 @@ class MypageUser {
         $basename = function_exists('basename_jp') ? basename_jp($songfile) : basename(str_replace('\\', '/', $songfile));
         $keyword  = pathinfo($basename, PATHINFO_FILENAME);
         return 'search_listerdb_filelist.php?anyword=' . urlencode($keyword);
+    }
+
+    // ---- Google 連携 ----
+
+    public function linkGoogle($google_sub, $email, $access_token, $refresh_token, $expires_at) {
+        $stmt = $this->db->prepare(
+            "INSERT OR REPLACE INTO mypage_google_link
+             (userid, google_sub, google_email, access_token, refresh_token, token_expires_at, linked_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([$this->userid, $google_sub, $email, $access_token, $refresh_token, $expires_at, time()]);
+    }
+
+    public function unlinkGoogle() {
+        $this->db->prepare("DELETE FROM mypage_google_link WHERE userid=?")->execute([$this->userid]);
+    }
+
+    public function getGoogleLink() {
+        $stmt = $this->db->prepare(
+            "SELECT google_sub, google_email, access_token, refresh_token, token_expires_at, last_synced_at
+             FROM mypage_google_link WHERE userid=?"
+        );
+        $stmt->execute([$this->userid]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function updateGoogleTokens($access_token, $expires_at) {
+        $this->db->prepare(
+            "UPDATE mypage_google_link SET access_token=?, token_expires_at=? WHERE userid=?"
+        )->execute([$access_token, $expires_at, $this->userid]);
+    }
+
+    public function updateGoogleSyncTime() {
+        $this->db->prepare(
+            "UPDATE mypage_google_link SET last_synced_at=? WHERE userid=?"
+        )->execute([time(), $this->userid]);
+    }
+
+    public static function findUserByGoogleSub($db, $google_sub) {
+        $stmt = $db->prepare("SELECT userid FROM mypage_google_link WHERE google_sub=?");
+        $stmt->execute([$google_sub]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ? $row['userid'] : null;
     }
 }
