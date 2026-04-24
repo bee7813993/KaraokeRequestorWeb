@@ -1269,6 +1269,7 @@ EOD;
     }
     
     print '    </ul>';
+    print '<style>@media(min-width:768px){.navbar-nav.navbar-right{margin-right:0!important;}}</style>';
     print '    <ul class="nav navbar-nav navbar-right">';
     // PC用：Help等ドロップダウンの右にマイページアイコンを表示（hidden-xs でスマホでは非表示）
     print '    <li class="dropdown">';

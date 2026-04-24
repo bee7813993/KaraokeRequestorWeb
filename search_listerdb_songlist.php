@@ -392,6 +392,7 @@ if (!empty($song_name)) {
 if (!empty($_kw_save)) {
     $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
     $kw_sp = 'param=' . $_kw_param . (!empty($sp) ? '&' . $sp : '');
+    if (!empty($match)) $kw_sp .= '&match=' . urlencode($match);
     print mypage_save_keyword_link($_kw_save, 'listerdb_songlist', $kw_sp);
 }
 print '</div>';

@@ -122,8 +122,8 @@ print <<<EOM
 <div class="bg-info" >
 <form action="search_listerdb_songlist.php" method="GET" >
   <div class="form-group">
-    <label>ファイル名</label>
-    <input type="test" name="filename" id="filename" class="form-control" placeholder="ファイル名">
+    <label>曲名</label>
+    <input type="text" name="song_name" id="song_name" class="form-control" placeholder="曲名">
     <div class="form-group"><label>作品名</label><input type="text" class="form-control" name="program_name" value="" /></div>
     <div class="form-group"><label>歌手名</label><input type="text" class="form-control" name="artist" value="" /></div>
     <div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="" /></div>

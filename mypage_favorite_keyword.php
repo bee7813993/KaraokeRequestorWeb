@@ -37,6 +37,14 @@ $search_type_labels = [
     'listerdb_songlist'   => '曲名検索',
     'anisoninfo'          => 'アニソン検索',
 ];
+$param_labels = [
+    'anyword'      => 'なんでも検索',
+    'song_name'    => '曲名検索',
+    'filename'     => '曲名検索',
+    'artist'       => '歌手名検索',
+    'program_name' => '作品名検索',
+    'maker_name'   => '製作会社検索',
+];
 
 function build_search_url($keyword, $search_type, $search_params) {
     $params = [];
@@ -50,12 +58,18 @@ function build_search_url($keyword, $search_type, $search_params) {
             if (!empty($params['lister_dbpath'])) {
                 $url .= '&lister_dbpath=' . urlencode($params['lister_dbpath']);
             }
+            if (!empty($params['match'])) {
+                $url .= '&match=' . urlencode($params['match']);
+            }
             return $url;
         case 'listerdb_songlist':
             $param = !empty($params['param']) ? $params['param'] : 'song_name';
             $url = 'search_listerdb_songlist.php?' . $param . '=' . urlencode($keyword);
             if (!empty($params['lister_dbpath'])) {
                 $url .= '&lister_dbpath=' . urlencode($params['lister_dbpath']);
+            }
+            if (!empty($params['match'])) {
+                $url .= '&match=' . urlencode($params['match']);
             }
             return $url;
         case 'anisoninfo':
@@ -91,7 +105,14 @@ function build_search_url($keyword, $search_type, $search_params) {
         $search_params = $row['search_params'];
         $kw_id       = (int)$row['id'];
         $added_dt    = date('Y/m/d H:i', $row['added_at']);
-        $type_label  = isset($search_type_labels[$search_type]) ? $search_type_labels[$search_type] : $search_type;
+        $row_params  = [];
+        if (!empty($search_params)) parse_str($search_params, $row_params);
+        $row_param   = !empty($row_params['param']) ? $row_params['param'] : '';
+        if (!empty($row_param) && isset($param_labels[$row_param])) {
+            $type_label = $param_labels[$row_param];
+        } else {
+            $type_label = isset($search_type_labels[$search_type]) ? $search_type_labels[$search_type] : $search_type;
+        }
         $search_url  = build_search_url($kw, $search_type, $search_params);
     ?>
       <tr>
