@@ -131,6 +131,25 @@ $icon_path = $mypage->getIconPath();
     </div>
   </div>
 
+  <div class="panel panel-default" style="margin-top:10px;">
+    <div class="panel-heading"><h4 class="panel-title">データのバックアップ / 復元</h4></div>
+    <div class="panel-body">
+      <p>
+        <a href="mypage_export.php" class="btn btn-default">
+          <span class="glyphicon glyphicon-download-alt"></span> エクスポート（JSONダウンロード）
+        </a>
+        &nbsp;
+        <a href="mypage_import.php" class="btn btn-default">
+          <span class="glyphicon glyphicon-upload"></span> インポート
+        </a>
+      </p>
+      <p class="text-muted" style="font-size:small;">
+        エクスポートで選曲履歴・お気に入り等をJSONファイルとして保存できます。<br>
+        インポートで別の端末やバックアップからデータを復元できます。
+      </p>
+    </div>
+  </div>
+
   <hr>
   <p>
     <a href="mypage_link_device.php">別の端末でも同じマイページを使う（デバイスリンク）</a>

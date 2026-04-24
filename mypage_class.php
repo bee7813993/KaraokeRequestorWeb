@@ -371,6 +371,134 @@ class MypageUser {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // ---- インポート / エクスポート ----
+
+    public function exportData() {
+        $stmt = $this->db->prepare(
+            "SELECT fullpath, songfile, kind, requested_at
+             FROM mypage_history WHERE userid = ? ORDER BY requested_at ASC"
+        );
+        $stmt->execute([$this->userid]);
+        $history = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->db->prepare(
+            "SELECT fullpath, songfile, kind, added_at
+             FROM mypage_later WHERE userid = ? ORDER BY added_at ASC"
+        );
+        $stmt->execute([$this->userid]);
+        $later = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->db->prepare(
+            "SELECT fullpath, songfile, kind, added_at
+             FROM mypage_favorite_song WHERE userid = ? ORDER BY added_at ASC"
+        );
+        $stmt->execute([$this->userid]);
+        $fav_songs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $stmt = $this->db->prepare(
+            "SELECT keyword, search_type, search_params, added_at
+             FROM mypage_favorite_keyword WHERE userid = ? ORDER BY added_at ASC"
+        );
+        $stmt->execute([$this->userid]);
+        $fav_keywords = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'version'           => 1,
+            'exported_at'       => time(),
+            'displayname'       => $this->getDisplayName(),
+            'history'           => $history,
+            'later'             => $later,
+            'favorite_songs'    => $fav_songs,
+            'favorite_keywords' => $fav_keywords,
+        ];
+    }
+
+    /**
+     * @param array $data     exportData() と同じ構造のデータ
+     * @param bool  $overwrite true=既存データを削除してから挿入、false=追加（重複はスキップ）
+     * @return array ['ok'=>bool, 'counts'=>array|null, 'error'=>string|null]
+     */
+    public function importData(array $data, bool $overwrite = false) {
+        if (empty($data['version']) || (int)$data['version'] !== 1) {
+            return ['ok' => false, 'error' => '対応していないフォーマットです（version フィールドを確認してください）。'];
+        }
+        $counts = ['history' => 0, 'later' => 0, 'favorite_songs' => 0, 'favorite_keywords' => 0];
+        $this->db->beginTransaction();
+        try {
+            if ($overwrite) {
+                foreach (['mypage_history', 'mypage_later', 'mypage_favorite_song', 'mypage_favorite_keyword'] as $tbl) {
+                    $this->db->prepare("DELETE FROM $tbl WHERE userid=?")->execute([$this->userid]);
+                }
+            }
+
+            // 選曲履歴
+            if (!empty($data['history']) && is_array($data['history'])) {
+                $ins = $this->db->prepare(
+                    "INSERT INTO mypage_history (userid, fullpath, songfile, kind, requested_at) VALUES (?, ?, ?, ?, ?)"
+                );
+                $chk = $this->db->prepare(
+                    "SELECT 1 FROM mypage_history WHERE userid=? AND fullpath=? AND requested_at=? LIMIT 1"
+                );
+                foreach ($data['history'] as $row) {
+                    if (empty($row['fullpath'])) continue;
+                    if (!$overwrite) {
+                        $chk->execute([$this->userid, $row['fullpath'], (int)($row['requested_at'] ?? 0)]);
+                        if ($chk->fetch()) continue;
+                    }
+                    $ins->execute([$this->userid, $row['fullpath'], $row['songfile'] ?? '', $row['kind'] ?? '', (int)($row['requested_at'] ?? time())]);
+                    $counts['history']++;
+                }
+            }
+
+            // 後で歌う
+            if (!empty($data['later']) && is_array($data['later'])) {
+                $ins = $this->db->prepare(
+                    "INSERT OR IGNORE INTO mypage_later (userid, fullpath, songfile, kind, added_at) VALUES (?, ?, ?, ?, ?)"
+                );
+                foreach ($data['later'] as $row) {
+                    if (empty($row['fullpath'])) continue;
+                    $ins->execute([$this->userid, $row['fullpath'], $row['songfile'] ?? '', $row['kind'] ?? '', (int)($row['added_at'] ?? time())]);
+                    $counts['later']++;
+                }
+            }
+
+            // お気に入り曲
+            if (!empty($data['favorite_songs']) && is_array($data['favorite_songs'])) {
+                $ins = $this->db->prepare(
+                    "INSERT OR IGNORE INTO mypage_favorite_song (userid, fullpath, songfile, kind, added_at) VALUES (?, ?, ?, ?, ?)"
+                );
+                foreach ($data['favorite_songs'] as $row) {
+                    if (empty($row['fullpath'])) continue;
+                    $ins->execute([$this->userid, $row['fullpath'], $row['songfile'] ?? '', $row['kind'] ?? '', (int)($row['added_at'] ?? time())]);
+                    $counts['favorite_songs']++;
+                }
+            }
+
+            // お気に入り検索ワード
+            if (!empty($data['favorite_keywords']) && is_array($data['favorite_keywords'])) {
+                $ins = $this->db->prepare(
+                    "INSERT OR IGNORE INTO mypage_favorite_keyword (userid, keyword, search_type, search_params, added_at) VALUES (?, ?, ?, ?, ?)"
+                );
+                foreach ($data['favorite_keywords'] as $row) {
+                    if (empty($row['keyword'])) continue;
+                    $ins->execute([$this->userid, mb_substr(trim($row['keyword']), 0, 256), $row['search_type'] ?? '', $row['search_params'] ?? '', (int)($row['added_at'] ?? time())]);
+                    $counts['favorite_keywords']++;
+                }
+            }
+
+            // 表示名（上書きモードのみ）
+            if ($overwrite && !empty($data['displayname'])) {
+                $this->updateDisplayName($data['displayname']);
+            }
+
+            $this->db->commit();
+            return ['ok' => true, 'counts' => $counts];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
+    }
+
     // ---- デバイスリンク (ペアリングコード) ----
 
     public function generatePairingCode() {
