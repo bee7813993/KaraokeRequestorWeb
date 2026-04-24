@@ -328,6 +328,7 @@ function filelistfromsong($filelist){
         print ''.basename_jp($fileinfo['found_path']);
           print '</strong>';
         print '</a>'; //divid10
+        print mypage_action_links($fileinfo['found_path'], basename_jp($fileinfo['found_path']));
         $fileintoexilts = false;
         print '</div>'; //class="col-sm-10"
 		if($listerpreviewportenable ){
@@ -423,7 +424,7 @@ if(!empty($worker) ){
 if(!empty($filename) ){
     $url = add_get_query($url , 'filename='.urlencode($filename) );
     $myformvalue = $myformvalue.'<input type="hidden" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" />';
-    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>ファイル名</label><input type="text" class="form-control" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" /></div>';
+    $myformvalue_shown = $myformvalue_shown.'<div class="form-group"><label>曲名</label><input type="text" class="form-control" name="filename" value="'.htmlspecialchars($filename, ENT_QUOTES, 'UTF-8').'" /></div>';
 }
 
 if(!empty($maker_name) ){
@@ -599,6 +600,7 @@ function custom_sort($a, $b) {
     // 同じ優先度内では元の「項目・順番」設定の順を維持（stable sort）
     return $a['_sort_idx'] - $b['_sort_idx'];
 }
+mypage_action_script();
 ?>
 
 </head>
@@ -655,6 +657,28 @@ if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
+// 使われた検索ワードを特定して保存リンクを表示
+if (!empty($anyword)) {
+    $_kw_save  = $anyword;  $_kw_param = 'anyword';
+} elseif (!empty($song_name)) {
+    $_kw_save  = $song_name;  $_kw_param = 'song_name';
+} elseif (!empty($filename)) {
+    $_kw_save  = $filename;  $_kw_param = 'filename';
+} elseif (!empty($artist)) {
+    $_kw_save  = $artist;  $_kw_param = 'artist';
+} elseif (!empty($program_name)) {
+    $_kw_save  = $program_name;  $_kw_param = 'program_name';
+} elseif (!empty($maker_name)) {
+    $_kw_save  = $maker_name;  $_kw_param = 'maker_name';
+} else {
+    $_kw_save  = '';  $_kw_param = 'song_name';
+}
+if (!empty($_kw_save)) {
+    $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    $kw_sp = 'param=' . $_kw_param . (!empty($sp) ? '&' . $sp : '');
+    if (!empty($match)) $kw_sp .= '&match=' . urlencode($match);
+    print mypage_save_keyword_link($_kw_save, 'listerdb_filelist', $kw_sp);
+}
 print '</div>';
 
 if($programlist['recordsTotal'] == 0) {
@@ -745,6 +769,7 @@ if(!empty($showcomment)){
     print '<br />【'.$showcomment.'】';
 }
 print '</a>';
+print mypage_action_links($program['found_path'], $display_songname);
 		
 		 if(!check_access_from_online()){
 		     $fn = "";

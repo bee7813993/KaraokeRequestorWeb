@@ -15,3 +15,6 @@ list/
 
 # Visual Studio cache/options directory
 .vs/
+
+# デバッグ用スクリプト（本番環境に含めない）
+mypage_google_debug.php

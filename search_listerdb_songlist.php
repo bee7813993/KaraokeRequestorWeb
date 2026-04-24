@@ -322,6 +322,7 @@ function selected_check($checkstr, $selectedstr){
    }
    return "";
 }
+mypage_action_script();
 ?>
 
 </head>
@@ -377,6 +378,23 @@ if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
 print '</form>';
+if (!empty($song_name)) {
+    $_kw_save = $song_name;   $_kw_param = 'song_name';
+} elseif (!empty($artist)) {
+    $_kw_save = $artist;      $_kw_param = 'artist';
+} elseif (!empty($program_name)) {
+    $_kw_save = $program_name; $_kw_param = 'program_name';
+} elseif (!empty($maker_name)) {
+    $_kw_save = $maker_name;  $_kw_param = 'maker_name';
+} else {
+    $_kw_save = ''; $_kw_param = 'song_name';
+}
+if (!empty($_kw_save)) {
+    $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    $kw_sp = 'param=' . $_kw_param . (!empty($sp) ? '&' . $sp : '');
+    if (!empty($match)) $kw_sp .= '&match=' . urlencode($match);
+    print mypage_save_keyword_link($_kw_save, 'listerdb_songlist', $kw_sp);
+}
 print '</div>';
 
 if($programlist['recordsTotal'] == 0) {

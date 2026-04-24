@@ -2,7 +2,8 @@
 
 require_once 'kara_config.php';
 require_once 'prioritydb_func.php';
-//require_once("getid3/getid3.php");
+
+date_default_timezone_set('Asia/Tokyo');
 
 $showsonglengthflag = 0;
 
@@ -1195,7 +1196,31 @@ EOD;
 EOD;
     
     print '<div id="gnavi" class="collapse navbar-collapse">';
+    // マイページアイコン変数を準備
+    $mypage_active_border = '';
+    $mypage_icon_url = 'images/mypage_icon_default.svg';
+    if (configbool("usemypage", true)) {
+        $mypage_active_border = (strpos($page, 'mypage') === 0) ? 'border:3px solid #fff;' : '';
+        $mypage_icon_path = 'images/mypage_icon_default.svg';
+        if (!empty($_COOKIE['YkariUserIcon'])) {
+            $c = $_COOKIE['YkariUserIcon'];
+            // 安全なパスのみ許可
+            if (preg_match('#^images/mypage_icons/[a-f0-9\-]+\.\w{2,5}$#', $c) && @file_exists($c)) {
+                $mypage_icon_path = $c;
+            }
+        }
+        $mypage_icon_url = htmlspecialchars($mypage_icon_path, ENT_QUOTES, 'UTF-8');
+    }
     print '    <ul class="nav navbar-nav">';
+    // スマホ用：コラプスメニューの先頭にマイページリンクを表示
+    if (configbool("usemypage", true)) {
+        print '    <li class="visible-xs">'
+            . '<a href="'.$prefix.'mypage.php" style="padding:8px 15px;">'
+            . '<img src="'.$mypage_icon_url.'" alt="マイページ" '
+            . 'style="width:40px;height:40px;border-radius:50%;vertical-align:middle;'.$mypage_active_border.'">'
+            . '&nbsp;マイページ'
+            . '</a></li>';
+    }
 
 
 
@@ -1244,7 +1269,11 @@ EOD;
         print '    </p>';
     }
     
-    print '    <li class="dropdown navbar-right">';
+    print '    </ul>';
+    print '<style>@media(min-width:768px){.navbar-nav.navbar-right{margin-right:0!important;}}</style>';
+    print '    <ul class="nav navbar-nav navbar-right">';
+    // PC用：Help等ドロップダウンの右にマイページアイコンを表示（hidden-xs でスマホでは非表示）
+    print '    <li class="dropdown">';
     print '    <a href="#" class="dropdown-toggle" data-toggle="dropdown" href="">Help等  <b class="caret"></b></a>';
 
     print '    <ul class="dropdown-menu">';
@@ -1267,6 +1296,12 @@ EOD;
     print '      </li>';
     print '    </ul>';
     print '    </li>';
+    if (configbool("usemypage", true)) {
+        print '    <li class="hidden-xs"><a href="'.$prefix.'mypage.php" title="マイページ" style="padding:5px 10px;line-height:0;">'
+            . '<img src="'.$mypage_icon_url.'" alt="マイページ" '
+            . 'style="width:40px;height:40px;border-radius:50%;display:inline-block;'.$mypage_active_border.'">'
+            . '</a></li>';
+    }
     print '    </ul>';
     
 //    print '    <p class="navbar-text navbar-right"> <a href="'.$helpurl.'" class="navbar-link">ヘルプ</a> </p>';
@@ -1986,8 +2021,9 @@ function get_fullfilename2($l_fullpath,$word,&$filepath_utf8){
           $jsonurl = "http://" . "localhost" . ":81/?search=" . urlencode($word) . "&sort=size&ascending=0&path=1&path_column=3&size_column=4&json=1";
           // logtocmd_cf $jsonurl;
           $json = file_get_html_with_retry($jsonurl, 5);
+          if (empty($json)) return false;
           $decode = json_decode($json, true);
-          if( !isset($decode['results']['0']['name']) ) return false;
+          if (empty($decode) || !isset($decode['results']['0']['name'])) return false;
           $filepath = $decode['results']['0']['path'] . "\\" . $decode['results']['0']['name'];
           $filepath_utf8= $filepath;
           $filepath = mb_convert_encoding($filepath,"cp932");
@@ -1999,5 +2035,95 @@ function get_fullfilename2($l_fullpath,$word,&$filepath_utf8){
 function logtocmd_cf($msg){
   //print(mb_convert_encoding("$msg\n","SJIS-win"));
   error_log($msg."\n", 3, 'ykrdebug.log');
+}
+
+/**
+ * マイページ: 「後で歌う」「お気に入り」登録リンクを出力する
+ * $fullpath, $songfile は htmlspecialchars せずに渡す (内部でエスケープ)
+ */
+function mypage_action_links($fullpath, $songfile, $kind = '') {
+    global $config_ini;
+    if (!configbool("usemypage", true)) return '';
+
+    $fp_enc  = urlencode($fullpath);
+    $sf_enc  = urlencode($songfile);
+    $k_enc   = urlencode($kind);
+
+    $links = '<span class="mypage-actions" style="font-size:small;">';
+    $links .= ' [<a href="mypage_api.php?action=add_later'
+            . '&fullpath=' . $fp_enc
+            . '&songfile=' . $sf_enc
+            . '&kind=' . $k_enc
+            . '" onclick="mypageAction(this,\'later\');return false;"'
+            . '>後で歌う</a>]';
+    $links .= ' [<a href="mypage_api.php?action=add_favorite_song'
+            . '&fullpath=' . $fp_enc
+            . '&songfile=' . $sf_enc
+            . '&kind=' . $k_enc
+            . '" onclick="mypageAction(this,\'fav\');return false;"'
+            . '>お気に入り</a>]';
+    $links .= '</span>';
+    return $links;
+}
+
+/**
+ * マイページ: お気に入り検索ワード保存リンクを出力する
+ */
+function mypage_save_keyword_link($keyword, $search_type, $search_params = '') {
+    global $config_ini;
+    if (!configbool("usemypage", true)) return '';
+    if (empty(trim($keyword))) return '';
+
+    $url = 'mypage_api.php?action=add_favorite_keyword'
+         . '&keyword=' . urlencode($keyword)
+         . '&search_type=' . urlencode($search_type)
+         . '&search_params=' . urlencode($search_params);
+
+    return ' [<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '"'
+         . ' onclick="mypageSaveKeyword(this);return false;"'
+         . '>検索ワードを保存</a>]';
+}
+
+/**
+ * マイページ用 JS (fetch + フィードバック表示) を出力する
+ * <head> または <body> 内に一度だけ出力する
+ */
+function mypage_action_script() {
+    if (!configbool("usemypage", true)) return;
+    echo <<<'JS'
+<script>
+function mypageSaveKeyword(el) {
+    var url = el.getAttribute('href');
+    fetch(url, {method:'GET'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var notice = document.createElement('span');
+        notice.style.color = '#090';
+        notice.textContent = ' (保存しました)';
+        el.parentNode.appendChild(notice);
+        setTimeout(function(){if(notice.parentNode)notice.parentNode.removeChild(notice);}, 3000);
+      })
+      .catch(function(){});
+}
+function mypageAction(el, type) {
+    var url = el.getAttribute('href');
+    fetch(url, {method:'GET'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var msg = (type === 'later') ? '後で歌うに追加しました' : 'お気に入りに追加しました';
+        if (d.status === 'removed') {
+            msg = (type === 'later') ? '後で歌うから削除しました' : 'お気に入りから削除しました';
+        }
+        var span = el.parentNode;
+        var notice = document.createElement('span');
+        notice.style.color = '#090';
+        notice.textContent = ' (' + msg + ')';
+        span.appendChild(notice);
+        setTimeout(function(){if(notice.parentNode)notice.parentNode.removeChild(notice);}, 3000);
+      })
+      .catch(function(){});
+}
+</script>
+JS;
 }
 ?>

@@ -150,7 +150,7 @@ showuppermenu($target,$linkoption);
         $linecounter++;
     }
     if($target == "song_name" ){
-        $formtext = $formtext . ' <input type="text" name="filename" id="song_name" class="form-control" placeholder="'.$searchitem.'">';
+        $formtext = $formtext . ' <input type="text" name="song_name" id="song_name" class="form-control" placeholder="'.$searchitem.'">';
         $linecounter++;
     }
     if($linecounter){

@@ -782,6 +782,7 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
                     }
                     print '<p>';
                     print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信で予約する＞ </a>';
+                    print mypage_action_links('', $songinfo, 'カラオケ配信');
                     print '</p>';
                 }
                 echo "</td>"."\n";
@@ -901,6 +902,7 @@ function anisoninfo_display_finallist2($list,$nexturlbase,$selectid = NULL)
                     }
                     print '<p>';
                     print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信で予約する＞ </a>';
+                    print mypage_action_links('', $songinfo, 'カラオケ配信');
                     print '</p>';
                 }
                 echo "</td>"."\n";
@@ -980,6 +982,7 @@ function anisoninfo_display_finallist2($list,$nexturlbase,$selectid = NULL)
                     }
                     print '<p>';
                     print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信で予約する＞ </a>';
+                    print mypage_action_links('', $songinfo, 'カラオケ配信');
                     print '</p>';
                 }
                 echo "</td>"."\n";

@@ -242,6 +242,9 @@ print '</pre>';
     <li class="menu">
      <a href="#pfwd" class="menulink" > pfwd </a>
     </li>
+    <li class="menu">
+     <a href="#googlesync" class="menulink" > Google同期設定 </a>
+    </li>
     </ul>
     <li class="menu">
      <a href="#hostname" class="menulink" > 接続設定（オンライン、ホスト名） </a>
@@ -1408,6 +1411,36 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
 </script>
     <button type="button" class="btn btn-default" onclick="GenRandomKeyword();" > キーワードランダム生成 </button>
     </div>
+  </div>
+
+  <!---- Google同期設定 ----->
+  <div class="form-group">
+    <h3 id="googlesync" class="radio control-label menulink"> Google同期設定 </h3>
+    <label class="control-label">
+      <small>マイページデータをGoogle Driveに保存し、複数サーバー間で共有する機能です。</small>
+    </label>
+
+    <h4 class="control-label"> Google Client ID </h4>
+    <input type="text" name="google_client_id" class="form-control"
+      value="<?php echo htmlspecialchars(urldecode($config_ini['google_client_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+      placeholder="例: 123456789-xxxx.apps.googleusercontent.com" />
+
+    <h4 class="control-label"> Google Client Secret </h4>
+    <small class="text-muted">中継サーバー（ykr.moe）側に設定する場合は空欄にしてください。</small>
+    <input type="text" name="google_client_secret" class="form-control"
+      value="<?php echo htmlspecialchars(urldecode($config_ini['google_client_secret'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+      placeholder="中継サーバーを使う場合は空欄" />
+
+    <h4 class="control-label"> 中継サーバーURL </h4>
+    <input type="text" name="google_relay_url" class="form-control"
+      value="<?php echo htmlspecialchars(urldecode($config_ini['google_relay_url'] ?? 'https://ykr.moe/mypage_google_callback.php'), ENT_QUOTES, 'UTF-8'); ?>"
+      placeholder="https://ykr.moe/mypage_google_callback.php" />
+
+    <h4 class="control-label"> 中継シークレット </h4>
+    <small class="text-muted">中継サーバーとこのサーバー間の共有秘密鍵です。中継サーバー管理者から入手してください。</small>
+    <input type="text" name="google_relay_secret" class="form-control"
+      value="<?php echo htmlspecialchars(urldecode($config_ini['google_relay_secret'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
+      placeholder="中継サーバー管理者から入手したシークレット" />
   </div>
 
   <input type="submit" class="btn btn-default btn-lg" value="設定" />

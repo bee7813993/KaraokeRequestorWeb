@@ -248,6 +248,13 @@ if (is_numeric($selectid)) {
 }
 file_get_contents("http://localhost/updaterequestlist.php");
 
+// マイページ: 新規追加時のみ選曲履歴に記録 (差し替えは記録しない)
+if (!is_numeric($selectid) && configbool("usemypage", true)) {
+    require_once 'mypage_class.php';
+    $mypage = new MypageUser($db);
+    $mypage->addHistory($l_fullpath, $displayfilename, $l_kind);
+}
+
 if(!empty($DEBUG)){
     print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加しました。<br>");
     print("1秒後に登録ページに移動します<br>");
