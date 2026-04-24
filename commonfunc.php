@@ -1295,9 +1295,9 @@ EOD;
     print '    </ul>';
     print '    </li>';
     if (configbool("usemypage", true)) {
-        print '    <li class="hidden-xs"><a href="'.$prefix.'mypage.php" title="マイページ" style="padding:5px 8px;">'
+        print '    <li class="hidden-xs"><a href="'.$prefix.'mypage.php" title="マイページ" style="padding:5px 10px;line-height:0;">'
             . '<img src="'.$mypage_icon_url.'" alt="マイページ" '
-            . 'style="width:44px;height:44px;border-radius:50%;vertical-align:middle;'.$mypage_active_border.'">'
+            . 'style="width:40px;height:40px;border-radius:50%;display:inline-block;'.$mypage_active_border.'">'
             . '</a></li>';
     }
     print '    </ul>';
