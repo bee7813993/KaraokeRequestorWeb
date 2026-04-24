@@ -54,7 +54,7 @@ $list = $mypage->getLaterList();
         $fullpath = $row['fullpath'];
         $kind     = $row['kind'];
         $added_dt = date('Y/m/d H:i', $row['added_at']);
-        $basename = !empty($fullpath) ? basename($fullpath) : $songfile;
+        $basename = !empty($fullpath) ? basename_jp($fullpath) : $songfile;
 
         $status     = MypageUser::checkFileStatus($fullpath, $songfile);
         $req_fullpath = ($status['status'] === 'relocated') ? $status['fullpath'] : $fullpath;
@@ -77,10 +77,10 @@ $list = $mypage->getLaterList();
         <td>
           <?php if ($status['status'] === 'ok' || $status['status'] === 'relocated'): ?>
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-xs">リクエスト</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-default btn-xs">曲名で再検索</a>
           <?php else: ?>
             <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-xs">曲名で再検索</a>
           <?php endif; ?>
-          <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-default btn-xs">曲名で再検索</a>
           &nbsp;
           <form method="POST" action="mypage_later.php" style="display:inline;"
                 onsubmit="return confirm('リストから削除しますか？');">

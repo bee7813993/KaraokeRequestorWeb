@@ -74,7 +74,7 @@ function sort_link($label, $sort_key, $cur_sort, $cur_order) {
         $kind     = $row['kind'];
         $times    = (int)$row['times'];
         $last_dt  = date('Y/m/d H:i', $row['last_requested_at']);
-        $basename = !empty($fullpath) ? basename($fullpath) : $songfile;
+        $basename = !empty($fullpath) ? basename_jp($fullpath) : $songfile;
 
         $status = MypageUser::checkFileStatus($fullpath, $songfile);
         // relocated の場合は新パスでリクエスト

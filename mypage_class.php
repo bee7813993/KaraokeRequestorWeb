@@ -477,7 +477,8 @@ class MypageUser {
         if (!empty($kind) && $kind === 'カラオケ配信') {
             return 'request_confirm.php?shop_karaoke=1&filename=' . urlencode($songfile);
         }
-        $filename = basename($fullpath);
+        // Windows パス対応の basename (Linuxでは basename() が \ を認識しないため)
+        $filename = function_exists('basename_jp') ? basename_jp($fullpath) : basename(str_replace('\\', '/', $fullpath));
         return 'request_confirm.php?filename=' . urlencode($filename)
              . '&fullpath=' . urlencode($fullpath);
     }
@@ -487,8 +488,9 @@ class MypageUser {
      * anyword 検索 (search_listerdb_filelist) を使う
      */
     public static function makeSearchFallbackUrl($songfile) {
-        // 拡張子を除いた表示名をキーワードに
-        $keyword = pathinfo($songfile, PATHINFO_FILENAME);
+        // Windows パス対応: パス区切りを除いてファイル名のみ取り出し、拡張子も除く
+        $basename = function_exists('basename_jp') ? basename_jp($songfile) : basename(str_replace('\\', '/', $songfile));
+        $keyword  = pathinfo($basename, PATHINFO_FILENAME);
         return 'search_listerdb_filelist.php?anyword=' . urlencode($keyword);
     }
 }
