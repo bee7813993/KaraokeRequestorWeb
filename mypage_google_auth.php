@@ -3,6 +3,7 @@
  * Google OAuth 連携開始
  * ローカルサーバーから呼び出し → 中継サーバー経由で Google OAuth を開始する
  */
+require_once 'commonfunc.php';
 require_once 'kara_config.php';
 require_once 'mypage_class.php';
 

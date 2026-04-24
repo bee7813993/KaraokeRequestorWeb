@@ -5,6 +5,7 @@
  * 中継サーバーからリダイレクトされてきた payload を検証し、
  * Google アカウントをローカルユーザーに紐付ける。
  */
+require_once 'commonfunc.php';
 require_once 'kara_config.php';
 require_once 'mypage_class.php';
 require_once 'mypage_google_drive.php';
