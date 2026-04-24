@@ -9,11 +9,11 @@ class GoogleDriveHelper {
     private $token_refreshed = false;
 
     public function __construct($access_token, $refresh_token, $token_expires_at, $relay_url, $relay_secret) {
-        $this->access_token    = $access_token;
-        $this->refresh_token   = $refresh_token;
+        $this->access_token     = $access_token;
+        $this->refresh_token    = $refresh_token;
         $this->token_expires_at = $token_expires_at;
-        $this->relay_url       = $relay_url;
-        $this->relay_secret    = $relay_secret;
+        $this->relay_url        = $relay_url;
+        $this->relay_secret     = $relay_secret;
     }
 
     // 最新トークンを返す（refreshした場合は新しい値）
@@ -34,16 +34,16 @@ class GoogleDriveHelper {
         if (!empty($client_secret)) {
             // 中継サーバー自身: 直接リフレッシュ
             $client_id = $config_ini['google_client_id'] ?? '';
-            $resp = $this->httpPost('https://oauth2.googleapis.com/token', [
+            $resp = $this->curlPost('https://oauth2.googleapis.com/token', http_build_query([
                 'client_id'     => $client_id,
                 'client_secret' => $client_secret,
                 'refresh_token' => $this->refresh_token,
                 'grant_type'    => 'refresh_token',
-            ]);
+            ]), ['Content-Type: application/x-www-form-urlencoded']);
         } else {
             // ローカルサーバー: 中継経由でリフレッシュ
             $hmac = hash_hmac('sha256', $this->refresh_token, $this->relay_secret);
-            $resp = $this->httpPost(
+            $resp = $this->curlPost(
                 $this->relay_url . '?action=refresh',
                 json_encode(['refresh_token' => $this->refresh_token, 'hmac' => $hmac]),
                 ['Content-Type: application/json']
@@ -52,9 +52,9 @@ class GoogleDriveHelper {
 
         $data = json_decode($resp, true);
         if (!empty($data['access_token'])) {
-            $this->access_token    = $data['access_token'];
+            $this->access_token     = $data['access_token'];
             $this->token_expires_at = time() + (int)($data['expires_in'] ?? 3600);
-            $this->token_refreshed = true;
+            $this->token_refreshed  = true;
         }
     }
 
@@ -65,7 +65,7 @@ class GoogleDriveHelper {
             'q'      => "name='mypage_data.json'",
             'fields' => 'files(id)',
         ]);
-        $resp = $this->request('GET', $url);
+        $resp = $this->curlRequest('GET', $url);
         $data = json_decode($resp, true);
         return $data['files'][0]['id'] ?? null;
     }
@@ -74,7 +74,9 @@ class GoogleDriveHelper {
     public function readData() {
         $file_id = $this->findFileId();
         if (!$file_id) return null;
-        $resp = $this->request('GET', 'https://www.googleapis.com/drive/v3/files/' . urlencode($file_id) . '?alt=media');
+        $resp = $this->curlRequest('GET',
+            'https://www.googleapis.com/drive/v3/files/' . urlencode($file_id) . '?alt=media'
+        );
         if (!$resp) return null;
         return json_decode($resp, true);
     }
@@ -86,7 +88,7 @@ class GoogleDriveHelper {
 
         if ($file_id) {
             // 既存ファイルを更新
-            $resp = $this->request(
+            $resp = $this->curlRequest(
                 'PATCH',
                 'https://www.googleapis.com/upload/drive/v3/files/' . urlencode($file_id) . '?uploadType=media',
                 $json,
@@ -99,54 +101,79 @@ class GoogleDriveHelper {
             $body     = "--{$boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{$meta}\r\n"
                       . "--{$boundary}\r\nContent-Type: application/json\r\n\r\n{$json}\r\n"
                       . "--{$boundary}--";
-            $resp = $this->request(
+            $resp = $this->curlRequest(
                 'POST',
                 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
                 $body,
                 ["Content-Type: multipart/related; boundary={$boundary}"]
             );
         }
+
         $decoded = json_decode($resp, true);
-        return !empty($decoded['id']) || (isset($decoded['size']) );
+        return !empty($decoded['id']) || isset($decoded['size']);
     }
 
-    private function request($method, $url, $body = null, $extra_headers = []) {
+    // ---- HTTP ヘルパー (cURL 優先、フォールバックで file_get_contents) ----
+
+    private function curlRequest($method, $url, $body = null, $extra_headers = []) {
         $this->ensureValidToken();
         $headers = array_merge(
             ['Authorization: Bearer ' . $this->access_token],
             $extra_headers
         );
+        return $this->curlExec($method, $url, $body, $headers);
+    }
+
+    private function curlPost($url, $body, $extra_headers = []) {
+        return $this->curlExec('POST', $url, $body, $extra_headers);
+    }
+
+    private function curlExec($method, $url, $body, $headers) {
+        if (function_exists('curl_init')) {
+            return $this->curlExecViaCurl($method, $url, $body, $headers);
+        }
+        return $this->curlExecViaStream($method, $url, $body, $headers);
+    }
+
+    private function curlExecViaCurl($method, $url, $body, $headers) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        switch (strtoupper($method)) {
+            case 'POST':
+                curl_setopt($ch, CURLOPT_POST, true);
+                if ($body !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+                break;
+            case 'PATCH':
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+                if ($body !== null) curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+                break;
+            case 'GET':
+            default:
+                break;
+        }
+
+        $resp = curl_exec($ch);
+        curl_close($ch);
+        return $resp;
+    }
+
+    private function curlExecViaStream($method, $url, $body, $headers) {
         $opts = [
             'http' => [
                 'method'        => $method,
                 'header'        => implode("\r\n", $headers),
                 'ignore_errors' => true,
-                'timeout'       => 15,
+                'timeout'       => 20,
             ],
             'ssl' => ['verify_peer' => true],
         ];
         if ($body !== null) {
             $opts['http']['content'] = $body;
         }
-        return @file_get_contents($url, false, stream_context_create($opts));
-    }
-
-    private function httpPost($url, $data, $extra_headers = []) {
-        $is_json    = in_array('Content-Type: application/json', $extra_headers);
-        $content    = $is_json ? $data : http_build_query($data);
-        $def_header = $is_json ? 'Content-Type: application/json' : 'Content-Type: application/x-www-form-urlencoded';
-        $headers    = array_merge([$def_header], $extra_headers);
-        $headers    = array_unique($headers);
-        $opts = [
-            'http' => [
-                'method'        => 'POST',
-                'header'        => implode("\r\n", $headers),
-                'content'       => $content,
-                'ignore_errors' => true,
-                'timeout'       => 10,
-            ],
-            'ssl' => ['verify_peer' => true],
-        ];
         return @file_get_contents($url, false, stream_context_create($opts));
     }
 }
