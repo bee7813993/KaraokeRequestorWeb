@@ -41,7 +41,9 @@ $items = [];
 foreach ($rows as $idx => $row) {
     $songfile     = $row['songfile'];
     $display_name = $songfile;
-    if (!empty($row['secret']) && $row['secret'] == 1) {
+    $nowplaying_val = !empty($row['nowplaying']) ? $row['nowplaying'] : '1';
+    if (!empty($row['secret']) && $row['secret'] == 1
+        && ($nowplaying_val === '未再生' || $nowplaying_val === '1')) {
         $display_name = mb_substr($songfile, 0, 1) . '***';
     }
     $items[] = [
