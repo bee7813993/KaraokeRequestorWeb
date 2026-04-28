@@ -998,14 +998,23 @@ function start_song($db,$id,$addplaytimes = 0){
                     pclose($fp);
 
             //★ MPCの再生開始時に音量を指定値に戻す（設定で有効にしている場合）
-            if(array_key_exists('startvolume50',$config_ini)){	//★
-                if($config_ini['startvolume50'] != 1)  {	//★
+            //   制作者別音量初期値（requesttable.volume >= 0）が設定されている場合はそちらを優先する。
+            $req_volume = -1;
+            if(array_key_exists("volume" , $row) && $row["volume"] !== null && $row["volume"] !== ''){
+                $req_volume = intval($row["volume"]);
+            }
+            if($req_volume >= 0 && $req_volume <= 100){
+                set_volume($req_volume);
+            }else{
+                if(array_key_exists('startvolume50',$config_ini)){	//★
+                    if($config_ini['startvolume50'] != 1)  {	//★
+                    }else{	//★
+                        set_volume($config_ini["startvolume"]);	//★
+                    }	//★
                 }else{	//★
                     set_volume($config_ini["startvolume"]);	//★
                 }	//★
-            }else{	//★
-                set_volume($config_ini["startvolume"]);	//★
-            }	//★
+            }
             //★ 音声トラックの切替が無いor１回の場合、再生開始を遅延させる。
             if($row["track"] == 0){  //★
               sleep(1);  //★

@@ -561,8 +561,9 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8) && !empty($vi
 }
 echo '<input type="hidden" name="duration" value="' . (int)$duration_seconds . '" />' . "\n";
 
-// 制作者別音ズレデフォルト値を取得（ListerDB の found_worker と完全一致で判定）
+// 制作者別音ズレ・音量デフォルト値を取得（ListerDB の found_worker と完全一致で判定）
 $audiodelay_init = 0;
+$volume_init = -1; // -1 = 未設定（全体設定の戻す音量を使用）
 if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
     $delay_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'creator_audiodelay.json';
     if (file_exists($delay_file)) {
@@ -601,15 +602,21 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8)) {
                         }
                     }
                     $audiodelay_init = isset($drule['delay']) ? intval($drule['delay']) : 0;
+                    if (isset($drule['volume']) && $drule['volume'] !== '' && intval($drule['volume']) >= 0 && intval($drule['volume']) <= 100) {
+                        $volume_init = intval($drule['volume']);
+                    }
                     break;
                 }
             }
         }
     }
 }
-// 差し替えモードの場合は元のリクエストの音ズレ値を優先
+// 差し替えモードの場合は元のリクエストの音ズレ・音量値を優先
 if (is_numeric($selectid) && !empty($selectrequest)) {
     $audiodelay_init = intval($selectrequest[0]['audiodelay']);
+    if (array_key_exists('volume', $selectrequest[0]) && $selectrequest[0]['volume'] !== null && $selectrequest[0]['volume'] !== '') {
+        $volume_init = intval($selectrequest[0]['volume']);
+    }
 }
 ?>
 <?php if ($shop_karaoke != 1 && $filetype == 1): ?>
@@ -621,6 +628,15 @@ if (is_numeric($selectid) && !empty($selectrequest)) {
   <input type="hidden" name="audiodelay" id="audiodelay_val" value="<?php echo intval($audiodelay_init); ?>" />
   </small>
 </div>
+<div style="margin-top:4px; margin-bottom:4px; color:#888;">
+  <small>音量初期値：
+  <button type="button" class="btn btn-default btn-xs" onclick="changeVolume(-5)">-5</button>
+  <span id="volume_disp" style="display:inline-block; min-width:80px; text-align:center;"><?php echo ($volume_init < 0 ? '未設定' : intval($volume_init)); ?></span>
+  <button type="button" class="btn btn-default btn-xs" onclick="changeVolume(5)">+5</button>
+  <button type="button" class="btn btn-default btn-xs" onclick="resetVolume()">未設定に戻す</button>
+  <input type="hidden" name="volume" id="volume_val" value="<?php echo intval($volume_init); ?>" />
+  </small>
+</div>
 <script>
 function changeAudioDelay(delta){
   var inp = document.getElementById('audiodelay_val');
@@ -630,6 +646,27 @@ function changeAudioDelay(delta){
   if(v > 9900) v = 9900;
   inp.value = v;
   disp.textContent = v + ' ms';
+}
+function changeVolume(delta){
+  var inp = document.getElementById('volume_val');
+  var disp = document.getElementById('volume_disp');
+  var cur = parseInt(inp.value, 10);
+  // 未設定（-1）から増減した場合は 50 を起点にする
+  if(isNaN(cur) || cur < 0){
+    cur = 50;
+  } else {
+    cur = cur + delta;
+  }
+  if(cur < 0) cur = 0;
+  if(cur > 100) cur = 100;
+  inp.value = cur;
+  disp.textContent = cur;
+}
+function resetVolume(){
+  var inp = document.getElementById('volume_val');
+  var disp = document.getElementById('volume_disp');
+  inp.value = -1;
+  disp.textContent = '未設定';
 }
 </script>
 <?php endif; ?>
