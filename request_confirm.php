@@ -103,8 +103,6 @@ function pickupsinger($rt, $moreuser = "")
 }
 
 function selectedcheck_rc($rt,$singer,$beforesinger = 'none' ){
-    $rt_i = array_reverse($rt);
-
     if($beforesinger == 'none'){
       foreach($rt as $row){
       
