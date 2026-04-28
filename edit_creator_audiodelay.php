@@ -129,18 +129,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!in_array($fps_cond, ['以上', '以下'], true)) $fps_cond = '以下';
 
         $volume_set = false;
-        $volume = -1;
+        $volume = 0;
         if ($volume_in !== '') {
             if (!is_numeric($volume_in)) {
-                $message      = '音量は数値で指定してください';
+                $message      = '音量増減は数値で指定してください';
                 $message_type = 'danger';
             } else {
                 $volume = intval($volume_in);
-                if ($volume < 0 || $volume > 100) {
-                    $message      = '音量は 0 ～ 100 の範囲で指定してください';
+                if ($volume < -100 || $volume > 100) {
+                    $message      = '音量増減は -100 ～ +100 の範囲で指定してください';
                     $message_type = 'danger';
                 } else {
-                    $volume_set = true;
+                    $volume_set = ($volume !== 0);
                 }
             }
         }
@@ -260,8 +260,8 @@ $rules = load_creator_delays($delay_file);
         </td>
         <td><?php echo htmlspecialchars($rule['delay'], ENT_QUOTES, 'UTF-8'); ?> ms</td>
         <td>
-          <?php if (isset($rule['volume']) && $rule['volume'] !== '' && intval($rule['volume']) >= 0): ?>
-            <?php echo htmlspecialchars(intval($rule['volume']), ENT_QUOTES, 'UTF-8'); ?>
+          <?php if (isset($rule['volume']) && $rule['volume'] !== '' && intval($rule['volume']) !== 0): ?>
+            <?php $rv = intval($rule['volume']); echo htmlspecialchars(($rv > 0 ? '+' : '') . $rv, ENT_QUOTES, 'UTF-8'); ?> %
           <?php else: ?>
             <span class="text-muted">指定なし</span>
           <?php endif; ?>
@@ -315,12 +315,12 @@ $rules = load_creator_delays($delay_file);
     </div>
 
     <div class="form-group">
-      <label>音量初期値 <small class="text-muted">（任意・0～100）</small></label>
+      <label>音量増減 <small class="text-muted">（任意・-100～+100）</small></label>
       <div class="input-group" style="max-width:200px;">
-        <input type="number" name="volume" class="form-control" value="" step="1" min="0" max="100" placeholder="例: 60">
+        <input type="number" name="volume" class="form-control" value="0" step="5" min="-100" max="100" placeholder="例: -20">
         <span class="input-group-addon">%</span>
       </div>
-      <p class="help-block">0 ～ 100 で指定。空欄にすると全体設定の「戻す音量」を使用します。</p>
+      <p class="help-block">正の値で音量を上げる、負の値で下げる。0 または空欄は全体設定の「戻す音量」をそのまま使用します。</p>
     </div>
 
     <div class="form-group">
@@ -353,7 +353,7 @@ $rules = load_creator_delays($delay_file);
             例：「30fps 以下」と指定すると 30fps 以下の動画にのみ適用されます。</li>
         <li>設定した音ズレ値は予約確認画面の初期値として表示されます。ユーザーが変更することもできます。</li>
         <li>音ズレ値は 100ms 単位で、-9900ms ～ +9900ms の範囲で設定できます。</li>
-        <li>音量初期値（0～100）を指定すると、再生開始時に MPC の音量がその値に設定されます。空欄の場合は全体設定の「戻す音量」が使用されます。</li>
+        <li>音量増減（-100～+100）を指定すると、再生開始時に全体設定の「戻す音量」にその値を加算して MPC の音量を設定します。サーバーごとに基準音量が異なる場合でも相対値で調整できます。0 または未指定の場合は全体設定をそのまま使用します。</li>
       </ol>
     </div>
   </div>

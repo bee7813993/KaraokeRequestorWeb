@@ -998,13 +998,17 @@ function start_song($db,$id,$addplaytimes = 0){
                     pclose($fp);
 
             //★ MPCの再生開始時に音量を指定値に戻す（設定で有効にしている場合）
-            //   制作者別音量初期値（requesttable.volume >= 0）が設定されている場合はそちらを優先する。
-            $req_volume = -1;
+            //   制作者別音量増減（requesttable.volume != 0）が設定されている場合は
+            //   startvolume にオフセットを加算した値を設定する。
+            $req_volume_offset = 0;
             if(array_key_exists("volume" , $row) && $row["volume"] !== null && $row["volume"] !== ''){
-                $req_volume = intval($row["volume"]);
+                $v = intval($row["volume"]);
+                if($v >= -100 && $v <= 100) $req_volume_offset = $v;
             }
-            if($req_volume >= 0 && $req_volume <= 100){
-                set_volume($req_volume);
+            if($req_volume_offset !== 0){
+                $base_volume = array_key_exists('startvolume', $config_ini) ? intval($config_ini['startvolume']) : 50;
+                $applied_volume = max(0, min(100, $base_volume + $req_volume_offset));
+                set_volume($applied_volume);
             }else{
                 if(array_key_exists('startvolume50',$config_ini)){	//★
                     if($config_ini['startvolume50'] != 1)  {	//★

@@ -88,11 +88,11 @@ if(array_key_exists("audiodelay", $_REQUEST)) {
     }
 }
 
-$l_volume = -1; // -1 = 未設定（再生時は全体設定の戻す音量を使用）
+$l_volume = 0; // 0 = 変更なし（全体設定の戻す音量をそのまま使用）
 if(array_key_exists("volume", $_REQUEST) && $_REQUEST["volume"] !== '') {
     $l_volume = intval($_REQUEST["volume"]);
-    if($l_volume < 0 || $l_volume > 100){
-        $l_volume = -1;
+    if($l_volume < -100 || $l_volume > 100){
+        $l_volume = 0;
     }
 }
 
