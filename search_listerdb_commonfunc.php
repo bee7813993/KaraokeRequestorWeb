@@ -20,67 +20,26 @@ function headerlistcheck_column($oneheaderlist,$headerlist,$key){
 }
 
 
-function showuppermenu($target,$linkoption){
-print '<div class="container  ">';
-print '  <div class="row ">';
-print '    <div class="col-xs-3 col-md-3  ">';
-print '      <a href="search_listerdb_program_index.php?'.$linkoption.'" class="btn ';
-if($target == 'program_name' ) {
-print 'btn-primary';
-}else {
-print 'btn-default';
-}
-print ' center-block" >作品名 </a>';
-
-print '    </div>';
-print '    <div class="col-xs-3 col-md-3">';
-//print '      <a href="search_listerdb_artist.php?'.$linkoption.'" class="btn ';
-print '      <a href="search_listerdb_column_index.php?target=song_artist&'.$linkoption.'" class="btn ';
-if($target == 'song_artist' ) {
-print 'btn-primary';
-}else {
-print 'btn-default';
-}
-print ' center-block" >歌手名 </a>';
-print '    </div>';
-print '    <div class="col-xs-3 col-md-3">';
-print '      <a href="search_listerdb_column_index.php?target=maker_name&'.$linkoption.'" class="btn ';
-if($target == 'maker_name' ) {
-print 'btn-primary';
-}else {
-print 'btn-default';
-}
-print ' center-block" >制作会社 </a>';
-print '    </div>';
-print '    <div class="col-xs-3 col-md-3">';
-print '      <a href="search_listerdb_column_index.php?target=song_name&'.$linkoption.'" class="btn ';
-if($target == 'song_name' ) {
-print 'btn-primary';
-}else {
-print 'btn-default';
-}
-print ' center-block" >曲名 </a>';
-print '    </div>';
-print '    <div class="col-xs-3 col-md-3">';
-print '      <a href="search_listerdb_column_index.php?target=tie_up_group_name&'.$linkoption.'" class="btn ';
-if($target == 'tie_up_group_name' ) {
-print 'btn-primary';
-}else {
-print 'btn-default';
-}
-print ' center-block" >シリーズ </a>';
-print '    </div>';
-print '    <div class="col-xs-3 col-md-3 " >';
-print '      <a style="white-space: normal;" href="search_listerdb_anysearch_index.php?'.$linkoption.'" class="btn ';
-if($target == 'filename' ) {
-print 'btn-primary';
-}else {
-print 'btn-default';
-}
-print ' center-block" >詳細検索</a>';
-print '    </div>';
-print '  </div>';
-print '</div>';
+function showuppermenu($target, $linkoption) {
+    $items = [
+        ['key' => 'filename',         'label' => '詳細検索（キーワード）', 'href' => 'search_listerdb_anysearch_index.php?' . $linkoption],
+        ['key' => 'program_name',     'label' => '作品名',               'href' => 'search_listerdb_program_index.php?' . $linkoption],
+        ['key' => 'song_artist',      'label' => '歌手名',               'href' => 'search_listerdb_column_index.php?target=song_artist&' . $linkoption],
+        ['key' => 'song_name',        'label' => '曲名',                 'href' => 'search_listerdb_column_index.php?target=song_name&' . $linkoption],
+        ['key' => 'tie_up_group_name','label' => 'シリーズ',             'href' => 'search_listerdb_column_index.php?target=tie_up_group_name&' . $linkoption],
+        ['key' => 'maker_name',       'label' => '制作会社',             'href' => 'search_listerdb_column_index.php?target=maker_name&' . $linkoption],
+    ];
+    print '<div class="container">';
+    print '<div class="search-mode-nav">';
+    foreach ($items as $item) {
+        $active = ($item['key'] === $target) ? ' active' : '';
+        print '<a href="' . htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8') . '"'
+            . ' class="search-mode-btn' . $active . '">'
+            . htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8')
+            . '</a>';
+    }
+    print '</div>';
+    print '</div>';
 
     
 }

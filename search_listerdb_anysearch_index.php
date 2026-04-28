@@ -1,174 +1,142 @@
-<?php 
+<?php
 require_once 'commonfunc.php';
 require_once 'search_listerdb_commonfunc.php';
-print_meta_header();
-if(!isset($includepage) )
-$includepage = "";
 
-if(array_key_exists("includepage", $_REQUEST)) {
-    $includepage = $_REQUEST["includepage"];
-}
+if (!isset($includepage)) $includepage = '';
+if (array_key_exists("includepage", $_REQUEST)) $includepage = $_REQUEST["includepage"];
 
-if(!isset($includepage) )
-$filesearch = "";
+$filesearch = '';
+if (array_key_exists("filesearch", $_REQUEST)) $filesearch = $_REQUEST["filesearch"];
 
-if(array_key_exists("filesearch", $_REQUEST)) {
-    $filesearch = $_REQUEST["filesearch"];
-}
-
-if(!empty($filesearch)){
+if (!empty($filesearch)) {
     print printfilenamesearch();
-    return 0;
-    die();
+    return;
 }
 
-$lister_dbpath = "list\List.sqlite3";
-if(array_key_exists("listerDBPATH", $config_ini)) {
+$lister_dbpath = "list\\List.sqlite3";
+if (array_key_exists("listerDBPATH", $config_ini)) {
     $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
-$selectid = '';
-if(array_key_exists("selectid", $_REQUEST)) {
-    $selectid = $_REQUEST["selectid"];
+$selectid   = array_key_exists("selectid", $_REQUEST) ? $_REQUEST["selectid"] : '';
+$linkoption = !empty($selectid) ? 'selectid=' . rawurlencode($selectid) : '';
+
+// アルファベット配列（未使用だが他のincludeとの互換性のため維持）
+$alpha_list = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+$num_list   = ['1','2','3','4','5','6','7','8','9','0'];
+$kana_list  = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ','た','ち','つ','て','と',
+                'な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ','ま','み','む','め','も','や','ゐ','ゆ','ゑ','よ',
+                'ら','り','る','れ','ろ','わ','を','ん'];
+
+if (empty($includepage)) {
+    print '<!doctype html><html lang="ja"><head>';
+    print_meta_header();
+    print_bs5_search_head();
+    print '<title>りすたーDB検索</title>';
+    print '</head><body>';
+    if (empty($filesearch)) {
+        shownavigatioinbar('searchreserve.php');
+    }
 }
-$linkoption = '';
-if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
 
-// アルファベット配列
-$alpha_list = array( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' );
+showuppermenu('filename', $linkoption);
 
-// 数字配列
-$num_list = array( '1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,'0' );
+function printfilenamesearch()
+{
+    global $lister_dbpath, $selectid;
 
-// かな配列
-$kana_list = array( 'あ' ,'い' ,'う' ,'え' ,'お' ,'か' ,'き' ,'く' ,'け' ,'こ' ,'さ' ,'し' ,'す' ,'せ' ,'そ' ,'た' ,'ち' ,'つ' ,'て' ,'と' ,'な' ,'に' ,'ぬ' ,'ね' ,'の' ,'は' ,'ひ' ,'ふ' ,'へ' ,'ほ' ,'ま' ,'み' ,'む' ,'め' ,'も' ,'や' ,'ゐ' ,'ゆ' ,'ゑ' ,'よ' ,'ら' ,'り' ,'る' ,'れ' ,'ろ' ,'わ' ,'を' ,'ん');
+    $sid_field = !empty($selectid)
+        ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
+        : '';
+    $db_field = !empty($lister_dbpath)
+        ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
+        : '';
 
-   $errmsg = "";
-
-if(empty($includepage)){
-print '<html>';
-print '<head>';
-print_meta_header();
-
-print <<<EOM
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta http-equiv="Content-Script-Type" content="text/javascript" />
-
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-  <script type="text/javascript">
-
-    // ここに処理を記述します。
-  </script>
-  <title>リスターDB検索画面</title>
-  <link type="text/css" rel="stylesheet" href="css/style.css" />
-  <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-
-
-</head>
-<body>
-EOM;
-if(empty($filesearch) )
-    shownavigatioinbar('searchreserve.php');
-}
-    showuppermenu('filename',$linkoption);
-?>
-
-<?php
-function printfilenamesearch() {
-  global $lister_dbpath;
-  global $selectid;
-  
-print <<<EOM
-<div class="container  ">
-<h1> キーワード検索 </h1>
-<div class="bg-info" >
-
-<form action="search_listerdb_filelist.php" method="GET" >
-  <div class="form-group">
-    <label>検索ワード （「ふりがな」での検索も可能です）</label>
-    <input type="test" name="anyword" id="anyword" class="form-control" placeholder="作品名、曲名、歌手名、ファイル名の一部">
-EOM;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
-if(!empty($selectid))
-    print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
-print <<<EOM
-  </div>
-  <button type="submit" class="btn btn-default">検索</button>
-</form>
-
-</div>
-</div>
-EOM;
+    print '<div class="container py-3">';
+    print '<div class="search-hero">';
+    print '  <p class="form-label-sm mb-2">検索ワード <small>（ふりがな・作品名・曲名・歌手名・ファイル名の一部）</small></p>';
+    print '  <form action="search_listerdb_filelist.php" method="GET">';
+    print '    <div class="search-input-wrap">';
+    print '      <input type="text" name="anyword" id="anyword" class="form-control-themed"';
+    print '             placeholder="作品名、曲名、歌手名、ファイル名の一部" autocomplete="off" />';
+    print '      <button type="submit" class="btn-search-submit">検索</button>';
+    print '    </div>';
+    print    $db_field . $sid_field;
+    print '  </form>';
+    print '</div>';
+    print '</div>';
 }
 
 printfilenamesearch();
 
-print <<<EOM
-<hr />
-<div class="container  ">
-<h1> 詳細検索 </h1>
-<div class="bg-info" >
-<form action="search_listerdb_songlist.php" method="GET" >
-  <div class="form-group">
-    <label>曲名</label>
-    <input type="text" name="song_name" id="song_name" class="form-control" placeholder="曲名">
-    <div class="form-group"><label>作品名</label><input type="text" class="form-control" name="program_name" value="" /></div>
-    <div class="form-group"><label>歌手名</label><input type="text" class="form-control" name="artist" value="" /></div>
-    <div class="form-group"><label>製作会社</label><input type="text" class="form-control" name="maker_name" value="" /></div>
-    <div class="form-group"><label>作品シリーズ名</label><input type="text" class="form-control" name="tie_up_group_name" value="" /></div>
-    <div class="form-group"><label>動画製作者</label><input type="text" class="form-control" name="worker" value="" /></div>
-    <div class="form-group">
-    <label>更新日範囲 始め</label>
-    <input type="date"  class="form-control" name="datestart" value="0" />
+// --- 詳細検索フォーム ---
+$sid_field = !empty($selectid)
+    ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
+    : '';
+$db_field = !empty($lister_dbpath)
+    ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
+    : '';
+?>
+<div class="container py-2">
+  <div class="search-section">
+    <div class="search-section-header" data-bs-toggle="collapse" data-bs-target="#sec-detail-search"
+         aria-expanded="false" aria-controls="sec-detail-search" role="button">
+      詳細検索（複数項目絞り込み）
+      <span class="collapse-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+          <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+        </svg>
+      </span>
     </div>
-    <div class="form-group">
-    <label>更新日範囲 終わり</label>
-    <input type="date"  class="form-control" name="dateend" value="0" />
+    <div id="sec-detail-search" class="collapse">
+      <div class="search-section-body">
+        <form action="search_listerdb_songlist.php" method="GET">
+          <?php echo $db_field . $sid_field; ?>
+          <div class="row g-3 mb-3">
+            <?php
+            $fields = [
+                ['name' => 'song_name',         'label' => '曲名'],
+                ['name' => 'program_name',       'label' => '作品名'],
+                ['name' => 'artist',             'label' => '歌手名'],
+                ['name' => 'maker_name',         'label' => '制作会社'],
+                ['name' => 'tie_up_group_name',  'label' => 'シリーズ名'],
+                ['name' => 'worker',             'label' => '動画製作者'],
+            ];
+            foreach ($fields as $f):
+            ?>
+            <div class="col-md-4">
+              <label class="form-label-sm" for="<?php echo $f['name']; ?>"><?php echo $f['label']; ?></label>
+              <input type="text" name="<?php echo $f['name']; ?>" id="<?php echo $f['name']; ?>"
+                     class="form-control-themed" value="">
+            </div>
+            <?php endforeach; ?>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label-sm" for="datestart">更新日（開始）</label>
+              <input type="date" name="datestart" id="datestart" class="form-control-themed">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label-sm" for="dateend">更新日（終了）</label>
+              <input type="date" name="dateend" id="dateend" class="form-control-themed">
+            </div>
+          </div>
+          <div class="d-flex gap-3 mb-3">
+            <label class="d-flex align-items-center gap-1" style="cursor:pointer;">
+              <input type="radio" name="match" value="part" checked> 部分一致
+            </label>
+            <label class="d-flex align-items-center gap-1" style="cursor:pointer;">
+              <input type="radio" name="match" value="full"> 完全一致
+            </label>
+          </div>
+          <button type="submit" class="btn-secondary-themed">検索</button>
+        </form>
+      </div>
     </div>
   </div>
-    <div class="btn-group" data-toggle="buttons">
-	<label class="btn btn-default active">
-		<input type="radio" name="match" value="part" autocomplete="off" checked> 部分一致
-	</label>
-	<label class="btn btn-default">
-		<input type="radio" name="match" value="full" autocomplete="off"> 完全一致
-	</label>
-    </div>
-EOM;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
-if(!empty($selectid))
-    print '<input type="hidden" name="selectid" value='.$selectid.'" />';
-print <<<EOM
-    <div class="form-group">
-      <button type="submit" class="btn btn-default">検索</button>
-    </div>
-
-</form>
-
-
 </div>
-</div>
-EOM;
 
-if(empty($includepage)){
-print <<<EOM
-</body>
-</html>
-EOM;
+<?php
+if (empty($includepage)) {
+    print '</body></html>';
 }
-
-
 ?>

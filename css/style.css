@@ -3,6 +3,32 @@
 	padding-top: 90px;
 }
 
+/* 検索ボタン（全ページ共通・Bootstrap 3 navbar 内） */
+a.navbar-brand.navbar-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-size: 14px;
+  font-weight: 600;
+  color: #f8f9fa !important;
+  text-decoration: none;
+  line-height: 1.4;
+  transition: background 0.18s ease;
+}
+
+a.navbar-brand.navbar-search-btn:hover,
+a.navbar-brand.navbar-search-btn:focus {
+  background: rgba(255, 255, 255, 0.32);
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
 .navbar-brand-dropdown {
 	margin: 0;
 }

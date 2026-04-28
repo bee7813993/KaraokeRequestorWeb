@@ -1185,11 +1185,11 @@ EOD;
          }
 
          print '    </ul>';
-         print '    </li>';         
-         print '    <a class="navbar-brand" href="search.php">検索</a>';
+         print '    </li>';
+         print '    <a class="navbar-brand navbar-search-btn" href="search.php"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/></svg> 検索</a>';
          print '</ul>';
     }else{
-         print '    <a class="navbar-brand" href="search.php">検索</a>';
+         print '    <a class="navbar-brand navbar-search-btn" href="search.php"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/></svg> 検索</a>';
     }
     print <<<EOD
   </div>
@@ -1308,11 +1308,24 @@ EOD;
     print '</div>';
     print '</nav>';
     
-    // 背景色変更
+    // 背景色変更 + CSS変数注入
+    $injected_vars = [];
     if(array_key_exists("bgcolor",$config_ini)){
-         print '<script type="text/javascript" >';
-         print 'document.body.style.backgroundColor = "'.urldecode($config_ini["bgcolor"]).'";';
-         print '</script>';
+        $bg = htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8');
+        $injected_vars[] = '--bg-page:' . $bg . ';';
+    }
+    if(array_key_exists("bgimage",$config_ini) && !empty($config_ini["bgimage"])){
+        $bgimg = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
+        $injected_vars[] = '--bg-page-image:url(\'' . $bgimg . '\');';
+    }
+    if(!empty($injected_vars)){
+        print '<style>:root{' . implode('', $injected_vars) . '}</style>';
+        if(array_key_exists("bgcolor",$config_ini)){
+            // Bootstrap 3の古いpages用にJS注入も維持
+            print '<script type="text/javascript">document.body.style.backgroundColor="'
+                . htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8')
+                . '";</script>';
+        }
     }
 }
 
@@ -1331,8 +1344,103 @@ function commentenabledcheck(){
 
    if(empty($config_ini['commenturl'])) return false;
    if(strcmp($config_ini['commenturl_base'],'notset') == 0 ) return false;
-   
+
    return true;
+}
+
+/**
+ * Bootstrap 5 対応の検索画面用 <head> 内リソースを出力する。
+ * search.php 等、BS5へ移行した画面からのみ呼び出す。
+ * @param string $extra_css 追加で読み込むCSSファイルのパス（相対）
+ */
+function print_bs5_search_head($extra_css = ''){
+    print '<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">';
+    print '<link rel="stylesheet" href="css/themes/_variables.css">';
+    print '<link rel="stylesheet" href="css/themes/search.css">';
+    if(!empty($extra_css)){
+        print '<link rel="stylesheet" href="' . htmlspecialchars($extra_css, ENT_QUOTES, 'UTF-8') . '">';
+    }
+    print '<script src="js/jquery.js"></script>';
+    print '<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>';
+}
+
+/**
+ * searchreserve 相当の予約方法タブHTMLを返す。
+ * selectid が指定されている場合は各リンクに引き継ぐ。
+ * $current には現在のページ ('search' | 'karaoke' | 'url' | 'pause' | 'bgv') を渡す。
+ */
+function build_reservation_tabs($selectid = '', $current = 'search', $prefix = ''){
+    global $config_ini;
+
+    $sid = (is_numeric($selectid) && $selectid !== '') ? '&selectid=' . rawurlencode($selectid) : '';
+    $pfx = htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8');
+
+    $icon_search  = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/></svg>';
+    $icon_karaoke = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/><path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/><path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/></svg>';
+    $icon_pause   = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/></svg>';
+    $icon_url     = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/><path d="M9 5a3 3 0 0 0 0 6h3a3 3 0 0 0 0-6H9zm0 1h3a2 2 0 1 1 0 4H9a2 2 0 0 1 0-4z"/></svg>';
+    $icon_bgv     = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>';
+
+    $tabs = [];
+
+    $tabs[] = [
+        'id'    => 'search',
+        'label' => 'ファイル検索',
+        'icon'  => $icon_search,
+        'href'  => $pfx . 'search.php?searchmode=file' . $sid,
+    ];
+
+    if(!empty($config_ini['karaokeshop'])){
+        $tabs[] = [
+            'id'    => 'karaoke',
+            'label' => 'カラオケ配信',
+            'icon'  => $icon_karaoke,
+            'href'  => $pfx . 'request_confirm.php?shop_karaoke=1' . $sid,
+        ];
+    }
+
+    $connectinternet = isset($config_ini['connectinternet']) ? (int)$config_ini['connectinternet'] : 0;
+    if($connectinternet == 1){
+        $tabs[] = [
+            'id'    => 'url',
+            'label' => 'URL指定',
+            'icon'  => $icon_url,
+            'href'  => $pfx . 'request_confirm_url.php?shop_karaoke=0&set_directurl=1' . $sid,
+        ];
+    }
+
+    if(isset($config_ini['usepause']) && (int)$config_ini['usepause'] == 1){
+        $tabs[] = [
+            'id'    => 'pause',
+            'label' => '小休止',
+            'icon'  => $icon_pause,
+            'href'  => $pfx . 'request_confirm.php?pause=1' . $sid,
+        ];
+    }
+
+    if(!empty($config_ini['bgvfolderpath'])){
+        $tabs[] = [
+            'id'    => 'bgv',
+            'label' => 'BGV選択',
+            'icon'  => $icon_bgv,
+            'href'  => $pfx . 'search_bgv.php' . ($sid ? '?' . ltrim($sid, '&') : ''),
+        ];
+    }
+
+    if(count($tabs) <= 1) return '';
+
+    $html = '<div class="reservation-tabs" role="tablist" aria-label="予約方法">';
+    foreach($tabs as $tab){
+        $active = ($tab['id'] === $current) ? ' active' : '';
+        $aria   = ($tab['id'] === $current) ? ' aria-current="page"' : '';
+        $html .= '<a href="' . htmlspecialchars($tab['href'], ENT_QUOTES, 'UTF-8') . '"'
+               . ' class="reservation-tab-btn' . $active . '"'
+               . $aria . '>'
+               . $tab['icon'] . ' ' . htmlspecialchars($tab['label'], ENT_QUOTES, 'UTF-8')
+               . '</a>';
+    }
+    $html .= '</div>';
+    return $html;
 }
 
 

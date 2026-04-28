@@ -1,0 +1,67 @@
+/* ==========================================================
+   KaraokeRequestor テーマ変数定義
+   全テーマはこのファイルの変数を上書きする形で実装する。
+   init.php からの動的注入（背景色・背景画像）もここに合流する。
+   ========================================================== */
+
+:root {
+  /* --- 背景 --- */
+  --bg-page: #F8ECE0;          /* init.php の page_bg_color で上書き可 */
+  --bg-page-image: none;       /* init.php の page_bg_image で上書き可 */
+  --bg-navbar: #222222;
+  --bg-card: #ffffff;
+  --bg-card-alt: #f8f4f0;      /* 交互行・サブカード */
+  --bg-card-hover: #fff5f0;
+  --bg-badge: #6c757d;
+  --bg-input: #ffffff;
+  --bg-swap-banner: #fff3cd;   /* 曲差し替えバナー */
+
+  /* --- テキスト --- */
+  --color-text: #212529;
+  --color-text-muted: #6c757d;
+  --color-text-on-accent: #ffffff;
+  --color-text-on-navbar: #f8f9fa;
+  --color-swap-banner: #664d03;
+
+  /* --- アクセント（ボタン・強調） --- */
+  --color-accent: #c0392b;       /* メインアクション（リクエストボタン等） */
+  --color-accent-hover: #a93226;
+  --color-accent-secondary: #2980b9; /* サブアクション */
+  --color-accent-secondary-hover: #2471a3;
+
+  /* --- 境界線・区切り --- */
+  --color-border: #dee2e6;
+  --color-border-active: #c0392b;
+
+  /* --- インデックスボタン（作品名インデックス等） --- */
+  --bg-index-btn: #f0f0f0;
+  --bg-index-btn-hover: #e0e0e0;
+  --bg-index-btn-has-data: #2980b9;
+  --bg-index-btn-has-data-hover: #2471a3;
+  --color-index-btn: #333333;
+  --color-index-btn-has-data: #ffffff;
+
+  /* --- 形状 --- */
+  --radius-card: 12px;
+  --radius-button: 8px;
+  --radius-input: 6px;
+  --radius-badge: 20px;
+
+  /* --- 影 --- */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.14);
+  --shadow-navbar: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  /* --- 間隔トークン --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+
+  /* --- タッチ操作 --- */
+  --tap-target: 44px;
+
+  /* --- トランジション --- */
+  --transition-base: 0.18s ease;
+}
