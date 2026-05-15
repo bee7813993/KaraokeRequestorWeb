@@ -1297,7 +1297,7 @@ EOD;
     print '    </ul>';
     print '    </li>';
     if (configbool("usemypage", true)) {
-        print '    <li class="hidden-xs"><a href="'.$prefix.'mypage.php" title="マイページ" style="padding:5px 10px;line-height:0;">'
+        print '    <li class="hidden-xs"><a href="'.$prefix.'mypage.php" title="マイページ" class="navbar-mypage-icon">'
             . '<img src="'.$mypage_icon_url.'" alt="マイページ" '
             . 'style="width:40px;height:40px;border-radius:50%;display:inline-block;'.$mypage_active_border.'">'
             . '</a></li>';

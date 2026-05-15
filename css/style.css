@@ -28,6 +28,11 @@ nav.navbar.navbar-fixed-top,
   padding-right: 8px !important;
   font-size: 13px !important;
 }
+/* マイページアイコンボタンは画像サイズに合わせた上下パディング (8+40+8=56px) */
+.navbar.navbar-fixed-top .navbar-nav > li > a.navbar-mypage-icon {
+  padding: 8px !important;
+  line-height: 0 !important;
+}
 .navbar.navbar-fixed-top .navbar-toggle {
   margin-top: 11px !important;
   margin-bottom: 11px !important;
