@@ -134,21 +134,13 @@ $RELAY_SECRET        = '32文字以上のランダム文字列'; // openssl rand
 
 ### 新検索UIの有効化方法
 
-設定画面から切り替えられます。
-
-**設定 → 新デザイン検索画面UI（Bootstrap 5）→「使用する」**
-
-または `config.ini` に直接記載する場合：
-
-```ini
-usenewsearchui = 1
-```
+設定画面の **「新デザイン検索画面UI（Bootstrap 5）」** から「使用する」に変更して保存すると有効になります。
 
 有効にすると、既存の検索ページへのアクセスは自動的にBS5版にリダイレクトされます。直接 `search_bs5.php` にアクセスすることも可能です。
 
 ### ナビバーの高さ統一
 
-以前はBS3ページとBS5ページでナビバーの高さが異なっていましたが、`css/style.css` に`!important`付きオーバーライドを追加して **56px** に統一されました。
+BS3ページのナビバー高さを、新しく実装したBS5ページと統一して **56px** に調整しました。
 
 - スマートフォンでのバーガーメニュー展開時も正しく表示
 - 「管理者ログイン中」ラベルの余白・フォントサイズも調整
@@ -218,7 +210,7 @@ usenewsearchui = 1
 
 - データベースのマイグレーションは自動的に行われます（`requesttable`への`volume`列追加など）
 - Google Drive同期を使う場合は別途、設定画面の「Google同期設定」で設定が必要（前述の設定方法を参照）
-- 新検索UIを使う場合は設定画面から「使用する」に変更
+- 新検索UIを使う場合は設定画面の **「新デザイン検索画面UI（Bootstrap 5）」** から「使用する」に変更
 
 ---
 
@@ -234,4 +226,4 @@ usenewsearchui = 1
 
 特に**マイページのGoogle Drive同期**と**新デザイン検索画面**は大きな追加機能です。設定は任意ですので、既存の動作を維持したままアップデートできます。
 
-ご質問や不具合報告は [GitHubのIssue](https://github.com/bee7813993/KaraokeRequestorWeb/issues) までお願いします。
+ご質問や不具合報告はサポートDiscord（**https://discord.gg/9wtZApZU5P**）または [GitHubのIssue](https://github.com/bee7813993/KaraokeRequestorWeb/issues) までお願いします。
