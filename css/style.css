@@ -1,15 +1,108 @@
 ﻿body	{
 	background-color:#F8ECE0;
-	padding-top: 90px;
+	padding-top: 70px;
+}
+
+/* Bootstrap 3 navbar — BS5版と縦サイズを揃える
+   このプロジェクトの bootstrap.min.css は navbar-brand height:80px / navbar min-height:80px /
+   navbar-nav>li>a padding 29px のカスタム値を持つため、style.css 側で 56px に上書きする。
+   Bootstrap のメディアクエリ内ルールに勝つため、全部 !important + .navbar.navbar-fixed-top
+   プレフィックスで特異性も高めている。
+   height は固定しない（折返しや collapse 展開で navbar-inverse 背景が伸びる必要があるため min-height のみ）。 */
+nav.navbar.navbar-fixed-top,
+.navbar.navbar-fixed-top {
+  min-height: 56px !important;
+  margin-bottom: 0 !important;
+}
+.navbar.navbar-fixed-top .navbar-nav > li > a {
+  padding: 17px 8px !important;
+  margin: 0 !important;
+  line-height: 22px !important;
+  font-size: 13px !important;
+}
+.navbar.navbar-fixed-top .navbar-brand {
+  height: auto !important;
+  padding-top: 17px !important;
+  padding-bottom: 17px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  font-size: 13px !important;
+}
+/* マイページアイコンボタンは画像サイズに合わせた上下パディング (8+40+8=56px) */
+.navbar.navbar-fixed-top .navbar-nav > li > a.navbar-mypage-icon {
+  padding: 8px !important;
+  line-height: 0 !important;
+}
+.navbar.navbar-fixed-top .navbar-toggle {
+  margin-top: 11px !important;
+  margin-bottom: 11px !important;
+  padding: 7px 10px !important;
+}
+.navbar.navbar-fixed-top .navbar-nav {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+.navbar.navbar-fixed-top .navbar-text {
+  margin: 0 4px !important;
+  padding: 17px 0 !important;
+  font-size: 12px !important;
+  line-height: 22px !important;
+}
+.navbar.navbar-fixed-top.navbar-inverse {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+/* スマホで burger 展開時 / 中間幅で項目が折返した時に、暗い背景を確実に下まで伸ばす */
+.navbar.navbar-fixed-top.navbar-inverse .navbar-collapse,
+.navbar.navbar-fixed-top.navbar-inverse .navbar-header {
+  background-color: #222;
+}
+/* BS3 mobile collapsed dropdown はデフォルトで透明 → 中身が読みづらいので少し縁取りする */
+@media (max-width: 767px) {
+  .navbar.navbar-fixed-top.navbar-inverse .navbar-nav .open .dropdown-menu {
+    background-color: #111 !important;
+    padding-left: 8px;
+  }
+  .navbar.navbar-fixed-top.navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
+    color: #eee !important;
+  }
+}
+
+/* 検索ボタン（全ページ共通・Bootstrap 3 navbar 内） */
+.navbar.navbar-fixed-top a.navbar-brand.navbar-search-btn,
+a.navbar-brand.navbar-search-btn {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px !important;
+  margin: 11px 6px !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-size: 14px;
+  font-weight: 600;
+  color: #f8f9fa !important;
+  text-decoration: none;
+  transition: background 0.18s ease;
+}
+
+a.navbar-brand.navbar-search-btn:hover,
+a.navbar-brand.navbar-search-btn:focus {
+  background: rgba(255, 255, 255, 0.32);
+  color: #ffffff !important;
+  text-decoration: none;
 }
 
 .navbar-brand-dropdown {
 	margin: 0;
 }
+.navbar.navbar-fixed-top .navbar-brand.dropdown-toggle,
 .navbar-brand.dropdown-toggle {
-	padding-top: 30px;
-	margin-top: 0px;
-	margin-bottom: 0px;
+	padding: 17px 8px !important;
+	height: auto !important;
+	margin: 0 !important;
+	font-size: 13px !important;
 }
 .dropdown-menu.dropdown-brand {
 	margin-left: -30px;

@@ -6,6 +6,13 @@ $includepage = "";
 if(array_key_exists("includepage", $_REQUEST)) {
     $includepage = $_REQUEST["includepage"];
 }
+
+if (empty($includepage) && !empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_listerdb_program_index_bs5.php' . $qs);
+    exit;
+}
+
 if(!isset($lister_dbpath) )
 $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("listerDBPATH", $config_ini)) {

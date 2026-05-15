@@ -1,6 +1,14 @@
+<?php
+require_once 'commonfunc.php';
+if (!empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_listerdb_songlist_bs5.php' . $qs);
+    exit;
+}
+?>
 <html>
 <head>
-<?php 
+<?php
 require_once 'commonfunc.php';
 require_once 'search_listerdb_commonfunc.php';
 

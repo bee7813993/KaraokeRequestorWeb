@@ -40,6 +40,15 @@ if(!in_array($column, $valid_columns)) {
     die();
 }
 
+$headercolumn = $column;
+if(array_key_exists("headercolumn", $_REQUEST) && !empty($_REQUEST["headercolumn"])) {
+    if(!in_array($_REQUEST["headercolumn"], $valid_columns)) {
+        http_response_code(400);
+        die();
+    }
+    $headercolumn = $_REQUEST["headercolumn"];
+}
+
 $header = "";
 if(array_key_exists("header", $_REQUEST)) {
     $header = $_REQUEST["header"];
@@ -66,7 +75,7 @@ if( !$listerdb ) {
 // 検索条件を構造化パラメータから構築
 $where_conditions = array();
 if(!empty($header)) {
-    $where_conditions[] = $column . ' LIKE ' . $listerdb->quote($header . '%');
+    $where_conditions[] = $headercolumn . ' LIKE ' . $listerdb->quote($header . '%');
 }
 if(!empty($maker_name)) {
     $where_conditions[] = 'maker_name = ' . $listerdb->quote($maker_name);

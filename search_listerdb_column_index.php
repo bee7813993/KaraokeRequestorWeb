@@ -1,7 +1,13 @@
-<?php 
+<?php
 
 require_once 'commonfunc.php';
 require_once 'search_listerdb_commonfunc.php';
+
+if (!empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_listerdb_column_index_bs5.php' . $qs);
+    exit;
+}
 
 $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("listerDBPATH", $config_ini)) {
@@ -79,7 +85,7 @@ function checkandbuild_headerlink( $oneheader, $headerlist, $columnname, $column
     foreach($headerlist['data']  as $key => $value) {
     $katakana_oneheader = mb_convert_kana($oneheader,'C');
         if( $oneheader === $value[$headerkey] || $katakana_oneheader === $value[$headerkey]) {
-            $linkparams = 'start=0&length=50&header='.urlencode($value[$headerkey]).'&searchcolumn='.$columnname.'&searchitem='.urlencode($searchitem);
+            $linkparams = 'start=0&length=50&header='.urlencode($value[$headerkey]).'&searchcolumn='.$columnname.'&rubycolumn='.urlencode($columnname_ruby).'&searchitem='.urlencode($searchitem);
             if(!empty($linkoption)) $linkparams = $linkparams.'&'.$linkoption;
             $url='<a class="btn btn-primary center-block indexbtnstr" href="search_listerdb_column_list.php?'.$linkparams.'"> '. $oneheader .'</a>';
             return $url;

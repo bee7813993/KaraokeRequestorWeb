@@ -4,6 +4,12 @@ require_once 'easyauth_class.php';
 $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
 
+if (!empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_bs5.php' . $qs);
+    exit;
+}
+
 if(array_key_exists("searchword", $_REQUEST)) {
     $word = $_REQUEST["searchword"];
     if($historylog == 1){

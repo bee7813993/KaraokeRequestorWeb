@@ -1,19 +1,17 @@
-<?php 
+<?php
 require_once 'commonfunc.php';
 require_once 'search_listerdb_commonfunc.php';
-print_meta_header();
-if(!isset($includepage) )
-$includepage = "";
 
-if(array_key_exists("includepage", $_REQUEST)) {
-    $includepage = $_REQUEST["includepage"];
-}
+if(!isset($includepage)) $includepage = "";
+if(array_key_exists("includepage", $_REQUEST)) $includepage = $_REQUEST["includepage"];
 
-if(!isset($includepage) )
-$filesearch = "";
+if(!isset($filesearch)) $filesearch = "";
+if(array_key_exists("filesearch", $_REQUEST)) $filesearch = $_REQUEST["filesearch"];
 
-if(array_key_exists("filesearch", $_REQUEST)) {
-    $filesearch = $_REQUEST["filesearch"];
+if (empty($includepage) && empty($filesearch) && !empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_listerdb_anysearch_index_bs5.php' . $qs);
+    exit;
 }
 
 if(!empty($filesearch)){

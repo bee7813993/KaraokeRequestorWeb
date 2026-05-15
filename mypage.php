@@ -1,4 +1,5 @@
-<html>
+<!doctype html>
+<html lang="ja">
 <head>
 <?php
 require_once 'commonfunc.php';
@@ -6,16 +7,16 @@ require_once 'mypage_class.php';
 print_meta_header();
 ?>
 <title>マイページ</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
 </head>
 <body>
-<?php
-shownavigatioinbar('mypage.php');
+<?php shownavigatioinbar_bs5('mypage.php'); ?>
 
+<?php
 if (!configbool("usemypage", true)) {
-    print '<div class="container" style="margin-top:80px;"><p>マイページ機能は無効です。</p></div>';
+    print '<div class="container py-3"><p>マイページ機能は無効です。</p></div>';
     print '</body></html>';
     exit;
 }
@@ -23,7 +24,6 @@ if (!configbool("usemypage", true)) {
 $mypage = new MypageUser($db);
 $displayname = $mypage->getDisplayName();
 
-// 表示名変更処理
 $msg = '';
 $msg_type = 'success';
 if (isset($_POST['action']) && $_POST['action'] === 'update_name') {
@@ -35,7 +35,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_name') {
     }
 }
 
-// アイコン変更処理
 if (isset($_POST['action']) && $_POST['action'] === 'update_icon') {
     if (isset($_FILES['icon_file']) && $_FILES['icon_file']['error'] === UPLOAD_ERR_OK) {
         $result = $mypage->updateIconPath($_FILES['icon_file']);
@@ -53,37 +52,37 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_icon') {
 
 $icon_path = $mypage->getIconPath();
 ?>
-<div class="container" style="margin-top:80px;">
-  <h2>マイページ</h2>
+
+<div class="container py-3">
+  <h2 class="mb-3">マイページ</h2>
 
   <?php if ($msg): ?>
-  <div class="alert alert-<?php echo htmlspecialchars($msg_type, ENT_QUOTES, 'UTF-8'); ?>">
+  <div class="alert alert-<?php echo htmlspecialchars($msg_type, ENT_QUOTES, 'UTF-8'); ?> alert-dismissible" role="alert">
     <?php echo htmlspecialchars($msg, ENT_QUOTES, 'UTF-8'); ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
   <?php endif; ?>
 
-  <div class="panel panel-default">
-    <div class="panel-heading"><h4 class="panel-title">あなたの情報</h4></div>
-    <div class="panel-body">
-      <div class="row">
-        <div class="col-xs-12 col-sm-3 col-md-2" style="text-align:center;margin-bottom:10px;">
+  <div class="card mb-3">
+    <div class="card-header"><h5 class="card-title mb-0">あなたの情報</h5></div>
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-12 col-sm-3 col-md-2 text-center mb-2 mb-sm-0">
           <img src="<?php echo htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8'); ?>"
                alt="マイページアイコン"
                style="width:80px;height:80px;border-radius:50%;border:2px solid #ddd;object-fit:cover;" />
         </div>
-        <div class="col-xs-12 col-sm-9 col-md-10">
-          <form method="POST" action="mypage.php" class="form-inline" style="margin-bottom:8px;">
+        <div class="col-12 col-sm-9 col-md-10">
+          <form method="POST" action="mypage.php" class="d-flex flex-wrap align-items-center gap-2 mb-2">
             <input type="hidden" name="action" value="update_name" />
-            <div class="form-group">
-              <label>表示名: </label>&nbsp;
-              <input type="text" name="displayname" class="form-control"
-                     value="<?php echo htmlspecialchars($displayname, ENT_QUOTES, 'UTF-8'); ?>"
-                     maxlength="64" placeholder="名前を入力" />
-            </div>
-            &nbsp;
-            <button type="submit" class="btn btn-default">変更</button>
+            <label class="form-label mb-0">表示名:</label>
+            <input type="text" name="displayname" class="form-control"
+                   style="max-width:240px;"
+                   value="<?php echo htmlspecialchars($displayname, ENT_QUOTES, 'UTF-8'); ?>"
+                   maxlength="64" placeholder="名前を入力" />
+            <button type="submit" class="btn btn-outline-secondary btn-sm">変更</button>
           </form>
-          <p class="text-muted" style="font-size:small;">
+          <p class="text-muted small mb-0">
             ユーザーID: <?php echo htmlspecialchars($mypage->getUserId(), ENT_QUOTES, 'UTF-8'); ?>
           </p>
         </div>
@@ -91,59 +90,48 @@ $icon_path = $mypage->getIconPath();
     </div>
   </div>
 
-  <div class="panel panel-default">
-    <div class="panel-heading"><h4 class="panel-title">アイコン変更</h4></div>
-    <div class="panel-body">
-      <form method="POST" action="mypage.php" enctype="multipart/form-data" class="form-inline">
+  <div class="card mb-3">
+    <div class="card-header"><h5 class="card-title mb-0">アイコン変更</h5></div>
+    <div class="card-body">
+      <form method="POST" action="mypage.php" enctype="multipart/form-data"
+            class="d-flex flex-wrap align-items-center gap-2">
         <input type="hidden" name="action" value="update_icon" />
-        <div class="form-group">
-          <input type="file" name="icon_file" accept="image/*" />
-        </div>
-        &nbsp;
-        <button type="submit" class="btn btn-default">アイコンを更新</button>
+        <input type="file" name="icon_file" accept="image/*" class="form-control" style="max-width:280px;" />
+        <button type="submit" class="btn btn-outline-secondary btn-sm">アイコンを更新</button>
       </form>
-      <p class="text-muted" style="margin-top:6px;font-size:small;">
+      <p class="text-muted small mt-2 mb-0">
         JPEG / PNG / GIF / SVG / WebP が使用できます。
       </p>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-xs-12 col-sm-6 col-md-3">
-      <a href="mypage_history.php" class="btn btn-primary btn-lg btn-block" style="margin-bottom:10px;">
-        選曲履歴
-      </a>
+  <div class="row g-2 mb-3">
+    <div class="col-12 col-sm-6 col-md-3">
+      <a href="mypage_history.php" class="btn btn-primary btn-lg w-100">選曲履歴</a>
     </div>
-    <div class="col-xs-12 col-sm-6 col-md-3">
-      <a href="mypage_later.php" class="btn btn-success btn-lg btn-block" style="margin-bottom:10px;">
-        後で歌う
-      </a>
+    <div class="col-12 col-sm-6 col-md-3">
+      <a href="mypage_later.php" class="btn btn-success btn-lg w-100">後で歌う</a>
     </div>
-    <div class="col-xs-12 col-sm-6 col-md-3">
-      <a href="mypage_favorite_song.php" class="btn btn-warning btn-lg btn-block" style="margin-bottom:10px;">
-        お気に入り曲
-      </a>
+    <div class="col-12 col-sm-6 col-md-3">
+      <a href="mypage_favorite_song.php" class="btn btn-warning btn-lg w-100">お気に入り曲</a>
     </div>
-    <div class="col-xs-12 col-sm-6 col-md-3">
-      <a href="mypage_favorite_keyword.php" class="btn btn-info btn-lg btn-block" style="margin-bottom:10px;">
-        お気に入り検索ワード
-      </a>
+    <div class="col-12 col-sm-6 col-md-3">
+      <a href="mypage_favorite_keyword.php" class="btn btn-info btn-lg w-100">お気に入り検索ワード</a>
     </div>
   </div>
 
-  <div class="panel panel-default" style="margin-top:10px;">
-    <div class="panel-heading"><h4 class="panel-title">データのバックアップ / 復元</h4></div>
-    <div class="panel-body">
-      <p>
-        <a href="mypage_export.php" class="btn btn-default">
-          <span class="glyphicon glyphicon-download-alt"></span> エクスポート（JSONダウンロード）
+  <div class="card mb-3">
+    <div class="card-header"><h5 class="card-title mb-0">データのバックアップ / 復元</h5></div>
+    <div class="card-body">
+      <div class="d-flex flex-wrap gap-2">
+        <a href="mypage_export.php" class="btn btn-outline-secondary">
+          &#x2B07; エクスポート（JSONダウンロード）
         </a>
-        &nbsp;
-        <a href="mypage_import.php" class="btn btn-default">
-          <span class="glyphicon glyphicon-upload"></span> インポート
+        <a href="mypage_import.php" class="btn btn-outline-secondary">
+          &#x2B06; インポート
         </a>
-      </p>
-      <p class="text-muted" style="font-size:small;">
+      </div>
+      <p class="text-muted small mt-2 mb-0">
         エクスポートで選曲履歴・お気に入り等をJSONファイルとして保存できます。<br>
         インポートで別の端末やバックアップからデータを復元できます。
       </p>
@@ -159,19 +147,18 @@ $icon_path = $mypage->getIconPath();
   $google_configured = (!empty($config_ini['google_client_id']) && !empty($config_ini['google_relay_secret']));
   if ($google_configured):
   ?>
-  <div class="panel panel-default" style="margin-top:10px;">
-    <div class="panel-heading"><h4 class="panel-title">Google同期</h4></div>
-    <div class="panel-body">
+  <div class="card mb-3">
+    <div class="card-header"><h5 class="card-title mb-0">Google同期</h5></div>
+    <div class="card-body">
       <?php if ($google_link_row): ?>
-      <p>
-        <span class="glyphicon glyphicon-ok text-success"></span>
-        Googleアカウント（<?php echo htmlspecialchars($google_link_row['google_email'], ENT_QUOTES, 'UTF-8'); ?>）と連携中
+      <p class="mb-2">
+        &#x2713; Googleアカウント（<?php echo htmlspecialchars($google_link_row['google_email'], ENT_QUOTES, 'UTF-8'); ?>）と連携中
       </p>
       <?php else: ?>
-      <p class="text-muted">未連携</p>
+      <p class="text-muted mb-2">未連携</p>
       <?php endif; ?>
-      <a href="mypage_google_sync.php" class="btn btn-default btn-sm">
-        <span class="glyphicon glyphicon-cloud"></span> Google同期の設定
+      <a href="mypage_google_sync.php" class="btn btn-outline-secondary btn-sm">
+        &#x2601; Google同期の設定
       </a>
     </div>
   </div>

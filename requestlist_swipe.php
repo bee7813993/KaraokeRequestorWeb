@@ -34,11 +34,11 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires"       content="0">
 <title><?php echo htmlspecialchars($titlePrefix, ENT_QUOTES, 'UTF-8'); ?>リクエスト一覧</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<link href="css/style.css"         rel="stylesheet">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css"                    rel="stylesheet">
+<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<!-- SortableJS: js/Sortable.min.js に配置してください。取得先: https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js -->
+<script src="js/Sortable.min.js"></script>
 <style>
 body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-8'); ?>; }
 
@@ -277,7 +277,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 <body>
 <div class="container">
 <?php
-shownavigatioinbar();
+shownavigatioinbar_bs5();
 showmode();
 
 if (!empty($config_ini['noticeof_listpage'])) {
@@ -289,7 +289,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
 
 <?php if ($reloadInterval != 0): ?>
 <div class="checkbox">
-  <label class="checkbox-inline" data-toggle="tooltip" data-placement="top"
+  <label class="d-inline-flex align-items-center gap-1" data-bs-toggle="tooltip" data-bs-placement="top"
          title="コピペとかする時はチェックを外してください">
     <input type="checkbox" id="autoreload" checked> 自動リロード
   </label>
@@ -301,14 +301,14 @@ if (!empty($config_ini['noticeof_listpage'])) {
 <div class="list-toolbar">
   <div class="toolbar-left">
     <h4>現在の登録状況</h4>
-    <button class="btn btn-default btn-xs" id="refresh-btn">更新</button>
-    <button class="btn btn-warning btn-xs" id="goto-playing-btn">&#9654; 再生中へ</button>
+    <button class="btn btn-outline-secondary btn-sm" id="refresh-btn">更新</button>
+    <button class="btn btn-warning btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
-    <a href="simplelistexport_utf8.php" class="btn btn-default btn-xs">リクエストリストCSV</a>
-    <a href="simplelist.php" class="btn btn-default btn-xs">シンプルリスト</a>
+    <a href="simplelistexport_utf8.php" class="btn btn-outline-secondary btn-sm">リクエストリストCSV</a>
+    <a href="simplelist.php" class="btn btn-outline-secondary btn-sm">シンプルリスト</a>
 <?php if ($requestlist_num > 0): ?>
-    <select id="count-select" class="form-control input-sm">
+    <select id="count-select" class="form-select form-select-sm">
       <option value="<?php echo $requestlist_num; ?>"><?php echo $requestlist_num; ?>件</option>
       <option value="<?php echo $requestlist_num * 2; ?>"><?php echo $requestlist_num * 2; ?>件</option>
       <option value="0">ALL</option>
@@ -336,34 +336,34 @@ if (!empty($config_ini['noticeof_listpage'])) {
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">コメントへのレス＆編集</h4>
+        <h5 class="modal-title">コメントへのレス＆編集</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="comment-edit-form">
-          <div class="form-group">
+          <div class="mb-3">
             <label>コメント修正</label>
             <textarea class="form-control" id="comment-edit-text" rows="3"></textarea>
           </div>
-          <button type="submit" class="btn btn-default pull-right">修正</button>
+          <button type="submit" class="btn btn-secondary float-end">修正</button>
         </form>
         <div class="clearfix" style="margin-bottom:10px;"></div>
         <hr>
         <form id="comment-reply-form">
-          <div class="form-group">
+          <div class="mb-3">
             <label>レス <small>再生中にコメントするとその場で流れます</small></label>
             <input type="text" class="form-control" id="comment-reply-text" placeholder="レス(コメントへの)">
           </div>
-          <div class="form-group">
+          <div class="mb-3">
             <label>名前</label>
             <input type="text" class="form-control" id="comment-reply-name" placeholder="名前">
           </div>
-          <button type="submit" class="btn btn-primary pull-right">送信</button>
+          <button type="submit" class="btn btn-primary float-end">送信</button>
         </form>
         <div class="clearfix"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
       </div>
     </div>
   </div>
@@ -374,17 +374,17 @@ if (!empty($config_ini['noticeof_listpage'])) {
   <div class="modal-dialog modal-sm">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">再生状況を変更</h4>
+        <h5 class="modal-title">再生状況を変更</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <select class="form-control" id="status-select">
+        <select class="form-select" id="status-select">
           <option value="未再生">未再生</option>
           <option value="再生済">再生済</option>
         </select>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
         <button type="button" class="btn btn-primary" id="status-submit">変更</button>
       </div>
     </div>
@@ -392,7 +392,11 @@ if (!empty($config_ini['noticeof_listpage'])) {
 </div>
 
 <script>
-$(function () { $('[data-toggle="tooltip"]').tooltip(); });
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        new bootstrap.Tooltip(el);
+    });
+});
 
 // ---- 設定値（PHP から埋め込み） ----
 var USE_ACTIVE_RELOAD  = <?php echo $useActiveReload ? 'true' : 'false'; ?>;
@@ -451,11 +455,11 @@ function esc(str) {
 
 var STATUS_CLASS = {
     // 数値コード
-    '1': 'default',  '2': 'success', '3': 'warning',
-    '4': 'info',     '5': 'info',    '6': 'warning',  '7': 'danger',
+    '1': 'secondary', '2': 'success', '3': 'warning',
+    '4': 'info',      '5': 'info',   '6': 'warning',  '7': 'danger',
     // 日本語テキスト（既存DBとの互換）
-    '未再生': 'default', '再生中': 'success',    '停止中': 'warning',
-    '再生済': 'info',    '再生済？': 'info',     '再生開始待ち': 'warning',
+    '未再生': 'secondary', '再生中': 'success',    '停止中': 'warning',
+    '再生済': 'info',      '再生済？': 'info',     '再生開始待ち': 'warning',
     '変更中': 'danger'
 };
 var STATUS_LABEL = {
@@ -467,7 +471,7 @@ function statusBadge(nowplaying) {
     if (!nowplaying) return '';
     var cls   = STATUS_CLASS[String(nowplaying)] || 'default';
     var label = STATUS_LABEL[String(nowplaying)] || nowplaying; // 数値なら日本語に変換、テキストはそのまま
-    return '<span class="label label-' + cls + '">' + esc(label) + '</span>';
+    return '<span class="badge bg-' + cls + '">' + esc(label) + '</span>';
 }
 
 // ---- カード HTML 生成 ----
@@ -502,9 +506,9 @@ function createCardHTML(item, idx) {
     // 曲終了 / 曲開始ボタン
     var ctrlBtn = '';
     if (isPlaying(item.nowplaying)) {
-        ctrlBtn = '<button class="btn btn-warning btn-xs card-ctrl-btn song-end-btn">曲終了</button>';
+        ctrlBtn = '<button class="btn btn-warning btn-sm card-ctrl-btn song-end-btn">曲終了</button>';
     } else if (isWaiting(item.nowplaying) && item.kind === '動画') {
-        ctrlBtn = '<button class="btn btn-success btn-xs card-ctrl-btn song-start-btn">曲開始</button>';
+        ctrlBtn = '<button class="btn btn-success btn-sm card-ctrl-btn song-start-btn">曲開始</button>';
     }
 
     // Tweet リンク
@@ -900,7 +904,7 @@ function openCommentModal(id, comment) {
     document.getElementById('comment-edit-text').value  = comment || '';
     document.getElementById('comment-reply-text').value = '';
     document.getElementById('comment-reply-name').value = getUsernameFromCookie();
-    $('#comment-modal').modal('show');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('comment-modal')).show();
 }
 
 document.getElementById('comment-edit-form').addEventListener('submit', function (e) {
@@ -908,7 +912,7 @@ document.getElementById('comment-edit-form').addEventListener('submit', function
     if (!currentCommentId) return;
     var comment = document.getElementById('comment-edit-text').value;
     fetch('update.php?id=' + currentCommentId + '&comment=' + encodeURIComponent(comment) + '&edit=edit')
-        .then(function () { $('#comment-modal').modal('hide'); loadList(); });
+        .then(function () { bootstrap.Modal.getInstance(document.getElementById('comment-modal')).hide(); loadList(); });
 });
 
 document.getElementById('comment-reply-form').addEventListener('submit', function (e) {
@@ -917,7 +921,7 @@ document.getElementById('comment-reply-form').addEventListener('submit', functio
     var reply = document.getElementById('comment-reply-text').value;
     var name  = document.getElementById('comment-reply-name').value;
     fetch('commentedit.php?id=' + currentCommentId + '&addcomment=' + encodeURIComponent(reply) + '&name=' + encodeURIComponent(name) + '&add=add')
-        .then(function () { $('#comment-modal').modal('hide'); loadList(); });
+        .then(function () { bootstrap.Modal.getInstance(document.getElementById('comment-modal')).hide(); loadList(); });
 });
 
 // 再生状況変更モーダル
@@ -931,25 +935,29 @@ function openStatusModal(id, songfile, nowplaying) {
     var label = STATUS_LABEL[String(nowplaying)] || nowplaying;
     sel.value = label;
     if (!sel.value) sel.value = '未再生';
-    $('#status-modal').modal('show');
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('status-modal')).show();
 }
 
 document.getElementById('status-submit').addEventListener('click', function () {
     if (!currentStatusId) return;
     var val = document.getElementById('status-select').value;
     fetch('changeplaystatus.php?id=' + currentStatusId + '&songfile=' + encodeURIComponent(currentStatusSongfile) + '&nowplaying=' + encodeURIComponent(val))
-        .then(function () { $('#status-modal').modal('hide'); loadList(); });
+        .then(function () { bootstrap.Modal.getInstance(document.getElementById('status-modal')).hide(); loadList(); });
 });
 
 // モーダル表示中は自動リロードを抑制
 var storedAutoReload = true;
-$('#comment-modal, #status-modal').on('show.bs.modal', function () {
-    var cb = document.getElementById('autoreload');
-    storedAutoReload = cb ? cb.checked : true;
-    if (cb) cb.checked = false;
-}).on('hide.bs.modal', function () {
-    var cb = document.getElementById('autoreload');
-    if (cb) cb.checked = storedAutoReload;
+['comment-modal', 'status-modal'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('show.bs.modal', function () {
+        var cb = document.getElementById('autoreload');
+        storedAutoReload = cb ? cb.checked : true;
+        if (cb) cb.checked = false;
+    });
+    el.addEventListener('hide.bs.modal', function () {
+        var cb = document.getElementById('autoreload');
+        if (cb) cb.checked = storedAutoReload;
+    });
 });
 
 function playNext(id, songfile) {

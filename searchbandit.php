@@ -1,3 +1,11 @@
+<?php
+require_once 'commonfunc.php';
+if (!empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: searchbandit_bs5.php' . $qs);
+    exit;
+}
+?>
 <!doctype html>
 <html lang="ja">
 <head>

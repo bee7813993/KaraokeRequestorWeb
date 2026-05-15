@@ -560,6 +560,29 @@ print ' value="10" ';
     </label>
   </div>
 
+<!---- 新デザイン検索画面UI ----->
+  <?php
+      $usenewsearchui = false;
+      if(array_key_exists("usenewsearchui",$config_ini)){
+          if($config_ini["usenewsearchui"] == 1 ){
+             $usenewsearchui = true;
+          }
+      }
+  ?>
+  <div class="form-group">
+    <h4 class="radio control-label"> 新デザイン検索画面UI（Bootstrap 5） </h4>
+    <label class="radio control-label"><small>モバイル対応の新デザイン検索画面を使用します。旧デザインに戻すには「使用しない」を選択してください。</small></label>
+    <label class="radio-inline">
+      <input type="radio" name="usenewsearchui" value="1" <?php print ($usenewsearchui)?'checked':' ' ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="usenewsearchui" value="2" <?php print (!$usenewsearchui)?'checked':' ' ?> /> 使用しない
+    </label>
+    <label>
+      <a href="search_bs5.php"> 新デザイン検索画面へのリンク </a>
+    </label>
+  </div>
+
 <!---- ページ背景色設定 ----->
   <?php
       $bgcolor='#F8ECE0';
