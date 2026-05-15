@@ -248,6 +248,12 @@ if (is_numeric($selectid)) {
 }
 file_get_contents("http://localhost/updaterequestlist.php");
 
+// 歌う人名をクッキーに保存（次回 request_confirm.php でIP+UAマッチングの代わりに使われる）
+$nonameusername = urldecode($config_ini['nonameusername']);
+if (!empty($l_singer) && $l_singer !== $nonameusername && $l_kind !== '小休止') {
+    setcookie("YkariUsername", $l_singer, time() + 5184000, '/');
+}
+
 // マイページ: 新規追加時のみ選曲履歴に記録 (差し替えは記録しない)
 if (!is_numeric($selectid) && configbool("usemypage", true)) {
     require_once 'mypage_class.php';
