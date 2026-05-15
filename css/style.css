@@ -4,34 +4,49 @@
 }
 
 /* Bootstrap 3 navbar — BS5版と縦サイズを揃える
-   このプロジェクトの bootstrap.min.css は navbar-brand height:80px / navbar min-height:80px の
-   カスタム値を持つため、style.css 側で 56px に上書きする */
+   このプロジェクトの bootstrap.min.css は navbar-brand height:80px / navbar min-height:80px /
+   navbar-nav>li>a padding 29px のカスタム値を持つため、style.css 側で 56px に上書きする。
+   Bootstrap のメディアクエリ内ルールに勝つため、全部 !important + .navbar.navbar-fixed-top
+   プレフィックスで特異性も高めている。 */
+nav.navbar.navbar-fixed-top,
 .navbar.navbar-fixed-top {
   min-height: 56px !important;
+  height: 56px !important;
+  margin-bottom: 0 !important;
 }
 .navbar.navbar-fixed-top .navbar-nav > li > a {
   padding-top: 17px !important;
   padding-bottom: 17px !important;
+  line-height: 22px !important;
+}
+.navbar.navbar-fixed-top .navbar-brand {
+  height: auto !important;
+  padding-top: 17px !important;
+  padding-bottom: 17px !important;
 }
 .navbar.navbar-fixed-top .navbar-toggle {
-  margin-top: 11px;
-  margin-bottom: 11px;
+  margin-top: 11px !important;
+  margin-bottom: 11px !important;
+  padding: 7px 10px !important;
 }
-
-/* Bootstrap 3 navbar — BS5版と縦サイズを揃える */
+.navbar.navbar-fixed-top .navbar-nav {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
 .navbar.navbar-fixed-top.navbar-inverse {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* 検索ボタン（全ページ共通・Bootstrap 3 navbar 内） */
+.navbar.navbar-fixed-top a.navbar-brand.navbar-search-btn,
 a.navbar-brand.navbar-search-btn {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   gap: 5px;
-  padding: 6px 14px;
-  margin-top: 0;
-  margin-bottom: 0;
-  height: auto;
+  padding: 6px 14px !important;
+  margin: 11px 6px !important;
+  height: auto !important;
+  line-height: 1.4 !important;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -39,7 +54,6 @@ a.navbar-brand.navbar-search-btn {
   font-weight: 600;
   color: #f8f9fa !important;
   text-decoration: none;
-  line-height: 1.4;
   transition: background 0.18s ease;
 }
 
@@ -53,10 +67,11 @@ a.navbar-brand.navbar-search-btn:focus {
 .navbar-brand-dropdown {
 	margin: 0;
 }
+.navbar.navbar-fixed-top .navbar-brand.dropdown-toggle,
 .navbar-brand.dropdown-toggle {
-	padding-top: 17px;
-	padding-bottom: 17px;
-	height: auto;
+	padding-top: 17px !important;
+	padding-bottom: 17px !important;
+	height: auto !important;
 	margin-top: 0px;
 	margin-bottom: 0px;
 }
