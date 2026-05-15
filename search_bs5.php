@@ -67,13 +67,81 @@ function print_listerdb_search() {
 }
 
 function print_listerdb_fileonly() {
-    global $config_ini;
-    $includepage = 1;
+    global $config_ini, $selectid;
+    $lister_dbpath = '';
     if (array_key_exists("listerDBPATH", $config_ini)) {
-        $lister_dbpath = $config_ini['listerDBPATH'];
+        $lister_dbpath = urldecode($config_ini['listerDBPATH']);
     }
-    $filesearch = 1;
-    require 'search_listerdb_anysearch_index_bs5.php';
+    $sid_field = !empty($selectid)
+        ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
+        : '';
+    $db_field = !empty($lister_dbpath)
+        ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
+        : '';
+
+    print '<p class="form-label-sm mb-2">検索ワード <small>（ふりがな・作品名・曲名・歌手名・ファイル名の一部）</small></p>';
+    print '<form action="search_listerdb_filelist.php" method="GET">';
+    print '  <div class="search-input-wrap">';
+    print '    <input type="text" name="anyword" id="anyword" class="form-control-themed"';
+    print '           placeholder="作品名、曲名、歌手名、ファイル名の一部" autocomplete="off" />';
+    print '    <button type="submit" class="btn-search-submit">検索</button>';
+    print '  </div>';
+    print  $db_field . $sid_field;
+    print '</form>';
+}
+
+function print_listerdb_detailsearch() {
+    global $config_ini, $selectid;
+    $lister_dbpath = '';
+    if (array_key_exists("listerDBPATH", $config_ini)) {
+        $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+    }
+    $sid_field = !empty($selectid)
+        ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
+        : '';
+    $db_field = !empty($lister_dbpath)
+        ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
+        : '';
+
+    $fields = [
+        ['name' => 'song_name',         'label' => '曲名'],
+        ['name' => 'program_name',      'label' => '作品名'],
+        ['name' => 'artist',            'label' => '歌手名'],
+        ['name' => 'maker_name',        'label' => '制作会社'],
+        ['name' => 'tie_up_group_name', 'label' => 'シリーズ名'],
+        ['name' => 'worker',            'label' => '動画製作者'],
+    ];
+
+    print '<form action="search_listerdb_songlist.php" method="GET">';
+    print  $db_field . $sid_field;
+    print '<div class="row g-3 mb-3">';
+    foreach ($fields as $f) {
+        print '<div class="col-md-4">';
+        print '  <label class="form-label-sm" for="' . $f['name'] . '">' . $f['label'] . '</label>';
+        print '  <input type="text" name="' . $f['name'] . '" id="' . $f['name'] . '" class="form-control-themed" value="">';
+        print '</div>';
+    }
+    print '</div>';
+    print '<div class="row g-3 mb-3">';
+    print '  <div class="col-md-4">';
+    print '    <label class="form-label-sm" for="datestart">更新日（開始）</label>';
+    print '    <input type="date" name="datestart" id="datestart" class="form-control-themed">';
+    print '  </div>';
+    print '  <div class="col-md-4">';
+    print '    <label class="form-label-sm" for="dateend">更新日（終了）</label>';
+    print '    <input type="date" name="dateend" id="dateend" class="form-control-themed">';
+    print '  </div>';
+    print '</div>';
+    print '<div class="d-flex gap-3 mb-3">';
+    print '  <label class="d-flex align-items-center gap-1" style="cursor:pointer;">';
+    print '    <input type="radio" name="match" value="part" checked> 部分一致';
+    print '  </label>';
+    print '  <label class="d-flex align-items-center gap-1" style="cursor:pointer;">';
+    print '    <input type="radio" name="match" value="full"> 完全一致';
+    print '  </label>';
+    print '</div>';
+    print '<button type="submit" class="btn-secondary-themed">検索</button>';
+    print '</form>';
 }
 
 function print_everything_filenamesearch($first = false) {
@@ -293,8 +361,7 @@ else:
             switch ($v) {
                 case 0:
                     if (checkbox_check($config_ini['searchitem'], "listerDB_file")) {
-                        // キーワード検索 (listerDB) はそのまま include
-                        _section_open('sec-listerdb-file', 'キーワード検索', $first);
+                        _section_open('sec-listerdb-file', 'キーワード検索（りすたー）', $first);
                         print_listerdb_fileonly();
                         _section_close();
                         $first = false;
@@ -334,6 +401,14 @@ else:
                             print str_replace('#yukarihost#', $_SERVER["HTTP_HOST"], urldecode($config_ini["noticeof_searchpage"]));
                             print '</div>';
                         }
+                    }
+                    break;
+                case 6:
+                    if (checkbox_check($config_ini['searchitem'], "listerDB_detail")) {
+                        _section_open('sec-listerdb-detail', 'キーワード詳細検索', $first);
+                        print_listerdb_detailsearch();
+                        _section_close();
+                        $first = false;
                     }
                     break;
             }

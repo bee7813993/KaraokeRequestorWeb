@@ -935,14 +935,19 @@ if(!isset($config_ini['searchitem_o'][5])) {
         $config_ini['searchitem'][] = 'searchmessage';
     }
 }
+if(!isset($config_ini['searchitem_o'][6])) {
+    // 詳細検索フォームは既存ユーザーではデフォルト非表示（順序0）
+    $config_ini['searchitem_o'][6] = 0;
+}
 
 $searchitem_defs = array(
-    array('id' => 'listerDB_file',  'label' => 'キーワード検索（りすたー）'),
-    array('id' => 'listerDB',       'label' => 'りすたーDB検索'),
-    array('id' => 'filesearch_e',   'label' => 'ファイル名検索（Everything）'),
-    array('id' => 'anisoninfo_e',   'label' => '外部検索（anison.info）（Everything）'),
-    array('id' => 'bandit_e',       'label' => '外部検索（banditの隠れ家）（Everything）'),
-    array('id' => 'searchmessage',  'label' => '検索画面表示メッセージ'),
+    array('id' => 'listerDB_file',   'label' => 'キーワード検索（りすたー）'),
+    array('id' => 'listerDB',        'label' => 'りすたーDB検索'),
+    array('id' => 'filesearch_e',    'label' => 'ファイル名検索（Everything）'),
+    array('id' => 'anisoninfo_e',    'label' => '外部検索（anison.info）（Everything）'),
+    array('id' => 'bandit_e',        'label' => '外部検索（banditの隠れ家）（Everything）'),
+    array('id' => 'searchmessage',   'label' => '検索画面表示メッセージ'),
+    array('id' => 'listerDB_detail', 'label' => 'キーワード詳細検索（りすたー）'),
 );
 
 $si_order_map = array();
