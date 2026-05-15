@@ -17,6 +17,8 @@ nav.navbar.navbar-fixed-top,
 .navbar.navbar-fixed-top .navbar-nav > li > a {
   padding-top: 17px !important;
   padding-bottom: 17px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
   line-height: 22px !important;
 }
 .navbar.navbar-fixed-top .navbar-brand {
