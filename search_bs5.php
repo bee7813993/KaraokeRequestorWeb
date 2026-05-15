@@ -79,15 +79,17 @@ function print_listerdb_fileonly() {
         ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
         : '';
 
-    print '<p class="form-label-sm mb-2">検索ワード <small>（ふりがな・作品名・曲名・歌手名・ファイル名の一部）</small></p>';
-    print '<form action="search_listerdb_filelist.php" method="GET">';
-    print '  <div class="search-input-wrap">';
-    print '    <input type="text" name="anyword" id="anyword" class="form-control-themed"';
-    print '           placeholder="作品名、曲名、歌手名、ファイル名の一部" autocomplete="off" />';
-    print '    <button type="submit" class="btn-search-submit">検索</button>';
-    print '  </div>';
-    print  $db_field . $sid_field;
-    print '</form>';
+    print '<div class="search-hero">';
+    print '  <p class="form-label-sm mb-2">検索ワード <small>（ふりがな・作品名・曲名・歌手名・ファイル名の一部）</small></p>';
+    print '  <form action="search_listerdb_filelist.php" method="GET">';
+    print '    <div class="search-input-wrap">';
+    print '      <input type="text" name="anyword" id="anyword" class="form-control-themed"';
+    print '             placeholder="作品名、曲名、歌手名、ファイル名の一部" autocomplete="off" />';
+    print '      <button type="submit" class="btn-search-submit">検索</button>';
+    print '    </div>';
+    print      $db_field . $sid_field;
+    print '  </form>';
+    print '</div>';
 }
 
 function print_listerdb_detailsearch() {
@@ -361,10 +363,8 @@ else:
             switch ($v) {
                 case 0:
                     if (checkbox_check($config_ini['searchitem'], "listerDB_file")) {
-                        _section_open('sec-listerdb-file', 'キーワード検索（りすたー）', $first);
+                        // アコーディオンなしで常時表示
                         print_listerdb_fileonly();
-                        _section_close();
-                        $first = false;
                     }
                     break;
                 case 1:
