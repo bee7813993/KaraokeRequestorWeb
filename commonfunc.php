@@ -1474,7 +1474,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
         $mypage_icon_url = htmlspecialchars($mypage_icon_path, ENT_QUOTES, 'UTF-8');
     }
 
-    print '<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">';
+    print '<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">';
     print '<div class="container-fluid">';
 
     // 部屋ドロップダウン（マルチルーム時）
@@ -1516,7 +1516,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
 
     // スマホ：先頭にマイページ
     if (configbool("usemypage", true)) {
-        print '<li class="nav-item d-lg-none">';
+        print '<li class="nav-item d-md-none">';
         print '<a class="nav-link" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'mypage.php">';
         print '<img src="' . $mypage_icon_url . '" alt="マイページ" style="width:32px;height:32px;border-radius:50%;vertical-align:middle;' . $mypage_active_border . '"> マイページ';
         print '</a></li>';
@@ -1572,7 +1572,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
 
     // PC用マイページアイコン
     if (configbool("usemypage", true)) {
-        print '<li class="nav-item d-none d-lg-flex align-items-center">';
+        print '<li class="nav-item d-none d-md-flex align-items-center">';
         print '<a class="nav-link p-1" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'mypage.php" title="マイページ">';
         print '<img src="' . $mypage_icon_url . '" alt="マイページ" style="width:36px;height:36px;border-radius:50%;display:inline-block;' . $mypage_active_border . '">';
         print '</a></li>';

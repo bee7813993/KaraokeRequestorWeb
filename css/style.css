@@ -15,16 +15,18 @@ nav.navbar.navbar-fixed-top,
   margin-bottom: 0 !important;
 }
 .navbar.navbar-fixed-top .navbar-nav > li > a {
-  padding: 17px 10px !important;
+  padding: 17px 8px !important;
   margin: 0 !important;
   line-height: 22px !important;
+  font-size: 13px !important;
 }
 .navbar.navbar-fixed-top .navbar-brand {
   height: auto !important;
   padding-top: 17px !important;
   padding-bottom: 17px !important;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  font-size: 13px !important;
 }
 .navbar.navbar-fixed-top .navbar-toggle {
   margin-top: 11px !important;
@@ -86,11 +88,10 @@ a.navbar-brand.navbar-search-btn:focus {
 }
 .navbar.navbar-fixed-top .navbar-brand.dropdown-toggle,
 .navbar-brand.dropdown-toggle {
-	padding-top: 17px !important;
-	padding-bottom: 17px !important;
+	padding: 17px 8px !important;
 	height: auto !important;
-	margin-top: 0px;
-	margin-bottom: 0px;
+	margin: 0 !important;
+	font-size: 13px !important;
 }
 .dropdown-menu.dropdown-brand {
 	margin-left: -30px;
