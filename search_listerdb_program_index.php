@@ -1,260 +1,480 @@
-<?php
+<?php 
 require_once 'commonfunc.php';
-if (!isset($includepage)) $includepage = '';
-if (array_key_exists("includepage", $_REQUEST)) $includepage = $_REQUEST["includepage"];
+if(!isset($includepage) )
+$includepage = "";
 
-if (!isset($lister_dbpath)) $lister_dbpath = "list\\List.sqlite3";
-if (array_key_exists("listerDBPATH", $config_ini)) {
+if(array_key_exists("includepage", $_REQUEST)) {
+    $includepage = $_REQUEST["includepage"];
+}
+
+if (empty($includepage) && !empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_listerdb_program_index_bs5.php' . $qs);
+    exit;
+}
+
+if(!isset($lister_dbpath) )
+$lister_dbpath = "list\List.sqlite3";
+if(array_key_exists("listerDBPATH", $config_ini)) {
     $lister_dbpath = urldecode($config_ini['listerDBPATH']);
 }
-$selectid   = array_key_exists("selectid", $_REQUEST) ? $_REQUEST["selectid"] : '';
-$linkoption = !empty($selectid) ? 'selectid=' . rawurlencode($selectid) : '';
-
-require_once 'search_listerdb_commonfunc.php';
-
-$alpha_list = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
-$num_list   = ['1','2','3','4','5','6','7','8','9','0'];
-$kana_list  = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ','た','ち','つ','て','と',
-                'な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ','ま','み','む','め','も','や','ゐ','ゆ','ゑ','よ',
-                'ら','り','る','れ','ろ','わ','を','ん'];
-
-function checkandbuild_headerlink($oneheader, $headlist, $lister_dbpath)
-{
-    global $selectid;
-    foreach ($headlist['data'] as $value) {
-        if ($oneheader === $value["found_head"]) {
-            $searchcategory = $headlist["program_category"];
-            if ($headlist["program_category"] === 'ISNULL') {
-                $searchcategory = 'ISNULL';
-            }
-            $linkurl = 'search_listerdb_programlist_fromhead.php?start=0&length=50'
-                . '&category=' . urlencode($searchcategory)
-                . '&header=' . urlencode($oneheader);
-            if (!empty($selectid)) $linkurl .= '&selectid=' . rawurlencode($selectid);
-            return '<a class="index-btn has-data" href="' . htmlspecialchars($linkurl, ENT_QUOTES, 'UTF-8') . '">'
-                . htmlspecialchars($oneheader, ENT_QUOTES, 'UTF-8') . '</a>';
-        }
-    }
-    return '<span class="index-btn no-data">' . htmlspecialchars($oneheader, ENT_QUOTES, 'UTF-8') . '</span>';
+$selectid = '';
+if(array_key_exists("selectid", $_REQUEST)) {
+    $selectid = $_REQUEST["selectid"];
 }
 
-function sortcategorylist($categorylist)
-{
-    $lister_config = parse_ini_file("listerdb_config.ini", true);
-    if ($lister_config === false) return $categorylist;
-    if (!array_key_exists("category_order", $lister_config)) return $categorylist;
-    if (!array_key_exists("category_name", $lister_config["category_order"])) return $categorylist;
+$linkoption = '';
+if(!empty($selectid) ) $linkoption = $linkoption.'&selectid='.$selectid;
+require_once 'search_listerdb_commonfunc.php';
 
-    $newcategorylist     = [];
+
+// アルファベット配列
+$alpha_list = array( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' );
+
+// 数字配列
+$num_list = array( '1' ,'2' ,'3' ,'4' ,'5' ,'6' ,'7' ,'8' ,'9' ,'0' );
+
+// かな配列
+$kana_list = array( 'あ' ,'い' ,'う' ,'え' ,'お' ,'か' ,'き' ,'く' ,'け' ,'こ' ,'さ' ,'し' ,'す' ,'せ' ,'そ' ,'た' ,'ち' ,'つ' ,'て' ,'と' ,'な' ,'に' ,'ぬ' ,'ね' ,'の' ,'は' ,'ひ' ,'ふ' ,'へ' ,'ほ' ,'ま' ,'み' ,'む' ,'め' ,'も' ,'や' ,'ゐ' ,'ゆ' ,'ゑ' ,'よ' ,'ら' ,'り' ,'る' ,'れ' ,'ろ' ,'わ' ,'を' ,'ん');
+
+function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
+//    global $lister_dbpath;
+    global $selectid;
+    foreach($headerlist['data']  as $key => $value) {
+    //print $oneheader.$value["found_head"];
+        if( $oneheader === $value["found_head"] ) {
+            $searchcategory = $headerlist["program_category"];
+            if($headerlist["program_category"] === 'ISNULL' ) {
+                $searchcategory = 'ISNULL';
+            }
+        
+            // URL Sample http://localhost/search_listerdb_programlist_fromhead.php?start=0&length=10&category=%E3%82%B2%E3%83%BC%E3%83%A0&header=%E3%82%89
+            $whereword = urlencode('found_head='.$value["found_head"]) ;
+            $linkurl = 'search_listerdb_programlist_fromhead.php?start=0&length=50&category='.urlencode($searchcategory).'&header='.$oneheader;
+            if(!empty($selectid) ) $linkurl = $linkurl.'&selectid='.$selectid;
+            $url='<a class="btn btn-primary center-block indexbtnstr"  href="'.$linkurl.'"> '. $oneheader .'</a>';
+            return $url;
+        }
+    }
+    $nolinkbtn = '<button type="button" class="btn btn-default btn-block indexbtnstr" disabled="disabled" >'.$oneheader.'</button>';
+    return $nolinkbtn;
+}
+
+
+//カテゴリーリストの並べ替え
+function sortcategorylist($categorylist){
+    $lister_config = parse_ini_file("listerdb_config.ini", true);
+    if( $lister_config === FALSE ){
+        // ファイルがない場合、DBの順番
+        return $categorylist;
+    }
     $nullcategory_exists = 0;
-    $allcategory_exists  = 0;
-    foreach ($lister_config["category_order"]["category_name"] as $ordercat) {
-        if ($ordercat === '全部') {
-            $newcategorylist[] = ['program_category' => $ordercat];
+    $allcategory_exists = 0;
+    
+    $newcategorylist = array();
+    if(! array_key_exists("category_order",$lister_config) )  return $categorylist;
+    if(! array_key_exists("category_name",$lister_config["category_order"]) )  return $categorylist;
+    
+    foreach($lister_config["category_order"]["category_name"] as $ordercat ){
+    // print $ordercat;
+        if($ordercat === "全部" ){
+            $newcategorylist[] = array("program_category" => $ordercat);
             $allcategory_exists++;
             continue;
+            
         }
-        if ($ordercat === 'その他') {
+        if($ordercat === "その他" ){
+//            $newcategorylist[] = array("program_category" => NULL);
             $nullcategory_exists++;
-            $ordercat = null;
+            $ordercat = NULL;
         }
+
         $foundkey = false;
-        foreach ($categorylist as $key => $value) {
-            if ($value["program_category"] == $ordercat) { $foundkey = $key; break; }
+        foreach($categorylist as $key => $value ){
+           if($value["program_category"] == $ordercat ){
+               $foundkey = $key;
+               break;
+           }
         }
-        if ($foundkey !== false) {
-            $newcategorylist[] = ['program_category' => $ordercat];
-            array_splice($categorylist, $foundkey, 1);
+        if( $foundkey !== FALSE ){
+            $newcategorylist[] = array("program_category" => $ordercat);
+            $split = array_splice($categorylist,$foundkey,1);
         }
     }
-    if (count($categorylist) > 0) {
-        $newcategorylist = array_merge($newcategorylist, $categorylist);
+    
+
+    if(count($categorylist ) > 0 ) {
+        $result = array_merge($newcategorylist,$categorylist);
+        $newcategorylist = $result;
     }
-    if ($nullcategory_exists == 0) {
+    if($nullcategory_exists == 0 ) {
         $foundkey = false;
-        foreach ($newcategorylist as $key => $value) {
-            if ($value["program_category"] == null) { $foundkey = $key; break; }
+        foreach($newcategorylist as $key => $value ){
+           if($value["program_category"] == NULL ){
+               $foundkey = $key;
+               break;
+           }
         }
-        if ($foundkey !== false) array_splice($newcategorylist, $foundkey, 1);
-        $newcategorylist[] = ['program_category' => null];
+        $split = array_splice($newcategorylist,$foundkey,1);
+        $newcategorylist[] = array("program_category" => NULL);
     }
-    if ($allcategory_exists == 0) {
-        $newcategorylist[] = ['program_category' => '全部'];
+    
+    if($allcategory_exists == 0 ) {
+        $newcategorylist[] = array("program_category" => '全部');
     }
     return $newcategorylist;
 }
 
-function any_header_in_chars($chars, $headlist)
-{
-    if (empty($headlist['data'])) return false;
-    foreach ($headlist['data'] as $row) {
-        if (isset($row['found_head']) && in_array($row['found_head'], $chars, true)) return true;
-    }
-    return false;
+   $errmsg = "";
+   $geturl = 'http://localhost/search_listerdb_head_json.php?list=1';
+   $categorylist_json = file_get_contents($geturl);
+   if(!$categorylist_json) {
+      $errmsg = 'カテゴリーリストの取得に失敗';
+   }else {
+      $categorylist = json_decode($categorylist_json,true);
+   }
+   if(!$categorylist) {
+      $errmsg = 'カテゴリーリストのJSON parse 失敗';
+   }
+   $categorylist = sortcategorylist($categorylist);
+   //var_dump($categorylist);
+
+if(empty($includepage)){
+
+print '<html>';
+print '<head>';
+print_meta_header();
+
+
+print <<<EOM
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <script type="text/javascript">
+
+    // ここに処理を記述します。
+  </script>
+  <title>リスターDB検索画面</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css" />
+  <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+</head>
+<body>
+EOM;
+shownavigatioinbar('searchreserve.php');
+}
+showuppermenu('program_name',$linkoption);
+
+function printprogramnamesearch() {
+  global $lister_dbpath;
+  global $selectid;
+  
+print <<<EOM
+<h1> 作品名検索 </h1>
+<div class="bg-info" >
+
+<form action="search_listerdb_songlist.php" method="GET" >
+  <div class="form-group">
+    <label>検索ワード (作品名)</label>
+    <input type="test" name="program_name" id="program_name" class="form-control" placeholder="ファイル名の一部">
+EOM;
+if(!empty($lister_dbpath))
+    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
+if(!empty($selectid))
+    print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
+print <<<EOM
+  </div>
+  <div class="form-group">
+    <div class="btn-group" data-toggle="buttons">
+      <label class="btn btn-default active">
+        <input type="radio" name="match" value="part" autocomplete="off" checked=""> 部分一致
+      </label>
+      <label class="btn btn-default ">
+        <input type="radio" name="match" value="full" autocomplete="off"> 完全一致
+      </label>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-default">検索</button>
+</form>
+
+</div>
+EOM;
 }
 
-function print_index_grid($headlist, $lists, $lister_dbpath)
-{
-    foreach ($lists as $item) {
-        ['label' => $label, 'chars' => $chars, 'always' => $always] = $item;
-        // かなは常時表示。アルファベット・数字はデータが存在する場合のみ。
-        if (!$always && !any_header_in_chars($chars, $headlist)) continue;
-        print '<div class="index-section-label">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</div>';
-        print '<div class="index-btn-grid">';
-        foreach ($chars as $c) {
-            print checkandbuild_headerlink($c, $headlist, $lister_dbpath);
-        }
-        print '</div>';
-    }
-    print '<div class="index-section-label">その他</div>';
-    print '<div class="index-btn-grid">';
-    print checkandbuild_headerlink('その他', $headlist, $lister_dbpath);
-    print '</div>';
-}
 
-// --- カテゴリリスト取得 ---
-$errmsg     = '';
-$categorylist = [];
-$geturl = 'http://localhost/search_listerdb_head_json.php?list=1';
-$categorylist_json = @file_get_contents($geturl);
-if (!$categorylist_json) {
-    $errmsg = 'カテゴリーリストの取得に失敗';
-} else {
-    $categorylist = json_decode($categorylist_json, true);
-    if (!$categorylist) $errmsg = 'カテゴリーリストのJSON parse 失敗';
-}
-$categorylist = sortcategorylist($categorylist);
-
-if (empty($includepage)) {
-    print '<!doctype html><html lang="ja"><head>';
-    print_meta_header();
-    print_bs5_search_head();
-    print '<title>作品名インデックス検索</title>';
-    print '</head><body>';
-    shownavigatioinbar_bs5('searchreserve.php');
-}
-showuppermenu('program_name', $linkoption);
 ?>
 
-<div class="container py-3">
-
-<?php if (!empty($errmsg)): ?>
-  <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
-<?php else: ?>
-
-  <!-- 更新日検索 -->
-  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-    <span class="form-label-sm mb-0">新しく更新された動画:</span>
-    <?php foreach ([1 => '過去1か月', 2 => '過去2か月', 3 => '過去3か月'] as $mo => $lbl): ?>
-      <a class="reservation-tab-btn"
-         href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-{$mo} month")); ?>&<?php echo htmlspecialchars($linkoption, ENT_QUOTES, 'UTF-8'); ?>">
-        <?php echo $lbl; ?>
-      </a>
-    <?php endforeach; ?>
+<div class="container  ">
+ <div class="form-group">
+  <lavel class=" control-label"> <strong > 新しく更新された動画 </strong>
+  </lavel> 
+  <div class=" btn-toolbar">
+   <div class=" btn-group">
+    <a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-1 month"));?>&<?php echo $linkoption;?>" role="button">過去1か月</a>
+    <a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-2 month"));?>&<?php echo $linkoption;?>" role="button">過去2か月</a>
+    <a class="btn btn-primary" href="search_listerdb_songlist.php?datestart=<?php echo date('Y-m-d', strtotime("-3 month"));?>&<?php echo $linkoption;?>" role="button">過去3か月</a>
+   </div>
   </div>
+ </div>
 
-  <!-- 作品名テキスト検索 -->
-  <div class="search-hero mb-4">
-    <p class="form-label-sm mb-2">作品名キーワード検索</p>
-    <form action="search_listerdb_songlist.php" method="GET">
-      <?php if (!empty($lister_dbpath)): ?>
-        <input type="hidden" name="lister_dbpath" value="<?php echo htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8'); ?>">
-      <?php endif; ?>
-      <?php if (!empty($selectid)): ?>
-        <input type="hidden" name="selectid" value="<?php echo htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8'); ?>">
-      <?php endif; ?>
-      <div class="search-input-wrap">
-        <input type="text" name="program_name" id="program_name" class="form-control-themed"
-               placeholder="作品名の一部を入力" autocomplete="off">
-        <button type="submit" class="btn-search-submit">検索</button>
-      </div>
-      <div class="d-flex gap-3 mt-2">
-        <label class="d-flex align-items-center gap-1" style="cursor:pointer;">
-          <input type="radio" name="match" value="part" checked> 部分一致
-        </label>
-        <label class="d-flex align-items-center gap-1" style="cursor:pointer;">
-          <input type="radio" name="match" value="full"> 完全一致
-        </label>
-      </div>
-    </form>
-  </div>
+<?php 
+printprogramnamesearch();
+?>
 
-  <!-- 作品名インデックス -->
-  <h2 class="h5 mb-3">作品名インデックス検索</h2>
+<h1> 作品名インデックス検索 </h1>
+<?php
+if(!empty($errmsg)){
+  print $errmsg;
+  die();
+}
 
-  <?php
-  $char_groups = [
-      ['label' => 'かな', 'chars' => $kana_list, 'always' => true],
-      ['label' => 'アルファベット', 'chars' => $alpha_list, 'always' => false],
-      ['label' => '数字', 'chars' => $num_list, 'always' => false],
-  ];
+$nullcategory_exists = 0;
+$allcategory_exists = 0;
+foreach ($categorylist as $category ){
+$cur_category = $category["program_category"];
+if($category["program_category"] == '全部'){
+  $url = 'http://localhost/search_listerdb_head_json.php';
+  $allcategory_exists ++;
+} else {
+    $url = 'http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]);
+}
+if($cur_category === NULL ) {
+  $nullcategory_exists++;
+//  continue;
+  $cur_category = 'その他';
+  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
+}
 
-  $nullcategory_exists = 0;
-  $allcategory_exists  = 0;
+$headlist_json = file_get_contents($url);
+if(!$headlist_json) {
+print     '作品名Headerの取得に失敗';
+print 'failed: '.$url;
+    die();
+}else {
+    
+}
+$headlist = json_decode($headlist_json,true);
+if($headlist === NULL) {
+print    '作品名Headerの取得に失敗';
+print 'failed: '.$url.$headlist_json;
+    die();
+}
+if(empty($headlist['data'])) continue;
+// var_dump($headlist_json);
+print '<h2> ' . $cur_category . '</h2>';
+print '<div class="container bg-info ">';
+print '  <div class="row">';
+$count = 1;
+foreach ($kana_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn center-block" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn center-block btn indexbtnstr" >&nbsp; </div>';
+   if( ($count % 10) == 0 ) {
+     $count = 1;
+     print '  </div>';
+     print '  <div class="row">';
+   }else{
+     $count++;
+   }
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+if(headerlistcheck($alpha_list,$headlist) != 0 ){
+print '  <hr />';
+print '  <div class="row">';
+$count = 1;
+foreach ($alpha_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+}
+if(headerlistcheck($num_list,$headlist) != 0 ){
+print '  <hr />';
+print '  <div class="row">';
+$count = 1;
+foreach ($num_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+}
+print '  <div class="row">';
+  print '    <div class="col-xs-4 col-md-2 indexbtn" >'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
+print '  </div>';
 
-  foreach ($categorylist as $category):
-      $cur_category = $category["program_category"];
-      if ($cur_category === '全部') {
-          $url = 'http://localhost/search_listerdb_head_json.php';
-          $allcategory_exists++;
-      } elseif ($cur_category === null) {
-          $nullcategory_exists++;
-          $cur_category = 'その他';
-          $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
-      } else {
-          $url = 'http://localhost/search_listerdb_head_json.php?program_category=' . urlencode($cur_category);
-      }
+print '</div>';
+}
 
-      $headlist_json = @file_get_contents($url);
-      if (!$headlist_json) continue;
-      $headlist = json_decode($headlist_json, true);
-      if (empty($headlist['data'])) continue;
-  ?>
-  <div class="search-section mb-3">
-    <div class="search-section-body">
-      <h3 class="h6 mb-2"><?php echo htmlspecialchars($cur_category, ENT_QUOTES, 'UTF-8'); ?></h3>
-      <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
-    </div>
-  </div>
-  <?php endforeach; ?>
+// その他のカテゴリーは最後
+if($nullcategory_exists == 0 ){
+  $cur_category = 'その他';
+  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
 
-  <?php if ($nullcategory_exists == 0): ?>
-    <?php
-    $headlist_json = @file_get_contents('http://localhost/search_listerdb_head_json.php?program_category=ISNULL');
-    if ($headlist_json):
-        $headlist = json_decode($headlist_json, true);
-        if (!empty($headlist['data'])):
-    ?>
-    <div class="search-section mb-3">
-      <div class="search-section-body">
-        <h3 class="h6 mb-2">その他</h3>
-        <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
-      </div>
-    </div>
-    <?php endif; endif; ?>
-  <?php endif; ?>
+$headlist_json = file_get_contents($url);
+if(!$headlist_json) {
+    '作品名Headerの取得に失敗';
+    die();
+}else {
+    
+}
+$headlist = json_decode($headlist_json,true);
+if(!empty($headlist['data'])) {
+print '<h2> ' . $cur_category . '</h2>';
 
-  <?php if ($allcategory_exists == 0): ?>
-    <?php
-    $headlist_json = @file_get_contents('http://localhost/search_listerdb_head_json.php?' . $linkoption);
-    if ($headlist_json):
-        $headlist = json_decode($headlist_json, true);
-        if ($headlist):
-    ?>
-    <div class="search-section mb-3">
-      <div class="search-section-body">
-        <h3 class="h6 mb-2">全部</h3>
-        <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
-      </div>
-    </div>
-    <?php endif; endif; ?>
-  <?php endif; ?>
+//var_dump($headlist);
+print '<div class="container bg-info ">';
+print '  <div class="row">';
+$count = 1;
+foreach ($kana_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn center-block" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn center-block btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+print '  <div class="row">';
+$count = 1;
+foreach ($alpha_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
 
-<?php endif; // errmsg ?>
+print '  <div class="row">';
+$count = 1;
+foreach ($num_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+print '  <div class="row">';
+  print '    <div class="col-xs-4 col-md-2 indexbtn">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
+print '  </div>';
+
+print '</div>';
+
+
+}
+}
+
+if($allcategory_exists == 0 ){
+// カテゴリ分けしない全部表示
+  $cur_category = '全部';
+  $url = 'http://localhost/search_listerdb_head_json.php?'.$linkoption;
+
+print '<h2> ' . $cur_category . '</h2>';
+$headlist_json = file_get_contents($url);
+if(!$headlist_json) {
+    '作品名Headerの取得に失敗';
+    die();
+}else {
+    
+}
+$headlist = json_decode($headlist_json,true);
+
+//var_dump($headlist);
+print '<div class="container bg-info ">';
+print '  <div class="row">';
+$count = 1;
+foreach ($kana_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn center-block" >'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn center-block btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+print '  <div class="row">';
+$count = 1;
+foreach ($alpha_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+
+print '  <div class="row">';
+$count = 1;
+foreach ($num_list as $kana) {
+  print '    <div class="col-xs-2 col-md-1 indexbtn">'.checkandbuild_headerlink($kana, $headlist, $lister_dbpath).'</div>';
+// print $count;
+  if( ($count % 5) == 0 ) {
+    print '    <div class="col-xs-2 col-md-1 indexbtn btn indexbtnstr" >&nbsp; </div>';
+    $count = 1;
+  }else{
+    $count++;
+  }
+}
+print '  </div>';
+print '  <div class="row">';
+  print '    <div class="col-xs-4 col-md-2 indexbtn">'.checkandbuild_headerlink('その他', $headlist, $lister_dbpath).'</div>';
+print '  </div>';
+
+print '</div>';
+}
+
+?>
 </div>
 
+
 <?php
-if (empty($includepage)) {
-    print '</body></html>';
+if(empty($includepage)){
+print <<<EOM
+</body>
+</html>
+EOM;
 }
+
 ?>
