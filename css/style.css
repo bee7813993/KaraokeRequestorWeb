@@ -7,24 +7,24 @@
    このプロジェクトの bootstrap.min.css は navbar-brand height:80px / navbar min-height:80px /
    navbar-nav>li>a padding 29px のカスタム値を持つため、style.css 側で 56px に上書きする。
    Bootstrap のメディアクエリ内ルールに勝つため、全部 !important + .navbar.navbar-fixed-top
-   プレフィックスで特異性も高めている。 */
+   プレフィックスで特異性も高めている。
+   height は固定しない（折返しや collapse 展開で navbar-inverse 背景が伸びる必要があるため min-height のみ）。 */
 nav.navbar.navbar-fixed-top,
 .navbar.navbar-fixed-top {
   min-height: 56px !important;
-  height: 56px !important;
   margin-bottom: 0 !important;
 }
 .navbar.navbar-fixed-top .navbar-nav > li > a {
-  padding-top: 17px !important;
-  padding-bottom: 17px !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
+  padding: 17px 10px !important;
+  margin: 0 !important;
   line-height: 22px !important;
 }
 .navbar.navbar-fixed-top .navbar-brand {
   height: auto !important;
   padding-top: 17px !important;
   padding-bottom: 17px !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
 }
 .navbar.navbar-fixed-top .navbar-toggle {
   margin-top: 11px !important;
@@ -37,6 +37,21 @@ nav.navbar.navbar-fixed-top,
 }
 .navbar.navbar-fixed-top.navbar-inverse {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+/* スマホで burger 展開時 / 中間幅で項目が折返した時に、暗い背景を確実に下まで伸ばす */
+.navbar.navbar-fixed-top.navbar-inverse .navbar-collapse,
+.navbar.navbar-fixed-top.navbar-inverse .navbar-header {
+  background-color: #222;
+}
+/* BS3 mobile collapsed dropdown はデフォルトで透明 → 中身が読みづらいので少し縁取りする */
+@media (max-width: 767px) {
+  .navbar.navbar-fixed-top.navbar-inverse .navbar-nav .open .dropdown-menu {
+    background-color: #111 !important;
+    padding-left: 8px;
+  }
+  .navbar.navbar-fixed-top.navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
+    color: #eee !important;
+  }
 }
 
 /* 検索ボタン（全ページ共通・Bootstrap 3 navbar 内） */
