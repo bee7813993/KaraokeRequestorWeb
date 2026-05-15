@@ -79,7 +79,7 @@ function print_listerdb_fileonly() {
 function print_everything_filenamesearch($first = false) {
     global $config_ini, $word, $selectid, $result_count, $l_order, $connectinternet;
 
-    _section_open('sec-filesearch', 'ファイル名（曲名）検索', $first);
+    _section_open('sec-filesearch', 'ファイル名検索（Everything）', $first);
 
     print '<form action="search.php" method="GET">';
     if ($is_swap = (is_numeric($selectid) && $selectid !== '')) {
@@ -222,7 +222,7 @@ if (!empty($config_ini['roomurl'])) {
 </head>
 <body>
 
-<?php shownavigatioinbar('searchreserve.php'); ?>
+<?php shownavigatioinbar_bs5('searchreserve.php'); ?>
 
 <div class="container py-3">
 
@@ -302,7 +302,8 @@ else:
                     break;
                 case 1:
                     if (checkbox_check($config_ini['searchitem'], "listerDB")) {
-                        _section_open('sec-listerdb', '作品名インデックス検索', $first);
+                        // 作品名インデックス検索は常時開いた状態にする
+                        _section_open('sec-listerdb', '作品名インデックス検索', true);
                         print_listerdb_search();
                         _section_close();
                         $first = false;

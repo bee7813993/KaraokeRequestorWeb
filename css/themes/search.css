@@ -13,41 +13,52 @@ body {
   color: var(--color-text);
 }
 
-/* --- ナビバー --- */
-.navbar {
+/* --- ナビバー (Bootstrap 5) --- */
+.navbar.bg-dark {
   background-color: var(--bg-navbar) !important;
   box-shadow: var(--shadow-navbar);
 }
 
-.navbar-brand {
-  font-weight: 700;
-  color: var(--color-text-on-navbar) !important;
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.85);
 }
 
-/* 検索ボタン（ナビバー内） */
-.navbar-search-btn {
-  display: flex;
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+  color: #ffffff;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* 検索ボタン（ナビバー内・BS5用） */
+.navbar .navbar-search-btn {
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   font-weight: 600;
   padding: 6px 14px;
+  margin-right: 10px;
   border-radius: var(--radius-button);
-  color: var(--color-text-on-navbar);
+  color: var(--color-text-on-navbar) !important;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
   text-decoration: none;
   transition: background var(--transition-base);
   white-space: nowrap;
+  font-size: 0.95rem;
 }
 
-.navbar-search-btn:hover,
-.navbar-search-btn:focus {
+.navbar .navbar-search-btn:hover,
+.navbar .navbar-search-btn:focus {
   background: rgba(255, 255, 255, 0.28);
-  color: #ffffff;
+  color: #ffffff !important;
   text-decoration: none;
 }
 
-.navbar-search-btn svg {
+.navbar .navbar-search-btn svg {
   flex-shrink: 0;
 }
 

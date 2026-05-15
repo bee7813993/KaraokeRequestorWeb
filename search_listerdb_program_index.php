@@ -84,11 +84,21 @@ function sortcategorylist($categorylist)
     return $newcategorylist;
 }
 
+function any_header_in_chars($chars, $headlist)
+{
+    if (empty($headlist['data'])) return false;
+    foreach ($headlist['data'] as $row) {
+        if (isset($row['found_head']) && in_array($row['found_head'], $chars, true)) return true;
+    }
+    return false;
+}
+
 function print_index_grid($headlist, $lists, $lister_dbpath)
 {
     foreach ($lists as $item) {
-        ['label' => $label, 'chars' => $chars] = $item;
-        if (!headerlistcheck($chars, $headlist)) continue;
+        ['label' => $label, 'chars' => $chars, 'always' => $always] = $item;
+        // かなは常時表示。アルファベット・数字はデータが存在する場合のみ。
+        if (!$always && !any_header_in_chars($chars, $headlist)) continue;
         print '<div class="index-section-label">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</div>';
         print '<div class="index-btn-grid">';
         foreach ($chars as $c) {
@@ -96,7 +106,6 @@ function print_index_grid($headlist, $lists, $lister_dbpath)
         }
         print '</div>';
     }
-    // 「その他」は常に出力
     print '<div class="index-section-label">その他</div>';
     print '<div class="index-btn-grid">';
     print checkandbuild_headerlink('その他', $headlist, $lister_dbpath);
@@ -122,7 +131,7 @@ if (empty($includepage)) {
     print_bs5_search_head();
     print '<title>作品名インデックス検索</title>';
     print '</head><body>';
-    shownavigatioinbar('searchreserve.php');
+    shownavigatioinbar_bs5('searchreserve.php');
 }
 showuppermenu('program_name', $linkoption);
 ?>
@@ -175,9 +184,9 @@ showuppermenu('program_name', $linkoption);
 
   <?php
   $char_groups = [
-      ['label' => 'かな', 'chars' => $kana_list],
-      ['label' => 'アルファベット', 'chars' => $alpha_list],
-      ['label' => '数字', 'chars' => $num_list],
+      ['label' => 'かな', 'chars' => $kana_list, 'always' => true],
+      ['label' => 'アルファベット', 'chars' => $alpha_list, 'always' => false],
+      ['label' => '数字', 'chars' => $num_list, 'always' => false],
   ];
 
   $nullcategory_exists = 0;

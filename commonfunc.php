@@ -1370,7 +1370,7 @@ function print_bs5_search_head($extra_css = ''){
  * $current には現在のページ ('search' | 'karaoke' | 'url' | 'pause' | 'bgv') を渡す。
  */
 function build_reservation_tabs($selectid = '', $current = 'search', $prefix = ''){
-    global $config_ini;
+    global $config_ini, $playmode, $user, $connectinternet, $usenfrequset;
 
     $sid = (is_numeric($selectid) && $selectid !== '') ? '&selectid=' . rawurlencode($selectid) : '';
     $pfx = htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8');
@@ -1380,6 +1380,7 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
     $icon_pause   = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/></svg>';
     $icon_url     = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/><path d="M9 5a3 3 0 0 0 0 6h3a3 3 0 0 0 0-6H9zm0 1h3a2 2 0 1 1 0 4H9a2 2 0 0 1 0-4z"/></svg>';
     $icon_bgv     = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>';
+    $icon_notfound = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/></svg>';
 
     $tabs = [];
 
@@ -1387,20 +1388,31 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
         'id'    => 'search',
         'label' => 'ファイル検索',
         'icon'  => $icon_search,
-        'href'  => $pfx . 'search.php?searchmode=file' . $sid,
+        'href'  => $pfx . 'search.php' . ($sid ? '?' . ltrim($sid, '&') : ''),
     ];
 
-    if(!empty($config_ini['karaokeshop'])){
-        $tabs[] = [
-            'id'    => 'karaoke',
-            'label' => 'カラオケ配信',
-            'icon'  => $icon_karaoke,
-            'href'  => $pfx . 'request_confirm.php?shop_karaoke=1' . $sid,
-        ];
+    $pm = isset($playmode) ? (int)$playmode : 0;
+    if ($pm != 4 && $pm != 5) {
+        if (configbool("usehaishin", true)) {
+            $tabs[] = [
+                'id'    => 'karaoke',
+                'label' => 'カラオケ配信',
+                'icon'  => $icon_karaoke,
+                'href'  => $pfx . 'request_confirm.php?shop_karaoke=1' . $sid,
+            ];
+        }
+        if (configbool("useuserpause", false) || (isset($user) && $user == 'admin')) {
+            $tabs[] = [
+                'id'    => 'pause',
+                'label' => '小休止',
+                'icon'  => $icon_pause,
+                'href'  => $pfx . 'request_confirm.php?pause=1' . $sid,
+            ];
+        }
     }
 
-    $connectinternet = isset($config_ini['connectinternet']) ? (int)$config_ini['connectinternet'] : 0;
-    if($connectinternet == 1){
+    $ci = isset($connectinternet) ? (int)$connectinternet : (isset($config_ini['connectinternet']) ? (int)$config_ini['connectinternet'] : 0);
+    if ($ci == 1) {
         $tabs[] = [
             'id'    => 'url',
             'label' => 'URL指定',
@@ -1409,16 +1421,7 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
         ];
     }
 
-    if(isset($config_ini['usepause']) && (int)$config_ini['usepause'] == 1){
-        $tabs[] = [
-            'id'    => 'pause',
-            'label' => '小休止',
-            'icon'  => $icon_pause,
-            'href'  => $pfx . 'request_confirm.php?pause=1' . $sid,
-        ];
-    }
-
-    if(!empty($config_ini['bgvfolderpath'])){
+    if (isset($config_ini['usebgv']) && $config_ini['usebgv'] == 1 && !empty($config_ini['BGVfolder'])) {
         $tabs[] = [
             'id'    => 'bgv',
             'label' => 'BGV選択',
@@ -1427,10 +1430,10 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
         ];
     }
 
-    if(count($tabs) <= 1) return '';
+    if (count($tabs) <= 1) return '';
 
     $html = '<div class="reservation-tabs" role="tablist" aria-label="予約方法">';
-    foreach($tabs as $tab){
+    foreach ($tabs as $tab) {
         $active = ($tab['id'] === $current) ? ' active' : '';
         $aria   = ($tab['id'] === $current) ? ' aria-current="page"' : '';
         $html .= '<a href="' . htmlspecialchars($tab['href'], ENT_QUOTES, 'UTF-8') . '"'
@@ -1441,6 +1444,222 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
     }
     $html .= '</div>';
     return $html;
+}
+
+/**
+ * Bootstrap 5 用ナビバー出力。BS5へ移行した画面（search 系等）から呼ぶ。
+ * 既存の shownavigatioinbar(BS3) と並行運用。
+ */
+function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
+    global $helpurl, $user, $config_ini, $usebingo;
+
+    if ($page == 'none') {
+        $page = basename($_SERVER["PHP_SELF"]);
+    }
+
+    $search_icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/></svg>';
+
+    // マイページアイコン準備
+    $mypage_active_border = '';
+    $mypage_icon_url = 'images/mypage_icon_default.svg';
+    if (configbool("usemypage", true)) {
+        $mypage_active_border = (strpos($page, 'mypage') === 0) ? 'border:3px solid #fff;' : '';
+        $mypage_icon_path = 'images/mypage_icon_default.svg';
+        if (!empty($_COOKIE['YkariUserIcon'])) {
+            $c = $_COOKIE['YkariUserIcon'];
+            if (preg_match('#^images/mypage_icons/[a-f0-9\-]+\.\w{2,5}$#', $c) && @file_exists($c)) {
+                $mypage_icon_path = $c;
+            }
+        }
+        $mypage_icon_url = htmlspecialchars($mypage_icon_path, ENT_QUOTES, 'UTF-8');
+    }
+
+    print '<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">';
+    print '<div class="container-fluid">';
+
+    // 部屋ドロップダウン（マルチルーム時）
+    if (multiroomenabled()) {
+        print '<ul class="navbar-nav me-2">';
+        print '<li class="nav-item dropdown">';
+        $displayonece = 0;
+        $room_items = '';
+        foreach ($config_ini["roomurl"] as $key => $value) {
+            if ($displayonece == 0) {
+                print '<a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown" aria-expanded="false">'
+                    . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '部屋</a>';
+                $displayonece = 1;
+            }
+            if (!empty($value)) {
+                if (array_key_exists("roomurlshow", $config_ini) && array_key_exists($key, $config_ini["roomurlshow"]) && $config_ini["roomurlshow"][$key] == 1) {
+                    $room_items .= '<li id="' . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . 'room">'
+                                . '<a class="dropdown-item" href="' . htmlspecialchars(urldecode($value), ENT_QUOTES, 'UTF-8') . '">'
+                                . htmlspecialchars($key, ENT_QUOTES, 'UTF-8') . '</a></li>';
+                }
+            }
+        }
+        print '<ul class="dropdown-menu">' . $room_items . '</ul>';
+        print '</li>';
+        print '</ul>';
+    }
+
+    // 検索ボタン（常時表示）
+    print '<a class="navbar-brand navbar-search-btn" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'search.php">'
+        . $search_icon . ' 検索</a>';
+
+    // ハンバーガー
+    print '<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#gnavi" aria-controls="gnavi" aria-expanded="false" aria-label="メニュー">';
+    print '<span class="navbar-toggler-icon"></span>';
+    print '</button>';
+
+    print '<div id="gnavi" class="collapse navbar-collapse">';
+    print '<ul class="navbar-nav me-auto">';
+
+    // スマホ：先頭にマイページ
+    if (configbool("usemypage", true)) {
+        print '<li class="nav-item d-lg-none">';
+        print '<a class="nav-link" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'mypage.php">';
+        print '<img src="' . $mypage_icon_url . '" alt="マイページ" style="width:32px;height:32px;border-radius:50%;vertical-align:middle;' . $mypage_active_border . '"> マイページ';
+        print '</a></li>';
+    }
+
+    // 予約一覧
+    $rl_active = ($page == 'requestlist_only.php' || $page == 'requestlist_swipe.php' || $page == 'requestlist_top.php') ? ' active' : '';
+    print '<li class="nav-item"><a class="nav-link' . $rl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'requestlist_top.php">予約一覧</a></li>';
+
+    // いろいろ予約ドロップダウン
+    print '<li class="nav-item dropdown">';
+    print '<a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">いろいろ予約</a>';
+    print '<ul class="dropdown-menu">';
+    selectrequestkind_bs5_dd($prefix);
+    print '</ul>';
+    print '</li>';
+
+    // Player
+    $pl_active = ($page == 'playerctrl_portal.php') ? ' active' : '';
+    print '<li class="nav-item"><a class="nav-link' . $pl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'playerctrl_portal.php">Player</a></li>';
+
+    // コメント
+    if (commentenabledcheck()) {
+        $cm_active = ($page == 'comment.php') ? ' active' : '';
+        print '<li class="nav-item"><a class="nav-link' . $cm_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'comment.php">コメント</a></li>';
+    }
+
+    if (isset($user) && $user === 'admin') {
+        print '<li class="nav-item d-flex align-items-center px-2 text-white-50"><small>管理者ログイン中</small></li>';
+    }
+
+    print '</ul>'; // me-auto
+
+    // 右側
+    print '<ul class="navbar-nav ms-auto align-items-center">';
+    print '<li class="nav-item dropdown">';
+    print '<a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Help等</a>';
+    print '<ul class="dropdown-menu dropdown-menu-end">';
+    if (!empty($helpurl)) {
+        print '<li><a class="dropdown-item" href="' . htmlspecialchars($helpurl, ENT_QUOTES, 'UTF-8') . '">ヘルプ</a></li>';
+    }
+    print '<li><a class="dropdown-item" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'init.php">設定</a></li>';
+    print '<li><a class="dropdown-item" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'toolinfo.php">接続情報表示</a></li>';
+    if (!empty($usebingo)) {
+        print '<li><a class="dropdown-item" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'bingo_showresult.php">ビンゴ結果表示</a></li>';
+    }
+    $rq_active = ($page == 'request.php') ? ' active' : '';
+    print '<li><a class="dropdown-item' . $rq_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'request.php">全部</a></li>';
+    print '<li><hr class="dropdown-divider"></li>';
+    print '<li><span class="dropdown-item-text small text-muted">' . get_version() . '</span></li>';
+    print '</ul>';
+    print '</li>';
+
+    // PC用マイページアイコン
+    if (configbool("usemypage", true)) {
+        print '<li class="nav-item d-none d-lg-flex align-items-center">';
+        print '<a class="nav-link p-1" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'mypage.php" title="マイページ">';
+        print '<img src="' . $mypage_icon_url . '" alt="マイページ" style="width:36px;height:36px;border-radius:50%;display:inline-block;' . $mypage_active_border . '">';
+        print '</a></li>';
+    }
+
+    print '</ul>';
+    print '</div>'; // collapse
+    print '</div>'; // container-fluid
+    print '</nav>';
+
+    // CSS変数注入（BS3版と同じ）
+    $injected_vars = [];
+    if (array_key_exists("bgcolor", $config_ini)) {
+        $bg = htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8');
+        $injected_vars[] = '--bg-page:' . $bg . ';';
+    }
+    if (array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
+        $bgimg = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
+        $injected_vars[] = '--bg-page-image:url(\'' . $bgimg . '\');';
+    }
+    if (!empty($injected_vars)) {
+        print '<style>:root{' . implode('', $injected_vars) . '}</style>';
+    }
+}
+
+/**
+ * BS5用「いろいろ予約」ドロップダウンの中身を出力する。
+ * 既存 selectrequestkind('dd') と同じ並びを BS5 の dropdown-item クラスで出す。
+ */
+function selectrequestkind_bs5_dd($prefix = '', $id = '') {
+    global $playmode, $connectinternet, $usenfrequset, $config_ini, $user;
+
+    $pfx = htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8');
+    $sid = !empty($id) ? '&selectid=' . rawurlencode($id) : '';
+
+    $items = [];
+    $items[] = ['href' => $pfx . 'searchreserve.php' . ($sid ? '?' . ltrim($sid, '&') : ''), 'label' => '検索＆予約MENU'];
+    $items[] = ['type' => 'divider'];
+
+    if (!empty($config_ini["limitlistname"][0])) {
+        for ($i = 0; $i < count($config_ini["limitlistname"]); $i++) {
+            if (empty($config_ini["limitlistname"][$i])) continue;
+            $items[] = [
+                'href' => $pfx . 'limitlist.php?data=' . rawurlencode($config_ini["limitlistfile"][$i]),
+                'label' => $config_ini["limitlistname"][$i],
+            ];
+        }
+        $items[] = ['type' => 'divider'];
+    }
+
+    if (!empty($config_ini["usebgv"]) && $config_ini["usebgv"] == 1 && !empty($config_ini["BGVfolder"])) {
+        $items[] = ['href' => $pfx . 'search_bgv.php', 'label' => 'BGV選択'];
+    }
+    $items[] = ['href' => $pfx . 'search.php', 'label' => 'ファイル検索'];
+
+    $pm = isset($playmode) ? (int)$playmode : 0;
+    if ($pm != 4 && $pm != 5) {
+        if (configbool("usehaishin", true)) {
+            $items[] = ['href' => $pfx . 'request_confirm.php?shop_karaoke=1', 'label' => 'カラオケ配信'];
+        }
+        if (configbool("useuserpause", false) || (isset($user) && $user == 'admin')) {
+            $items[] = ['href' => $pfx . 'request_confirm.php?pause=1', 'label' => '小休止'];
+        }
+    }
+
+    if (!empty($config_ini["downloadfolder"]) && function_exists('check_access_from_online') && (check_access_from_online() === false)) {
+        $items[] = ['href' => $pfx . 'file_uploader.php', 'label' => 'ファイル転送'];
+    }
+    if (function_exists('nicofuncenabled') && nicofuncenabled() === true) {
+        $items[] = ['href' => $pfx . 'nicodownload_post.php', 'label' => 'ニコニコ動画'];
+    }
+    $ci = isset($connectinternet) ? (int)$connectinternet : 0;
+    if ($ci == 1) {
+        $items[] = ['href' => $pfx . 'request_confirm_url.php?shop_karaoke=0&set_directurl=1', 'label' => 'URL(youtube等)'];
+    }
+    if (isset($usenfrequset) && $usenfrequset == 1) {
+        $items[] = ['href' => $pfx . 'notfoundrequest/notfoundrequest.php', 'label' => '未発見曲報告'];
+    }
+
+    foreach ($items as $it) {
+        if (isset($it['type']) && $it['type'] === 'divider') {
+            print '<li><hr class="dropdown-divider"></li>';
+            continue;
+        }
+        print '<li><a class="dropdown-item" href="' . htmlspecialchars($it['href'], ENT_QUOTES, 'UTF-8') . '">'
+            . htmlspecialchars($it['label'], ENT_QUOTES, 'UTF-8') . '</a></li>';
+    }
 }
 
 

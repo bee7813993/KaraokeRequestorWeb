@@ -34,7 +34,7 @@ if (empty($includepage)) {
     print '<title>りすたーDB検索</title>';
     print '</head><body>';
     if (empty($filesearch)) {
-        shownavigatioinbar('searchreserve.php');
+        shownavigatioinbar_bs5('searchreserve.php');
     }
 }
 
