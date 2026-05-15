@@ -86,12 +86,12 @@ if (!$authenticated) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>制作者別音ズレ初期値設定 - 認証</title>
+  <title>制作者別音ズレ・音量初期値設定 - 認証</title>
   <link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container" style="max-width:400px; margin-top:80px;">
-  <h2>制作者別音ズレ初期値設定</h2>
+  <h2>制作者別音ズレ・音量初期値設定</h2>
   <p>このページにアクセスするにはパスワードが必要です。</p>
   <?php if ($auth_error): ?>
   <div class="alert alert-danger">パスワードが違います。</div>
@@ -123,11 +123,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'add') {
         $keyword  = isset($_POST['keyword'])   ? trim($_POST['keyword'])   : '';
         $delay    = isset($_POST['delay'])     ? intval($_POST['delay'])   : 0;
+        $volume_in = isset($_POST['volume'])   ? trim($_POST['volume'])    : '';
         $fps      = isset($_POST['fps'])       ? trim($_POST['fps'])       : '';
         $fps_cond = isset($_POST['fps_cond'])  ? trim($_POST['fps_cond'])  : '以下';
         if (!in_array($fps_cond, ['以上', '以下'], true)) $fps_cond = '以下';
 
-        if ($keyword === '') {
+        $volume_set = false;
+        $volume = 0;
+        if ($volume_in !== '') {
+            if (!is_numeric($volume_in)) {
+                $message      = '音量増減は数値で指定してください';
+                $message_type = 'danger';
+            } else {
+                $volume = intval($volume_in);
+                if ($volume < -100 || $volume > 100) {
+                    $message      = '音量増減は -100 ～ +100 の範囲で指定してください';
+                    $message_type = 'danger';
+                } else {
+                    $volume_set = ($volume !== 0);
+                }
+            }
+        }
+
+        if ($message !== '') {
+            // 入力エラーは上で設定済み
+        } elseif ($keyword === '') {
             $message      = '制作者名を入力してください';
             $message_type = 'danger';
         } elseif ($delay % 100 !== 0) {
@@ -138,6 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message_type = 'danger';
         } else {
             $rule = ['keyword' => $keyword, 'delay' => $delay];
+            if ($volume_set) {
+                $rule['volume'] = $volume;
+            }
             if ($fps !== '' && is_numeric($fps) && floatval($fps) > 0) {
                 $rule['fps']      = floatval($fps);
                 $rule['fps_cond'] = $fps_cond;
@@ -194,7 +217,7 @@ $rules = load_creator_delays($delay_file);
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
-<title>制作者別音ズレ初期値設定</title>
+<title>制作者別音ズレ・音量初期値設定</title>
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
@@ -203,7 +226,7 @@ $rules = load_creator_delays($delay_file);
 <body>
 <?php shownavigatioinbar(); ?>
 <div class="container">
-  <h1>制作者別音ズレ初期値設定</h1>
+  <h1>制作者別音ズレ・音量初期値設定</h1>
   <p class="text-muted">※ りすたーDB使用時のみ有効です。</p>
 
   <?php if (!empty($message)): ?>
@@ -216,9 +239,10 @@ $rules = load_creator_delays($delay_file);
   <table class="table table-striped table-bordered">
     <thead>
       <tr>
-        <th class="col-xs-4">制作者名</th>
-        <th class="col-xs-3">FPS条件</th>
-        <th class="col-xs-3">音ズレ初期値</th>
+        <th class="col-xs-3">制作者名</th>
+        <th class="col-xs-2">FPS条件</th>
+        <th class="col-xs-2">音ズレ初期値</th>
+        <th class="col-xs-2">音量初期値</th>
         <th class="col-xs-2">操作</th>
       </tr>
     </thead>
@@ -236,6 +260,13 @@ $rules = load_creator_delays($delay_file);
         </td>
         <td><?php echo htmlspecialchars($rule['delay'], ENT_QUOTES, 'UTF-8'); ?> ms</td>
         <td>
+          <?php if (isset($rule['volume']) && $rule['volume'] !== '' && intval($rule['volume']) !== 0): ?>
+            <?php $rv = intval($rule['volume']); echo htmlspecialchars(($rv > 0 ? '+' : '') . $rv, ENT_QUOTES, 'UTF-8'); ?> %
+          <?php else: ?>
+            <span class="text-muted">指定なし</span>
+          <?php endif; ?>
+        </td>
+        <td>
           <form method="post" action="edit_creator_audiodelay.php" style="margin:0;">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="index" value="<?php echo $i; ?>">
@@ -246,7 +277,7 @@ $rules = load_creator_delays($delay_file);
       <?php endforeach; ?>
       <?php if (empty($rules)): ?>
       <tr>
-        <td colspan="4" class="text-center text-muted">ルールが設定されていません</td>
+        <td colspan="5" class="text-center text-muted">ルールが設定されていません</td>
       </tr>
       <?php endif; ?>
     </tbody>
@@ -284,6 +315,15 @@ $rules = load_creator_delays($delay_file);
     </div>
 
     <div class="form-group">
+      <label>音量増減 <small class="text-muted">（任意・-100～+100）</small></label>
+      <div class="input-group" style="max-width:200px;">
+        <input type="number" name="volume" class="form-control" value="0" step="5" min="-100" max="100" placeholder="例: -20">
+        <span class="input-group-addon">%</span>
+      </div>
+      <p class="help-block">正の値で音量を上げる、負の値で下げる。0 または空欄は全体設定の「戻す音量」をそのまま使用します。</p>
+    </div>
+
+    <div class="form-group">
       <label>FPS条件 <small class="text-muted">（任意）</small></label>
       <div style="display:flex; align-items:center; gap:6px; max-width:320px;">
         <input type="number" name="fps" class="form-control" placeholder="例: 30" step="0.01" min="0" style="max-width:120px;">
@@ -313,6 +353,7 @@ $rules = load_creator_delays($delay_file);
             例：「30fps 以下」と指定すると 30fps 以下の動画にのみ適用されます。</li>
         <li>設定した音ズレ値は予約確認画面の初期値として表示されます。ユーザーが変更することもできます。</li>
         <li>音ズレ値は 100ms 単位で、-9900ms ～ +9900ms の範囲で設定できます。</li>
+        <li>音量増減（-100～+100）を指定すると、再生開始時に全体設定の「戻す音量」にその値を加算して MPC の音量を設定します。サーバーごとに基準音量が異なる場合でも相対値で調整できます。0 または未指定の場合は全体設定をそのまま使用します。</li>
       </ol>
     </div>
   </div>
