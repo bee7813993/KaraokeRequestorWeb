@@ -225,10 +225,11 @@ body {
   gap: var(--space-1);
 }
 
-/* 50音表の行をそのまま縦に並べる（行内では改行しない） */
+/* 50音表の行を横に並べる（幅不足時は折り返し、行内では改行しない） */
 .index-btn-rows {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: var(--space-3);
 }
 
