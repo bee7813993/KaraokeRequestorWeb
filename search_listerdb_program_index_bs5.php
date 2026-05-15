@@ -14,9 +14,18 @@ require_once 'search_listerdb_commonfunc_bs5.php';
 
 $alpha_list = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
 $num_list   = ['1','2','3','4','5','6','7','8','9','0'];
-$kana_list  = ['あ','い','う','え','お','か','き','く','け','こ','さ','し','す','せ','そ','た','ち','つ','て','と',
-                'な','に','ぬ','ね','の','は','ひ','ふ','へ','ほ','ま','み','む','め','も','や','ゐ','ゆ','ゑ','よ',
-                'ら','り','る','れ','ろ','わ','を','ん'];
+$kana_rows  = [
+    ['あ','い','う','え','お'],
+    ['か','き','く','け','こ'],
+    ['さ','し','す','せ','そ'],
+    ['た','ち','つ','て','と'],
+    ['な','に','ぬ','ね','の'],
+    ['は','ひ','ふ','へ','ほ'],
+    ['ま','み','む','め','も'],
+    ['や','ゐ','ゆ','ゑ','よ'],
+    ['ら','り','る','れ','ろ'],
+    ['わ','を','ん'],
+];
 
 function checkandbuild_headerlink($oneheader, $headlist, $lister_dbpath)
 {
@@ -96,15 +105,35 @@ function any_header_in_chars($chars, $headlist)
 function print_index_grid($headlist, $lists, $lister_dbpath)
 {
     foreach ($lists as $item) {
-        ['label' => $label, 'chars' => $chars, 'always' => $always] = $item;
+        $label  = $item['label'];
+        $always = $item['always'];
+        $rows   = isset($item['rows']) ? $item['rows'] : [$item['chars']];
+
         // かなは常時表示。アルファベット・数字はデータが存在する場合のみ。
-        if (!$always && !any_header_in_chars($chars, $headlist)) continue;
-        print '<div class="index-section-label">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</div>';
-        print '<div class="index-btn-grid">';
-        foreach ($chars as $c) {
-            print checkandbuild_headerlink($c, $headlist, $lister_dbpath);
+        if (!$always) {
+            $flat = [];
+            foreach ($rows as $r) $flat = array_merge($flat, $r);
+            if (!any_header_in_chars($flat, $headlist)) continue;
         }
-        print '</div>';
+
+        print '<div class="index-section-label">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</div>';
+        if (count($rows) > 1) {
+            print '<div class="index-btn-rows">';
+            foreach ($rows as $row) {
+                print '<div class="index-btn-row">';
+                foreach ($row as $c) {
+                    print checkandbuild_headerlink($c, $headlist, $lister_dbpath);
+                }
+                print '</div>';
+            }
+            print '</div>';
+        } else {
+            print '<div class="index-btn-grid">';
+            foreach ($rows[0] as $c) {
+                print checkandbuild_headerlink($c, $headlist, $lister_dbpath);
+            }
+            print '</div>';
+        }
     }
     print '<div class="index-section-label">その他</div>';
     print '<div class="index-btn-grid">';
@@ -184,7 +213,7 @@ showuppermenu('program_name', $linkoption);
 
   <?php
   $char_groups = [
-      ['label' => 'かな', 'chars' => $kana_list, 'always' => true],
+      ['label' => 'かな', 'rows'  => $kana_rows, 'always' => true],
       ['label' => 'アルファベット', 'chars' => $alpha_list, 'always' => false],
       ['label' => '数字', 'chars' => $num_list, 'always' => false],
   ];
