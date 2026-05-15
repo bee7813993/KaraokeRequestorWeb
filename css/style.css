@@ -37,6 +37,12 @@ nav.navbar.navbar-fixed-top,
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+.navbar.navbar-fixed-top .navbar-text {
+  margin: 0 4px !important;
+  padding: 17px 0 !important;
+  font-size: 12px !important;
+  line-height: 22px !important;
+}
 .navbar.navbar-fixed-top.navbar-inverse {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
