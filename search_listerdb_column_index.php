@@ -85,7 +85,7 @@ function checkandbuild_headerlink( $oneheader, $headerlist, $columnname, $column
     foreach($headerlist['data']  as $key => $value) {
     $katakana_oneheader = mb_convert_kana($oneheader,'C');
         if( $oneheader === $value[$headerkey] || $katakana_oneheader === $value[$headerkey]) {
-            $linkparams = 'start=0&length=50&header='.urlencode($value[$headerkey]).'&searchcolumn='.$columnname.'&searchitem='.urlencode($searchitem);
+            $linkparams = 'start=0&length=50&header='.urlencode($value[$headerkey]).'&searchcolumn='.$columnname.'&rubycolumn='.urlencode($columnname_ruby).'&searchitem='.urlencode($searchitem);
             if(!empty($linkoption)) $linkparams = $linkparams.'&'.$linkoption;
             $url='<a class="btn btn-primary center-block indexbtnstr" href="search_listerdb_column_list.php?'.$linkparams.'"> '. $oneheader .'</a>';
             return $url;

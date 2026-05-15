@@ -69,6 +69,7 @@ function checkandbuild_column_headerlink($oneheader, $columnmany, $target, $colu
             $params = 'start=0&length=50'
                 . '&header=' . urlencode($value[$headerkey])
                 . '&searchcolumn=' . urlencode($target)
+                . '&rubycolumn=' . urlencode($columnname_ruby)
                 . '&searchitem=' . urlencode($searchitem);
             if (!empty($linkoption)) $params .= '&' . $linkoption;
             return '<a class="index-btn has-data" href="search_listerdb_column_list.php?' . htmlspecialchars($params, ENT_QUOTES, 'UTF-8') . '">'

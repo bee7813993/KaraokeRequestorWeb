@@ -48,12 +48,19 @@ if (array_key_exists("searchword", $_REQUEST)) {
     $myrequestarray["searchword"] = $tie_up_group_name;
 }
 
+$rubycolumn = '';
+if (array_key_exists("rubycolumn", $_REQUEST)) {
+    $rubycolumn = $_REQUEST["rubycolumn"];
+    $myrequestarray["rubycolumn"] = $rubycolumn;
+}
+
 $nextsonglistflg = !($searchcolumn === 'maker_name' || $searchcolumn === 'tie_up_group_name');
 
 $getqueries = ['start' => $displayfrom, 'length' => $displaynum, 'column' => $searchcolumn];
-if (!empty($category))         $getqueries['category']         = $category;
-if (!empty($header))           $getqueries['header']           = $header;
-if (!empty($maker_name))       $getqueries['maker_name']       = $maker_name;
+if (!empty($category))          $getqueries['category']          = $category;
+if (!empty($header))            $getqueries['header']            = $header;
+if (!empty($rubycolumn))        $getqueries['headercolumn']      = $rubycolumn;
+if (!empty($maker_name))        $getqueries['maker_name']        = $maker_name;
 if (!empty($tie_up_group_name)) $getqueries['tie_up_group_name'] = $tie_up_group_name;
 
 $url = 'http://localhost/search_listerdb_column_json.php?' . buildgetquery($getqueries);

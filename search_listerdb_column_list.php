@@ -87,6 +87,12 @@ if(array_key_exists("searchword", $_REQUEST)) {
     $myrequestarray["searchword"] = $tie_up_group_name;
 }
 
+$rubycolumn = "";
+if(array_key_exists("rubycolumn", $_REQUEST)) {
+    $rubycolumn = $_REQUEST["rubycolumn"];
+    $myrequestarray["rubycolumn"] = $rubycolumn;
+}
+
 $nextsonglistflg = true;
 if( $searchcolumn == 'maker_name' || $searchcolumn == 'tie_up_group_name' ) {
    // 制作会社検索かシリーズ検索の場合、次は作品名リストになる処理をここに書く
@@ -107,6 +113,9 @@ $getqueries['category'] = $category;
 }
 if(!empty($header)){
 $getqueries['header'] = $header;
+}
+if(!empty($rubycolumn)){
+$getqueries['headercolumn'] = $rubycolumn;
 }
 if(!empty($maker_name)){
 $getqueries['maker_name'] = $maker_name;
