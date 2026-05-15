@@ -550,6 +550,7 @@ function createCardHTML(item, idx) {
     var track = parseInt(item.track, 10);
     var keychange = parseInt(item.keychange, 10);
     var audiodelay = parseInt(item.audiodelay, 10);
+    var volume = parseInt(item.volume, 10);
     if (track > 0) {
         extras.push('<span class="card-label">トラック：</span>' + (track + 1));
     }
@@ -558,6 +559,9 @@ function createCardHTML(item, idx) {
     }
     if (audiodelay !== 0) {
         extras.push('<span class="card-label">音ズレ：</span>' + (audiodelay > 0 ? '+' : '') + audiodelay + 'ms');
+    }
+    if (!isNaN(volume) && volume !== 0) {
+        extras.push('<span class="card-label">音量：</span>' + (volume > 0 ? '+' : '') + volume + '%');
     }
     var extraMetaHtml = extras.length > 0
         ? '<div class="card-meta" style="font-size:12px;">' + extras.join('　') + '</div>'

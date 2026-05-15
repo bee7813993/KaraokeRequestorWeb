@@ -256,7 +256,8 @@ function updatedb($db){
                   array ( "name" => "track" , "type" =>  "INTEGER default 0") ,
                   array ( "name" => "pause" , "type" =>  "INTEGER default 0") ,
                   array ( "name" => "audiodelay" , "type" =>  "INTEGER default 0") ,
-                  array ( "name" => "duration"   , "type" =>  "INTEGER default 0")
+                  array ( "name" => "duration"   , "type" =>  "INTEGER default 0") ,
+                  array ( "name" => "volume"     , "type" =>  "INTEGER default 0")
                   );
     /* 現在の項目一覧取得 */
     try {
@@ -321,7 +322,8 @@ $sql = "create table IF NOT EXISTS requesttable (
  track INTEGER default 0,
  pause INTEGER default 0,
  audiodelay INTEGER default 0,
- duration INTEGER default 0
+ duration INTEGER default 0,
+ volume INTEGER default 0
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){

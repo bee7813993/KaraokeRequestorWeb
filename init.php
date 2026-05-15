@@ -311,7 +311,7 @@ print '</pre>';
   <h3>製作者別設定 <small>（りすたーDB検索のみ有効）</small></h3>
     <a href="edit_search_sort_priority.php" class="btn btn-default" > 製作者優先表示設定 </a>
     &nbsp;
-    <a href="edit_creator_audiodelay.php" class="btn btn-default" > 制作者別音ズレ初期値設定 </a>
+    <a href="edit_creator_audiodelay.php" class="btn btn-default" > 制作者別音ズレ・音量初期値設定 </a>
   </p>
   <p>
   <h3>表示優先度設定 <small>（Everything検索のみ有効）</small></h3>
