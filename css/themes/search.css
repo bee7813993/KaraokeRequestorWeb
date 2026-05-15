@@ -230,6 +230,7 @@ body {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-3);
 }
 
