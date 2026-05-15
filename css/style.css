@@ -1,6 +1,11 @@
 ﻿body	{
 	background-color:#F8ECE0;
-	padding-top: 90px;
+	padding-top: 70px;
+}
+
+/* Bootstrap 3 navbar — BS5版と縦サイズを揃える */
+.navbar.navbar-fixed-top.navbar-inverse {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* 検索ボタン（全ページ共通・Bootstrap 3 navbar 内） */
@@ -8,9 +13,9 @@ a.navbar-brand.navbar-search-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 14px;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  padding: 6px 14px;
+  margin-top: 0;
+  margin-bottom: 0;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -33,7 +38,8 @@ a.navbar-brand.navbar-search-btn:focus {
 	margin: 0;
 }
 .navbar-brand.dropdown-toggle {
-	padding-top: 30px;
+	padding-top: 15px;
+	padding-bottom: 15px;
 	margin-top: 0px;
 	margin-bottom: 0px;
 }
