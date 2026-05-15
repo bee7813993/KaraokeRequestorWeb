@@ -3,6 +3,21 @@
 	padding-top: 70px;
 }
 
+/* Bootstrap 3 navbar — BS5版と縦サイズを揃える
+   このプロジェクトの bootstrap.min.css は navbar-brand height:80px / navbar min-height:80px の
+   カスタム値を持つため、style.css 側で 56px に上書きする */
+.navbar.navbar-fixed-top {
+  min-height: 56px !important;
+}
+.navbar.navbar-fixed-top .navbar-nav > li > a {
+  padding-top: 17px !important;
+  padding-bottom: 17px !important;
+}
+.navbar.navbar-fixed-top .navbar-toggle {
+  margin-top: 11px;
+  margin-bottom: 11px;
+}
+
 /* Bootstrap 3 navbar — BS5版と縦サイズを揃える */
 .navbar.navbar-fixed-top.navbar-inverse {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -16,6 +31,7 @@ a.navbar-brand.navbar-search-btn {
   padding: 6px 14px;
   margin-top: 0;
   margin-bottom: 0;
+  height: auto;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.35);
@@ -38,8 +54,9 @@ a.navbar-brand.navbar-search-btn:focus {
 	margin: 0;
 }
 .navbar-brand.dropdown-toggle {
-	padding-top: 15px;
-	padding-bottom: 15px;
+	padding-top: 17px;
+	padding-bottom: 17px;
+	height: auto;
 	margin-top: 0px;
 	margin-bottom: 0px;
 }
