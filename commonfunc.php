@@ -1545,7 +1545,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     }
 
     if (isset($user) && $user === 'admin') {
-        print '<li class="nav-item d-flex align-items-center px-2 text-white-50"><small>管理者ログイン中</small></li>';
+        print '<li class="nav-item d-flex align-items-center px-2 text-white-50" style="font-size:12px;">管理者ログイン中</li>';
     }
 
     print '</ul>'; // me-auto
