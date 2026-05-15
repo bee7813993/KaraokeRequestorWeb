@@ -29,6 +29,7 @@ function showuppermenu($target, $linkoption) {
         ['key' => 'tie_up_group_name','label' => 'シリーズ',             'href' => 'search_listerdb_column_index.php?target=tie_up_group_name&' . $linkoption],
         ['key' => 'maker_name',       'label' => '制作会社',             'href' => 'search_listerdb_column_index.php?target=maker_name&' . $linkoption],
     ];
+    print '<div class="search-mode-nav-wrap">';
     print '<div class="container">';
     print '<div class="search-mode-nav">';
     foreach ($items as $item) {
@@ -40,8 +41,7 @@ function showuppermenu($target, $linkoption) {
     }
     print '</div>';
     print '</div>';
-
-    
+    print '</div>';
 }
 
 function buildgetquery($queries){
@@ -108,5 +108,63 @@ function kanabuild ($str) {
    return $temp;
 }
 
+
+
+function build_breadcrumbs_bs5($crumbs) {
+    if (count($crumbs) <= 1) return;
+    echo '<nav aria-label="breadcrumb" class="mb-2">';
+    echo '<ol class="breadcrumb-themed">';
+    $last = count($crumbs) - 1;
+    foreach ($crumbs as $i => $c) {
+        $label = htmlspecialchars($c['label'], ENT_QUOTES, 'UTF-8');
+        if ($i === $last) {
+            echo '<li class="breadcrumb-themed-item active" aria-current="page">' . $label . '</li>';
+        } else {
+            $url = htmlspecialchars(isset($c['url']) ? $c['url'] : '#', ENT_QUOTES, 'UTF-8');
+            echo '<li class="breadcrumb-themed-item"><a href="' . $url . '">' . $label . '</a></li>';
+        }
+    }
+    echo '</ol>';
+    echo '</nav>';
+}
+
+function build_pagination_bs5($displayfrom, $displaynum, $total, $myrequestarray, $page_url) {
+    $total_pages = (int)ceil($total / $displaynum);
+    if ($total_pages <= 1) return;
+
+    $current_page = (int)floor($displayfrom / $displaynum);
+    $window = 2;
+
+    echo '<nav class="pagination-themed" aria-label="ページ">';
+    echo '<div class="d-flex flex-wrap justify-content-center align-items-center gap-1">';
+
+    if ($current_page > 0) {
+        $req = $myrequestarray; $req['start'] = ($current_page - 1) * $displaynum; $req['length'] = $displaynum;
+        echo '<a href="' . htmlspecialchars($page_url . '?' . buildgetquery($req), ENT_QUOTES, 'UTF-8') . '" class="page-btn" aria-label="前のページ">‹</a>';
+    } else {
+        echo '<span class="page-btn disabled">‹</span>';
+    }
+
+    $prev_shown = -1;
+    for ($p = 0; $p < $total_pages; $p++) {
+        if (!($p === 0 || $p === $total_pages - 1 || abs($p - $current_page) <= $window)) continue;
+        if ($p > $prev_shown + 1) echo '<span class="page-btn ellipsis" aria-hidden="true">…</span>';
+        $req = $myrequestarray; $req['start'] = $p * $displaynum; $req['length'] = $displaynum;
+        $cls = 'page-btn' . ($p === $current_page ? ' active' : '');
+        $aria = ($p === $current_page) ? ' aria-current="page"' : '';
+        echo '<a href="' . htmlspecialchars($page_url . '?' . buildgetquery($req), ENT_QUOTES, 'UTF-8') . '" class="' . $cls . '"' . $aria . '>' . ($p + 1) . '</a>';
+        $prev_shown = $p;
+    }
+
+    if ($current_page < $total_pages - 1) {
+        $req = $myrequestarray; $req['start'] = ($current_page + 1) * $displaynum; $req['length'] = $displaynum;
+        echo '<a href="' . htmlspecialchars($page_url . '?' . buildgetquery($req), ENT_QUOTES, 'UTF-8') . '" class="page-btn" aria-label="次のページ">›</a>';
+    } else {
+        echo '<span class="page-btn disabled">›</span>';
+    }
+
+    echo '</div>';
+    echo '</nav>';
+}
 
 ?>

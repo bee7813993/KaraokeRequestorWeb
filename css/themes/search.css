@@ -356,8 +356,6 @@ table.searchresult tbody td {
   gap: var(--space-2);
   flex-wrap: wrap;
   padding: var(--space-3) 0;
-  margin-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
 }
 
 .search-mode-btn {
@@ -528,4 +526,131 @@ table.searchresult tbody td {
     -webkit-overflow-scrolling: touch;
     padding-bottom: var(--space-1);
   }
+
+  .search-mode-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: var(--space-2);
+  }
+}
+
+/* --- Sticky 上部メニューラッパー --- */
+.search-mode-nav-wrap {
+  position: sticky;
+  top: 56px; /* Bootstrap 5 default navbar height */
+  z-index: 99;
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* --- パンくずナビ --- */
+.breadcrumb-themed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-3);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.breadcrumb-themed-item {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.breadcrumb-themed-item + .breadcrumb-themed-item::before {
+  content: '›';
+  padding: 0 var(--space-1);
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.breadcrumb-themed-item a {
+  color: var(--color-accent-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.breadcrumb-themed-item a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-themed-item.active {
+  color: var(--color-text);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+/* --- ページネーション --- */
+.pagination-themed {
+  margin-top: var(--space-4);
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-button);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid var(--color-border);
+  background: var(--bg-card);
+  color: var(--color-text);
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.page-btn:hover:not(.disabled):not(.ellipsis) {
+  border-color: var(--color-accent-secondary);
+  color: var(--color-accent-secondary);
+  background: var(--bg-card-hover);
+  text-decoration: none;
+}
+
+.page-btn.active {
+  background: var(--color-accent-secondary);
+  border-color: var(--color-accent-secondary);
+  color: #ffffff;
+}
+
+.page-btn.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.page-btn.ellipsis {
+  border: none;
+  background: none;
+  pointer-events: none;
+  min-width: 20px;
+}
+
+/* --- ファイル検索結果カード（キーワード検索・複数曲時）--- */
+.file-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-2);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-base);
+}
+
+.file-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
