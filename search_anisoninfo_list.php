@@ -1,8 +1,13 @@
 <?php
-// 変数チェック
 require_once 'modules/simple_html_dom.php';
 require_once 'search_anisoninfo_common.php';
 require_once 'commonfunc.php';
+
+if (!empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_anisoninfo_list_bs5.php' . $qs);
+    exit;
+}
 
 if(array_key_exists("m", $_REQUEST)) {
     $l_m = $_REQUEST["m"];

@@ -1,7 +1,13 @@
-<?php 
+<?php
 
 require_once 'commonfunc.php';
 require_once 'search_listerdb_commonfunc.php';
+
+if (!empty($config_ini['usenewsearchui']) && $config_ini['usenewsearchui'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_listerdb_column_index_bs5.php' . $qs);
+    exit;
+}
 
 $lister_dbpath = "list\List.sqlite3";
 if(array_key_exists("listerDBPATH", $config_ini)) {
