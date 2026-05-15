@@ -97,6 +97,25 @@ if (!$json) {
     if (!$programlist) $errmsg = '検索結果の JSON parse に失敗しました';
 }
 
+$_home_url = 'searchreserve.php' . (!empty($selectid) ? '?selectid=' . rawurlencode($selectid) : '');
+$_sel_sfx  = !empty($selectid) ? '&selectid=' . rawurlencode($selectid) : '';
+$crumbs = [['label' => 'ホーム', 'url' => $_home_url]];
+if (!empty($program_name)) {
+    $crumbs[] = ['label' => '作品名', 'url' => 'search_listerdb_column_index.php?target=program_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $program_name . '」の曲一覧'];
+} elseif (!empty($artist)) {
+    $crumbs[] = ['label' => '歌手名', 'url' => 'search_listerdb_column_index.php?target=song_artist' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $artist . '」の曲一覧'];
+} elseif (!empty($song_name)) {
+    $crumbs[] = ['label' => '曲名', 'url' => 'search_listerdb_column_index.php?target=song_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $song_name . '」の曲一覧'];
+} elseif (!empty($maker_name)) {
+    $crumbs[] = ['label' => '制作会社', 'url' => 'search_listerdb_column_index.php?target=maker_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $maker_name . '」の曲一覧'];
+} elseif (!empty($tie_up_group_name)) {
+    $crumbs[] = ['label' => 'シリーズ', 'url' => 'search_listerdb_column_index.php?target=tie_up_group_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $tie_up_group_name . '」の曲一覧'];
+}
 mypage_action_script();
 ?>
 <!doctype html>
@@ -111,6 +130,7 @@ mypage_action_script();
 <?php showuppermenu('', $linkoptionbare); ?>
 
 <div class="container py-3">
+<?php build_breadcrumbs_bs5($crumbs); ?>
 <?php if (!empty($errmsg)): ?>
   <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php else: ?>
@@ -207,21 +227,11 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
 <?php endforeach; ?>
 </div>
 
-<!-- ページネーション -->
 <?php
 $myrequestarray['lister_dbpath'] = $lister_dbpath;
 if (!empty($selectid)) $myrequestarray['selectid'] = $selectid;
+build_pagination_bs5($displayfrom, $displaynum, $programlist['recordsTotal'], $myrequestarray, 'search_listerdb_songlist.php');
 ?>
-<div class="d-flex gap-3">
-  <?php if ($displayfrom > 0): ?>
-    <?php $prev = max(0, $displayfrom - $displaynum); $myrequestarray['start'] = $prev; $myrequestarray['length'] = $displaynum; ?>
-    <a href="search_listerdb_songlist.php?<?php echo buildgetquery($myrequestarray); ?>" class="btn-secondary-themed">← 前の<?php echo $displaynum; ?>件</a>
-  <?php endif; ?>
-  <?php if ($programlist['recordsTotal'] > ($displayfrom + $displaynum)): ?>
-    <?php $myrequestarray['start'] = $displayfrom + $displaynum; $myrequestarray['length'] = $displaynum; ?>
-    <a href="search_listerdb_songlist.php?<?php echo buildgetquery($myrequestarray); ?>" class="btn-secondary-themed ms-auto">次の<?php echo $displaynum; ?>件 →</a>
-  <?php endif; ?>
-</div>
 
 <?php endif; ?>
 <?php endif; ?>

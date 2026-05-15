@@ -77,6 +77,28 @@ if (!$json) {
     $columnlist = json_decode($json, true);
     if (!$columnlist) $errmsg = '項目リストの JSON parse に失敗しました';
 }
+
+$_home_url = 'searchreserve.php' . (!empty($selectid) ? '?selectid=' . rawurlencode($selectid) : '');
+$_sel_sfx  = !empty($selectid) ? '&selectid=' . rawurlencode($selectid) : '';
+$crumbs = [['label' => 'ホーム', 'url' => $_home_url]];
+$_col_labels = [
+    'song_artist'       => ['label' => '歌手名',   'target' => 'song_artist'],
+    'song_name'         => ['label' => '曲名',     'target' => 'song_name'],
+    'maker_name'        => ['label' => '制作会社', 'target' => 'maker_name'],
+    'tie_up_group_name' => ['label' => 'シリーズ', 'target' => 'tie_up_group_name'],
+    'program_name'      => ['label' => '作品名',   'target' => 'program_name'],
+];
+if (!empty($maker_name)) {
+    $crumbs[] = ['label' => '制作会社', 'url' => 'search_listerdb_column_index.php?target=maker_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $maker_name . '」の作品名'];
+} elseif (!empty($tie_up_group_name)) {
+    $crumbs[] = ['label' => 'シリーズ', 'url' => 'search_listerdb_column_index.php?target=tie_up_group_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $tie_up_group_name . '」の作品名'];
+} elseif (isset($_col_labels[$searchcolumn])) {
+    $_col = $_col_labels[$searchcolumn];
+    $crumbs[] = ['label' => $_col['label'], 'url' => 'search_listerdb_column_index.php?target=' . $_col['target'] . $_sel_sfx];
+    $crumbs[] = ['label' => !empty($header) ? '「' . $header . '」の' . $_col['label'] : $_col['label'] . '一覧'];
+}
 ?>
 <!doctype html>
 <html lang="ja">
@@ -90,6 +112,7 @@ if (!$json) {
 <?php showuppermenu($searchcolumn, $linkoption); ?>
 
 <div class="container py-3">
+<?php build_breadcrumbs_bs5($crumbs); ?>
 <?php if (!empty($errmsg)): ?>
   <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php else: ?>
@@ -121,20 +144,7 @@ $searchtitle .= !empty($searchitem) ? '「' . htmlspecialchars($searchitem, ENT_
 <?php endforeach; ?>
 </div>
 
-<!-- ページネーション -->
-<div class="d-flex gap-3">
-  <?php if ($displayfrom > 0): ?>
-    <?php
-    $prev = max(0, $displayfrom - $displaynum);
-    $myrequestarray['start'] = $prev; $myrequestarray['length'] = $displaynum;
-    ?>
-    <a href="search_listerdb_column_list.php?<?php echo buildgetquery($myrequestarray); ?>" class="btn-secondary-themed">← 前の<?php echo $displaynum; ?>件</a>
-  <?php endif; ?>
-  <?php if ($columnlist['recordsTotal'] > ($displayfrom + $displaynum)): ?>
-    <?php $myrequestarray['start'] = $displayfrom + $displaynum; $myrequestarray['length'] = $displaynum; ?>
-    <a href="search_listerdb_column_list.php?<?php echo buildgetquery($myrequestarray); ?>" class="btn-secondary-themed ms-auto">次の<?php echo $displaynum; ?>件 →</a>
-  <?php endif; ?>
-</div>
+<?php build_pagination_bs5($displayfrom, $displaynum, $columnlist['recordsTotal'], $myrequestarray, 'search_listerdb_column_list.php'); ?>
 
 <?php endif; ?>
 </div>

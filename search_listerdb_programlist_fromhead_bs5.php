@@ -35,6 +35,15 @@ if (!$json) {
     $programlist = json_decode($json, true);
     if (!$programlist) $errmsg = '作品一覧の JSON parse に失敗しました';
 }
+
+$_home_url = 'searchreserve.php' . (!empty($selectid) ? '?selectid=' . rawurlencode($selectid) : '');
+$crumbs = [
+    ['label' => 'ホーム',  'url' => $_home_url],
+    ['label' => '作品名', 'url' => 'search_listerdb_program_index.php' . (!empty($selectid) ? '?selectid=' . rawurlencode($selectid) : '')],
+];
+if (!empty($header)) {
+    $crumbs[] = ['label' => '「' . $header . '」で始まる作品名'];
+}
 ?>
 <!doctype html>
 <html lang="ja">
@@ -48,6 +57,7 @@ if (!$json) {
 <?php showuppermenu('program_name', ltrim($linkoption, '&')); ?>
 
 <div class="container py-3">
+<?php build_breadcrumbs_bs5($crumbs); ?>
 <?php if (!empty($errmsg)): ?>
   <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php else: ?>
@@ -73,23 +83,10 @@ if (!$json) {
 </div>
 
 <?php
-// ページネーション
-$urlparams = 'header=' . urlencode($header)
-           . '&category=' . urlencode($category)
-           . '&draw=' . urlencode($draw)
-           . $linkoption;
+$pagi_req = ['header' => $header, 'category' => $category, 'draw' => $draw];
+if (!empty($selectid)) $pagi_req['selectid'] = $selectid;
+build_pagination_bs5($displayfrom, $displaynum, $programlist['recordsTotal'], $pagi_req, 'search_listerdb_programlist_fromhead.php');
 ?>
-<div class="d-flex gap-3">
-  <?php if ($displayfrom > 0): ?>
-    <?php $prev = max(0, $displayfrom - $displaynum); ?>
-    <a href="search_listerdb_programlist_fromhead_bs5.php?<?php echo $urlparams; ?>&start=<?php echo $prev; ?>&length=<?php echo $displaynum; ?>"
-       class="btn-secondary-themed">← 前の<?php echo $displaynum; ?>件</a>
-  <?php endif; ?>
-  <?php if ($programlist['recordsTotal'] > ($displayfrom + $displaynum)): ?>
-    <a href="search_listerdb_programlist_fromhead_bs5.php?<?php echo $urlparams; ?>&start=<?php echo $displayfrom + $displaynum; ?>&length=<?php echo $displaynum; ?>"
-       class="btn-secondary-themed ms-auto">次の<?php echo $displaynum; ?>件 →</a>
-  <?php endif; ?>
-</div>
 
 <?php endif; ?>
 </div>

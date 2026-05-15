@@ -256,6 +256,28 @@ if ($programlist && $recommendation === 'on') {
     usort($programlist['data'], 'custom_sort_bs5');
 }
 
+$_home_url = 'searchreserve.php' . (!empty($selectid) ? '?selectid=' . rawurlencode($selectid) : '');
+$_sel_sfx  = !empty($selectid) ? '&selectid=' . rawurlencode($selectid) : '';
+$crumbs = [['label' => 'ホーム', 'url' => $_home_url]];
+if (!empty($anyword)) {
+    $crumbs[] = ['label' => 'キーワード検索', 'url' => 'search_listerdb_anysearch_index.php' . (!empty($selectid) ? '?selectid=' . rawurlencode($selectid) : '')];
+    $crumbs[] = ['label' => '「' . $anyword . '」の検索結果'];
+} elseif (!empty($filename)) {
+    $crumbs[] = ['label' => 'キーワード検索', 'url' => 'search_listerdb_anysearch_index.php' . (!empty($selectid) ? '?selectid=' . rawurlencode($selectid) : '')];
+    $crumbs[] = ['label' => '「' . $filename . '」の検索結果'];
+} elseif (!empty($artist)) {
+    $crumbs[] = ['label' => '歌手名', 'url' => 'search_listerdb_column_index.php?target=song_artist' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $artist . '」のファイル'];
+} elseif (!empty($program_name)) {
+    $crumbs[] = ['label' => '作品名', 'url' => 'search_listerdb_column_index.php?target=program_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $program_name . '」のファイル'];
+} elseif (!empty($song_name)) {
+    $crumbs[] = ['label' => '曲名', 'url' => 'search_listerdb_column_index.php?target=song_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $song_name . '」のファイル'];
+} elseif (!empty($maker_name)) {
+    $crumbs[] = ['label' => '制作会社', 'url' => 'search_listerdb_column_index.php?target=maker_name' . $_sel_sfx];
+    $crumbs[] = ['label' => '「' . $maker_name . '」のファイル'];
+}
 mypage_action_script();
 ?>
 <!doctype html>
@@ -272,6 +294,7 @@ mypage_action_script();
 <?php showuppermenu('filename', $linkoptionbare); ?>
 
 <div class="container py-3">
+<?php build_breadcrumbs_bs5($crumbs); ?>
 <?php if (!empty($errmsg)): ?>
   <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php else: ?>
@@ -370,7 +393,7 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
     if (empty($display)) $display = '未分類';
     $comment = preg_replace('/\,\/\/.*/', '', $program['found_comment'] ?? '');
     ?>
-    <div class="d-flex align-items-start gap-3 py-2 border-bottom">
+    <div class="file-item">
       <a href="<?php echo htmlspecialchars(create_requestconfirmlink_bs5($program, $linkoption), ENT_QUOTES, 'UTF-8'); ?>"
          class="btn-request flex-shrink-0">予約</a>
       <div class="flex-grow-1" style="min-width:0;">
@@ -405,22 +428,11 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
   <?php endforeach; ?>
 <?php endif; ?>
 
-<!-- ページネーション -->
 <?php
 $myrequestarray['lister_dbpath'] = $lister_dbpath;
 if (!empty($selectid)) $myrequestarray['selectid'] = $selectid;
+build_pagination_bs5($displayfrom, $displaynum, $programlist['recordsTotal'], $myrequestarray, 'search_listerdb_filelist.php');
 ?>
-<div class="d-flex gap-3 mt-4">
-  <?php if ($displayfrom > 0): ?>
-    <?php $prev = max(0, $displayfrom - $displaynum); $myrequestarray['start'] = $prev; $myrequestarray['length'] = $displaynum; ?>
-    <a href="search_listerdb_filelist.php?<?php echo buildgetquery($myrequestarray); ?>" class="btn-secondary-themed">← 前の<?php echo $displaynum; ?>件</a>
-  <?php endif; ?>
-  <span class="ms-auto me-auto align-self-center text-muted" style="font-size:0.85rem;"><?php echo $displayfrom; ?>–<?php echo $displaylast; ?>（全<?php echo $programlist['recordsTotal']; ?>件）</span>
-  <?php if ($programlist['recordsTotal'] > ($displayfrom + $displaynum)): ?>
-    <?php $myrequestarray['start'] = $displayfrom + $displaynum; $myrequestarray['length'] = $displaynum; ?>
-    <a href="search_listerdb_filelist.php?<?php echo buildgetquery($myrequestarray); ?>" class="btn-secondary-themed">次の<?php echo $displaynum; ?>件 →</a>
-  <?php endif; ?>
-</div>
 
 <?php endif; ?>
 <?php endif; ?>
