@@ -41,6 +41,24 @@ function song_vreset() {
     _sendCmd(_playerCtrlUrl + '?cmd=reset_volume');
 }
 
+/* 字幕補正（明るさ/コントラスト/彩度） */
+function _updateCompLevel(level) {
+    var el = document.getElementById('comp-level');
+    if (!el || typeof level === 'undefined') return;
+    var sign = level > 0 ? '+' : '';
+    el.textContent = sign + level;
+}
+function _compFetch(cmd) {
+    return fetch(_playerCtrlUrl + '?cmd=' + cmd)
+        .then(function (r) { return r.json(); })
+        .then(function (d) { _updateCompLevel(d && d.level); return d; })
+        .catch(function () { /* silent */ });
+}
+function comp_inc()   { _compFetch('comp_inc'); }
+function comp_dec()   { _compFetch('comp_dec'); }
+function comp_reset() { _compFetch('comp_reset'); }
+function comp_apply() { _compFetch('comp_apply'); }
+
 /* foobar 曲終了 */
 function foobar_cmd_songnext() {
     _sendCmd(_foobarCtrlUrl + '?songnext=1').then(function () {
@@ -94,13 +112,12 @@ function _updateStatusBadge(stateNum) {
     }
 }
 
-/* progresstime_init のコールバックをフックして UI 同期 */
+/* progresstime_init のコールバックをフックして UI 同期 + 曲変化検出 */
+var _lastPlayingTitle = null;
+
 (function () {
     var _origInit = typeof progresstime_init !== 'undefined' ? progresstime_init : null;
     if (!_origInit) return;
-
-    /* オリジナルの progresstime_autoplay をラップして状態バッジを更新 */
-    var _origAutoplay = typeof progresstime_autoplay !== 'undefined' ? progresstime_autoplay : null;
 
     /* progresstime_init をオーバーライドして state 取得後に UI 更新 */
     window.progresstime_init = function (nowstate) {
@@ -115,6 +132,19 @@ function _updateStatusBadge(stateNum) {
                 var ps = JSON.parse(req.responseText);
                 _updatePlayPauseBtn(ps.status);
                 _updateStatusBadge(ps.status);
+
+                /* 曲タイトル変化を検出 → 字幕補正を再適用
+                   初回ロード時は _lastPlayingTitle が null なので発火しない */
+                var title = ps.playingtitle || '';
+                if (_lastPlayingTitle !== null
+                    && title !== ''
+                    && title !== _lastPlayingTitle) {
+                    fetch(_playerCtrlUrl + '?cmd=comp_apply')
+                        .then(function (r) { return r.json(); })
+                        .then(function (d) { _updateCompLevel(d && d.level); })
+                        .catch(function () {});
+                }
+                if (title !== '') _lastPlayingTitle = title;
             } catch (e) {}
         };
         req.send('');

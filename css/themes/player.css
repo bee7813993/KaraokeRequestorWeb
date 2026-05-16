@@ -231,6 +231,23 @@ body {
   margin-top: 0;
 }
 
+/* 字幕補正レベル表示 */
+.player-comp-level {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 6px 4px;
+  background: #1a1a2e;
+  color: #f0f4ff;
+  border-radius: var(--radius-button);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+}
+
 /* 任意コード入力 */
 .player-code-input {
   font-family: 'Courier New', Courier, monospace;

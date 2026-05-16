@@ -25,6 +25,48 @@ function reset_initial_volume_bs5() {
     return $applied;
 }
 
+/* ---- 映像補正（字幕の白飛び対策） ---- */
+/* レベルを player_compensation.json に永続化し、MPC の
+   明るさ/コントラスト/彩度 を一括調整する。
+   +1 = 明るさDOWN(867) + コントラストDOWN(869) + 彩度UP(872)
+   -1 = 反対方向: 866 + 868 + 873
+   範囲: -10 .. +10 (各 MPC ステップ分の累積) */
+function _player_compensation_file() {
+    return __DIR__ . '/player_compensation.json';
+}
+function get_player_compensation_level() {
+    $f = _player_compensation_file();
+    if (!file_exists($f)) return 0;
+    $d = @json_decode(@file_get_contents($f), true);
+    if (!is_array($d) || !isset($d['level'])) return 0;
+    return max(-10, min(10, intval($d['level'])));
+}
+function save_player_compensation_level($level) {
+    $level = max(-10, min(10, intval($level)));
+    @file_put_contents(_player_compensation_file(), json_encode(['level' => $level]));
+    return $level;
+}
+function _compensation_step_stronger() {
+    command_mpc(867); // brightness DOWN
+    command_mpc(869); // contrast   DOWN
+    command_mpc(872); // saturation UP
+}
+function _compensation_step_weaker() {
+    command_mpc(866); // brightness UP
+    command_mpc(868); // contrast   UP
+    command_mpc(873); // saturation DOWN
+}
+function apply_player_compensation_full() {
+    $level = get_player_compensation_level();
+    command_mpc(874); // reset color settings
+    if ($level > 0) {
+        for ($i = 0; $i < $level; $i++) _compensation_step_stronger();
+    } elseif ($level < 0) {
+        for ($i = 0; $i < abs($level); $i++) _compensation_step_weaker();
+    }
+    return $level;
+}
+
 /* ---- AJAX / コマンドリクエスト処理 ---- */
 if (!empty($_REQUEST['songnext'])) {
     songnext();
@@ -44,6 +86,33 @@ if (array_key_exists('cmd', $_REQUEST)) {
     elseif ($l_cmd === 'delaym100')    { delay_minus100_mpc(); }
     elseif ($l_cmd === 'start_first')  { start_first_mpc(); }
     elseif ($l_cmd === 'reset_volume') { reset_initial_volume_bs5(); }
+    elseif ($l_cmd === 'comp_inc') {
+        $level = save_player_compensation_level(get_player_compensation_level() + 1);
+        _compensation_step_stronger();
+        header('Content-Type: application/json');
+        echo json_encode(['level' => $level]);
+    }
+    elseif ($l_cmd === 'comp_dec') {
+        $level = save_player_compensation_level(get_player_compensation_level() - 1);
+        _compensation_step_weaker();
+        header('Content-Type: application/json');
+        echo json_encode(['level' => $level]);
+    }
+    elseif ($l_cmd === 'comp_reset') {
+        save_player_compensation_level(0);
+        command_mpc(874);
+        header('Content-Type: application/json');
+        echo json_encode(['level' => 0]);
+    }
+    elseif ($l_cmd === 'comp_apply') {
+        $level = apply_player_compensation_full();
+        header('Content-Type: application/json');
+        echo json_encode(['level' => $level]);
+    }
+    elseif ($l_cmd === 'comp_get') {
+        header('Content-Type: application/json');
+        echo json_encode(['level' => get_player_compensation_level()]);
+    }
     else { $r = command_mpc($l_cmd); print $r; }
     die();
 }
@@ -409,6 +478,33 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
             <button class="btn btn-outline-secondary btn-sm w-100"
                     onclick="mpccmd_num(880)">左右反転</button>
           </div>
+        </div>
+
+        <!-- 字幕補正（白飛び対策） -->
+        <?php
+            $comp_level = get_player_compensation_level();
+            $comp_disp  = ($comp_level > 0 ? '+' : '') . $comp_level;
+        ?>
+        <div class="adv-section-title">字幕補正（白飛び対策）</div>
+        <div class="small text-muted mb-2">
+          明るさ・コントラスト・彩度を一括で調整します。TVごとに最適値が異なるため、設定値は永続化され次の曲にも引き継がれます。
+        </div>
+        <div class="row g-2 mb-2 align-items-center">
+          <div class="col-4">
+            <button class="btn btn-outline-secondary btn-sm w-100"
+                    onclick="comp_dec()" aria-label="補正を弱める">− 弱める</button>
+          </div>
+          <div class="col-4">
+            <div class="player-comp-level" id="comp-level" aria-live="polite"><?= $comp_disp ?></div>
+          </div>
+          <div class="col-4">
+            <button class="btn btn-outline-secondary btn-sm w-100"
+                    onclick="comp_inc()" aria-label="補正を強める">強める ＋</button>
+          </div>
+        </div>
+        <div class="d-grid mb-3">
+          <button class="btn btn-outline-secondary btn-sm"
+                  onclick="comp_reset()" aria-label="補正をリセット">リセット（0 に戻す）</button>
         </div>
 
         <!-- 任意コード -->
