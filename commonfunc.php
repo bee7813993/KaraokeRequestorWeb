@@ -1535,8 +1535,8 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     print '</li>';
 
     // Player
-    $pl_active = ($page == 'playerctrl_portal.php') ? ' active' : '';
-    print '<li class="nav-item"><a class="nav-link' . $pl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'playerctrl_portal.php">Player</a></li>';
+    $pl_active = ($page == 'playerctrl_portal.php' || $page == 'playerctrl_portal_bs5.php') ? ' active' : '';
+    print '<li class="nav-item"><a class="nav-link' . $pl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'playerctrl_portal_bs5.php">Player</a></li>';
 
     // コメント
     if (commentenabledcheck()) {
