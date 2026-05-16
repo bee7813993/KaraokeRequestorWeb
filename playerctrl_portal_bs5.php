@@ -8,7 +8,10 @@ $playerkind = getcurrentplayer();
 <!doctype html>
 <html lang="ja">
 <head>
-<?php print_meta_header(); ?>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title><?php
 if (!empty($config_ini['roomurl'])) {
     $roomnames = array_keys($config_ini['roomurl']);

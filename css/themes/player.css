@@ -10,6 +10,21 @@ body {
   background-attachment: fixed;
   padding-top: 70px;
   color: var(--color-text);
+  /* ピンチズーム抑止 (touch-action) */
+  touch-action: pan-x pan-y;
+  -ms-touch-action: pan-x pan-y;
+}
+
+/* タップ操作されるボタン類はダブルタップズームを完全に無効化 */
+.player-btn,
+.player-controls-card .btn,
+.accordion-body .btn,
+.accordion-button {
+  touch-action: manipulation;
+  -ms-touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* ナビバー */
