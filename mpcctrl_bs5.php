@@ -56,8 +56,8 @@ $ic_play      = _svg('<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.2
 $ic_pause     = _svg('<path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>');
 $ic_skip_s    = _svg('<path d="M4 4a.5.5 0 0 1 1 0v3.248l6.267-3.636c.54-.313 1.233.066 1.233.696v7.384c0 .63-.693 1.01-1.233.697L5 8.753V12a.5.5 0 0 1-1 0V4z"/>');
 $ic_skip_e    = _svg('<path d="M12.5 4a.5.5 0 0 0-1 0v3.248L5.233 3.612C4.693 3.3 4 3.678 4 4.308v7.384c0 .63.693 1.01 1.233.697L11.5 8.753V12a.5.5 0 0 0 1 0V4z"/>');
-$ic_rwd       = _svg('<path d="M.5 3.5A.5.5 0 0 0 0 4v8a.5.5 0 0 0 1 0V8.753l6.267 3.636c.54.313 1.233-.066 1.233-.697v-2.94l6.267 3.636c.54.312 1.233-.066 1.233-.697V4.308c0-.63-.693-1.01-1.233-.696L8.5 7.248v-2.94c0-.63-.692-1.01-1.233-.696L1 7.248V3.5a.5.5 0 0 0-.5-.5z"/>');
-$ic_fwd       = _svg('<path d="M15.5 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V8.752l-6.267 3.636c-.52.302-1.233-.043-1.233-.696v-2.94l-6.267 3.636C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696L7.5 7.248V4.5a.5.5 0 0 1 .267-.445L14 .064a.5.5 0 0 1 .733.444V3.5z"/>');
+$ic_rwd       = _svg('<path d="M8.404 7.304a.802.802 0 0 0 0 1.392l6.363 3.692c.52.302 1.233-.043 1.233-.696V4.308c0-.653-.713-.998-1.233-.696L8.404 7.304Z"/><path d="M.404 7.304a.802.802 0 0 0 0 1.392l6.363 3.692c.52.302 1.233-.043 1.233-.696V4.308c0-.653-.713-.998-1.233-.696L.404 7.304Z"/>');
+$ic_fwd       = _svg('<path d="M7.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692C.713 12.69 0 12.345 0 11.692V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"/><path d="M15.596 7.304a.802.802 0 0 1 0 1.392l-6.363 3.692c-.52.302-1.233-.043-1.233-.696V4.308c0-.653.713-.998 1.233-.696l6.363 3.692Z"/>');
 $ic_chev_l    = _svg('<path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>');
 $ic_chev_r    = _svg('<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>');
 $ic_vol_d     = _svg('<path d="M9 1a.5.5 0 0 0-.812-.39L4.825 3.5H2.5A.5.5 0 0 0 2 4v8a.5.5 0 0 0 .5.5h2.325l3.363 2.89A.5.5 0 0 0 9 15V1zm-4.5 4.5h.325l.5-.5V4h1V3.39L9 2.028V13.97L6.325 12.5H6v-.5H5.5L4.5 11V5.5zM11.5 8a3.5 3.5 0 0 1-.5 1.774v-3.55A3.5 3.5 0 0 1 11.5 8z"/>');
@@ -145,30 +145,30 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     <div class="row g-2 mb-2">
       <div class="col-3">
         <button class="btn btn-outline-secondary player-btn w-100"
-                onclick="jump_before_large()" aria-label="−60秒">
+                onclick="jump_before_large()" aria-label="−20秒">
           <?= $ic_rwd ?>
-          <span class="small">−60s</span>
+          <span class="small">−20s</span>
         </button>
       </div>
       <div class="col-3">
         <button class="btn btn-outline-secondary player-btn w-100"
-                onclick="jump_before()" aria-label="−10秒">
+                onclick="jump_before()" aria-label="−5秒">
           <?= $ic_chev_l ?>
-          <span class="small">−10s</span>
+          <span class="small">−5s</span>
         </button>
       </div>
       <div class="col-3">
         <button class="btn btn-outline-secondary player-btn w-100"
-                onclick="jump_later()" aria-label="+10秒">
+                onclick="jump_later()" aria-label="+5秒">
           <?= $ic_chev_r ?>
-          <span class="small">+10s</span>
+          <span class="small">+5s</span>
         </button>
       </div>
       <div class="col-3">
         <button class="btn btn-outline-secondary player-btn w-100"
-                onclick="jump_later_large()" aria-label="+60秒">
+                onclick="jump_later_large()" aria-label="+20秒">
           <?= $ic_fwd ?>
-          <span class="small">+60s</span>
+          <span class="small">+20s</span>
         </button>
       </div>
     </div>
