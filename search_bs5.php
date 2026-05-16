@@ -81,11 +81,14 @@ function print_listerdb_fileonly() {
 
     print '<div class="search-hero">';
     print '  <p class="form-label-sm mb-2">検索ワード <small>（ふりがな・作品名・曲名・歌手名・ファイル名の一部）</small></p>';
-    print '  <form action="search_listerdb_filelist.php" method="GET">';
-    print '    <div class="search-input-wrap">';
-    print '      <input type="text" name="anyword" id="anyword" class="form-control-themed"';
-    print '             placeholder="作品名、曲名、歌手名、ファイル名の一部" autocomplete="off" />';
-    print '      <button type="submit" class="btn-search-submit">検索</button>';
+    print '  <form action="search_listerdb_filelist.php" method="GET" id="anyword-form">';
+    print '    <div class="search-history-wrap">';
+    print '      <div class="search-input-wrap">';
+    print '        <input type="text" name="anyword" id="anyword" class="form-control-themed"';
+    print '               placeholder="作品名、曲名、歌手名、ファイル名の一部" autocomplete="off" />';
+    print '        <button type="submit" class="btn-search-submit">検索</button>';
+    print '      </div>';
+    print '      <div id="search-history-dropdown" hidden></div>';
     print '    </div>';
     print      $db_field . $sid_field;
     print '  </form>';
@@ -418,6 +421,99 @@ endif;
 ?>
 
 </div><!-- /container -->
+
+<script>
+(function () {
+  var STORAGE_KEY = "krw_search_history";
+  var MAX_HISTORY = 10;
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+    catch (e) { return []; }
+  }
+  function saveHistory(hist) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(hist));
+  }
+  function addToHistory(word) {
+    word = word.trim();
+    if (!word) return;
+    var hist = getHistory().filter(function (h) { return h !== word; });
+    hist.unshift(word);
+    saveHistory(hist.slice(0, MAX_HISTORY));
+  }
+  function removeFromHistory(word) {
+    saveHistory(getHistory().filter(function (h) { return h !== word; }));
+  }
+  function escHtml(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function renderDropdown() {
+    var dropdown = document.getElementById("search-history-dropdown");
+    if (!dropdown) return;
+    var hist = getHistory();
+    if (hist.length === 0) { dropdown.hidden = true; dropdown.innerHTML = ""; return; }
+
+    var html = "<ul class=\"search-history-list\">";
+    hist.forEach(function (word) {
+      var e = escHtml(word);
+      html += "<li class=\"search-history-item\">"
+            + "<button type=\"button\" class=\"search-history-word\" data-word=\"" + e + "\">" + e + "</button>"
+            + "<button type=\"button\" class=\"search-history-del\" data-word=\"" + e + "\" aria-label=\"削除\">×</button>"
+            + "</li>";
+    });
+    html += "</ul>";
+    html += "<div class=\"search-history-footer\"><button type=\"button\" id=\"search-history-clear\">履歴をクリア</button></div>";
+    dropdown.innerHTML = html;
+    dropdown.hidden = false;
+
+    dropdown.querySelectorAll(".search-history-word").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var input = document.getElementById("anyword");
+        input.value = btn.dataset.word;
+        dropdown.hidden = true;
+        addToHistory(btn.dataset.word);
+        input.form.submit();
+      });
+    });
+    dropdown.querySelectorAll(".search-history-del").forEach(function (btn) {
+      btn.addEventListener("mousedown", function (e) { e.preventDefault(); });
+      btn.addEventListener("click", function () {
+        removeFromHistory(btn.dataset.word);
+        renderDropdown();
+      });
+    });
+    var clearBtn = document.getElementById("search-history-clear");
+    if (clearBtn) {
+      clearBtn.addEventListener("mousedown", function (e) { e.preventDefault(); });
+      clearBtn.addEventListener("click", function () {
+        saveHistory([]);
+        renderDropdown();
+      });
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var input = document.getElementById("anyword");
+    var form  = document.getElementById("anyword-form");
+    if (!input || !form) return;
+
+    form.addEventListener("submit", function () {
+      if (input.value.trim()) addToHistory(input.value.trim());
+    });
+
+    input.addEventListener("focus", function () {
+      if (getHistory().length > 0) renderDropdown();
+    });
+    input.addEventListener("blur", function () {
+      setTimeout(function () {
+        var dropdown = document.getElementById("search-history-dropdown");
+        if (dropdown) dropdown.hidden = true;
+      }, 180);
+    });
+  });
+})();
+</script>
 
 </body>
 </html>
