@@ -1,6 +1,30 @@
 <?php
 require_once 'mpcctrl_func.php';
 
+/* ボリュームを再生開始時の初期値に戻す
+   manage-mpc.php の曲開始時ロジックと同じ: startvolume + 制作者別オフセット */
+function reset_initial_volume_bs5() {
+    global $db, $config_ini;
+    $offset = 0;
+    try {
+        $sql = "SELECT volume FROM requesttable WHERE nowplaying = '再生中' ORDER BY reqorder ASC LIMIT 1";
+        $select = $db->query($sql);
+        if ($select) {
+            $row = $select->fetch(PDO::FETCH_ASSOC);
+            $select->closeCursor();
+            if ($row && isset($row['volume']) && $row['volume'] !== '' && $row['volume'] !== null) {
+                $v = intval($row['volume']);
+                if ($v >= -100 && $v <= 100) $offset = $v;
+            }
+        }
+    } catch (Exception $e) { /* silent */ }
+    $base = isset($config_ini['startvolume']) ? intval($config_ini['startvolume']) : 50;
+    $applied = max(0, min(100, $base + $offset));
+    set_volume($applied);
+    print $applied;
+    return $applied;
+}
+
 /* ---- AJAX / コマンドリクエスト処理 ---- */
 if (!empty($_REQUEST['songnext'])) {
     songnext();
@@ -16,9 +40,10 @@ if (array_key_exists('fadeout', $_REQUEST)) {
 }
 if (array_key_exists('cmd', $_REQUEST)) {
     $l_cmd = $_REQUEST['cmd'];
-    if ($l_cmd === 'delayp100')      { delay_plus100_mpc(); }
-    elseif ($l_cmd === 'delaym100')  { delay_minus100_mpc(); }
-    elseif ($l_cmd === 'start_first'){ start_first_mpc(); }
+    if ($l_cmd === 'delayp100')        { delay_plus100_mpc(); }
+    elseif ($l_cmd === 'delaym100')    { delay_minus100_mpc(); }
+    elseif ($l_cmd === 'start_first')  { start_first_mpc(); }
+    elseif ($l_cmd === 'reset_volume') { reset_initial_volume_bs5(); }
     else { $r = command_mpc($l_cmd); print $r; }
     die();
 }
@@ -63,6 +88,7 @@ $ic_chev_r    = _svg('<path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 
 $ic_vol_d     = _svg('<path d="M9 1a.5.5 0 0 0-.812-.39L4.825 3.5H2.5A.5.5 0 0 0 2 4v8a.5.5 0 0 0 .5.5h2.325l3.363 2.89A.5.5 0 0 0 9 15V1zm-4.5 4.5h.325l.5-.5V4h1V3.39L9 2.028V13.97L6.325 12.5H6v-.5H5.5L4.5 11V5.5zM11.5 8a3.5 3.5 0 0 1-.5 1.774v-3.55A3.5 3.5 0 0 1 11.5 8z"/>');
 $ic_vol_u     = _svg('<path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/><path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/><path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 0 9.025 8 3.49 3.49 0 0 0 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>');
 $ic_fade      = _svg('<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>');
+$ic_vol_reset = _svg('<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>');
 $ic_music     = _svg('<path d="M9 3a1 1 0 0 1 1-1h6v10.5a1.5 1.5 0 0 1-3 0v-.5a1.5 1.5 0 0 0-3 0v.5a1.5 1.5 0 0 1-3 0V1a1 1 0 0 1 1-1h.5v7h1V0H9v3z"/>');
 $ic_arrow_u   = _svg('<path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 0 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>');
 $ic_arrow_d   = _svg('<path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>');
@@ -173,24 +199,31 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
       </div>
     </div>
 
-    <!-- 行3: ボリューム + フェードアウト -->
+    <!-- 行3: ボリューム + フェードアウト + 初期値 -->
     <div class="player-section-label">ボリューム</div>
     <div class="row g-2 mb-2">
-      <div class="col-4">
+      <div class="col-3">
         <button class="btn btn-outline-secondary player-btn w-100"
                 onclick="song_vdown()" aria-label="ボリュームDOWN">
           <?= $ic_vol_d ?>
           <span class="small">Vol−</span>
         </button>
       </div>
-      <div class="col-4">
+      <div class="col-3">
+        <button class="btn btn-outline-secondary player-btn w-100"
+                onclick="song_vreset()" aria-label="ボリュームを再生開始時の値に戻す">
+          <?= $ic_vol_reset ?>
+          <span class="small">初期値</span>
+        </button>
+      </div>
+      <div class="col-3">
         <button class="btn btn-warning player-btn w-100"
                 onclick="exec_fadeout()" aria-label="フェードアウト">
           <?= $ic_fade ?>
           <span class="small">フェードアウト</span>
         </button>
       </div>
-      <div class="col-4">
+      <div class="col-3">
         <button class="btn btn-outline-secondary player-btn w-100"
                 onclick="song_vup()" aria-label="ボリュームUP">
           <?= $ic_vol_u ?>

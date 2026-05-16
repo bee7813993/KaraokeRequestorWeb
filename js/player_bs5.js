@@ -36,6 +36,11 @@ function cmd_songstart() {
     });
 }
 
+/* ボリュームを再生開始時の初期値に戻す (MPC) */
+function song_vreset() {
+    _sendCmd(_playerCtrlUrl + '?cmd=reset_volume');
+}
+
 /* foobar 曲終了 */
 function foobar_cmd_songnext() {
     _sendCmd(_foobarCtrlUrl + '?songnext=1').then(function () {
