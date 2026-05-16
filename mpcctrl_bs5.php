@@ -28,9 +28,10 @@ function reset_initial_volume_bs5() {
 /* ---- 映像補正（字幕の白飛び対策） ---- */
 /* レベルを player_compensation.json に永続化し、MPC の
    明るさ/コントラスト/彩度 を一括調整する。
-   +1 = 明るさDOWN(867) + コントラストDOWN(869) + 彩度UP(872)
-   -1 = 反対方向: 866 + 868 + 873
-   範囲: -10 .. +10 (各 MPC ステップ分の累積) */
+   +1 = 明るさDOWN(985) + コントラストDOWN(987) + 彩度UP(990)
+   -1 = 反対方向: 984 + 986 + 991
+   範囲: -10 .. +10 (各 MPC ステップ分の累積)
+   ※ MPC-BE のコマンドID。MPC-HC とは番号が異なる。 */
 function _player_compensation_file() {
     return __DIR__ . '/player_compensation.json';
 }
@@ -47,18 +48,18 @@ function save_player_compensation_level($level) {
     return $level;
 }
 function _compensation_step_stronger() {
-    command_mpc(867); // brightness DOWN
-    command_mpc(869); // contrast   DOWN
-    command_mpc(872); // saturation UP
+    command_mpc(985); // 明るさを下げる
+    command_mpc(987); // コントラストを下げる
+    command_mpc(990); // 彩度を上げる
 }
 function _compensation_step_weaker() {
-    command_mpc(866); // brightness UP
-    command_mpc(868); // contrast   UP
-    command_mpc(873); // saturation DOWN
+    command_mpc(984); // 明るさを上げる
+    command_mpc(986); // コントラストを上げる
+    command_mpc(991); // 彩度を下げる
 }
 function apply_player_compensation_full() {
     $level = get_player_compensation_level();
-    command_mpc(874); // reset color settings
+    command_mpc(992); // カラー設定をリセット
     if ($level > 0) {
         for ($i = 0; $i < $level; $i++) _compensation_step_stronger();
     } elseif ($level < 0) {
@@ -100,7 +101,7 @@ if (array_key_exists('cmd', $_REQUEST)) {
     }
     elseif ($l_cmd === 'comp_reset') {
         save_player_compensation_level(0);
-        command_mpc(874);
+        command_mpc(992); // カラー設定をリセット
         header('Content-Type: application/json');
         echo json_encode(['level' => 0]);
     }
