@@ -61,8 +61,8 @@ try {
         $sel->closeCursor();
     }
 
-    /* 歌唱履歴 直近8件 (再生済み・停止中) */
-    $sel = $db->query("SELECT $cols FROM requesttable WHERE nowplaying IN ('再生済み','停止中') ORDER BY reqorder DESC LIMIT 8");
+    /* 歌唱履歴 直近8件 (再生済・再生済？・停止中) */
+    $sel = $db->query("SELECT $cols FROM requesttable WHERE nowplaying IN ('再生済','再生済？','停止中') ORDER BY reqorder DESC LIMIT 8");
     if ($sel) {
         while ($row = $sel->fetch(PDO::FETCH_ASSOC)) $history[] = _qrow($row, $config_ini, $has_lister);
         $sel->closeCursor();
