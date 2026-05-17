@@ -52,8 +52,9 @@
 
               $sf = $row_next['songfile'];
               $sn = $sn_raw !== '' ? $sn_raw : '';
+              $secret_text = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)'));
               $ret['nextsong'] = [
-                  'title'    => $is_secret_next ? 'ヒ・ミ・ツ♪' : ($sn ?: $sf),
+                  'title'    => $is_secret_next ? $secret_text : ($sn ?: $sf),
                   'songfile' => $is_secret_next ? '' : $sf,
                   'show_file'=> !$is_secret_next && $sn !== '' && $sn !== $sf,
                   'singer'   => $is_secret_next ? '' : $row_next['singer'],

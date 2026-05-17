@@ -10,9 +10,10 @@ function readconfig_array()
     $configinifile = $configfile."";
     
     if(file_exists($configinifile)){
-        $config_ini = parse_ini_file($configinifile);
-    }else {
-       // set initial value
+        $parsed = parse_ini_file($configinifile);
+        if (is_array($parsed)) {
+            $config_ini = $parsed;
+        }
     }
     // set initial value
     if(!array_key_exists("dbname", $config_ini)){
@@ -142,6 +143,9 @@ function readconfig_array()
     }
     if(!array_key_exists("usenewrequestlist", $config_ini)){
         $config_ini = array_merge($config_ini,array("usenewrequestlist" => 2));
+    }
+    if(!array_key_exists("secret_display_text", $config_ini)){
+        $config_ini["secret_display_text"] = urlencode("ヒ・ミ・ツ♪(シークレット予約)");
     }
     if(!array_key_exists("usemypage", $config_ini)){
         $config_ini = array_merge($config_ini,array("usemypage" => 1));

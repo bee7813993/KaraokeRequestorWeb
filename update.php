@@ -146,6 +146,15 @@ if(array_key_exists("pause", $_REQUEST)) {
     }
     $updatestring = $updatestring.' pause = '. $db->quote($l_value) . ' ';
 }
+
+foreach (['audiodelay', 'duration', 'volume', 'song_name', 'lister_artist', 'lister_work', 'lister_op_ed', 'lister_comment'] as $col) {
+    if (array_key_exists($col, $_REQUEST)) {
+        if (strlen($updatestring) > 0) {
+            $updatestring = $updatestring . ' ,';
+        }
+        $updatestring = $updatestring . ' ' . $col . ' = ' . $db->quote($_REQUEST[$col]) . ' ';
+    }
+}
 if(strlen($updatestring) > 0){
     try{
     $sql_u = 'UPDATE requesttable set '. $updatestring . ' WHERE id = '. (int)$l_id;

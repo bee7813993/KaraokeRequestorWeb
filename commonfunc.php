@@ -1245,11 +1245,11 @@ EOD;
     print '</li>';
 
     print '     <li  ';
-    if($page == 'playerctrl_portal.php')
+    if($page == 'playerctrl_portal.php' || $page == 'playerctrl_portal_bs5.php')
     {
         print 'class="active" ';
     }
-    print '><a href="'.$prefix.'playerctrl_portal.php" >Player</a></li>';
+    print '><a href="'.$prefix.'playerctrl_portal_top.php" >Player</a></li>';
     // comment 
     if(commentenabledcheck()){
         print '     <li ';
@@ -1536,7 +1536,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
 
     // Player
     $pl_active = ($page == 'playerctrl_portal.php' || $page == 'playerctrl_portal_bs5.php') ? ' active' : '';
-    print '<li class="nav-item"><a class="nav-link' . $pl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'playerctrl_portal_bs5.php">Player</a></li>';
+    print '<li class="nav-item"><a class="nav-link' . $pl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'playerctrl_portal_top.php">Player</a></li>';
 
     // コメント
     if (commentenabledcheck()) {
