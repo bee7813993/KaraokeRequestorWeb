@@ -646,8 +646,9 @@ class MypageUser {
             $stmt->execute([$fullpath]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($row && !empty($row['found_last_write_time'])) {
-                // Excel時刻（days since 1900-01-00）→ Unixタイムスタンプ
-                return (int)round(((float)$row['found_last_write_time'] - 25569) * 86400);
+                // MJD (Modified Julian Date, days since 1858-11-17) → Unixタイムスタンプ
+                // Unixエポック(1970-01-01) = MJD 40587
+                return (int)round(((float)$row['found_last_write_time'] - 40587) * 86400);
             }
             // フォルダ違いに対応：ファイル名で検索
             $basename = basename(str_replace('\\', '/', $fullpath));
@@ -658,7 +659,7 @@ class MypageUser {
                 $stmt->execute(['%' . $basename]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($row && !empty($row['found_last_write_time'])) {
-                    return (int)round(((float)$row['found_last_write_time'] - 25569) * 86400);
+                    return (int)round(((float)$row['found_last_write_time'] - 40587) * 86400);
                 }
             }
         } catch (Exception $e) {}

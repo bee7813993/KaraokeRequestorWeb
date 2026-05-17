@@ -66,14 +66,11 @@ function sort_link_f($label, $sort_key, $cur_sort, $cur_order) {
     検索結果の画面で「お気に入り」リンクを押すと追加できます。
   </p>
   <?php else: ?>
-  <div class="table-responsive">
   <table class="table table-striped table-sm table-hover align-middle">
     <thead class="table-dark">
       <tr>
         <th>曲名</th>
-        <th class="text-nowrap">登録日時</th>
-        <?php if ($sort === 'filedate'): ?><th class="text-nowrap">動画更新日</th><?php endif; ?>
-        <th>操作</th>
+        <th class="text-nowrap">操作</th>
       </tr>
     </thead>
     <tbody>
@@ -95,20 +92,22 @@ function sort_link_f($label, $sort_key, $cur_sort, $cur_order) {
     ?>
       <tr>
         <td>
-          <?php echo htmlspecialchars($songname, ENT_QUOTES, 'UTF-8'); ?>
+          <div><?php echo htmlspecialchars($songname, ENT_QUOTES, 'UTF-8'); ?></div>
           <?php if ($basename !== $songname): ?>
-            <br><span class="text-muted" style="font-size:x-small;"><?php echo htmlspecialchars($basename, ENT_QUOTES, 'UTF-8'); ?></span>
+            <div class="text-muted" style="font-size:x-small;"><?php echo htmlspecialchars($basename, ENT_QUOTES, 'UTF-8'); ?></div>
           <?php endif; ?>
+          <div class="text-muted small">
+            登録: <?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?>
+            <?php if ($filedate_str !== ''): ?>
+              ｜ 動画更新日: <?php echo htmlspecialchars($filedate_str, ENT_QUOTES, 'UTF-8'); ?>
+            <?php endif; ?>
+          </div>
           <?php if ($status['status'] === 'notfound'): ?>
-            <br><span class="text-danger small">[!] ファイルが見つかりません</span>
+            <div class="text-danger small">[!] ファイルが見つかりません</div>
           <?php elseif ($status['status'] === 'relocated'): ?>
-            <br><span class="text-warning small">[!] 別フォルダで見つかりました</span>
+            <div class="text-warning small">[!] 別フォルダで見つかりました</div>
           <?php endif; ?>
         </td>
-        <td class="text-nowrap"><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
-        <?php if ($sort === 'filedate'): ?>
-        <td class="text-nowrap"><?php echo $filedate_str !== '' ? htmlspecialchars($filedate_str, ENT_QUOTES, 'UTF-8') : '<span class="text-muted">-</span>'; ?></td>
-        <?php endif; ?>
         <td class="text-nowrap">
           <?php if ($status['status'] === 'ok' || $status['status'] === 'relocated'): ?>
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">リクエスト</a>
@@ -127,7 +126,6 @@ function sort_link_f($label, $sort_key, $cur_sort, $cur_order) {
     <?php endforeach; ?>
     </tbody>
   </table>
-  </div>
   <?php endif; ?>
 </div>
 </body>
