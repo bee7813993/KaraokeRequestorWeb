@@ -281,7 +281,7 @@ shownavigatioinbar_bs5();
 showmode();
 
 if (!empty($config_ini['noticeof_listpage'])) {
-    echo '<div class="well">';
+    echo '<div class="p-3 mb-3 border rounded bg-light">';
     echo str_replace('#yukarihost#', $_SERVER['HTTP_HOST'], urldecode($config_ini['noticeof_listpage']));
     echo '</div>';
 }
