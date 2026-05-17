@@ -237,11 +237,26 @@
     var count = _el('db-queue-count');
     if (!list) return;
 
-    var playing = data.playing || null;
-    var queue   = data.queue   || [];
-    var total   = queue.length + (playing ? 0 : 0); /* 再生中は含めない */
+    var playing     = data.playing     || null;
+    var queue       = data.queue       || [];
+    var queueSec    = data.queue_sec   || 0;
+    var knownCount  = data.known_count || 0;
 
+    /* 曲数テキスト */
     if (count) count.textContent = queue.length + '曲待機中';
+
+    /* 残総時間 */
+    var durEl = _el('db-queue-duration');
+    if (durEl) {
+      if (queueSec > 0) {
+        var durTxt = _fmt(queueSec);
+        /* 一部の曲だけ duration が既知の場合は「約」を付ける */
+        durEl.textContent = (knownCount < queue.length ? '約 ' : '') + durTxt;
+        durEl.style.display = '';
+      } else {
+        durEl.style.display = 'none';
+      }
+    }
 
     var html = '';
 

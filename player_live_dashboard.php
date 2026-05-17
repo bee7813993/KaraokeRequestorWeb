@@ -412,7 +412,10 @@ if (!empty($config_ini['roomurl'])) {
   <div class="db-queue-panel">
     <div class="db-queue-header">
       <span class="db-queue-title">QUEUE</span>
-      <span class="db-queue-count" id="db-queue-count"><?= count($init_queue) ?>曲待機中</span>
+      <div class="db-queue-header-right">
+        <span class="db-queue-duration" id="db-queue-duration" style="display:none;"></span>
+        <span class="db-queue-count" id="db-queue-count"><?= count($init_queue) ?>曲待機中</span>
+      </div>
     </div>
     <div class="db-queue-list" id="db-queue-list">
       <?php

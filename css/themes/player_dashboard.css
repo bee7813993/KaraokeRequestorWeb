@@ -331,10 +331,20 @@ body.dashboard-body {
   text-transform: uppercase;
   color: #4facfe;
 }
+.db-queue-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .db-queue-count {
   font-size: 0.7rem;
   color: #484f58;
   font-family: 'Courier New', Courier, monospace;
+}
+.db-queue-duration {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.7rem;
+  color: #e8a838;
 }
 
 .db-queue-list {
