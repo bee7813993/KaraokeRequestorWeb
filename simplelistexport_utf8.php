@@ -18,7 +18,7 @@ if (setlocale(LC_ALL,  'ja_JP.UTF-8', 'Japanese_Japan.932') === false) {
 }
 date_default_timezone_set('Asia/Tokyo');
 
-$sql = "SELECT * FROM requesttable ORDER BY reqorder ASC";
+$sql = "SELECT id, songfile, singer, comment, kind, fullpath, keychange, nowplaying, song_name, lister_artist, lister_work, lister_op_ed, lister_comment FROM requesttable ORDER BY reqorder ASC";
 $select = $db->query($sql);
 $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 $select->closeCursor();
@@ -59,62 +59,6 @@ function load_export_columns($config_file, $all_columns_def) {
 
 $active_columns = load_export_columns('csv_export_columns.json', $all_columns_def);
 
-function getsonginfofromfilename($filename){
-  global $config_ini;
-
-  if(empty($filename)) return false;
-  $res = array_key_exists("listerDBPATH",$config_ini);
-  if ($res === false ) {
-     print( "config not found");
-     return false;
-  }
-  $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
-  if(!file_exists($lister_dbpath) ){
-     print( "Listerdb file :". $lister_dbpath." not found");
-     return false;
-  }
-
-  $lister = new ListerDB();
-  $lister->listerdbfile = $lister_dbpath;
-  $listerdb = $lister->initdb();
-  if( !$listerdb ) {
-       return false;
-  }
-
-  $select_where = 'WHERE found_path LIKE '. $listerdb ->quote('%'.$filename.'%');
-  $sql = 'SELECT * FROM t_found '. $select_where.';';
-  @$songdbdata = $lister->select($sql);
-  if(!$songdbdata){
-      $select_where = 'WHERE found_path LIKE '. $listerdb ->quote('%'.basename($filename).'%');
-      $sql = 'SELECT * FROM t_found '. $select_where.';';
-      @$songdbdata = $lister->select($sql);
-      if(!$songdbdata){
-         return false;
-      }
-  }
-  return $songdbdata;
-}
-
-function listerdbfoundcheck($alldata){
-   foreach($alldata as $row){
-     $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-     if( $songdataarray_all === false ) continue;
-     $songdataarray = $songdataarray_all[0];
-     if(!empty($songdataarray["song_name"]) ) {
-       return true;
-     }
-   }
-   return false;
-}
-
-$listerdbenabled = false;
-if(array_key_exists("listerDBPATH",$config_ini) ) {
-    $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
-    if(file_exists($lister_dbpath) ){
-        $listerdbenabled = true;
-    }
-}
-
 header('Content-Type: application/octet-stream');
 header('Content-Disposition: attachment; filename=list_'.$dbname.'.csv');
 
@@ -128,52 +72,62 @@ foreach ($active_columns as $col_id) {
 }
 $csvarray[] = $header;
 
-$use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
-
 foreach ($allrequest as $row) {
-    // ListerDB情報の取得
-    $songdataarray = [];
-    if ($use_listerdb) {
-        $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-        if (isset($songdataarray_all[0])) $songdataarray = $songdataarray_all[0];
-    }
+    $rid = (int)$row["id"];
+    $song_name = $row["song_name"] ?? '';
+    $lister_artist = $row["lister_artist"] ?? '';
+    $lister_work = $row["lister_work"] ?? '';
+    $lister_op_ed = $row["lister_op_ed"] ?? '';
+    $lister_comment = $row["lister_comment"] ?? '';
 
-    // 曲名
-    if (!empty($songdataarray["song_name"])) {
-        $songname = $songdataarray["song_name"];
-        if (!empty($songdataarray["found_comment"])) {
-            $showcomment = preg_replace('/\,\/\/.*/', "", $songdataarray["found_comment"]);
-            if (!empty($showcomment))
-                $songname = $songname . '【' . $showcomment . '】';
-        }
-    } else {
-        $songname = $row["songfile"];
-    }
-
-    // 作品名
-    $program_name = '';
-    if (!empty($songdataarray["program_name"])) {
-        if ($songdataarray["program_name"] == "その他") {
-            $program_name = '-';
-        } else {
-            $program_name = $songdataarray["program_name"];
-            if (!empty($songdataarray["song_op_ed"])) {
-                $program_name = $program_name . ' ' . $songdataarray["song_op_ed"];
+    // Display-time fallback: check requesttable for saved data, otherwise query ListerDB
+    if (empty($song_name)
+        && !empty($row['fullpath'])
+        && array_key_exists('listerDBPATH', $config_ini)) {
+        $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+        if (file_exists($lister_dbpath)) {
+            $info = listerdb_lookup_songinfo($row['fullpath'], $lister_dbpath);
+            if ($info && !empty($info['song_name'])) {
+                $song_name = $info['song_name'];
+                $lister_artist = $info['lister_artist'];
+                $lister_work = $info['lister_work'];
+                $lister_op_ed = $info['lister_op_ed'];
+                $lister_comment = $info['lister_comment'];
+                $db->exec(
+                    'UPDATE requesttable SET '
+                    . 'song_name='      . $db->quote($info['song_name'])      . ','
+                    . 'lister_artist='  . $db->quote($info['lister_artist'])  . ','
+                    . 'lister_work='    . $db->quote($info['lister_work'])    . ','
+                    . 'lister_op_ed='   . $db->quote($info['lister_op_ed'])   . ','
+                    . 'lister_comment=' . $db->quote($info['lister_comment'])
+                    . ' WHERE id=' . $rid
+                );
             }
         }
     }
 
-    // 歌手名
-    $artist = '';
-    if (!empty($songdataarray["song_artist"])) {
-        $artist = $songdataarray["song_artist"];
+    // 曲名
+    $songname = !empty($song_name) ? $song_name : $row["songfile"];
+    if (!empty($lister_comment)) {
+        $showcomment = preg_replace('/\,\/\/.*/', "", $lister_comment);
+        if (!empty($showcomment))
+            $songname = $songname . '【' . $showcomment . '】';
     }
 
-    // 動画制作者
-    $worker = '';
-    if (!empty($songdataarray["found_worker"])) {
-        $worker = $songdataarray["found_worker"];
+    // 作品名
+    $program_name = '';
+    if (!empty($lister_work)) {
+        $program_name = $lister_work;
+        if (!empty($lister_op_ed)) {
+            $program_name = $program_name . ' ' . $lister_op_ed;
+        }
     }
+
+    // 歌手名
+    $artist = $lister_artist;
+
+    // 動画制作者 (ListerDB から取得、requesttable に保存していないため常に空)
+    $worker = '';
 
     // 列設定に従って行データを生成
     $row_data = [];
