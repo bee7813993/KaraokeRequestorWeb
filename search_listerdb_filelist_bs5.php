@@ -325,7 +325,10 @@ mypage_action_script();
         <?php if (!empty($selectid)):       ?><input type="hidden" name="selectid"     value="<?php echo htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
         <button type="submit" class="btn-secondary-themed">再検索</button>
       </form>
-      <?php
+    </div>
+  </div>
+</div>
+<?php
       if      (!empty($anyword))     { $_kp = 'anyword';     $_kv = $anyword; }
       elseif  (!empty($song_name))   { $_kp = 'song_name';   $_kv = $song_name; }
       elseif  (!empty($filename))    { $_kp = 'filename';    $_kv = $filename; }
@@ -338,10 +341,7 @@ mypage_action_script();
           $kw_sp = 'param=' . $_kp . (!empty($sp) ? '&' . $sp : '') . (!empty($match) ? '&match=' . urlencode($match) : '');
           echo mypage_save_keyword_link($_kv, 'listerdb_filelist', $kw_sp);
       }
-      ?>
-    </div>
-  </div>
-</div>
+?>
 <?php endif; ?>
 
 <!-- 並び替え & おすすめ -->
