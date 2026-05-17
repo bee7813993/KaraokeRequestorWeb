@@ -587,6 +587,10 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
             <button class="btn btn-outline-secondary btn-sm w-100"
                     onclick="mpccmd_num(880)">左右反転</button>
           </div>
+          <div class="col-4">
+            <button class="btn btn-outline-secondary btn-sm w-100"
+                    onclick="mpccmd_num('1036')">時刻表示</button>
+          </div>
         </div>
 
         <!-- 字幕補正（白飛び対策） -->
