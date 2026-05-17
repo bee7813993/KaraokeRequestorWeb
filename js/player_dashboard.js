@@ -81,6 +81,15 @@
       }
     }
 
+    /* 曲終了/再開ボタン: 停止中は「再開」に切り替え */
+    var snBtn = _el('db-btn-songnext');
+    var snLbl = _el('db-lbl-songnext');
+    if (snBtn && snLbl) {
+      var snLabel = (state === 2) ? '曲終了' : '再開';
+      snLbl.textContent = snLabel;
+      snBtn.setAttribute('aria-label', snLabel);
+    }
+
     /* タイトル更新 */
     var titleDisp = _el('db-title-display');
     if (titleDisp) {

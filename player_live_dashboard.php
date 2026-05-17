@@ -211,9 +211,10 @@ if (!empty($config_ini['globalhost'])) {
         </div>
         <div class="col-4">
           <button class="btn btn-danger db-btn db-btn-main w-100"
-                  onclick="db_cmd_songnext()" aria-label="曲終了">
+                  onclick="db_cmd_songnext()" id="db-btn-songnext"
+                  aria-label="<?= $state_num == 2 ? '曲終了' : '再開' ?>">
             <?= $ic_skip_e ?>
-            <span>曲終了</span>
+            <span id="db-lbl-songnext"><?= $state_num == 2 ? '曲終了' : '再開' ?></span>
           </button>
         </div>
       </div>
