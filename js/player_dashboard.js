@@ -9,6 +9,7 @@
   var _ctrlUrl  = _base + '/mpcctrl_bs5.php';
   var _statUrl  = _base + '/get_playingstatus_json.php';
   var _queueUrl = _base + '/get_requestqueue_json.php';
+  var _sseUrl   = _base + '/dashboard_sse.php';
 
   /* 内部状態 */
   var _titleMode     = 'title';
@@ -21,7 +22,12 @@
   var _playtime      = 0;    // ms
   var _totaltime     = 0;    // ms
   var _isPlaying     = false;
-  var _playingKind   = '';   // 再生中アイテムの kind ('小休止'/'カラオケ配信'/etc)
+  var _playingKind   = '';   // 再生中アイテムの kind
+
+  /* SSE */
+  var _sse           = null;
+  var _sseActive     = false;
+  var _sseRetryTimer = null;
 
   /* =====================
      ユーティリティ
@@ -41,8 +47,8 @@
     return h > 0 ? h + ':' + mm + ':' + ss : mm + ':' + ss;
   }
   function _hhmm(date) {
-    var h  = date.getHours();
-    var m  = date.getMinutes();
+    var h = date.getHours();
+    var m = date.getMinutes();
     return h + ':' + (m < 10 ? '0' : '') + m;
   }
   function _el(id) { return document.getElementById(id); }
@@ -82,7 +88,7 @@
       }
     }
 
-    /* 曲終了/再開ボタン: 小休止・カラオケ配信の場合のみ「再開」 */
+    /* 曲終了/再開ボタン */
     _updateSongnextLabel();
 
     /* タイトル更新 */
@@ -106,7 +112,7 @@
     }
     if (title !== '') _lastTitle = title;
 
-    /* ポーリング直後は txt を使って時刻表示 */
+    /* 時刻表示 (ポーリング直後は txt を使用) */
     var tCur = _el('db-time-cur');
     var tTot = _el('db-time-total');
     if (tCur) tCur.textContent = ps.playtime_txt  || '--:--';
@@ -157,7 +163,7 @@
     }
     var hasAlt  = (f !== '' && f !== t);
     var showTxt = (_titleMode === 'file' && hasAlt) ? f : t;
-    titleEl.className  = 'db-song-title';
+    titleEl.className    = 'db-song-title';
     titleEl.style.cursor = hasAlt ? 'pointer' : '';
     titleEl.title        = hasAlt ? 'タップでファイル名表示を切り替え' : '';
     titleEl.onclick      = hasAlt ? _toggleTitleMode : null;
@@ -170,14 +176,13 @@
       titleEl.appendChild(icon);
     }
   }
-
   function _toggleTitleMode() {
     _titleMode = (_titleMode === 'file') ? 'title' : 'file';
     var el = _el('db-title-display');
     if (el) _renderTitle(el);
   }
 
-  /* 曲終了/再開ボタンのラベルを kind に基づいて更新 */
+  /* 曲終了/再開ボタン */
   function _updateSongnextLabel() {
     var snBtn = _el('db-btn-songnext');
     var snLbl = _el('db-lbl-songnext');
@@ -189,7 +194,52 @@
   }
 
   /* =====================
-     ポーリング: プレイヤーステータス
+     SSE 接続
+     ===================== */
+  function _startSSE() {
+    if (_sse) { _sse.close(); _sse = null; }
+    if (!window.EventSource) { _startPolling(); return; }
+
+    _sse = new EventSource(_sseUrl);
+    _sseActive = true;
+
+    _sse.addEventListener('status', function (e) {
+      try {
+        var ps = JSON.parse(e.data);
+        _updateStatus(ps);
+        _stopProgressTick();
+        _startProgressTick();
+      } catch (err) {}
+    });
+
+    _sse.addEventListener('queue', function (e) {
+      try {
+        var data = JSON.parse(e.data);
+        var hash = e.data;
+        if (hash !== _lastQueueHash) {
+          _lastQueueHash = hash;
+          _renderQueue(data);
+        }
+      } catch (err) {}
+    });
+
+    _sse.onerror = function () {
+      _sseActive = false;
+      _sse.close();
+      _sse = null;
+      /* SSE 失敗時はポーリングにフォールバック */
+      if (!_statTimer && !_queueTimer) _startPolling();
+      /* 30 秒後に SSE 再接続を試みる */
+      clearTimeout(_sseRetryTimer);
+      _sseRetryTimer = setTimeout(function () {
+        _stopPolling();
+        _startSSE();
+      }, 30000);
+    };
+  }
+
+  /* =====================
+     ポーリング (SSE フォールバック)
      ===================== */
   function _pollStatus() {
     fetch(_statUrl)
@@ -200,12 +250,9 @@
         _startProgressTick();
       })
       .catch(function () {})
-      .finally(function () { _statTimer = setTimeout(_pollStatus, 2000); });
+      .finally(function () { if (!_sseActive) _statTimer = setTimeout(_pollStatus, 2000); });
   }
 
-  /* =====================
-     ポーリング: キュー
-     ===================== */
   function _pollQueue() {
     fetch(_queueUrl)
       .then(function (r) { return r.json(); })
@@ -217,7 +264,16 @@
         }
       })
       .catch(function () {})
-      .finally(function () { _queueTimer = setTimeout(_pollQueue, 4000); });
+      .finally(function () { if (!_sseActive) _queueTimer = setTimeout(_pollQueue, 4000); });
+  }
+
+  function _startPolling() {
+    if (!_statTimer)  _pollStatus();
+    if (!_queueTimer) _pollQueue();
+  }
+  function _stopPolling() {
+    if (_statTimer)  { clearTimeout(_statTimer);  _statTimer  = null; }
+    if (_queueTimer) { clearTimeout(_queueTimer); _queueTimer = null; }
   }
 
   /* =====================
@@ -235,9 +291,9 @@
      キュー描画
      ===================== */
   function _renderQueue(data) {
-    var list      = _el('db-queue-list');
-    var countEl   = _el('db-queue-count');
-    var durEl     = _el('db-queue-duration');
+    var list    = _el('db-queue-list');
+    var countEl = _el('db-queue-count');
+    var durEl   = _el('db-queue-duration');
     if (!list) return;
 
     var playing    = data.playing    || null;
@@ -246,11 +302,11 @@
     var knownCount = data.known_count || 0;
     var history    = data.history    || [];
 
-    /* 再生中アイテムの kind を保持し、ボタンラベルを同期 */
+    /* 再生中アイテムの kind を保持 */
     _playingKind = playing ? (playing.kind || '') : '';
     _updateSongnextLabel();
 
-    /* 新着通知 (初回ロードは通知しない) */
+    /* 新着通知 (初回は通知しない) */
     if (_lastQueueLen >= 0 && queue.length > _lastQueueLen) {
       _showToast('＋' + (queue.length - _lastQueueLen) + '曲 新着リクエスト！');
     }
@@ -269,14 +325,14 @@
       }
     }
 
-    /* ListerDB info in Now Playing */
+    /* ListerDB 情報 */
     var listerInfo = _el('db-lister-info');
     if (listerInfo) {
       if (playing && (playing.lister_work || playing.lister_op_ed)) {
-        var html = '';
-        if (playing.lister_work)  html += '<span class="db-lister-work">'  + _esc(playing.lister_work)  + '</span>';
-        if (playing.lister_op_ed) html += '<span class="db-lister-op-ed">' + _esc(playing.lister_op_ed) + '</span>';
-        listerInfo.innerHTML = html;
+        var lhtml = '';
+        if (playing.lister_work)  lhtml += '<span class="db-lister-work">'  + _esc(playing.lister_work)  + '</span>';
+        if (playing.lister_op_ed) lhtml += '<span class="db-lister-op-ed">' + _esc(playing.lister_op_ed) + '</span>';
+        listerInfo.innerHTML = lhtml;
         listerInfo.style.display = '';
       } else {
         listerInfo.innerHTML = '';
@@ -284,14 +340,13 @@
       }
     }
 
-    /* --- タイムテーブル予測 ---
-       現在の残り時間 (ms) を起点に各曲の開始予定時刻を算出 */
-    var nowMs        = Date.now();
-    var remainingMs  = Math.max(0, _totaltime - _playtime);
-    var accMs        = remainingMs;
-    var predictable  = true;  // duration=0の曲が出たら以降は予測不可
+    /* タイムテーブル予測 */
+    var nowMs       = Date.now();
+    var remainingMs = Math.max(0, _totaltime - _playtime);
+    var accMs       = remainingMs;
+    var predictable = true;
 
-    /* --- キューリスト描画 --- */
+    /* キューリスト HTML */
     var html = '';
 
     /* 再生中 */
@@ -306,15 +361,13 @@
       if (pm.length)      html += '<div class="db-queue-meta">' + pm.join('') + '</div>';
       if (playing.lister_work) html += '<div class="db-queue-work">' + _esc(playing.lister_work) + '</div>';
     } else {
-      html += '<div class="db-queue-song" style="color:#3d444d;font-style:italic;">再生中の曲なし</div>';
+      html += '<div class="db-queue-song" style="font-style:italic;opacity:.4;">再生中の曲なし</div>';
     }
     html += '</div>';
-    /* 残り時間 (ラベル付き) */
     if (_totaltime > 0) {
       var remStr = _fmt(Math.max(0, Math.floor(remainingMs / 1000)));
       html += '<div class="db-queue-time db-queue-time-remain">'
-            + '<span class="db-queue-time-label">残</span>' + remStr
-            + '</div>';
+            + '<span class="db-queue-time-label">残</span>' + remStr + '</div>';
     }
     html += '</div>';
 
@@ -345,17 +398,12 @@
         }
         html += '</div>';
 
-        if (item.duration > 0) {
-          accMs += item.duration * 1000;
-        } else {
-          predictable = false;
-        }
+        if (item.duration > 0) accMs += item.duration * 1000;
+        else predictable = false;
       }
     }
 
     list.innerHTML = html;
-
-    /* --- 歌唱履歴描画 --- */
     _renderHistory(history);
   }
 
@@ -377,7 +425,7 @@
       html += '<div class="db-queue-info">';
       html += '<div class="db-history-song">' + _esc(h.title) + '</div>';
       var m = [];
-      if (h.singer) m.push(h.singer);
+      if (h.singer)      m.push(h.singer);
       if (h.lister_work) m.push(h.lister_work);
       if (m.length) html += '<div class="db-history-meta">' + _esc(m.join(' · ')) + '</div>';
       html += '</div></div>';
@@ -386,25 +434,69 @@
   }
 
   /* =====================
+     テーマ切り替え
+     ===================== */
+  var _THEME_KEY = 'db-theme';
+
+  function _applyTheme(theme) {
+    var body = document.body;
+    var btn  = _el('db-theme-btn');
+    if (theme === 'light') {
+      body.classList.add('db-light');
+      if (btn) btn.textContent = '☽';
+      if (btn) btn.title = 'ダークテーマに切り替え';
+    } else {
+      body.classList.remove('db-light');
+      if (btn) btn.textContent = '☀';
+      if (btn) btn.title = 'ライトテーマに切り替え';
+    }
+  }
+
+  function _initTheme() {
+    var saved = localStorage.getItem(_THEME_KEY) || 'dark';
+    _applyTheme(saved);
+    var btn = _el('db-theme-btn');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var isLight = document.body.classList.contains('db-light');
+        var next = isLight ? 'dark' : 'light';
+        localStorage.setItem(_THEME_KEY, next);
+        _applyTheme(next);
+      });
+    }
+  }
+
+  /* =====================
      コントロール関数
      ===================== */
   window.db_cmd_songnext = function () {
     _cmd(_ctrlUrl + '?songnext=1').then(function () {
-      setTimeout(function () { _pollStatus(); _pollQueue(); }, 500);
+      setTimeout(function () {
+        if (_sseActive) return; // SSE が更新を拾う
+        _pollStatus(); _pollQueue();
+      }, 500);
     });
   };
   window.db_cmd_songstart = function () {
-    _cmd(_ctrlUrl + '?songstart=1').then(function () { setTimeout(_pollStatus, 600); });
+    _cmd(_ctrlUrl + '?songstart=1').then(function () {
+      if (!_sseActive) setTimeout(_pollStatus, 600);
+    });
   };
   window.db_cmd_pause = function () {
-    _cmd(_ctrlUrl + '?cmd=887').then(function () { setTimeout(_pollStatus, 300); });
+    _cmd(_ctrlUrl + '?cmd=887').then(function () {
+      if (!_sseActive) setTimeout(_pollStatus, 300);
+    });
   };
   window.db_startfirst = function () {
-    _cmd(_ctrlUrl + '?cmd=start_first').then(function () { setTimeout(_pollStatus, 300); });
+    _cmd(_ctrlUrl + '?cmd=start_first').then(function () {
+      if (!_sseActive) setTimeout(_pollStatus, 300);
+    });
   };
   window.db_fadeout = function () { _cmd(_ctrlUrl + '?fadeout=1'); };
   window.db_seek    = function (cmd) {
-    _cmd(_ctrlUrl + '?cmd=' + cmd).then(function () { setTimeout(_pollStatus, 400); });
+    _cmd(_ctrlUrl + '?cmd=' + cmd).then(function () {
+      if (!_sseActive) setTimeout(_pollStatus, 400);
+    });
   };
 
   /* ボリューム */
@@ -420,8 +512,8 @@
         if (dp) dp.textContent = d.volume;
       }).catch(function () {});
   }
-  window.db_vol_up   = function () { _cmd(_ctrlUrl + '?cmd=907').then(function () { setTimeout(_syncVolSlider, 350); }); };
-  window.db_vol_down = function () { _cmd(_ctrlUrl + '?cmd=908').then(function () { setTimeout(_syncVolSlider, 350); }); };
+  window.db_vol_up    = function () { _cmd(_ctrlUrl + '?cmd=907').then(function () { setTimeout(_syncVolSlider, 350); }); };
+  window.db_vol_down  = function () { _cmd(_ctrlUrl + '?cmd=908').then(function () { setTimeout(_syncVolSlider, 350); }); };
   window.db_vol_reset = function () { _cmd(_ctrlUrl + '?cmd=reset_volume').then(function () { setTimeout(_syncVolSlider, 700); }); };
 
   function _initVolSlider() {
@@ -469,13 +561,15 @@
      初期化
      ===================== */
   window.addEventListener('DOMContentLoaded', function () {
+    _initTheme();
     _initVolSlider();
     fetch(_ctrlUrl + '?cmd=comp_get')
       .then(function (r) { return r.json(); })
       .then(function (d) { _updateCompLevel(d && d.level); })
       .catch(function () {});
-    _pollStatus();
-    _pollQueue();
+
+    /* SSE で接続。失敗時は自動でポーリングにフォールバック */
+    _startSSE();
   });
 
 })();

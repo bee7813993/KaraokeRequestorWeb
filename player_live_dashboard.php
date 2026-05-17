@@ -126,6 +126,7 @@ if (!empty($config_ini['globalhost'])) {
 <!-- 薄いタイトルバー (ナビバー代替) -->
 <div class="db-topbar">
   <span class="db-topbar-title"><?= $roomname ?>ライブダッシュボード</span>
+  <button class="db-theme-btn" id="db-theme-btn" title="テーマ切り替え" aria-label="テーマ切り替え">☀</button>
   <a href="playerctrl_portal_bs5.php" class="db-topbar-link">通常Player</a>
 </div>
 
