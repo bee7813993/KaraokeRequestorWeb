@@ -299,10 +299,33 @@ mypage_action_script();
   <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php else: ?>
 
+<?php
+if      (!empty($anyword))     { $_kp = 'anyword';     $_kv = $anyword; }
+elseif  (!empty($song_name))   { $_kp = 'song_name';   $_kv = $song_name; }
+elseif  (!empty($filename))    { $_kp = 'filename';    $_kv = $filename; }
+elseif  (!empty($artist))      { $_kp = 'artist';      $_kv = $artist; }
+elseif  (!empty($program_name)){ $_kp = 'program_name';$_kv = $program_name; }
+elseif  (!empty($maker_name))  { $_kp = 'maker_name';  $_kv = $maker_name; }
+else                           { $_kp = '';             $_kv = ''; }
+$_kw_savelink = '';
+if (!empty($_kv)) {
+    $_sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    $_kw_sp = 'param=' . $_kp . (!empty($_sp) ? '&' . $_sp : '') . (!empty($match) ? '&match=' . urlencode($match) : '');
+    $_kw_savelink = mypage_save_keyword_link($_kv, 'listerdb_filelist', $_kw_sp);
+}
+?>
 <?php if (!empty($program_name) && !empty($category)): ?>
-  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>」「<?php echo htmlspecialchars($program_name, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧</h2>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>」「<?php echo htmlspecialchars($program_name, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧<?php echo $_kw_savelink; ?></h2>
 <?php elseif (!empty($artist)): ?>
-  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($artist, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧</h2>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($artist, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧<?php echo $_kw_savelink; ?></h2>
+<?php elseif (!empty($anyword)): ?>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($anyword, ENT_QUOTES, 'UTF-8'); ?>」の検索結果<?php echo $_kw_savelink; ?></h2>
+<?php elseif (!empty($song_name)): ?>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($song_name, ENT_QUOTES, 'UTF-8'); ?>」の検索結果<?php echo $_kw_savelink; ?></h2>
+<?php elseif (!empty($filename)): ?>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($filename, ENT_QUOTES, 'UTF-8'); ?>」の検索結果<?php echo $_kw_savelink; ?></h2>
+<?php elseif (!empty($maker_name)): ?>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($maker_name, ENT_QUOTES, 'UTF-8'); ?>」の検索結果<?php echo $_kw_savelink; ?></h2>
 <?php endif; ?>
 
 <!-- 再検索 -->
@@ -328,20 +351,6 @@ mypage_action_script();
     </div>
   </div>
 </div>
-<?php
-      if      (!empty($anyword))     { $_kp = 'anyword';     $_kv = $anyword; }
-      elseif  (!empty($song_name))   { $_kp = 'song_name';   $_kv = $song_name; }
-      elseif  (!empty($filename))    { $_kp = 'filename';    $_kv = $filename; }
-      elseif  (!empty($artist))      { $_kp = 'artist';      $_kv = $artist; }
-      elseif  (!empty($program_name)){ $_kp = 'program_name';$_kv = $program_name; }
-      elseif  (!empty($maker_name))  { $_kp = 'maker_name';  $_kv = $maker_name; }
-      else                           { $_kp = '';             $_kv = ''; }
-      if (!empty($_kv)) {
-          $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
-          $kw_sp = 'param=' . $_kp . (!empty($sp) ? '&' . $sp : '') . (!empty($match) ? '&match=' . urlencode($match) : '');
-          echo mypage_save_keyword_link($_kv, 'listerdb_filelist', $kw_sp);
-      }
-?>
 <?php endif; ?>
 
 <!-- 並び替え & おすすめ -->
