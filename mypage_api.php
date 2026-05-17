@@ -85,5 +85,7 @@ switch ($action) {
 
     default:
         echo json_encode(['status' => 'error', 'message' => 'unknown action']);
-        break;
+        exit;
 }
+
+$mypage->autoSyncToDrive();

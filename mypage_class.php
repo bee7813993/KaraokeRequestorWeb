@@ -84,9 +84,10 @@ class MypageUser {
         // Migrate existing tables: add icon_path if missing
         try {
             $this->db->exec("ALTER TABLE mypage_user ADD COLUMN icon_path TEXT DEFAULT ''");
-        } catch (Exception $e) {
-            // Column already exists; ignore
-        }
+        } catch (Exception $e) {}
+        try {
+            $this->db->exec("ALTER TABLE mypage_google_link ADD COLUMN auto_sync INTEGER NOT NULL DEFAULT 0");
+        } catch (Exception $e) {}
         // Migrate: expand UNIQUE constraint on mypage_favorite_keyword to include search_params
         $row = $this->db->query(
             "SELECT sql FROM sqlite_master WHERE type='table' AND name='mypage_favorite_keyword'"
@@ -787,11 +788,40 @@ class MypageUser {
 
     public function getGoogleLink() {
         $stmt = $this->db->prepare(
-            "SELECT google_sub, google_email, access_token, refresh_token, token_expires_at, last_synced_at
+            "SELECT google_sub, google_email, access_token, refresh_token, token_expires_at, last_synced_at, auto_sync
              FROM mypage_google_link WHERE userid=?"
         );
         $stmt->execute([$this->userid]);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    public function setGoogleAutoSync(bool $enabled) {
+        $this->db->prepare(
+            "UPDATE mypage_google_link SET auto_sync=? WHERE userid=?"
+        )->execute([$enabled ? 1 : 0, $this->userid]);
+    }
+
+    public function autoSyncToDrive() {
+        global $config_ini;
+        $link = $this->getGoogleLink();
+        if (!$link || empty($link['auto_sync'])) return;
+
+        $relay_url    = $config_ini['google_relay_url']    ?? '';
+        $relay_secret = $config_ini['google_relay_secret'] ?? '';
+        if (empty($relay_secret)) return;
+
+        require_once __DIR__ . '/mypage_google_drive.php';
+        $drive = new GoogleDriveHelper(
+            $link['access_token'],
+            $link['refresh_token'],
+            $link['token_expires_at'],
+            $relay_url,
+            $relay_secret
+        );
+        $ok = @$drive->writeData($this->exportData());
+        [$new_at, $new_exp, $refreshed] = $drive->getNewTokens();
+        if ($refreshed) $this->updateGoogleTokens($new_at, $new_exp);
+        if ($ok) $this->updateGoogleSyncTime();
     }
 
     public function updateGoogleTokens($access_token, $expires_at) {
