@@ -288,9 +288,12 @@
       html += '<div class="db-queue-song" style="color:#3d444d;font-style:italic;">再生中の曲なし</div>';
     }
     html += '</div>';
-    /* 残り時間 */
+    /* 残り時間 (ラベル付き) */
     if (_totaltime > 0) {
-      html += '<div class="db-queue-time">' + _fmt(Math.max(0, Math.floor(remainingMs / 1000))) + '</div>';
+      var remStr = _fmt(Math.max(0, Math.floor(remainingMs / 1000)));
+      html += '<div class="db-queue-time db-queue-time-remain">'
+            + '<span class="db-queue-time-label">残</span>' + remStr
+            + '</div>';
     }
     html += '</div>';
 
@@ -313,7 +316,12 @@
         if (m.length)    html += '<div class="db-queue-meta">' + m.join('') + '</div>';
         if (item.lister_work) html += '<div class="db-queue-work">' + _esc(item.lister_work) + '</div>';
         html += '</div>';
-        if (timeStr) html += '<div class="db-queue-time">' + timeStr + '</div>';
+        if (timeStr) {
+          html += '<div class="db-queue-time db-queue-time-start">'
+                + '〜' + timeStr
+                + '<span class="db-queue-time-sublabel">開始予定</span>'
+                + '</div>';
+        }
         html += '</div>';
 
         if (item.duration > 0) {
