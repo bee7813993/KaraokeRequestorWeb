@@ -232,7 +232,7 @@ body.dashboard-body {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #484f58;
+  color: #768390;
   margin-bottom: 8px;
   margin-top: 12px;
 }
@@ -338,7 +338,7 @@ body.dashboard-body {
 }
 .db-queue-count {
   font-size: 0.7rem;
-  color: #484f58;
+  color: #768390;
   font-family: 'Courier New', Courier, monospace;
 }
 .db-queue-duration {
@@ -352,7 +352,7 @@ body.dashboard-body {
 .db-queue-duration-label {
   font-family: sans-serif;
   font-size: 0.62rem;
-  color: #484f58;
+  color: #768390;
   letter-spacing: 0;
 }
 
@@ -408,7 +408,7 @@ body.dashboard-body {
 .db-queue-num {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.7rem;
-  color: #484f58;
+  color: #768390;
   min-width: 28px;
   text-align: right;
   flex-shrink: 0;
@@ -436,7 +436,7 @@ body.dashboard-body {
 }
 .db-queue-meta {
   font-size: 0.72rem;
-  color: #484f58;
+  color: #768390;
   margin-top: 2px;
   display: flex;
   gap: 8px;
@@ -446,7 +446,7 @@ body.dashboard-body {
   color: #6e7681;
 }
 .db-queue-kind {
-  color: #3d444d;
+  color: #6e7681;
   font-style: italic;
 }
 
@@ -454,7 +454,7 @@ body.dashboard-body {
 .db-queue-empty {
   padding: 32px 16px;
   text-align: center;
-  color: #3d444d;
+  color: #6e7681;
   font-size: 0.85rem;
 }
 
@@ -527,7 +527,7 @@ body.dashboard-body {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #3d444d;
+  color: #6e7681;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   padding-bottom: 4px;
   margin-bottom: 8px;
@@ -548,7 +548,7 @@ body.dashboard-body {
   text-align: center;
 }
 .db-code-input::placeholder {
-  color: #484f58;
+  color: #768390;
 }
 
 /* ===========================
@@ -586,7 +586,7 @@ body.dashboard-body {
 .db-queue-time {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.7rem;
-  color: #3d444d;
+  color: #6e7681;
   white-space: nowrap;
   flex-shrink: 0;
   padding-top: 2px;
@@ -663,7 +663,7 @@ body.dashboard-body {
 }
 .db-history-num {
   font-size: 0.65rem;
-  color: #3d444d;
+  color: #6e7681;
   min-width: 16px;
   text-align: right;
   padding-top: 2px;
@@ -677,13 +677,13 @@ body.dashboard-body {
 }
 .db-history-meta {
   font-size: 0.68rem;
-  color: #3d444d;
+  color: #6e7681;
   margin-top: 1px;
 }
 .db-history-empty {
   padding: 16px;
   text-align: center;
-  color: #3d444d;
+  color: #6e7681;
   font-size: 0.8rem;
 }
 
@@ -746,7 +746,7 @@ body.dashboard-body {
 .db-url-empty {
   padding: 12px 16px;
   font-size: 0.78rem;
-  color: #3d444d;
+  color: #6e7681;
 }
 
 /* ===========================
@@ -777,10 +777,10 @@ body.dashboard-body {
 /* キュー内の lister_work サブ表示 */
 .db-queue-work {
   font-size: 0.68rem;
-  color: #3d444d;
+  color: #6e7681;
   margin-top: 1px;
 }
 .db-queue-item:hover .db-queue-work {
-  color: #484f58;
+  color: #768390;
 }
 
