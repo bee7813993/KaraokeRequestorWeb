@@ -537,7 +537,7 @@ print ' value="10" ';
   </label>
   </div>
 
-<!---- スワイプ操作対応リクエスト一覧UI ----->
+<!---- リクエスト一覧UI v2 ----->
   <?php
       $usenewrequestlist = false;
       if(array_key_exists("usenewrequestlist",$config_ini)){
@@ -547,7 +547,7 @@ print ' value="10" ';
       }
   ?>
   <div class="form-group">
-    <h4 class="radio control-label"> スワイプ操作対応リクエスト一覧UI </h4>
+    <h4 class="radio control-label"> リクエスト一覧UI v2 </h4>
     <label class="radio control-label"><small>ドラッグハンドルで並べ替え・左スワイプでアクションメニューを表示するリクエスト一覧画面を使用します。</small></label>
     <label class="radio-inline">
       <input type="radio" name="usenewrequestlist" value="1" <?php print ($usenewrequestlist)?'checked':' ' ?> /> 使用する
@@ -556,11 +556,11 @@ print ' value="10" ';
       <input type="radio" name="usenewrequestlist" value="0" <?php print (!$usenewrequestlist)?'checked':' ' ?> /> 使用しない
     </label>
     <label>
-      <a href="requestlist_swipe.php"> スワイプUIリクエスト一覧へのリンク </a>
+      <a href="requestlist_swipe.php"> リクエスト一覧UI v2 へのリンク </a>
     </label>
   </div>
 
-<!---- 新デザイン検索画面UI ----->
+<!---- 検索画面UI v2 ----->
   <?php
       $usenewsearchui = false;
       if(array_key_exists("usenewsearchui",$config_ini)){
@@ -570,8 +570,8 @@ print ' value="10" ';
       }
   ?>
   <div class="form-group">
-    <h4 class="radio control-label"> 新デザイン検索画面UI（Bootstrap 5） </h4>
-    <label class="radio control-label"><small>モバイル対応の新デザイン検索画面を使用します。旧デザインに戻すには「使用しない」を選択してください。</small></label>
+    <h4 class="radio control-label"> 検索画面UI v2 </h4>
+    <label class="radio control-label"><small>モバイル対応の検索画面を使用します。旧バージョンに戻すには「使用しない」を選択してください。</small></label>
     <label class="radio-inline">
       <input type="radio" name="usenewsearchui" value="1" <?php print ($usenewsearchui)?'checked':' ' ?> /> 使用する
     </label>
@@ -579,7 +579,7 @@ print ' value="10" ';
       <input type="radio" name="usenewsearchui" value="2" <?php print (!$usenewsearchui)?'checked':' ' ?> /> 使用しない
     </label>
     <label>
-      <a href="search_bs5.php"> 新デザイン検索画面へのリンク </a>
+      <a href="search_bs5.php"> 検索画面UI v2 へのリンク </a>
     </label>
   </div>
 
