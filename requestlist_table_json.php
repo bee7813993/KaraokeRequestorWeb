@@ -82,44 +82,44 @@ foreach($allrequest as $value ){
 $showcommentblock = "";
 if(strlen($value['comment']) === 0){
 //    $showcommentblock = '<a class="btn btn-default" data-toggle="modal" data-target="#comment_modal_'.$value['id'].'">修正orレス</a>';
-    $showcommentblock = '<a href="#" data-bs-toggle="modal" class="commentmodallink" data-bs-target="#comment_modal_'.$value['id'].'"  title="このエリアを押すことでコメントにレスを付けたり編集したりできます">'.nl2br(htmlspecialchars($value['comment']))."</a>\n";
+    $showcommentblock = '<a href="#" data-toggle="modal" class="commentmodallink" data-target="#comment_modal_'.$value['id'].'"  title="このエリアを押すことでコメントにレスを付けたり編集したりできます">'.nl2br(htmlspecialchars($value['comment']))."</a>\n";
 } else {
-    $showcommentblock = '<a href="#" data-bs-toggle="modal" class="commentmodallink" data-bs-target="#comment_modal_'.$value['id'].'"  title="このエリアを押すことでコメントにレスを付けたり編集したりできます">'.nl2br(htmlspecialchars($value['comment']))."</a>\n";
+    $showcommentblock = '<a href="#" data-toggle="modal" class="commentmodallink" data-target="#comment_modal_'.$value['id'].'"  title="このエリアを押すことでコメントにレスを付けたり編集したりできます">'.nl2br(htmlspecialchars($value['comment']))."</a>\n";
 }    
     $comment_pf = <<<EOD
 <div style="position: relative;width:100%%;min-height: 1em;">
-%s 
+%s
 <!-- 2.モーダルの配置 -->
 <div class="modal" id="comment_modal_%s" tabindex="-1" >
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modal-label">コメントへのレス＆編集</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+        <h4 class="modal-title" id="modal-label">コメントへのレス＆編集</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="閉じる"><span aria-hidden="true">&times;</span></button>
       </div>
       <form method="GET" action="update.php" class="sendnomove" >\n
-      <div class="mb-3">
+      <div class="form-group">
       <textarea class="form-control" name="comment"  >%s</textarea>
       <input type="hidden" name="id" value="%s" />\n
-      <input type="submit" class="btn btn-secondary float-end" name="edit"   value="修正"  />\n
+      <input type="submit" class="btn btn-secondary pull-right" name="edit"   value="修正"  />\n
       </div>
       </form>\n
       <form method="GET" action="commentedit.php" class="sendnomove" >\n
       <label class="form-label">コメント <small>再生中にコメントするとその場で流れます</small></label>
-      <div class="mb-3">
-      <label class="col-sm-2 col-form-label">レス</label>
+      <div class="form-group">
+      <label class="col-sm-2 control-label">レス</label>
       <div class="col-sm-10">
       <input type="text" class="form-control" name="addcomment"  value="" placeholder="レス(コメントへの)"/>\n
       </div>
-      <label class="col-sm-2 col-form-label">名前</label>
+      <label class="col-sm-2 control-label">名前</label>
       <div class="col-sm-10">
         <input type="text" name="name" class="form-control" value="%s" placeholder="名前" />\n
       </div>
       <input type="hidden" name="id" value="%s" />\n
-      <input type="submit" name="add"  class="btn btn-primary float-end" value="送信"/>\n
+      <input type="submit" name="add"  class="btn btn-primary pull-right" value="送信"/>\n
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
       </div>
     </form>
     </div>
@@ -203,16 +203,16 @@ $action_pf = <<<EOD
 <input type="hidden" name="id" class="requestid" value="%s" />
 <input type="hidden" name="songfile" id="requestsongfile" value="%s" />
 <div class="acition" >
-<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+<button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 リスト操作
 <span class="caret"></span>
 </button>
-<ul class="dropdown-menu">
-<li> <a class="requestmove" name="up"  id="requestup" value="up" onClick='moverequestlist(this,%s,"up","%s")' >上へ</a> </li>
-<li> <a class="requestmove" name="down" id="requestdown"  value="down" onClick='moverequestlist(this,%s,"down","%s")' > 下へ</a> </li>
-<li> <a class="requestmove" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' > 次に再生</a> </li>
+<ul class="dropdown-menu" role="menu">
+<li role="presentation"> <a class="requestmove" name="up"  id="requestup" value="up" onClick='moverequestlist(this,%s,"up","%s")' role="menuitem">上へ</a> </li>
+<li role="presentation"> <a class="requestmove" name="down" id="requestdown"  value="down" onClick='moverequestlist(this,%s,"down","%s")' role="menuitem"> 下へ</a> </li>
+<li role="presentation"> <a class="requestmove" name="warikomi" id="requesttonext" value="warikomi" onClick='moverequestlist(this,%s,"warikomi","%s")' role="menuitem"> 次に再生</a> </li>
 %s
-<li> <a href="#" class="" data-bs-toggle="modal" data-bs-target="#act_modal_%s">削除</a> </li>
+<li role="presentation"> <a href="#" class="" data-toggle="modal" data-target="#act_modal_%s" role="menuitem">削除</a> </li>
 </ul>
 </div>
 <!--
@@ -221,16 +221,16 @@ $action_pf = <<<EOD
 </form>
 </div>
 <!-- 2.モーダルの配置 -->
-<div class="modal" id="act_modal_%s" tabindex="-1">
-  <div class="modal-dialog">
+<div class="modal" id="act_modal_%s" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="modal-label">%sを削除します</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="閉じる"></button>
+        <h4 class="modal-title" id="modal-label">%sを削除します</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="閉じる"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-footer">
         <form method="post" class="sendnomove" action="delete.php">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
           <input type="hidden" name="id" class="requestid" value="%s" />
           <input type="hidden" name="songfile" id="requestsongfile" value="%s" />
           <button class="btn btn-primary" type="submit" name="delete" id="requestdelete" value="delete" > 削除</button>
