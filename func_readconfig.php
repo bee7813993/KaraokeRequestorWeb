@@ -9,7 +9,8 @@ class ReadConfig {
         $config_ini = array ();
     
         if(file_exists($this->readconfigfile)){
-            $this->read_config_ini = parse_ini_file($this->readconfigfile);
+            $parsed = parse_ini_file($this->readconfigfile);
+            $this->read_config_ini = is_array($parsed) ? $parsed : false;
         }else {
             $this->read_config_ini = false;
         }
