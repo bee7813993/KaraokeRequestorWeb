@@ -1,4 +1,5 @@
-<html>
+<!doctype html>
+<html lang="ja">
 <head>
 <?php
 require_once 'commonfunc.php';
@@ -6,16 +7,17 @@ require_once 'mypage_class.php';
 print_meta_header();
 ?>
 <title>後で歌う - マイページ</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/themes/_variables.css" rel="stylesheet">
+<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
+<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
 </head>
 <body>
 <?php
-shownavigatioinbar('mypage_later.php');
+shownavigatioinbar_bs5('mypage_later.php');
 
 if (!configbool("usemypage", true)) {
-    print '<div class="container" style="margin-top:80px;"><p>マイページ機能は無効です。</p></div>';
+    print '<div class="container py-3"><p>マイページ機能は無効です。</p></div>';
     print '</body></html>';
     exit;
 }
@@ -29,23 +31,46 @@ if (isset($_POST['action']) && $_POST['action'] === 'remove' && !empty($_POST['f
     exit;
 }
 
-$list = $mypage->getLaterList();
+$valid_sorts = ['date', 'filedate'];
+$sort  = in_array($_GET['sort'] ?? '', $valid_sorts, true) ? $_GET['sort'] : 'date';
+$order = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'asc' : 'desc';
+
+$list = $mypage->getLaterList($sort, $order);
+
+function sort_link_l($label, $sort_key, $cur_sort, $cur_order) {
+    $next_order = ($cur_sort === $sort_key && $cur_order === 'desc') ? 'asc' : 'desc';
+    $arrow = '';
+    $active_class = '';
+    if ($cur_sort === $sort_key) {
+        $arrow = $cur_order === 'desc' ? ' ▼' : ' ▲';
+        $active_class = ' fw-bold';
+    }
+    $url = 'mypage_later.php?sort=' . urlencode($sort_key) . '&order=' . urlencode($next_order);
+    return '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" class="link-secondary' . $active_class . '">'
+         . htmlspecialchars($label . $arrow, ENT_QUOTES, 'UTF-8') . '</a>';
+}
 ?>
-<div class="container" style="margin-top:80px;">
-  <h2>後で歌う</h2>
-  <p><a href="mypage.php">&laquo; マイページへ戻る</a></p>
+<div class="container py-3">
+  <h2 class="mb-2">後で歌う</h2>
+  <p class="mb-2"><a href="mypage.php">&laquo; マイページへ戻る</a></p>
+
+  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+    <span class="text-muted small">並び替え:</span>
+    <?php echo sort_link_l('追加日順', 'date', $sort, $order); ?>
+    <span class="text-muted">|</span>
+    <?php echo sort_link_l('動画更新日順', 'filedate', $sort, $order); ?>
+  </div>
 
   <?php if (empty($list)): ?>
   <p class="text-muted">リストに曲がありません。<br>
     検索結果の画面で「後で歌う」リンクを押すと追加できます。
   </p>
   <?php else: ?>
-  <table class="table table-striped table-condensed">
-    <thead>
+  <table class="table table-striped table-sm table-hover align-middle">
+    <thead class="table-dark">
       <tr>
         <th>曲名</th>
-        <th>追加日時</th>
-        <th>操作</th>
+        <th class="text-nowrap">操作</th>
       </tr>
     </thead>
     <tbody>
@@ -60,33 +85,41 @@ $list = $mypage->getLaterList();
         $req_fullpath = ($status['status'] === 'relocated') ? $status['fullpath'] : $fullpath;
         $req_url    = MypageUser::makeRequestConfirmUrl($req_fullpath, $songfile, $kind);
         $search_url = MypageUser::makeSearchFallbackUrl($songfile);
+        $filedate_str = '';
+        if ($sort === 'filedate' && !empty($row['_filedate_ts'])) {
+            $filedate_str = date('Y/m/d', $row['_filedate_ts']);
+        }
     ?>
       <tr>
         <td>
-          <?php echo htmlspecialchars($songname, ENT_QUOTES, 'UTF-8'); ?>
+          <div><?php echo htmlspecialchars($songname, ENT_QUOTES, 'UTF-8'); ?></div>
           <?php if ($basename !== $songname): ?>
-            <br><span class="text-muted" style="font-size:x-small;"><?php echo htmlspecialchars($basename, ENT_QUOTES, 'UTF-8'); ?></span>
+            <div class="text-muted" style="font-size:x-small;"><?php echo htmlspecialchars($basename, ENT_QUOTES, 'UTF-8'); ?></div>
           <?php endif; ?>
+          <div class="text-muted small">
+            追加: <?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?>
+            <?php if ($filedate_str !== ''): ?>
+              ｜ 動画更新日: <?php echo htmlspecialchars($filedate_str, ENT_QUOTES, 'UTF-8'); ?>
+            <?php endif; ?>
+          </div>
           <?php if ($status['status'] === 'notfound'): ?>
-            <br><span class="text-danger" style="font-size:small;">[!] ファイルが見つかりません</span>
+            <div class="text-danger small">[!] ファイルが見つかりません</div>
           <?php elseif ($status['status'] === 'relocated'): ?>
-            <br><span class="text-warning" style="font-size:small;">[!] 別フォルダで見つかりました</span>
+            <div class="text-warning small">[!] 別フォルダで見つかりました</div>
           <?php endif; ?>
         </td>
-        <td><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
-        <td>
+        <td class="text-nowrap">
           <?php if ($status['status'] === 'ok' || $status['status'] === 'relocated'): ?>
-            <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-xs">リクエスト</a>
-            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-default btn-xs">曲名で再検索</a>
+            <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">リクエスト</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary btn-sm">再検索</a>
           <?php else: ?>
-            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-xs">曲名で再検索</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm">曲名で再検索</a>
           <?php endif; ?>
-          &nbsp;
-          <form method="POST" action="mypage_later.php" style="display:inline;"
+          <form method="POST" action="mypage_later.php" class="d-inline"
                 onsubmit="return confirm('リストから削除しますか？');">
             <input type="hidden" name="action" value="remove" />
             <input type="hidden" name="fullpath" value="<?php echo htmlspecialchars($fullpath, ENT_QUOTES, 'UTF-8'); ?>" />
-            <button type="submit" class="btn btn-danger btn-xs">削除</button>
+            <button type="submit" class="btn btn-outline-danger btn-sm">削除</button>
           </form>
         </td>
       </tr>
