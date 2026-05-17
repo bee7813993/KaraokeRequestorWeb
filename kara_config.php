@@ -257,7 +257,12 @@ function updatedb($db){
                   array ( "name" => "pause" , "type" =>  "INTEGER default 0") ,
                   array ( "name" => "audiodelay" , "type" =>  "INTEGER default 0") ,
                   array ( "name" => "duration"   , "type" =>  "INTEGER default 0") ,
-                  array ( "name" => "volume"     , "type" =>  "INTEGER default 0")
+                  array ( "name" => "volume"     , "type" =>  "INTEGER default 0") ,
+                  array ( "name" => "song_name"  , "type" =>  "text default ''") ,
+                  array ( "name" => "lister_artist"  , "type" =>  "text default ''") ,
+                  array ( "name" => "lister_work"    , "type" =>  "text default ''") ,
+                  array ( "name" => "lister_op_ed"   , "type" =>  "text default ''") ,
+                  array ( "name" => "lister_comment" , "type" =>  "text default ''")
                   );
     /* 現在の項目一覧取得 */
     try {

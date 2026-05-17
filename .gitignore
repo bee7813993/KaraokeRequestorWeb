@@ -10,6 +10,9 @@ prioritydb.db
 request.db
 updatenotice.db
 
+# プレイヤー画面の永続化設定（TV依存のため環境ごと）
+player_compensation.json
+
 # ゆかりすたー 4 NEBULA により生成されるフォルダー
 list/
 

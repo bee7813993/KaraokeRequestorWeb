@@ -255,6 +255,26 @@ if (is_numeric($selectid)) {
         $list->save_allrequest($db);
     }
     $db->exec("COMMIT;");
+
+    // ListerDB から曲情報を取得して保存
+    if (!empty($l_fullpath) && array_key_exists('listerDBPATH', $config_ini)) {
+        $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+        if (file_exists($lister_dbpath)) {
+            require_once 'function_search_listerdb.php';
+            $lfd_row = listerdb_lookup_songinfo($l_fullpath, $lister_dbpath);
+            if ($lfd_row) {
+                $db->exec(
+                    'UPDATE requesttable SET '
+                    . 'song_name='      . $db->quote($lfd_row['song_name'])      . ','
+                    . 'lister_artist='  . $db->quote($lfd_row['lister_artist'])  . ','
+                    . 'lister_work='    . $db->quote($lfd_row['lister_work'])    . ','
+                    . 'lister_op_ed='   . $db->quote($lfd_row['lister_op_ed'])   . ','
+                    . 'lister_comment=' . $db->quote($lfd_row['lister_comment'])
+                    . ' WHERE id=' . $newid
+                );
+            }
+        }
+    }
 }
 file_get_contents("http://localhost/updaterequestlist.php");
 

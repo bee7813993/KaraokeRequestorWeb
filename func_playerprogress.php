@@ -12,6 +12,7 @@ class PlayerProgress {
     public $totaltime = "";
     public $status = 0;
     public $playingtitle = "";
+    public $playingfile = "";
     public $playercommandname = "";
     
     
@@ -72,7 +73,7 @@ class PlayerProgress {
         return true;
     }
     public function gettitle() {
-        global $db;
+        global $db, $config_ini;
         for($i = 0 ; $i < 10 ; $i++) {
           $sql = "SELECT * FROM requesttable  WHERE nowplaying = '再生中' ORDER BY reqorder ASC ";
           $select = $db->query($sql);
@@ -80,14 +81,42 @@ class PlayerProgress {
           $select->closeCursor();
           if(count($rowall) == 0){
               $this->playingtitle = "";
+              $this->playingfile = "";
               usleep(100000);
           }else {
-              
-              $this->playingtitle = $rowall[0]['songfile'];
+
+              $song_name = $rowall[0]['song_name'] ?? '';
+
+              // song_name が空なら ListerDB を参照し、見つかれば requesttable も更新
+              if (empty($song_name)
+                  && !empty($rowall[0]['fullpath'])
+                  && array_key_exists('listerDBPATH', $config_ini)) {
+                  $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+                  if (file_exists($lister_dbpath)) {
+                      require_once 'function_search_listerdb.php';
+                      $info = listerdb_lookup_songinfo($rowall[0]['fullpath'], $lister_dbpath);
+                      if ($info && !empty($info['song_name'])) {
+                          $song_name = $info['song_name'];
+                          $rid = (int)$rowall[0]['id'];
+                          $db->exec(
+                              'UPDATE requesttable SET '
+                              . 'song_name='      . $db->quote($info['song_name'])      . ','
+                              . 'lister_artist='  . $db->quote($info['lister_artist'])  . ','
+                              . 'lister_work='    . $db->quote($info['lister_work'])    . ','
+                              . 'lister_op_ed='   . $db->quote($info['lister_op_ed'])   . ','
+                              . 'lister_comment=' . $db->quote($info['lister_comment'])
+                              . ' WHERE id=' . $rid
+                          );
+                      }
+                  }
+              }
+
+              $this->playingtitle = !empty($song_name) ? $song_name : $rowall[0]['songfile'];
+              $this->playingfile = $rowall[0]['songfile'] ?? '';
               break;
           }
         }
-        
+
     }
     
     public function getplaystatus_json() {
@@ -100,7 +129,8 @@ class PlayerProgress {
         $ret += array('totaltime'=>$this->totaltime);
         $ret += array('status'=>$this->status);
         $ret += array('playingtitle'=>$this->playingtitle);
-        
+        $ret += array('playingfile'=>$this->playingfile);
+
         return json_encode($ret);
         }else {
           return false;
