@@ -300,12 +300,12 @@ if (!empty($config_ini['noticeof_listpage'])) {
 <div class="list-toolbar">
   <div class="toolbar-left">
     <h4>現在の登録状況</h4>
-    <button class="btn btn-outline-secondary btn-sm" id="refresh-btn">更新</button>
-    <button class="btn btn-outline-primary btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
+    <button class="btn btn-secondary btn-sm" id="refresh-btn">更新</button>
+    <button class="btn btn-primary btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
-    <a href="simplelistexport_utf8.php" class="btn btn-outline-secondary btn-sm">リクエストリストCSV</a>
-    <a href="simplelist.php" class="btn btn-outline-secondary btn-sm">シンプルリスト</a>
+    <a href="simplelistexport_utf8.php" class="btn btn-secondary btn-sm">リクエストリストCSV</a>
+    <a href="simplelist.php" class="btn btn-secondary btn-sm">シンプルリスト</a>
 <?php if ($requestlist_num > 0): ?>
     <select id="count-select" class="form-select form-select-sm">
       <option value="<?php echo $requestlist_num; ?>"><?php echo $requestlist_num; ?>件</option>
@@ -324,7 +324,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
 
 <div id="request-list"></div>
 <div id="load-more-wrap" style="display:none">
-  <button class="btn btn-outline-secondary" id="load-more-btn">もっと見る</button>
+  <button class="btn btn-secondary" id="load-more-btn">もっと見る</button>
 </div>
 <div id="empty-msg" style="display:none">リクエストはありません</div>
 
@@ -505,7 +505,7 @@ function createCardHTML(item, idx) {
     // 曲終了 / 曲開始ボタン
     var ctrlBtn = '';
     if (isPlaying(item.nowplaying)) {
-        ctrlBtn = '<button class="btn btn-outline-warning btn-sm card-ctrl-btn song-end-btn">曲終了</button>';
+        ctrlBtn = '<button class="btn btn-warning btn-sm card-ctrl-btn song-end-btn">曲終了</button>';
     } else if (isWaiting(item.nowplaying) && item.kind === '動画') {
         ctrlBtn = '<button class="btn btn-success btn-sm card-ctrl-btn song-start-btn">曲開始</button>';
     }
