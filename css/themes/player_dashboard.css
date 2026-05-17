@@ -347,8 +347,16 @@ body.dashboard-body {
   color: #e8a838;
 }
 
+/* 右カラムラッパー (flex縦積み) */
+.db-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
 .db-queue-list {
-  max-height: calc(100vh - 140px);
+  max-height: 55vh;
   overflow-y: auto;
   padding: 8px 0;
   scrollbar-width: thin;
@@ -533,3 +541,210 @@ body.dashboard-body {
 .db-code-input::placeholder {
   color: #484f58;
 }
+
+/* ===========================
+   ListerDB 情報 (Now Playing)
+   =========================== */
+.db-lister-info {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-height: 0;
+}
+.db-lister-work {
+  font-size: 0.78rem;
+  color: #8b949e;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.db-lister-op-ed {
+  font-size: 0.68rem;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(79,172,254,0.12);
+  color: #4facfe;
+  border: 1px solid rgba(79,172,254,0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* タイムテーブル予測時刻 */
+.db-queue-time {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.65rem;
+  color: #3d444d;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 2px;
+  min-width: 36px;
+  text-align: right;
+}
+.db-queue-item:hover .db-queue-time {
+  color: #6e7681;
+}
+
+/* ===========================
+   歌唱履歴パネル
+   =========================== */
+.db-history-panel {
+  background: #161b22;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.db-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.db-history-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6e7681;
+}
+.db-history-list {
+  padding: 4px 0;
+}
+.db-history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  opacity: 0.7;
+}
+.db-history-item:last-child {
+  border-bottom: none;
+}
+.db-history-num {
+  font-size: 0.65rem;
+  color: #3d444d;
+  min-width: 16px;
+  text-align: right;
+  padding-top: 2px;
+  flex-shrink: 0;
+}
+.db-history-song {
+  font-size: 0.82rem;
+  color: #6e7681;
+  word-break: break-word;
+  line-height: 1.3;
+}
+.db-history-meta {
+  font-size: 0.68rem;
+  color: #3d444d;
+  margin-top: 1px;
+}
+.db-history-empty {
+  padding: 16px;
+  text-align: center;
+  color: #3d444d;
+  font-size: 0.8rem;
+}
+
+/* ===========================
+   QR / リクエストURL パネル
+   =========================== */
+.db-url-panel {
+  background: #161b22;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.db-url-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.db-url-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6e7681;
+}
+.db-url-body {
+  padding: 12px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.db-qr-img {
+  width: 90px;
+  height: 90px;
+  border-radius: 6px;
+  background: #fff;
+  flex-shrink: 0;
+  display: block;
+}
+.db-url-info {
+  flex: 1;
+  min-width: 0;
+}
+.db-url-room {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8b949e;
+  margin-bottom: 4px;
+}
+.db-url-link {
+  font-size: 0.72rem;
+  word-break: break-all;
+  color: #4facfe;
+  text-decoration: none;
+}
+.db-url-link:hover {
+  color: #79c3ff;
+  text-decoration: underline;
+}
+.db-url-empty {
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  color: #3d444d;
+}
+
+/* ===========================
+   新着リクエスト トースト通知
+   =========================== */
+.db-toast {
+  position: fixed;
+  top: 72px;
+  right: 16px;
+  background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+}
+.db-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* キュー内の lister_work サブ表示 */
+.db-queue-work {
+  font-size: 0.68rem;
+  color: #3d444d;
+  margin-top: 1px;
+}
+.db-queue-item:hover .db-queue-work {
+  color: #484f58;
+}
+

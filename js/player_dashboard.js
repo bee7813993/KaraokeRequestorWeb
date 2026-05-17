@@ -1,8 +1,5 @@
 'use strict';
 
-/* ライブダッシュボード専用JS
-   mpcctrl.js / player_bs5.js とは独立して動作する */
-
 (function () {
   var _base = (function () {
     var u = location.href.split(/#/)[0];
@@ -13,37 +10,39 @@
   var _statUrl  = _base + '/get_playingstatus_json.php';
   var _queueUrl = _base + '/get_requestqueue_json.php';
 
-  /* =====================
-     内部状態
-     ===================== */
-  var _titleMode = 'title'; // 'title' | 'file'
-  var _lastTitle = null;
+  /* 内部状態 */
+  var _titleMode     = 'title';
+  var _lastTitle     = null;
   var _lastQueueHash = '';
-  var _statTimer  = null;
-  var _queueTimer = null;
+  var _lastQueueLen  = -1;   // -1 = 初回ロード
+  var _statTimer     = null;
+  var _queueTimer    = null;
   var _progressTimer = null;
-  var _playtime  = 0;
-  var _totaltime = 0;
-  var _isPlaying = false;
+  var _playtime      = 0;    // ms
+  var _totaltime     = 0;    // ms
+  var _isPlaying     = false;
 
   /* =====================
      ユーティリティ
      ===================== */
   function _esc(s) {
     return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
   function _fmt(sec) {
     sec = Math.max(0, Math.floor(sec));
-    var h = Math.floor(sec / 3600);
-    var m = Math.floor((sec % 3600) / 60);
-    var s = sec % 60;
+    var h  = Math.floor(sec / 3600);
+    var m  = Math.floor((sec % 3600) / 60);
+    var s  = sec % 60;
     var mm = (m < 10 ? '0' : '') + m;
     var ss = (s < 10 ? '0' : '') + s;
     return h > 0 ? h + ':' + mm + ':' + ss : mm + ':' + ss;
+  }
+  function _hhmm(date) {
+    var h  = date.getHours();
+    var m  = date.getMinutes();
+    return h + ':' + (m < 10 ? '0' : '') + m;
   }
   function _el(id) { return document.getElementById(id); }
   function _cmd(url) { return fetch(url).catch(function () {}); }
@@ -52,22 +51,18 @@
      プレイヤーステータス更新
      ===================== */
   function _updateStatus(ps) {
-    var state = ps.status || 0; // 0=停止, 1=一時停止, 2=再生中
+    var state = parseInt(ps.status, 10) || 0;
     _isPlaying = (state === 2);
     _playtime  = parseFloat(ps.playtime  || 0);
     _totaltime = parseFloat(ps.totaltime || 0);
 
-    /* ドット & バッジ */
+    /* 点滅ドット & ステータスバッジ */
     var dot   = _el('db-pulse-dot');
     var badge = _el('db-status-badge');
-    if (dot) {
-      dot.className = 'db-pulse-dot' + (state === 2 ? ' is-playing' : state === 1 ? ' is-paused' : '');
-    }
+    if (dot)   dot.className   = 'db-pulse-dot'    + (state===2?' is-playing':state===1?' is-paused':'');
     if (badge) {
-      var txt = state === 2 ? '再生中' : (state === 1 ? '一時停止' : '停止中');
-      var cls = 'db-status-badge' + (state === 2 ? ' is-playing' : state === 1 ? ' is-paused' : '');
-      badge.textContent = txt;
-      badge.className = cls;
+      badge.textContent = state===2?'再生中':state===1?'一時停止':'停止中';
+      badge.className   = 'db-status-badge' + (state===2?' is-playing':state===1?' is-paused':'');
     }
 
     /* 再生/一時停止ボタン */
@@ -91,13 +86,13 @@
     if (titleDisp) {
       var pt = ps.playingtitle || '';
       var pf = ps.playingfile  || '';
-      if (pt !== titleDisp.dataset.songTitle) { _titleMode = 'title'; }
+      if (pt !== titleDisp.dataset.songTitle) _titleMode = 'title';
       titleDisp.dataset.songTitle = pt;
       titleDisp.dataset.songFile  = pf;
       _renderTitle(titleDisp);
     }
 
-    /* 曲名 → 曲変化で字幕補正を再適用 */
+    /* 曲変化 → 字幕補正再適用 */
     var title = ps.playingtitle || '';
     if (_lastTitle !== null && title !== '' && title !== _lastTitle) {
       _cmd(_ctrlUrl + '?cmd=comp_apply')
@@ -107,13 +102,12 @@
     }
     if (title !== '') _lastTitle = title;
 
-    /* ポーリング直後は txt を使って時刻表示 (ミリ秒変換不要) */
+    /* ポーリング直後は txt を使って時刻表示 */
     var tCur = _el('db-time-cur');
     var tTot = _el('db-time-total');
     if (tCur) tCur.textContent = ps.playtime_txt  || '--:--';
     if (tTot) tTot.textContent = ps.totaltime_txt || '--:--';
 
-    /* プログレスバーと残り時間を更新 */
     _updateProgress();
   }
 
@@ -121,26 +115,20 @@
     var pct = (_totaltime > 0) ? Math.min(100, _playtime / _totaltime * 100) : 0;
     var bar = _el('db-progress-bar');
     if (bar) bar.style.width = pct + '%';
-    /* 残り時間: ミリ秒 → 秒 に変換してフォーマット */
     var tRem = _el('db-time-remaining');
     if (tRem) {
-      if (_totaltime > 0) {
-        var remSec = Math.max(0, Math.floor((_totaltime - _playtime) / 1000));
-        tRem.textContent = '−' + _fmt(remSec);
-      } else {
-        tRem.textContent = '';
-      }
+      tRem.textContent = (_totaltime > 0)
+        ? '−' + _fmt(Math.max(0, Math.floor((_totaltime - _playtime) / 1000)))
+        : '';
     }
   }
 
-  /* 再生中に1秒ずつ経過表示 (_playtime はミリ秒) */
   function _startProgressTick() {
     _stopProgressTick();
     if (!_isPlaying) return;
     _progressTimer = setInterval(function () {
       if (!_isPlaying) { _stopProgressTick(); return; }
       _playtime = Math.min(_playtime + 1000, _totaltime);
-      /* ティック中は _fmt でミリ秒→秒変換して表示 */
       var tCur = _el('db-time-cur');
       if (tCur) tCur.textContent = _fmt(Math.floor(_playtime / 1000));
       _updateProgress();
@@ -151,36 +139,28 @@
   }
 
   /* =====================
-     タイトル描画 (曲名⇄ファイル名)
+     タイトル描画
      ===================== */
   function _renderTitle(el) {
     var t = el.dataset.songTitle || '';
     var f = el.dataset.songFile  || '';
     var titleEl = _el('db-song-title');
-    var singerEl = _el('db-song-singer-now'); /* 再生中のnow playingの歌手欄はキューが更新する */
     if (!titleEl) return;
     if (!t) {
-      titleEl.className = 'db-song-title is-empty';
+      titleEl.className   = 'db-song-title is-empty';
       titleEl.textContent = '曲が選択されていません';
       return;
     }
     var hasAlt  = (f !== '' && f !== t);
     var showTxt = (_titleMode === 'file' && hasAlt) ? f : t;
-    titleEl.className = 'db-song-title' + (hasAlt ? ' db-title-toggleable' : '');
-    if (hasAlt) {
-      titleEl.style.cursor = 'pointer';
-      titleEl.onclick = _toggleTitleMode;
-      titleEl.title   = 'タップでファイル名表示を切り替え';
-    } else {
-      titleEl.onclick = null;
-      titleEl.style.cursor = '';
-      titleEl.title = '';
-    }
-    titleEl.textContent = showTxt;
+    titleEl.className  = 'db-song-title';
+    titleEl.style.cursor = hasAlt ? 'pointer' : '';
+    titleEl.title        = hasAlt ? 'タップでファイル名表示を切り替え' : '';
+    titleEl.onclick      = hasAlt ? _toggleTitleMode : null;
+    titleEl.textContent  = showTxt;
     if (hasAlt) {
       var icon = document.createElement('span');
-      icon.className = 'ms-1';
-      icon.style.cssText = 'font-size:.7em;opacity:.4;vertical-align:.1em;';
+      icon.style.cssText = 'font-size:.7em;opacity:.4;margin-left:5px;vertical-align:.1em;';
       icon.setAttribute('aria-hidden', 'true');
       icon.textContent = '⇄';
       titleEl.appendChild(icon);
@@ -194,7 +174,7 @@
   }
 
   /* =====================
-     ポーリング: プレイヤーステータス (2秒)
+     ポーリング: プレイヤーステータス
      ===================== */
   function _pollStatus() {
     fetch(_statUrl)
@@ -205,13 +185,11 @@
         _startProgressTick();
       })
       .catch(function () {})
-      .finally(function () {
-        _statTimer = setTimeout(_pollStatus, 2000);
-      });
+      .finally(function () { _statTimer = setTimeout(_pollStatus, 2000); });
   }
 
   /* =====================
-     ポーリング: キュー (4秒)
+     ポーリング: キュー
      ===================== */
   function _pollQueue() {
     fetch(_queueUrl)
@@ -224,59 +202,97 @@
         }
       })
       .catch(function () {})
-      .finally(function () {
-        _queueTimer = setTimeout(_pollQueue, 4000);
-      });
+      .finally(function () { _queueTimer = setTimeout(_pollQueue, 4000); });
+  }
+
+  /* =====================
+     新着通知
+     ===================== */
+  function _showToast(msg) {
+    var t = _el('db-toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('is-visible');
+    setTimeout(function () { t.classList.remove('is-visible'); }, 3500);
   }
 
   /* =====================
      キュー描画
      ===================== */
   function _renderQueue(data) {
-    var list  = _el('db-queue-list');
-    var count = _el('db-queue-count');
+    var list      = _el('db-queue-list');
+    var countEl   = _el('db-queue-count');
+    var durEl     = _el('db-queue-duration');
     if (!list) return;
 
-    var playing     = data.playing     || null;
-    var queue       = data.queue       || [];
-    var queueSec    = data.queue_sec   || 0;
-    var knownCount  = data.known_count || 0;
+    var playing    = data.playing    || null;
+    var queue      = data.queue      || [];
+    var queueSec   = data.queue_sec  || 0;
+    var knownCount = data.known_count || 0;
+    var history    = data.history    || [];
 
-    /* 曲数テキスト */
-    if (count) count.textContent = queue.length + '曲待機中';
+    /* 新着通知 (初回ロードは通知しない) */
+    if (_lastQueueLen >= 0 && queue.length > _lastQueueLen) {
+      _showToast('＋' + (queue.length - _lastQueueLen) + '曲 新着リクエスト！');
+    }
+    _lastQueueLen = queue.length;
 
-    /* 残総時間 */
-    var durEl = _el('db-queue-duration');
+    /* 曲数 & 残総時間 */
+    if (countEl) countEl.textContent = queue.length + '曲待機中';
     if (durEl) {
       if (queueSec > 0) {
-        var durTxt = _fmt(queueSec);
-        /* 一部の曲だけ duration が既知の場合は「約」を付ける */
-        durEl.textContent = (knownCount < queue.length ? '約 ' : '') + durTxt;
+        durEl.textContent = (knownCount < queue.length ? '約 ' : '') + _fmt(queueSec);
         durEl.style.display = '';
       } else {
         durEl.style.display = 'none';
       }
     }
 
+    /* ListerDB info in Now Playing */
+    var listerInfo = _el('db-lister-info');
+    if (listerInfo) {
+      if (playing && (playing.lister_work || playing.lister_op_ed)) {
+        var html = '';
+        if (playing.lister_work)  html += '<span class="db-lister-work">'  + _esc(playing.lister_work)  + '</span>';
+        if (playing.lister_op_ed) html += '<span class="db-lister-op-ed">' + _esc(playing.lister_op_ed) + '</span>';
+        listerInfo.innerHTML = html;
+        listerInfo.style.display = '';
+      } else {
+        listerInfo.innerHTML = '';
+        listerInfo.style.display = 'none';
+      }
+    }
+
+    /* --- タイムテーブル予測 ---
+       現在の残り時間 (ms) を起点に各曲の開始予定時刻を算出 */
+    var nowMs        = Date.now();
+    var remainingMs  = Math.max(0, _totaltime - _playtime);
+    var accMs        = remainingMs;
+    var predictable  = true;  // duration=0の曲が出たら以降は予測不可
+
+    /* --- キューリスト描画 --- */
     var html = '';
 
     /* 再生中 */
+    html += '<div class="db-queue-item is-playing">';
+    html += '<div class="db-queue-num">▶</div>';
+    html += '<div class="db-queue-info">';
     if (playing) {
-      html += '<div class="db-queue-item is-playing">';
-      html += '<div class="db-queue-num">▶</div>';
-      html += '<div class="db-queue-info">';
       html += '<div class="db-queue-song">' + _esc(playing.title) + '</div>';
-      var meta = [];
-      if (playing.singer) meta.push('<span class="db-queue-singer">' + _esc(playing.singer) + '</span>');
-      if (playing.kind)   meta.push('<span class="db-queue-kind">'   + _esc(playing.kind)   + '</span>');
-      if (meta.length) html += '<div class="db-queue-meta">' + meta.join('') + '</div>';
-      html += '</div></div>';
+      var pm = [];
+      if (playing.singer) pm.push('<span class="db-queue-singer">' + _esc(playing.singer) + '</span>');
+      if (playing.kind)   pm.push('<span class="db-queue-kind">'   + _esc(playing.kind)   + '</span>');
+      if (pm.length)      html += '<div class="db-queue-meta">' + pm.join('') + '</div>';
+      if (playing.lister_work) html += '<div class="db-queue-work">' + _esc(playing.lister_work) + '</div>';
     } else {
-      html += '<div class="db-queue-item is-playing">';
-      html += '<div class="db-queue-num">▶</div>';
-      html += '<div class="db-queue-info"><div class="db-queue-song" style="color:#3d444d;font-style:italic;">再生中の曲なし</div></div>';
-      html += '</div>';
+      html += '<div class="db-queue-song" style="color:#3d444d;font-style:italic;">再生中の曲なし</div>';
     }
+    html += '</div>';
+    /* 残り時間 */
+    if (_totaltime > 0) {
+      html += '<div class="db-queue-time">' + _fmt(Math.max(0, Math.floor(remainingMs / 1000))) + '</div>';
+    }
+    html += '</div>';
 
     /* 待機キュー */
     if (queue.length === 0) {
@@ -284,6 +300,9 @@
     } else {
       for (var i = 0; i < queue.length; i++) {
         var item = queue[i];
+        var startDate = new Date(nowMs + accMs);
+        var timeStr = (predictable && item.duration > 0 && accMs > 0) ? _hhmm(startDate) : '';
+
         html += '<div class="db-queue-item">';
         html += '<div class="db-queue-num">' + (i + 1) + '</div>';
         html += '<div class="db-queue-info">';
@@ -291,12 +310,50 @@
         var m = [];
         if (item.singer) m.push('<span class="db-queue-singer">' + _esc(item.singer) + '</span>');
         if (item.kind)   m.push('<span class="db-queue-kind">'   + _esc(item.kind)   + '</span>');
-        if (m.length) html += '<div class="db-queue-meta">' + m.join('') + '</div>';
-        html += '</div></div>';
+        if (m.length)    html += '<div class="db-queue-meta">' + m.join('') + '</div>';
+        if (item.lister_work) html += '<div class="db-queue-work">' + _esc(item.lister_work) + '</div>';
+        html += '</div>';
+        if (timeStr) html += '<div class="db-queue-time">' + timeStr + '</div>';
+        html += '</div>';
+
+        if (item.duration > 0) {
+          accMs += item.duration * 1000;
+        } else {
+          predictable = false;
+        }
       }
     }
 
     list.innerHTML = html;
+
+    /* --- 歌唱履歴描画 --- */
+    _renderHistory(history);
+  }
+
+  /* =====================
+     歌唱履歴描画
+     ===================== */
+  function _renderHistory(history) {
+    var panel = _el('db-history-list');
+    if (!panel) return;
+    if (!history || history.length === 0) {
+      panel.innerHTML = '<div class="db-history-empty">履歴なし</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < history.length; i++) {
+      var h = history[i];
+      html += '<div class="db-history-item">';
+      html += '<div class="db-history-num">' + (i + 1) + '</div>';
+      html += '<div class="db-queue-info">';
+      html += '<div class="db-history-song">' + _esc(h.title) + '</div>';
+      var m = [];
+      if (h.singer) m.push(h.singer);
+      if (h.lister_work) m.push(h.lister_work);
+      if (m.length) html += '<div class="db-history-meta">' + _esc(m.join(' · ')) + '</div>';
+      html += '</div></div>';
+    }
+    panel.innerHTML = html;
   }
 
   /* =====================
@@ -307,35 +364,18 @@
       setTimeout(function () { _pollStatus(); _pollQueue(); }, 500);
     });
   };
-
   window.db_cmd_songstart = function () {
-    _cmd(_ctrlUrl + '?songstart=1').then(function () {
-      setTimeout(_pollStatus, 600);
-    });
+    _cmd(_ctrlUrl + '?songstart=1').then(function () { setTimeout(_pollStatus, 600); });
   };
-
   window.db_cmd_pause = function () {
-    /* MPC コマンド 887 = 再生/一時停止切り替え */
-    _cmd(_ctrlUrl + '?cmd=887').then(function () {
-      setTimeout(_pollStatus, 300);
-    });
+    _cmd(_ctrlUrl + '?cmd=887').then(function () { setTimeout(_pollStatus, 300); });
   };
-
   window.db_startfirst = function () {
-    _cmd(_ctrlUrl + '?cmd=start_first').then(function () {
-      setTimeout(_pollStatus, 300);
-    });
+    _cmd(_ctrlUrl + '?cmd=start_first').then(function () { setTimeout(_pollStatus, 300); });
   };
-
-  window.db_fadeout = function () {
-    _cmd(_ctrlUrl + '?fadeout=1');
-  };
-
-  /* シーク */
-  window.db_seek = function (cmd) {
-    _cmd(_ctrlUrl + '?cmd=' + cmd).then(function () {
-      setTimeout(_pollStatus, 400);
-    });
+  window.db_fadeout = function () { _cmd(_ctrlUrl + '?fadeout=1'); };
+  window.db_seek    = function (cmd) {
+    _cmd(_ctrlUrl + '?cmd=' + cmd).then(function () { setTimeout(_pollStatus, 400); });
   };
 
   /* ボリューム */
@@ -349,19 +389,11 @@
         var dp = _el('db-vol-display');
         if (sl) sl.value = d.volume;
         if (dp) dp.textContent = d.volume;
-      })
-      .catch(function () {});
+      }).catch(function () {});
   }
-
-  window.db_vol_up = function () {
-    _cmd(_ctrlUrl + '?cmd=907').then(function () { setTimeout(_syncVolSlider, 350); });
-  };
-  window.db_vol_down = function () {
-    _cmd(_ctrlUrl + '?cmd=908').then(function () { setTimeout(_syncVolSlider, 350); });
-  };
-  window.db_vol_reset = function () {
-    _cmd(_ctrlUrl + '?cmd=reset_volume').then(function () { setTimeout(_syncVolSlider, 700); });
-  };
+  window.db_vol_up   = function () { _cmd(_ctrlUrl + '?cmd=907').then(function () { setTimeout(_syncVolSlider, 350); }); };
+  window.db_vol_down = function () { _cmd(_ctrlUrl + '?cmd=908').then(function () { setTimeout(_syncVolSlider, 350); }); };
+  window.db_vol_reset = function () { _cmd(_ctrlUrl + '?cmd=reset_volume').then(function () { setTimeout(_syncVolSlider, 700); }); };
 
   function _initVolSlider() {
     var sl = _el('db-vol-slider');
@@ -372,9 +404,7 @@
       var val = parseInt(sl.value, 10);
       if (dp) dp.textContent = val;
       clearTimeout(_volTimer);
-      _volTimer = setTimeout(function () {
-        _cmd(_ctrlUrl + '?cmd=set_volume&val=' + val);
-      }, 150);
+      _volTimer = setTimeout(function () { _cmd(_ctrlUrl + '?cmd=set_volume&val=' + val); }, 150);
     });
   }
 
@@ -396,8 +426,7 @@
 
   /* キーチェンジ */
   window.db_keychange = function (cmd) {
-    fetch(_base + '/mpcctrl_bs5.php?key=' + encodeURIComponent(cmd))
-      .catch(function () {});
+    fetch(_base + '/mpcctrl_bs5.php?key=' + encodeURIComponent(cmd)).catch(function () {});
   };
 
   /* 任意コード */
@@ -412,12 +441,10 @@
      ===================== */
   window.addEventListener('DOMContentLoaded', function () {
     _initVolSlider();
-    /* 補正レベルを初期取得 */
     fetch(_ctrlUrl + '?cmd=comp_get')
       .then(function (r) { return r.json(); })
       .then(function (d) { _updateCompLevel(d && d.level); })
       .catch(function () {});
-    /* ポーリング開始 */
     _pollStatus();
     _pollQueue();
   });

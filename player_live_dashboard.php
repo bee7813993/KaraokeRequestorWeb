@@ -148,6 +148,8 @@ if (!empty($config_ini['roomurl'])) {
       <?php else: ?>
         <div class="db-song-title is-empty" id="db-song-title">曲が選択されていません</div>
       <?php endif; ?>
+      <!-- ListerDB 情報 (作品名・OP/ED等) JS が更新 -->
+      <div class="db-lister-info" id="db-lister-info" style="display:none;"></div>
 
       <!-- プログレスバー -->
       <div class="db-progress-wrap mt-3">
@@ -407,8 +409,9 @@ if (!empty($config_ini['roomurl'])) {
   </div><!-- /db-player-panel -->
 
   <!-- ============================================================
-       右: キューパネル
+       右カラム: キュー・履歴・URL
        ============================================================ -->
+  <div class="db-right-col">
   <div class="db-queue-panel">
     <div class="db-queue-header">
       <span class="db-queue-title">QUEUE</span>
@@ -455,8 +458,55 @@ if (!empty($config_ini['roomurl'])) {
     </div>
   </div><!-- /db-queue-panel -->
 
+  <!-- 歌唱履歴パネル -->
+  <div class="db-history-panel">
+    <div class="db-history-header">
+      <span class="db-history-title">HISTORY</span>
+    </div>
+    <div class="db-history-list" id="db-history-list">
+      <div class="db-history-empty">履歴なし</div>
+    </div>
+  </div>
+
+  <?php
+  /* リクエストURL & QRコード */
+  $room_urls = [];
+  if (!empty($config_ini['roomurl'])) {
+      foreach ($config_ini['roomurl'] as $rname => $rurl) {
+          if (!empty($rurl)) {
+              $room_urls[] = [
+                  'name' => htmlspecialchars($rname, ENT_QUOTES, 'UTF-8'),
+                  'url'  => htmlspecialchars(urldecode($rurl), ENT_QUOTES, 'UTF-8'),
+              ];
+          }
+      }
+  }
+  if (!empty($room_urls)): ?>
+  <div class="db-url-panel">
+    <div class="db-url-header">
+      <span class="db-url-title">REQUEST URL</span>
+    </div>
+    <div class="db-url-body">
+      <img class="db-qr-img"
+           src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=<?= rawurlencode($room_urls[0]['url']) ?>"
+           alt="QR" loading="lazy">
+      <div class="db-url-info">
+        <?php foreach ($room_urls as $ru): ?>
+        <div class="db-url-room"><?= $ru['name'] ?></div>
+        <a class="db-url-link" href="<?= $ru['url'] ?>" target="_blank" rel="noopener"><?= $ru['url'] ?></a>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  </div><!-- /db-right-col -->
+
 </div><!-- /db-layout -->
 </div><!-- /container-xl -->
+
+<!-- 新着リクエスト トースト -->
+<div class="db-toast" id="db-toast" role="alert" aria-live="assertive"></div>
 
 <script src="js/player_dashboard.js"></script>
 </body>
