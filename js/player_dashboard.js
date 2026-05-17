@@ -21,6 +21,7 @@
   var _playtime      = 0;    // ms
   var _totaltime     = 0;    // ms
   var _isPlaying     = false;
+  var _playingKind   = '';   // 再生中アイテムの kind ('小休止'/'カラオケ配信'/etc)
 
   /* =====================
      ユーティリティ
@@ -81,14 +82,8 @@
       }
     }
 
-    /* 曲終了/再開ボタン: 停止中は「再開」に切り替え */
-    var snBtn = _el('db-btn-songnext');
-    var snLbl = _el('db-lbl-songnext');
-    if (snBtn && snLbl) {
-      var snLabel = (state === 2) ? '曲終了' : '再開';
-      snLbl.textContent = snLabel;
-      snBtn.setAttribute('aria-label', snLabel);
-    }
+    /* 曲終了/再開ボタン: 小休止・カラオケ配信の場合のみ「再開」 */
+    _updateSongnextLabel();
 
     /* タイトル更新 */
     var titleDisp = _el('db-title-display');
@@ -182,6 +177,17 @@
     if (el) _renderTitle(el);
   }
 
+  /* 曲終了/再開ボタンのラベルを kind に基づいて更新 */
+  function _updateSongnextLabel() {
+    var snBtn = _el('db-btn-songnext');
+    var snLbl = _el('db-lbl-songnext');
+    if (!snBtn || !snLbl) return;
+    var isBreak = (_playingKind === '小休止' || _playingKind === 'カラオケ配信');
+    var label = isBreak ? '再開' : '曲終了';
+    snLbl.textContent = label;
+    snBtn.setAttribute('aria-label', label);
+  }
+
   /* =====================
      ポーリング: プレイヤーステータス
      ===================== */
@@ -239,6 +245,10 @@
     var queueSec   = data.queue_sec  || 0;
     var knownCount = data.known_count || 0;
     var history    = data.history    || [];
+
+    /* 再生中アイテムの kind を保持し、ボタンラベルを同期 */
+    _playingKind = playing ? (playing.kind || '') : '';
+    _updateSongnextLabel();
 
     /* 新着通知 (初回ロードは通知しない) */
     if (_lastQueueLen >= 0 && queue.length > _lastQueueLen) {

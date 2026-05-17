@@ -210,11 +210,16 @@ if (!empty($config_ini['globalhost'])) {
           </button>
         </div>
         <div class="col-4">
+          <?php
+          $init_kind = $init_playing ? ($init_playing['kind'] ?? '') : '';
+          $is_break_kind = ($init_kind === '小休止' || $init_kind === 'カラオケ配信');
+          $snlbl = $is_break_kind ? '再開' : '曲終了';
+          ?>
           <button class="btn btn-danger db-btn db-btn-main w-100"
                   onclick="db_cmd_songnext()" id="db-btn-songnext"
-                  aria-label="<?= $state_num == 2 ? '曲終了' : '再開' ?>">
+                  aria-label="<?= $snlbl ?>">
             <?= $ic_skip_e ?>
-            <span id="db-lbl-songnext"><?= $state_num == 2 ? '曲終了' : '再開' ?></span>
+            <span id="db-lbl-songnext"><?= $snlbl ?></span>
           </button>
         </div>
       </div>
