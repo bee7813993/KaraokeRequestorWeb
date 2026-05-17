@@ -163,6 +163,15 @@ foreach($newconfig as $key => $value){
 }
 
 if(!empty($newconfig) ) $newconfig['roomurlshow'] = $new_roomurlshow ;
+
+// usev2ui（統合設定）を個別キーに展開
+if (isset($newconfig['usev2ui'])) {
+    $v2 = ($newconfig['usev2ui'] == '1');
+    $newconfig['usenewrequestlist'] = $v2 ? '1' : '0';
+    $newconfig['usenewsearchui']    = $v2 ? '1' : '2';
+    unset($newconfig['usev2ui']);
+}
+
 // $config_ini['roomurl'] = array();
 $config_ini_new = array_merge($config_ini,$newconfig);
 
@@ -537,49 +546,23 @@ print ' value="10" ';
   </label>
   </div>
 
-<!---- リクエスト一覧UI v2 ----->
+<!---- UI v2 ----->
   <?php
-      $usenewrequestlist = false;
-      if(array_key_exists("usenewrequestlist",$config_ini)){
-          if($config_ini["usenewrequestlist"] == 1 ){
-             $usenewrequestlist = true;
-          }
-      }
+      $usev2ui = (isset($config_ini["usenewrequestlist"]) && $config_ini["usenewrequestlist"] == 1)
+              || (isset($config_ini["usenewsearchui"])    && $config_ini["usenewsearchui"]    == 1);
   ?>
   <div class="form-group">
-    <h4 class="radio control-label"> リクエスト一覧UI v2 </h4>
-    <label class="radio control-label"><small>ドラッグハンドルで並べ替え・左スワイプでアクションメニューを表示するリクエスト一覧画面を使用します。</small></label>
+    <h4 class="radio control-label"> UI v2 </h4>
+    <label class="radio control-label"><small>リクエスト一覧・検索画面をまとめてv2デザイン（モバイル対応）に切り替えます。</small></label>
     <label class="radio-inline">
-      <input type="radio" name="usenewrequestlist" value="1" <?php print ($usenewrequestlist)?'checked':' ' ?> /> 使用する
+      <input type="radio" name="usev2ui" value="1" <?php print $usev2ui ? 'checked' : '' ?> /> 使用する
     </label>
     <label class="radio-inline">
-      <input type="radio" name="usenewrequestlist" value="0" <?php print (!$usenewrequestlist)?'checked':' ' ?> /> 使用しない
+      <input type="radio" name="usev2ui" value="0" <?php print !$usev2ui ? 'checked' : '' ?> /> 使用しない
     </label>
     <label>
       <a href="requestlist_swipe.php"> リクエスト一覧UI v2 へのリンク </a>
-    </label>
-  </div>
-
-<!---- 検索画面UI v2 ----->
-  <?php
-      $usenewsearchui = false;
-      if(array_key_exists("usenewsearchui",$config_ini)){
-          if($config_ini["usenewsearchui"] == 1 ){
-             $usenewsearchui = true;
-          }
-      }
-  ?>
-  <div class="form-group">
-    <h4 class="radio control-label"> 検索画面UI v2 </h4>
-    <label class="radio control-label"><small>モバイル対応の検索画面を使用します。旧バージョンに戻すには「使用しない」を選択してください。</small></label>
-    <label class="radio-inline">
-      <input type="radio" name="usenewsearchui" value="1" <?php print ($usenewsearchui)?'checked':' ' ?> /> 使用する
-    </label>
-    <label class="radio-inline">
-      <input type="radio" name="usenewsearchui" value="2" <?php print (!$usenewsearchui)?'checked':' ' ?> /> 使用しない
-    </label>
-    <label>
-      <a href="search_bs5.php"> 検索画面UI v2 へのリンク </a>
+      　<a href="search_bs5.php"> 検索画面UI v2 へのリンク </a>
     </label>
   </div>
 
