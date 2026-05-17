@@ -553,7 +553,7 @@ print ' value="10" ';
       <input type="radio" name="usenewrequestlist" value="1" <?php print ($usenewrequestlist)?'checked':' ' ?> /> 使用する
     </label>
     <label class="radio-inline">
-      <input type="radio" name="usenewrequestlist" value="2" <?php print (!$usenewrequestlist)?'checked':' ' ?> /> 使用しない
+      <input type="radio" name="usenewrequestlist" value="0" <?php print (!$usenewrequestlist)?'checked':' ' ?> /> 使用しない
     </label>
     <label>
       <a href="requestlist_swipe.php"> スワイプUIリクエスト一覧へのリンク </a>
