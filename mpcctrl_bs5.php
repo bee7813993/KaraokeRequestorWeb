@@ -203,8 +203,9 @@ try {
 
             $sf = htmlspecialchars($row_next['songfile'], ENT_QUOTES, 'UTF-8');
             $sn = $sn_raw !== '' ? htmlspecialchars($sn_raw, ENT_QUOTES, 'UTF-8') : '';
+            $secret_text = htmlspecialchars($config_ini['secret_display_text'] ?? 'ヒ・ミ・ツ♪(シークレット予約)', ENT_QUOTES, 'UTF-8');
             $next_song = [
-                'title'    => $is_secret_next ? 'ヒ・ミ・ツ♪' : ($sn ?: $sf),
+                'title'    => $is_secret_next ? $secret_text : ($sn ?: $sf),
                 'songfile' => $is_secret_next ? '' : $sf,
                 'show_file'=> !$is_secret_next && $sn !== '' && $sn !== $sf,
                 'singer'   => $is_secret_next ? '' : htmlspecialchars($row_next['singer'], ENT_QUOTES, 'UTF-8'),

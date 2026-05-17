@@ -143,6 +143,11 @@ function readconfig_array()
     if(!array_key_exists("usenewrequestlist", $config_ini)){
         $config_ini = array_merge($config_ini,array("usenewrequestlist" => 2));
     }
+    if(!array_key_exists("secret_display_text", $config_ini)){
+        $config_ini["secret_display_text"] = "ヒ・ミ・ツ♪(シークレット予約)";
+    } else {
+        $config_ini["secret_display_text"] = urldecode($config_ini["secret_display_text"]);
+    }
     if(!array_key_exists("usemypage", $config_ini)){
         $config_ini = array_merge($config_ini,array("usemypage" => 1));
     }
