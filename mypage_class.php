@@ -646,7 +646,8 @@ class MypageUser {
             $stmt->execute([$fullpath]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($row && !empty($row['found_last_write_time'])) {
-                return (float)$row['found_last_write_time'];
+                // Excel時刻（days since 1900-01-00）→ Unixタイムスタンプ
+                return (int)round(((float)$row['found_last_write_time'] - 25569) * 86400);
             }
             // フォルダ違いに対応：ファイル名で検索
             $basename = basename(str_replace('\\', '/', $fullpath));
@@ -657,7 +658,7 @@ class MypageUser {
                 $stmt->execute(['%' . $basename]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($row && !empty($row['found_last_write_time'])) {
-                    return (float)$row['found_last_write_time'];
+                    return (int)round(((float)$row['found_last_write_time'] - 25569) * 86400);
                 }
             }
         } catch (Exception $e) {}
@@ -667,11 +668,12 @@ class MypageUser {
     private static function sortByFileDate(array $rows, $orderDir) {
         $listerdb = self::openListerDB();
         foreach ($rows as &$row) {
-            $row['_filedate'] = self::lookupFileDate($row['fullpath'], $listerdb);
+            // _filedate_ts にUnixタイムスタンプを格納（0＝不明）
+            $row['_filedate_ts'] = self::lookupFileDate($row['fullpath'], $listerdb);
         }
         unset($row);
         usort($rows, function($a, $b) use ($orderDir) {
-            $cmp = $a['_filedate'] <=> $b['_filedate'];
+            $cmp = $a['_filedate_ts'] <=> $b['_filedate_ts'];
             return $orderDir === 'ASC' ? $cmp : -$cmp;
         });
         return $rows;

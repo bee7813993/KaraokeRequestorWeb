@@ -74,6 +74,7 @@ function sort_link_h($label, $sort_key, $cur_sort, $cur_order) {
         <th>曲名</th>
         <th class="text-nowrap">回数</th>
         <th class="text-nowrap">最終リクエスト日時</th>
+        <?php if ($sort === 'filedate'): ?><th class="text-nowrap">動画更新日</th><?php endif; ?>
         <th>操作</th>
       </tr>
     </thead>
@@ -90,6 +91,10 @@ function sort_link_h($label, $sort_key, $cur_sort, $cur_order) {
         $req_fullpath = ($status['status'] === 'relocated') ? $status['fullpath'] : $fullpath;
         $req_url    = MypageUser::makeRequestConfirmUrl($req_fullpath, $songfile, $kind);
         $search_url = MypageUser::makeSearchFallbackUrl($songfile);
+        $filedate_str = '';
+        if ($sort === 'filedate' && !empty($row['_filedate_ts'])) {
+            $filedate_str = date('Y/m/d', $row['_filedate_ts']);
+        }
     ?>
       <tr>
         <td>
@@ -105,6 +110,9 @@ function sort_link_h($label, $sort_key, $cur_sort, $cur_order) {
         </td>
         <td class="text-nowrap"><?php echo $times; ?>回</td>
         <td class="text-nowrap"><?php echo htmlspecialchars($last_dt, ENT_QUOTES, 'UTF-8'); ?></td>
+        <?php if ($sort === 'filedate'): ?>
+        <td class="text-nowrap"><?php echo $filedate_str !== '' ? htmlspecialchars($filedate_str, ENT_QUOTES, 'UTF-8') : '<span class="text-muted">-</span>'; ?></td>
+        <?php endif; ?>
         <td class="text-nowrap">
           <?php if ($status['status'] === 'ok' || $status['status'] === 'relocated'): ?>
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">再選曲</a>
