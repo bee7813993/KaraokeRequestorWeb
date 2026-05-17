@@ -256,30 +256,22 @@ if (is_numeric($selectid)) {
     }
     $db->exec("COMMIT;");
 
-    // ListerDB から曲名を取得して song_name に保存
+    // ListerDB から曲情報を取得して保存
     if (!empty($l_fullpath) && array_key_exists('listerDBPATH', $config_ini)) {
         $lister_dbpath = urldecode($config_ini['listerDBPATH']);
         if (file_exists($lister_dbpath)) {
             require_once 'function_search_listerdb.php';
-            $lister = new ListerDB();
-            $lister->listerdbfile = $lister_dbpath;
-            $lfd = $lister->initdb();
-            if ($lfd) {
-                $found_song_name = '';
-                foreach ([$l_fullpath, basename($l_fullpath)] as $search) {
-                    $res = $lister->select(
-                        "SELECT song_name FROM t_found WHERE found_path LIKE "
-                        . $lfd->quote('%' . $search . '%')
-                        . " AND song_name != '' LIMIT 1"
-                    );
-                    if ($res && !empty($res[0]['song_name'])) {
-                        $found_song_name = $res[0]['song_name'];
-                        break;
-                    }
-                }
-                if ($found_song_name !== '') {
-                    $db->exec('UPDATE requesttable SET song_name=' . $db->quote($found_song_name) . ' WHERE id=' . $newid);
-                }
+            $lfd_row = listerdb_lookup_songinfo($l_fullpath, $lister_dbpath);
+            if ($lfd_row) {
+                $db->exec(
+                    'UPDATE requesttable SET '
+                    . 'song_name='      . $db->quote($lfd_row['song_name'])      . ','
+                    . 'lister_artist='  . $db->quote($lfd_row['lister_artist'])  . ','
+                    . 'lister_work='    . $db->quote($lfd_row['lister_work'])    . ','
+                    . 'lister_op_ed='   . $db->quote($lfd_row['lister_op_ed'])   . ','
+                    . 'lister_comment=' . $db->quote($lfd_row['lister_comment'])
+                    . ' WHERE id=' . $newid
+                );
             }
         }
     }

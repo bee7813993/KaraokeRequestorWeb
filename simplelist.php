@@ -290,6 +290,7 @@ $allrequest = $select->fetchAll(PDO::FETCH_ASSOC);
 $select->closeCursor();
 
 $listerdbenabled = false;
+$lister_dbpath = '';
 if(array_key_exists("listerDBPATH",$config_ini) ) {
     $lister_dbpath = urldecode($config_ini["listerDBPATH"]);
     if(file_exists($lister_dbpath) ){
@@ -297,7 +298,9 @@ if(array_key_exists("listerDBPATH",$config_ini) ) {
     }
 }
 
-$use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
+// requesttable に保存済みの曲名があれば ListerDB 不要でも詳細列を表示
+$has_saved_lister = (bool)array_filter($allrequest, fn($r) => !empty($r['song_name']));
+$use_listerdb = $has_saved_lister || ($listerdbenabled && listerdbfoundcheck($allrequest));
 ?>
 <div class="simplelist-container">
   <h2 class="page-title">再生曲リスト</h2>
@@ -324,33 +327,44 @@ $use_listerdb = $listerdbenabled && listerdbfoundcheck($allrequest);
     <tbody>
     <?php $num = 1; foreach($allrequest as $row): ?>
       <?php
-        $songdataarray = array();
-        $songdataarray_all = getsonginfofromfilename($row["fullpath"]);
-        if(isset($songdataarray_all[0])) $songdataarray = $songdataarray_all[0];
+        // 保存済みの lister 情報を優先し、なければ表示時に ListerDB を参照
+        if (!empty($row['song_name'])) {
+            $sd = [
+                'song_name'    => $row['song_name'],
+                'song_artist'  => $row['lister_artist']  ?? '',
+                'program_name' => $row['lister_work']    ?? '',
+                'song_op_ed'   => $row['lister_op_ed']   ?? '',
+                'found_comment'=> $row['lister_comment'] ?? '',
+            ];
+        } elseif ($listerdbenabled) {
+            $tmp = getsonginfofromfilename($row["fullpath"]);
+            $sd  = $tmp[0] ?? [];
+        } else {
+            $sd = [];
+        }
 
-        $songname = !empty($songdataarray["song_name"])
-            ? htmlspecialchars($songdataarray["song_name"])
+        $songname = !empty($sd["song_name"])
+            ? htmlspecialchars($sd["song_name"])
             : htmlspecialchars($row["songfile"]);
 
         $foundcomment = '';
-        if(!empty($songdataarray["found_comment"])){
-            $sc = preg_replace('/\,\/\/.*/', '', $songdataarray["found_comment"]);
-            if(!empty($sc)) $foundcomment = '【' . htmlspecialchars($sc) . '】';
+        if (!empty($sd["found_comment"])) {
+            $sc = preg_replace('/\,\/\/.*/', '', $sd["found_comment"]);
+            if (!empty($sc)) $foundcomment = '【' . htmlspecialchars($sc) . '】';
         }
 
         $keychange = '';
-        if($row['keychange'] > 0)      $keychange = 'キー変更：+' . $row['keychange'];
-        elseif($row['keychange'] < 0)  $keychange = 'キー変更：'  . $row['keychange'];
+        if ($row['keychange'] > 0)      $keychange = 'キー変更：+' . $row['keychange'];
+        elseif ($row['keychange'] < 0)  $keychange = 'キー変更：'  . $row['keychange'];
 
         $programname = '';
-        if(!empty($songdataarray["program_name"]) && $songdataarray["program_name"] != "その他"){
-            $programname = htmlspecialchars($songdataarray["program_name"]);
-            if(!empty($songdataarray["song_op_ed"]))
-                $programname .= '&nbsp;' . htmlspecialchars($songdataarray["song_op_ed"]);
+        if (!empty($sd["program_name"]) && $sd["program_name"] !== 'その他') {
+            $programname = htmlspecialchars($sd["program_name"]);
+            if (!empty($sd["song_op_ed"]))
+                $programname .= '&nbsp;' . htmlspecialchars($sd["song_op_ed"]);
         }
 
-        $artistname = !empty($songdataarray["song_artist"])
-            ? htmlspecialchars($songdataarray["song_artist"]) : '';
+        $artistname = !empty($sd["song_artist"]) ? htmlspecialchars($sd["song_artist"]) : '';
 
         $filter_text = mb_strtolower(implode(' ', [
             strip_tags($songname), strip_tags($programname),

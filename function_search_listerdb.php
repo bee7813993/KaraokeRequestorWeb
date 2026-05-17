@@ -52,6 +52,43 @@ class ListerDB {
     }
 }
 
+/**
+ * fullpath から t_found を検索し、requesttable 保存用の連想配列を返す。
+ * 見つからない場合は null。
+ * キー: song_name, lister_artist, lister_work, lister_op_ed, lister_comment
+ */
+function listerdb_lookup_songinfo($fullpath, $lister_dbpath) {
+    if (empty($fullpath) || !file_exists($lister_dbpath)) return null;
+    $lister = new ListerDB();
+    $lister->listerdbfile = $lister_dbpath;
+    $lfd = $lister->initdb();
+    if (!$lfd) return null;
+
+    $row = null;
+    foreach ([$fullpath, basename($fullpath)] as $search) {
+        $res = $lister->select(
+            'SELECT song_name, song_artist, program_name, song_op_ed, found_comment'
+            . ' FROM t_found WHERE found_path LIKE ' . $lfd->quote('%' . $search . '%')
+            . " AND song_name != '' LIMIT 1"
+        );
+        if ($res) { $row = $res[0]; break; }
+    }
+    if (!$row) return null;
+
+    $fc = '';
+    if (!empty($row['found_comment'])) {
+        $fc = trim(preg_replace('/\,\/\/.*/', '', $row['found_comment']));
+    }
+
+    return [
+        'song_name'      => $row['song_name']    ?? '',
+        'lister_artist'  => $row['song_artist']  ?? '',
+        'lister_work'    => (!empty($row['program_name']) && $row['program_name'] !== 'その他') ? $row['program_name'] : '',
+        'lister_op_ed'   => $row['song_op_ed']   ?? '',
+        'lister_comment' => $fc,
+    ];
+}
+
 function exceltime2unixtime ($exceltime){
     return round( ($exceltime - 25569) * 60 * 60 * 24) ;
     return round( $exceltime * (86400 + 25569) - 32400);
