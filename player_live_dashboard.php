@@ -122,9 +122,13 @@ if (!empty($config_ini['globalhost'])) {
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
 </head>
 <body class="dashboard-body">
-<?php shownavigatioinbar_bs5('player_live_dashboard.php'); ?>
 
-<div class="container-xl px-3">
+<!-- 薄いタイトルバー (ナビバー代替) -->
+<div class="db-topbar">
+  <span class="db-topbar-title"><?= $roomname ?>ライブダッシュボード</span>
+  <a href="playerctrl_portal_bs5.php" class="db-topbar-link">通常Player</a>
+</div>
+
 <div class="db-layout">
 
   <!-- ============================================================
@@ -409,14 +413,6 @@ if (!empty($config_ini['globalhost'])) {
       </div>
     </div><!-- /db-accordion -->
 
-    <!-- 既存Playerへのリンク -->
-    <div class="d-grid mb-3">
-      <a href="playerctrl_portal_bs5.php"
-         class="btn btn-outline-secondary btn-sm">
-        通常のPlayerページへ
-      </a>
-    </div>
-
   </div><!-- /db-player-panel -->
 
   <!-- ============================================================
@@ -499,7 +495,6 @@ if (!empty($config_ini['globalhost'])) {
   </div><!-- /db-right-col -->
 
 </div><!-- /db-layout -->
-</div><!-- /container-xl -->
 
 <!-- 新着リクエスト トースト -->
 <div class="db-toast" id="db-toast" role="alert" aria-live="assertive"></div>

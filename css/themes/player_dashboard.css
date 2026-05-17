@@ -3,15 +3,49 @@
    ========================================================== */
 @import url('../themes/_variables.css');
 
-/* --- 全体: ダーク背景 --- */
+/* --- 全体: ダーク背景 (タブレット固定高さ) --- */
 body.dashboard-body {
   background: #0d1117;
   background-image: none !important;
-  padding-top: 60px;
+  padding-top: 0;
   color: #e6edf3;
-  min-height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
+}
+
+/* ===========================
+   トップバー (ナビバー代替)
+   =========================== */
+.db-topbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #161b22;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 0 16px;
+  height: 36px;
+}
+.db-topbar-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #8b949e;
+}
+.db-topbar-link {
+  font-size: 0.68rem;
+  color: #4facfe;
+  text-decoration: none;
+  opacity: 0.8;
+}
+.db-topbar-link:hover {
+  opacity: 1;
+  color: #79c3ff;
 }
 
 /* タッチズーム抑止 */
@@ -24,30 +58,25 @@ body.dashboard-body {
   -webkit-user-select: none;
 }
 
-/* ナビバー */
-.dashboard-body .navbar.bg-dark {
-  background-color: #161b22 !important;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
-}
-.dashboard-body .navbar-dark .navbar-nav .nav-link {
-  color: rgba(255, 255, 255, 0.75);
-}
-
 /* ===========================
-   レイアウト
+   レイアウト (タブレット固定)
    =========================== */
 .db-layout {
+  flex: 1;
   display: grid;
-  grid-template-columns: 420px 1fr;
-  grid-template-rows: auto;
-  gap: 16px;
-  align-items: start;
-  padding: 16px 0 32px;
+  grid-template-columns: 380px 1fr;
+  grid-template-rows: 1fr;
+  gap: 12px;
+  padding: 10px 12px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (max-width: 900px) {
   .db-layout {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow-y: auto;
   }
 }
 
@@ -55,8 +84,14 @@ body.dashboard-body {
    Now Playing パネル (左)
    =========================== */
 .db-player-panel {
-  position: sticky;
-  top: 72px;
+  position: static;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #30363d transparent;
 }
 
 .db-nowplaying {
@@ -64,10 +99,11 @@ body.dashboard-body {
   border: 1px solid rgba(79, 172, 254, 0.15);
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  margin-bottom: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
   position: relative;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* 背景アクセント光 */
@@ -223,8 +259,9 @@ body.dashboard-body {
   background: #161b22;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
 }
 
 .db-section-label {
@@ -245,20 +282,20 @@ body.dashboard-body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  font-size: 0.72rem;
+  gap: 2px;
+  font-size: 0.7rem;
   font-weight: 600;
   border-radius: 8px;
   transition: all 0.15s;
   line-height: 1.2;
-  padding: 8px 4px;
-  min-height: 52px;
+  padding: 6px 4px;
+  min-height: 44px;
   white-space: nowrap;
 }
 
 .db-btn-main {
-  min-height: 60px;
-  font-size: 0.8rem;
+  min-height: 48px;
+  font-size: 0.78rem;
 }
 
 .db-btn-playpause {
@@ -311,6 +348,10 @@ body.dashboard-body {
    キューパネル (右)
    =========================== */
 .db-queue-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   background: #161b22;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 14px;
@@ -356,16 +397,19 @@ body.dashboard-body {
   letter-spacing: 0;
 }
 
-/* 右カラムラッパー (flex縦積み) */
+/* 右カラムラッパー (flex縦積み、固定高さ) */
 .db-right-col {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .db-queue-list {
-  max-height: 55vh;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 8px 0;
   scrollbar-width: thin;
@@ -464,14 +508,15 @@ body.dashboard-body {
 .db-start-btn {
   display: block;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   font-weight: 700;
-  font-size: 0.9rem;
-  padding: 12px;
+  font-size: 0.85rem;
+  padding: 9px;
   border-radius: 10px;
   background: #238636;
   border-color: #238636;
   color: #fff;
+  flex-shrink: 0;
 }
 .db-start-btn:hover {
   background: #2ea043;
@@ -628,6 +673,10 @@ body.dashboard-body {
    歌唱履歴パネル
    =========================== */
 .db-history-panel {
+  flex-shrink: 0;
+  max-height: 160px;
+  display: flex;
+  flex-direction: column;
   background: #161b22;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 14px;
@@ -649,6 +698,9 @@ body.dashboard-body {
 }
 .db-history-list {
   padding: 4px 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #30363d transparent;
 }
 .db-history-item {
   display: flex;
@@ -691,6 +743,7 @@ body.dashboard-body {
    QR / リクエストURL パネル
    =========================== */
 .db-url-panel {
+  flex-shrink: 0;
   background: #161b22;
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 14px;
@@ -716,8 +769,8 @@ body.dashboard-body {
   align-items: flex-start;
 }
 .db-qr-img {
-  width: 90px;
-  height: 90px;
+  width: 72px;
+  height: 72px;
   border-radius: 6px;
   background: #fff;
   flex-shrink: 0;
@@ -754,7 +807,7 @@ body.dashboard-body {
    =========================== */
 .db-toast {
   position: fixed;
-  top: 72px;
+  top: 44px;
   right: 16px;
   background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
   color: #fff;
