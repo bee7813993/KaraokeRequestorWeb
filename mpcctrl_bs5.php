@@ -163,15 +163,42 @@ $moviefullscreen = isset($moviefullscreen) ? (int)$moviefullscreen : 0;
 /* ---- 次の曲 ---- */
 $next_song = null;
 try {
-    $sql_next = "SELECT songfile, song_name, singer, secret, kind FROM requesttable WHERE nowplaying = '未再生' ORDER BY reqorder ASC LIMIT 1";
+    $sql_next = "SELECT id, songfile, song_name, singer, secret, kind, fullpath FROM requesttable WHERE nowplaying = '未再生' ORDER BY reqorder ASC LIMIT 1";
     $sel_next = $db->query($sql_next);
     if ($sel_next) {
         $row_next = $sel_next->fetch(PDO::FETCH_ASSOC);
         $sel_next->closeCursor();
         if ($row_next) {
             $is_secret_next = (int)$row_next['secret'] === 1;
+            $sn_raw = $row_next['song_name'] ?? '';
+
+            // 未保存なら表示時に ListerDB を参照し、見つかれば requesttable も更新
+            if (empty($sn_raw)
+                && !$is_secret_next
+                && !empty($row_next['fullpath'])
+                && array_key_exists('listerDBPATH', $config_ini)) {
+                $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+                if (file_exists($lister_dbpath)) {
+                    require_once 'function_search_listerdb.php';
+                    $info = listerdb_lookup_songinfo($row_next['fullpath'], $lister_dbpath);
+                    if ($info && !empty($info['song_name'])) {
+                        $sn_raw = $info['song_name'];
+                        $rid = (int)$row_next['id'];
+                        $db->exec(
+                            'UPDATE requesttable SET '
+                            . 'song_name='      . $db->quote($info['song_name'])      . ','
+                            . 'lister_artist='  . $db->quote($info['lister_artist'])  . ','
+                            . 'lister_work='    . $db->quote($info['lister_work'])    . ','
+                            . 'lister_op_ed='   . $db->quote($info['lister_op_ed'])   . ','
+                            . 'lister_comment=' . $db->quote($info['lister_comment'])
+                            . ' WHERE id=' . $rid
+                        );
+                    }
+                }
+            }
+
             $sf = htmlspecialchars($row_next['songfile'], ENT_QUOTES, 'UTF-8');
-            $sn = !empty($row_next['song_name']) ? htmlspecialchars($row_next['song_name'], ENT_QUOTES, 'UTF-8') : '';
+            $sn = $sn_raw !== '' ? htmlspecialchars($sn_raw, ENT_QUOTES, 'UTF-8') : '';
             $next_song = [
                 'title'    => $is_secret_next ? 'ヒ・ミ・ツ♪' : ($sn ?: $sf),
                 'songfile' => $is_secret_next ? '' : $sf,
