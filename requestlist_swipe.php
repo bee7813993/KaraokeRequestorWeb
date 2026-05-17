@@ -83,10 +83,10 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   padding: 0;
 }
 .action-btn:active { opacity: 0.8; }
-.action-replace { background: #27ae60; }
-.action-next    { background: #e67e22; }
-.action-delete  { background: #e74c3c; }
-.action-change  { background: #7f8c8d; }
+.action-replace { background: var(--bs-success); }
+.action-next    { background: var(--bs-orange, #fd7e14); }
+.action-delete  { background: var(--bs-danger); }
+.action-change  { background: var(--bs-secondary); }
 .action-icon    { font-size: 18px; }
 
 /* カード本体（スワイプで左にスライド） */
@@ -167,7 +167,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   padding: 2px 0;
   min-height: 18px;
 }
-.card-comment-area:hover { color: #337ab7; text-decoration: underline; }
+.card-comment-area:hover { color: var(--bs-primary); text-decoration: underline; }
 .card-comment-placeholder { color: #bbb; font-style: italic; }
 /* Tweet リンク */
 .card-tweet-link {
@@ -182,7 +182,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 /* SortableJS */
 .sortable-ghost {
   opacity: 0.4;
-  background: #d9eaf7 !important;
+  background: #cfe2ff !important;
 }
 .sortable-chosen {
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
@@ -288,11 +288,10 @@ if (!empty($config_ini['noticeof_listpage'])) {
 ?>
 
 <?php if ($reloadInterval != 0): ?>
-<div class="checkbox">
-  <label class="d-inline-flex align-items-center gap-1" data-bs-toggle="tooltip" data-bs-placement="top"
-         title="コピペとかする時はチェックを外してください">
-    <input type="checkbox" id="autoreload" checked> 自動リロード
-  </label>
+<div class="form-check" data-bs-toggle="tooltip" data-bs-placement="top"
+     title="コピペとかする時はチェックを外してください">
+  <input class="form-check-input" type="checkbox" id="autoreload" checked>
+  <label class="form-check-label" for="autoreload">自動リロード</label>
 </div>
 <?php endif; ?>
 
@@ -302,7 +301,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
   <div class="toolbar-left">
     <h4>現在の登録状況</h4>
     <button class="btn btn-outline-secondary btn-sm" id="refresh-btn">更新</button>
-    <button class="btn btn-warning btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
+    <button class="btn btn-outline-primary btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
     <a href="simplelistexport_utf8.php" class="btn btn-outline-secondary btn-sm">リクエストリストCSV</a>
@@ -325,7 +324,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
 
 <div id="request-list"></div>
 <div id="load-more-wrap" style="display:none">
-  <button class="btn btn-default" id="load-more-btn">もっと見る</button>
+  <button class="btn btn-outline-secondary" id="load-more-btn">もっと見る</button>
 </div>
 <div id="empty-msg" style="display:none">リクエストはありません</div>
 
@@ -506,7 +505,7 @@ function createCardHTML(item, idx) {
     // 曲終了 / 曲開始ボタン
     var ctrlBtn = '';
     if (isPlaying(item.nowplaying)) {
-        ctrlBtn = '<button class="btn btn-warning btn-sm card-ctrl-btn song-end-btn">曲終了</button>';
+        ctrlBtn = '<button class="btn btn-outline-warning btn-sm card-ctrl-btn song-end-btn">曲終了</button>';
     } else if (isWaiting(item.nowplaying) && item.kind === '動画') {
         ctrlBtn = '<button class="btn btn-success btn-sm card-ctrl-btn song-start-btn">曲開始</button>';
     }
