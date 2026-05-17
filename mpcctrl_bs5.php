@@ -163,15 +163,19 @@ $moviefullscreen = isset($moviefullscreen) ? (int)$moviefullscreen : 0;
 /* ---- 次の曲 ---- */
 $next_song = null;
 try {
-    $sql_next = "SELECT songfile, singer, secret, kind FROM requesttable WHERE nowplaying = '未再生' ORDER BY reqorder ASC LIMIT 1";
+    $sql_next = "SELECT songfile, song_name, singer, secret, kind FROM requesttable WHERE nowplaying = '未再生' ORDER BY reqorder ASC LIMIT 1";
     $sel_next = $db->query($sql_next);
     if ($sel_next) {
         $row_next = $sel_next->fetch(PDO::FETCH_ASSOC);
         $sel_next->closeCursor();
         if ($row_next) {
             $is_secret_next = (int)$row_next['secret'] === 1;
+            $sf = htmlspecialchars($row_next['songfile'], ENT_QUOTES, 'UTF-8');
+            $sn = !empty($row_next['song_name']) ? htmlspecialchars($row_next['song_name'], ENT_QUOTES, 'UTF-8') : '';
             $next_song = [
-                'songfile' => $is_secret_next ? 'ヒ・ミ・ツ♪' : htmlspecialchars($row_next['songfile'], ENT_QUOTES, 'UTF-8'),
+                'title'    => $is_secret_next ? 'ヒ・ミ・ツ♪' : ($sn ?: $sf),
+                'songfile' => $is_secret_next ? '' : $sf,
+                'show_file'=> !$is_secret_next && $sn !== '' && $sn !== $sf,
                 'singer'   => $is_secret_next ? '' : htmlspecialchars($row_next['singer'], ENT_QUOTES, 'UTF-8'),
                 'kind'     => htmlspecialchars($row_next['kind'], ENT_QUOTES, 'UTF-8'),
             ];
@@ -219,7 +223,10 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
       </span>
       <span class="player-kind-badge">MPC</span>
     </div>
-    <div id="songtitle">
+    <!-- mpcctrl.js 互換用（非表示）: mpcctrl.js がここを書き換えるため残す -->
+    <div id="songtitle" style="display:none;" aria-hidden="true"></div>
+    <!-- BS5 表示用: player_bs5.js が song_name で更新する -->
+    <div id="player-title-display">
       <?php if ($song_title): ?>
         <div class="player-label">Now Playing</div>
         <div class="player-title"><?= $song_title ?></div>
@@ -243,9 +250,12 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
 <div class="card player-nextsong mb-3">
   <div class="card-body py-2 px-3">
     <div class="player-label">Next</div>
-    <div class="player-nextsong-title"><?= $next_song['songfile'] ?></div>
+    <div class="player-nextsong-title"><?= $next_song['title'] ?></div>
     <?php if ($next_song['singer']): ?>
     <div class="player-nextsong-singer"><?= $next_song['singer'] ?></div>
+    <?php endif; ?>
+    <?php if ($next_song['show_file']): ?>
+    <div class="player-nextsong-file"><?= $next_song['songfile'] ?></div>
     <?php endif; ?>
     <?php if (!empty($next_song['kind'])): ?>
     <div class="player-nextsong-kind"><?= $next_song['kind'] ?></div>

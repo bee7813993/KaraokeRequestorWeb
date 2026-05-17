@@ -300,6 +300,13 @@ body {
   color: var(--color-text-muted);
   margin-top: 2px;
 }
+.player-nextsong-file {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  word-break: break-all;
+  opacity: 0.75;
+}
 .player-nextsong-kind {
   font-size: 0.7rem;
   color: var(--color-text-muted);

@@ -178,6 +178,20 @@ var _lastPlayingTitle = null;
                 _updatePlayPauseBtn(ps.status);
                 _updateStatusBadge(ps.status);
 
+                /* Now Playing タイトルを BS5 構造で更新 */
+                var titleDisplay = document.getElementById('player-title-display');
+                if (titleDisplay) {
+                    var pt = ps.playingtitle || '';
+                    if (pt) {
+                        titleDisplay.innerHTML =
+                            '<div class="player-label">Now Playing</div>' +
+                            '<div class="player-title">' + pt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
+                    } else {
+                        titleDisplay.innerHTML =
+                            '<div class="player-title text-muted" style="opacity:.5;">曲が選択されていません</div>';
+                    }
+                }
+
                 /* 曲タイトル変化を検出 → 字幕補正を再適用
                    初回ロード時は _lastPlayingTitle が null なので発火しない */
                 var title = ps.playingtitle || '';

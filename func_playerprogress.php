@@ -83,7 +83,9 @@ class PlayerProgress {
               usleep(100000);
           }else {
               
-              $this->playingtitle = $rowall[0]['songfile'];
+              $this->playingtitle = !empty($rowall[0]['song_name'])
+                  ? $rowall[0]['song_name']
+                  : $rowall[0]['songfile'];
               break;
           }
         }

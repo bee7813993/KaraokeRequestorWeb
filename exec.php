@@ -255,6 +255,34 @@ if (is_numeric($selectid)) {
         $list->save_allrequest($db);
     }
     $db->exec("COMMIT;");
+
+    // ListerDB から曲名を取得して song_name に保存
+    if (!empty($l_fullpath) && array_key_exists('listerDBPATH', $config_ini)) {
+        $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+        if (file_exists($lister_dbpath)) {
+            require_once 'function_search_listerdb.php';
+            $lister = new ListerDB();
+            $lister->listerdbfile = $lister_dbpath;
+            $lfd = $lister->initdb();
+            if ($lfd) {
+                $found_song_name = '';
+                foreach ([$l_fullpath, basename($l_fullpath)] as $search) {
+                    $res = $lister->select(
+                        "SELECT song_name FROM t_found WHERE found_path LIKE "
+                        . $lfd->quote('%' . $search . '%')
+                        . " AND song_name != '' LIMIT 1"
+                    );
+                    if ($res && !empty($res[0]['song_name'])) {
+                        $found_song_name = $res[0]['song_name'];
+                        break;
+                    }
+                }
+                if ($found_song_name !== '') {
+                    $db->exec('UPDATE requesttable SET song_name=' . $db->quote($found_song_name) . ' WHERE id=' . $newid);
+                }
+            }
+        }
+    }
 }
 file_get_contents("http://localhost/updaterequestlist.php");
 
