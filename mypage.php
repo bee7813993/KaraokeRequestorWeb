@@ -9,6 +9,8 @@ print_meta_header();
 <title>マイページ</title>
 <link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
 <link href="css/style.css" rel="stylesheet">
+<link href="css/themes/_variables.css" rel="stylesheet">
+<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; }</style>
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
 </head>
 <body>

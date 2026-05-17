@@ -248,15 +248,30 @@ class MypageUser {
     }
 
     /**
-     * @param string $sort  'date'|'count'
+     * @param string $sort  'date'|'count'|'filedate'
      * @param string $order 'desc'|'asc'
      */
     public function getHistory($sort = 'date', $order = 'desc', $limit = 200) {
-        $order = ($order === 'asc') ? 'ASC' : 'DESC';
+        $orderDir = ($order === 'asc') ? 'ASC' : 'DESC';
+        if ($sort === 'filedate') {
+            $stmt = $this->db->prepare(
+                "SELECT fullpath, songfile, kind,
+                        COUNT(*) AS times,
+                        MAX(requested_at) AS last_requested_at,
+                        MIN(id) AS first_id
+                 FROM mypage_history
+                 WHERE userid = ?
+                 GROUP BY fullpath
+                 LIMIT ?"
+            );
+            $stmt->execute([$this->userid, $limit]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return self::sortByFileDate($rows, $orderDir);
+        }
         if ($sort === 'count') {
-            $orderby = "times $order, last_requested_at DESC";
+            $orderby = "times $orderDir, last_requested_at DESC";
         } else {
-            $orderby = "last_requested_at $order";
+            $orderby = "last_requested_at $orderDir";
         }
         $stmt = $this->db->prepare(
             "SELECT fullpath, songfile, kind,
@@ -297,11 +312,22 @@ class MypageUser {
         $stmt->execute([$this->userid, $fullpath]);
     }
 
-    public function getLaterList() {
+    public function getLaterList($sort = 'date', $order = 'desc') {
+        $orderDir = ($order === 'asc') ? 'ASC' : 'DESC';
+        if ($sort === 'filedate') {
+            $stmt = $this->db->prepare(
+                "SELECT fullpath, songfile, kind, added_at
+                 FROM mypage_later WHERE userid = ?
+                 ORDER BY added_at DESC"
+            );
+            $stmt->execute([$this->userid]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return self::sortByFileDate($rows, $orderDir);
+        }
         $stmt = $this->db->prepare(
             "SELECT fullpath, songfile, kind, added_at
              FROM mypage_later WHERE userid = ?
-             ORDER BY added_at DESC"
+             ORDER BY added_at $orderDir"
         );
         $stmt->execute([$this->userid]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -332,11 +358,22 @@ class MypageUser {
         $stmt->execute([$this->userid, $fullpath]);
     }
 
-    public function getFavoriteSongs() {
+    public function getFavoriteSongs($sort = 'date', $order = 'desc') {
+        $orderDir = ($order === 'asc') ? 'ASC' : 'DESC';
+        if ($sort === 'filedate') {
+            $stmt = $this->db->prepare(
+                "SELECT fullpath, songfile, kind, added_at
+                 FROM mypage_favorite_song WHERE userid = ?
+                 ORDER BY added_at DESC"
+            );
+            $stmt->execute([$this->userid]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return self::sortByFileDate($rows, $orderDir);
+        }
         $stmt = $this->db->prepare(
             "SELECT fullpath, songfile, kind, added_at
              FROM mypage_favorite_song WHERE userid = ?
-             ORDER BY added_at DESC"
+             ORDER BY added_at $orderDir"
         );
         $stmt->execute([$this->userid]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -579,6 +616,67 @@ class MypageUser {
      *   'songfile' => string,
      * ]
      */
+
+    private static function openListerDB() {
+        global $config_ini;
+        if (empty($config_ini['listerDBPATH'])) return null;
+        $decoded = urldecode($config_ini['listerDBPATH']);
+        if (function_exists('file_exist_check_japanese_cf')) {
+            $win_dbpath = mb_convert_encoding($decoded, 'SJIS-win', 'UTF-8');
+            if (@file_exist_check_japanese_cf($win_dbpath) === false) return null;
+        } elseif (!@file_exists($decoded)) {
+            return null;
+        }
+        try {
+            require_once 'function_search_listerdb.php';
+            $lister = new ListerDB();
+            $lister->listerdbfile = $decoded;
+            return $lister->initdb();
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    private static function lookupFileDate($fullpath, $listerdb) {
+        if (!$listerdb || empty($fullpath)) return 0;
+        try {
+            $stmt = $listerdb->prepare(
+                "SELECT found_last_write_time FROM t_found WHERE found_path = ? LIMIT 1"
+            );
+            $stmt->execute([$fullpath]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row && !empty($row['found_last_write_time'])) {
+                return (float)$row['found_last_write_time'];
+            }
+            // フォルダ違いに対応：ファイル名で検索
+            $basename = basename(str_replace('\\', '/', $fullpath));
+            if (!empty($basename)) {
+                $stmt = $listerdb->prepare(
+                    "SELECT found_last_write_time FROM t_found WHERE found_path LIKE ? LIMIT 1"
+                );
+                $stmt->execute(['%' . $basename]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($row && !empty($row['found_last_write_time'])) {
+                    return (float)$row['found_last_write_time'];
+                }
+            }
+        } catch (Exception $e) {}
+        return 0;
+    }
+
+    private static function sortByFileDate(array $rows, $orderDir) {
+        $listerdb = self::openListerDB();
+        foreach ($rows as &$row) {
+            $row['_filedate'] = self::lookupFileDate($row['fullpath'], $listerdb);
+        }
+        unset($row);
+        usort($rows, function($a, $b) use ($orderDir) {
+            $cmp = $a['_filedate'] <=> $b['_filedate'];
+            return $orderDir === 'ASC' ? $cmp : -$cmp;
+        });
+        return $rows;
+    }
+
     public static function checkFileStatus($fullpath, $songfile) {
         // ListerDB接続を先に準備（song_name取得とrelocated検索に共用）
         $listerdb = null;

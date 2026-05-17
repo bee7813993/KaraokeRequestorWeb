@@ -1,4 +1,5 @@
-<html>
+<!doctype html>
+<html lang="ja">
 <head>
 <?php
 require_once 'commonfunc.php';
@@ -6,16 +7,17 @@ require_once 'mypage_class.php';
 print_meta_header();
 ?>
 <title>お気に入り検索ワード - マイページ</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/themes/_variables.css" rel="stylesheet">
+<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
+<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
 </head>
 <body>
 <?php
-shownavigatioinbar('mypage_favorite_keyword.php');
+shownavigatioinbar_bs5('mypage_favorite_keyword.php');
 
 if (!configbool("usemypage", true)) {
-    print '<div class="container" style="margin-top:80px;"><p>マイページ機能は無効です。</p></div>';
+    print '<div class="container py-3"><p>マイページ機能は無効です。</p></div>';
     print '</body></html>';
     exit;
 }
@@ -80,21 +82,22 @@ function build_search_url($keyword, $search_type, $search_params) {
     }
 }
 ?>
-<div class="container" style="margin-top:80px;">
-  <h2>お気に入り検索ワード</h2>
-  <p><a href="mypage.php">&laquo; マイページへ戻る</a></p>
+<div class="container py-3">
+  <h2 class="mb-2">お気に入り検索ワード</h2>
+  <p class="mb-2"><a href="mypage.php">&laquo; マイページへ戻る</a></p>
 
   <?php if (empty($list)): ?>
   <p class="text-muted">お気に入り検索ワードが登録されていません。<br>
     検索結果の画面で「検索ワードを保存」リンクを押すと追加できます。
   </p>
   <?php else: ?>
-  <table class="table table-striped table-condensed">
-    <thead>
+  <div class="table-responsive">
+  <table class="table table-striped table-sm table-hover align-middle">
+    <thead class="table-dark">
       <tr>
         <th>検索ワード</th>
-        <th>検索種別</th>
-        <th>登録日時</th>
+        <th class="text-nowrap">検索種別</th>
+        <th class="text-nowrap">登録日時</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -117,22 +120,22 @@ function build_search_url($keyword, $search_type, $search_params) {
     ?>
       <tr>
         <td><?php echo htmlspecialchars($kw, ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($type_label, ENT_QUOTES, 'UTF-8'); ?></td>
-        <td><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
-        <td>
-          <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-xs">再検索</a>
-          &nbsp;
-          <form method="POST" action="mypage_favorite_keyword.php" style="display:inline;"
+        <td class="text-nowrap"><?php echo htmlspecialchars($type_label, ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="text-nowrap"><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="text-nowrap">
+          <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">再検索</a>
+          <form method="POST" action="mypage_favorite_keyword.php" class="d-inline"
                 onsubmit="return confirm('削除しますか？');">
             <input type="hidden" name="action" value="remove" />
             <input type="hidden" name="kw_id" value="<?php echo $kw_id; ?>" />
-            <button type="submit" class="btn btn-danger btn-xs">削除</button>
+            <button type="submit" class="btn btn-outline-danger btn-sm">削除</button>
           </form>
         </td>
       </tr>
     <?php endforeach; ?>
     </tbody>
   </table>
+  </div>
   <?php endif; ?>
 </div>
 </body>
