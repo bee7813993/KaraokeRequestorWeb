@@ -97,6 +97,17 @@ if (!empty($config_ini['roomurl'])) {
     $rk = array_keys($config_ini['roomurl']);
     $roomname = htmlspecialchars($rk[0], ENT_QUOTES, 'UTF-8') . '：';
 }
+
+/* globalurl: toolinfo.php と同じロジックで生成 */
+$globalurl = '';
+if (!empty($config_ini['globalhost'])) {
+    $globalhost = urldecode($config_ini['globalhost']);
+    $globalurl  = 'http://' . $globalhost . '/';
+    if (!empty($config_ini['useeasyauth']) && $config_ini['useeasyauth'] == 1
+        && !empty($config_ini['useeasyauth_word'])) {
+        $globalurl .= '?easypass=' . urlencode($config_ini['useeasyauth_word']);
+    }
+}
 ?>
 <!doctype html>
 <html lang="ja">
@@ -468,33 +479,18 @@ if (!empty($config_ini['roomurl'])) {
     </div>
   </div>
 
-  <?php
-  /* リクエストURL & QRコード */
-  $room_urls = [];
-  if (!empty($config_ini['roomurl'])) {
-      foreach ($config_ini['roomurl'] as $rname => $rurl) {
-          if (!empty($rurl)) {
-              $room_urls[] = [
-                  'name' => htmlspecialchars($rname, ENT_QUOTES, 'UTF-8'),
-                  'url'  => htmlspecialchars(urldecode($rurl), ENT_QUOTES, 'UTF-8'),
-              ];
-          }
-      }
-  }
-  if (!empty($room_urls)): ?>
+  <?php if (!empty($globalurl)): ?>
   <div class="db-url-panel">
     <div class="db-url-header">
       <span class="db-url-title">REQUEST URL</span>
     </div>
     <div class="db-url-body">
       <img class="db-qr-img"
-           src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=<?= rawurlencode($room_urls[0]['url']) ?>"
-           alt="QR" loading="lazy">
+           src="qrcode_php/outputqrimg.php?data=<?= rawurlencode($globalurl) ?>&qrsize=5"
+           alt="QR">
       <div class="db-url-info">
-        <?php foreach ($room_urls as $ru): ?>
-        <div class="db-url-room"><?= $ru['name'] ?></div>
-        <a class="db-url-link" href="<?= $ru['url'] ?>" target="_blank" rel="noopener"><?= $ru['url'] ?></a>
-        <?php endforeach; ?>
+        <a class="db-url-link" href="<?= htmlspecialchars($globalurl, ENT_QUOTES, 'UTF-8') ?>"
+           target="_blank" rel="noopener"><?= htmlspecialchars($globalurl, ENT_QUOTES, 'UTF-8') ?></a>
       </div>
     </div>
   </div>
