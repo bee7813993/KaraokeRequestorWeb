@@ -12,6 +12,7 @@ class PlayerProgress {
     public $totaltime = "";
     public $status = 0;
     public $playingtitle = "";
+    public $playingfile = "";
     public $playercommandname = "";
     
     
@@ -80,6 +81,7 @@ class PlayerProgress {
           $select->closeCursor();
           if(count($rowall) == 0){
               $this->playingtitle = "";
+              $this->playingfile = "";
               usleep(100000);
           }else {
 
@@ -110,6 +112,7 @@ class PlayerProgress {
               }
 
               $this->playingtitle = !empty($song_name) ? $song_name : $rowall[0]['songfile'];
+              $this->playingfile = $rowall[0]['songfile'] ?? '';
               break;
           }
         }
@@ -126,7 +129,8 @@ class PlayerProgress {
         $ret += array('totaltime'=>$this->totaltime);
         $ret += array('status'=>$this->status);
         $ret += array('playingtitle'=>$this->playingtitle);
-        
+        $ret += array('playingfile'=>$this->playingfile);
+
         return json_encode($ret);
         }else {
           return false;

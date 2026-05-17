@@ -157,6 +157,47 @@ function _updateStatusBadge(stateNum) {
     }
 }
 
+/* Now Playing タイトル: 曲名 ⇄ ファイル名 のタップ切り替え
+   "title" を表示中か "file" を表示中かを保持。曲が変わったら "title" にリセット */
+var _titleMode = 'title';
+
+function _escapeHTML(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function _renderPlayerTitle() {
+    var disp = document.getElementById('player-title-display');
+    if (!disp) return;
+    var t = disp.dataset.songTitle || '';
+    var f = disp.dataset.songFile  || '';
+    if (!t) {
+        disp.innerHTML =
+            '<div class="player-title text-muted" id="player-title-text" style="opacity:.5;">曲が選択されていません</div>';
+        return;
+    }
+    var hasAlt   = (f !== '' && f !== t);
+    var showText = (_titleMode === 'file' && hasAlt) ? f : t;
+    var isFile   = (_titleMode === 'file' && hasAlt);
+    var attrs = hasAlt
+        ? ' role="button" tabindex="0"'
+          + ' onclick="player_title_toggle()"'
+          + ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();player_title_toggle();}"'
+          + ' title="タップでファイル名表示を切り替え"'
+          + ' aria-label="タップでファイル名表示を切り替え"'
+        : '';
+    var cls = 'player-title' + (hasAlt ? ' player-title-toggleable' : '') + (isFile ? ' player-title-as-file' : '');
+    var icon = hasAlt ? '<span class="player-title-toggle-icon" aria-hidden="true">⇄</span>' : '';
+    disp.innerHTML =
+        '<div class="player-label">Now Playing</div>' +
+        '<div class="' + cls + '" id="player-title-text"' + attrs + '>' +
+        _escapeHTML(showText) + icon + '</div>';
+}
+
+function player_title_toggle() {
+    _titleMode = (_titleMode === 'file') ? 'title' : 'file';
+    _renderPlayerTitle();
+}
+
 /* progresstime_init のコールバックをフックして UI 同期 + 曲変化検出 */
 var _lastPlayingTitle = null;
 
@@ -178,18 +219,18 @@ var _lastPlayingTitle = null;
                 _updatePlayPauseBtn(ps.status);
                 _updateStatusBadge(ps.status);
 
-                /* Now Playing タイトルを BS5 構造で更新 */
+                /* Now Playing タイトルを BS5 構造で更新 (data 属性に反映してから再描画) */
                 var titleDisplay = document.getElementById('player-title-display');
                 if (titleDisplay) {
                     var pt = ps.playingtitle || '';
-                    if (pt) {
-                        titleDisplay.innerHTML =
-                            '<div class="player-label">Now Playing</div>' +
-                            '<div class="player-title">' + pt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>';
-                    } else {
-                        titleDisplay.innerHTML =
-                            '<div class="player-title text-muted" style="opacity:.5;">曲が選択されていません</div>';
+                    var pf = ps.playingfile  || '';
+                    /* 曲が変わったら表示モードをタイトル側にリセット */
+                    if (pt !== titleDisplay.dataset.songTitle) {
+                        _titleMode = 'title';
                     }
+                    titleDisplay.dataset.songTitle = pt;
+                    titleDisplay.dataset.songFile  = pf;
+                    _renderPlayerTitle();
                 }
 
                 /* 曲タイトル変化を検出 → 字幕補正を再適用

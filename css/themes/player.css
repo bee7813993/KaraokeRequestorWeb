@@ -94,6 +94,45 @@ body {
   overflow-wrap: break-word;
 }
 
+/* 曲名タップで ファイル名 ⇄ 曲名 切り替え可能であることを示すスタイル */
+.player-nowplaying .player-title-toggleable {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  transition: background-color var(--transition-base);
+  -webkit-tap-highlight-color: rgba(79, 172, 254, 0.25);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.player-nowplaying .player-title-toggleable:hover,
+.player-nowplaying .player-title-toggleable:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+.player-nowplaying .player-title-toggleable:active {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+/* 切り替えアイコン (⇄): タップ可能であることの控えめなヒント */
+.player-nowplaying .player-title-toggle-icon {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.75em;
+  font-weight: 400;
+  color: #a0aec0;
+  opacity: 0.55;
+  vertical-align: 0.08em;
+}
+/* ファイル名表示中はモノスペース風に控えめな色で */
+.player-nowplaying .player-title.player-title-as-file {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #c0c8d8;
+  word-break: break-all;
+}
+
 .player-nowplaying .player-status-badge {
   font-size: 0.68rem;
   font-weight: 700;

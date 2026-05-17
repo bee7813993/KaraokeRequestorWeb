@@ -153,6 +153,10 @@ $time_total  = $has_song ? htmlspecialchars($playstat->totaltime_txt, ENT_QUOTES
 $song_title  = ($has_song && !empty($playstat->playingtitle))
                ? htmlspecialchars($playstat->playingtitle, ENT_QUOTES, 'UTF-8')
                : '';
+$song_file   = ($has_song && !empty($playstat->playingfile))
+               ? htmlspecialchars($playstat->playingfile, ENT_QUOTES, 'UTF-8')
+               : '';
+$has_alt_file = ($song_file !== '' && $song_file !== $song_title);
 // state: 2=再生中, 1=一時停止
 $state_num   = $has_song ? (int)$playstat->status : 0;
 
@@ -253,12 +257,23 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     <!-- mpcctrl.js 互換用（非表示）: mpcctrl.js がここを書き換えるため残す -->
     <div id="songtitle" style="display:none;" aria-hidden="true"></div>
     <!-- BS5 表示用: player_bs5.js が song_name で更新する -->
-    <div id="player-title-display">
+    <div id="player-title-display"
+         data-song-title="<?= $song_title ?>"
+         data-song-file="<?= $song_file ?>">
       <?php if ($song_title): ?>
         <div class="player-label">Now Playing</div>
-        <div class="player-title"><?= $song_title ?></div>
+        <div class="player-title<?= $has_alt_file ? ' player-title-toggleable' : '' ?>"
+             id="player-title-text"
+             <?php if ($has_alt_file): ?>
+             role="button" tabindex="0"
+             onclick="player_title_toggle()"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();player_title_toggle();}"
+             title="タップでファイル名表示を切り替え"
+             aria-label="タップでファイル名表示を切り替え"
+             <?php endif; ?>
+        ><?= $song_title ?><?php if ($has_alt_file): ?><span class="player-title-toggle-icon" aria-hidden="true">⇄</span><?php endif; ?></div>
       <?php else: ?>
-        <div class="player-title text-muted" style="opacity:.5;">曲が選択されていません</div>
+        <div class="player-title text-muted" id="player-title-text" style="opacity:.5;">曲が選択されていません</div>
       <?php endif; ?>
     </div>
     <div class="progress mt-3 mb-2" style="height:6px;" role="progressbar"
