@@ -121,6 +121,17 @@ if (array_key_exists('cmd', $_REQUEST)) {
         header('Content-Type: application/json');
         echo json_encode(['level' => get_player_compensation_level()]);
     }
+    elseif ($l_cmd === 'get_volume') {
+        $vol = get_volume();
+        header('Content-Type: application/json');
+        echo json_encode(['volume' => (int)$vol]);
+    }
+    elseif ($l_cmd === 'set_volume') {
+        $val = isset($_REQUEST['val']) ? max(0, min(100, intval($_REQUEST['val']))) : 50;
+        set_volume($val);
+        header('Content-Type: application/json');
+        echo json_encode(['volume' => $val]);
+    }
     else { $r = command_mpc($l_cmd); print $r; }
     die();
 }
@@ -148,6 +159,24 @@ $state_num   = $has_song ? (int)$playstat->status : 0;
 /* ---- 設定フラグ ---- */
 $usekeychange    = isset($config_ini['usekeychange']) && $config_ini['usekeychange'] == 1;
 $moviefullscreen = isset($moviefullscreen) ? (int)$moviefullscreen : 0;
+
+/* ---- 次の曲 ---- */
+$next_song = null;
+try {
+    $sql_next = "SELECT songfile, singer, secret FROM requesttable WHERE nowplaying = '未再生' ORDER BY reqorder ASC LIMIT 1";
+    $sel_next = $db->query($sql_next);
+    if ($sel_next) {
+        $row_next = $sel_next->fetch(PDO::FETCH_ASSOC);
+        $sel_next->closeCursor();
+        if ($row_next) {
+            $is_secret_next = (int)$row_next['secret'] === 1;
+            $next_song = [
+                'songfile' => $is_secret_next ? 'ヒ・ミ・ツ♪' : htmlspecialchars($row_next['songfile'], ENT_QUOTES, 'UTF-8'),
+                'singer'   => $is_secret_next ? '' : htmlspecialchars($row_next['singer'], ENT_QUOTES, 'UTF-8'),
+            ];
+        }
+    }
+} catch (Exception $e) { /* silent */ }
 
 /* ---- SVGアイコン定義 ---- */
 function _svg($path_d, $w = 20, $h = 20) {
@@ -207,6 +236,19 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     </div>
   </div>
 </div>
+
+<?php if ($next_song): ?>
+<!-- === 次の曲カード === -->
+<div class="card player-nextsong mb-3">
+  <div class="card-body py-2 px-3">
+    <div class="player-label">Next</div>
+    <div class="player-nextsong-title"><?= $next_song['songfile'] ?></div>
+    <?php if ($next_song['singer']): ?>
+    <div class="player-nextsong-singer"><?= $next_song['singer'] ?></div>
+    <?php endif; ?>
+  </div>
+</div>
+<?php endif; ?>
 
 <!-- === メインコントロール === -->
 <div class="card player-controls-card mb-3">
@@ -276,35 +318,38 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
       </div>
     </div>
 
-    <!-- 行3: ボリューム + フェードアウト + 初期値 -->
+    <!-- 行3: ボリューム -->
     <div class="player-section-label">ボリューム</div>
+    <!-- スライダー行 -->
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <button class="btn btn-outline-secondary player-btn flex-shrink-0"
+              style="min-width:var(--tap-target);padding:8px;"
+              onclick="vol_btn_down()" aria-label="ボリュームDOWN">
+        <?= $ic_vol_d ?>
+      </button>
+      <input type="range" class="form-range flex-grow-1" id="volume-slider"
+             min="0" max="100" value="50" aria-label="ボリューム">
+      <button class="btn btn-outline-secondary player-btn flex-shrink-0"
+              style="min-width:var(--tap-target);padding:8px;"
+              onclick="vol_btn_up()" aria-label="ボリュームUP">
+        <?= $ic_vol_u ?>
+      </button>
+      <span class="player-vol-display" id="vol-display" aria-live="polite">－</span>
+    </div>
+    <!-- 初期値・フェードアウト行 -->
     <div class="row g-2 mb-2">
-      <div class="col-3">
+      <div class="col-6">
         <button class="btn btn-outline-secondary player-btn w-100"
-                onclick="song_vdown()" aria-label="ボリュームDOWN">
-          <?= $ic_vol_d ?>
-          <span class="small">Vol−</span>
-        </button>
-      </div>
-      <div class="col-3">
-        <button class="btn btn-outline-secondary player-btn w-100"
-                onclick="song_vreset()" aria-label="ボリュームを再生開始時の値に戻す">
+                onclick="song_vreset_sync()" aria-label="ボリュームを再生開始時の値に戻す">
           <?= $ic_vol_reset ?>
           <span class="small">初期値</span>
         </button>
       </div>
-      <div class="col-3">
+      <div class="col-6">
         <button class="btn btn-warning player-btn w-100"
                 onclick="exec_fadeout()" aria-label="フェードアウト">
           <?= $ic_fade ?>
           <span class="small">フェードアウト</span>
-        </button>
-      </div>
-      <div class="col-3">
-        <button class="btn btn-outline-secondary player-btn w-100"
-                onclick="song_vup()" aria-label="ボリュームUP">
-          <?= $ic_vol_u ?>
-          <span class="small">Vol＋</span>
         </button>
       </div>
     </div>

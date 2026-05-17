@@ -259,6 +259,45 @@ body {
   text-align: center;
 }
 
+/* ボリューム数値表示 */
+.player-vol-display {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: right;
+  color: var(--color-text);
+  flex-shrink: 0;
+}
+
+/* 次の曲カード */
+.player-nextsong {
+  background: var(--bg-card);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent-secondary);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+.player-nextsong .player-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent-secondary);
+  margin-bottom: 2px;
+}
+.player-nextsong-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  word-break: break-all;
+}
+.player-nextsong-singer {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
 /* foobar 用 プレイヤー種別バッジ */
 .player-kind-badge {
   font-size: 0.72rem;

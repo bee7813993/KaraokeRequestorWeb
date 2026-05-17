@@ -73,6 +73,51 @@ function foobar_cmd_songstart() {
     });
 }
 
+/* ボリュームスライダー */
+function _syncVolSlider() {
+    fetch(_playerCtrlUrl + '?cmd=get_volume')
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            if (!d || typeof d.volume === 'undefined') return;
+            var slider  = document.getElementById('volume-slider');
+            var display = document.getElementById('vol-display');
+            if (slider)  slider.value = d.volume;
+            if (display) display.textContent = d.volume;
+        })
+        .catch(function () {});
+}
+
+function _initVolumeSlider() {
+    var slider  = document.getElementById('volume-slider');
+    var display = document.getElementById('vol-display');
+    if (!slider) return;
+
+    _syncVolSlider();
+
+    var _volTimer = null;
+    slider.addEventListener('input', function () {
+        var val = parseInt(slider.value, 10);
+        if (display) display.textContent = val;
+        clearTimeout(_volTimer);
+        _volTimer = setTimeout(function () {
+            fetch(_playerCtrlUrl + '?cmd=set_volume&val=' + val).catch(function () {});
+        }, 150);
+    });
+}
+
+function vol_btn_down() {
+    if (typeof song_vdown === 'function') song_vdown();
+    setTimeout(_syncVolSlider, 350);
+}
+function vol_btn_up() {
+    if (typeof song_vup === 'function') song_vup();
+    setTimeout(_syncVolSlider, 350);
+}
+function song_vreset_sync() {
+    song_vreset();
+    setTimeout(_syncVolSlider, 700);
+}
+
 /* 再生状態に応じて再生/一時停止ボタンのアイコンを切り替える */
 var _iconPlay  = '<path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>';
 var _iconPause = '<path d="M5.5 3.5A1.5 1.5 0 0 1 7 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5zm5 0A1.5 1.5 0 0 1 12 5v6a1.5 1.5 0 0 1-3 0V5a1.5 1.5 0 0 1 1.5-1.5z"/>';
@@ -162,4 +207,5 @@ window.addEventListener('DOMContentLoaded', function () {
     if (typeof event_initial_player === 'function') {
         event_initial_player();
     }
+    _initVolumeSlider();
 });
