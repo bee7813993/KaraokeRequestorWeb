@@ -44,7 +44,7 @@ foreach ($rows as $idx => $row) {
     $nowplaying_val = !empty($row['nowplaying']) ? $row['nowplaying'] : '1';
     if (!empty($row['secret']) && $row['secret'] == 1
         && ($nowplaying_val === '未再生' || $nowplaying_val === '1')) {
-        $display_name = $config_ini['secret_display_text'] ?? 'ヒ・ミ・ツ♪(シークレット予約)';
+        $display_name = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)'));
     }
     $items[] = [
         'id'           => (int)$row['id'],

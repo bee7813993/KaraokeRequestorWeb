@@ -54,7 +54,7 @@ foreach($allrequest as $value ){
     $reqcount -= 1;
     $songfilename = '';
     if( ($value['secret'] == 1 ) && strcmp($value['nowplaying'],'未再生') == 0){
-        $secret_text  = $config_ini['secret_display_text'] ?? 'ヒ・ミ・ツ♪(シークレット予約)';
+        $secret_text  = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)'));
         $songfilename = nl2br(htmlspecialchars(' ' . $secret_text . ' '));
     }else{
         $songfilename = nl2br(htmlspecialchars($value['songfile']));

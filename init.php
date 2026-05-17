@@ -571,7 +571,7 @@ print ' value="10" ';
     <h4 class="radio control-label"> シークレット予約の表示テキスト </h4>
     <label class="radio control-label"><small>未再生のシークレット予約の曲名の代わりに表示するテキストです。</small></label>
     <input type="text" name="secret_display_text" class="form-control"
-      value="<?php echo htmlspecialchars($config_ini['secret_display_text'] ?? 'ヒ・ミ・ツ♪(シークレット予約)', ENT_QUOTES, 'UTF-8'); ?>"
+      value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)')), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="ヒ・ミ・ツ♪(シークレット予約)" />
   </div>
 
