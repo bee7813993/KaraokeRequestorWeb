@@ -22,6 +22,7 @@
   var _playtime      = 0;    // ms
   var _totaltime     = 0;    // ms
   var _isPlaying     = false;
+  var _playerState   = 0;    // 0=停止 1=一時停止 2=再生中
   var _playingKind   = '';   // 再生中アイテムの kind
 
   /* SSE */
@@ -59,7 +60,8 @@
      ===================== */
   function _updateStatus(ps) {
     var state = parseInt(ps.status, 10) || 0;
-    _isPlaying = (state === 2);
+    _playerState = state;
+    _isPlaying   = (state === 2);
     _playtime  = parseFloat(ps.playtime  || 0);
     _totaltime = parseFloat(ps.totaltime || 0);
 
@@ -483,7 +485,9 @@
     });
   };
   window.db_cmd_pause = function () {
-    _cmd(_ctrlUrl + '?cmd=887').then(function () {
+    /* 再生中=889(pause), それ以外=887(play) */
+    var code = (_playerState === 2) ? '889' : '887';
+    _cmd(_ctrlUrl + '?cmd=' + code).then(function () {
       if (!_sseActive) setTimeout(_pollStatus, 300);
     });
   };
