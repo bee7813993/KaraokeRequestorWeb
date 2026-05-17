@@ -130,11 +130,6 @@ mypage_action_script();
 <?php showuppermenu('', $linkoptionbare); ?>
 
 <div class="container py-3">
-<?php build_breadcrumbs_bs5($crumbs); ?>
-<?php if (!empty($errmsg)): ?>
-  <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
-<?php else: ?>
-
 <?php
 if      (!empty($song_name))    { $_kp = 'song_name';    $_kv = $song_name; }
 elseif  (!empty($artist))       { $_kp = 'artist';       $_kv = $artist; }
@@ -148,14 +143,18 @@ if (!empty($_kv)) {
     $_kw_savelink = mypage_save_keyword_link($_kv, 'listerdb_songlist', $_kw_sp);
 }
 ?>
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <?php build_breadcrumbs_bs5($crumbs); ?>
+  <?php if (!empty($_kw_savelink)): ?><small class="text-muted"><?php echo $_kw_savelink; ?></small><?php endif; ?>
+</div>
+<?php if (!empty($errmsg)): ?>
+  <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
+<?php else: ?>
+
 <?php if (!empty($program_name) && !empty($category)): ?>
-  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>」「<?php echo htmlspecialchars($program_name, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧<?php echo $_kw_savelink; ?></h2>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?>」「<?php echo htmlspecialchars($program_name, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧</h2>
 <?php elseif (!empty($artist)): ?>
-  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($artist, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧<?php echo $_kw_savelink; ?></h2>
-<?php elseif (!empty($song_name)): ?>
-  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($song_name, ENT_QUOTES, 'UTF-8'); ?>」の検索結果<?php echo $_kw_savelink; ?></h2>
-<?php elseif (!empty($maker_name)): ?>
-  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($maker_name, ENT_QUOTES, 'UTF-8'); ?>」の検索結果<?php echo $_kw_savelink; ?></h2>
+  <h2 class="h5 mb-3">「<?php echo htmlspecialchars($artist, ENT_QUOTES, 'UTF-8'); ?>」の曲一覧</h2>
 <?php endif; ?>
 
 <!-- 再検索フォーム -->
