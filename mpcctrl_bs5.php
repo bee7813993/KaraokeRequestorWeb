@@ -218,7 +218,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
         <button class="btn btn-outline-secondary player-btn player-btn-main w-100"
                 onclick="song_startfirst()" aria-label="曲の最初から">
           <?= $ic_skip_s ?>
-          <span>曲頭へ</span>
+          <span>曲の最初から</span>
         </button>
       </div>
       <div class="col-4">
