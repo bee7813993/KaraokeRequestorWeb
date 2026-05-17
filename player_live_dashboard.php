@@ -157,6 +157,7 @@ if (!empty($config_ini['roomurl'])) {
         </div>
         <div class="db-time-row">
           <span id="db-time-cur"><?= $time_cur ?></span>
+          <span class="db-time-remaining" id="db-time-remaining"></span>
           <span id="db-time-total"><?= $time_total ?></span>
         </div>
       </div>

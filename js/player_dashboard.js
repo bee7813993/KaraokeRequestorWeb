@@ -107,7 +107,13 @@
     }
     if (title !== '') _lastTitle = title;
 
-    /* プログレスバー更新 */
+    /* ポーリング直後は txt を使って時刻表示 (ミリ秒変換不要) */
+    var tCur = _el('db-time-cur');
+    var tTot = _el('db-time-total');
+    if (tCur) tCur.textContent = ps.playtime_txt  || '--:--';
+    if (tTot) tTot.textContent = ps.totaltime_txt || '--:--';
+
+    /* プログレスバーと残り時間を更新 */
     _updateProgress();
   }
 
@@ -115,19 +121,28 @@
     var pct = (_totaltime > 0) ? Math.min(100, _playtime / _totaltime * 100) : 0;
     var bar = _el('db-progress-bar');
     if (bar) bar.style.width = pct + '%';
-    var tCur = _el('db-time-cur');
-    var tTot = _el('db-time-total');
-    if (tCur) tCur.textContent = _fmt(_playtime);
-    if (tTot) tTot.textContent = _fmt(_totaltime);
+    /* 残り時間: ミリ秒 → 秒 に変換してフォーマット */
+    var tRem = _el('db-time-remaining');
+    if (tRem) {
+      if (_totaltime > 0) {
+        var remSec = Math.max(0, Math.floor((_totaltime - _playtime) / 1000));
+        tRem.textContent = '−' + _fmt(remSec);
+      } else {
+        tRem.textContent = '';
+      }
+    }
   }
 
-  /* 再生中に1秒ずつ経過表示 */
+  /* 再生中に1秒ずつ経過表示 (_playtime はミリ秒) */
   function _startProgressTick() {
     _stopProgressTick();
     if (!_isPlaying) return;
     _progressTimer = setInterval(function () {
       if (!_isPlaying) { _stopProgressTick(); return; }
-      _playtime = Math.min(_playtime + 1, _totaltime);
+      _playtime = Math.min(_playtime + 1000, _totaltime);
+      /* ティック中は _fmt でミリ秒→秒変換して表示 */
+      var tCur = _el('db-time-cur');
+      if (tCur) tCur.textContent = _fmt(Math.floor(_playtime / 1000));
       _updateProgress();
     }, 1000);
   }

@@ -203,9 +203,17 @@ body.dashboard-body {
 .db-time-row {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.8rem;
   color: #6e7681;
+}
+
+/* 残り時間: 総時間の左に添える */
+.db-time-remaining {
+  font-size: 0.75rem;
+  color: #e8a838;
+  letter-spacing: 0.02em;
 }
 
 /* ===========================
