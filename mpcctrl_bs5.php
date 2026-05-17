@@ -163,7 +163,7 @@ $moviefullscreen = isset($moviefullscreen) ? (int)$moviefullscreen : 0;
 /* ---- 次の曲 ---- */
 $next_song = null;
 try {
-    $sql_next = "SELECT songfile, singer, secret FROM requesttable WHERE nowplaying = '未再生' ORDER BY reqorder ASC LIMIT 1";
+    $sql_next = "SELECT songfile, singer, secret, kind FROM requesttable WHERE nowplaying = '未再生' ORDER BY reqorder ASC LIMIT 1";
     $sel_next = $db->query($sql_next);
     if ($sel_next) {
         $row_next = $sel_next->fetch(PDO::FETCH_ASSOC);
@@ -173,6 +173,7 @@ try {
             $next_song = [
                 'songfile' => $is_secret_next ? 'ヒ・ミ・ツ♪' : htmlspecialchars($row_next['songfile'], ENT_QUOTES, 'UTF-8'),
                 'singer'   => $is_secret_next ? '' : htmlspecialchars($row_next['singer'], ENT_QUOTES, 'UTF-8'),
+                'kind'     => htmlspecialchars($row_next['kind'], ENT_QUOTES, 'UTF-8'),
             ];
         }
     }
@@ -245,6 +246,9 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     <div class="player-nextsong-title"><?= $next_song['songfile'] ?></div>
     <?php if ($next_song['singer']): ?>
     <div class="player-nextsong-singer"><?= $next_song['singer'] ?></div>
+    <?php endif; ?>
+    <?php if (!empty($next_song['kind'])): ?>
+    <div class="player-nextsong-kind"><?= $next_song['kind'] ?></div>
     <?php endif; ?>
   </div>
 </div>
