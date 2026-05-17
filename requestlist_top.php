@@ -1,5 +1,15 @@
 <?php
-$config = file_exists('config.ini') ? parse_ini_file('config.ini') : [];
+header('Pragma: no-cache');
+header('Cache-Control: no-cache, no-store, max-age=0, must-revalidate');
+header('Expires: Mon, 01 Jan 1990 00:00:00 GMT');
+
+$config = [];
+if (file_exists('config.ini')) {
+    $config = @parse_ini_file('config.ini');
+    if ($config === false) {
+        $config = [];
+    }
+}
 $useNew = isset($config['usenewrequestlist']) && $config['usenewrequestlist'] == '1';
 $target = $useNew ? 'requestlist_swipe.php' : 'requestlist_only.php';
 
