@@ -344,7 +344,16 @@ body.dashboard-body {
 .db-queue-duration {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.7rem;
-  color: #e8a838;
+  color: #8b949e;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.db-queue-duration-label {
+  font-family: sans-serif;
+  font-size: 0.62rem;
+  color: #484f58;
+  letter-spacing: 0;
 }
 
 /* 右カラムラッパー (flex縦積み) */

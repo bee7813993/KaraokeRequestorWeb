@@ -241,7 +241,9 @@
     if (countEl) countEl.textContent = queue.length + '曲待機中';
     if (durEl) {
       if (queueSec > 0) {
-        durEl.textContent = (knownCount < queue.length ? '約 ' : '') + _fmt(queueSec);
+        var approx = knownCount < queue.length ? '約 ' : '';
+        durEl.innerHTML = '<span class="db-queue-duration-label">待機合計</span>'
+                        + approx + _fmt(queueSec);
         durEl.style.display = '';
       } else {
         durEl.style.display = 'none';
