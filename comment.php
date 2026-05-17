@@ -99,5 +99,30 @@ require_once 'commonfunc.php';
 
 </div><!-- /container -->
 
+<script>
+$(document).ready(function(){
+    $(".sendcomment").submit(function(event){
+        event.preventDefault();
+        var $form = $(this);
+        var $button = $form.find('button');
+        $.ajax({
+            url: $form.attr('action'),
+            type: $form.attr('method'),
+            data: $form.serialize(),
+            timeout: 10000,
+            beforeSend: function(){
+                $button.attr('disabled', true);
+            },
+            complete: function(){
+                $button.attr('disabled', false);
+            },
+            error: function(){
+                alert('NG...');
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>
