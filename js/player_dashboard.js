@@ -485,9 +485,8 @@
     });
   };
   window.db_cmd_pause = function () {
-    /* 再生中=889(pause), それ以外=887(play) */
-    var code = (_playerState === 2) ? '889' : '887';
-    _cmd(_ctrlUrl + '?cmd=' + code).then(function () {
+    /* 889 = 再生/停止トグル (887=再生, 888=一時停止) */
+    _cmd(_ctrlUrl + '?cmd=889').then(function () {
       if (!_sseActive) setTimeout(_pollStatus, 300);
     });
   };
