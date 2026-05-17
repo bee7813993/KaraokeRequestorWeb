@@ -198,6 +198,49 @@ function player_title_toggle() {
     _renderPlayerTitle();
 }
 
+/* 次の曲カード更新 */
+function _updateNextSongCard(nextsong) {
+    var card = document.querySelector('.player-nextsong');
+    if (!card) return;
+
+    if (!nextsong) {
+        card.style.display = 'none';
+        return;
+    }
+
+    card.style.display = 'block';
+    var title = card.querySelector('.player-nextsong-title');
+    var singer = card.querySelector('.player-nextsong-singer');
+    var file = card.querySelector('.player-nextsong-file');
+    var kind = card.querySelector('.player-nextsong-kind');
+
+    if (title) title.textContent = nextsong.title || '';
+    if (singer) {
+        if (nextsong.singer) {
+            singer.textContent = nextsong.singer;
+            singer.style.display = 'block';
+        } else {
+            singer.style.display = 'none';
+        }
+    }
+    if (file) {
+        if (nextsong.show_file && nextsong.songfile) {
+            file.textContent = nextsong.songfile;
+            file.style.display = 'block';
+        } else {
+            file.style.display = 'none';
+        }
+    }
+    if (kind) {
+        if (nextsong.kind) {
+            kind.textContent = nextsong.kind;
+            kind.style.display = 'block';
+        } else {
+            kind.style.display = 'none';
+        }
+    }
+}
+
 /* progresstime_init のコールバックをフックして UI 同期 + 曲変化検出 */
 var _lastPlayingTitle = null;
 
@@ -231,6 +274,11 @@ var _lastPlayingTitle = null;
                     titleDisplay.dataset.songTitle = pt;
                     titleDisplay.dataset.songFile  = pf;
                     _renderPlayerTitle();
+                }
+
+                /* 次の曲カードを更新 */
+                if (ps.nextsong !== undefined) {
+                    _updateNextSongCard(ps.nextsong);
                 }
 
                 /* 曲タイトル変化を検出 → 字幕補正を再適用
