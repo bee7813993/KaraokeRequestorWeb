@@ -30,8 +30,11 @@ function reset_initial_volume_bs5() {
    明るさ/コントラスト/彩度 を一括調整する。
    +1 = 明るさDOWN(985) + コントラストDOWN(987) + 彩度UP(990)
    -1 = 反対方向: 984 + 986 + 991
-   範囲: -10 .. +10 (各 MPC ステップ分の累積)
+   範囲: -COMP_MAX .. +COMP_MAX (各 MPC ステップ分の累積)
+   ボタン1クリックで COMP_STEP ステップ動かす。
    ※ MPC-BE のコマンドID。MPC-HC とは番号が異なる。 */
+define('COMP_MAX',  50);
+define('COMP_STEP', 5);
 function _player_compensation_file() {
     return __DIR__ . '/player_compensation.json';
 }
@@ -40,10 +43,10 @@ function get_player_compensation_level() {
     if (!file_exists($f)) return 0;
     $d = @json_decode(@file_get_contents($f), true);
     if (!is_array($d) || !isset($d['level'])) return 0;
-    return max(-10, min(10, intval($d['level'])));
+    return max(-COMP_MAX, min(COMP_MAX, intval($d['level'])));
 }
 function save_player_compensation_level($level) {
-    $level = max(-10, min(10, intval($level)));
+    $level = max(-COMP_MAX, min(COMP_MAX, intval($level)));
     @file_put_contents(_player_compensation_file(), json_encode(['level' => $level]));
     return $level;
 }
@@ -88,16 +91,20 @@ if (array_key_exists('cmd', $_REQUEST)) {
     elseif ($l_cmd === 'start_first')  { start_first_mpc(); }
     elseif ($l_cmd === 'reset_volume') { reset_initial_volume_bs5(); }
     elseif ($l_cmd === 'comp_inc') {
-        $level = save_player_compensation_level(get_player_compensation_level() + 1);
-        _compensation_step_stronger();
+        $cur = get_player_compensation_level();
+        $new = save_player_compensation_level($cur + COMP_STEP);
+        $diff = $new - $cur;
+        for ($i = 0; $i < $diff; $i++) _compensation_step_stronger();
         header('Content-Type: application/json');
-        echo json_encode(['level' => $level]);
+        echo json_encode(['level' => $new]);
     }
     elseif ($l_cmd === 'comp_dec') {
-        $level = save_player_compensation_level(get_player_compensation_level() - 1);
-        _compensation_step_weaker();
+        $cur = get_player_compensation_level();
+        $new = save_player_compensation_level($cur - COMP_STEP);
+        $diff = $cur - $new;
+        for ($i = 0; $i < $diff; $i++) _compensation_step_weaker();
         header('Content-Type: application/json');
-        echo json_encode(['level' => $level]);
+        echo json_encode(['level' => $new]);
     }
     elseif ($l_cmd === 'comp_reset') {
         save_player_compensation_level(0);
