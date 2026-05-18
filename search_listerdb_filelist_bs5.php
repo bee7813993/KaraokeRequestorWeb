@@ -195,7 +195,7 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         }
         echo '<span>' . formatBytes($fi['found_file_size']) . '</span>';
         echo '<span>' . fmt_date_bs5($fi['found_last_write_time']) . '</span>';
-        if (!empty($fi['found_worker'])) echo '<span class="ms-auto text-nowrap"><span class="text-muted">動画制作者:</span>&nbsp;<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="text-decoration-none" style="color:var(--color-accent-secondary);">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a></span>';
+        if (!empty($fi['found_worker'])) echo '<span class="ms-auto text-nowrap"><span class="text-muted">動画制作者:</span>&nbsp;<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="text-decoration-none fw-semibold" style="color:var(--color-accent-secondary);">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a></span>';
         echo mypage_action_links($fi['found_path'], $fname);
         echo '</div>';
         echo '</div>';
@@ -427,7 +427,7 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
           <span><?php echo formatBytes($program['found_file_size']); ?></span>
           <span><?php echo fmt_date_bs5($program['found_last_write_time']); ?></span>
           <?php if (!empty($program['found_worker'])): ?>
-            <span class="ms-auto text-nowrap"><span class="text-muted">動画制作者:</span>&nbsp;<a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="text-decoration-none" style="color:var(--color-accent-secondary);"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a></span>
+            <span class="ms-auto text-nowrap"><span class="text-muted">動画制作者:</span>&nbsp;<a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="text-decoration-none fw-semibold" style="color:var(--color-accent-secondary);"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a></span>
           <?php endif; ?>
           <?php echo mypage_action_links($program['found_path'], $display); ?>
         </div>
