@@ -1,6 +1,11 @@
 <?php
 require_once 'commonfunc.php';
 
+if (check_access_from_online() && !configbool('online_preview', false)) {
+    http_response_code(403);
+    exit;
+}
+
 $filepath = isset($_GET['path']) ? $_GET['path'] : '';
 if (empty($filepath)) {
     http_response_code(400);

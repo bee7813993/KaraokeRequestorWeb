@@ -106,7 +106,7 @@ function isSocketListening_bs5($host, $port, $timeout = 1) {
     fclose($sock);
     return true;
 }
-$listerpreviewportenable = true;
+$listerpreviewportenable = !check_access_from_online() || configbool('online_preview', false);
 
 function make_preview_modal_bs5($filepath, $modalid) {
     $ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
