@@ -130,7 +130,23 @@ mypage_action_script();
 <?php showuppermenu('', $linkoptionbare); ?>
 
 <div class="container py-3">
-<?php build_breadcrumbs_bs5($crumbs); ?>
+<?php
+if      (!empty($song_name))    { $_kp = 'song_name';    $_kv = $song_name; }
+elseif  (!empty($artist))       { $_kp = 'artist';       $_kv = $artist; }
+elseif  (!empty($program_name)) { $_kp = 'program_name'; $_kv = $program_name; }
+elseif  (!empty($maker_name))   { $_kp = 'maker_name';   $_kv = $maker_name; }
+else                            { $_kp = ''; $_kv = ''; }
+$_kw_savelink = '';
+if (!empty($_kv)) {
+    $_sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    $_kw_sp = 'param=' . $_kp . (!empty($_sp) ? '&' . $_sp : '') . (!empty($match) ? '&match=' . urlencode($match) : '');
+    $_kw_savelink = mypage_save_keyword_link($_kv, 'listerdb_songlist', $_kw_sp);
+}
+?>
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <?php build_breadcrumbs_bs5($crumbs); ?>
+  <?php if (!empty($_kw_savelink)): ?><small class="text-muted"><?php echo $_kw_savelink; ?></small><?php endif; ?>
+</div>
 <?php if (!empty($errmsg)): ?>
   <div class="notice-box" role="alert"><?php echo htmlspecialchars($errmsg, ENT_QUOTES, 'UTF-8'); ?></div>
 <?php else: ?>
@@ -161,18 +177,6 @@ mypage_action_script();
         <?php if (!empty($selectid)): ?><input type="hidden" name="selectid" value="<?php echo htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
         <button type="submit" class="btn-secondary-themed">再検索</button>
       </form>
-      <?php
-      if      (!empty($song_name))    { $_kp = 'song_name';    $_kv = $song_name; }
-      elseif  (!empty($artist))       { $_kp = 'artist';       $_kv = $artist; }
-      elseif  (!empty($program_name)) { $_kp = 'program_name'; $_kv = $program_name; }
-      elseif  (!empty($maker_name))   { $_kp = 'maker_name';   $_kv = $maker_name; }
-      else                            { $_kp = ''; $_kv = ''; }
-      if (!empty($_kv)) {
-          $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
-          $kw_sp = 'param=' . $_kp . (!empty($sp) ? '&' . $sp : '') . (!empty($match) ? '&match=' . urlencode($match) : '');
-          echo mypage_save_keyword_link($_kv, 'listerdb_songlist', $kw_sp);
-      }
-      ?>
     </div>
   </div>
 </div>

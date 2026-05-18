@@ -63,6 +63,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'unlink') {
     exit;
 }
 
+// 自動同期 オン/オフ切り替え
+if (isset($_POST['action']) && $_POST['action'] === 'set_auto_sync') {
+    $mypage->setGoogleAutoSync(!empty($_POST['auto_sync']));
+    header('Location: mypage_google_sync.php');
+    exit;
+}
+
 // 手動同期（Drive → ローカル merge）
 if (isset($_POST['action']) && $_POST['action'] === 'sync_from_drive') {
     $link = $mypage->getGoogleLink();
@@ -170,6 +177,26 @@ $link = $mypage->getGoogleLink(); // 最新状態を再取得
             <span class="glyphicon glyphicon-download-alt"></span>
             DriveのデータをこのサーバーにMerge
           </button>
+        </form>
+      </div>
+
+      <div style="margin-top:14px;">
+        <form method="POST" action="mypage_google_sync.php">
+          <input type="hidden" name="action" value="set_auto_sync" />
+          <?php if (!empty($link['auto_sync'])): ?>
+            <p><span class="label label-success">自動同期: ON</span>
+            &nbsp;お気に入り・検索ワードを追加・削除するたびに自動でDriveに保存されます。</p>
+            <button type="submit" class="btn btn-default btn-sm">自動同期を無効にする</button>
+          <?php else: ?>
+            <p><span class="label label-default">自動同期: OFF</span></p>
+            <button type="submit" name="auto_sync" value="1" class="btn btn-success btn-sm">
+              <span class="glyphicon glyphicon-refresh"></span>
+              自動同期を有効にする
+            </button>
+            <p class="text-muted" style="margin-top:6px;font-size:12px;">
+              有効にすると、お気に入り・検索ワードの追加・削除のたびに自動でDriveに保存されます。
+            </p>
+          <?php endif; ?>
         </form>
       </div>
 
