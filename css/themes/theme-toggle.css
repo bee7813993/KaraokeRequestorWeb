@@ -2,13 +2,35 @@
    テーマ切り替え: ダークモード / 大文字モード
    data-theme="dark"     → ダークモード
    data-fontsize="large" → 大文字モード
-   theme-changing        → 切り替えアニメーション中
+   theme-changing        → 切り替えアニメーション中（JS が付与）
    ========================================================== */
 
 /* ============================================================
-   テーマ切り替えトランジション
-   .theme-changing クラスが付いている間だけ有効化する
+   ページ背景の ::before レイヤー
+   body::before に背景色・背景画像を移し、ダークモード時に
+   CSS filter: brightness() で自動暗転する。
+   body 本体の背景はダークモードで transparent に切り替える。
    ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--bg-page, #F8ECE0);
+  background-image: var(--bg-page-image, none);
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* ============================================================
+   切り替えトランジション
+   .theme-changing が付いている間だけ有効にすることで、
+   hover 等の通常 UI アニメーションには影響しない。
+   ============================================================ */
+.theme-changing body::before {
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+
 .theme-changing body,
 .theme-changing .request-card,
 .theme-changing .card,
@@ -59,6 +81,15 @@
   --color-index-btn: #cccccc;
   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.45);
   --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.65);
+}
+
+/* ダークモード: ページ背景を filter で暗転 */
+[data-theme="dark"] body {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+[data-theme="dark"] body::before {
+  filter: brightness(0.18) saturate(0.4);
 }
 
 /* --- ダークモード: Bootstrap ドロップダウン --- */
@@ -306,8 +337,8 @@
 [data-fontsize="large"] .card-main          { padding: 14px 16px; gap: 14px; }
 
 /* ナビバーは大文字モードでも固定サイズ（レイアウト崩れ防止） */
-[data-fontsize="large"] .navbar       { font-size: 1rem; }
-[data-fontsize="large"] .navbar-theme-btn { font-size: 0.9rem; }
+[data-fontsize="large"] .navbar             { font-size: 1rem; }
+[data-fontsize="large"] .navbar-theme-btn   { font-size: 0.9rem; }
 
 /* ============================================================
    ナビバー内テーマ切り替えボタン

@@ -3,10 +3,10 @@
   if (window.__ykThemeToggle) return;
   window.__ykThemeToggle = true;
 
-  var THEME_KEY = 'ykari-theme';
-  var FONT_KEY  = 'ykari-fontsize';
+  var THEME_KEY     = 'ykari-theme';
+  var FONT_KEY      = 'ykari-fontsize';
   var TRANSITION_MS = 350;
-  var _transTimer = null;
+  var _transTimer   = null;
 
   function load(key, def) {
     try { return localStorage.getItem(key) || def; } catch (e) { return def; }
@@ -21,10 +21,21 @@
   document.documentElement.setAttribute('data-theme',    theme);
   document.documentElement.setAttribute('data-fontsize', fontsize);
 
-  // テーマ切り替え時に一時的に transition クラスを付与してアニメーションを有効化
+  // DOMContentLoaded が既に発火済み（動的ロード時）でも動作するよう対応
+  function onReady(fn) {
+    if (document.readyState !== 'loading') {
+      fn();
+    } else {
+      document.addEventListener('DOMContentLoaded', fn);
+    }
+  }
+
+  // theme-changing クラスを付与してトランジションを有効化する。
+  // void offsetHeight でリフローを強制し、クラス追加と属性変更が別フレームになるよう保証する。
   function withTransition(fn) {
     if (_transTimer) clearTimeout(_transTimer);
     document.documentElement.classList.add('theme-changing');
+    void document.documentElement.offsetHeight; // force reflow
     fn();
     _transTimer = setTimeout(function () {
       document.documentElement.classList.remove('theme-changing');
@@ -52,7 +63,7 @@
     btn.setAttribute('aria-pressed', isLarge ? 'true' : 'false');
   }
 
-  document.addEventListener('DOMContentLoaded', function () {
+  onReady(function () {
     var themeBtn    = document.getElementById('yk-theme-btn');
     var fontsizeBtn = document.getElementById('yk-fontsize-btn');
 
