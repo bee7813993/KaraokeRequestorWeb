@@ -21,7 +21,8 @@ if (!isset($mime_map[$ext])) {
 }
 $mime = $mime_map[$ext];
 
-// ゆかりすたー(13582)への候補URL。バックスラッシュをスラッシュ変換版とURLエンコード版を両方試みる
+// ゆかりすたー(13582)への候補URL
+// バックスラッシュをスラッシュ変換版とそのまま urlencode 版を両方試みる
 $filepath_fwd = str_replace('\\', '/', $filepath);
 $candidate_urls = [
     'http://127.0.0.1:13582/' . str_replace('%2F', '/', rawurlencode($filepath_fwd)),
@@ -32,23 +33,20 @@ $candidate_urls = [
 $filesize = 0;
 $chosen_url = null;
 foreach ($candidate_urls as $url) {
-    $hctx = stream_context_create(['http' => [
-        'method'          => 'HEAD',
-        'ignore_errors'   => true,
-        'timeout'         => 3,
-    ]]);
-    $hfp = @fopen($url, 'rb', false, $hctx);
-    if (!$hfp) continue;
-    $meta    = stream_get_meta_data($hfp);
-    $headers = $meta['wrapper_data'] ?? [];
-    fclose($hfp);
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_NOBODY         => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 3,
+        CURLOPT_FOLLOWLOCATION => true,
+    ]);
+    curl_exec($ch);
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $clen   = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
+    curl_close($ch);
 
-    $status = 0;
-    foreach ($headers as $h) {
-        if (preg_match('#^HTTP/[\d.]+ (\d+)#i', $h, $m)) { $status = (int)$m[1]; }
-        if (preg_match('/^Content-Length:\s*(\d+)/i', $h, $m)) { $filesize = (int)$m[1]; }
-    }
-    if ($status === 200 && $filesize > 0) {
+    if ($status === 200 && $clen > 0) {
+        $filesize   = (int)$clen;
         $chosen_url = $url;
         break;
     }
@@ -87,32 +85,35 @@ if (isset($_SERVER['HTTP_RANGE'])) {
 $length = $end - $start + 1;
 header('Content-Length: ' . $length);
 
-// GETストリームを開いて$startまで読み捨て、$length分を転送
-$gctx = stream_context_create(['http' => [
-    'method'        => 'GET',
-    'ignore_errors' => true,
-    'timeout'       => 30,
-]]);
-$fp = @fopen($chosen_url, 'rb', false, $gctx);
-if (!$fp) {
-    http_response_code(502);
-    exit;
-}
-
-// $startバイト分を読み捨て（ローカルホストなので許容範囲内）
-$skip = $start;
-while ($skip > 0 && !feof($fp)) {
-    $chunk = fread($fp, min(65536, $skip));
-    if ($chunk === false) break;
-    $skip -= strlen($chunk);
-}
-
+// curlコールバックで $start バイト分を読み捨て、$length 分だけ転送
+$skip      = $start;
 $remaining = $length;
-while ($remaining > 0 && !feof($fp)) {
-    $chunk = fread($fp, min(65536, $remaining));
-    if ($chunk === false) break;
-    echo $chunk;
-    $remaining -= strlen($chunk);
-    flush();
-}
-fclose($fp);
+$ch = curl_init($chosen_url);
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => false,
+    CURLOPT_TIMEOUT        => 300,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_WRITEFUNCTION  => function ($ch, $data) use (&$skip, &$remaining) {
+        $len = strlen($data);
+        if ($skip >= $len) {
+            $skip -= $len;
+            return $len;
+        }
+        if ($skip > 0) {
+            $data = substr($data, $skip);
+            $skip = 0;
+        }
+        if ($remaining <= 0) {
+            return $len;
+        }
+        if (strlen($data) > $remaining) {
+            $data = substr($data, 0, $remaining);
+        }
+        echo $data;
+        flush();
+        $remaining -= strlen($data);
+        return $len;
+    },
+]);
+curl_exec($ch);
+curl_close($ch);
