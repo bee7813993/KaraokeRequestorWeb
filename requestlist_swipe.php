@@ -55,8 +55,31 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   background: #fff;
+  border-left: 4px solid #ced4da;
   -webkit-user-select: none;
   user-select: none;
+}
+/* 再生状況別の左ボーダー色 */
+.request-card[data-nowplaying="再生中"],
+.request-card[data-nowplaying="2"] {
+  border-left-color: var(--bs-success);
+  background: #f6fff8;
+}
+.request-card[data-nowplaying="再生開始待ち"],
+.request-card[data-nowplaying="6"] {
+  border-left-color: var(--bs-warning);
+  background: #fffef5;
+}
+.request-card[data-nowplaying="停止中"],
+.request-card[data-nowplaying="3"] {
+  border-left-color: var(--bs-warning);
+}
+.request-card[data-nowplaying="再生済"],
+.request-card[data-nowplaying="再生済？"],
+.request-card[data-nowplaying="4"],
+.request-card[data-nowplaying="5"] {
+  border-left-color: #adb5bd;
+  background: #f8f9fa;
 }
 
 /* スワイプで現れるアクションボタン群 */
@@ -93,7 +116,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .card-main {
   position: relative;
   z-index: 2;
-  background: #fff;
+  background: inherit;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -113,7 +136,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .drag-handle {
   flex-shrink: 0;
   font-size: 20px;
-  color: #bbb;
+  color: #999;
   cursor: grab;
   padding: 0 2px;
   touch-action: none;
@@ -127,19 +150,21 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   min-width: 0;
 }
 .card-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: bold;
+  color: #212529;
   word-break: break-all;
   line-height: 1.4;
 }
 .card-meta {
-  font-size: 16px;
-  color: #555;
+  font-size: 14px;
+  color: #444;
   margin-top: 4px;
 }
 .card-label {
-  color: #aaa;
-  font-size: 13px;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 /* 右カラム（バッジ＋曲終了ボタン） */
@@ -162,13 +187,17 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 /* コメント欄 */
 .card-comment-area {
   font-size: 13px;
-  color: #555;
+  color: #444;
   cursor: pointer;
-  padding: 2px 0;
-  min-height: 18px;
+  padding: 3px 6px;
+  min-height: 22px;
+  margin-top: 4px;
+  background: #f1f3f5;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
 }
-.card-comment-area:hover { color: var(--bs-primary); text-decoration: underline; }
-.card-comment-placeholder { color: #bbb; font-style: italic; }
+.card-comment-area:hover { color: var(--bs-primary); border-color: var(--bs-primary); }
+.card-comment-placeholder { color: #999; font-style: italic; }
 /* Tweet リンク */
 .card-tweet-link {
   font-size: 11px;
@@ -228,7 +257,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 
 #empty-msg {
   text-align: center;
-  color: #aaa;
+  color: #888;
   padding: 30px 0;
   font-size: 15px;
 }
@@ -240,7 +269,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 /* 統計バー */
 #stats-bar {
   font-size: 13px;
-  color: #555;
+  color: #444;
   background: #fff;
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
@@ -249,9 +278,10 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
+  border: 1px solid #e9ecef;
 }
 .stats-item { white-space: nowrap; }
-.stats-val   { font-weight: bold; color: #333; }
+.stats-val   { font-weight: bold; color: #212529; }
 
 /* カード左側（番号＋ドラッグハンドル） */
 .card-left {
@@ -263,13 +293,13 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   min-width: 28px;
 }
 .card-num {
-  font-size: 10px;
-  color: #ccc;
+  font-size: 11px;
+  color: #888;
   line-height: 1;
   font-weight: bold;
 }
 .card-duration {
-  color: #888;
+  color: #666;
   font-size: 13px;
 }
 </style>
