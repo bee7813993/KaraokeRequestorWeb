@@ -120,23 +120,16 @@ function make_preview_modal_bs5($filepath, $modalid) {
     $js  = '<script>document.addEventListener("DOMContentLoaded",function(){'
          . 'var el=document.getElementById("' . $modalid . '");'
          . 'if(!el)return;'
-         . 'var vp=null;'
-         . 'el.addEventListener("shown.bs.modal",function(){'
-         .   'if(!vp){'
-         .     'vp=videojs("preview_video_' . $modalid . 'a",{fluid:true},function(){this.trigger("resize");});'
-         .   '}else{'
-         .     'vp.currentTime(0);vp.trigger("resize");'
-         .   '}'
-         . '});'
+         . 'var vid=document.getElementById("preview_video_' . $modalid . 'a");'
          . 'el.addEventListener("hidden.bs.modal",function(){'
-         .   'if(vp){vp.pause();vp.currentTime(0);}'
+         .   'if(vid){vid.pause();vid.currentTime=0;}'
          . '});'
          . '});</script>';
     $modal = '<div class="modal fade" id="' . $modalid . '" tabindex="-1">'
            . '<div class="modal-dialog modal-lg"><div class="modal-content">'
            . '<div class="modal-header"><h5 class="modal-title">動画プレビュー</h5>'
            . '<button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>'
-           . '<div class="modal-body p-0"><video id="preview_video_' . $modalid . 'a" class="video-js vjs-default-skin vjs-big-play-centered" controls muted playsinline preload="none">' . $sources . '</video></div>'
+           . '<div class="modal-body p-0"><video id="preview_video_' . $modalid . 'a" controls muted playsinline preload="none" style="width:100%;max-height:70vh;display:block;">' . $sources . '</video></div>'
            . '<div class="modal-footer"><button type="button" class="btn-secondary-themed" data-bs-dismiss="modal">閉じる</button></div>'
            . '</div></div></div>';
     return $btn . $js . $modal;
@@ -297,8 +290,6 @@ mypage_action_script();
 <?php print_meta_header(); ?>
 <title>ファイル一覧</title>
 <?php print_bs5_search_head(); ?>
-<link href="js/video-js.min.css" rel="stylesheet">
-<script src="js/video.min.js"></script>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('searchreserve.php'); ?>
