@@ -34,9 +34,12 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires"       content="0">
 <title><?php echo htmlspecialchars($titlePrefix, ENT_QUOTES, 'UTF-8'); ?>リクエスト一覧</title>
+<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
 <link href="css/style.css"                    rel="stylesheet">
+<link href="css/themes/theme-toggle.css"      rel="stylesheet">
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="js/theme-toggle.js"></script>
 <!-- SortableJS: js/Sortable.min.js に配置してください。取得先: https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js -->
 <script src="js/Sortable.min.js"></script>
 <style>

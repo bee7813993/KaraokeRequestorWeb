@@ -174,6 +174,45 @@
   background-color: #495057 !important;
 }
 
+/* --- ダークモード: requestlist_swipe カード --- */
+[data-theme="dark"] .request-card {
+  background: #1e1e2e;
+  border-left-color: #4a4a6a;
+  color: #e2e2e2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .request-card[data-nowplaying="再生中"],
+[data-theme="dark"] .request-card[data-nowplaying="2"] {
+  background: #1a2e1e;
+}
+[data-theme="dark"] .request-card[data-nowplaying="再生開始待ち"],
+[data-theme="dark"] .request-card[data-nowplaying="6"] {
+  background: #2e2a14;
+}
+[data-theme="dark"] .request-card[data-nowplaying="再生済"],
+[data-theme="dark"] .request-card[data-nowplaying="再生済？"],
+[data-theme="dark"] .request-card[data-nowplaying="4"],
+[data-theme="dark"] .request-card[data-nowplaying="5"] {
+  background: #252535;
+}
+[data-theme="dark"] .card-title { color: #e2e2e2; }
+[data-theme="dark"] .card-meta  { color: #b0b0c0; }
+[data-theme="dark"] .card-label { color: #9090a0; }
+[data-theme="dark"] .card-num   { color: #9090a0; }
+[data-theme="dark"] .drag-handle { color: #6060a0; }
+[data-theme="dark"] #stats-bar {
+  background: #1e1e2e;
+  border-color: #3d3d5c;
+  color: #b0b0c0;
+}
+[data-theme="dark"] .stats-val { color: #e2e2e2; }
+[data-theme="dark"] .card-comment-area {
+  background: #252535;
+  border-color: #3d3d5c;
+  color: #9090a0;
+}
+[data-theme="dark"] .card-tweet-link { color: #5bc0f8; }
+
 /* --- ダークモード: DataTables --- */
 [data-theme="dark"] .dataTables_wrapper .dataTables_filter input,
 [data-theme="dark"] .dataTables_wrapper .dataTables_length select {
@@ -200,6 +239,19 @@
 [data-fontsize="large"] {
   font-size: 20px;
 }
+
+/* requestlist_swipe: 固定px指定を上書きして大文字化（セレクタ詳細度で勝つ） */
+[data-fontsize="large"] #stats-bar          { font-size: 17px; }
+[data-fontsize="large"] .stats-item         { font-size: 17px; }
+[data-fontsize="large"] .card-title         { font-size: 20px; }
+[data-fontsize="large"] .card-meta          { font-size: 18px; }
+[data-fontsize="large"] .card-label         { font-size: 15px; }
+[data-fontsize="large"] .meta-chip          { font-size: 15px; padding: 3px 10px; }
+[data-fontsize="large"] .card-comment-area  { font-size: 15px; min-height: 32px; }
+[data-fontsize="large"] .card-tweet-link    { font-size: 14px; }
+[data-fontsize="large"] .card-num           { font-size: 17px; }
+[data-fontsize="large"] .card-ctrl-btn      { font-size: 15px; padding: 3px 10px; }
+[data-fontsize="large"] .card-main          { padding: 12px 14px; gap: 12px; }
 
 /* ナビバーは大文字モードで少し抑える（レイアウト崩れ防止） */
 [data-fontsize="large"] .navbar {
