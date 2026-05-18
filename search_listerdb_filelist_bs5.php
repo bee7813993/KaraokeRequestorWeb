@@ -188,8 +188,10 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         echo '<div class="fw-semibold text-break mb-1">' . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '</div>';
         echo '<div class="d-flex flex-wrap align-items-center gap-2" style="font-size:0.78rem;color:var(--color-text-muted);">';
         if (!empty($fi['found_track'])) {
-            if ($fi['found_smart_track_on']  == 1) echo '<span class="badge bg-success">OnVocal</span>';
-            if ($fi['found_smart_track_off'] == 1) echo '<span class="badge bg-secondary">OffVocal</span>';
+            $vocal_badges = '';
+            if ($fi['found_smart_track_on']  == 1) $vocal_badges .= '<span class="badge bg-success">OnVocal</span>';
+            if ($fi['found_smart_track_off'] == 1) $vocal_badges .= '<span class="badge bg-secondary">OffVocal</span>';
+            if ($vocal_badges) echo '<span class="text-nowrap d-inline-flex gap-1">' . $vocal_badges . '</span>';
         }
         echo '<span>' . formatBytes($fi['found_file_size']) . '</span>';
         echo '<span>' . fmt_date_bs5($fi['found_last_write_time']) . '</span>';
@@ -415,8 +417,12 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
             <?php endforeach; ?>
           <?php endif; ?>
           <?php if (!empty($program['found_track'])): ?>
-            <?php if ($program['found_smart_track_on']  == 1) echo '<span class="badge bg-success">OnVocal</span>'; ?>
-            <?php if ($program['found_smart_track_off'] == 1) echo '<span class="badge bg-secondary">OffVocal</span>'; ?>
+            <?php
+            $vocal_badges = '';
+            if ($program['found_smart_track_on']  == 1) $vocal_badges .= '<span class="badge bg-success">OnVocal</span>';
+            if ($program['found_smart_track_off'] == 1) $vocal_badges .= '<span class="badge bg-secondary">OffVocal</span>';
+            if ($vocal_badges) echo '<span class="text-nowrap d-inline-flex gap-1">' . $vocal_badges . '</span>';
+            ?>
           <?php endif; ?>
           <span><?php echo formatBytes($program['found_file_size']); ?></span>
           <span><?php echo fmt_date_bs5($program['found_last_write_time']); ?></span>
