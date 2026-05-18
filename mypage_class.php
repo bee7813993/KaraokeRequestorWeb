@@ -86,7 +86,8 @@ class MypageUser {
             $this->db->exec("ALTER TABLE mypage_user ADD COLUMN icon_path TEXT DEFAULT ''");
         } catch (Exception $e) {}
         try {
-            $this->db->exec("ALTER TABLE mypage_google_link ADD COLUMN auto_sync INTEGER NOT NULL DEFAULT 0");
+            $this->db->exec("ALTER TABLE mypage_google_link ADD COLUMN auto_sync INTEGER NOT NULL DEFAULT 1");
+            $this->db->exec("UPDATE mypage_google_link SET auto_sync=1");
         } catch (Exception $e) {}
         // Migrate: expand UNIQUE constraint on mypage_favorite_keyword to include search_params
         $row = $this->db->query(
@@ -776,8 +777,8 @@ class MypageUser {
     public function linkGoogle($google_sub, $email, $access_token, $refresh_token, $expires_at) {
         $stmt = $this->db->prepare(
             "INSERT OR REPLACE INTO mypage_google_link
-             (userid, google_sub, google_email, access_token, refresh_token, token_expires_at, linked_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
+             (userid, google_sub, google_email, access_token, refresh_token, token_expires_at, linked_at, auto_sync)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1)"
         );
         $stmt->execute([$this->userid, $google_sub, $email, $access_token, $refresh_token, $expires_at, time()]);
     }
