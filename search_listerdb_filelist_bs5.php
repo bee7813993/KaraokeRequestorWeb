@@ -119,14 +119,21 @@ function make_preview_modal_bs5($filepath, $modalid) {
     $btn = '<a href="#" data-bs-toggle="modal" data-bs-target="#' . $modalid . '" class="btn-secondary-themed" style="font-size:0.8rem;padding:4px 10px;">プレビュー</a>';
     $js  = '<script>document.addEventListener("DOMContentLoaded",function(){'
          . 'var el=document.getElementById("' . $modalid . '");'
-         . 'if(el)el.addEventListener("hidden.bs.modal",function(){'
-         . 'if(typeof videojs!=="undefined"){try{videojs("preview_video_' . $modalid . 'a").pause();}catch(e){}}'
-         . '});});</script>';
+         . 'if(!el)return;'
+         . 'var vp=null;'
+         . 'el.addEventListener("shown.bs.modal",function(){'
+         .   'if(!vp){vp=videojs("preview_video_' . $modalid . 'a",{},function(){});}'
+         .   'else{vp.currentTime(0);}'
+         . '});'
+         . 'el.addEventListener("hidden.bs.modal",function(){'
+         .   'if(vp){vp.pause();vp.currentTime(0);}'
+         . '});'
+         . '});</script>';
     $modal = '<div class="modal fade" id="' . $modalid . '" tabindex="-1">'
            . '<div class="modal-dialog"><div class="modal-content">'
            . '<div class="modal-header"><h5 class="modal-title">動画プレビュー</h5>'
            . '<button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>'
-           . '<div class="modal-body"><video id="preview_video_' . $modalid . 'a" class="video-js vjs-default-skin" controls muted playsinline preload="none" data-setup="{}" style="width:100%;max-width:480px;height:auto;">' . $sources . '</video></div>'
+           . '<div class="modal-body"><video id="preview_video_' . $modalid . 'a" class="video-js vjs-default-skin" controls muted playsinline preload="none" style="width:100%;max-width:480px;height:auto;">' . $sources . '</video></div>'
            . '<div class="modal-footer"><button type="button" class="btn-secondary-themed" data-bs-dismiss="modal">閉じる</button></div>'
            . '</div></div></div>';
     return $btn . $js . $modal;
@@ -433,7 +440,7 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
         </div>
         <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
-      <?php if (!check_access_from_online()): ?>
+      <?php if ($listerpreviewportenable): ?>
         <?php $pm = make_preview_modal_bs5($program['found_path'], 'pm_m_' . $k); ?>
         <?php if ($pm): ?><div class="flex-shrink-0 mt-1"><?php echo $pm; ?></div><?php endif; ?>
       <?php endif; ?>
