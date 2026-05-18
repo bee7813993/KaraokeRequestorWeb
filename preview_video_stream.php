@@ -21,43 +21,98 @@ if (!isset($mime_map[$ext])) {
 }
 $mime = $mime_map[$ext];
 
-// ゆかりすたー(13582)への候補URL
-// バックスラッシュをスラッシュ変換版とそのまま urlencode 版を両方試みる
+// ゆかりすたー(13582)へのリクエストパス候補
+// urlencode: \ → %5C、: → %3A、日本語 → %XX、スペース → +
+// rawurlencode + スラッシュ変換: \ → /、: → %3A、日本語 → %XX
 $filepath_fwd = str_replace('\\', '/', $filepath);
-$candidate_urls = [
-    'http://localhost:13582/' . str_replace('%2F', '/', rawurlencode($filepath_fwd)),
-    'http://localhost:13582/' . urlencode($filepath),
+$candidate_paths = [
+    '/' . urlencode($filepath),
+    '/' . str_replace('%2F', '/', rawurlencode($filepath_fwd)),
 ];
 
-// HEADリクエストでファイル存在確認とContent-Length取得
-$filesize = 0;
-$chosen_url = null;
-foreach ($candidate_urls as $url) {
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_NOBODY         => true,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 3,
-        CURLOPT_FOLLOWLOCATION => true,
-    ]);
-    curl_exec($ch);
-    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $clen   = curl_getinfo($ch, CURLINFO_CONTENT_LENGTH_DOWNLOAD);
-    curl_close($ch);
+/**
+ * fsockopen でゆかりすたーに生 HTTP/1.0 リクエストを送り、
+ * ステータスコード・ヘッダ・本体ストリームを返す。
+ * libcurl の URL 正規化を回避するために使用。
+ */
+function yukari_open($req_path, $method = 'HEAD') {
+    foreach (['localhost', '127.0.0.1'] as $host) {
+        $fp = @fsockopen($host, 13582, $errno, $errstr, 3);
+        if (!$fp) continue;
 
-    if ($status === 200 && $clen > 0) {
-        $filesize   = (int)$clen;
-        $chosen_url = $url;
-        break;
+        $req = "$method $req_path HTTP/1.0\r\n"
+             . "Host: $host:13582\r\n"
+             . "Connection: close\r\n"
+             . "\r\n";
+        fwrite($fp, $req);
+
+        // ステータス行
+        $status_line = fgets($fp, 512);
+        if (!preg_match('#HTTP/[\d.]+ (\d+)#', $status_line, $m)) {
+            fclose($fp);
+            continue;
+        }
+        $status = (int)$m[1];
+
+        // ヘッダ読み取り
+        $headers = [];
+        while (!feof($fp)) {
+            $line = rtrim(fgets($fp, 4096), "\r\n");
+            if ($line === '') break;
+            $headers[] = $line;
+        }
+        return ['fp' => $fp, 'status' => $status, 'headers' => $headers];
+    }
+    return null;
+}
+
+function parse_content_length($headers) {
+    foreach ($headers as $h) {
+        if (preg_match('/^Content-Length:\s*(\d+)/i', $h, $m)) {
+            return (int)$m[1];
+        }
+    }
+    return 0;
+}
+
+// HEAD で存在確認とファイルサイズ取得
+$filesize   = 0;
+$chosen_path = null;
+foreach ($candidate_paths as $req_path) {
+    $res = yukari_open($req_path, 'HEAD');
+    if (!$res) continue;
+    fclose($res['fp']);
+    if ($res['status'] === 200) {
+        $clen = parse_content_length($res['headers']);
+        if ($clen > 0) {
+            $filesize    = $clen;
+            $chosen_path = $req_path;
+            break;
+        }
+        // Content-Length なしでも 200 なら候補として保持し GET で再確認
+        if ($chosen_path === null) {
+            $chosen_path = $req_path;
+        }
     }
 }
 
-if ($chosen_url === null || $filesize === 0) {
+// HEAD で Content-Length が取れなかった場合 GET で再確認
+if ($chosen_path !== null && $filesize === 0) {
+    $res = yukari_open($chosen_path, 'GET');
+    if ($res) {
+        if ($res['status'] === 200) {
+            $filesize = parse_content_length($res['headers']);
+        }
+        fclose($res['fp']);
+    }
+}
+
+if ($chosen_path === null || $filesize === 0) {
     http_response_code(404);
     exit;
 }
 
-// Rangeリクエスト解析
+// Range リクエスト解析
 $start = 0;
 $end   = $filesize - 1;
 
@@ -85,35 +140,27 @@ if (isset($_SERVER['HTTP_RANGE'])) {
 $length = $end - $start + 1;
 header('Content-Length: ' . $length);
 
-// curlコールバックで $start バイト分を読み捨て、$length 分だけ転送
-$skip      = $start;
+// GET ストリームを開いて $start バイト読み捨て → $length バイト転送
+$res = yukari_open($chosen_path, 'GET');
+if (!$res || $res['status'] !== 200) {
+    http_response_code(502);
+    exit;
+}
+$fp = $res['fp'];
+
+$skip = $start;
+while ($skip > 0 && !feof($fp)) {
+    $chunk = fread($fp, min(65536, $skip));
+    if ($chunk === false || $chunk === '') break;
+    $skip -= strlen($chunk);
+}
+
 $remaining = $length;
-$ch = curl_init($chosen_url);
-curl_setopt_array($ch, [
-    CURLOPT_RETURNTRANSFER => false,
-    CURLOPT_TIMEOUT        => 300,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_WRITEFUNCTION  => function ($ch, $data) use (&$skip, &$remaining) {
-        $len = strlen($data);
-        if ($skip >= $len) {
-            $skip -= $len;
-            return $len;
-        }
-        if ($skip > 0) {
-            $data = substr($data, $skip);
-            $skip = 0;
-        }
-        if ($remaining <= 0) {
-            return $len;
-        }
-        if (strlen($data) > $remaining) {
-            $data = substr($data, 0, $remaining);
-        }
-        echo $data;
-        flush();
-        $remaining -= strlen($data);
-        return $len;
-    },
-]);
-curl_exec($ch);
-curl_close($ch);
+while ($remaining > 0 && !feof($fp)) {
+    $chunk = fread($fp, min(65536, $remaining));
+    if ($chunk === false || $chunk === '') break;
+    echo $chunk;
+    $remaining -= strlen($chunk);
+    flush();
+}
+fclose($fp);
