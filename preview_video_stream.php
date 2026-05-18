@@ -25,8 +25,8 @@ $mime = $mime_map[$ext];
 // バックスラッシュをスラッシュ変換版とそのまま urlencode 版を両方試みる
 $filepath_fwd = str_replace('\\', '/', $filepath);
 $candidate_urls = [
-    'http://127.0.0.1:13582/' . str_replace('%2F', '/', rawurlencode($filepath_fwd)),
-    'http://127.0.0.1:13582/' . urlencode($filepath),
+    'http://localhost:13582/' . str_replace('%2F', '/', rawurlencode($filepath_fwd)),
+    'http://localhost:13582/' . urlencode($filepath),
 ];
 
 // HEADリクエストでファイル存在確認とContent-Length取得
