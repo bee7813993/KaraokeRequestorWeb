@@ -13,6 +13,7 @@ class PlayerProgress {
     public $status = 0;
     public $playingtitle = "";
     public $playingfile = "";
+    public $playingsinger = "";
     public $playercommandname = "";
     
     
@@ -113,6 +114,7 @@ class PlayerProgress {
 
               $this->playingtitle = !empty($song_name) ? $song_name : $rowall[0]['songfile'];
               $this->playingfile = $rowall[0]['songfile'] ?? '';
+              $this->playingsinger = $rowall[0]['singer'] ?? '';
               break;
           }
         }
@@ -130,6 +132,7 @@ class PlayerProgress {
         $ret += array('status'=>$this->status);
         $ret += array('playingtitle'=>$this->playingtitle);
         $ret += array('playingfile'=>$this->playingfile);
+        $ret += array('playingsinger'=>$this->playingsinger);
 
         return json_encode($ret);
         }else {

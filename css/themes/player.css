@@ -160,6 +160,17 @@ body {
   color: #a0aec0;
 }
 
+.player-nowplaying-singer {
+  font-size: 0.8rem;
+  color: #a0aec0;
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+.player-nowplaying-singer::before {
+  content: '♪ ';
+  opacity: 0.7;
+}
+
 /* --- コントロールカード --- */
 .player-controls-card {
   background: var(--bg-card);
@@ -352,6 +363,21 @@ body {
   margin-top: 2px;
   font-style: italic;
   opacity: 0.8;
+}
+
+/* 更新ボタン (小) */
+.player-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  opacity: 0.65;
+  font-size: 0.78rem;
+  touch-action: manipulation;
+}
+.player-refresh-btn:hover,
+.player-refresh-btn:focus {
+  opacity: 1;
 }
 
 /* foobar 用 プレイヤー種別バッジ */

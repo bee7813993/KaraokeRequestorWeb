@@ -36,6 +36,22 @@ $ic_vol_u  = _fb_svg('<path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.
 
 <script src="foobarctrl.js"></script>
 
+<?php
+/* Now Playing の singer を DB から取得 */
+$_fb_singer = '';
+try {
+    global $db;
+    $_sql_np = "SELECT singer FROM requesttable WHERE nowplaying = '再生中' ORDER BY reqorder ASC LIMIT 1";
+    $_sel_np = $db->query($_sql_np);
+    if ($_sel_np) {
+        $_row_np = $_sel_np->fetch(PDO::FETCH_ASSOC);
+        $_sel_np->closeCursor();
+        if ($_row_np && !empty($_row_np['singer'])) {
+            $_fb_singer = htmlspecialchars($_row_np['singer'], ENT_QUOTES, 'UTF-8');
+        }
+    }
+} catch (Exception $e) { /* silent */ }
+?>
 <!-- === Now Playing カード (foobar) === -->
 <div class="card player-nowplaying mb-3">
   <div class="card-body p-3">
@@ -44,6 +60,9 @@ $ic_vol_u  = _fb_svg('<path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.
       <span class="player-kind-badge">foobar2000</span>
     </div>
     <div class="player-title text-muted" style="opacity:.6;">音楽再生中</div>
+    <?php if ($_fb_singer): ?>
+    <div class="player-nowplaying-singer"><?= $_fb_singer ?></div>
+    <?php endif; ?>
   </div>
 </div>
 
@@ -54,7 +73,7 @@ $ic_vol_u  = _fb_svg('<path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.
     <!-- 行1: 曲頭へ / 一時停止・再開 / 曲終了 -->
     <div class="row g-2 mb-2">
       <div class="col-4">
-        <button class="btn btn-outline-secondary player-btn player-btn-main w-100"
+        <button class="btn btn-outline-info player-btn player-btn-main w-100"
                 onclick="song_startfirst()" aria-label="曲の最初から">
           <?= $ic_skip_s ?>
           <span>曲頭へ</span>
@@ -68,7 +87,7 @@ $ic_vol_u  = _fb_svg('<path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.
         </button>
       </div>
       <div class="col-4">
-        <button class="btn btn-danger player-btn player-btn-main w-100"
+        <button class="btn btn-outline-secondary player-btn player-btn-main w-100"
                 onclick="foobar_cmd_songnext()" aria-label="曲終了">
           <?= $ic_skip_e ?>
           <span>曲終了</span>
@@ -80,14 +99,14 @@ $ic_vol_u  = _fb_svg('<path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.
     <div class="player-section-label">ボリューム</div>
     <div class="row g-2">
       <div class="col-6">
-        <button class="btn btn-outline-secondary player-btn w-100"
+        <button class="btn btn-outline-primary player-btn w-100"
                 onclick="song_vdown()" aria-label="ボリュームDOWN">
           <?= $ic_vol_d ?>
           <span class="small">Vol−</span>
         </button>
       </div>
       <div class="col-6">
-        <button class="btn btn-outline-secondary player-btn w-100"
+        <button class="btn btn-outline-primary player-btn w-100"
                 onclick="song_vup()" aria-label="ボリュームUP">
           <?= $ic_vol_u ?>
           <span class="small">Vol＋</span>
@@ -98,23 +117,14 @@ $ic_vol_u  = _fb_svg('<path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.
   </div>
 </div>
 
-<!-- === 再生開始 / 更新 === -->
-<div class="row g-2 mb-3">
-  <div class="col-6">
-    <button class="btn btn-success w-100 player-btn player-btn-main"
-            onclick="foobar_cmd_songstart()" aria-label="再生開始">
-      <?= $ic_play ?>
-      <span>再生開始</span>
-    </button>
-  </div>
-  <div class="col-6">
-    <a href="playerctrl_portal_bs5.php"
-       class="btn btn-outline-secondary w-100 player-btn player-btn-main"
-       aria-label="画面を更新">
-      <?= _fb_svg('<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>') ?>
-      <span>更新</span>
-    </a>
-  </div>
+<!-- === 更新 (小) === -->
+<div class="d-grid mb-2">
+  <a href="playerctrl_portal_bs5.php"
+     class="btn btn-sm btn-outline-secondary player-refresh-btn"
+     aria-label="画面を更新">
+    <?= _fb_svg('<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>', 14, 14) ?>
+    更新
+  </a>
 </div>
 
 <script src="js/player_bs5.js"></script>
