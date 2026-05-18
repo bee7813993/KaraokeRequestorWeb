@@ -113,9 +113,8 @@ function make_preview_modal_bs5($filepath, $modalid) {
     $ftmap = ['mp4' => 'video/mp4', 'flv' => 'video/x-flv'];
     if (!isset($ftmap[$ext])) return null;
     $filetype = $ftmap[$ext];
-    $furl1 = 'http://' . $_SERVER["SERVER_NAME"] . ':13582/' . urlencode($filepath);
-    $furl2 = 'http://' . $_SERVER["SERVER_NAME"] . ':13582/' . str_replace('\\', '/', $filepath);
-    $sources = '<source src="' . htmlspecialchars($furl1, ENT_QUOTES, 'UTF-8') . '" type="' . $filetype . '"><source src="' . htmlspecialchars($furl2, ENT_QUOTES, 'UTF-8') . '" type="' . $filetype . '">';
+    $furl    = 'preview_video_stream.php?path=' . urlencode($filepath);
+    $sources = '<source src="' . htmlspecialchars($furl, ENT_QUOTES, 'UTF-8') . '" type="' . $filetype . '">';
     $btn = '<a href="#" data-bs-toggle="modal" data-bs-target="#' . $modalid . '" class="btn-secondary-themed" style="font-size:0.8rem;padding:4px 10px;">プレビュー</a>';
     $js  = '<script>document.addEventListener("DOMContentLoaded",function(){'
          . 'var el=document.getElementById("' . $modalid . '");'
