@@ -1,10 +1,48 @@
 /* ==========================================================
    テーマ切り替え: ダークモード / 大文字モード
-   data-theme="dark"  → ダークモード
-   data-fontsize="large" → 大文字モード (20px ベース)
+   data-theme="dark"     → ダークモード
+   data-fontsize="large" → 大文字モード
+   theme-changing        → 切り替えアニメーション中
    ========================================================== */
 
-/* --- ダークモード: CSS 変数上書き --- */
+/* ============================================================
+   テーマ切り替えトランジション
+   .theme-changing クラスが付いている間だけ有効化する
+   ============================================================ */
+.theme-changing body,
+.theme-changing .request-card,
+.theme-changing .card,
+.theme-changing #stats-bar,
+.theme-changing .stats-item,
+.theme-changing .stats-val,
+.theme-changing .card-title,
+.theme-changing .card-meta,
+.theme-changing .card-label,
+.theme-changing .card-num,
+.theme-changing .drag-handle,
+.theme-changing .meta-chip,
+.theme-changing .card-comment-area,
+.theme-changing .dropdown-menu,
+.theme-changing .dropdown-item,
+.theme-changing .accordion-item,
+.theme-changing .accordion-button,
+.theme-changing .accordion-body,
+.theme-changing .list-group-item,
+.theme-changing .modal-content,
+.theme-changing .form-control,
+.theme-changing .form-select,
+.theme-changing .input-group-text,
+.theme-changing .table,
+.theme-changing .table > :not(caption) > * > *,
+.theme-changing thead th {
+  transition: background-color 0.35s ease,
+              color            0.35s ease,
+              border-color     0.35s ease !important;
+}
+
+/* ============================================================
+   ダークモード: CSS 変数上書き
+   ============================================================ */
 [data-theme="dark"] {
   --bg-card: #1e1e2e;
   --bg-card-alt: #252535;
@@ -174,7 +212,9 @@
   background-color: #495057 !important;
 }
 
-/* --- ダークモード: requestlist_swipe カード --- */
+/* ============================================================
+   ダークモード: requestlist_swipe カード・統計バー
+   ============================================================ */
 [data-theme="dark"] .request-card {
   background: #1e1e2e;
   border-left-color: #4a4a6a;
@@ -195,11 +235,11 @@
 [data-theme="dark"] .request-card[data-nowplaying="5"] {
   background: #252535;
 }
-[data-theme="dark"] .card-title { color: #e2e2e2; }
-[data-theme="dark"] .card-meta  { color: #b0b0c0; }
-[data-theme="dark"] .card-label { color: #9090a0; }
-[data-theme="dark"] .card-num   { color: #9090a0; }
-[data-theme="dark"] .drag-handle { color: #6060a0; }
+[data-theme="dark"] .card-title    { color: #e2e2e2; }
+[data-theme="dark"] .card-meta     { color: #b0b0c0; }
+[data-theme="dark"] .card-label    { color: #9090a0; }
+[data-theme="dark"] .card-num      { color: #9090a0; }
+[data-theme="dark"] .drag-handle   { color: #5050a0; }
 [data-theme="dark"] #stats-bar {
   background: #1e1e2e;
   border-color: #3d3d5c;
@@ -212,6 +252,16 @@
   color: #9090a0;
 }
 [data-theme="dark"] .card-tweet-link { color: #5bc0f8; }
+
+/* --- ダークモード: メタチップ --- */
+[data-theme="dark"] .chip-singer   { background: #1a1f3c; color: #8ba4e8; }
+[data-theme="dark"] .chip-kind     { background: #0f2218; color: #74c57a; }
+[data-theme="dark"] .chip-duration { background: #252535; color: #9a9aaa; }
+[data-theme="dark"] .chip-track    { background: #200f30; color: #c48fda; }
+[data-theme="dark"] .chip-key-pos  { background: #0f2218; color: #74c57a; }
+[data-theme="dark"] .chip-key-neg  { background: #2e0810; color: #f08080; }
+[data-theme="dark"] .chip-volume   { background: #2a1600; color: #ffa04a; }
+[data-theme="dark"] .chip-delay    { background: #0a1828; color: #64b5f6; }
 
 /* --- ダークモード: DataTables --- */
 [data-theme="dark"] .dataTables_wrapper .dataTables_filter input,
@@ -235,33 +285,33 @@
   color: #fff !important;
 }
 
-/* --- 大文字モード --- */
+/* ============================================================
+   大文字モード
+   ============================================================ */
 [data-fontsize="large"] {
-  font-size: 20px;
+  font-size: 22px;
 }
 
-/* requestlist_swipe: 固定px指定を上書きして大文字化（セレクタ詳細度で勝つ） */
-[data-fontsize="large"] #stats-bar          { font-size: 17px; }
-[data-fontsize="large"] .stats-item         { font-size: 17px; }
-[data-fontsize="large"] .card-title         { font-size: 20px; }
-[data-fontsize="large"] .card-meta          { font-size: 18px; }
-[data-fontsize="large"] .card-label         { font-size: 15px; }
-[data-fontsize="large"] .meta-chip          { font-size: 15px; padding: 3px 10px; }
-[data-fontsize="large"] .card-comment-area  { font-size: 15px; min-height: 32px; }
-[data-fontsize="large"] .card-tweet-link    { font-size: 14px; }
-[data-fontsize="large"] .card-num           { font-size: 17px; }
-[data-fontsize="large"] .card-ctrl-btn      { font-size: 15px; padding: 3px 10px; }
-[data-fontsize="large"] .card-main          { padding: 12px 14px; gap: 12px; }
+/* requestlist_swipe: 固定px指定を詳細度で上書き */
+[data-fontsize="large"] #stats-bar          { font-size: 20px; }
+[data-fontsize="large"] .stats-item         { font-size: 20px; }
+[data-fontsize="large"] .card-title         { font-size: 24px; }
+[data-fontsize="large"] .card-meta          { font-size: 22px; }
+[data-fontsize="large"] .card-label         { font-size: 18px; }
+[data-fontsize="large"] .meta-chip          { font-size: 18px; padding: 4px 12px; }
+[data-fontsize="large"] .card-comment-area  { font-size: 18px; min-height: 36px; padding: 6px 10px; }
+[data-fontsize="large"] .card-tweet-link    { font-size: 17px; }
+[data-fontsize="large"] .card-num           { font-size: 20px; }
+[data-fontsize="large"] .card-ctrl-btn      { font-size: 18px; padding: 4px 12px; }
+[data-fontsize="large"] .card-main          { padding: 14px 16px; gap: 14px; }
 
-/* ナビバーは大文字モードで少し抑える（レイアウト崩れ防止） */
-[data-fontsize="large"] .navbar {
-  font-size: 1rem;
-}
-[data-fontsize="large"] .navbar-theme-btn {
-  font-size: 0.9rem;
-}
+/* ナビバーは大文字モードでも固定サイズ（レイアウト崩れ防止） */
+[data-fontsize="large"] .navbar       { font-size: 1rem; }
+[data-fontsize="large"] .navbar-theme-btn { font-size: 0.9rem; }
 
-/* --- ナビバー内テーマ切り替えボタン --- */
+/* ============================================================
+   ナビバー内テーマ切り替えボタン
+   ============================================================ */
 .navbar-theme-btn {
   display: inline-flex;
   align-items: center;
