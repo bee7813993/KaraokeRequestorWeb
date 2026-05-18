@@ -516,7 +516,7 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		    $orderstr = 'sort=size&ascending=0';
 		  if(empty($order)){
 		    $orderstr = 'sort=size&ascending=0';
-		  }else if($order[0]['column']==3  ){
+		  }else if($order[0]['column']==4  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';
 		    }else {
@@ -528,7 +528,7 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		    }else {
 		       $orderstr='sort=name&ascending=0';
 		    }
-		  }else if($order[0]['column']==4  ){
+		  }else if($order[0]['column']==5  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=path&ascending=1';
 		    }else {
@@ -539,7 +539,7 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		  if(empty($order)){
 		    $result_array = search_order_priority($kerwords,$start,$length);
 		    return $result_array;
-		  }else if($order[0]['column']==3  ){
+		  }else if($order[0]['column']==4  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';
 		    }else {
@@ -551,7 +551,7 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		    }else {
 		       $orderstr='sort=name&ascending=0';
 		    }
-		  }else if($order[0]['column']==4  ){
+		  }else if($order[0]['column']==5  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=path&ascending=1';
 		    }else {
@@ -865,13 +865,14 @@ $(document).ready(function(){
       { "data": "no", "className":"no"},
       { "data": "reqbtn", "className":"reqbtn"},
       { "data": "filename", "className":"filename"},
+      { "data": "worker", "className":"worker"},
       { "data": "filesize", "className":"filesize"},
       { "data": "filepath", "className":"filepath"},
   ],
   "sDom": '<"H"lrip>t<"F"ip>',
   columnDefs: [
-  { type: 'currency', targets: [3] },
-  { "orderable": false , targets: [1]} 
+  { type: 'currency', targets: [4] },
+  { "orderable": false , targets: [1]}
    ],
    }
   );
@@ -890,6 +891,7 @@ EOD;
 <th>No. <font size="-2" class="searchresult_comment">(おすすめ順)</font></th>
 <th>リクエスト </th>
 <th>ファイル名(プレビューリンク) </th>
+<th>動画制作者 </th>
 <th>サイズ </th>
 <th>パス </th>
 </tr>

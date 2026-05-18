@@ -65,6 +65,18 @@ if(array_key_exists("etorder", $_REQUEST)) {
 searchlocalfilename_part($keyword,$result_a,$start,$length,$r_order,$path);
 //var_dump($result_a);
 
+// Initialize ListerDB for worker lookup
+$lister_kw = null;
+if (array_key_exists('listerDBPATH', $config_ini)) {
+    $lister_dbpath_kw = urldecode($config_ini['listerDBPATH']);
+    if (!empty($lister_dbpath_kw) && file_exist_check_japanese_cf($lister_dbpath_kw)) {
+        require_once('function_search_listerdb.php');
+        $lister_kw = new ListerDB();
+        $lister_kw->listerdbfile = $lister_dbpath_kw;
+        $lister_kw->initdb();
+    }
+}
+
 if( $result_a["totalResults"] >= 1) {
     //build search result 
     $result_withp = addpriority($priority_db,$result_a);
@@ -127,7 +139,17 @@ $draw++;
 			 $fn = $fn . '</div>';
 		 }
 		 $oneresult += array("filename" => $fn);
-		 
+
+		 $worker_val = '';
+		 if ($lister_kw && $lister_kw->ListerDBFD) {
+		     $sql = 'SELECT found_worker FROM t_found WHERE found_path LIKE ' . $lister_kw->ListerDBFD->quote('%' . $v['name'] . '%') . ' LIMIT 1';
+		     $worker_result = $lister_kw->select($sql);
+		     if ($worker_result && !empty($worker_result[0]['found_worker'])) {
+		         $worker_val = htmlspecialchars($worker_result[0]['found_worker'], ENT_QUOTES, 'UTF-8');
+		     }
+		 }
+		 $oneresult += array("worker" => $worker_val);
+
 		 $fs = formatBytes($v['size']);
 		 $oneresult += array("filesize" => $fs);
 		 

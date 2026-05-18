@@ -421,7 +421,11 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
           <?php endif; ?>
           <span><?php echo formatBytes($program['found_file_size']); ?></span>
           <span><?php echo fmt_date_bs5($program['found_last_write_time']); ?></span>
+          <?php if (!empty($program['found_worker'])): ?>
+            <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="text-decoration-none text-muted"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
+          <?php endif; ?>
         </div>
+        <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars($program['found_path'], ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
       <?php echo mypage_action_links($program['found_path'], $display); ?>
       <?php if (!check_access_from_online()): ?>
