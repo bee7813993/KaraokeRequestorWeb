@@ -1356,14 +1356,18 @@ function commentenabledcheck(){
  * @param string $extra_css 追加で読み込むCSSファイルのパス（相対）
  */
 function print_bs5_search_head($extra_css = ''){
+    // テーマ初期適用: フラッシュ防止のため head の最初に実行する
+    print '<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>';
     print '<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">';
     print '<link rel="stylesheet" href="css/themes/_variables.css">';
     print '<link rel="stylesheet" href="css/themes/search.css">';
+    print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
     if(!empty($extra_css)){
         print '<link rel="stylesheet" href="' . htmlspecialchars($extra_css, ENT_QUOTES, 'UTF-8') . '">';
     }
     print '<script src="js/jquery.js"></script>';
     print '<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>';
+    print '<script src="js/theme-toggle.js"></script>';
 }
 
 /**
@@ -1476,6 +1480,10 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
         $mypage_icon_url = htmlspecialchars($mypage_icon_path, ENT_QUOTES, 'UTF-8');
     }
 
+    // print_bs5_search_head() を使わないページ向けに CSS/JS を動的注入（重複読込を防ぐガード付き）
+    $pfx_js = addslashes(htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8'));
+    print '<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}var p="' . $pfx_js . '";if(!document.querySelector("link[href*=\'theme-toggle.css\']")){var l=document.createElement("link");l.rel="stylesheet";l.href=p+"css/themes/theme-toggle.css";document.head.appendChild(l);}if(!document.getElementById("yk-theme-js")){var s=document.createElement("script");s.id="yk-theme-js";s.src=p+"js/theme-toggle.js";document.head.appendChild(s);}})();</script>';
+
     print '<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">';
     print '<div class="container-fluid">';
 
@@ -1553,7 +1561,25 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     print '</ul>'; // me-auto
 
     // 右側
-    print '<ul class="navbar-nav ms-auto align-items-center">';
+    print '<ul class="navbar-nav ms-auto align-items-center gap-1">';
+
+    // ダークモード切り替えボタン
+    print '<li class="nav-item">';
+    print '<button id="yk-theme-btn" type="button" class="navbar-theme-btn"'
+        . ' title="ダークモードに切り替え" aria-label="ダークモードに切り替え" aria-pressed="false">';
+    // 初期アイコン（JS が上書きするが、JS 無効環境向けに月アイコンを設置）
+    print '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/></svg>';
+    print '</button>';
+    print '</li>';
+
+    // 文字サイズ切り替えボタン
+    print '<li class="nav-item">';
+    print '<button id="yk-fontsize-btn" type="button" class="navbar-theme-btn"'
+        . ' title="文字を大きくする" aria-label="文字を大きくする" aria-pressed="false">';
+    print '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.244 13.081l.943-2.803H6.66l.944 2.803H8.86L5.54 3.75H4.322L1 13.081h1.244zm2.7-7.923L6.34 9.314H3.51l1.4-4.156h.034zm9.146 7.027h.035v.896h1.128V8.125c0-1.51-1.114-2.345-2.646-2.345-1.736 0-2.59.916-2.666 2.174h1.108c.068-.718.595-1.19 1.517-1.19.971 0 1.518.52 1.518 1.464v.731H12.19c-1.647.007-2.522.8-2.522 2.058 0 1.319.957 2.18 2.345 2.18 1.06 0 1.75-.56 2.078-1.133zm-1.763.035c-.752 0-1.456-.397-1.456-1.244 0-.65.424-1.115 1.408-1.115h1.805v.834c0 .896-.752 1.525-1.757 1.525z"/></svg>';
+    print '</button>';
+    print '</li>';
+
     print '<li class="nav-item dropdown">';
     print '<a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">Help等</a>';
     print '<ul class="dropdown-menu dropdown-menu-end">';

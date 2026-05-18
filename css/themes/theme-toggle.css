@@ -1,0 +1,244 @@
+/* ==========================================================
+   テーマ切り替え: ダークモード / 大文字モード
+   data-theme="dark"  → ダークモード
+   data-fontsize="large" → 大文字モード (20px ベース)
+   ========================================================== */
+
+/* --- ダークモード: CSS 変数上書き --- */
+[data-theme="dark"] {
+  --bg-card: #1e1e2e;
+  --bg-card-alt: #252535;
+  --bg-card-hover: #2c2c40;
+  --bg-badge: #495057;
+  --bg-input: #2a2a3c;
+  --bg-swap-banner: #3d2f00;
+  --color-text: #e2e2e2;
+  --color-text-muted: #9ca3af;
+  --color-swap-banner: #ffd966;
+  --color-border: #3d3d5c;
+  --bg-index-btn: #2a2a3c;
+  --bg-index-btn-hover: #3a3a4c;
+  --color-index-btn: #cccccc;
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.45);
+  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.65);
+}
+
+/* --- ダークモード: Bootstrap ドロップダウン --- */
+[data-theme="dark"] .dropdown-menu {
+  background-color: #1e1e2e;
+  border-color: #3d3d5c;
+}
+[data-theme="dark"] .dropdown-item {
+  color: #e2e2e2;
+}
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+  background-color: #2a2a3c;
+  color: #ffffff;
+}
+[data-theme="dark"] .dropdown-divider {
+  border-color: #3d3d5c;
+}
+[data-theme="dark"] .dropdown-item-text {
+  color: #9ca3af;
+}
+
+/* --- ダークモード: カード --- */
+[data-theme="dark"] .card {
+  background-color: var(--bg-card);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .card-header,
+[data-theme="dark"] .card-footer {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: テーブル --- */
+[data-theme="dark"] .table {
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(255,255,255,0.05);
+  --bs-table-hover-bg: rgba(255,255,255,0.075);
+  --bs-table-color: var(--color-text);
+  --bs-table-border-color: var(--color-border);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .table > :not(caption) > * > * {
+  color: var(--color-text);
+  border-bottom-color: var(--color-border);
+}
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: var(--bg-card-alt);
+}
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  background-color: var(--bg-card-hover);
+}
+[data-theme="dark"] thead th {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: フォームコントロール --- */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] textarea {
+  background-color: var(--bg-input);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: var(--bg-input);
+  color: var(--color-text);
+  border-color: var(--color-accent-secondary, #2980b9);
+  box-shadow: 0 0 0 0.25rem rgba(41,128,185,0.25);
+}
+[data-theme="dark"] .form-control::placeholder {
+  color: #6c757d;
+}
+[data-theme="dark"] .input-group-text {
+  background-color: var(--bg-card-alt);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: モーダル --- */
+[data-theme="dark"] .modal-content {
+  background-color: var(--bg-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: リストグループ --- */
+[data-theme="dark"] .list-group-item {
+  background-color: var(--bg-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .list-group-item:hover {
+  background-color: var(--bg-card-hover);
+}
+[data-theme="dark"] a.list-group-item:hover {
+  color: var(--color-text);
+}
+
+/* --- ダークモード: アコーディオン --- */
+[data-theme="dark"] .accordion-item {
+  background-color: var(--bg-card);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .accordion-button {
+  background-color: var(--bg-card-alt);
+  color: var(--color-text);
+}
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+  background-color: var(--bg-card-hover);
+  color: var(--color-text);
+  box-shadow: inset 0 -1px 0 var(--color-border);
+}
+[data-theme="dark"] .accordion-button::after {
+  filter: invert(1);
+}
+[data-theme="dark"] .accordion-body {
+  background-color: var(--bg-card);
+}
+
+/* --- ダークモード: ユーティリティ上書き --- */
+[data-theme="dark"] .text-muted {
+  color: var(--color-text-muted) !important;
+}
+[data-theme="dark"] .bg-light {
+  background-color: var(--bg-card-alt) !important;
+}
+[data-theme="dark"] .bg-white {
+  background-color: var(--bg-card) !important;
+}
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-start,
+[data-theme="dark"] .border-end {
+  border-color: var(--color-border) !important;
+}
+[data-theme="dark"] hr {
+  border-color: var(--color-border);
+  opacity: 0.5;
+}
+[data-theme="dark"] .badge.bg-secondary {
+  background-color: #495057 !important;
+}
+
+/* --- ダークモード: DataTables --- */
+[data-theme="dark"] .dataTables_wrapper .dataTables_filter input,
+[data-theme="dark"] .dataTables_wrapper .dataTables_length select {
+  background-color: var(--bg-input);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_info,
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button {
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--bg-card-alt) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--color-accent-secondary, #2980b9) !important;
+  border-color: var(--color-accent-secondary, #2980b9) !important;
+  color: #fff !important;
+}
+
+/* --- 大文字モード --- */
+[data-fontsize="large"] {
+  font-size: 20px;
+}
+
+/* ナビバーは大文字モードで少し抑える（レイアウト崩れ防止） */
+[data-fontsize="large"] .navbar {
+  font-size: 1rem;
+}
+[data-fontsize="large"] .navbar-theme-btn {
+  font-size: 0.9rem;
+}
+
+/* --- ナビバー内テーマ切り替えボタン --- */
+.navbar-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  vertical-align: middle;
+}
+.navbar-theme-btn:hover,
+.navbar-theme-btn:focus {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+  box-shadow: none;
+}
+.navbar-theme-btn.active {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #ffffff !important;
+}
