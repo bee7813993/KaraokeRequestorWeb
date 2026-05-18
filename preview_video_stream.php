@@ -1,12 +1,6 @@
 <?php
 require_once 'commonfunc.php';
 
-// ローカル接続のみ許可
-if (check_access_from_online()) {
-    http_response_code(403);
-    exit;
-}
-
 $filepath = isset($_GET['path']) ? $_GET['path'] : '';
 if (empty($filepath)) {
     http_response_code(400);
