@@ -156,7 +156,10 @@ $song_title  = ($has_song && !empty($playstat->playingtitle))
 $song_file   = ($has_song && !empty($playstat->playingfile))
                ? htmlspecialchars($playstat->playingfile, ENT_QUOTES, 'UTF-8')
                : '';
-$has_alt_file = ($song_file !== '' && $song_file !== $song_title);
+$has_alt_file   = ($song_file !== '' && $song_file !== $song_title);
+$playing_singer = ($has_song && !empty($playstat->playingsinger))
+               ? htmlspecialchars($playstat->playingsinger, ENT_QUOTES, 'UTF-8')
+               : '';
 // state: 2=再生中, 1=一時停止
 $state_num   = $has_song ? (int)$playstat->status : 0;
 
@@ -260,7 +263,8 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     <!-- BS5 表示用: player_bs5.js が song_name で更新する -->
     <div id="player-title-display"
          data-song-title="<?= $song_title ?>"
-         data-song-file="<?= $song_file ?>">
+         data-song-file="<?= $song_file ?>"
+         data-song-singer="<?= $playing_singer ?>">
       <?php if ($song_title): ?>
         <div class="player-label">Now Playing</div>
         <div class="player-title<?= $has_alt_file ? ' player-title-toggleable' : '' ?>"
@@ -277,6 +281,8 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
         <div class="player-title text-muted" id="player-title-text" style="opacity:.5;">曲が選択されていません</div>
       <?php endif; ?>
     </div>
+    <div class="player-nowplaying-singer<?= $playing_singer ? '' : ' d-none' ?>"
+         id="player-singer"><?= $playing_singer ?></div>
     <div class="progress mt-3 mb-2" style="height:6px;" role="progressbar"
          aria-valuenow="<?= round($prog_pct) ?>" aria-valuemin="0" aria-valuemax="100">
       <div class="progress-bar" id="divprogress" style="width:<?= $prog_pct ?>%;"></div>
@@ -314,7 +320,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     <!-- 行1: 曲頭へ / 再生・一時停止 / 曲終了 -->
     <div class="row g-2 mb-2">
       <div class="col-4">
-        <button class="btn btn-outline-secondary player-btn player-btn-main w-100"
+        <button class="btn btn-outline-info player-btn player-btn-main w-100"
                 onclick="song_startfirst()" aria-label="曲の最初から">
           <?= $ic_skip_s ?>
           <span>曲の最初から</span>
@@ -334,7 +340,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
         </button>
       </div>
       <div class="col-4">
-        <button class="btn btn-danger player-btn player-btn-main w-100"
+        <button class="btn btn-outline-secondary player-btn player-btn-main w-100"
                 onclick="cmd_songnext()" aria-label="曲終了">
           <?= $ic_skip_e ?>
           <span>曲終了</span>
@@ -379,14 +385,14 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     <div class="player-section-label">ボリューム</div>
     <!-- スライダー行 -->
     <div class="d-flex align-items-center gap-2 mb-2">
-      <button class="btn btn-outline-secondary player-btn flex-shrink-0"
+      <button class="btn btn-outline-primary player-btn flex-shrink-0"
               style="min-width:var(--tap-target);padding:8px;"
               onclick="vol_btn_down()" aria-label="ボリュームDOWN">
         <?= $ic_vol_d ?>
       </button>
       <input type="range" class="form-range flex-grow-1" id="volume-slider"
              min="0" max="100" value="50" aria-label="ボリューム">
-      <button class="btn btn-outline-secondary player-btn flex-shrink-0"
+      <button class="btn btn-outline-primary player-btn flex-shrink-0"
               style="min-width:var(--tap-target);padding:8px;"
               onclick="vol_btn_up()" aria-label="ボリュームUP">
         <?= $ic_vol_u ?>
@@ -403,7 +409,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
         </button>
       </div>
       <div class="col-6">
-        <button class="btn btn-warning player-btn w-100"
+        <button class="btn btn-outline-secondary player-btn w-100"
                 onclick="exec_fadeout()" aria-label="フェードアウト">
           <?= $ic_fade ?>
           <span class="small">フェードアウト</span>
@@ -423,7 +429,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
         </button>
       </div>
       <div class="col-4">
-        <button class="btn btn-outline-secondary player-btn w-100"
+        <button class="btn btn-outline-primary player-btn w-100"
                 onclick="song_changeaudio()" aria-label="音声トラック変更">
           <?= _svg('<path d="M6 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM3.5 6.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 1 0v1a.5.5 0 0 1-.5.5zM16 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm-2.5 3.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 1 0v1a.5.5 0 0 1-.5.5z"/><path d="M0 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V9zm2-1a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H2z"/><path d="M3 10.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>') ?>
           <span class="small">音声切替</span>
@@ -449,7 +455,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
         </button>
       </div>
       <div class="col-6">
-        <button class="btn btn-outline-secondary player-btn w-100"
+        <button class="btn btn-outline-primary player-btn w-100"
                 onclick="song_changeaudio()" aria-label="音声トラック変更">
           <?= _svg('<path d="M6 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM3.5 6.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 1 0v1a.5.5 0 0 1-.5.5zM16 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm-2.5 3.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 1 0v1a.5.5 0 0 1-.5.5z"/><path d="M0 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V9zm2-1a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H2z"/>') ?>
           <span class="small">音声トラック変更</span>
@@ -488,25 +494,6 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
 
   </div><!-- /card-body -->
 </div><!-- /controls-card -->
-
-<!-- === 再生開始 / 更新 === -->
-<div class="row g-2 mb-3">
-  <div class="col-6">
-    <button class="btn btn-success w-100 player-btn player-btn-main"
-            onclick="cmd_songstart()" aria-label="再生開始">
-      <?= $ic_play ?>
-      <span>再生開始</span>
-    </button>
-  </div>
-  <div class="col-6">
-    <a href="playerctrl_portal_bs5.php"
-       class="btn btn-outline-secondary w-100 player-btn player-btn-main"
-       aria-label="画面を更新">
-      <?= _svg('<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>') ?>
-      <span>更新</span>
-    </a>
-  </div>
-</div>
 
 <!-- === 詳細設定アコーディオン === -->
 <div class="accordion mb-3" id="playerAdvanced">
@@ -633,4 +620,14 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
       </div><!-- /accordion-body -->
     </div>
   </div>
+</div>
+
+<!-- === 更新 (小) === -->
+<div class="d-grid mb-2">
+  <a href="playerctrl_portal_bs5.php"
+     class="btn btn-sm btn-outline-secondary player-refresh-btn"
+     aria-label="画面を更新">
+    <?= _svg('<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>', 14, 14) ?>
+    更新
+  </a>
 </div>

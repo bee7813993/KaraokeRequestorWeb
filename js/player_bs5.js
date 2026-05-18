@@ -157,6 +157,19 @@ function _updateStatusBadge(stateNum) {
     }
 }
 
+/* Now Playing 歌唱者表示を更新 */
+function _updateSingerDisplay(singer) {
+    var el = document.getElementById('player-singer');
+    if (!el) return;
+    if (singer) {
+        el.textContent = singer;
+        el.classList.remove('d-none');
+    } else {
+        el.textContent = '';
+        el.classList.add('d-none');
+    }
+}
+
 /* Now Playing タイトル: 曲名 ⇄ ファイル名 のタップ切り替え
    "title" を表示中か "file" を表示中かを保持。曲が変わったら "title" にリセット */
 var _titleMode = 'title';
@@ -265,15 +278,18 @@ var _lastPlayingTitle = null;
                 /* Now Playing タイトルを BS5 構造で更新 (data 属性に反映してから再描画) */
                 var titleDisplay = document.getElementById('player-title-display');
                 if (titleDisplay) {
-                    var pt = ps.playingtitle || '';
-                    var pf = ps.playingfile  || '';
+                    var pt = ps.playingtitle  || '';
+                    var pf = ps.playingfile   || '';
+                    var ps_singer = ps.playingsinger || '';
                     /* 曲が変わったら表示モードをタイトル側にリセット */
                     if (pt !== titleDisplay.dataset.songTitle) {
                         _titleMode = 'title';
                     }
-                    titleDisplay.dataset.songTitle = pt;
-                    titleDisplay.dataset.songFile  = pf;
+                    titleDisplay.dataset.songTitle  = pt;
+                    titleDisplay.dataset.songFile   = pf;
+                    titleDisplay.dataset.songSinger = ps_singer;
                     _renderPlayerTitle();
+                    _updateSingerDisplay(ps_singer);
                 }
 
                 /* 次の曲カードを更新 */
