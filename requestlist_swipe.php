@@ -605,7 +605,7 @@ function createCardHTML(item, idx) {
 
     // メイン情報チップ（登録者・再生方法・曲の長さ）
     var mainChips = '<div class="meta-chips">'
-        + '<span class="meta-chip chip-singer">&#128100; ' + esc(item.singer) + '</span>'
+        + '<span class="meta-chip chip-singer">&#128100; 登録者：' + esc(item.singer) + '</span>'
         + '<span class="meta-chip chip-kind">&#9654; ' + esc(item.kind) + '</span>'
         + durationChip
         + '</div>';
