@@ -186,27 +186,60 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 /* コメント欄 */
 .card-comment-area {
-  font-size: 13px;
-  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #555;
   cursor: pointer;
-  padding: 3px 6px;
-  min-height: 22px;
-  margin-top: 4px;
-  background: #f1f3f5;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
+  padding: 4px 8px;
+  min-height: 24px;
+  margin-top: 5px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  transition: border-color 0.15s, color 0.15s;
 }
 .card-comment-area:hover { color: var(--bs-primary); border-color: var(--bs-primary); }
-.card-comment-placeholder { color: #999; font-style: italic; }
+.card-comment-icon { font-size: 13px; flex-shrink: 0; opacity: 0.6; }
+.card-comment-placeholder { color: #aaa; font-style: italic; }
 /* Tweet リンク */
 .card-tweet-link {
   font-size: 11px;
   color: #1da1f2;
   text-decoration: none;
   display: inline-block;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 .card-tweet-link:hover { text-decoration: underline; color: #0c85d0; }
+
+/* ---- メタ情報チップ ---- */
+.meta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+  align-items: center;
+}
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.chip-singer   { background: #e8eaf6; color: #3949ab; }
+.chip-kind     { background: #e8f5e9; color: #2e7d32; }
+.chip-duration { background: #f1f3f5; color: #555;    }
+.chip-track    { background: #f3e5f5; color: #7b1fa2; }
+.chip-key-pos  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
+.chip-key-neg  { background: #fce4ec; color: #c62828; font-weight: 700; }
+.chip-volume   { background: #fff3e0; color: #e65100; }
+.chip-delay    { background: #e3f2fd; color: #1565c0; }
 
 /* SortableJS */
 .sortable-ghost {
@@ -293,14 +326,10 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   min-width: 28px;
 }
 .card-num {
-  font-size: 11px;
-  color: #888;
-  line-height: 1;
-  font-weight: bold;
-}
-.card-duration {
-  color: #666;
   font-size: 13px;
+  color: #555;
+  line-height: 1;
+  font-weight: 700;
 }
 </style>
 </head>
@@ -524,9 +553,9 @@ function createCardHTML(item, idx) {
 
     // コメント欄
     var commentHtml = '<div class="card-comment-area" data-id="' + item.id + '" data-comment="' + esc(item.comment) + '">'
-        + '<span class="card-label">コメント：</span>';
+        + '<span class="card-comment-icon">&#128172;</span>';
     if (item.comment) {
-        commentHtml += esc(item.comment) + ' <small>&#9998;</small>';
+        commentHtml += '<span>' + esc(item.comment) + '</span><small style="margin-left:4px;opacity:.6;">&#9998;</small>';
     } else {
         commentHtml += '<span class="card-comment-placeholder">コメントを追加...</span>';
     }
@@ -562,38 +591,46 @@ function createCardHTML(item, idx) {
         '    </button>'
     ].join('\n') : '';
 
-    // 曲の長さ（データがある場合のみ）
-    var durationHtml = '';
-    if (item.duration && item.duration > 0) {
-        var dm = Math.floor(item.duration / 60);
-        var ds = item.duration % 60;
-        durationHtml = '<span class="card-duration">　' + dm + ':' + ('0' + ds).slice(-2) + '</span>';
-    }
-
-    // 番号（先頭からの件数）
+    // 番号
     var position = item.position != null ? item.position : (totalCount - idx);
     var numHtml = '<span class="card-num">' + position + '</span>';
 
-    // トラック・キー・音ズレ（デフォルト値と異なる場合のみ表示）
-    var extras = [];
+    // 曲の長さチップ
+    var durationChip = '';
+    if (item.duration && item.duration > 0) {
+        var dm = Math.floor(item.duration / 60);
+        var ds = item.duration % 60;
+        durationChip = '<span class="meta-chip chip-duration">&#9201; ' + dm + ':' + ('0' + ds).slice(-2) + '</span>';
+    }
+
+    // メイン情報チップ（登録者・再生方法・曲の長さ）
+    var mainChips = '<div class="meta-chips">'
+        + '<span class="meta-chip chip-singer">&#128100; ' + esc(item.singer) + '</span>'
+        + '<span class="meta-chip chip-kind">&#9654; ' + esc(item.kind) + '</span>'
+        + durationChip
+        + '</div>';
+
+    // トラック・キー・音ズレ・音量チップ
     var track = parseInt(item.track, 10);
     var keychange = parseInt(item.keychange, 10);
     var audiodelay = parseInt(item.audiodelay, 10);
     var volume = parseInt(item.volume, 10);
+    var extraChips = [];
     if (track > 0) {
-        extras.push('<span class="card-label">トラック：</span>' + (track + 1));
+        extraChips.push('<span class="meta-chip chip-track">&#127926; トラック ' + (track + 1) + '</span>');
     }
     if (keychange !== 0) {
-        extras.push('<span class="card-label">キー：</span>' + (keychange > 0 ? '+' : '') + keychange);
+        var keyClass = keychange > 0 ? 'chip-key-pos' : 'chip-key-neg';
+        extraChips.push('<span class="meta-chip ' + keyClass + '">&#9835; キー ' + (keychange > 0 ? '+' : '') + keychange + '</span>');
     }
     if (audiodelay !== 0) {
-        extras.push('<span class="card-label">音ズレ：</span>' + (audiodelay > 0 ? '+' : '') + audiodelay + 'ms');
+        extraChips.push('<span class="meta-chip chip-delay">&#8987; 音ズレ ' + (audiodelay > 0 ? '+' : '') + audiodelay + 'ms</span>');
     }
     if (!isNaN(volume) && volume !== 0) {
-        extras.push('<span class="card-label">音量：</span>' + (volume > 0 ? '+' : '') + volume + '%');
+        extraChips.push('<span class="meta-chip chip-volume">&#128266; 音量 ' + (volume > 0 ? '+' : '') + volume + '%</span>');
     }
-    var extraMetaHtml = extras.length > 0
-        ? '<div class="card-meta" style="font-size:12px;">' + extras.join('　') + '</div>'
+    var extraMetaHtml = extraChips.length > 0
+        ? '<div class="meta-chips">' + extraChips.join('') + '</div>'
         : '';
 
     return [
@@ -627,7 +664,7 @@ function createCardHTML(item, idx) {
         '    </div>',
         '    <div class="card-info">',
         '      <div class="card-title">' + esc(item.display_name) + '</div>',
-        '      <div class="card-meta"><span class="card-label">登録者：</span>' + esc(item.singer) + '　<span class="card-label">再生方法：</span>' + esc(item.kind) + durationHtml + '</div>',
+        '      ' + mainChips,
         '      ' + extraMetaHtml,
         '      ' + commentHtml,
         '      ' + tweetHtml,
