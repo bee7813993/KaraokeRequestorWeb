@@ -21,20 +21,47 @@ if (!isset($mime_map[$ext])) {
 }
 $mime = $mime_map[$ext];
 
-// ファイル存在確認（UTF-8 → SJIS変換を試みる）
-$filepath_sjis = mb_convert_encoding($filepath, 'cp932', 'utf-8');
-if (file_exists($filepath_sjis)) {
-    $realpath = $filepath_sjis;
-} elseif (file_exists($filepath)) {
-    $realpath = $filepath;
-} else {
+// ゆかりすたー(13582)への候補URL。バックスラッシュをスラッシュ変換版とURLエンコード版を両方試みる
+$filepath_fwd = str_replace('\\', '/', $filepath);
+$candidate_urls = [
+    'http://127.0.0.1:13582/' . str_replace('%2F', '/', rawurlencode($filepath_fwd)),
+    'http://127.0.0.1:13582/' . urlencode($filepath),
+];
+
+// HEADリクエストでファイル存在確認とContent-Length取得
+$filesize = 0;
+$chosen_url = null;
+foreach ($candidate_urls as $url) {
+    $hctx = stream_context_create(['http' => [
+        'method'          => 'HEAD',
+        'ignore_errors'   => true,
+        'timeout'         => 3,
+    ]]);
+    $hfp = @fopen($url, 'rb', false, $hctx);
+    if (!$hfp) continue;
+    $meta    = stream_get_meta_data($hfp);
+    $headers = $meta['wrapper_data'] ?? [];
+    fclose($hfp);
+
+    $status = 0;
+    foreach ($headers as $h) {
+        if (preg_match('#^HTTP/[\d.]+ (\d+)#i', $h, $m)) { $status = (int)$m[1]; }
+        if (preg_match('/^Content-Length:\s*(\d+)/i', $h, $m)) { $filesize = (int)$m[1]; }
+    }
+    if ($status === 200 && $filesize > 0) {
+        $chosen_url = $url;
+        break;
+    }
+}
+
+if ($chosen_url === null || $filesize === 0) {
     http_response_code(404);
     exit;
 }
 
-$filesize = filesize($realpath);
-$start    = 0;
-$end      = $filesize - 1;
+// Rangeリクエスト解析
+$start = 0;
+$end   = $filesize - 1;
 
 header('Content-Type: ' . $mime);
 header('Accept-Ranges: bytes');
@@ -60,15 +87,32 @@ if (isset($_SERVER['HTTP_RANGE'])) {
 $length = $end - $start + 1;
 header('Content-Length: ' . $length);
 
-$fp = fopen($realpath, 'rb');
-if ($start > 0) {
-    fseek($fp, $start);
+// GETストリームを開いて$startまで読み捨て、$length分を転送
+$gctx = stream_context_create(['http' => [
+    'method'        => 'GET',
+    'ignore_errors' => true,
+    'timeout'       => 30,
+]]);
+$fp = @fopen($chosen_url, 'rb', false, $gctx);
+if (!$fp) {
+    http_response_code(502);
+    exit;
 }
+
+// $startバイト分を読み捨て（ローカルホストなので許容範囲内）
+$skip = $start;
+while ($skip > 0 && !feof($fp)) {
+    $chunk = fread($fp, min(65536, $skip));
+    if ($chunk === false) break;
+    $skip -= strlen($chunk);
+}
+
 $remaining = $length;
 while ($remaining > 0 && !feof($fp)) {
-    $read = min(65536, $remaining);
-    echo fread($fp, $read);
-    $remaining -= $read;
+    $chunk = fread($fp, min(65536, $remaining));
+    if ($chunk === false) break;
+    echo $chunk;
+    $remaining -= strlen($chunk);
     flush();
 }
 fclose($fp);
