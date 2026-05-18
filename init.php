@@ -981,6 +981,18 @@ $si_sorted_indices = array_keys($si_order_map);
   </div>
 
   <div class="form-group">
+    <?php $online_preview = configbool("online_preview", false); ?>
+    <h4 class="radio control-label"> オンラインからの動画プレビュー </h4>
+    <label class="radio control-label"><small>インターネット経由でアクセスした場合も動画プレビューを使用できるようにします</small></label>
+    <label class="radio-inline">
+      <input type="radio" name="online_preview" value="1" <?php print ($online_preview) ? 'checked' : ' '; ?> /> 使用する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="online_preview" value="2" <?php print (!$online_preview) ? 'checked' : ' '; ?> /> 使用しない
+    </label>
+  </div>
+
+  <div class="form-group">
     <h4 class="radio control-label"> 検索ログの保存 </h4>
     <label class="radio-inline">
       <input type="radio" name="historylog" value="1" <?php print ($config_ini["historylog"]==1)?'checked':' ' ?> /> 使用する

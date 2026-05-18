@@ -106,27 +106,29 @@ function isSocketListening_bs5($host, $port, $timeout = 1) {
     fclose($sock);
     return true;
 }
-$listerpreviewportenable = (!check_access_from_online() && isSocketListening_bs5($_SERVER["SERVER_NAME"], 13582, 1));
+$listerpreviewportenable = !check_access_from_online() || configbool('online_preview', false);
 
 function make_preview_modal_bs5($filepath, $modalid) {
     $ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
     $ftmap = ['mp4' => 'video/mp4', 'flv' => 'video/x-flv'];
     if (!isset($ftmap[$ext])) return null;
     $filetype = $ftmap[$ext];
-    $furl1 = 'http://' . $_SERVER["SERVER_NAME"] . ':13582/' . urlencode($filepath);
-    $furl2 = 'http://' . $_SERVER["SERVER_NAME"] . ':13582/' . str_replace('\\', '/', $filepath);
-    $sources = '<source src="' . htmlspecialchars($furl1, ENT_QUOTES, 'UTF-8') . '" type="' . $filetype . '"><source src="' . htmlspecialchars($furl2, ENT_QUOTES, 'UTF-8') . '" type="' . $filetype . '">';
+    $furl    = 'preview_video_stream.php?path=' . urlencode($filepath);
+    $sources = '<source src="' . htmlspecialchars($furl, ENT_QUOTES, 'UTF-8') . '" type="' . $filetype . '">';
     $btn = '<a href="#" data-bs-toggle="modal" data-bs-target="#' . $modalid . '" class="btn-secondary-themed" style="font-size:0.8rem;padding:4px 10px;">プレビュー</a>';
     $js  = '<script>document.addEventListener("DOMContentLoaded",function(){'
          . 'var el=document.getElementById("' . $modalid . '");'
-         . 'if(el)el.addEventListener("hidden.bs.modal",function(){'
-         . 'if(typeof videojs!=="undefined"){try{videojs("preview_video_' . $modalid . 'a").pause();}catch(e){}}'
-         . '});});</script>';
+         . 'if(!el)return;'
+         . 'var vid=document.getElementById("preview_video_' . $modalid . 'a");'
+         . 'el.addEventListener("hidden.bs.modal",function(){'
+         .   'if(vid){vid.pause();vid.currentTime=0;}'
+         . '});'
+         . '});</script>';
     $modal = '<div class="modal fade" id="' . $modalid . '" tabindex="-1">'
-           . '<div class="modal-dialog"><div class="modal-content">'
+           . '<div class="modal-dialog modal-lg"><div class="modal-content">'
            . '<div class="modal-header"><h5 class="modal-title">動画プレビュー</h5>'
            . '<button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>'
-           . '<div class="modal-body"><video id="preview_video_' . $modalid . 'a" class="video-js vjs-default-skin" controls muted playsinline preload="none" data-setup="{}" style="width:100%;max-width:480px;height:auto;">' . $sources . '</video></div>'
+           . '<div class="modal-body p-0"><video id="preview_video_' . $modalid . 'a" controls muted playsinline preload="none" style="width:100%;max-height:70vh;display:block;">' . $sources . '</video></div>'
            . '<div class="modal-footer"><button type="button" class="btn-secondary-themed" data-bs-dismiss="modal">閉じる</button></div>'
            . '</div></div></div>';
     return $btn . $js . $modal;
@@ -188,16 +190,17 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         echo '<div class="fw-semibold text-break mb-1">' . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '</div>';
         echo '<div class="d-flex flex-wrap align-items-center gap-2" style="font-size:0.78rem;color:var(--color-text-muted);">';
         if (!empty($fi['found_track'])) {
-            if ($fi['found_smart_track_on']  == 1) echo '<span class="badge bg-success">OnVocal</span>';
-            if ($fi['found_smart_track_off'] == 1) echo '<span class="badge bg-secondary">OffVocal</span>';
+            $vocal_badges = '';
+            if ($fi['found_smart_track_on']  == 1) $vocal_badges .= '<span class="badge bg-success">OnVocal</span>';
+            if ($fi['found_smart_track_off'] == 1) $vocal_badges .= '<span class="badge bg-secondary">OffVocal</span>';
+            if ($vocal_badges) echo '<span class="text-nowrap d-inline-flex gap-1">' . $vocal_badges . '</span>';
         }
         echo '<span>' . formatBytes($fi['found_file_size']) . '</span>';
         echo '<span>' . fmt_date_bs5($fi['found_last_write_time']) . '</span>';
-        if (!empty($fi['found_worker'])) echo '<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="text-decoration-none text-muted">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a>';
-        echo '</div>';
-        echo '<div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;">' . htmlspecialchars($fi['found_path'], ENT_QUOTES, 'UTF-8') . '</div>';
-        echo '</div>';
+        if (!empty($fi['found_worker'])) echo '<span class="ms-auto text-nowrap"><span class="text-muted">動画制作者:</span>&nbsp;<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="text-decoration-none fw-semibold" style="color:var(--color-accent-secondary);">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a></span>';
         echo mypage_action_links($fi['found_path'], $fname);
+        echo '</div>';
+        echo '</div>';
         if ($listerpreviewportenable) {
             $pm = make_preview_modal_bs5($fi['found_path'], 'pm_' . $k);
             if ($pm) echo '<div class="flex-shrink-0">' . $pm . '</div>';
@@ -286,8 +289,6 @@ mypage_action_script();
 <?php print_meta_header(); ?>
 <title>ファイル一覧</title>
 <?php print_bs5_search_head(); ?>
-<link href="js/video-js.min.css" rel="stylesheet">
-<script src="js/video.min.js"></script>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('searchreserve.php'); ?>
@@ -416,19 +417,23 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
             <?php endforeach; ?>
           <?php endif; ?>
           <?php if (!empty($program['found_track'])): ?>
-            <?php if ($program['found_smart_track_on']  == 1) echo '<span class="badge bg-success">OnVocal</span>'; ?>
-            <?php if ($program['found_smart_track_off'] == 1) echo '<span class="badge bg-secondary">OffVocal</span>'; ?>
+            <?php
+            $vocal_badges = '';
+            if ($program['found_smart_track_on']  == 1) $vocal_badges .= '<span class="badge bg-success">OnVocal</span>';
+            if ($program['found_smart_track_off'] == 1) $vocal_badges .= '<span class="badge bg-secondary">OffVocal</span>';
+            if ($vocal_badges) echo '<span class="text-nowrap d-inline-flex gap-1">' . $vocal_badges . '</span>';
+            ?>
           <?php endif; ?>
           <span><?php echo formatBytes($program['found_file_size']); ?></span>
           <span><?php echo fmt_date_bs5($program['found_last_write_time']); ?></span>
           <?php if (!empty($program['found_worker'])): ?>
-            <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="text-decoration-none text-muted"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
+            <span class="ms-auto text-nowrap"><span class="text-muted">動画制作者:</span>&nbsp;<a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="text-decoration-none fw-semibold" style="color:var(--color-accent-secondary);"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a></span>
           <?php endif; ?>
+          <?php echo mypage_action_links($program['found_path'], $display); ?>
         </div>
-        <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars($program['found_path'], ENT_QUOTES, 'UTF-8'); ?></div>
+        <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
-      <?php echo mypage_action_links($program['found_path'], $display); ?>
-      <?php if (!check_access_from_online()): ?>
+      <?php if ($listerpreviewportenable): ?>
         <?php $pm = make_preview_modal_bs5($program['found_path'], 'pm_m_' . $k); ?>
         <?php if ($pm): ?><div class="flex-shrink-0 mt-1"><?php echo $pm; ?></div><?php endif; ?>
       <?php endif; ?>
