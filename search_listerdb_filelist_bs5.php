@@ -193,11 +193,10 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         }
         echo '<span>' . formatBytes($fi['found_file_size']) . '</span>';
         echo '<span>' . fmt_date_bs5($fi['found_last_write_time']) . '</span>';
-        echo '</div>';
-        echo '<div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;">' . htmlspecialchars(basename_jp($fi['found_path']), ENT_QUOTES, 'UTF-8') . '</div>';
-        echo '</div>';
-        if (!empty($fi['found_worker'])) echo '<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="badge text-decoration-none align-self-center ms-auto flex-shrink-0" style="background-color:var(--color-accent-secondary);font-size:0.78rem;">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a>';
+        if (!empty($fi['found_worker'])) echo '<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="badge text-decoration-none ms-auto" style="background-color:var(--color-accent-secondary);font-size:0.78rem;">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a>';
         echo mypage_action_links($fi['found_path'], $fname);
+        echo '</div>';
+        echo '</div>';
         if ($listerpreviewportenable) {
             $pm = make_preview_modal_bs5($fi['found_path'], 'pm_' . $k);
             if ($pm) echo '<div class="flex-shrink-0">' . $pm . '</div>';
@@ -421,13 +420,13 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
           <?php endif; ?>
           <span><?php echo formatBytes($program['found_file_size']); ?></span>
           <span><?php echo fmt_date_bs5($program['found_last_write_time']); ?></span>
+          <?php if (!empty($program['found_worker'])): ?>
+            <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="badge text-decoration-none ms-auto" style="background-color:var(--color-accent-secondary);font-size:0.78rem;"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
+          <?php endif; ?>
+          <?php echo mypage_action_links($program['found_path'], $display); ?>
         </div>
         <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
-      <?php if (!empty($program['found_worker'])): ?>
-        <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="badge text-decoration-none align-self-center ms-auto flex-shrink-0" style="background-color:var(--color-accent-secondary);font-size:0.78rem;"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
-      <?php endif; ?>
-      <?php echo mypage_action_links($program['found_path'], $display); ?>
       <?php if (!check_access_from_online()): ?>
         <?php $pm = make_preview_modal_bs5($program['found_path'], 'pm_m_' . $k); ?>
         <?php if ($pm): ?><div class="flex-shrink-0 mt-1"><?php echo $pm; ?></div><?php endif; ?>
