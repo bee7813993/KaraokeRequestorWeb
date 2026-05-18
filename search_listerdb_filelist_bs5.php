@@ -187,7 +187,6 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         if (!empty($comment)) echo '<div class="text-secondary mb-1" style="font-size:0.8rem;">【' . htmlspecialchars($comment, ENT_QUOTES, 'UTF-8') . '】</div>';
         echo '<div class="fw-semibold text-break mb-1">' . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '</div>';
         echo '<div class="d-flex flex-wrap align-items-center gap-2" style="font-size:0.78rem;color:var(--color-text-muted);">';
-        if (!empty($fi['found_worker'])) echo '<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="badge text-decoration-none" style="background-color:var(--color-accent-secondary);font-size:0.78rem;">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a>';
         if (!empty($fi['found_track'])) {
             if ($fi['found_smart_track_on']  == 1) echo '<span class="badge bg-success">OnVocal</span>';
             if ($fi['found_smart_track_off'] == 1) echo '<span class="badge bg-secondary">OffVocal</span>';
@@ -197,6 +196,7 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         echo '</div>';
         echo '<div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;">' . htmlspecialchars(basename_jp($fi['found_path']), ENT_QUOTES, 'UTF-8') . '</div>';
         echo '</div>';
+        if (!empty($fi['found_worker'])) echo '<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="badge text-decoration-none align-self-center ms-auto flex-shrink-0" style="background-color:var(--color-accent-secondary);font-size:0.78rem;">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a>';
         echo mypage_action_links($fi['found_path'], $fname);
         if ($listerpreviewportenable) {
             $pm = make_preview_modal_bs5($fi['found_path'], 'pm_' . $k);
@@ -415,9 +415,6 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
               <a href="search_listerdb_songlist.php?artist=<?php echo urlencode($v); ?><?php echo $linkoption; ?>&match=part" class="text-muted text-decoration-none"><?php echo htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); ?></a>
             <?php endforeach; ?>
           <?php endif; ?>
-          <?php if (!empty($program['found_worker'])): ?>
-            <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="badge text-decoration-none" style="background-color:var(--color-accent-secondary);font-size:0.78rem;"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
-          <?php endif; ?>
           <?php if (!empty($program['found_track'])): ?>
             <?php if ($program['found_smart_track_on']  == 1) echo '<span class="badge bg-success">OnVocal</span>'; ?>
             <?php if ($program['found_smart_track_off'] == 1) echo '<span class="badge bg-secondary">OffVocal</span>'; ?>
@@ -427,6 +424,9 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
         </div>
         <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
+      <?php if (!empty($program['found_worker'])): ?>
+        <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="badge text-decoration-none align-self-center ms-auto flex-shrink-0" style="background-color:var(--color-accent-secondary);font-size:0.78rem;"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
+      <?php endif; ?>
       <?php echo mypage_action_links($program['found_path'], $display); ?>
       <?php if (!check_access_from_online()): ?>
         <?php $pm = make_preview_modal_bs5($program['found_path'], 'pm_m_' . $k); ?>
