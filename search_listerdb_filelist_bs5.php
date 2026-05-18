@@ -193,9 +193,9 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         }
         echo '<span>' . formatBytes($fi['found_file_size']) . '</span>';
         echo '<span>' . fmt_date_bs5($fi['found_last_write_time']) . '</span>';
-        if (!empty($fi['found_worker'])) echo '<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="text-decoration-none text-muted">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a>';
+        if (!empty($fi['found_worker'])) echo '<a href="search_listerdb_filelist.php?worker=' . urlencode($fi['found_worker']) . $linkoption . '" class="text-decoration-none fw-semibold" style="color:var(--color-accent-secondary);">' . htmlspecialchars($fi['found_worker'], ENT_QUOTES, 'UTF-8') . '</a>';
         echo '</div>';
-        echo '<div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;">' . htmlspecialchars($fi['found_path'], ENT_QUOTES, 'UTF-8') . '</div>';
+        echo '<div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;">' . htmlspecialchars(basename_jp($fi['found_path']), ENT_QUOTES, 'UTF-8') . '</div>';
         echo '</div>';
         echo mypage_action_links($fi['found_path'], $fname);
         if ($listerpreviewportenable) {
@@ -422,10 +422,10 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
           <span><?php echo formatBytes($program['found_file_size']); ?></span>
           <span><?php echo fmt_date_bs5($program['found_last_write_time']); ?></span>
           <?php if (!empty($program['found_worker'])): ?>
-            <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="text-decoration-none text-muted"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
+            <a href="search_listerdb_filelist.php?worker=<?php echo urlencode($program['found_worker']); ?><?php echo $linkoption; ?>" class="text-decoration-none fw-semibold" style="color:var(--color-accent-secondary);"><?php echo htmlspecialchars($program['found_worker'], ENT_QUOTES, 'UTF-8'); ?></a>
           <?php endif; ?>
         </div>
-        <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars($program['found_path'], ENT_QUOTES, 'UTF-8'); ?></div>
+        <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
       <?php echo mypage_action_links($program['found_path'], $display); ?>
       <?php if (!check_access_from_online()): ?>
