@@ -65,58 +65,57 @@ if(array_key_exists("clearauth", $_REQUEST)) {
 
 //include 'kara_config.php';
 ?>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="ja">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="Content-Style-Type" content="text/css" />
-<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
-
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-<script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
-<script type="text/javascript" >
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-
-$(function(){
-	$('a[href^=#]').not('[data-toggle]').click(function() {
-		var speed = 400;
-		var href= $(this).attr("href");
-		var target = $(href == "#" || href == "" ? 'html' : href);
-		var headerHeight = 120; //固定ヘッダーの高さ
-		var position = target.offset().top - headerHeight; //ターゲットの座標からヘッダの高さ分引く
-		$('body,html').animate({scrollTop:position}, speed, 'swing');
-		return false;
-	});
-});
-
-</script>
-
-
-
 <title>設定画面</title>
-<link type="text/css" rel="stylesheet" href="css/style.css" />
+<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
+<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/themes/_variables.css" rel="stylesheet">
+<link rel="stylesheet" href="css/themes/theme-toggle.css">
+<link type="text/css" rel="stylesheet" href="css/style.css">
+<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="js/theme-toggle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<style>
+/* BS3 互換: radio-inline / checkbox-inline は BS5 に存在しないため独自定義 */
+.radio-inline, .checkbox-inline {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-right: 12px; cursor: pointer;
+}
+.radio-inline input, .checkbox-inline input { margin: 0; }
+/* 固定ナビバー分のアンカースクロールオフセット */
+:target { scroll-margin-top: 80px; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Tooltip (BS5 native)
+  document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+    new bootstrap.Tooltip(el);
+  });
+  // スムーススクロール（アンカーリンク）
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var id = this.getAttribute('href');
+      if (!id || id === '#') return;
+      var target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      var top = target.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    });
+  });
+});
+</script>
 </head>
-<body style="padding-top:0px;">
+<body>
 <?php
-shownavigatioinbar();
+shownavigatioinbar_bs5('init.php');
 ?>
 <div style="height:100px;">
 </div>
@@ -236,12 +235,13 @@ print '</pre>';
 //echo '</pre>';
 ?>
 
-<div class="container"  class="menulink">
-<div class="col-md-3 col-md-push-9 col-xs-12" style="" >
+<div class="container menulink">
+<div class="row">
+<div class="col-lg-3 order-lg-last col-12 mb-3">
 <!--- メニュー --->
-<div class="panel panel-default">
-  <div class="panel-heading">もくじ</div>
-  <div class="panel-body">
+<div class="card sticky-top" style="top:80px;z-index:100;">
+  <div class="card-header fw-bold">もくじ</div>
+  <div class="card-body p-2">
     <ul>
     <li class="menu">
      <a href="#listctrl" class="menulink" > リクエストリスト操作 </a>
@@ -300,12 +300,12 @@ print '</pre>';
   </div>
 </div>
 </div>
-<div class="col-md-9 col-md-pull-3 col-xs-12 menulink" >
+<div class="col-lg-9 order-lg-first col-12 menulink">
 <div class="bg-info"  >
   <h1 id="listctrl" class="menulink" > リクエストリスト操作 </h1>
   <h3> リストのダウンロード </h3>
-  <a href ="listexport.php"  class="btn btn-default" > リクエストリストのダウンロード(UTF-8) </a>
-  <a href ="listexport_sjis.php"  class="btn btn-default" > (SJIS) </a>
+  <a href ="listexport.php"  class="btn btn-secondary" > リクエストリストのダウンロード(UTF-8) </a>
+  <a href ="listexport_sjis.php"  class="btn btn-secondary" > (SJIS) </a>
   <h3> リストのインポート(csvより) </h3>
   <form action="listimport.php" method="post" enctype="multipart/form-data">
     <label > 
@@ -318,24 +318,24 @@ print '</pre>';
     <input type="submit" value="Send" />  
   </form>
   <h3> リスト消去 </h3>
-  <a href ="listclear.php" class="btn btn-default" > リクエストリストの全消去 </a>
+  <a href ="listclear.php" class="btn btn-secondary" > リクエストリストの全消去 </a>
 
   <h3> リスト未再生化 </h3>
   <form method="post" action="delete.php">
-    <input type="submit" name="resetstatus" value="全て未再生化" class="btn btn-default" />
+    <input type="submit" name="resetstatus" value="全て未再生化" class="btn btn-secondary" />
   </form>
 
   <h3> 曲の長さ一括更新 </h3>
-  <a href="update_duration_all.php" class="btn btn-default" onclick="return confirm('リクエストリスト内の全曲の長さを取得し直します。曲数が多い場合は時間がかかります。実行しますか？')">
+  <a href="update_duration_all.php" class="btn btn-secondary" onclick="return confirm('リクエストリスト内の全曲の長さを取得し直します。曲数が多い場合は時間がかかります。実行しますか？')">
     曲の長さを全件登録し直す
   </a>
 
   <h3> BGMモード用再生回数操作 </h3>
   <li>
-    <a href ="listtimesclear.php?times=0" class="btn btn-default" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
+    <a href ="listtimesclear.php?times=0" class="btn btn-secondary" > 再生回数0クリア </a>【BGMモード(ジュークボックスモード)にて次から全て順番に再生】
   </li>
   <li>
-    <a href ="listtimesclear.php?times=1" class="btn btn-default" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
+    <a href ="listtimesclear.php?times=1" class="btn btn-secondary" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
   </li>
 </div>
 
@@ -345,26 +345,26 @@ print '</pre>';
   <p>
   <h1 id="opbuttom" class="menulink">各種操作ボタン </h1>
   <h3>ログイン情報クリア </h3>
-    <a href ="init.php?clearauth=1" class="btn btn-default" > ログイン情報クリア (対応ブラウザのみ)</a>
+    <a href ="init.php?clearauth=1" class="btn btn-secondary" > ログイン情報クリア (対応ブラウザのみ)</a>
   </p>
   <p>
   <h3>CSV出力列設定</h3>
-    <a href="edit_csv_columns.php" class="btn btn-default" > CSV出力列設定 </a>
+    <a href="edit_csv_columns.php" class="btn btn-secondary" > CSV出力列設定 </a>
   </p>
   <p>
   <h3>製作者別設定 <small>（りすたーDB検索のみ有効）</small></h3>
-    <a href="edit_search_sort_priority.php" class="btn btn-default" > 製作者優先表示設定 </a>
+    <a href="edit_search_sort_priority.php" class="btn btn-secondary" > 製作者優先表示設定 </a>
     &nbsp;
-    <a href="edit_creator_audiodelay.php" class="btn btn-default" > 制作者別音ズレ・音量初期値設定 </a>
+    <a href="edit_creator_audiodelay.php" class="btn btn-secondary" > 制作者別音ズレ・音量初期値設定 </a>
   </p>
   <p>
   <h3>表示優先度設定 <small>（Everything検索のみ有効）</small></h3>
-    <a href="edit_priority.php" class="btn btn-default" > 表示優先度設定 (Everything) </a>
+    <a href="edit_priority.php" class="btn btn-secondary" > 表示優先度設定 (Everything) </a>
   </p>
 
   <h3>オンラインアップデート画面 </h3>
   <p>
-    <a href ="online_update.php" class="btn btn-default" > オンラインアップデート画面 </a>
+    <a href ="online_update.php" class="btn btn-secondary" > オンラインアップデート画面 </a>
   </p>
 <script type="text/javascript">
 function start_yklistercmd(){
@@ -389,11 +389,11 @@ request.send("");
   }else {
   $addattr = ' disabled ';
   }
-print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
+print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
 ?>
   </p>
 
-  <a href="requestlist_top.php" class="btn btn-default" > リクエストTOP画面に戻る　</a>
+  <a href="requestlist_top.php" class="btn btn-secondary" > リクエストTOP画面に戻る　</a>
 </div>
 
 <hr />
@@ -403,17 +403,17 @@ print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'>
   <h1  id="workconfig"  class="menulink" >動作設定 </h1>
   <form name="allconfig" method="post" action="init.php" enctype="multipart/form-data">
 
-  <div class="form-group">
+  <div class="mb-3">
     <h3 title="未設定でパスワードチェックを省略">設定画面パスワード</h3>
     <input type="password" name="configpass" id="configpass" class="form-control" placeholder="未設定でパスワードチェックを省略"  value=<?php echo  $configauth -> show_password(); ?> >
   </div>
 
-  <div class="form-group">
+  <div class="mb-3">
     <h3>DBファイル名</h3>
     <input type="text" name="dbname" id="dbname" class="form-control" value=<?php echo  urldecode($config_ini["dbname"]); ?> >
   </div>
   
-  <div class="form-group">
+  <div class="mb-3">
     <h3 for="playmode">動作モード選択</h3>
     <select name="playmode" id="playmode" class="form-control" >  
       <option value="1" <?php print selectedcheck("1",$config_ini["playmode"]); ?> >自動再生開始モード</option>
@@ -427,12 +427,12 @@ print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'>
   <h3 id="autoplay" class="menulink" >自動再生設定 </h3>
 <?php
 if(array_key_exists("autoplay_exec",$config_ini) && strlen($config_ini["autoplay_exec"]) > 0) {
-print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
+print '<button type="button" class="btn btn-secondary btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
 }
 ?>
 
 
-  <div class="form-group">
+  <div class="mb-3">
     <h4> 自動再生プログラムPATH設定 
     </h4>
     <label>
@@ -446,8 +446,8 @@ if(array_key_exists("autoplay_exec",$config_ini)) {
 print 'value="'.urldecode($config_ini["autoplay_exec"]).'"';
 }
 ?> />
-    <h4 class="radio control-label"> 自動再生制御の一般ユーザーへの公開</h4>
-    <label class="radio control-label"> <small>プレイヤーコントローラー画面 </small></label>
+    <h4 class="radio form-label"> 自動再生制御の一般ユーザーへの公開</h4>
+    <label class="radio form-label"> <small>プレイヤーコントローラー画面 </small></label>
     <label class="checkbox-inline">
       <input type="radio" name="autoplay_show" value="1" 
 <?php 
@@ -473,13 +473,13 @@ print 'checked';
   </div>
 
 <!---- トップ画面メッセージの設定 ----->
-  <div class="form-group">
+  <div class="mb-3">
     <h3 id="topmessage" class="menulink" >
     トップ画面メッセージの設定 
     
     </h3>
 
-    <div class="form-group">
+    <div class="mb-3">
     <h4 for=> 予約一覧（トップ）画面表示メッセージ  </h4>
     <label for=> <small> HTML記述OK、「#yukarihost#」はホスト名に置換 </small> </label>
      <textarea name="noticeof_listpage" class="form-control" id="noticeof_listpage" >
@@ -491,7 +491,7 @@ if(array_key_exists("noticeof_listpage",$config_ini)) {
 }
 ?></textarea>
     </div>  
-    <div class="form-group">
+    <div class="mb-3">
     <h4 for="noticeof_searchpage" > 検索画面表示メッセージ  </h4>
     <label for="noticeof_searchpage" >  <small> HTML記述OK 「#yukarihost#」はホスト名に置換 </small> </label>
      <textarea name="noticeof_searchpage" class="form-control" id="noticeof_searchpage" >
@@ -506,7 +506,7 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   </div>  
 
   <!---- トップ画面即時リロードの設定 ----->
-  <div class="form-group">
+  <div class="mb-3">
   <?php
       $requestlistactivereload=true;
       if(array_key_exists("requestlistactivereload",$config_ini)){
@@ -515,9 +515,9 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
           }
       }
   ?>
-    <h3 id="requestlist" class="radio control-label menulink"> リクエスト一覧画面設定  </h3>
-    <h4 class="radio control-label"> リクエスト一覧即時リロード  </h4>
-    <label class="radio control-label">  <br /><small>リクエスト一覧がリスト更新時のみに即時リロードされます。定期的なリロードより通信量が削減できます。有効にすると定期的なリロードは無効になり、下の設定は無視されます。</small> </label>
+    <h3 id="requestlist" class="radio form-label menulink"> リクエスト一覧画面設定  </h3>
+    <h4 class="radio form-label"> リクエスト一覧即時リロード  </h4>
+    <label class="radio form-label">  <br /><small>リクエスト一覧がリスト更新時のみに即時リロードされます。定期的なリロードより通信量が削減できます。有効にすると定期的なリロードは無効になり、下の設定は無視されます。</small> </label>
     <label class="radio-inline">
       <input type="radio" name="requestlistactivereload" value="1" <?php print ($requestlistactivereload)?'checked':' ' ?> /> 使用する
     </label>
@@ -528,7 +528,7 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
 
 
 <!---- トップ画面リクエストリストリロード時間 ----->
-  <div class="form-group">
+  <div class="mb-3">
     <h4 for="reloadtime"> リクエスト一覧リロード時間  </h4>
     <label for="reloadtime">  <small> 0 でリロード無効。数値を大きくするとオンライン接続時の通信量を減らせます </small> </label>
     </label>
@@ -544,7 +544,7 @@ print ' value="20" ';
 />
   </div>
 <!---- トップ画面リクエスト一覧表示件数 ----->
-  <div class="form-group">
+  <div class="mb-3">
     <h4 for="requestlist_num"> リクエスト一覧表示件数  </h4>
     <label for="requestlist_num">  <small> 0 全件表示。数値を小さくするとオンライン接続時の通信量を減らせます </small> </label>
     <input type="text" name="requestlist_num" size="100" class="form-control"
@@ -568,8 +568,8 @@ print ' value="10" ';
           }
       }
   ?>
-  <div class="form-group">
-    <h4 class="radio control-label"> 公開用シンプルリクエスト一覧表示 <br /><small></small> </h4>
+  <div class="mb-3">
+    <h4 class="radio form-label"> 公開用シンプルリクエスト一覧表示 <br /><small></small> </h4>
     <label class="radio-inline">
       <input type="radio" name="usesimplelist" value="1" <?php print ($usesimplelist)?'checked':' ' ?> /> 使用する
     </label>
@@ -586,9 +586,9 @@ print ' value="10" ';
       $usev2ui = (isset($config_ini["usenewrequestlist"]) && $config_ini["usenewrequestlist"] == 1)
               || (isset($config_ini["usenewsearchui"])    && $config_ini["usenewsearchui"]    == 1);
   ?>
-  <div class="form-group">
-    <h4 class="radio control-label"> UI v2 </h4>
-    <label class="radio control-label"><small>リクエスト一覧・検索画面をまとめてv2デザイン（モバイル対応）に切り替えます。</small></label>
+  <div class="mb-3">
+    <h4 class="radio form-label"> UI v2 </h4>
+    <label class="radio form-label"><small>リクエスト一覧・検索画面をまとめてv2デザイン（モバイル対応）に切り替えます。</small></label>
     <label class="radio-inline">
       <input type="radio" name="usev2ui" value="1" <?php print $usev2ui ? 'checked' : '' ?> /> 使用する
     </label>
@@ -602,9 +602,9 @@ print ' value="10" ';
   </div>
 
 <!---- シークレット予約の表示テキスト ----->
-  <div class="form-group">
-    <h4 class="radio control-label"> シークレット予約の表示テキスト </h4>
-    <label class="radio control-label"><small>未再生のシークレット予約の曲名の代わりに表示するテキストです。</small></label>
+  <div class="mb-3">
+    <h4 class="radio form-label"> シークレット予約の表示テキスト </h4>
+    <label class="radio form-label"><small>未再生のシークレット予約の曲名の代わりに表示するテキストです。</small></label>
     <input type="text" name="secret_display_text" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)')), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="ヒ・ミ・ツ♪(シークレット予約)" />
@@ -617,8 +617,8 @@ print ' value="10" ';
              $bgcolor=urldecode($config_ini["bgcolor"]);
       }
   ?>
-  <div class="form-group">
-    <h3 id="bgcolor_t" class="radio control-label menulink"> ページ背景色  </h3>
+  <div class="mb-3">
+    <h3 id="bgcolor_t" class="radio form-label menulink"> ページ背景色  </h3>
     <input type="color" name="bgcolor" id="bgcolor" list="colors" value="<?php print $bgcolor ?>" />
 		<datalist id="colors">
 			<option value="#F8ECE0"></option>
@@ -627,9 +627,9 @@ print ' value="10" ';
 			<option value="#ceffce"></option>
 		</datalist>
   </div>
-  <script type="text/javascript">
-  $("#bgcolor").on("change", function(){
-      document.body.style.backgroundColor = $('#bgcolor').val();
+  <script>
+  document.getElementById('bgcolor').addEventListener('change', function(){
+      document.body.style.backgroundColor = this.value;
   });
   </script>
 
@@ -648,8 +648,8 @@ print ' value="10" ';
           $bg_overlay_opacity = (int)$config_ini["bg_overlay_opacity"];
       }
   ?>
-  <div class="form-group">
-    <h3 id="bgimage_t" class="radio control-label menulink"> 背景画像 </h3>
+  <div class="mb-3">
+    <h3 id="bgimage_t" class="radio form-label menulink"> 背景画像 </h3>
     <label><small>画面全体の背景に画像を表示します。透過度で見やすさを調整できます。</small></label>
     <?php if (!empty($bgimage_upload_msg)) { ?>
       <div class="alert alert-info" style="margin-top:6px;"><?php echo htmlspecialchars($bgimage_upload_msg, ENT_QUOTES, 'UTF-8'); ?></div>
@@ -677,18 +677,18 @@ print ' value="10" ';
     <!-- 現在のbgimage値を保持 -->
     <input type="hidden" name="bgimage" value="<?php echo htmlspecialchars($bgimage_path, ENT_QUOTES, 'UTF-8'); ?>" />
 
-    <div class="form-group" style="margin-top:10px;">
+    <div class="mb-3" style="margin-top:10px;">
       <label for="bg_card_opacity"><small>カード透過度: <span id="bg_card_opacity_val"><?php echo $bg_card_opacity; ?></span>%</small></label>
       <input type="range" name="bg_card_opacity" id="bg_card_opacity" min="0" max="100" step="1" value="<?php echo $bg_card_opacity; ?>" />
       <small>低くするほどカード(各パネル)が透けて背景画像が見えます。</small>
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <label for="bg_overlay_opacity"><small>背景オーバーレイ透過度: <span id="bg_overlay_opacity_val"><?php echo $bg_overlay_opacity; ?></span>%</small></label>
       <input type="range" name="bg_overlay_opacity" id="bg_overlay_opacity" min="0" max="100" step="1" value="<?php echo $bg_overlay_opacity; ?>" />
       <small>背景画像の上にページ背景色をかぶせる強さ。100%で背景色のみ(画像非表示)、0%で画像がそのまま見えます。</small>
     </div>
   </div>
-  <script type="text/javascript">
+  <script>
   (function(){
       function hexToRgb(h){
           h = (h||'').replace('#','');
@@ -697,25 +697,28 @@ print ' value="10" ';
           return parseInt(h.substr(0,2),16)+', '+parseInt(h.substr(2,2),16)+', '+parseInt(h.substr(4,2),16);
       }
       function updateBgPreview(){
-          var co = parseInt($('#bg_card_opacity').val(),10)/100;
-          var oo = parseInt($('#bg_overlay_opacity').val(),10)/100;
+          var co = parseInt(document.getElementById('bg_card_opacity').value,10)/100;
+          var oo = parseInt(document.getElementById('bg_overlay_opacity').value,10)/100;
           document.documentElement.style.setProperty('--bg-card-alpha', co);
           document.documentElement.style.setProperty('--bg-overlay-alpha', oo);
-          document.documentElement.style.setProperty('--bg-page-rgb', hexToRgb($('#bgcolor').val()));
-          $('#bg_card_opacity_val').text($('#bg_card_opacity').val());
-          $('#bg_overlay_opacity_val').text($('#bg_overlay_opacity').val());
+          document.documentElement.style.setProperty('--bg-page-rgb', hexToRgb(document.getElementById('bgcolor').value));
+          document.getElementById('bg_card_opacity_val').textContent = document.getElementById('bg_card_opacity').value;
+          document.getElementById('bg_overlay_opacity_val').textContent = document.getElementById('bg_overlay_opacity').value;
       }
-      $('#bg_card_opacity, #bg_overlay_opacity, #bgcolor').on('input change', updateBgPreview);
+      ['bg_card_opacity','bg_overlay_opacity','bgcolor'].forEach(function(id){
+          document.getElementById(id).addEventListener('input', updateBgPreview);
+          document.getElementById(id).addEventListener('change', updateBgPreview);
+      });
       updateBgPreview();
   })();
   </script>
 
 <!---- twitter投稿リンク ----->
-  <div class="form-group">
+  <div class="mb-3">
   <?php
       $useposttwitter = configbool("useposttwitter", true);
   ?>
-    <label class="radio control-label"> twitter投稿リンク </label>
+    <label class="radio form-label"> twitter投稿リンク </label>
     <label class="radio-inline">
       <input type="radio" name="useposttwitter" value="1" <?php print ($useposttwitter)?'checked':' ' ?> /> 表示する
     </label>
@@ -726,7 +729,7 @@ print ' value="10" ';
 
 
 
-  <div class="form-group">
+  <div class="mb-3">
     <h3 id="movieplayer" class="menulink" > 動画プレーヤー設定 </h3>
     <h4 for="playerpath_select">MediaPlayerClassic PATH設定</h4>
     <select  class="form-control" name="playerpath_select" id="playerpath_select" >  
@@ -746,8 +749,8 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
 ?>
 />
   </div>
-  <div class="form-group">
-    <h4 class="radio control-label"> MPCのフルスクリーンボタン </h4>
+  <div class="mb-3">
+    <h4 class="radio form-label"> MPCのフルスクリーンボタン </h4>
     <label class="radio-inline">
       <input type="radio" name="moviefullscreen" value="1" <?php print ($config_ini["moviefullscreen"]==1)?'checked':' ' ?> /> 有効
     </label>
@@ -765,13 +768,13 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
           }
       }
   ?>
-  <div class="form-group">
+  <div class="mb-3">
 <!--★削除★
-    <h4 class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title=" MPCの動画再生開始時に音量を５０％に戻す" >
+    <h4 class="radio form-label"> <span data-bs-toggle="tooltip" data-bs-placement="top" title=" MPCの動画再生開始時に音量を５０％に戻す" >
         MPCの再生開始時に音量を５０％に戻す <small></small> </span>
 ★-->
 <!--★追加★-->
-    <h4 class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title="MPCの動画再生開始時に音量を戻す" >
+    <h4 class="radio form-label"> <span data-bs-toggle="tooltip" data-bs-placement="top" title="MPCの動画再生開始時に音量を戻す" >
         MPCの再生開始時に音量を戻す <small></small> </span>
 <!--★追加★-->
     </h4>
@@ -783,7 +786,7 @@ if( urldecode($config_ini["playerpath_select"]) == 'その他PATH指定' )
       <input type="radio" name="startvolume50" value="2" <?php print (!$startvolume50)?'checked':' ' ?> /> 無効
     </label>
 <!--★追加★-->
-    <h5> <span data-toggle="tooltip" data-placement="top">戻す音量 (％) </span></h5>
+    <h5> <span data-bs-toggle="tooltip" data-bs-placement="top">戻す音量 (％) </span></h5>
     <input type="number" name="startvolume" min="0" max="100" class="startvolume" 
 <?php
 if(array_key_exists("startvolume",$config_ini)) {
@@ -804,10 +807,10 @@ print 'value="'.urldecode($config_ini["startvolume"]).'"';
           }
       }
   ?>
-  <div class="form-group">
-    <h4 class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title="Player画面にキー変更ボタンを表示します" >
+  <div class="mb-3">
+    <h4 class="radio form-label"> <span data-bs-toggle="tooltip" data-bs-placement="top" title="Player画面にキー変更ボタンを表示します" >
         MPCのキーチェンジ機能 </span> </h4>
-    <label class="radio control-label">
+    <label class="radio form-label">
         <small>『要<a href="http://shinta.coresv.com/soft/EasyKeyChanger_JPN.html" > 簡易キーチェンジャー </a>のセットアップ』</small>
     </label>
         
@@ -819,9 +822,9 @@ print 'value="'.urldecode($config_ini["startvolume"]).'"';
     </label>
   </div>
 
-  <div class="form-group">
-    <h4 class="radio control-label"><span data-toggle="tooltip" data-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。予約確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </h4>
-    <label class="radio-inline" data-toggle="tooltip" data-placement="top" title="予約確認画面に項目を追加するかどうか">
+  <div class="mb-3">
+    <h4 class="radio form-label"><span data-bs-toggle="tooltip" data-bs-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。予約確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </h4>
+    <label class="radio-inline" data-bs-toggle="tooltip" data-bs-placement="top" title="予約確認画面に項目を追加するかどうか">
       <input type="radio" name="useotherplayer" value="1" <?php 
       if(array_key_exists("useotherplayer",$config_ini)){
           print ($config_ini["useotherplayer"]==1)?'checked':' ';
@@ -835,7 +838,7 @@ print 'value="'.urldecode($config_ini["startvolume"]).'"';
         print "checked";
     }
     ?> /> 使用しない </label></br>
-    <h4 > <span data-toggle="tooltip" data-placement="top" title="リクエスト確認画面でのこの項目に対する説明文">リクエスト確認画面での説明文 </span></h4>
+    <h4 > <span data-bs-toggle="tooltip" data-bs-placement="top" title="リクエスト確認画面でのこの項目に対する説明文">リクエスト確認画面での説明文 </span></h4>
     <input type="text" name="otherplayer_disc" class="form-control" 
 <?php
 if(array_key_exists("otherplayer_disc",$config_ini)) {
@@ -843,7 +846,7 @@ print 'value="'.urldecode($config_ini["otherplayer_disc"]).'"';
 }
 ?>
 />
-    <h4 > <span data-toggle="tooltip" data-placement="top" title="起動する別プログラム コマンドプロンプトから「 ＜コマンド名＞ ＜ファイル名＞ 」で起動させる">別プレーヤーのPATH（空白で手動実行) </span></h4>
+    <h4 > <span data-bs-toggle="tooltip" data-bs-placement="top" title="起動する別プログラム コマンドプロンプトから「 ＜コマンド名＞ ＜ファイル名＞ 」で起動させる">別プレーヤーのPATH（空白で手動実行) </span></h4>
     <input type="text" name="otherplayer_path" class="form-control" 
 <?php
 if(array_key_exists("otherplayer_path",$config_ini)) {
@@ -853,7 +856,7 @@ print 'value="'.urldecode($config_ini["otherplayer_path"]).'"';
 />
 
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <h4 for="foobarpath"> foobar2000 PATH設定　</h4>
     <label > 任意のPATH選択  </label>
     <input type="text" name="foobarpath" class="form-control" id="foobarpath" value="<?php echo urldecode($config_ini["foobarpath"]); ?>" />
@@ -872,8 +875,8 @@ print 'value="'.urldecode($config_ini["otherplayer_path"]).'"';
   ?>
 
 
-    <div class="form-group">
-    <h4 class="radio control-label">カラオケ配信リクエストを受け付ける </h4>
+    <div class="mb-3">
+    <h4 class="radio form-label">カラオケ配信リクエストを受け付ける </h4>
     <label class="radio-inline">
       <input type="radio" name="usehaishin" value="1" <?php print ($usehaishin)?'checked':' ' ?> /> 使用する
     </label>
@@ -881,8 +884,8 @@ print 'value="'.urldecode($config_ini["otherplayer_path"]).'"';
       <input type="radio" name="usehaishin" value="2" <?php print (!$usehaishin)?'checked':' ' ?> /> 使用しない
     </label>
   </div>
-  <div class="form-group">
-    <h4 class="radio control-label">配信曲にビデオキャプチャデバイスを使用 </h4>
+  <div class="mb-3">
+    <h4 class="radio form-label">配信曲にビデオキャプチャデバイスを使用 </h4>
     <label class="radio-inline">
       <input type="radio" name="usevideocapture" value="2" <?php print ($config_ini["usevideocapture"]!=1 && $config_ini["usevideocapture"]!=3)?'checked':' ' ?> /> 使用しない
     </label>
@@ -893,7 +896,7 @@ print 'value="'.urldecode($config_ini["otherplayer_path"]).'"';
       <input type="radio" name="usevideocapture" value="3" <?php print ($config_ini["usevideocapture"]==3)?'checked':' ' ?> /> 別のアプリを使用する
     </label>
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <h4 >
       配信表示アプリ <small>(「別アプリ使用」の設定の時のみ有効)</small>
     </h4>
@@ -905,7 +908,7 @@ print 'value="'.urldecode($config_ini["captureapli_path"]).'"';
 ?>
 />
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <h4 >
       配信開始時実行コマンド 
     </h4>
@@ -917,7 +920,7 @@ print 'value="'.urldecode($config_ini["DeliveryCMD"]).'"';
 ?>
 />
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <h4 >
       配信終了時実行コマンド 
     </h4>
@@ -939,8 +942,8 @@ print 'value="'.urldecode($config_ini["DeliveryCMDEND"]).'"';
           }
       }
   ?>
-  <div class="form-group">
-    <h4 class="radio control-label"> <span data-toggle="tooltip" data-placement="top" title=" 通常再生時Direct3Dフルスクリーンを有効にしている際に有効にする" >
+  <div class="mb-3">
+    <h4 class="radio form-label"> <span data-bs-toggle="tooltip" data-bs-placement="top" title=" 通常再生時Direct3Dフルスクリーンを有効にしている際に有効にする" >
         ビデオキャプチャデバイスを使用時にDirect3Dフルスクリーンの切り替え <small></small> </span>
     </h4>
         
@@ -952,14 +955,14 @@ print 'value="'.urldecode($config_ini["DeliveryCMDEND"]).'"';
     </label>
   </div>
 
-  <div class="form-group">
-    <h4 class="radio control-label">BGVモード </h4>
+  <div class="mb-3">
+    <h4 class="radio form-label">BGVモード </h4>
     <label class="radio-inline"> <input type="radio" name="usebgv" value="1" <?php print ($config_ini["usebgv"]==1)?'checked':' ' ?> /> 使用する </label>
     <label class="radio-inline"> <input type="radio" name="usebgv" value="2" <?php print ($config_ini["usebgv"]!=1)?'checked':' ' ?> /> 使用しない </label>
 
-    <div class="form-group">
-    <h4 class="radio control-label"> BGVフォルダ  </h4>
-    <label class="radio control-label"> <small> 空でBGV検索画面無効 </small> </label>
+    <div class="mb-3">
+    <h4 class="radio form-label"> BGVフォルダ  </h4>
+    <label class="radio form-label"> <small> 空でBGV検索画面無効 </small> </label>
     <input type="text" name="BGVfolder" class="form-control"
 <?php
 if(array_key_exists("BGVfolder",$config_ini)) {
@@ -970,7 +973,7 @@ if(array_key_exists("BGVfolder",$config_ini)) {
 ?>
 />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
     <h4 >
       BGV開始時実行コマンド 
     </h4>
@@ -982,7 +985,7 @@ print 'value="'.urldecode($config_ini["BGVCMDSTART"]).'"';
 ?>
 />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
     <h4 >
       BGV終了時実行コマンド 
     </h4>
@@ -997,19 +1000,19 @@ print 'value="'.urldecode($config_ini["BGVCMDEND"]).'"';
   </div>
 
 <h3 id=searchscreen class="menulink" > 検索画面設定 </h3>
-  <div class="form-group">
+  <div class="mb-3">
     <h4 for="comment"> リクエスト画面、コメント欄の説明書き </h4>
     <textarea class="form-control" name="requestcomment" id="comment" rows="4" wrap="soft" style="width:100%" >
 <?php print htmlspecialchars(urldecode($config_ini["requestcomment"])); ?>
     </textarea>
   </div>
 
-  <div class="form-group">
-    <h4 class="radio control-label">見つからなかった曲リストの使用 </h4>
+  <div class="mb-3">
+    <h4 class="radio form-label">見つからなかった曲リストの使用 </h4>
     <label class="radio-inline"> <input type="radio" name="usenfrequset" value="1" <?php print ($config_ini["usenfrequset"]==1)?'checked':' ' ?> /> 使用する </label>
     <label class="radio-inline"> <input type="radio" name="usenfrequset" value="2" <?php print ($config_ini["usenfrequset"]!=1)?'checked':' ' ?> /> 使用しない </label>
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <h4 for="max_filesize"> 検索結果に表示する最大ファイルサイズ(MB) </h4>
     <label for="max_filesize"> <small> 0 で無制限 </small> 
     </label>
@@ -1063,7 +1066,7 @@ $si_sorted_indices = array_keys($si_order_map);
 
 ?>
 
-  <div class="form-group">
+  <div class="mb-3">
      <h4 class=""> 検索画面に表示する項目 </h4>
      <small>ドラッグで表示順を変更できます</small>
 
@@ -1081,7 +1084,7 @@ $si_sorted_indices = array_keys($si_order_map);
 <?php } ?>
   </div>
 
-  <div class="form-group">
+  <div class="mb-3">
     <h4  > りすたーDBファイルパス  </h4>
     <?php 
         $listerDBPATH = 'list\List.sqlite3';
@@ -1092,10 +1095,10 @@ $si_sorted_indices = array_keys($si_order_map);
     <input type="text" name="listerDBPATH" size="100" class="form-control" value="<?php echo $listerDBPATH; ?>" />
   </div>
 
-  <div class="form-group">
+  <div class="mb-3">
     <?php $online_preview = configbool("online_preview", false); ?>
-    <h4 class="radio control-label"> オンラインからの動画プレビュー </h4>
-    <label class="radio control-label"><small>インターネット経由でアクセスした場合も動画プレビューを使用できるようにします</small></label>
+    <h4 class="radio form-label"> オンラインからの動画プレビュー </h4>
+    <label class="radio form-label"><small>インターネット経由でアクセスした場合も動画プレビューを使用できるようにします</small></label>
     <label class="radio-inline">
       <input type="radio" name="online_preview" value="1" <?php print ($online_preview) ? 'checked' : ' '; ?> /> 使用する
     </label>
@@ -1104,8 +1107,8 @@ $si_sorted_indices = array_keys($si_order_map);
     </label>
   </div>
 
-  <div class="form-group">
-    <h4 class="radio control-label"> 検索ログの保存 </h4>
+  <div class="mb-3">
+    <h4 class="radio form-label"> 検索ログの保存 </h4>
     <label class="radio-inline">
       <input type="radio" name="historylog" value="1" <?php print ($config_ini["historylog"]==1)?'checked':' ' ?> /> 使用する
     </label>
@@ -1114,7 +1117,7 @@ $si_sorted_indices = array_keys($si_order_map);
     </label>
   </div>
 
-  <div class="form-group">
+  <div class="mb-3">
     <h4 title="検索結果がこの数を超えた場合、作品名や歌手名と一緒に検索結果を表示する" > anison.info 詳細検索表示件数 <small> 0で1件でもあれば表示</small> </h4>
     <label title="検索結果がこの数を超えた場合、作品名や歌手名と一緒に検索結果を表示する" >  <small> 0で1件でもあれば表示</small> </label>
     <?php 
@@ -1126,12 +1129,12 @@ $si_sorted_indices = array_keys($si_order_map);
     <input type="text" name="anisoninfomanynumber" size="100" class="form-control" value="<?php echo $anisoninfomanynumber; ?>" />
   </div>
   <!---- 小休止の設定 ----->
-  <div class="form-group">
+  <div class="mb-3">
   <?php
       $useuserpause = configbool("useuserpause", false);
   ?>
-    <h3 class="radio control-label"> 小休止リクエストを管理者以外に許可 </h3>
-    <label class="radio control-label"> <small>一般ユーザーにも小休止リクエストができるようにします</small> </label>
+    <h3 class="radio form-label"> 小休止リクエストを管理者以外に許可 </h3>
+    <label class="radio form-label"> <small>一般ユーザーにも小休止リクエストができるようにします</small> </label>
     <label class="radio-inline">
       <input type="radio" name="useuserpause" value="1" <?php print ($useuserpause)?'checked':' ' ?> /> 使用する
     </label>
@@ -1139,21 +1142,21 @@ $si_sorted_indices = array_keys($si_order_map);
       <input type="radio" name="useuserpause" value="2" <?php print (!$useuserpause)?'checked':' ' ?> /> 使用しない
     </label>
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <h4>小休止リクエスト時のファイル名初期値</h4>
     <input type="text" name="pause_default_filename" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['pause_default_filename']), ENT_QUOTES, 'UTF-8'); ?>" />
   </div>
-  <div class="form-group">
+  <div class="mb-3">
     <h4>小休止リクエスト時のコメント初期値</h4>
     <input type="text" name="pause_default_comment" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['pause_default_comment']), ENT_QUOTES, 'UTF-8'); ?>" />
   </div>
 
 
-  <div class="form-group ">
-    <h3 id="useinternet" class="radio control-label menulink"> インターネット接続  </h3>
-    <label class="radio control-label"> <small>(使用しないにするとインターネット接続が前提の機能を無効にします)</small> </label>
+  <div class="mb-3 ">
+    <h3 id="useinternet" class="radio form-label menulink"> インターネット接続  </h3>
+    <label class="radio form-label"> <small>(使用しないにするとインターネット接続が前提の機能を無効にします)</small> </label>
     <label class="radio-inline">
       <input type="radio" name="connectinternet" value="1" <?php print ($config_ini["connectinternet"]==1)?'checked':' ' ?> /> 使用する
     </label>
@@ -1162,7 +1165,7 @@ $si_sorted_indices = array_keys($si_order_map);
     </label>
   </div>
 
-  <div class="form-group">
+  <div class="mb-3">
     <h3 id="commentserver" class="menulink">
     コメントサーバー設定
     </h3>
@@ -1180,7 +1183,7 @@ $si_sorted_indices = array_keys($si_order_map);
     <input type="text" name="commentroom" MAXLENGTH="24" class="form-control" value="<?php echo urldecode($config_ini["commentroom"]); ?>" />
   </div>
 
-  <div class="form-group">
+  <div class="mb-3">
     <h3 >
       ヘルプURL 
     </h3>
@@ -1195,8 +1198,8 @@ print 'value="'.urldecode($config_ini["helpurl"]).'"';
 ?>
 />
   </div> 
-  <div class="form-group">
-    <h3 class="radio control-label"> 名無しでのリクエスト許可 </h3>
+  <div class="mb-3">
+    <h3 class="radio form-label"> 名無しでのリクエスト許可 </h3>
     <label class="radio-inline">
       <input type="radio" name="nonamerequest" value="1" 
       <?php 
@@ -1216,7 +1219,7 @@ print 'value="'.urldecode($config_ini["helpurl"]).'"';
        
       ?> /> 不許可
     </label>
-    <h3 class="radio control-label"> 名無しリクエスト時の表示名 </h3>
+    <h3 class="radio form-label"> 名無しリクエスト時の表示名 </h3>
     <input type="text" name="nonameusername" class="form-control"
 <?php
 if(array_key_exists("nonameusername",$config_ini)) {
@@ -1228,7 +1231,7 @@ print 'value="名無しさん"';}
   </div> 
 
 
-  <div class="form-group">
+  <div class="mb-3">
     <h3 >
     ニコニコ動画ダウンロード設定 
     </h3>
@@ -1236,7 +1239,7 @@ print 'value="名無しさん"';}
     <small>(ゆかりでの設定は不要になりました。MPC-BEにyoutube-dlの設定をしてください。<a href="https://github.com/bee7813993/KaraokeRequestorWeb/wiki/urlrequest"> https://github.com/bee7813993/KaraokeRequestorWeb/wiki/urlrequest </a> </small>
 	</label >    
 <!---
-    <div class="form-group">
+    <div class="mb-3">
       <h4 > ログインID(メールアドレス) </h4>
       <input type="text" name="nicoid"  class="form-control" 
 <?php
@@ -1253,9 +1256,9 @@ print 'value="'.urldecode($config_ini["nicopass"]).'"';
 }
 ?>      />
     </div>
-    <div class="form-group">
-    <h4 class="radio control-label"> アップ／ダウンロード先フォルダ <small> 要Everythingの検索対象</small> </h4>
-    <label class="radio control-label"> <small> 要Everythingの検索対象</small> </label>
+    <div class="mb-3">
+    <h4 class="radio form-label"> アップ／ダウンロード先フォルダ <small> 要Everythingの検索対象</small> </h4>
+    <label class="radio form-label"> <small> 要Everythingの検索対象</small> </label>
     <input type="text" name="downloadfolder" class="form-control"
 <?php
 if(array_key_exists("downloadfolder",$config_ini)) {
@@ -1269,7 +1272,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
   </div>  
 ---!>
 
-  <div class="form-group">
+  <div class="mb-3">
     <h3 > プレイヤー動作監視開始待ち時間(秒) </h3>
       
     <input type="text" name="waitplayercheckstart" size="100" class="form-control" value="<?php echo $config_ini["waitplayercheckstart"]; ?>" />
@@ -1277,13 +1280,13 @@ if(array_key_exists("downloadfolder",$config_ini)) {
     <input type="text" name="playerchecktimes" size="100" class="form-control" value="<?php echo $config_ini["playerchecktimes"]; ?>" />
   </div>
 
-  <h3 id="otherroom" class="radio control-label menulink"> 別部屋URL設定 </h3>
-  <table class="table table-striped table-bordered table-condensed">
+  <h3 id="otherroom" class="radio form-label menulink"> 別部屋URL設定 </h3>
+  <table class="table table-striped table-bordered table-sm">
   <thead>
     <tr>
-      <th class="col-xs-3" >部屋番号</th>
-      <th class="col-xs-8" >URL</th>
-      <th class="col-xs-1" >表示</th>
+      <th class="col-3" >部屋番号</th>
+      <th class="col-8" >URL</th>
+      <th class="col-1" >表示</th>
     </tr>
   </thead>
 <?php 
@@ -1318,8 +1321,8 @@ if(array_key_exists("downloadfolder",$config_ini)) {
   </tr>
   </table>
 
-  <div class="form-group">
-    <h3 class="radio control-label"  > <span data-toggle="tooltip" data-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >リクエスト時_順番ピッタリ移動 </span ></h3> 
+  <div class="mb-3">
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >リクエスト時_順番ピッタリ移動 </span ></h3> 
     <label class="checkbox-inline">
       <input type="radio" name="request_automove" value="1" 
 <?php 
@@ -1344,8 +1347,8 @@ if(array_key_exists("request_automove",$config_ini)) {
     </label>
   </div>
 
-  <div class="form-group">
-    <h3 class="radio control-label"  > <span data-toggle="tooltip" data-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >ピッタリ移動_小休止時リセット </span ></h3> 
+  <div class="mb-3">
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >ピッタリ移動_小休止時リセット </span ></h3> 
     <label class="checkbox-inline">
       <input type="radio" name="request_automove_reset" value="1" 
 <?php 
@@ -1372,12 +1375,12 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
 
 
 <!---- 縛り曲リストの設定 ----->
-  <h3> <span data-toggle="tooltip" data-placement="top" title="検索予約メニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
+  <h3> <span data-bs-toggle="tooltip" data-bs-placement="top" title="検索予約メニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
   <?php 
   if(array_key_exists("limitlistname",$config_ini)) {
   for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){
       if(empty($config_ini["limitlistname"][$i])) continue; 
-      print '<div class="form-group">';
+      print '<div class="mb-3">';
       print '  <h4 > 縛り曲リスト名 '.$i.' </h4>';
       print '  <input type="text" name="limitlistname[]" size="100" class="form-control" value="';
       if(array_key_exists($i,$config_ini["limitlistname"]))
@@ -1397,7 +1400,7 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
   }
   }
   ?>
-  <div class="form-group">
+  <div class="mb-3">
     <h4 > 縛り曲リスト名(new)  </h4>
     <input type="text" name="limitlistname[]" size="100" class="form-control" value="" />
     <h4 > 縛り曲リストファイル名(new)（json形式） </h4>
@@ -1405,7 +1408,7 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
   </div>
 
   <!---- ビンゴ表示機能の設定 ----->
-  <div class="form-group">
+  <div class="mb-3">
   <?php
       $usebingo=false;
       if(array_key_exists("usebingo",$config_ini)){
@@ -1414,18 +1417,18 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
           }
       }
   ?>
-    <h3 class="radio control-label"> ビンゴ表示機能 <br /><small></small> </h3>
+    <h3 class="radio form-label"> ビンゴ表示機能 <br /><small></small> </h3>
     <label class="radio-inline">
       <input type="radio" name="usebingo" value="1" <?php print ($usebingo)?'checked':' ' ?> /> 使用する
     </label>
     <label class="radio-inline">
       <input type="radio" name="usebingo" value="2" <?php print (!$usebingo)?'checked':' ' ?> /> 使用しない
     </label>
-    <a href ="bingo_input.php" class="btn btn-default" > ビンゴ項目入力画面 </a>
+    <a href ="bingo_input.php" class="btn btn-secondary" > ビンゴ項目入力画面 </a>
   </div>
 
   <!---- xampp自動再起動の設定 ----->
-  <div class="form-group">
+  <div class="mb-3">
   <?php
       $xamppautorestart=true;
       if(array_key_exists("xamppautorestart",$config_ini)){
@@ -1436,8 +1439,8 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
           }
       }
   ?>
-    <h3 class="radio control-label"> xampp自動再起動  </h3>
-    <label class="radio control-label">  <small>ブラウザのボタンから自動再生が起動できない環境では「使用しない」にしてください</small> </label>
+    <h3 class="radio form-label"> xampp自動再起動  </h3>
+    <label class="radio form-label">  <small>ブラウザのボタンから自動再生が起動できない環境では「使用しない」にしてください</small> </label>
     <label class="radio-inline">
       <input type="radio" name="xamppautorestart" value="1" <?php print ($xamppautorestart)?'checked':' ' ?> /> 使用する
     </label>
@@ -1446,8 +1449,8 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
     </label>
   </div>
 
-  <div class="form-group">
-    <h3 class="control-label"> pfwd.exeインストールフォルダ  </h3>
+  <div class="mb-3">
+    <h3 class="form-label"> pfwd.exeインストールフォルダ  </h3>
     <input type="text" name="pfwdplace" class="form-control"
 <?php
 if(array_key_exists("pfwdplace",$config_ini)) {
@@ -1480,13 +1483,13 @@ if(array_key_exists("pfwdplace",$config_ini)) {
         }
     }
 ?>
-  <div class="form-group" id="usepfwdcheck" >
-    <h3 id="pfwd" class="radio control-label menulink"> pfwd 自動再起動 </h3>
-    <label class="radio control-label"><small>通常時オンライン版接続確認でOKになる環境で使用する</small> </label>
+  <div class="mb-3" id="usepfwdcheck" >
+    <h3 id="pfwd" class="radio form-label menulink"> pfwd 自動再起動 </h3>
+    <label class="radio form-label"><small>通常時オンライン版接続確認でOKになる環境で使用する</small> </label>
 <?php
   if($online_available_flg == false) {
       print '<div class="alert-danger" > オンライン版接続確認がNGの間は選択できません <br /> '.$ret ;
-      print '<button class="btn btn-default" role="button" onclick="location.reload();" >状態更新</button>'.'</div>';
+      print '<button class="btn btn-secondary" role="button" onclick="location.reload();" >状態更新</button>'.'</div>';
   } 
 
 ?>
@@ -1500,9 +1503,9 @@ if(array_key_exists("pfwdplace",$config_ini)) {
   </div>
 
   <!---- オンラインチェック、タイムアウト時間 ----->
-  <div class="form-group">
-    <h3 class="control-label"> オンラインチェック、タイムアウト時間 </h3>
-    <label class="control-label"> <small>ブラウザではオンライン接続できるのに下の「オンライン版接続確認」がOKにならない場合この数値を増やしてください。</small> </label>
+  <div class="mb-3">
+    <h3 class="form-label"> オンラインチェック、タイムアウト時間 </h3>
+    <label class="form-label"> <small>ブラウザではオンライン接続できるのに下の「オンライン版接続確認」がOKにならない場合この数値を増やしてください。</small> </label>
     <input type="text" name="onlinechecktimeout" class="form-control"
 <?php
 if(array_key_exists("onlinechecktimeout",$config_ini)) {
@@ -1525,16 +1528,16 @@ if(array_key_exists("onlinechecktimeout",$config_ini)) {
           }
       }
   ?>
-  <div class="form-group">
-    <h3 class="radio control-label"> 簡易認証 </h3>
+  <div class="mb-3">
+    <h3 class="radio form-label"> 簡易認証 </h3>
     <label class="radio-inline">
       <input type="radio" name="useeasyauth" value="1" <?php print ($useeasyauth)?'checked':' ' ?> /> 使用する
     </label>
     <label class="radio-inline">
       <input type="radio" name="useeasyauth" value="2" <?php print (!$useeasyauth)?'checked':' ' ?> /> 使用しない
     </label>
-      <div class="form-group">
-      <h4 class="control-label"> 簡易認証キーワード </h4>
+      <div class="mb-3">
+      <h4 class="form-label"> 簡易認証キーワード </h4>
       <input type="text" name="useeasyauth_word" class="form-control" id="useeasyauth_word" 
 <?php
 if(array_key_exists("useeasyauth_word",$config_ini)) {
@@ -1553,41 +1556,41 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
         
     }
 </script>
-    <button type="button" class="btn btn-default" onclick="GenRandomKeyword();" > キーワードランダム生成 </button>
+    <button type="button" class="btn btn-secondary" onclick="GenRandomKeyword();" > キーワードランダム生成 </button>
     </div>
   </div>
 
   <!---- Google同期設定 ----->
-  <div class="form-group">
-    <h3 id="googlesync" class="radio control-label menulink"> Google同期設定 </h3>
-    <label class="control-label">
+  <div class="mb-3">
+    <h3 id="googlesync" class="radio form-label menulink"> Google同期設定 </h3>
+    <label class="form-label">
       <small>マイページデータをGoogle Driveに保存し、複数サーバー間で共有する機能です。</small>
     </label>
 
-    <h4 class="control-label"> Google Client ID </h4>
+    <h4 class="form-label"> Google Client ID </h4>
     <input type="text" name="google_client_id" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['google_client_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="例: 123456789-xxxx.apps.googleusercontent.com" />
 
-    <h4 class="control-label"> Google Client Secret </h4>
+    <h4 class="form-label"> Google Client Secret </h4>
     <small class="text-muted">中継サーバー（ykr.moe）側に設定する場合は空欄にしてください。</small>
     <input type="text" name="google_client_secret" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['google_client_secret'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="中継サーバーを使う場合は空欄" />
 
-    <h4 class="control-label"> 中継サーバーURL </h4>
+    <h4 class="form-label"> 中継サーバーURL </h4>
     <input type="text" name="google_relay_url" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['google_relay_url'] ?? 'https://ykr.moe/mypage_google_callback.php'), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="https://ykr.moe/mypage_google_callback.php" />
 
-    <h4 class="control-label"> 中継シークレット </h4>
+    <h4 class="form-label"> 中継シークレット </h4>
     <small class="text-muted">中継サーバーとこのサーバー間の共有秘密鍵です。中継サーバー管理者から入手してください。</small>
     <input type="text" name="google_relay_secret" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['google_relay_secret'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="中継サーバー管理者から入手したシークレット" />
   </div>
 
-  <input type="submit" class="btn btn-default btn-lg" value="設定" />
+  <input type="submit" class="btn btn-secondary btn-lg" value="設定" />
   </form>
   </div>
 </div>
@@ -1606,24 +1609,19 @@ $pfwdavailable = $pfwdinfo->readpfwdcfg();
   <h1 id="hostname" class="menulink" > ホスト名設定（オンライン接続およびDDNSの設定） </h1>
   <h3> オンライン接続用</h3>
 
-<script type="text/javascript">
-$(document).ready(function(){
-  $('#onlinehost').on('submit', function(event) {
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('onlinehost').addEventListener('submit', function(event) {
     event.preventDefault();
-    $.post(
-    $(this).attr('action'),
-    $(this).serializeArray(),
-    function(result) {
-        window.location.href='init.php';
-    });
-    return false;
+    fetch(this.action, { method: 'POST', body: new FormData(this) })
+      .then(function(){ window.location.href='init.php'; });
   });
 });
 </script>
   <h4> オンライン接続用ホスト名 </h4>
   <form id="onlinehost" method="post"  action="toolinfo.php">
-  <div class="form-group">
-    <label class="control-label" >ホスト名</label>
+  <div class="mb-3">
+    <label class="form-label" >ホスト名</label>
     <input type="text" name="globalhost" class="form-control"  value="<?php
         if(array_key_exists("globalhost",$config_ini)) {
             print urldecode($config_ini["globalhost"]);
@@ -1646,20 +1644,15 @@ $(document).ready(function(){
       }
     }
 ?>
-  <input type="submit" class="btn btn-default" value="<?php print $btnvalue;?>" />
+  <input type="submit" class="btn btn-secondary" value="<?php print $btnvalue;?>" />
   </div>
   </form>
-<script type="text/javascript">
-$(document).ready(function(){
-  $('#pfwdconfig').on('submit', function(event) {
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.getElementById('pfwdconfig').addEventListener('submit', function(event) {
     event.preventDefault();
-    $.post(
-    $(this).attr('action'),
-    $(this).serializeArray(),
-    function(result) {
-        window.location.href='init.php';
-    });
-    return false;
+    fetch(this.action, { method: 'POST', body: new FormData(this) })
+      .then(function(){ window.location.href='init.php'; });
   });
 });
 
@@ -1700,26 +1693,26 @@ var xmlhttp = createXMLHttpRequest();
 </script>
       <h4> プライベートIPオンライン接続コマンド </h4>
       <form id="pfwdconfig" method="post"  action="pfwd_exec.php">
-  <div class="form-group">
-      <label class="control-label" >接続ホスト名</label>
+  <div class="mb-3">
+      <label class="form-label" >接続ホスト名</label>
     <input type="text" name="pfwdserverhost" class="form-control"  value="<?php
         if($pfwdavailable){
             print $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdport();
         }
     ?>" />
-      <label class="control-label" >ユーザー接続ポート</label>
+      <label class="form-label" >ユーザー接続ポート</label>
     <input type="text" name="pfwdserveropenport" class="form-control"  value="<?php
         if($pfwdavailable){
             print $pfwdinfo->get_pfwdopenport();
         }
     ?>" />
-    <input type="submit" class="btn btn-default" value="設定" />
+    <input type="submit" class="btn btn-secondary" value="設定" />
     </div>
     </form>
-  <div class="form-group">
-      <h4 class="control-label" >pfwdプログラム起動停止</h4>
-      <button type="button" class="btn btn-default" onClick="start_pfwdcmd()" >起動</button>
-      <button type="button" class="btn btn-default" onClick="stop_pfwdcmd()" >停止</button>
+  <div class="mb-3">
+      <h4 class="form-label" >pfwdプログラム起動停止</h4>
+      <button type="button" class="btn btn-secondary" onClick="start_pfwdcmd()" >起動</button>
+      <button type="button" class="btn btn-secondary" onClick="stop_pfwdcmd()" >停止</button>
       
       <?php
           if($pfwdavailable == false){
@@ -1736,37 +1729,37 @@ var xmlhttp = createXMLHttpRequest();
   <h4> DDNS登録 </h4>
   <label> pcgame-r18.jp (アカウントを持っている人用) </label>
   <form id="onlinehostpcg" method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">
-      <div class="form-group">
-        <label class="control-label"> Hostname </label>
+      <div class="mb-3">
+        <label class="form-label"> Hostname </label>
         <div class="row">
-          <div class="col-xs-8">
+          <div class="col-8">
             <input type="text" name="host" class="form-control" style=”width: 40%;” value="" />
           </div>
-          <div class="col-xs-4">
+          <div class="col-4">
           .pcgame-r18.jp
           </div>
         </div>
-        <label class="control-label"> IP</label>
+        <label class="form-label"> IP</label>
         <div >
           <input type="text" name="ip" size="10" class="form-control" value="<?php echo get_globalipv4();?>" />
         </div>
         <input type="hidden" name="ttl" size="10" class="ttl" value="30" />
         <input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
-      <input type="submit" class="btn btn-default" value="更新" />
+      <input type="submit" class="btn btn-secondary" value="更新" />
       </div>
   </form>
   <label> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></label>
   <form method="post"  action="http://www.mydns.jp/directip.html">
-  <div class="form-group">
-    <label class="control-label" >マスターID</label>
+  <div class="mb-3">
+    <label class="form-label" >マスターID</label>
     <input type="text" name="MID" class="form-control"  value=" " />
 
-    <label class="control-label ">パスワード</label>
+    <label class="form-label ">パスワード</label>
     <input type="text" name="PWD" class="form-control"  value=" " />
 
-    <label class="control-label ">IP</label>
+    <label class="form-label ">IP</label>
     <input type="text" name="IPV4ADDR" size="10" class="form-control" value="<?php echo get_globalipv4();?>" />
-  <input type="submit" class="btn btn-default" value="更新" />
+  <input type="submit" class="btn btn-secondary" value="更新" />
   </div>
   </form>
   <hr />
@@ -1774,38 +1767,38 @@ var xmlhttp = createXMLHttpRequest();
 
   <label> pcgame-r18.jp (アカウントを持っている人用) </label>
   <form method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">
-      <div class="form-group">
-        <label class="control-label"> Hostname </label>
+      <div class="mb-3">
+        <label class="form-label"> Hostname </label>
         <div class="row">
-          <div class="col-xs-8">
+          <div class="col-8">
             <input type="text" name="host" class="form-control" style=”width: 40%;” value=" " />
           </div>
-          <div class="col-xs-4">
+          <div class="col-4">
           .pcgame-r18.jp
           </div>
         </div>
-        <label class="control-label"> IP</label>
+        <label class="form-label"> IP</label>
         <div >
           <input type="text" name="ip" size="10" class="form-control" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
         </div>
         <input type="hidden" name="ttl" size="10" class="ttl" value="30" />
         <input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
-      <input type="submit" class="btn btn-default" value="更新" />
+      <input type="submit" class="btn btn-secondary" value="更新" />
       </div>
   </form>
 
   <label> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></label>
   <form method="post"  action="http://www.mydns.jp/directip.html">
-  <div class="form-group">
-    <label class="control-label" >マスターID</label>
+  <div class="mb-3">
+    <label class="form-label" >マスターID</label>
     <input type="text" name="MID" class="form-control"  value=" " />
 
-    <label class="control-label ">パスワード</label>
+    <label class="form-label ">パスワード</label>
     <input type="text" name="PWD" class="form-control"  value=" " />
 
-    <label class="control-label ">IP</label>
+    <label class="form-label ">IP</label>
     <input type="text" name="IPV4ADDR" size="10" class="form-control" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
-  <input type="submit" class="btn btn-default" value="更新" />
+  <input type="submit" class="btn btn-secondary" value="更新" />
   </div>
   </form>
 </div>
@@ -1845,8 +1838,9 @@ var xmlhttp = createXMLHttpRequest();
   
   </div>
 </div>
+</div><!-- row -->
 
-</div>
+</div><!-- container -->
 
 <hr />
 
