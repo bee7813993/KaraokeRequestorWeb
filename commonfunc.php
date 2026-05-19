@@ -1847,9 +1847,10 @@ function print_bg_style_block($is_bs5 = false) {
     }
     $vars[] = '--bg-page-rgb:' . hex_to_rgb_triplet($bgcolor_hex) . ';';
 
+    // 背景画像機能は BS5 ページのみ対象。BS3 ページでは $has_bgimage を false のまま維持する。
     $has_bgimage = false;
     $bgimg_url = '';
-    if (array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
+    if ($is_bs5 && array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
         $bgimg_url = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
         $vars[] = '--bg-page-image:url(\'' . $bgimg_url . '\');';
         $has_bgimage = true;
