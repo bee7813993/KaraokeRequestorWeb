@@ -1,11 +1,45 @@
+<?php
+// setcookie()/header() は HTML 出力前に呼ぶ必要があるため、
+// MypageUser の初期化と POST ハンドラをすべてここで処理する。
+require_once 'commonfunc.php';
+require_once 'mypage_class.php';
+$mypage = null;
+$displayname = '';
+$icon_path = '';
+$msg = '';
+$msg_type = 'success';
+if (configbool("usemypage", true)) {
+    $mypage = new MypageUser($db);
+    $displayname = $mypage->getDisplayName();
+    if (isset($_POST['action']) && $_POST['action'] === 'update_name') {
+        $newname = isset($_POST['displayname']) ? $_POST['displayname'] : '';
+        if ($newname !== '') {
+            $mypage->updateDisplayName($newname);
+            $displayname = htmlspecialchars(mb_substr(trim($newname), 0, 64), ENT_QUOTES, 'UTF-8');
+            $msg = '表示名を更新しました。';
+        }
+    }
+    if (isset($_POST['action']) && $_POST['action'] === 'update_icon') {
+        if (isset($_FILES['icon_file']) && $_FILES['icon_file']['error'] === UPLOAD_ERR_OK) {
+            $result = $mypage->updateIconPath($_FILES['icon_file']);
+            if ($result) {
+                $msg = 'アイコンを更新しました。';
+            } else {
+                $msg = 'アイコンの更新に失敗しました。画像ファイル（JPEG/PNG/GIF/SVG/WebP）を選択してください。';
+                $msg_type = 'danger';
+            }
+        } else {
+            $msg = '画像ファイルを選択してください。';
+            $msg_type = 'warning';
+        }
+    }
+    $icon_path = $mypage->getIconPath();
+}
+?>
 <!doctype html>
 <html lang="ja">
 <head>
-<?php
-require_once 'commonfunc.php';
-require_once 'mypage_class.php';
-print_meta_header();
-?>
+<?php print_meta_header(); ?>
 <title>マイページ</title>
 <script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
@@ -25,37 +59,7 @@ if (!configbool("usemypage", true)) {
     print '</body></html>';
     exit;
 }
-
-$mypage = new MypageUser($db);
-$displayname = $mypage->getDisplayName();
-
-$msg = '';
-$msg_type = 'success';
-if (isset($_POST['action']) && $_POST['action'] === 'update_name') {
-    $newname = isset($_POST['displayname']) ? $_POST['displayname'] : '';
-    if ($newname !== '') {
-        $mypage->updateDisplayName($newname);
-        $displayname = htmlspecialchars(mb_substr(trim($newname), 0, 64), ENT_QUOTES, 'UTF-8');
-        $msg = '表示名を更新しました。';
-    }
-}
-
-if (isset($_POST['action']) && $_POST['action'] === 'update_icon') {
-    if (isset($_FILES['icon_file']) && $_FILES['icon_file']['error'] === UPLOAD_ERR_OK) {
-        $result = $mypage->updateIconPath($_FILES['icon_file']);
-        if ($result) {
-            $msg = 'アイコンを更新しました。';
-        } else {
-            $msg = 'アイコンの更新に失敗しました。画像ファイル（JPEG/PNG/GIF/SVG/WebP）を選択してください。';
-            $msg_type = 'danger';
-        }
-    } else {
-        $msg = '画像ファイルを選択してください。';
-        $msg_type = 'warning';
-    }
-}
-
-$icon_path = $mypage->getIconPath();
+// $mypage/$displayname/$icon_path/$msg/$msg_type は冒頭の PHP ブロックで設定済み
 ?>
 
 <div class="container py-3">
