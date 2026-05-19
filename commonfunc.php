@@ -1929,6 +1929,15 @@ function print_bg_style_block($is_bs5 = false) {
                 . 'select.form-select,.form-control-themed,'
                 . '.input-group-text{'
                 . 'background-color:' . $card_bg . ' !important;}';
+
+            // 独自カードクラス(.search-section, .search-hero, .notice-box 等)が
+            // var(--bg-card) / var(--bg-card-alt) を直接参照しているため、
+            // 変数自体を rgba に置き換えて一括で透過させる。
+            // --bg-card-rgb / --bg-card-alt-rgb はテーマ別に正しく設定済みなので、
+            // 値解決時にライト/ダーク両モードで適切な色になる。
+            print ':root{'
+                . '--bg-card:rgba(var(--bg-card-rgb,255,255,255),var(--bg-card-alpha,1));'
+                . '--bg-card-alt:rgba(var(--bg-card-alt-rgb,248,244,240),var(--bg-card-alpha,1));}';
         }
     }
 
