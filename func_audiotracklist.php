@@ -136,6 +136,33 @@ function getvideodetails($filename) {
         $details['frame_rate'] = round($info['video']['frame_rate'], 2);
     }
 
+    if (!empty($info['video']['resolution_x']) && !empty($info['video']['resolution_y'])) {
+        $details['resolution'] = $info['video']['resolution_x'] . 'x' . $info['video']['resolution_y'];
+    }
+
+    if (!empty($info['video']['codec'])) {
+        $details['video_codec'] = $info['video']['codec'];
+    } elseif (!empty($info['video']['fourcc_lookup'])) {
+        $details['video_codec'] = $info['video']['fourcc_lookup'];
+    }
+
+    if (!empty($info['audio']['codec'])) {
+        $details['audio_codec'] = $info['audio']['codec'];
+    }
+
+    if (!empty($info['audio']['channels'])) {
+        $ch = (int)$info['audio']['channels'];
+        $details['audio_channels'] = $ch === 1 ? 'モノラル' : ($ch === 2 ? 'ステレオ' : $ch . 'ch');
+    }
+
+    if (!empty($info['audio']['sample_rate'])) {
+        $details['audio_sample_rate'] = number_format($info['audio']['sample_rate']) . ' Hz';
+    }
+
+    if (!empty($info['bitrate'])) {
+        $details['bitrate'] = round($info['bitrate'] / 1000) . ' kbps';
+    }
+
     return $details;
 }
 

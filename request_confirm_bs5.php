@@ -519,10 +519,29 @@ if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8) && !empty($vi
         print '<div class="card-body py-2">'."\n";
         print '<dl class="row mb-0">'."\n";
         if (isset($videodetails['duration'])) {
-            print '<dt class="col-sm-3">曲の長さ</dt><dd class="col-sm-9">'.htmlspecialchars($videodetails['duration']).'</dd>'."\n";
+            print '<dt class="col-sm-4">曲の長さ</dt><dd class="col-sm-8">'.htmlspecialchars($videodetails['duration']).'</dd>'."\n";
+        }
+        if (isset($videodetails['resolution'])) {
+            print '<dt class="col-sm-4">解像度</dt><dd class="col-sm-8">'.htmlspecialchars($videodetails['resolution']).'</dd>'."\n";
         }
         if (isset($videodetails['frame_rate'])) {
-            print '<dt class="col-sm-3">フレームレート</dt><dd class="col-sm-9">'.htmlspecialchars($videodetails['frame_rate']).' fps</dd>'."\n";
+            print '<dt class="col-sm-4">フレームレート</dt><dd class="col-sm-8">'.htmlspecialchars($videodetails['frame_rate']).' fps</dd>'."\n";
+        }
+        if (isset($videodetails['video_codec'])) {
+            print '<dt class="col-sm-4">映像コーデック</dt><dd class="col-sm-8">'.htmlspecialchars($videodetails['video_codec']).'</dd>'."\n";
+        }
+        if (isset($videodetails['audio_codec'])) {
+            $audio_info = htmlspecialchars($videodetails['audio_codec']);
+            if (isset($videodetails['audio_channels'])) {
+                $audio_info .= ' / ' . htmlspecialchars($videodetails['audio_channels']);
+            }
+            if (isset($videodetails['audio_sample_rate'])) {
+                $audio_info .= ' / ' . htmlspecialchars($videodetails['audio_sample_rate']);
+            }
+            print '<dt class="col-sm-4">音声コーデック</dt><dd class="col-sm-8">'.$audio_info.'</dd>'."\n";
+        }
+        if (isset($videodetails['bitrate'])) {
+            print '<dt class="col-sm-4">ビットレート</dt><dd class="col-sm-8">'.htmlspecialchars($videodetails['bitrate']).'</dd>'."\n";
         }
         print '</dl>'."\n";
         print '</div>'."\n";
