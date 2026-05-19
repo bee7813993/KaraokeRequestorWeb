@@ -67,6 +67,7 @@ body::before {
    ============================================================ */
 [data-theme="dark"] {
   --bg-card: #262638;
+  --bg-card-rgb: 38, 38, 56;
   --bg-card-alt: #2d2d42;
   --bg-card-hover: #34344c;
   --bg-badge: #495057;

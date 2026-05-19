@@ -1869,24 +1869,39 @@ function print_bg_style_block() {
     }
     $vars[] = '--bg-overlay-alpha:' . $overlay_alpha . ';';
     $vars[] = '--bg-card-alpha:' . $card_alpha . ';';
+    // BS3 ページでは _variables.css が読み込まれず --bg-card-rgb が未定義となるため、
+    // 既定値(白)を必ず注入する。BS5 ページの _variables.css も同値で互換。
+    $vars[] = '--bg-card-rgb:255, 255, 255;';
 
     print '<style>:root{' . implode('', $vars) . '}';
 
     if ($has_bgimage) {
-        // body 全体に背景画像を敷き、bgcolor をオーバーレイとして上に重ねる
-        print 'html,body{background-color:transparent;}';
-        print 'body{background-image:var(--bg-page-image);background-size:cover;background-attachment:fixed;background-position:center;}';
+        // body 自体の bg は透明化し、body::before に画像+オーバーレイを集約する。
+        // BS5 の theme-toggle.css に既存の body::before があるが、同セレクタを
+        // 後から上書きする。BS3 ページでは唯一の body::before として機能する。
+        print 'html,body{background-color:transparent !important;background-image:none !important;}';
         print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
-            . 'background-color:rgba(var(--bg-page-rgb), var(--bg-overlay-alpha));}';
+            . 'background-image:var(--bg-page-image, none);'
+            . 'background-size:cover;background-attachment:fixed;background-position:center;'
+            . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));}';
     }
 
     if ($has_bgimage && $card_alpha < 1.0) {
-        // カード系コンポーネントを透過させる(BS3 + BS5 + 既存ガラス風)
-        print '.panel,.panel-default,.panel-body,.panel-heading,.bg-info,'
-            . '.card,.card-body,.list-group-item,.well,.alert,'
-            . '.dropdown-menu,'
+        // カード系コンポーネントを透過させる(BS3 + BS5 + 本アプリ独自クラス)
+        // フォールバック値を持たせて _variables.css 未ロード時(BS3)でも有効化。
+        $card_bg = 'rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1))';
+        print '.panel,.panel-default,.panel-body,.panel-heading,.panel-footer,'
+            . '.bg-info,.bg-light,.bg-white,.well,.alert,'
+            . '.card,.card-body,.card-header,.card-footer,'
+            . '.list-group-item,.dropdown-menu,'
+            . '.accordion-item,.accordion-body,.accordion-button,'
+            . '.modal-content,'
+            . '.request-card,.player-nowplaying,#stats-bar,'
             . '.dataTables_wrapper > .dataTable, table.dataTable tbody tr{'
-            . 'background-color:rgba(var(--bg-card-rgb), var(--bg-card-alpha)) !important;}';
+            . 'background-color:' . $card_bg . ' !important;'
+            . 'background-image:none !important;}';
+        // 背景色をインラインで持つ既存スタイル(bg-info の青 等)を直接上書きするための補強
+        print '.bg-info{background-color:' . $card_bg . ' !important;}';
     }
 
     print '</style>';
