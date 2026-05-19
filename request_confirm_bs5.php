@@ -429,31 +429,31 @@ if(keychangecheck($config_ini, $shop_karaoke) && $filetype == 1){
 <dd>
 <div class="btn-group flex-wrap" role="group" aria-label="キー変更">
     <input type="radio" class="btn-check" name="keychange" id="key_m6" value="-6" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_m6">-6</label>
+    <label class="btn btn-secondary" for="key_m6">-6</label>
     <input type="radio" class="btn-check" name="keychange" id="key_m5" value="-5" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_m5">-5</label>
+    <label class="btn btn-secondary" for="key_m5">-5</label>
     <input type="radio" class="btn-check" name="keychange" id="key_m4" value="-4" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_m4">-4</label>
+    <label class="btn btn-secondary" for="key_m4">-4</label>
     <input type="radio" class="btn-check" name="keychange" id="key_m3" value="-3" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_m3">-3</label>
+    <label class="btn btn-secondary" for="key_m3">-3</label>
     <input type="radio" class="btn-check" name="keychange" id="key_m2" value="-2" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_m2">-2</label>
+    <label class="btn btn-secondary" for="key_m2">-2</label>
     <input type="radio" class="btn-check" name="keychange" id="key_m1" value="-1" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_m1">-1</label>
+    <label class="btn btn-secondary" for="key_m1">-1</label>
     <input type="radio" class="btn-check" name="keychange" id="key_0" value="0" autocomplete="off" checked>
-    <label class="btn btn-outline-secondary" for="key_0">原曲</label>
+    <label class="btn btn-secondary" for="key_0">原曲</label>
     <input type="radio" class="btn-check" name="keychange" id="key_p1" value="1" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_p1">1</label>
+    <label class="btn btn-secondary" for="key_p1">1</label>
     <input type="radio" class="btn-check" name="keychange" id="key_p2" value="2" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_p2">2</label>
+    <label class="btn btn-secondary" for="key_p2">2</label>
     <input type="radio" class="btn-check" name="keychange" id="key_p3" value="3" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_p3">3</label>
+    <label class="btn btn-secondary" for="key_p3">3</label>
     <input type="radio" class="btn-check" name="keychange" id="key_p4" value="4" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_p4">4</label>
+    <label class="btn btn-secondary" for="key_p4">4</label>
     <input type="radio" class="btn-check" name="keychange" id="key_p5" value="5" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_p5">5</label>
+    <label class="btn btn-secondary" for="key_p5">5</label>
     <input type="radio" class="btn-check" name="keychange" id="key_p6" value="6" autocomplete="off">
-    <label class="btn btn-outline-secondary" for="key_p6">6</label>
+    <label class="btn btn-secondary" for="key_p6">6</label>
 </div>
 </dd>
 </dl>
@@ -594,18 +594,18 @@ if (is_numeric($selectid) && !empty($selectrequest)) {
 <?php if ($shop_karaoke != 1 && $filetype == 1): ?>
 <div class="mt-2 mb-1 text-secondary">
   <small>音ズレ補正：
-  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeAudioDelay(-100)">-100ms</button>
+  <button type="button" class="btn btn-secondary btn-sm" onclick="changeAudioDelay(-100)">-100ms</button>
   <span id="audiodelay_disp" style="display:inline-block; min-width:65px; text-align:center;"><?php echo intval($audiodelay_init); ?> ms</span>
-  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeAudioDelay(100)">+100ms</button>
+  <button type="button" class="btn btn-secondary btn-sm" onclick="changeAudioDelay(100)">+100ms</button>
   <input type="hidden" name="audiodelay" id="audiodelay_val" value="<?php echo intval($audiodelay_init); ?>" />
   </small>
 </div>
 <div class="mt-1 mb-1 text-secondary">
   <small>音量増減：
-  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeVolume(-5)">-5%</button>
+  <button type="button" class="btn btn-secondary btn-sm" onclick="changeVolume(-5)">-5%</button>
   <span id="volume_disp" style="display:inline-block; min-width:80px; text-align:center;"><?php $vi = intval($volume_init); echo ($vi > 0 ? '+' : '') . $vi . ' %'; ?></span>
-  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeVolume(5)">+5%</button>
-  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetVolume()">±0に戻す</button>
+  <button type="button" class="btn btn-secondary btn-sm" onclick="changeVolume(5)">+5%</button>
+  <button type="button" class="btn btn-secondary btn-sm" onclick="resetVolume()">±0に戻す</button>
   <input type="hidden" name="volume" id="volume_val" value="<?php echo intval($volume_init); ?>" />
   </small>
 </div>
@@ -711,11 +711,11 @@ print '</div>';
 
 </form>
 <div class="mt-3 d-flex gap-2">
-<button type="button" onclick="location.href='search.php' " class="btn btn-outline-secondary">
+<button type="button" onclick="location.href='search.php' " class="btn btn-secondary">
 通常検索に戻る
 </button>
 
-<button type="button" onclick="location.href='requestlist_top.php' " class="btn btn-outline-secondary">
+<button type="button" onclick="location.href='requestlist_top.php' " class="btn btn-secondary">
 トップに戻る
 </button>
 </div>
