@@ -147,7 +147,7 @@ function fmt_date_bs5($jd) {
 
 function create_requestconfirmlink_bs5($songinfo, $linkoption) {
     $fp = $songinfo['found_path'];
-    return 'request_confirm.php?filename=' . urlencode(basename_jp($fp)) . '&fullpath=' . urlencode($fp) . $linkoption;
+    return 'request_confirm_bs5.php?filename=' . urlencode(basename_jp($fp)) . '&fullpath=' . urlencode($fp) . $linkoption;
 }
 
 function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) {

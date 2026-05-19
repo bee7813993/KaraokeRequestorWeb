@@ -1404,7 +1404,7 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
                 'id'    => 'karaoke',
                 'label' => 'カラオケ配信',
                 'icon'  => $icon_karaoke,
-                'href'  => $pfx . 'request_confirm.php?shop_karaoke=1' . $sid,
+                'href'  => $pfx . 'request_confirm_bs5.php?shop_karaoke=1' . $sid,
             ];
         }
         if (configbool("useuserpause", false) || (isset($user) && $user == 'admin')) {
@@ -1412,7 +1412,7 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
                 'id'    => 'pause',
                 'label' => '小休止',
                 'icon'  => $icon_pause,
-                'href'  => $pfx . 'request_confirm.php?pause=1' . $sid,
+                'href'  => $pfx . 'request_confirm_bs5.php?pause=1' . $sid,
             ];
         }
     }
@@ -1659,10 +1659,10 @@ function selectrequestkind_bs5_dd($prefix = '', $id = '') {
     $pm = isset($playmode) ? (int)$playmode : 0;
     if ($pm != 4 && $pm != 5) {
         if (configbool("usehaishin", true)) {
-            $items[] = ['href' => $pfx . 'request_confirm.php?shop_karaoke=1', 'label' => 'カラオケ配信'];
+            $items[] = ['href' => $pfx . 'request_confirm_bs5.php?shop_karaoke=1', 'label' => 'カラオケ配信'];
         }
         if (configbool("useuserpause", false) || (isset($user) && $user == 'admin')) {
-            $items[] = ['href' => $pfx . 'request_confirm.php?pause=1', 'label' => '小休止'];
+            $items[] = ['href' => $pfx . 'request_confirm_bs5.php?pause=1', 'label' => '小休止'];
         }
     }
 
