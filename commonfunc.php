@@ -1601,7 +1601,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     print '</nav>';
 
     // CSS変数注入（BS3版と同じ）
-    print_bg_style_block();
+    print_bg_style_block(true);
 }
 
 /**
@@ -1835,7 +1835,7 @@ function hex_to_rgb_triplet($hex, $fallback = '248, 236, 224') {
     return hexdec(substr($h,0,2)).', '.hexdec(substr($h,2,2)).', '.hexdec(substr($h,4,2));
 }
 
-function print_bg_style_block() {
+function print_bg_style_block($is_bs5 = false) {
     global $config_ini;
 
     $vars = [];
@@ -1909,6 +1909,27 @@ function print_bg_style_block() {
             . 'background-image:none !important;}';
         // 背景色をインラインで持つ既存スタイル(bg-info の青 等)を直接上書きするための補強
         print '.bg-info{background-color:' . $card_bg . ' !important;}';
+
+        // BS5 ページのみ: テーブル・フォームコントロール等の白抜き要素も透過対象に含める。
+        // BS3 ページで .table や .form-control が登場するページに副作用が出るのを避けるため、
+        // 呼び出し元 (shownavigatioinbar_bs5) で $is_bs5=true を渡したときのみ出力する。
+        if ($is_bs5) {
+            // BS5 の .table は --bs-table-bg を介して背景色を決めるため、変数を上書きする。
+            // セル/行/縞模様もまとめて rgba に置き換え。
+            print '.table{--bs-table-bg:' . $card_bg . ';'
+                . '--bs-table-striped-bg:' . $card_bg . ';'
+                . '--bs-table-hover-bg:' . $card_bg . ';'
+                . 'background-color:' . $card_bg . ' !important;}';
+            print '.table > :not(caption) > * > *,'
+                . '.table-striped > tbody > tr:nth-of-type(odd) > *,'
+                . '.table-hover > tbody > tr:hover > *{'
+                . 'background-color:' . $card_bg . ' !important;}';
+            // フォームコントロール (BS5 標準 + 当アプリ独自テーマ)
+            print '.form-control,.form-select,textarea.form-control,'
+                . 'select.form-select,.form-control-themed,'
+                . '.input-group-text{'
+                . 'background-color:' . $card_bg . ' !important;}';
+        }
     }
 
     print '</style>';
