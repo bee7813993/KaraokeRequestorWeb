@@ -91,6 +91,12 @@ if(array_key_exists("clearauth", $_REQUEST)) {
 .radio-inline input, .checkbox-inline input { margin: 0; }
 /* 固定ナビバー分のアンカースクロールオフセット */
 :target { scroll-margin-top: 80px; }
+/* 説明ラジオの description ラベル（クラスなし）をブロック化して
+   ラジオボタンが次の行に来るようにする */
+.mb-3 > label:not([class]) {
+  display: block;
+  margin-bottom: 0.25rem;
+}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

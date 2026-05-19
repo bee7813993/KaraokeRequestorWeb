@@ -1545,6 +1545,12 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
 
     if (isset($user) && $user === 'admin') {
         print '<li class="nav-item d-flex align-items-center px-2 text-white-50" style="font-size:12px;">管理者ログイン中</li>';
+        if ($page === 'init.php') {
+            print '<li class="nav-item">'
+                . '<button type="button" class="btn btn-success btn-sm"'
+                . ' onclick="document.allconfig.submit();">設定反映</button>'
+                . '</li>';
+        }
     }
 
     print '</ul>'; // me-auto
