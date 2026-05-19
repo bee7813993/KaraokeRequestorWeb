@@ -83,13 +83,42 @@ body::before {
   --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.65);
 }
 
-/* ダークモード: ページ背景を filter で暗転 */
+/* ダークモード: ページ背景を filter で暗転。body テキスト色も明色に統一。 */
 [data-theme="dark"] body {
   background-color: transparent !important;
   background-image: none !important;
+  color: var(--color-text);
 }
 [data-theme="dark"] body::before {
   filter: brightness(0.18) saturate(0.4);
+}
+
+/* --- ダークモード: 見出し・一般テキスト（Bootstrap デフォルトの黒を上書き） --- */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] p,
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .form-check-label,
+[data-theme="dark"] .form-text,
+[data-theme="dark"] small,
+[data-theme="dark"] span:not([class]),
+[data-theme="dark"] td,
+[data-theme="dark"] th {
+  color: var(--color-text);
+}
+
+/* --- ダークモード: アコーディオン開閉時の背景色（player.css 上書き） --- */
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+  background-color: var(--bg-card-hover) !important;
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .accordion-body {
+  background-color: var(--bg-card) !important;
 }
 
 /* --- ダークモード: Bootstrap ドロップダウン --- */

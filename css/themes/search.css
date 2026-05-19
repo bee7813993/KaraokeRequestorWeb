@@ -1,7 +1,7 @@
 /* ==========================================================
    検索画面専用スタイル (Bootstrap 5 ベース)
    ========================================================== */
-@import url('../themes/_variables.css');
+/* _variables.css は <link> で先行ロード済みのため @import 不要 */
 
 /* --- ページ基本 --- */
 body {
@@ -540,7 +540,9 @@ table.searchresult tbody td {
   position: sticky;
   top: 56px; /* Bootstrap 5 default navbar height */
   z-index: 99;
-  background: var(--bg-page);
+  background: transparent;
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
   border-bottom: 1px solid var(--color-border);
 }
 
