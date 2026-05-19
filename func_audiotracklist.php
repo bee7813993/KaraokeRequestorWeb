@@ -52,17 +52,16 @@ function checktracktype($trackinfo){
     if($mediainfo['audio_channels'] == 0 && $mediainfo['width'] > 0 &&  $mediainfo['height'] > 0 ) {
         return array(1, NULL);
     }
+    // トラック名: udta/name があれば優先、なければ mdia/hdlr の component_name
     if($typeafalse == 0 ){
         $trackname = $trackinfo['subatoms'][$udtakey]["subatoms"][$namekey]['data'];
     }else {
-        $trackname = $trackinfo['subatoms'][$mdiakey]['subatoms'][1]['component_name'];
+        $hdlrkey = array_search_key('name', 'hdlr', $trackinfo['subatoms'][$mdiakey]['subatoms']);
+        $trackname = ($hdlrkey !== false) ? $trackinfo['subatoms'][$mdiakey]['subatoms'][$hdlrkey]['component_name'] : '';
     }
-    
+
     // audio check
     if($mediainfo['audio_channels'] > 0  ) {
-        $trackname = $mediainfo = $trackinfo['subatoms'][$mdiakey]['subatoms'][1]['component_name'];
-        // print mb_convert_encoding($trackname, 'SJIS-win');
-        
         return array(2, $trackname);
     }
     return false;
