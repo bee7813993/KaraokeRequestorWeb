@@ -1869,25 +1869,29 @@ function print_bg_style_block() {
     }
     $vars[] = '--bg-overlay-alpha:' . $overlay_alpha . ';';
     $vars[] = '--bg-card-alpha:' . $card_alpha . ';';
-    // BS3 ページでは _variables.css が読み込まれず --bg-card-rgb が未定義となるため、
-    // 既定値(白)を必ず注入する。BS5 ページの _variables.css も同値で互換。
-    $vars[] = '--bg-card-rgb:255, 255, 255;';
 
     print '<style>:root{' . implode('', $vars) . '}';
 
     if ($has_bgimage) {
-        // body 自体の bg は透明化し、body::before に画像+オーバーレイを集約する。
-        // BS5 の theme-toggle.css に既存の body::before があるが、同セレクタを
-        // 後から上書きする。BS3 ページでは唯一の body::before として機能する。
-        print 'html,body{background-color:transparent !important;background-image:none !important;}';
+        // body 側に背景画像を貼り、body::before はオーバーレイ色のみに分離する。
+        // これによりダークモードの body::before に掛かる brightness フィルタが
+        // 背景画像を暗くするのを防ぐ(画像本体は body 直下に置くため影響を受けない)。
+        print 'html,body{background-color:transparent !important;}';
+        print 'body{background-image:var(--bg-page-image) !important;'
+            . 'background-size:cover;background-attachment:fixed;background-position:center;}';
         print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
-            . 'background-image:var(--bg-page-image, none);'
-            . 'background-size:cover;background-attachment:fixed;background-position:center;'
-            . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));}';
+            . 'background-image:none !important;'
+            . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));'
+            . 'filter:none !important;}';
+        // ダークモード時はユーザー指定の明るい bgcolor をそのままオーバーレイに使うと
+        // 違和感が出るため、暗色オーバーレイに置き換える。透過率は --bg-overlay-alpha を共用。
+        print '[data-theme="dark"] body::before{'
+            . 'background-color:rgba(18, 18, 30, var(--bg-overlay-alpha, 1));}';
     }
 
     if ($has_bgimage && $card_alpha < 1.0) {
         // カード系コンポーネントを透過させる(BS3 + BS5 + 本アプリ独自クラス)
+        // .request-card は requestlist_swipe.php 側で per-status の rgba を持つため除外。
         // フォールバック値を持たせて _variables.css 未ロード時(BS3)でも有効化。
         $card_bg = 'rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1))';
         print '.panel,.panel-default,.panel-body,.panel-heading,.panel-footer,'
@@ -1896,7 +1900,7 @@ function print_bg_style_block() {
             . '.list-group-item,.dropdown-menu,'
             . '.accordion-item,.accordion-body,.accordion-button,'
             . '.modal-content,'
-            . '.request-card,.player-nowplaying,#stats-bar,'
+            . '.player-nowplaying,#stats-bar,'
             . '.dataTables_wrapper > .dataTable, table.dataTable tbody tr{'
             . 'background-color:' . $card_bg . ' !important;'
             . 'background-image:none !important;}';

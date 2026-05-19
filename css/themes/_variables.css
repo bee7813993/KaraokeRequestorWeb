@@ -15,6 +15,7 @@
   --bg-card-rgb: 255, 255, 255;     /* カード基本色RGB(α指定用) */
   --bg-card-alpha: 1;               /* カード不透明度 0-1 */
   --bg-card-alt: #f8f4f0;      /* 交互行・サブカード */
+  --bg-card-alt-rgb: 248, 244, 240; /* サブカード色RGB(α指定用) */
   --bg-card-hover: #fff5f0;
   --bg-badge: #6c757d;
   --bg-input: #ffffff;

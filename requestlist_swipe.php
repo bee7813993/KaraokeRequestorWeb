@@ -57,21 +57,21 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   margin-bottom: 6px;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  background: var(--bg-card, #fff);
+  background: rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1));
   border-left: 4px solid #ced4da;
   -webkit-user-select: none;
   user-select: none;
 }
-/* 再生状況別の左ボーダー色 */
+/* 再生状況別の左ボーダー色 + 背景色(透過率は --bg-card-alpha を共用) */
 .request-card[data-nowplaying="再生中"],
 .request-card[data-nowplaying="2"] {
   border-left-color: var(--bs-success);
-  background: #f6fff8;
+  background: rgba(246, 255, 248, var(--bg-card-alpha, 1));
 }
 .request-card[data-nowplaying="再生開始待ち"],
 .request-card[data-nowplaying="6"] {
   border-left-color: var(--bs-warning);
-  background: #fffef5;
+  background: rgba(255, 254, 245, var(--bg-card-alpha, 1));
 }
 .request-card[data-nowplaying="停止中"],
 .request-card[data-nowplaying="3"] {
@@ -82,7 +82,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .request-card[data-nowplaying="4"],
 .request-card[data-nowplaying="5"] {
   border-left-color: #adb5bd;
-  background: var(--bg-card-alt, #f8f9fa);
+  background: rgba(var(--bg-card-alt-rgb, 248, 244, 240), var(--bg-card-alpha, 1));
 }
 
 /* スワイプで現れるアクションボタン群 */
