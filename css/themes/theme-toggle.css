@@ -1,0 +1,438 @@
+/* ==========================================================
+   テーマ切り替え: ダークモード / 大文字モード
+   data-theme="dark"     → ダークモード
+   data-fontsize="large" → 大文字モード
+   theme-changing        → 切り替えアニメーション中（JS が付与）
+   ========================================================== */
+
+/* ============================================================
+   ページ背景の ::before レイヤー
+   body::before に背景色・背景画像を移し、ダークモード時に
+   CSS filter: brightness() で自動暗転する。
+   body 本体の背景はダークモードで transparent に切り替える。
+   ============================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--bg-page, #F8ECE0);
+  background-image: var(--bg-page-image, none);
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+/* ============================================================
+   切り替えトランジション
+   .theme-changing が付いている間だけ有効にすることで、
+   hover 等の通常 UI アニメーションには影響しない。
+   ============================================================ */
+.theme-changing body::before {
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
+
+.theme-changing body,
+.theme-changing .request-card,
+.theme-changing .card,
+.theme-changing #stats-bar,
+.theme-changing .stats-item,
+.theme-changing .stats-val,
+.theme-changing .card-title,
+.theme-changing .card-meta,
+.theme-changing .card-label,
+.theme-changing .card-num,
+.theme-changing .drag-handle,
+.theme-changing .meta-chip,
+.theme-changing .card-comment-area,
+.theme-changing .dropdown-menu,
+.theme-changing .dropdown-item,
+.theme-changing .accordion-item,
+.theme-changing .accordion-button,
+.theme-changing .accordion-body,
+.theme-changing .list-group-item,
+.theme-changing .modal-content,
+.theme-changing .form-control,
+.theme-changing .form-select,
+.theme-changing .input-group-text,
+.theme-changing .table,
+.theme-changing .table > :not(caption) > * > *,
+.theme-changing thead th {
+  transition: background-color 0.35s ease,
+              color            0.35s ease,
+              border-color     0.35s ease !important;
+}
+
+/* ============================================================
+   ダークモード: CSS 変数上書き
+   ============================================================ */
+[data-theme="dark"] {
+  --bg-card: #262638;
+  --bg-card-alt: #2d2d42;
+  --bg-card-hover: #34344c;
+  --bg-badge: #495057;
+  --bg-input: #2a2a3c;
+  --bg-swap-banner: #3d2f00;
+  --color-text: #e8e8ec;
+  --color-text-muted: #a8acb8;
+  --color-swap-banner: #ffd966;
+  --color-border: #4a4a68;
+  --bg-index-btn: #2a2a3c;
+  --bg-index-btn-hover: #3a3a4c;
+  --color-index-btn: #cccccc;
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.55);
+  --shadow-card-hover: 0 4px 18px rgba(0, 0, 0, 0.7);
+}
+
+/* ダークモード: ページ背景を filter で暗転。body テキスト色も明色に統一。 */
+[data-theme="dark"] body {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--color-text);
+}
+/* --bg-page-dark-filter は theme-toggle.js が --bg-page の輝度に応じて設定。
+   未設定時のフォールバックはクリーム/白系を想定した強めの暗転。 */
+[data-theme="dark"] body::before {
+  filter: var(--bg-page-dark-filter, brightness(0.22) saturate(0.5));
+}
+
+/* --- ダークモード: 見出し・一般テキスト（Bootstrap デフォルトの黒を上書き） --- */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6,
+[data-theme="dark"] p,
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .form-check-label,
+[data-theme="dark"] .form-text,
+[data-theme="dark"] small,
+[data-theme="dark"] span:not([class]),
+[data-theme="dark"] td,
+[data-theme="dark"] th {
+  color: var(--color-text);
+}
+
+/* --- ダークモード: アコーディオン開閉時の背景色（player.css 上書き） --- */
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+  background-color: var(--bg-card-hover) !important;
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .accordion-body {
+  background-color: var(--bg-card) !important;
+}
+
+/* --- ダークモード: Now Playing カード（ライトモードは白ベース → ダークは従来の暗いデザイン） --- */
+[data-theme="dark"] .player-nowplaying {
+  background: #1a1a2e;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+}
+[data-theme="dark"] .player-nowplaying .player-label,
+[data-theme="dark"] .player-nowplaying .player-title-toggle-icon,
+[data-theme="dark"] .player-nowplaying .player-time,
+[data-theme="dark"] .player-nowplaying-singer {
+  color: #a0aec0;
+}
+[data-theme="dark"] .player-nowplaying .player-title {
+  color: #f0f4ff;
+}
+[data-theme="dark"] .player-nowplaying .player-title.player-title-as-file {
+  color: #c0c8d8;
+}
+[data-theme="dark"] .player-nowplaying .player-title-toggleable:hover,
+[data-theme="dark"] .player-nowplaying .player-title-toggleable:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+[data-theme="dark"] .player-nowplaying .player-title-toggleable:active {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+[data-theme="dark"] .player-nowplaying .progress {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* --- ダークモード: Bootstrap ドロップダウン --- */
+[data-theme="dark"] .dropdown-menu {
+  background-color: #1e1e2e;
+  border-color: #3d3d5c;
+}
+[data-theme="dark"] .dropdown-item {
+  color: #e2e2e2;
+}
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+  background-color: #2a2a3c;
+  color: #ffffff;
+}
+[data-theme="dark"] .dropdown-divider {
+  border-color: #3d3d5c;
+}
+[data-theme="dark"] .dropdown-item-text {
+  color: #9ca3af;
+}
+
+/* --- ダークモード: カード --- */
+[data-theme="dark"] .card {
+  background-color: var(--bg-card);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .card-header,
+[data-theme="dark"] .card-footer {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: テーブル --- */
+[data-theme="dark"] .table {
+  --bs-table-bg: transparent;
+  --bs-table-striped-bg: rgba(255,255,255,0.05);
+  --bs-table-hover-bg: rgba(255,255,255,0.075);
+  --bs-table-color: var(--color-text);
+  --bs-table-border-color: var(--color-border);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .table > :not(caption) > * > * {
+  color: var(--color-text);
+  border-bottom-color: var(--color-border);
+}
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: var(--bg-card-alt);
+}
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  background-color: var(--bg-card-hover);
+}
+[data-theme="dark"] thead th {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: フォームコントロール --- */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-theme="dark"] textarea {
+  background-color: var(--bg-input);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: var(--bg-input);
+  color: var(--color-text);
+  border-color: var(--color-accent-secondary, #2980b9);
+  box-shadow: 0 0 0 0.25rem rgba(41,128,185,0.25);
+}
+[data-theme="dark"] .form-control::placeholder {
+  color: #6c757d;
+}
+[data-theme="dark"] .input-group-text {
+  background-color: var(--bg-card-alt);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: モーダル --- */
+[data-theme="dark"] .modal-content {
+  background-color: var(--bg-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  border-color: var(--color-border);
+}
+
+/* --- ダークモード: リストグループ --- */
+[data-theme="dark"] .list-group-item {
+  background-color: var(--bg-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .list-group-item:hover {
+  background-color: var(--bg-card-hover);
+}
+[data-theme="dark"] a.list-group-item:hover {
+  color: var(--color-text);
+}
+
+/* --- ダークモード: アコーディオン --- */
+[data-theme="dark"] .accordion-item {
+  background-color: var(--bg-card);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .accordion-button {
+  background-color: var(--bg-card-alt);
+  color: var(--color-text);
+}
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+  background-color: var(--bg-card-hover);
+  color: var(--color-text);
+  box-shadow: inset 0 -1px 0 var(--color-border);
+}
+[data-theme="dark"] .accordion-button::after {
+  filter: invert(1);
+}
+[data-theme="dark"] .accordion-body {
+  background-color: var(--bg-card);
+}
+
+/* --- ダークモード: ユーティリティ上書き --- */
+[data-theme="dark"] .text-muted {
+  color: var(--color-text-muted) !important;
+}
+[data-theme="dark"] .bg-light {
+  background-color: var(--bg-card-alt) !important;
+}
+[data-theme="dark"] .bg-white {
+  background-color: var(--bg-card) !important;
+}
+[data-theme="dark"] .border,
+[data-theme="dark"] .border-top,
+[data-theme="dark"] .border-bottom,
+[data-theme="dark"] .border-start,
+[data-theme="dark"] .border-end {
+  border-color: var(--color-border) !important;
+}
+[data-theme="dark"] hr {
+  border-color: var(--color-border);
+  opacity: 0.5;
+}
+[data-theme="dark"] .badge.bg-secondary {
+  background-color: #495057 !important;
+}
+
+/* ============================================================
+   ダークモード: requestlist_swipe カード・統計バー
+   ============================================================ */
+[data-theme="dark"] .request-card {
+  background: var(--bg-card);
+  border-left-color: #5c5c7e;
+  color: var(--color-text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] .request-card[data-nowplaying="再生中"],
+[data-theme="dark"] .request-card[data-nowplaying="2"] {
+  background: #1f3a25;
+}
+[data-theme="dark"] .request-card[data-nowplaying="再生開始待ち"],
+[data-theme="dark"] .request-card[data-nowplaying="6"] {
+  background: #3a3318;
+}
+[data-theme="dark"] .request-card[data-nowplaying="再生済"],
+[data-theme="dark"] .request-card[data-nowplaying="再生済？"],
+[data-theme="dark"] .request-card[data-nowplaying="4"],
+[data-theme="dark"] .request-card[data-nowplaying="5"] {
+  background: var(--bg-card-alt);
+}
+[data-theme="dark"] .card-title    { color: var(--color-text); }
+[data-theme="dark"] .card-meta     { color: #c0c4d0; }
+[data-theme="dark"] .card-label    { color: var(--color-text-muted); }
+[data-theme="dark"] .card-num      { color: var(--color-text-muted); }
+[data-theme="dark"] .drag-handle   { color: #6c6cb0; }
+[data-theme="dark"] #stats-bar {
+  background: var(--bg-card);
+  border-color: var(--color-border);
+  color: #c0c4d0;
+}
+[data-theme="dark"] .stats-val { color: var(--color-text); }
+[data-theme="dark"] .card-comment-area {
+  background: var(--bg-card-alt);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
+}
+[data-theme="dark"] .card-tweet-link { color: #5bc0f8; }
+
+/* --- ダークモード: メタチップ --- */
+[data-theme="dark"] .chip-singer   { background: #1a1f3c; color: #8ba4e8; }
+[data-theme="dark"] .chip-kind     { background: #0f2218; color: #74c57a; }
+[data-theme="dark"] .chip-duration { background: #252535; color: #9a9aaa; }
+[data-theme="dark"] .chip-track    { background: #200f30; color: #c48fda; }
+[data-theme="dark"] .chip-key-pos  { background: #0f2218; color: #74c57a; }
+[data-theme="dark"] .chip-key-neg  { background: #2e0810; color: #f08080; }
+[data-theme="dark"] .chip-volume   { background: #2a1600; color: #ffa04a; }
+[data-theme="dark"] .chip-delay    { background: #0a1828; color: #64b5f6; }
+
+/* --- ダークモード: DataTables --- */
+[data-theme="dark"] .dataTables_wrapper .dataTables_filter input,
+[data-theme="dark"] .dataTables_wrapper .dataTables_length select {
+  background-color: var(--bg-input);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_info,
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button {
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  background: var(--bg-card-alt) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+  background: var(--color-accent-secondary, #2980b9) !important;
+  border-color: var(--color-accent-secondary, #2980b9) !important;
+  color: #fff !important;
+}
+
+/* ============================================================
+   大文字モード
+   ============================================================ */
+[data-fontsize="large"] {
+  font-size: 22px;
+}
+
+/* requestlist_swipe: 固定px指定を詳細度で上書き */
+[data-fontsize="large"] #stats-bar          { font-size: 20px; }
+[data-fontsize="large"] .stats-item         { font-size: 20px; }
+[data-fontsize="large"] .card-title         { font-size: 24px; }
+[data-fontsize="large"] .card-meta          { font-size: 22px; }
+[data-fontsize="large"] .card-label         { font-size: 18px; }
+[data-fontsize="large"] .meta-chip          { font-size: 18px; padding: 4px 12px; }
+[data-fontsize="large"] .card-comment-area  { font-size: 18px; min-height: 36px; padding: 6px 10px; }
+[data-fontsize="large"] .card-tweet-link    { font-size: 17px; }
+[data-fontsize="large"] .card-num           { font-size: 20px; }
+[data-fontsize="large"] .card-ctrl-btn      { font-size: 18px; padding: 4px 12px; }
+[data-fontsize="large"] .card-main          { padding: 14px 16px; gap: 14px; }
+
+/* ナビバーは大文字モードでも固定サイズ（レイアウト崩れ防止） */
+[data-fontsize="large"] .navbar             { font-size: 1rem; }
+[data-fontsize="large"] .navbar-theme-btn   { font-size: 0.9rem; }
+
+/* ============================================================
+   ナビバー内テーマ切り替えボタン
+   ============================================================ */
+.navbar-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  vertical-align: middle;
+}
+.navbar-theme-btn:hover,
+.navbar-theme-btn:focus {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+  box-shadow: none;
+}
+.navbar-theme-btn.active {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #ffffff !important;
+}

@@ -18,11 +18,14 @@ if (!empty($config_ini['roomurl'])) {
     echo htmlspecialchars($roomnames[0], ENT_QUOTES, 'UTF-8') . '：';
 }
 ?>プレイヤーコントローラー</title>
+<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">
 <link rel="stylesheet" href="css/themes/_variables.css">
+<link rel="stylesheet" href="css/themes/theme-toggle.css">
 <link rel="stylesheet" href="css/themes/player.css">
 <script src="js/jquery.js"></script>
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="js/theme-toggle.js"></script>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('playerctrl_portal_bs5.php'); ?>

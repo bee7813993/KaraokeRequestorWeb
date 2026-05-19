@@ -1,7 +1,7 @@
 /* ==========================================================
    プレイヤーコントローラー専用スタイル (Bootstrap 5 ベース)
    ========================================================== */
-@import url('../themes/_variables.css');
+/* _variables.css は <link> で先行ロード済みのため @import 不要 */
 
 body {
   background-color: var(--bg-page);
@@ -68,11 +68,11 @@ body {
 
 /* --- Now Playing カード --- */
 .player-nowplaying {
-  background: #1a1a2e;
-  border: none;
+  background: var(--bg-card);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  color: #ffffff;
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
 }
 
 .player-nowplaying .player-label {
@@ -80,7 +80,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #a0aec0;
+  color: var(--color-text-muted);
   margin-bottom: 2px;
 }
 
@@ -88,7 +88,7 @@ body {
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.3;
-  color: #f0f4ff;
+  color: var(--color-text);
   word-break: break-word;
   min-height: 1.4em;
   overflow-wrap: break-word;
@@ -108,11 +108,11 @@ body {
 }
 .player-nowplaying .player-title-toggleable:hover,
 .player-nowplaying .player-title-toggleable:focus {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(0, 0, 0, 0.06);
   outline: none;
 }
 .player-nowplaying .player-title-toggleable:active {
-  background-color: rgba(255, 255, 255, 0.14);
+  background-color: rgba(0, 0, 0, 0.1);
 }
 /* 切り替えアイコン (⇄): タップ可能であることの控えめなヒント */
 .player-nowplaying .player-title-toggle-icon {
@@ -120,7 +120,7 @@ body {
   margin-left: 6px;
   font-size: 0.75em;
   font-weight: 400;
-  color: #a0aec0;
+  color: var(--color-text-muted);
   opacity: 0.55;
   vertical-align: 0.08em;
 }
@@ -129,7 +129,7 @@ body {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #c0c8d8;
+  color: var(--color-text-muted);
   word-break: break-all;
 }
 
@@ -143,7 +143,7 @@ body {
 }
 
 .player-nowplaying .progress {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(0, 0, 0, 0.1);
   border-radius: 4px;
   height: 6px;
 }
@@ -157,12 +157,12 @@ body {
 .player-nowplaying .player-time {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.82rem;
-  color: #a0aec0;
+  color: var(--color-text-muted);
 }
 
 .player-nowplaying-singer {
   font-size: 0.8rem;
-  color: #a0aec0;
+  color: var(--color-text-muted);
   margin-top: 4px;
   letter-spacing: 0.02em;
 }

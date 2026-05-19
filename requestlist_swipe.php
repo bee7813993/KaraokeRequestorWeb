@@ -34,9 +34,12 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires"       content="0">
 <title><?php echo htmlspecialchars($titlePrefix, ENT_QUOTES, 'UTF-8'); ?>リクエスト一覧</title>
+<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
 <link href="css/style.css"                    rel="stylesheet">
+<link href="css/themes/theme-toggle.css"      rel="stylesheet">
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="js/theme-toggle.js"></script>
 <!-- SortableJS: js/Sortable.min.js に配置してください。取得先: https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js -->
 <script src="js/Sortable.min.js"></script>
 <style>
@@ -54,7 +57,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   margin-bottom: 6px;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  background: #fff;
+  background: var(--bg-card, #fff);
   border-left: 4px solid #ced4da;
   -webkit-user-select: none;
   user-select: none;
@@ -79,7 +82,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .request-card[data-nowplaying="4"],
 .request-card[data-nowplaying="5"] {
   border-left-color: #adb5bd;
-  background: #f8f9fa;
+  background: var(--bg-card-alt, #f8f9fa);
 }
 
 /* スワイプで現れるアクションボタン群 */
@@ -136,7 +139,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .drag-handle {
   flex-shrink: 0;
   font-size: 20px;
-  color: #999;
+  color: var(--color-text-muted, #999);
   cursor: grab;
   padding: 0 2px;
   touch-action: none;
@@ -152,17 +155,17 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .card-title {
   font-size: 16px;
   font-weight: bold;
-  color: #212529;
+  color: var(--color-text, #212529);
   word-break: break-all;
   line-height: 1.4;
 }
 .card-meta {
   font-size: 14px;
-  color: #444;
+  color: var(--color-text-muted, #444);
   margin-top: 4px;
 }
 .card-label {
-  color: #666;
+  color: var(--color-text-muted, #666);
   font-size: 12px;
   font-weight: 600;
 }
@@ -190,14 +193,14 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   align-items: center;
   gap: 5px;
   font-size: 12px;
-  color: #555;
+  color: var(--color-text-muted, #555);
   cursor: pointer;
   padding: 4px 8px;
   min-height: 24px;
   margin-top: 5px;
-  background: #f8f9fa;
+  background: var(--bg-card-alt, #f8f9fa);
   border-radius: 6px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-border, #e9ecef);
   transition: border-color 0.15s, color 0.15s;
 }
 .card-comment-area:hover { color: var(--bs-primary); border-color: var(--bs-primary); }
@@ -290,7 +293,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 
 #empty-msg {
   text-align: center;
-  color: #888;
+  color: var(--color-text-muted, #888);
   padding: 30px 0;
   font-size: 15px;
 }
@@ -302,8 +305,8 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 /* 統計バー */
 #stats-bar {
   font-size: 13px;
-  color: #444;
-  background: #fff;
+  color: var(--color-text-muted, #444);
+  background: var(--bg-card, #fff);
   border-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
   padding: 6px 10px;
@@ -311,10 +314,10 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-border, #e9ecef);
 }
 .stats-item { white-space: nowrap; }
-.stats-val   { font-weight: bold; color: #212529; }
+.stats-val   { font-weight: bold; color: var(--color-text, #212529); }
 
 /* カード左側（番号＋ドラッグハンドル） */
 .card-left {
@@ -327,7 +330,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 .card-num {
   font-size: 13px;
-  color: #555;
+  color: var(--color-text-muted, #555);
   line-height: 1;
   font-weight: 700;
 }
