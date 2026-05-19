@@ -121,6 +121,36 @@ body::before {
   background-color: var(--bg-card) !important;
 }
 
+/* --- ダークモード: Now Playing カード（ライトモードは白ベース → ダークは従来の暗いデザイン） --- */
+[data-theme="dark"] .player-nowplaying {
+  background: #1a1a2e;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+}
+[data-theme="dark"] .player-nowplaying .player-label,
+[data-theme="dark"] .player-nowplaying .player-title-toggle-icon,
+[data-theme="dark"] .player-nowplaying .player-time,
+[data-theme="dark"] .player-nowplaying-singer {
+  color: #a0aec0;
+}
+[data-theme="dark"] .player-nowplaying .player-title {
+  color: #f0f4ff;
+}
+[data-theme="dark"] .player-nowplaying .player-title.player-title-as-file {
+  color: #c0c8d8;
+}
+[data-theme="dark"] .player-nowplaying .player-title-toggleable:hover,
+[data-theme="dark"] .player-nowplaying .player-title-toggleable:focus {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+[data-theme="dark"] .player-nowplaying .player-title-toggleable:active {
+  background-color: rgba(255, 255, 255, 0.14);
+}
+[data-theme="dark"] .player-nowplaying .progress {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
 /* --- ダークモード: Bootstrap ドロップダウン --- */
 [data-theme="dark"] .dropdown-menu {
   background-color: #1e1e2e;
