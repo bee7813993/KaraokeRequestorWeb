@@ -110,7 +110,10 @@ function json_safe_encode($data){
 <html lang="ja">
 <head>
 <?php print_meta_header(); ?>
+<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">
+<link rel="stylesheet" href="css/themes/_variables.css">
+<link rel="stylesheet" href="css/themes/theme-toggle.css">
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
 <script src="js/jquery.js"></script>
 <title>リクエスト確認画面</title>
