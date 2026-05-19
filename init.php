@@ -91,9 +91,9 @@ if(array_key_exists("clearauth", $_REQUEST)) {
 .radio-inline input, .checkbox-inline input { margin: 0; }
 /* 固定ナビバー分のアンカースクロールオフセット */
 :target { scroll-margin-top: 80px; }
-/* 説明ラジオの description ラベル（クラスなし）をブロック化して
+/* 説明ラベル（.radio-inline/.checkbox-inline 以外）をブロック化して
    ラジオボタンが次の行に来るようにする */
-.mb-3 > label:not([class]) {
+.mb-3 > label:not(.radio-inline):not(.checkbox-inline) {
   display: block;
   margin-bottom: 0.25rem;
 }
@@ -453,7 +453,7 @@ print 'value="'.urldecode($config_ini["autoplay_exec"]).'"';
 }
 ?> />
     <h4 class="radio form-label"> 自動再生制御の一般ユーザーへの公開</h4>
-    <label class="radio form-label"> <small>プレイヤーコントローラー画面 </small></label>
+    <label class="form-label"> <small>プレイヤーコントローラー画面 </small></label>
     <label class="checkbox-inline">
       <input type="radio" name="autoplay_show" value="1" 
 <?php 
@@ -523,7 +523,7 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
   ?>
     <h3 id="requestlist" class="radio form-label menulink"> リクエスト一覧画面設定  </h3>
     <h4 class="radio form-label"> リクエスト一覧即時リロード  </h4>
-    <label class="radio form-label">  <br /><small>リクエスト一覧がリスト更新時のみに即時リロードされます。定期的なリロードより通信量が削減できます。有効にすると定期的なリロードは無効になり、下の設定は無視されます。</small> </label>
+    <label class="form-label">  <br /><small>リクエスト一覧がリスト更新時のみに即時リロードされます。定期的なリロードより通信量が削減できます。有効にすると定期的なリロードは無効になり、下の設定は無視されます。</small> </label>
     <label class="radio-inline">
       <input type="radio" name="requestlistactivereload" value="1" <?php print ($requestlistactivereload)?'checked':' ' ?> /> 使用する
     </label>
@@ -594,7 +594,7 @@ print ' value="10" ';
   ?>
   <div class="mb-3">
     <h4 class="radio form-label"> UI v2 </h4>
-    <label class="radio form-label"><small>リクエスト一覧・検索画面をまとめてv2デザイン（モバイル対応）に切り替えます。</small></label>
+    <label class="form-label"><small>リクエスト一覧・検索画面をまとめてv2デザイン（モバイル対応）に切り替えます。</small></label>
     <label class="radio-inline">
       <input type="radio" name="usev2ui" value="1" <?php print $usev2ui ? 'checked' : '' ?> /> 使用する
     </label>
@@ -610,7 +610,7 @@ print ' value="10" ';
 <!---- シークレット予約の表示テキスト ----->
   <div class="mb-3">
     <h4 class="radio form-label"> シークレット予約の表示テキスト </h4>
-    <label class="radio form-label"><small>未再生のシークレット予約の曲名の代わりに表示するテキストです。</small></label>
+    <label class="form-label"><small>未再生のシークレット予約の曲名の代わりに表示するテキストです。</small></label>
     <input type="text" name="secret_display_text" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)')), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="ヒ・ミ・ツ♪(シークレット予約)" />
@@ -724,7 +724,7 @@ print ' value="10" ';
   <?php
       $useposttwitter = configbool("useposttwitter", true);
   ?>
-    <label class="radio form-label"> twitter投稿リンク </label>
+    <label class="form-label"> twitter投稿リンク </label>
     <label class="radio-inline">
       <input type="radio" name="useposttwitter" value="1" <?php print ($useposttwitter)?'checked':' ' ?> /> 表示する
     </label>
@@ -816,7 +816,7 @@ print 'value="'.urldecode($config_ini["startvolume"]).'"';
   <div class="mb-3">
     <h4 class="radio form-label"> <span data-bs-toggle="tooltip" data-bs-placement="top" title="Player画面にキー変更ボタンを表示します" >
         MPCのキーチェンジ機能 </span> </h4>
-    <label class="radio form-label">
+    <label class="form-label">
         <small>『要<a href="http://shinta.coresv.com/soft/EasyKeyChanger_JPN.html" > 簡易キーチェンジャー </a>のセットアップ』</small>
     </label>
         
@@ -968,7 +968,7 @@ print 'value="'.urldecode($config_ini["DeliveryCMDEND"]).'"';
 
     <div class="mb-3">
     <h4 class="radio form-label"> BGVフォルダ  </h4>
-    <label class="radio form-label"> <small> 空でBGV検索画面無効 </small> </label>
+    <label class="form-label"> <small> 空でBGV検索画面無効 </small> </label>
     <input type="text" name="BGVfolder" class="form-control"
 <?php
 if(array_key_exists("BGVfolder",$config_ini)) {
@@ -1104,7 +1104,7 @@ $si_sorted_indices = array_keys($si_order_map);
   <div class="mb-3">
     <?php $online_preview = configbool("online_preview", false); ?>
     <h4 class="radio form-label"> オンラインからの動画プレビュー </h4>
-    <label class="radio form-label"><small>インターネット経由でアクセスした場合も動画プレビューを使用できるようにします</small></label>
+    <label class="form-label"><small>インターネット経由でアクセスした場合も動画プレビューを使用できるようにします</small></label>
     <label class="radio-inline">
       <input type="radio" name="online_preview" value="1" <?php print ($online_preview) ? 'checked' : ' '; ?> /> 使用する
     </label>
@@ -1140,7 +1140,7 @@ $si_sorted_indices = array_keys($si_order_map);
       $useuserpause = configbool("useuserpause", false);
   ?>
     <h3 class="radio form-label"> 小休止リクエストを管理者以外に許可 </h3>
-    <label class="radio form-label"> <small>一般ユーザーにも小休止リクエストができるようにします</small> </label>
+    <label class="form-label"> <small>一般ユーザーにも小休止リクエストができるようにします</small> </label>
     <label class="radio-inline">
       <input type="radio" name="useuserpause" value="1" <?php print ($useuserpause)?'checked':' ' ?> /> 使用する
     </label>
@@ -1162,7 +1162,7 @@ $si_sorted_indices = array_keys($si_order_map);
 
   <div class="mb-3 ">
     <h3 id="useinternet" class="radio form-label menulink"> インターネット接続  </h3>
-    <label class="radio form-label"> <small>(使用しないにするとインターネット接続が前提の機能を無効にします)</small> </label>
+    <label class="form-label"> <small>(使用しないにするとインターネット接続が前提の機能を無効にします)</small> </label>
     <label class="radio-inline">
       <input type="radio" name="connectinternet" value="1" <?php print ($config_ini["connectinternet"]==1)?'checked':' ' ?> /> 使用する
     </label>
@@ -1264,7 +1264,7 @@ print 'value="'.urldecode($config_ini["nicopass"]).'"';
     </div>
     <div class="mb-3">
     <h4 class="radio form-label"> アップ／ダウンロード先フォルダ <small> 要Everythingの検索対象</small> </h4>
-    <label class="radio form-label"> <small> 要Everythingの検索対象</small> </label>
+    <label class="form-label"> <small> 要Everythingの検索対象</small> </label>
     <input type="text" name="downloadfolder" class="form-control"
 <?php
 if(array_key_exists("downloadfolder",$config_ini)) {
@@ -1446,7 +1446,7 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
       }
   ?>
     <h3 class="radio form-label"> xampp自動再起動  </h3>
-    <label class="radio form-label">  <small>ブラウザのボタンから自動再生が起動できない環境では「使用しない」にしてください</small> </label>
+    <label class="form-label">  <small>ブラウザのボタンから自動再生が起動できない環境では「使用しない」にしてください</small> </label>
     <label class="radio-inline">
       <input type="radio" name="xamppautorestart" value="1" <?php print ($xamppautorestart)?'checked':' ' ?> /> 使用する
     </label>
@@ -1491,7 +1491,7 @@ if(array_key_exists("pfwdplace",$config_ini)) {
 ?>
   <div class="mb-3" id="usepfwdcheck" >
     <h3 id="pfwd" class="radio form-label menulink"> pfwd 自動再起動 </h3>
-    <label class="radio form-label"><small>通常時オンライン版接続確認でOKになる環境で使用する</small> </label>
+    <label class="form-label"><small>通常時オンライン版接続確認でOKになる環境で使用する</small> </label>
 <?php
   if($online_available_flg == false) {
       print '<div class="alert-danger" > オンライン版接続確認がNGの間は選択できません <br /> '.$ret ;
