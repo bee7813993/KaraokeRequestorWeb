@@ -171,6 +171,16 @@ function readconfig_array()
         $config_ini["google_relay_secret"] = urldecode($config_ini["google_relay_secret"]);
     }
 
+    if(!array_key_exists("bgimage", $config_ini)){
+        $config_ini["bgimage"] = "";
+    }
+    if(!array_key_exists("bg_card_opacity", $config_ini)){
+        $config_ini["bg_card_opacity"] = 100;
+    }
+    if(!array_key_exists("bg_overlay_opacity", $config_ini)){
+        $config_ini["bg_overlay_opacity"] = 100;
+    }
+
     if($config_ini["playerpath_select"] == urlencode("その他PATH指定" )) {
         $config_ini = array_merge($config_ini,array("playerpath" => ($config_ini["playerpath_any"])));
     }else{

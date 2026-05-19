@@ -26,6 +26,38 @@ $easyauth -> do_eashauthcheck();
 
 $newconfig = $_REQUEST;
 
+// 背景画像のアップロード/削除処理
+$bgimage_upload_msg = '';
+if (isset($_FILES['bgimage_upload']) && is_array($_FILES['bgimage_upload']) && $_FILES['bgimage_upload']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $f = $_FILES['bgimage_upload'];
+    if ($f['error'] === UPLOAD_ERR_OK && is_uploaded_file($f['tmp_name'])) {
+        $info = @getimagesize($f['tmp_name']);
+        $allowed = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'];
+        if ($info !== false && isset($allowed[$info[2]])) {
+            $ext = $allowed[$info[2]];
+            $bgdir = __DIR__ . '/images/bg';
+            if (!is_dir($bgdir)) { @mkdir($bgdir, 0777, true); }
+            $name = 'bg_' . date('YmdHis') . '_' . substr(bin2hex(random_bytes(4)),0,8) . '.' . $ext;
+            $dest = $bgdir . '/' . $name;
+            if (@move_uploaded_file($f['tmp_name'], $dest)) {
+                $newconfig['bgimage'] = 'images/bg/' . $name;
+                $bgimage_upload_msg = '背景画像をアップロードしました: ' . $name;
+            } else {
+                $bgimage_upload_msg = '背景画像の保存に失敗しました';
+            }
+        } else {
+            $bgimage_upload_msg = '画像ファイル (JPEG/PNG/GIF/WebP) を指定してください';
+        }
+    } else {
+        $bgimage_upload_msg = 'アップロードに失敗しました (code:' . $f['error'] . ')';
+    }
+}
+if (isset($_REQUEST['bgimage_delete']) && $_REQUEST['bgimage_delete'] == '1') {
+    $newconfig['bgimage'] = '';
+    if (isset($newconfig['bgimage_delete'])) unset($newconfig['bgimage_delete']);
+    $bgimage_upload_msg = '背景画像をクリアしました';
+}
+
 
 if(array_key_exists("clearauth", $_REQUEST)) {
     header('HTTP/1.0 401 Unauthorized');
@@ -234,6 +266,9 @@ print '</pre>';
      <a href="#bgcolor_t" class="menulink" > ページ背景色 </a>
     </li>
     <li class="menu">
+     <a href="#bgimage_t" class="menulink" > 背景画像 </a>
+    </li>
+    <li class="menu">
      <a href="#movieplayer" class="menulink" > 動画プレーヤー </a>
     </li>
     <li class="menu">
@@ -366,7 +401,7 @@ print '<button type="button" class="btn btn-default" id="listerbt" '.$addattr.'>
 
 <div class="bg-info">
   <h1  id="workconfig"  class="menulink" >動作設定 </h1>
-  <form name="allconfig" method="post" action="init.php">
+  <form name="allconfig" method="post" action="init.php" enctype="multipart/form-data">
 
   <div class="form-group">
     <h3 title="未設定でパスワードチェックを省略">設定画面パスワード</h3>
@@ -596,6 +631,83 @@ print ' value="10" ';
   $("#bgcolor").on("change", function(){
       document.body.style.backgroundColor = $('#bgcolor').val();
   });
+  </script>
+
+<!---- 背景画像 + 透過度設定 ----->
+  <?php
+      $bgimage_path = '';
+      if (array_key_exists("bgimage", $config_ini)) {
+          $bgimage_path = urldecode($config_ini["bgimage"]);
+      }
+      $bg_card_opacity = 100;
+      if (array_key_exists("bg_card_opacity", $config_ini)) {
+          $bg_card_opacity = (int)$config_ini["bg_card_opacity"];
+      }
+      $bg_overlay_opacity = 100;
+      if (array_key_exists("bg_overlay_opacity", $config_ini)) {
+          $bg_overlay_opacity = (int)$config_ini["bg_overlay_opacity"];
+      }
+  ?>
+  <div class="form-group">
+    <h3 id="bgimage_t" class="radio control-label menulink"> 背景画像 </h3>
+    <label><small>画面全体の背景に画像を表示します。透過度で見やすさを調整できます。</small></label>
+    <?php if (!empty($bgimage_upload_msg)) { ?>
+      <div class="alert alert-info" style="margin-top:6px;"><?php echo htmlspecialchars($bgimage_upload_msg, ENT_QUOTES, 'UTF-8'); ?></div>
+    <?php } ?>
+    <?php if (!empty($bgimage_path)) { ?>
+      <div style="margin:6px 0;">
+        現在の背景画像: <code><?php echo htmlspecialchars($bgimage_path, ENT_QUOTES, 'UTF-8'); ?></code><br>
+        <img src="<?php echo htmlspecialchars($bgimage_path, ENT_QUOTES, 'UTF-8'); ?>" alt="背景画像プレビュー" style="max-width:280px; max-height:160px; border:1px solid #ccc; margin-top:4px;">
+      </div>
+    <?php } else { ?>
+      <div style="margin:6px 0;"><small>背景画像は未設定です。</small></div>
+    <?php } ?>
+
+    <div style="margin:8px 0;">
+      <label><small>背景画像ファイル(アップロード時に置き換え):</small></label>
+      <input type="file" name="bgimage_upload" accept="image/png,image/jpeg,image/gif,image/webp" />
+    </div>
+    <?php if (!empty($bgimage_path)) { ?>
+      <div style="margin:8px 0;">
+        <label class="checkbox-inline">
+          <input type="checkbox" name="bgimage_delete" value="1" /> 背景画像をクリアする (設定反映で適用)
+        </label>
+      </div>
+    <?php } ?>
+    <!-- 現在のbgimage値を保持 -->
+    <input type="hidden" name="bgimage" value="<?php echo htmlspecialchars($bgimage_path, ENT_QUOTES, 'UTF-8'); ?>" />
+
+    <div class="form-group" style="margin-top:10px;">
+      <label for="bg_card_opacity"><small>カード透過度: <span id="bg_card_opacity_val"><?php echo $bg_card_opacity; ?></span>%</small></label>
+      <input type="range" name="bg_card_opacity" id="bg_card_opacity" min="0" max="100" step="1" value="<?php echo $bg_card_opacity; ?>" />
+      <small>低くするほどカード(各パネル)が透けて背景画像が見えます。</small>
+    </div>
+    <div class="form-group">
+      <label for="bg_overlay_opacity"><small>背景オーバーレイ透過度: <span id="bg_overlay_opacity_val"><?php echo $bg_overlay_opacity; ?></span>%</small></label>
+      <input type="range" name="bg_overlay_opacity" id="bg_overlay_opacity" min="0" max="100" step="1" value="<?php echo $bg_overlay_opacity; ?>" />
+      <small>背景画像の上にページ背景色をかぶせる強さ。100%で背景色のみ(画像非表示)、0%で画像がそのまま見えます。</small>
+    </div>
+  </div>
+  <script type="text/javascript">
+  (function(){
+      function hexToRgb(h){
+          h = (h||'').replace('#','');
+          if(h.length===3){ h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2]; }
+          if(!/^[0-9a-fA-F]{6}$/.test(h)) return '248, 236, 224';
+          return parseInt(h.substr(0,2),16)+', '+parseInt(h.substr(2,2),16)+', '+parseInt(h.substr(4,2),16);
+      }
+      function updateBgPreview(){
+          var co = parseInt($('#bg_card_opacity').val(),10)/100;
+          var oo = parseInt($('#bg_overlay_opacity').val(),10)/100;
+          document.documentElement.style.setProperty('--bg-card-alpha', co);
+          document.documentElement.style.setProperty('--bg-overlay-alpha', oo);
+          document.documentElement.style.setProperty('--bg-page-rgb', hexToRgb($('#bgcolor').val()));
+          $('#bg_card_opacity_val').text($('#bg_card_opacity').val());
+          $('#bg_overlay_opacity_val').text($('#bg_overlay_opacity').val());
+      }
+      $('#bg_card_opacity, #bg_overlay_opacity, #bgcolor').on('input change', updateBgPreview);
+      updateBgPreview();
+  })();
   </script>
 
 <!---- twitter投稿リンク ----->

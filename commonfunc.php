@@ -1311,23 +1311,12 @@ EOD;
     print '</nav>';
     
     // 背景色変更 + CSS変数注入
-    $injected_vars = [];
+    print_bg_style_block();
     if(array_key_exists("bgcolor",$config_ini)){
-        $bg = htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page:' . $bg . ';';
-    }
-    if(array_key_exists("bgimage",$config_ini) && !empty($config_ini["bgimage"])){
-        $bgimg = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page-image:url(\'' . $bgimg . '\');';
-    }
-    if(!empty($injected_vars)){
-        print '<style>:root{' . implode('', $injected_vars) . '}</style>';
-        if(array_key_exists("bgcolor",$config_ini)){
-            // Bootstrap 3の古いpages用にJS注入も維持
-            print '<script type="text/javascript">document.body.style.backgroundColor="'
-                . htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8')
-                . '";</script>';
-        }
+        // Bootstrap 3の古いpages用にJS注入も維持
+        print '<script type="text/javascript">document.body.style.backgroundColor="'
+            . htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8')
+            . '";</script>';
     }
 }
 
@@ -1612,18 +1601,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     print '</nav>';
 
     // CSS変数注入（BS3版と同じ）
-    $injected_vars = [];
-    if (array_key_exists("bgcolor", $config_ini)) {
-        $bg = htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page:' . $bg . ';';
-    }
-    if (array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
-        $bgimg = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page-image:url(\'' . $bgimg . '\');';
-    }
-    if (!empty($injected_vars)) {
-        print '<style>:root{' . implode('', $injected_vars) . '}</style>';
-    }
+    print_bg_style_block();
 }
 
 /**
@@ -1845,6 +1823,73 @@ if($usenfrequset == 1) {
   }
 }
 
+}
+
+function hex_to_rgb_triplet($hex, $fallback = '248, 236, 224') {
+    if (!is_string($hex)) return $fallback;
+    $h = ltrim(trim($hex), '#');
+    if (strlen($h) === 3) {
+        $h = $h[0].$h[0].$h[1].$h[1].$h[2].$h[2];
+    }
+    if (!preg_match('/^[0-9a-fA-F]{6}$/', $h)) return $fallback;
+    return hexdec(substr($h,0,2)).', '.hexdec(substr($h,2,2)).', '.hexdec(substr($h,4,2));
+}
+
+function print_bg_style_block() {
+    global $config_ini;
+
+    $vars = [];
+    $bgcolor_hex = '#F8ECE0';
+    if (array_key_exists("bgcolor", $config_ini)) {
+        $bgcolor_hex = urldecode($config_ini["bgcolor"]);
+        $bg = htmlspecialchars($bgcolor_hex, ENT_QUOTES, 'UTF-8');
+        $vars[] = '--bg-page:' . $bg . ';';
+    }
+    $vars[] = '--bg-page-rgb:' . hex_to_rgb_triplet($bgcolor_hex) . ';';
+
+    $has_bgimage = false;
+    $bgimg_url = '';
+    if (array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
+        $bgimg_url = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
+        $vars[] = '--bg-page-image:url(\'' . $bgimg_url . '\');';
+        $has_bgimage = true;
+    }
+
+    $overlay_alpha = 1.0;
+    if (array_key_exists("bg_overlay_opacity", $config_ini)) {
+        $v = (int)$config_ini["bg_overlay_opacity"];
+        if ($v < 0) $v = 0; if ($v > 100) $v = 100;
+        $overlay_alpha = $v / 100.0;
+    }
+    $card_alpha = 1.0;
+    if (array_key_exists("bg_card_opacity", $config_ini)) {
+        $v = (int)$config_ini["bg_card_opacity"];
+        if ($v < 0) $v = 0; if ($v > 100) $v = 100;
+        $card_alpha = $v / 100.0;
+    }
+    $vars[] = '--bg-overlay-alpha:' . $overlay_alpha . ';';
+    $vars[] = '--bg-card-alpha:' . $card_alpha . ';';
+
+    print '<style>:root{' . implode('', $vars) . '}';
+
+    if ($has_bgimage) {
+        // body 全体に背景画像を敷き、bgcolor をオーバーレイとして上に重ねる
+        print 'html,body{background-color:transparent;}';
+        print 'body{background-image:var(--bg-page-image);background-size:cover;background-attachment:fixed;background-position:center;}';
+        print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
+            . 'background-color:rgba(var(--bg-page-rgb), var(--bg-overlay-alpha));}';
+    }
+
+    if ($has_bgimage && $card_alpha < 1.0) {
+        // カード系コンポーネントを透過させる(BS3 + BS5 + 既存ガラス風)
+        print '.panel,.panel-default,.panel-body,.panel-heading,.bg-info,'
+            . '.card,.card-body,.list-group-item,.well,.alert,'
+            . '.dropdown-menu,'
+            . '.dataTables_wrapper > .dataTable, table.dataTable tbody tr{'
+            . 'background-color:rgba(var(--bg-card-rgb), var(--bg-card-alpha)) !important;}';
+    }
+
+    print '</style>';
 }
 
 function writeconfig2ini($config_ini,$configfile)
