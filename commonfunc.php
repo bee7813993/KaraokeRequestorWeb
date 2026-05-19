@@ -1311,23 +1311,12 @@ EOD;
     print '</nav>';
     
     // 背景色変更 + CSS変数注入
-    $injected_vars = [];
+    print_bg_style_block();
     if(array_key_exists("bgcolor",$config_ini)){
-        $bg = htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page:' . $bg . ';';
-    }
-    if(array_key_exists("bgimage",$config_ini) && !empty($config_ini["bgimage"])){
-        $bgimg = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page-image:url(\'' . $bgimg . '\');';
-    }
-    if(!empty($injected_vars)){
-        print '<style>:root{' . implode('', $injected_vars) . '}</style>';
-        if(array_key_exists("bgcolor",$config_ini)){
-            // Bootstrap 3の古いpages用にJS注入も維持
-            print '<script type="text/javascript">document.body.style.backgroundColor="'
-                . htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8')
-                . '";</script>';
-        }
+        // Bootstrap 3の古いpages用にJS注入も維持
+        print '<script type="text/javascript">document.body.style.backgroundColor="'
+            . htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8')
+            . '";</script>';
     }
 }
 
@@ -1556,6 +1545,12 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
 
     if (isset($user) && $user === 'admin') {
         print '<li class="nav-item d-flex align-items-center px-2 text-white-50" style="font-size:12px;">管理者ログイン中</li>';
+        if ($page === 'init.php') {
+            print '<li class="nav-item">'
+                . '<button type="button" class="btn btn-success btn-sm"'
+                . ' onclick="document.allconfig.submit();">設定反映</button>'
+                . '</li>';
+        }
     }
 
     print '</ul>'; // me-auto
@@ -1612,18 +1607,7 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     print '</nav>';
 
     // CSS変数注入（BS3版と同じ）
-    $injected_vars = [];
-    if (array_key_exists("bgcolor", $config_ini)) {
-        $bg = htmlspecialchars(urldecode($config_ini["bgcolor"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page:' . $bg . ';';
-    }
-    if (array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
-        $bgimg = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
-        $injected_vars[] = '--bg-page-image:url(\'' . $bgimg . '\');';
-    }
-    if (!empty($injected_vars)) {
-        print '<style>:root{' . implode('', $injected_vars) . '}</style>';
-    }
+    print_bg_style_block(true);
 }
 
 /**
@@ -1845,6 +1829,126 @@ if($usenfrequset == 1) {
   }
 }
 
+}
+
+function hex_to_rgb_triplet($hex, $fallback = '248, 236, 224') {
+    if (!is_string($hex)) return $fallback;
+    $h = ltrim(trim($hex), '#');
+    if (strlen($h) === 3) {
+        $h = $h[0].$h[0].$h[1].$h[1].$h[2].$h[2];
+    }
+    if (!preg_match('/^[0-9a-fA-F]{6}$/', $h)) return $fallback;
+    return hexdec(substr($h,0,2)).', '.hexdec(substr($h,2,2)).', '.hexdec(substr($h,4,2));
+}
+
+function print_bg_style_block($is_bs5 = false) {
+    global $config_ini;
+
+    $vars = [];
+    $bgcolor_hex = '#F8ECE0';
+    if (array_key_exists("bgcolor", $config_ini)) {
+        $bgcolor_hex = urldecode($config_ini["bgcolor"]);
+        $bg = htmlspecialchars($bgcolor_hex, ENT_QUOTES, 'UTF-8');
+        $vars[] = '--bg-page:' . $bg . ';';
+    }
+    $vars[] = '--bg-page-rgb:' . hex_to_rgb_triplet($bgcolor_hex) . ';';
+
+    // 背景画像機能は BS5 ページのみ対象。BS3 ページでは $has_bgimage を false のまま維持する。
+    $has_bgimage = false;
+    $bgimg_url = '';
+    if ($is_bs5 && array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
+        $bgimg_url = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
+        $vars[] = '--bg-page-image:url(\'' . $bgimg_url . '\');';
+        $has_bgimage = true;
+    }
+
+    $overlay_alpha = 1.0;
+    if (array_key_exists("bg_overlay_opacity", $config_ini)) {
+        $v = (int)$config_ini["bg_overlay_opacity"];
+        if ($v < 0) $v = 0; if ($v > 100) $v = 100;
+        $overlay_alpha = $v / 100.0;
+    }
+    $card_alpha = 1.0;
+    if (array_key_exists("bg_card_opacity", $config_ini)) {
+        $v = (int)$config_ini["bg_card_opacity"];
+        if ($v < 0) $v = 0; if ($v > 100) $v = 100;
+        $card_alpha = $v / 100.0;
+    }
+    $vars[] = '--bg-overlay-alpha:' . $overlay_alpha . ';';
+    $vars[] = '--bg-card-alpha:' . $card_alpha . ';';
+
+    print '<style>:root{' . implode('', $vars) . '}';
+
+    if ($has_bgimage) {
+        // body 側に背景画像を貼り、body::before はオーバーレイ色のみに分離する。
+        // これによりダークモードの body::before に掛かる brightness フィルタが
+        // 背景画像を暗くするのを防ぐ(画像本体は body 直下に置くため影響を受けない)。
+        print 'html,body{background-color:transparent !important;}';
+        print 'body{background-image:var(--bg-page-image) !important;'
+            . 'background-size:cover;background-attachment:fixed;background-position:center;}';
+        // theme-toggle.css の [data-theme="dark"] body { background-image: none !important }
+        // を同一詳細度・後優先で上書きして、ダークモードでも背景画像を表示させる。
+        print '[data-theme="dark"] body{background-image:var(--bg-page-image) !important;}';
+        print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
+            . 'background-image:none !important;'
+            . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));'
+            . 'filter:none !important;}';
+        // ダークモード時はユーザー指定の明るい bgcolor をそのままオーバーレイに使うと
+        // 違和感が出るため、暗色オーバーレイに置き換える。透過率は --bg-overlay-alpha を共用。
+        print '[data-theme="dark"] body::before{'
+            . 'background-color:rgba(18, 18, 30, var(--bg-overlay-alpha, 1));}';
+    }
+
+    if ($has_bgimage && $card_alpha < 1.0) {
+        // カード系コンポーネントを透過させる(BS3 + BS5 + 本アプリ独自クラス)
+        // .request-card は requestlist_swipe.php 側で per-status の rgba を持つため除外。
+        // フォールバック値を持たせて _variables.css 未ロード時(BS3)でも有効化。
+        $card_bg = 'rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1))';
+        print '.panel,.panel-default,.panel-body,.panel-heading,.panel-footer,'
+            . '.bg-info,.bg-light,.bg-white,.well,.alert,'
+            . '.card,.card-body,.card-header,.card-footer,'
+            . '.list-group-item,.dropdown-menu,'
+            . '.accordion-item,.accordion-body,.accordion-button,'
+            . '.modal-content,'
+            . '.player-nowplaying,#stats-bar,'
+            . '.dataTables_wrapper > .dataTable, table.dataTable tbody tr{'
+            . 'background-color:' . $card_bg . ' !important;'
+            . 'background-image:none !important;}';
+        // 背景色をインラインで持つ既存スタイル(bg-info の青 等)を直接上書きするための補強
+        print '.bg-info{background-color:' . $card_bg . ' !important;}';
+
+        // BS5 ページのみ: テーブル・フォームコントロール等の白抜き要素も透過対象に含める。
+        // BS3 ページで .table や .form-control が登場するページに副作用が出るのを避けるため、
+        // 呼び出し元 (shownavigatioinbar_bs5) で $is_bs5=true を渡したときのみ出力する。
+        if ($is_bs5) {
+            // BS5 の .table は --bs-table-bg を介して背景色を決めるため、変数を上書きする。
+            // セル/行/縞模様もまとめて rgba に置き換え。
+            print '.table{--bs-table-bg:' . $card_bg . ';'
+                . '--bs-table-striped-bg:' . $card_bg . ';'
+                . '--bs-table-hover-bg:' . $card_bg . ';'
+                . 'background-color:' . $card_bg . ' !important;}';
+            print '.table > :not(caption) > * > *,'
+                . '.table-striped > tbody > tr:nth-of-type(odd) > *,'
+                . '.table-hover > tbody > tr:hover > *{'
+                . 'background-color:' . $card_bg . ' !important;}';
+            // フォームコントロール (BS5 標準 + 当アプリ独自テーマ)
+            print '.form-control,.form-select,textarea.form-control,'
+                . 'select.form-select,.form-control-themed,'
+                . '.input-group-text{'
+                . 'background-color:' . $card_bg . ' !important;}';
+
+            // 独自カードクラス(.search-section, .search-hero, .notice-box 等)が
+            // var(--bg-card) / var(--bg-card-alt) を直接参照しているため、
+            // 変数自体を rgba に置き換えて一括で透過させる。
+            // --bg-card-rgb / --bg-card-alt-rgb はテーマ別に正しく設定済みなので、
+            // 値解決時にライト/ダーク両モードで適切な色になる。
+            print ':root{'
+                . '--bg-card:rgba(var(--bg-card-rgb,255,255,255),var(--bg-card-alpha,1));'
+                . '--bg-card-alt:rgba(var(--bg-card-alt-rgb,248,244,240),var(--bg-card-alpha,1));}';
+        }
+    }
+
+    print '</style>';
 }
 
 function writeconfig2ini($config_ini,$configfile)

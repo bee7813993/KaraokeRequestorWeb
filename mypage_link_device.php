@@ -1,10 +1,38 @@
-<html>
-<head>
 <?php
 require_once 'commonfunc.php';
 require_once 'mypage_class.php';
-print_meta_header();
+$mypage = null;
+$msg = '';
+$msg_type = 'info';
+$pair_code = '';
+if (configbool("usemypage", true)) {
+    $mypage = new MypageUser($db);
+    // コード発行
+    if (isset($_POST['action']) && $_POST['action'] === 'generate') {
+        $pair_code = $mypage->generatePairingCode();
+    }
+    // コード適用（applyPairingCode() が setcookie() を呼ぶため HTML 出力前に処理）
+    if (isset($_POST['action']) && $_POST['action'] === 'apply') {
+        $code = isset($_POST['code']) ? strtoupper(trim($_POST['code'])) : '';
+        if (empty($code)) {
+            $msg = 'コードを入力してください。';
+            $msg_type = 'danger';
+        } else {
+            $result = $mypage->applyPairingCode($code);
+            if ($result) {
+                $msg = 'デバイスのリンクに成功しました。マイページのデータが引き継がれました。';
+                $msg_type = 'success';
+            } else {
+                $msg = 'コードが無効または有効期限切れです。もう一度お試しください（コードの有効期限は5分です）。';
+                $msg_type = 'danger';
+            }
+        }
+    }
+}
 ?>
+<html>
+<head>
+<?php print_meta_header(); ?>
 <title>デバイスリンク - マイページ</title>
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <script src="js/jquery.js"></script>
@@ -19,34 +47,7 @@ if (!configbool("usemypage", true)) {
     print '</body></html>';
     exit;
 }
-
-$mypage = new MypageUser($db);
-$msg = '';
-$msg_type = 'info';
-$pair_code = '';
-
-// コード発行
-if (isset($_POST['action']) && $_POST['action'] === 'generate') {
-    $pair_code = $mypage->generatePairingCode();
-}
-
-// コード適用
-if (isset($_POST['action']) && $_POST['action'] === 'apply') {
-    $code = isset($_POST['code']) ? strtoupper(trim($_POST['code'])) : '';
-    if (empty($code)) {
-        $msg = 'コードを入力してください。';
-        $msg_type = 'danger';
-    } else {
-        $result = $mypage->applyPairingCode($code);
-        if ($result) {
-            $msg = 'デバイスのリンクに成功しました。マイページのデータが引き継がれました。';
-            $msg_type = 'success';
-        } else {
-            $msg = 'コードが無効または有効期限切れです。もう一度お試しください（コードの有効期限は5分です）。';
-            $msg_type = 'danger';
-        }
-    }
-}
+// $mypage/$msg/$msg_type/$pair_code は冒頭の PHP ブロックで設定済み
 ?>
 <div class="container" style="margin-top:80px;">
   <h2>デバイスリンク</h2>

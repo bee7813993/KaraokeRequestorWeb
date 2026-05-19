@@ -67,7 +67,9 @@ body::before {
    ============================================================ */
 [data-theme="dark"] {
   --bg-card: #262638;
+  --bg-card-rgb: 38, 38, 56;
   --bg-card-alt: #2d2d42;
+  --bg-card-alt-rgb: 45, 45, 66;
   --bg-card-hover: #34344c;
   --bg-badge: #495057;
   --bg-input: #2a2a3c;
@@ -308,24 +310,24 @@ body::before {
    ダークモード: requestlist_swipe カード・統計バー
    ============================================================ */
 [data-theme="dark"] .request-card {
-  background: var(--bg-card);
+  background: rgba(var(--bg-card-rgb, 38, 38, 56), var(--bg-card-alpha, 1));
   border-left-color: #5c5c7e;
   color: var(--color-text);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 [data-theme="dark"] .request-card[data-nowplaying="再生中"],
 [data-theme="dark"] .request-card[data-nowplaying="2"] {
-  background: #1f3a25;
+  background: rgba(31, 58, 37, var(--bg-card-alpha, 1));
 }
 [data-theme="dark"] .request-card[data-nowplaying="再生開始待ち"],
 [data-theme="dark"] .request-card[data-nowplaying="6"] {
-  background: #3a3318;
+  background: rgba(58, 51, 24, var(--bg-card-alpha, 1));
 }
 [data-theme="dark"] .request-card[data-nowplaying="再生済"],
 [data-theme="dark"] .request-card[data-nowplaying="再生済？"],
 [data-theme="dark"] .request-card[data-nowplaying="4"],
 [data-theme="dark"] .request-card[data-nowplaying="5"] {
-  background: var(--bg-card-alt);
+  background: rgba(var(--bg-card-alt-rgb, 45, 45, 66), var(--bg-card-alpha, 1));
 }
 [data-theme="dark"] .card-title    { color: var(--color-text); }
 [data-theme="dark"] .card-meta     { color: #c0c4d0; }

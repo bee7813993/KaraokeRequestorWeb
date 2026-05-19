@@ -57,21 +57,21 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   margin-bottom: 6px;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  background: var(--bg-card, #fff);
+  background: rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1));
   border-left: 4px solid #ced4da;
   -webkit-user-select: none;
   user-select: none;
 }
-/* 再生状況別の左ボーダー色 */
+/* 再生状況別の左ボーダー色 + 背景色(透過率は --bg-card-alpha を共用) */
 .request-card[data-nowplaying="再生中"],
 .request-card[data-nowplaying="2"] {
   border-left-color: var(--bs-success);
-  background: #f6fff8;
+  background: rgba(246, 255, 248, var(--bg-card-alpha, 1));
 }
 .request-card[data-nowplaying="再生開始待ち"],
 .request-card[data-nowplaying="6"] {
   border-left-color: var(--bs-warning);
-  background: #fffef5;
+  background: rgba(255, 254, 245, var(--bg-card-alpha, 1));
 }
 .request-card[data-nowplaying="停止中"],
 .request-card[data-nowplaying="3"] {
@@ -82,7 +82,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .request-card[data-nowplaying="4"],
 .request-card[data-nowplaying="5"] {
   border-left-color: #adb5bd;
-  background: var(--bg-card-alt, #f8f9fa);
+  background: rgba(var(--bg-card-alt-rgb, 248, 244, 240), var(--bg-card-alpha, 1));
 }
 
 /* スワイプで現れるアクションボタン群 */
@@ -91,6 +91,18 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   top: 0; right: 0; bottom: 0;
   display: flex;
   z-index: 1;
+  /* 通常時は不可視。スワイプ中(.swiping)または開いた状態(.swipe-open)のみ表示。
+     カード透過時にメニューが透けて見えるのを防ぐため。 */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.request-card.swiping .card-actions,
+.request-card.swipe-open .card-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .action-btn {
@@ -806,6 +818,7 @@ function initSortable() {
 // ---- スワイプアクション ----
 function closeCard(card) {
     card.classList.remove('swipe-open');
+    card.classList.remove('swiping');
     var main = card.querySelector('.card-main');
     if (main) main.style.transform = '';
     if (openCard === card) openCard = null;
@@ -841,6 +854,7 @@ function initSwipe() {
             if (!touchSwiping) {
                 if (Math.abs(dx) > DIR_THR && Math.abs(dx) > Math.abs(dy)) {
                     touchSwiping = true;
+                    card.classList.add('swiping');
                     if (openCard && openCard !== card) closeCard(openCard);
                 } else if (Math.abs(dy) > DIR_THR) {
                     touchTracking = false; // 縦スクロール → 解除
@@ -873,6 +887,7 @@ function initSwipe() {
             } else if (isOpen && dx > SNAP_THR) {
                 closeCard(card);
             }
+            card.classList.remove('swiping');
         }, { passive: true });
 
         // ----- マウス（デスクトップ） -----
@@ -895,6 +910,7 @@ function initSwipe() {
 
             if (!mouseSwiping && Math.abs(dx) > DIR_THR) {
                 mouseSwiping = true;
+                card.classList.add('swiping');
                 if (openCard && openCard !== card) closeCard(openCard);
             }
             if (mouseSwiping) {
@@ -921,6 +937,7 @@ function initSwipe() {
             } else if (isOpen && dx > SNAP_THR) {
                 closeCard(card);
             }
+            card.classList.remove('swiping');
         }
     });
 

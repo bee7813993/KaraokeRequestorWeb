@@ -1,11 +1,21 @@
-<!doctype html>
-<html lang="ja">
-<head>
 <?php
 require_once 'commonfunc.php';
 require_once 'mypage_class.php';
-print_meta_header();
+$mypage = null;
+if (configbool("usemypage", true)) {
+    $mypage = new MypageUser($db);
+    // 削除処理（header() を呼ぶため HTML 出力前に処理）
+    if (isset($_POST['action']) && $_POST['action'] === 'remove' && !empty($_POST['fullpath'])) {
+        $mypage->removeLater($_POST['fullpath']);
+        header('Location: mypage_later.php');
+        exit;
+    }
+}
 ?>
+<!doctype html>
+<html lang="ja">
+<head>
+<?php print_meta_header(); ?>
 <title>後で歌う - マイページ</title>
 <script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
@@ -24,15 +34,7 @@ if (!configbool("usemypage", true)) {
     print '</body></html>';
     exit;
 }
-
-$mypage = new MypageUser($db);
-
-// 削除処理
-if (isset($_POST['action']) && $_POST['action'] === 'remove' && !empty($_POST['fullpath'])) {
-    $mypage->removeLater($_POST['fullpath']);
-    header('Location: mypage_later.php');
-    exit;
-}
+// $mypage は冒頭の PHP ブロックで初期化済み
 
 $valid_sorts = ['date', 'filedate'];
 $sort  = in_array($_GET['sort'] ?? '', $valid_sorts, true) ? $_GET['sort'] : 'date';
