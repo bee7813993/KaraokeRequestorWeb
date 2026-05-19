@@ -1879,6 +1879,9 @@ function print_bg_style_block() {
         print 'html,body{background-color:transparent !important;}';
         print 'body{background-image:var(--bg-page-image) !important;'
             . 'background-size:cover;background-attachment:fixed;background-position:center;}';
+        // theme-toggle.css の [data-theme="dark"] body { background-image: none !important }
+        // を同一詳細度・後優先で上書きして、ダークモードでも背景画像を表示させる。
+        print '[data-theme="dark"] body{background-image:var(--bg-page-image) !important;}';
         print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
             . 'background-image:none !important;'
             . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));'
