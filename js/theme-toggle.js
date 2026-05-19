@@ -42,6 +42,57 @@
     }, TRANSITION_MS + 50);
   }
 
+  // --- 適応的ダーク背景フィルター ---
+  // 設定背景色の輝度に応じて body::before の filter 強度を変える。
+  // 明るい色（クリーム/白）は強く暗転、中明度の色（緑/青/ピンク等）は色相を残す
+  // 弱めの暗転、既に暗い色はほぼ変化させない。
+  function parseColor(str) {
+    if (!str) return null;
+    str = str.trim();
+    var m = str.match(/^#([0-9a-f]{6})$/i);
+    if (m) {
+      var n = parseInt(m[1], 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+    }
+    m = str.match(/^#([0-9a-f]{3})$/i);
+    if (m) {
+      var s = m[1];
+      return {
+        r: parseInt(s[0] + s[0], 16),
+        g: parseInt(s[1] + s[1], 16),
+        b: parseInt(s[2] + s[2], 16)
+      };
+    }
+    m = str.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+    if (m) {
+      return { r: +m[1], g: +m[2], b: +m[3] };
+    }
+    return null;
+  }
+  function applyAdaptiveDarkFilter() {
+    var cs   = getComputedStyle(document.documentElement);
+    var bg   = cs.getPropertyValue('--bg-page');
+    var rgb  = parseColor(bg);
+    var filt;
+    if (!rgb) {
+      filt = 'brightness(0.22) saturate(0.5)';
+    } else {
+      // ITU-R BT.709 相対輝度（0〜1）
+      var lum = (0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b) / 255;
+      if (lum >= 0.80) {
+        // クリーム・白系: 強く暗転（情報のない明るさを落とす）
+        filt = 'brightness(0.22) saturate(0.5)';
+      } else if (lum >= 0.40) {
+        // 中明度の色付き背景（緑・青・ピンク等）: 色相を残しつつ暗転
+        filt = 'brightness(0.5) saturate(0.8)';
+      } else {
+        // 既に暗い背景: ほぼ変化させない
+        filt = 'brightness(0.85) saturate(0.9)';
+      }
+    }
+    document.documentElement.style.setProperty('--bg-page-dark-filter', filt);
+  }
+
   var MOON = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/></svg>';
   var SUN  = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707z"/></svg>';
 
@@ -64,6 +115,8 @@
   }
 
   onReady(function () {
+    applyAdaptiveDarkFilter();
+
     var themeBtn    = document.getElementById('yk-theme-btn');
     var fontsizeBtn = document.getElementById('yk-fontsize-btn');
 

@@ -66,21 +66,21 @@ body::before {
    ダークモード: CSS 変数上書き
    ============================================================ */
 [data-theme="dark"] {
-  --bg-card: #1e1e2e;
-  --bg-card-alt: #252535;
-  --bg-card-hover: #2c2c40;
+  --bg-card: #262638;
+  --bg-card-alt: #2d2d42;
+  --bg-card-hover: #34344c;
   --bg-badge: #495057;
   --bg-input: #2a2a3c;
   --bg-swap-banner: #3d2f00;
-  --color-text: #e2e2e2;
-  --color-text-muted: #9ca3af;
+  --color-text: #e8e8ec;
+  --color-text-muted: #a8acb8;
   --color-swap-banner: #ffd966;
-  --color-border: #3d3d5c;
+  --color-border: #4a4a68;
   --bg-index-btn: #2a2a3c;
   --bg-index-btn-hover: #3a3a4c;
   --color-index-btn: #cccccc;
-  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.45);
-  --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.65);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.55);
+  --shadow-card-hover: 0 4px 18px rgba(0, 0, 0, 0.7);
 }
 
 /* ダークモード: ページ背景を filter で暗転。body テキスト色も明色に統一。 */
@@ -89,8 +89,10 @@ body::before {
   background-image: none !important;
   color: var(--color-text);
 }
+/* --bg-page-dark-filter は theme-toggle.js が --bg-page の輝度に応じて設定。
+   未設定時のフォールバックはクリーム/白系を想定した強めの暗転。 */
 [data-theme="dark"] body::before {
-  filter: brightness(0.18) saturate(0.4);
+  filter: var(--bg-page-dark-filter, brightness(0.22) saturate(0.5));
 }
 
 /* --- ダークモード: 見出し・一般テキスト（Bootstrap デフォルトの黒を上書き） --- */
@@ -306,40 +308,40 @@ body::before {
    ダークモード: requestlist_swipe カード・統計バー
    ============================================================ */
 [data-theme="dark"] .request-card {
-  background: #1e1e2e;
-  border-left-color: #4a4a6a;
-  color: #e2e2e2;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  background: var(--bg-card);
+  border-left-color: #5c5c7e;
+  color: var(--color-text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 [data-theme="dark"] .request-card[data-nowplaying="再生中"],
 [data-theme="dark"] .request-card[data-nowplaying="2"] {
-  background: #1a2e1e;
+  background: #1f3a25;
 }
 [data-theme="dark"] .request-card[data-nowplaying="再生開始待ち"],
 [data-theme="dark"] .request-card[data-nowplaying="6"] {
-  background: #2e2a14;
+  background: #3a3318;
 }
 [data-theme="dark"] .request-card[data-nowplaying="再生済"],
 [data-theme="dark"] .request-card[data-nowplaying="再生済？"],
 [data-theme="dark"] .request-card[data-nowplaying="4"],
 [data-theme="dark"] .request-card[data-nowplaying="5"] {
-  background: #252535;
+  background: var(--bg-card-alt);
 }
-[data-theme="dark"] .card-title    { color: #e2e2e2; }
-[data-theme="dark"] .card-meta     { color: #b0b0c0; }
-[data-theme="dark"] .card-label    { color: #9090a0; }
-[data-theme="dark"] .card-num      { color: #9090a0; }
-[data-theme="dark"] .drag-handle   { color: #5050a0; }
+[data-theme="dark"] .card-title    { color: var(--color-text); }
+[data-theme="dark"] .card-meta     { color: #c0c4d0; }
+[data-theme="dark"] .card-label    { color: var(--color-text-muted); }
+[data-theme="dark"] .card-num      { color: var(--color-text-muted); }
+[data-theme="dark"] .drag-handle   { color: #6c6cb0; }
 [data-theme="dark"] #stats-bar {
-  background: #1e1e2e;
-  border-color: #3d3d5c;
-  color: #b0b0c0;
+  background: var(--bg-card);
+  border-color: var(--color-border);
+  color: #c0c4d0;
 }
-[data-theme="dark"] .stats-val { color: #e2e2e2; }
+[data-theme="dark"] .stats-val { color: var(--color-text); }
 [data-theme="dark"] .card-comment-area {
-  background: #252535;
-  border-color: #3d3d5c;
-  color: #9090a0;
+  background: var(--bg-card-alt);
+  border-color: var(--color-border);
+  color: var(--color-text-muted);
 }
 [data-theme="dark"] .card-tweet-link { color: #5bc0f8; }
 
