@@ -1,21 +1,60 @@
 <?php
 require_once 'commonfunc.php';
 
-// --- AJAX: オンライン接続確認 ---
+// --- AJAX: オンライン接続確認（診断情報付き） ---
 if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
     header('Content-Type: application/json; charset=utf-8');
-    $status = 'disabled';
-    $host   = '';
-    if (
-        array_key_exists('connectinternet', $config_ini) && $config_ini['connectinternet'] == 1 &&
-        array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhost'])
-    ) {
-        $host    = urldecode($config_ini['globalhost']);
-        $timeout = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 2);
-        $ret     = check_online_available($config_ini['globalhost'], $timeout);
-        $status  = ($ret === 'OK') ? 'ok' : 'ng';
+
+    $internet_enabled = array_key_exists('connectinternet', $config_ini) && $config_ini['connectinternet'] == 1;
+    $host_configured  = array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhost']);
+
+    if (!$internet_enabled) {
+        echo json_encode(['status' => 'disabled', 'host' => '', 'check_url' => '',
+            'detail' => 'インターネット接続設定が無効 (connectinternet=0)']);
+        exit;
     }
-    echo json_encode(['status' => $status, 'host' => $host]);
+    if (!$host_configured) {
+        echo json_encode(['status' => 'disabled', 'host' => '', 'check_url' => '',
+            'detail' => 'オンライン接続用ホスト (globalhost) が未設定']);
+        exit;
+    }
+
+    $host      = urldecode($config_ini['globalhost']);
+    $check_url = 'http://' . $host;
+    $timeout   = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 2);
+    if ($timeout < 1) $timeout = 2;
+
+    // curl で接続確認（エラー詳細を取得するため直接実行）
+    $ch = curl_init($check_url);
+    curl_setopt($ch, CURLOPT_HEADER, false);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+    curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+    curl_setopt($ch, CURLOPT_FAILONERROR, false); // HTTP エラーでも接続できれば OK とする
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 4);
+    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'KaraokeRequestor/1.0');
+    $curl_result  = curl_exec($ch);
+    $curl_errno   = curl_errno($ch);
+    $curl_error   = curl_strerror($curl_errno);
+    $http_code    = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($curl_result !== false || $http_code > 0) {
+        $status = 'ok';
+        $detail = "HTTP {$http_code}";
+    } else {
+        $status = 'ng';
+        $detail = "curl({$curl_errno}): {$curl_error}";
+    }
+
+    echo json_encode([
+        'status'    => $status,
+        'host'      => $host,
+        'check_url' => $check_url,
+        'detail'    => $detail,
+    ]);
     exit;
 }
 
@@ -154,13 +193,17 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 
       <!-- オンライン接続確認 -->
       <div class="mb-3">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
+        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
           <span class="text-nowrap">オンライン接続:</span>
           <span id="online-status" class="badge bg-secondary">確認中...</span>
-          <?php if (!empty($globalhost_display)): ?>
-            <small class="text-muted"><?= htmlspecialchars($globalhost_display) ?></small>
-          <?php endif; ?>
           <button type="button" class="btn btn-sm btn-outline-secondary ms-auto text-nowrap" id="check-online-btn">再確認</button>
+        </div>
+        <div id="online-detail" class="small text-muted" style="word-break:break-all;">
+          <?php if (!empty($globalhost_display)): ?>
+            確認先: http://<?= htmlspecialchars($globalhost_display) ?>
+          <?php else: ?>
+            &nbsp;
+          <?php endif; ?>
         </div>
       </div>
 
@@ -276,25 +319,32 @@ function stop_pfwdcmd() {
 }
 
 function checkOnline() {
-    var el = document.getElementById('online-status');
+    var el     = document.getElementById('online-status');
+    var detailEl = document.getElementById('online-detail');
     if (!el) return;
     el.textContent = '確認中...';
     el.className = 'badge bg-secondary';
+    if (detailEl) detailEl.textContent = '確認中...';
     fetch('autoplayctrl.php?action=check_online')
         .then(function(r) { return r.json(); })
         .then(function(data) {
+            var urlText = data.check_url ? '確認先: ' + data.check_url : '';
+            var detailText = data.detail || '';
             if (data.status === 'ok') {
                 el.textContent = 'OK';
                 el.className = 'badge bg-success';
                 onlineConnected = true;
+                if (detailEl) detailEl.textContent = urlText + (detailText ? '  [' + detailText + ']' : '');
             } else if (data.status === 'ng') {
                 el.textContent = 'NG';
                 el.className = 'badge bg-danger';
                 onlineConnected = false;
+                if (detailEl) detailEl.textContent = urlText + (detailText ? '  [' + detailText + ']' : '');
             } else {
                 el.textContent = '無効';
                 el.className = 'badge bg-secondary';
                 onlineConnected = false;
+                if (detailEl) detailEl.textContent = detailText || urlText;
             }
             applyPfwdOnlineRestriction(onlineConnected, pfwdRunning);
         })
@@ -302,6 +352,7 @@ function checkOnline() {
             el.textContent = 'エラー';
             el.className = 'badge bg-danger';
             onlineConnected = false;
+            if (detailEl) detailEl.textContent = 'AJAX通信エラー';
         });
 }
 
