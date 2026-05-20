@@ -22,7 +22,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
     $host      = urldecode($config_ini['globalhost']);
     $check_url = 'http://' . $host;
     $timeout   = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
-    if ($timeout < 1) $timeout = 5;
+    if ($timeout < 5) $timeout = 5; // SSH 逆トンネル往復を考慮し最低 5 秒確保
 
     // curl で接続確認（エラー詳細を取得するため直接実行）
     // FOLLOWLOCATION=false: リダイレクト応答(3xx)が返った時点で到達確認済みとする。
