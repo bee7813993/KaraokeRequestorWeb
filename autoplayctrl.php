@@ -182,6 +182,18 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
   <div class="card mb-3">
     <div class="card-header fw-bold">pfwd (SSH転送)</div>
     <div class="card-body">
+
+      <!-- オンライン接続中の危険警告（pfwd起動中） -->
+      <div id="pfwd-danger-alert" class="alert alert-danger py-2 d-none" role="alert">
+        <strong>⚠ 警告:</strong> オンライン接続中（WireGuard）にもかかわらずpfwdが起動しています。<br>
+        pfwdはオフライン時のみ使用してください。直ちに停止してください。
+      </div>
+
+      <!-- オンライン接続中の注意（pfwd停止中） -->
+      <div id="pfwd-online-alert" class="alert alert-warning py-2 d-none" role="alert">
+        オンライン接続中（WireGuard）です。pfwdは起動しないでください。
+      </div>
+
       <p class="mb-3">
         ステータス：
         <span id="pfwdstatus" class="badge fs-6 <?= $pfwd_running ? 'bg-success' : 'bg-secondary' ?>">
@@ -189,7 +201,7 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
         </span>
       </p>
       <div class="d-flex gap-2">
-        <button type="button" class="btn btn-success" onclick="start_pfwdcmd()">起動</button>
+        <button type="button" id="pfwd-start-btn" class="btn btn-success" onclick="start_pfwdcmd()">起動</button>
         <button type="button" class="btn btn-danger" onclick="stop_pfwdcmd()">停止</button>
       </div>
     </div>
@@ -208,16 +220,45 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 <?php print_bg_style_block(true); ?>
 
 <script>
+// PHP側のpfwd起動状態をJSに渡す
+var pfwdRunning = <?= $pfwdavailable && $pfwd_running ? 'true' : 'false' ?>;
+// オンライン接続状態（checkOnline()完了後に更新）
+var onlineConnected = false;
+
+function applyPfwdOnlineRestriction(isOnline, pfwdIsRunning) {
+    var startBtn    = document.getElementById('pfwd-start-btn');
+    var dangerAlert = document.getElementById('pfwd-danger-alert');
+    var onlineAlert = document.getElementById('pfwd-online-alert');
+    if (!startBtn) return;
+
+    if (isOnline) {
+        startBtn.disabled = true;
+        if (pfwdIsRunning) {
+            if (dangerAlert) dangerAlert.classList.remove('d-none');
+            if (onlineAlert) onlineAlert.classList.add('d-none');
+        } else {
+            if (dangerAlert) dangerAlert.classList.add('d-none');
+            if (onlineAlert) onlineAlert.classList.remove('d-none');
+        }
+    } else {
+        startBtn.disabled = false;
+        if (dangerAlert) dangerAlert.classList.add('d-none');
+        if (onlineAlert) onlineAlert.classList.add('d-none');
+    }
+}
+
 function updatePfwdStatus(data) {
     var el = document.getElementById('pfwdstatus');
     if (!el) return;
-    if (data.pfwdstat) {
+    pfwdRunning = !!data.pfwdstat;
+    if (pfwdRunning) {
         el.textContent = '起動中';
         el.className = 'badge fs-6 bg-success';
     } else {
         el.textContent = '停止中';
         el.className = 'badge fs-6 bg-secondary';
     }
+    applyPfwdOnlineRestriction(onlineConnected, pfwdRunning);
 }
 
 function start_pfwdcmd() {
@@ -245,17 +286,22 @@ function checkOnline() {
             if (data.status === 'ok') {
                 el.textContent = 'OK';
                 el.className = 'badge bg-success';
+                onlineConnected = true;
             } else if (data.status === 'ng') {
                 el.textContent = 'NG';
                 el.className = 'badge bg-danger';
+                onlineConnected = false;
             } else {
                 el.textContent = '無効';
                 el.className = 'badge bg-secondary';
+                onlineConnected = false;
             }
+            applyPfwdOnlineRestriction(onlineConnected, pfwdRunning);
         })
         .catch(function() {
             el.textContent = 'エラー';
             el.className = 'badge bg-danger';
+            onlineConnected = false;
         });
 }
 
