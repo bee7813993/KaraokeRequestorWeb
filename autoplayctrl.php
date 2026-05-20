@@ -1,10 +1,47 @@
 <?php
 require_once 'commonfunc.php';
 
-// --- AJAX: オンライン接続確認（診断情報付き） ---
+// --- pfwd 情報を先行初期化（AJAX ハンドラでも使用するため） ---
+require_once 'pfwdctl.php';
+$pfwdavailable = false;
+$pfwdinfo = new pfwd();
+if (array_key_exists('pfwdplace', $config_ini) && !empty($config_ini['pfwdplace'])) {
+    $pfwdinfo->pfwdpath = urldecode($config_ini['pfwdplace']);
+    ob_start();
+    $pfwdavailable = $pfwdinfo->readpfwdcfg();
+    ob_end_clean();
+}
+
+// --- AJAX: オンライン接続確認 ---
 if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
     header('Content-Type: application/json; charset=utf-8');
 
+    $timeout = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
+    if ($timeout < 5) $timeout = 5;
+
+    // pfwd 起動中: HTTP ループバックを避け SSH サーバーへの TCP 接続で確認
+    // （pfwd の逆トンネルを介して HTTP チェックすると同一 Apache に折り返しデッドロックになる）
+    $pfwd_running_req = isset($_GET['pfwd_running']) && $_GET['pfwd_running'] === '1';
+    if ($pfwd_running_req && $pfwdavailable) {
+        $ssh_host  = $pfwdinfo->get_pfwdhost();
+        $ssh_port  = (int)$pfwdinfo->get_pfwdport();
+        $check_url = "tcp://{$ssh_host}:{$ssh_port}";
+        if ($ssh_host && $ssh_port) {
+            $fp = @fsockopen($ssh_host, $ssh_port, $sock_errno, $sock_errstr, $timeout);
+            if ($fp) {
+                fclose($fp);
+                $status = 'ok';
+                $detail = "SSH({$ssh_host}:{$ssh_port}) 到達OK (timeout:{$timeout}s)";
+            } else {
+                $status = 'ng';
+                $detail = "({$sock_errno}): {$sock_errstr} (timeout:{$timeout}s)";
+            }
+            echo json_encode(['status' => $status, 'host' => $ssh_host, 'check_url' => $check_url, 'detail' => $detail]);
+            exit;
+        }
+    }
+
+    // 通常の HTTP チェック（pfwd 停止中）
     $internet_enabled = array_key_exists('connectinternet', $config_ini) && $config_ini['connectinternet'] == 1;
     $host_configured  = array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhost']);
 
@@ -21,12 +58,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
 
     $host      = urldecode($config_ini['globalhost']);
     $check_url = 'http://' . $host;
-    $timeout   = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
-    if ($timeout < 5) $timeout = 5; // SSH 逆トンネル往復を考慮し最低 5 秒確保
 
-    // curl で接続確認（エラー詳細を取得するため直接実行）
-    // FOLLOWLOCATION=false: リダイレクト応答(3xx)が返った時点で到達確認済みとする。
-    //   リダイレクトを辿ると easyauth 等でループしタイムアウトになる場合があるため。
+    // FOLLOWLOCATION=false: 3xx レスポンスが返った時点で到達確認済みとする
     $ch = curl_init($check_url);
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -36,13 +69,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     curl_setopt($ch, CURLOPT_USERAGENT, 'KaraokeRequestor/1.0');
-    $curl_result  = curl_exec($ch);
-    $curl_errno   = curl_errno($ch);
-    $curl_error   = curl_strerror($curl_errno);
-    $http_code    = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_exec($ch);
+    $curl_errno = curl_errno($ch);
+    $curl_error = curl_strerror($curl_errno);
+    $http_code  = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    // 何らかの HTTP レスポンスが返れば（3xx/4xx/5xx 含む）到達成功と判定
     if ($http_code > 0) {
         $status = 'ok';
         $detail = "HTTP {$http_code} (timeout:{$timeout}s)";
@@ -51,12 +83,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
         $detail = "curl({$curl_errno}): {$curl_error} (timeout:{$timeout}s)";
     }
 
-    echo json_encode([
-        'status'    => $status,
-        'host'      => $host,
-        'check_url' => $check_url,
-        'detail'    => $detail,
-    ]);
+    echo json_encode(['status' => $status, 'host' => $host, 'check_url' => $check_url, 'detail' => $detail]);
     exit;
 }
 
@@ -117,21 +144,10 @@ if ($l_karaokeautorunaction === 'stop') {
     stopautoplaywithcheck();
 }
 
-// --- pfwd 情報取得 ---
-require_once 'pfwdctl.php';
-$pfwdavailable = false;
-$pfwdinfo = new pfwd();
-if (array_key_exists('pfwdplace', $config_ini) && !empty($config_ini['pfwdplace'])) {
-    $pfwdinfo->pfwdpath = urldecode($config_ini['pfwdplace']);
-    ob_start();
-    $pfwdavailable = $pfwdinfo->readpfwdcfg();
-    ob_end_clean();
-}
-$pfwd_running = $pfwdavailable ? $pfwdinfo->statpfwdcmd() : false;
-
 // --- ステータス取得 ---
-$ap         = checkautoplay();
-$wg_running = check_wireguard_running();
+$pfwd_running = $pfwdavailable ? $pfwdinfo->statpfwdcmd() : false;
+$ap           = checkautoplay();
+$wg_running   = check_wireguard_running();
 
 $globalhost_display = '';
 if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhost'])) {
@@ -200,13 +216,7 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
           <span id="online-status" class="badge bg-secondary">確認中...</span>
           <button type="button" class="btn btn-sm btn-outline-secondary ms-auto text-nowrap" id="check-online-btn">再確認</button>
         </div>
-        <div id="online-detail" class="small text-muted" style="word-break:break-all;">
-          <?php if (!empty($globalhost_display)): ?>
-            確認先: http://<?= htmlspecialchars($globalhost_display) ?>
-          <?php else: ?>
-            &nbsp;
-          <?php endif; ?>
-        </div>
+        <div id="online-detail" class="small text-muted" style="word-break:break-all;">&nbsp;</div>
       </div>
 
       <!-- WireGuard トンネル確認 -->
@@ -228,15 +238,15 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
     <div class="card-header fw-bold">pfwd (SSH転送)</div>
     <div class="card-body">
 
-      <!-- オンライン接続中の危険警告（pfwd起動中） -->
-      <div id="pfwd-danger-alert" class="alert alert-danger py-2 d-none" role="alert">
-        <strong>⚠ 警告:</strong> オンライン接続中（WireGuard）にもかかわらずpfwdが起動しています。<br>
-        pfwdはオフライン時のみ使用してください。直ちに停止してください。
+      <!-- WireGuard 実行中かつ pfwd も起動中: 危険警告 -->
+      <div id="pfwd-danger-alert" class="alert alert-danger py-2 <?= ($wg_running && $pfwd_running) ? '' : 'd-none' ?>" role="alert">
+        <strong>⚠ 警告:</strong> WireGuard 接続中にもかかわらず pfwd が起動しています。<br>
+        pfwd は WireGuard オフ時のみ使用してください。直ちに停止してください。
       </div>
 
-      <!-- オンライン接続中の注意（pfwd停止中） -->
-      <div id="pfwd-online-alert" class="alert alert-warning py-2 d-none" role="alert">
-        オンライン接続中（WireGuard）です。pfwdは起動しないでください。
+      <!-- WireGuard 実行中かつ pfwd 停止中: 注意 -->
+      <div id="pfwd-online-alert" class="alert alert-warning py-2 <?= ($wg_running && !$pfwd_running) ? '' : 'd-none' ?>" role="alert">
+        WireGuard 接続中です。pfwd は起動しないでください。
       </div>
 
       <p class="mb-3">
@@ -246,7 +256,8 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
         </span>
       </p>
       <div class="d-flex gap-2">
-        <button type="button" id="pfwd-start-btn" class="btn btn-success" onclick="start_pfwdcmd()">起動</button>
+        <button type="button" id="pfwd-start-btn" class="btn btn-success"
+          <?= $wg_running ? 'disabled' : '' ?> onclick="start_pfwdcmd()">起動</button>
         <button type="button" class="btn btn-danger" onclick="stop_pfwdcmd()">停止</button>
       </div>
     </div>
@@ -265,18 +276,15 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 <?php print_bg_style_block(true); ?>
 
 <script>
-// PHP側のpfwd起動状態をJSに渡す
 var pfwdRunning = <?= $pfwdavailable && $pfwd_running ? 'true' : 'false' ?>;
-// オンライン接続状態（checkOnline()完了後に更新）
-var onlineConnected = false;
+var wgRunning   = <?= $wg_running ? 'true' : 'false' ?>;
 
-function applyPfwdOnlineRestriction(isOnline, pfwdIsRunning) {
+function applyPfwdRestriction(pfwdIsRunning) {
     var startBtn    = document.getElementById('pfwd-start-btn');
     var dangerAlert = document.getElementById('pfwd-danger-alert');
     var onlineAlert = document.getElementById('pfwd-online-alert');
     if (!startBtn) return;
-
-    if (isOnline) {
+    if (wgRunning) {
         startBtn.disabled = true;
         if (pfwdIsRunning) {
             if (dangerAlert) dangerAlert.classList.remove('d-none');
@@ -303,7 +311,7 @@ function updatePfwdStatus(data) {
         el.textContent = '停止中';
         el.className = 'badge fs-6 bg-secondary';
     }
-    applyPfwdOnlineRestriction(onlineConnected, pfwdRunning);
+    applyPfwdRestriction(pfwdRunning);
 }
 
 function start_pfwdcmd() {
@@ -321,39 +329,34 @@ function stop_pfwdcmd() {
 }
 
 function checkOnline() {
-    var el     = document.getElementById('online-status');
+    var el       = document.getElementById('online-status');
     var detailEl = document.getElementById('online-detail');
     if (!el) return;
     el.textContent = '確認中...';
     el.className = 'badge bg-secondary';
     if (detailEl) detailEl.textContent = '確認中...';
-    fetch('autoplayctrl.php?action=check_online')
+    // pfwd 起動中を渡すことで PHP 側が SSH TCP チェックに切り替える
+    fetch('autoplayctrl.php?action=check_online&pfwd_running=' + (pfwdRunning ? '1' : '0'))
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            var urlText = data.check_url ? '確認先: ' + data.check_url : '';
+            var urlText    = data.check_url ? '確認先: ' + data.check_url : '';
             var detailText = data.detail || '';
+            var infoText   = urlText + (detailText ? '  [' + detailText + ']' : '');
             if (data.status === 'ok') {
                 el.textContent = 'OK';
                 el.className = 'badge bg-success';
-                onlineConnected = true;
-                if (detailEl) detailEl.textContent = urlText + (detailText ? '  [' + detailText + ']' : '');
             } else if (data.status === 'ng') {
                 el.textContent = 'NG';
                 el.className = 'badge bg-danger';
-                onlineConnected = false;
-                if (detailEl) detailEl.textContent = urlText + (detailText ? '  [' + detailText + ']' : '');
             } else {
                 el.textContent = '無効';
                 el.className = 'badge bg-secondary';
-                onlineConnected = false;
-                if (detailEl) detailEl.textContent = detailText || urlText;
             }
-            applyPfwdOnlineRestriction(onlineConnected, pfwdRunning);
+            if (detailEl) detailEl.textContent = infoText || detailText;
         })
         .catch(function() {
             el.textContent = 'エラー';
             el.className = 'badge bg-danger';
-            onlineConnected = false;
             if (detailEl) detailEl.textContent = 'AJAX通信エラー';
         });
 }
