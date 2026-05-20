@@ -1,0 +1,17 @@
+{
+  "language": "japanese",
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(cat *)",
+      "Bash(jq *)",
+      "Read",
+      "Edit"
+    ]
+  }
+}
