@@ -21,3 +21,4 @@ list/
 
 # デバッグ用スクリプト（本番環境に含めない）
 mypage_google_debug.php
+.claude/settings.local.json
