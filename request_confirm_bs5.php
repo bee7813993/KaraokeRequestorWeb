@@ -182,6 +182,7 @@ function extention_musiccheck($fn){
 <link rel="stylesheet" href="css/themes/_variables.css">
 <link rel="stylesheet" href="css/themes/theme-toggle.css">
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="js/theme-toggle.js"></script>
 <script src="js/jquery.js"></script>
 <title>リクエスト確認画面</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
