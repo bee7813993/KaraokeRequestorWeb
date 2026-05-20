@@ -12,8 +12,101 @@ if (array_key_exists('pfwdplace', $config_ini) && !empty($config_ini['pfwdplace'
     ob_end_clean();
 }
 
-// --- AJAX: オンライン接続確認 ---
-if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
+// --- AJAX: 接続診断（IPv4/IPv6/TCP を個別に試行して原因を特定する） ---
+if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
+    header('Content-Type: application/json; charset=utf-8');
+
+    $host_raw = array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhost'])
+        ? urldecode($config_ini['globalhost']) : '';
+    // host:port を分割
+    $host_parts = explode(':', $host_raw, 2);
+    $h_host = $host_parts[0];
+    $h_port = isset($host_parts[1]) ? (int)$host_parts[1] : 80;
+    $http_url = 'http://' . $host_raw;
+    $timeout  = 8;
+
+    $results = [];
+
+    // 1. DNS: IPv4 アドレス解決
+    $ipv4 = @gethostbyname($h_host);
+    $results['dns_v4'] = ($ipv4 !== $h_host) ? $ipv4 : '解決失敗';
+
+    // 2. DNS: IPv6 アドレス解決
+    $aaaa = @dns_get_record($h_host, DNS_AAAA);
+    $results['dns_v6'] = (!empty($aaaa)) ? $aaaa[0]['ipv6'] : '解決失敗(またはAAAAなし)';
+
+    // 3. TCP fsockopen (IPv4 解決済みアドレス直接)
+    if ($ipv4 !== $h_host) {
+        $fp = @fsockopen($ipv4, $h_port, $e, $es, $timeout);
+        if ($fp) { fclose($fp); $results['tcp_v4_direct'] = "OK ({$ipv4}:{$h_port})"; }
+        else { $results['tcp_v4_direct'] = "NG ({$e}): {$es}"; }
+    } else {
+        $results['tcp_v4_direct'] = 'スキップ(DNS解決失敗)';
+    }
+
+    // 4. TCP fsockopen (ホスト名・OS任せ)
+    $fp = @fsockopen($h_host, $h_port, $e, $es, $timeout);
+    if ($fp) { fclose($fp); $results['tcp_hostname'] = "OK"; }
+    else { $results['tcp_hostname'] = "NG ({$e}): {$es}"; }
+
+    // 5. curl: IPRESOLVE 指定なし（OS が IPv4/IPv6 を自動選択）
+    $ch = curl_init($http_url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true, CURLOPT_HEADER => false,
+        CURLOPT_CONNECTTIMEOUT => $timeout, CURLOPT_TIMEOUT => $timeout,
+        CURLOPT_FAILONERROR => false, CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_USERAGENT => 'KaraokeRequestor/1.0',
+    ]);
+    curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $ip   = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
+    $en   = curl_errno($ch); $es2  = curl_strerror($en);
+    curl_close($ch);
+    $results['curl_auto'] = $code > 0
+        ? "OK HTTP {$code} (接続先IP: {$ip})"
+        : "NG curl({$en}): {$es2}";
+
+    // 6. curl: IPv4 強制
+    $ch = curl_init($http_url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true, CURLOPT_HEADER => false,
+        CURLOPT_CONNECTTIMEOUT => $timeout, CURLOPT_TIMEOUT => $timeout,
+        CURLOPT_FAILONERROR => false, CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+        CURLOPT_USERAGENT => 'KaraokeRequestor/1.0',
+    ]);
+    curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $ip   = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
+    $en   = curl_errno($ch); $es2  = curl_strerror($en);
+    curl_close($ch);
+    $results['curl_v4'] = $code > 0
+        ? "OK HTTP {$code} (接続先IP: {$ip})"
+        : "NG curl({$en}): {$es2}";
+
+    // 7. curl: IPv6 強制
+    $ch = curl_init($http_url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true, CURLOPT_HEADER => false,
+        CURLOPT_CONNECTTIMEOUT => $timeout, CURLOPT_TIMEOUT => $timeout,
+        CURLOPT_FAILONERROR => false, CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V6,
+        CURLOPT_USERAGENT => 'KaraokeRequestor/1.0',
+    ]);
+    curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $ip   = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
+    $en   = curl_errno($ch); $es2  = curl_strerror($en);
+    curl_close($ch);
+    $results['curl_v6'] = $code > 0
+        ? "OK HTTP {$code} (接続先IP: {$ip})"
+        : "NG curl({$en}): {$es2}";
+
+    echo json_encode(['host' => $host_raw, 'timeout' => $timeout, 'results' => $results]);
+    exit;
+}
+
+
     header('Content-Type: application/json; charset=utf-8');
 
     $timeout = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
@@ -217,6 +310,12 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
           <button type="button" class="btn btn-sm btn-outline-secondary ms-auto text-nowrap" id="check-online-btn">再確認</button>
         </div>
         <div id="online-detail" class="small text-muted" style="word-break:break-all;">&nbsp;</div>
+        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="check-debug-btn">詳細診断</button>
+        <div id="debug-result" class="mt-2 d-none">
+          <table class="table table-sm table-bordered small mb-0">
+            <tbody id="debug-tbody"></tbody>
+          </table>
+        </div>
       </div>
 
       <!-- WireGuard トンネル確認 -->
@@ -362,6 +461,49 @@ function checkOnline() {
 }
 
 document.getElementById('check-online-btn').addEventListener('click', checkOnline);
+
+document.getElementById('check-debug-btn').addEventListener('click', function() {
+    var btn    = this;
+    var box    = document.getElementById('debug-result');
+    var tbody  = document.getElementById('debug-tbody');
+    btn.disabled = true;
+    btn.textContent = '診断中...';
+    box.classList.add('d-none');
+    tbody.innerHTML = '';
+    fetch('autoplayctrl.php?action=check_online_debug')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var labels = {
+                dns_v4:       'DNS (IPv4解決)',
+                dns_v6:       'DNS (IPv6解決)',
+                tcp_v4_direct:'TCP fsockopen IPv4直接',
+                tcp_hostname: 'TCP fsockopen ホスト名',
+                curl_auto:    'curl (IP自動選択)',
+                curl_v4:      'curl (IPv4強制)',
+                curl_v6:      'curl (IPv6強制)',
+            };
+            var row = '<tr><td colspan="2" class="fw-bold">確認先: ' +
+                data.host + ' (timeout:' + data.timeout + 's)</td></tr>';
+            tbody.innerHTML = row;
+            Object.keys(labels).forEach(function(key) {
+                var val = data.results[key] || '—';
+                var ok  = val.startsWith('OK');
+                tbody.innerHTML += '<tr><td>' + labels[key] + '</td>' +
+                    '<td class="' + (ok ? 'text-success' : 'text-danger') + '">' +
+                    val + '</td></tr>';
+            });
+            box.classList.remove('d-none');
+        })
+        .catch(function() {
+            tbody.innerHTML = '<tr><td colspan="2" class="text-danger">診断通信エラー</td></tr>';
+            box.classList.remove('d-none');
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.textContent = '詳細診断';
+        });
+});
+
 checkOnline();
 </script>
 
