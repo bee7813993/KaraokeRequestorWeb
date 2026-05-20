@@ -9,6 +9,7 @@
       "Bash(head *)",
       "Bash(tail *)",
       "Bash(cat *)",
+      "Bash(jq *)",
       "Read",
       "Edit"
     ]
