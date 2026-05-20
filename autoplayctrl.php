@@ -21,18 +21,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
 
     $host      = urldecode($config_ini['globalhost']);
     $check_url = 'http://' . $host;
-    $timeout   = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 2);
-    if ($timeout < 1) $timeout = 2;
+    $timeout   = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
+    if ($timeout < 1) $timeout = 5;
 
     // curl で接続確認（エラー詳細を取得するため直接実行）
+    // FOLLOWLOCATION=false: リダイレクト応答(3xx)が返った時点で到達確認済みとする。
+    //   リダイレクトを辿ると easyauth 等でループしタイムアウトになる場合があるため。
     $ch = curl_init($check_url);
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-    curl_setopt($ch, CURLOPT_FAILONERROR, false); // HTTP エラーでも接続できれば OK とする
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_MAXREDIRS, 4);
+    curl_setopt($ch, CURLOPT_FAILONERROR, false);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     curl_setopt($ch, CURLOPT_USERAGENT, 'KaraokeRequestor/1.0');
     $curl_result  = curl_exec($ch);
@@ -41,12 +42,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
     $http_code    = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    if ($curl_result !== false || $http_code > 0) {
+    // 何らかの HTTP レスポンスが返れば（3xx/4xx/5xx 含む）到達成功と判定
+    if ($http_code > 0) {
         $status = 'ok';
-        $detail = "HTTP {$http_code}";
+        $detail = "HTTP {$http_code} (timeout:{$timeout}s)";
     } else {
         $status = 'ng';
-        $detail = "curl({$curl_errno}): {$curl_error}";
+        $detail = "curl({$curl_errno}): {$curl_error} (timeout:{$timeout}s)";
     }
 
     echo json_encode([
