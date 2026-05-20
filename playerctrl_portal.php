@@ -59,15 +59,16 @@ if( strcmp('foobar', $playerkind) === 0 ) {
     include('mpcctrl.php');
 }
 
-if(array_key_exists("autoplay_exec",$config_ini)) {
-    if(!empty($config_ini["autoplay_exec"])){
-        if(array_key_exists("autoplay_show",$config_ini)) {
-            if($config_ini["autoplay_show"]==1){
-            print '<div align="center">';
-            print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
-            print '</div>';
-            }
-        }
+if (array_key_exists("autoplay_exec", $config_ini) && !empty($config_ini["autoplay_exec"])) {
+    $is_localhost = (isset($_SERVER['REMOTE_ADDR']) &&
+        ($_SERVER['REMOTE_ADDR'] === '127.0.0.1' || $_SERVER['REMOTE_ADDR'] === '::1'));
+    $is_admin = ($user === 'admin');
+    $autoplay_show_enabled = (array_key_exists("autoplay_show", $config_ini) && $config_ini["autoplay_show"] == 1);
+
+    if ($is_admin || $is_localhost || $autoplay_show_enabled) {
+        print '<div align="center">';
+        print '<button type="button" class="btn btn-default btn-lg" onclick="location.href=\'autoplayctrl.php\'" >自動実行開始、停止ページへ</button>';
+        print '</div>';
     }
 }
 

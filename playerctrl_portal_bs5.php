@@ -39,13 +39,17 @@ if (strcmp('foobar', $playerkind) === 0) {
     include('mpcctrl_bs5.php');
 }
 
-if (
-    array_key_exists('autoplay_exec', $config_ini) && !empty($config_ini['autoplay_exec']) &&
-    array_key_exists('autoplay_show', $config_ini) && $config_ini['autoplay_show'] == 1
-) {
-    echo '<div class="d-grid mt-2">';
-    echo '<a href="autoplayctrl.php" class="btn btn-outline-secondary btn-lg">自動実行開始・停止ページへ</a>';
-    echo '</div>';
+if (array_key_exists('autoplay_exec', $config_ini) && !empty($config_ini['autoplay_exec'])) {
+    $is_localhost = (isset($_SERVER['REMOTE_ADDR']) &&
+        ($_SERVER['REMOTE_ADDR'] === '127.0.0.1' || $_SERVER['REMOTE_ADDR'] === '::1'));
+    $is_admin = ($user === 'admin');
+    $autoplay_show_enabled = (array_key_exists('autoplay_show', $config_ini) && $config_ini['autoplay_show'] == 1);
+
+    if ($is_admin || $is_localhost || $autoplay_show_enabled) {
+        echo '<div class="d-grid mt-2">';
+        echo '<a href="autoplayctrl.php" class="btn btn-outline-secondary btn-lg">自動実行開始・停止ページへ</a>';
+        echo '</div>';
+    }
 }
 ?>
 

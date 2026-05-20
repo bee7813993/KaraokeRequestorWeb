@@ -377,7 +377,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  opacity: 0.65;
+  opacity: 0.85;
   font-size: 0.78rem;
   touch-action: manipulation;
 }
