@@ -106,35 +106,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
     exit;
 }
 
-
+// --- AJAX: オンライン接続確認 ---
+if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
     header('Content-Type: application/json; charset=utf-8');
 
-    $timeout = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
-    if ($timeout < 5) $timeout = 5;
-
-    // pfwd 起動中: HTTP ループバックを避け SSH サーバーへの TCP 接続で確認
-    // （pfwd の逆トンネルを介して HTTP チェックすると同一 Apache に折り返しデッドロックになる）
-    $pfwd_running_req = isset($_GET['pfwd_running']) && $_GET['pfwd_running'] === '1';
-    if ($pfwd_running_req && $pfwdavailable) {
-        $ssh_host  = $pfwdinfo->get_pfwdhost();
-        $ssh_port  = (int)$pfwdinfo->get_pfwdport();
-        $check_url = "tcp://{$ssh_host}:{$ssh_port}";
-        if ($ssh_host && $ssh_port) {
-            $fp = @fsockopen($ssh_host, $ssh_port, $sock_errno, $sock_errstr, $timeout);
-            if ($fp) {
-                fclose($fp);
-                $status = 'ok';
-                $detail = "SSH({$ssh_host}:{$ssh_port}) 到達OK (timeout:{$timeout}s)";
-            } else {
-                $status = 'ng';
-                $detail = "({$sock_errno}): {$sock_errstr} (timeout:{$timeout}s)";
-            }
-            echo json_encode(['status' => $status, 'host' => $ssh_host, 'check_url' => $check_url, 'detail' => $detail]);
-            exit;
-        }
-    }
-
-    // 通常の HTTP チェック（pfwd 停止中）
     $internet_enabled = array_key_exists('connectinternet', $config_ini) && $config_ini['connectinternet'] == 1;
     $host_configured  = array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhost']);
 
@@ -151,8 +126,12 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
 
     $host      = urldecode($config_ini['globalhost']);
     $check_url = 'http://' . $host;
+    $timeout   = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
+    if ($timeout < 5) $timeout = 5;
 
-    // FOLLOWLOCATION=false: 3xx レスポンスが返った時点で到達確認済みとする
+    // ykr.moe は IPv6 のみのため IPRESOLVE_V4 を強制しない。
+    // OS に IPv4/IPv6 の選択を任せることで IPv6 only ホストにも対応する。
+    // FOLLOWLOCATION=false: 3xx が返った時点で到達確認済みとする（リダイレクト先まで追わない）
     $ch = curl_init($check_url);
     curl_setopt($ch, CURLOPT_HEADER, false);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -160,17 +139,17 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
     curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
     curl_setopt($ch, CURLOPT_FAILONERROR, false);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
     curl_setopt($ch, CURLOPT_USERAGENT, 'KaraokeRequestor/1.0');
     curl_exec($ch);
-    $curl_errno = curl_errno($ch);
-    $curl_error = curl_strerror($curl_errno);
-    $http_code  = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curl_errno  = curl_errno($ch);
+    $curl_error  = curl_strerror($curl_errno);
+    $http_code   = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $primary_ip  = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
     curl_close($ch);
 
     if ($http_code > 0) {
         $status = 'ok';
-        $detail = "HTTP {$http_code} (timeout:{$timeout}s)";
+        $detail = "HTTP {$http_code} [{$primary_ip}] (timeout:{$timeout}s)";
     } else {
         $status = 'ng';
         $detail = "curl({$curl_errno}): {$curl_error} (timeout:{$timeout}s)";
@@ -434,8 +413,7 @@ function checkOnline() {
     el.textContent = '確認中...';
     el.className = 'badge bg-secondary';
     if (detailEl) detailEl.textContent = '確認中...';
-    // pfwd 起動中を渡すことで PHP 側が SSH TCP チェックに切り替える
-    fetch('autoplayctrl.php?action=check_online&pfwd_running=' + (pfwdRunning ? '1' : '0'))
+    fetch('autoplayctrl.php?action=check_online')
         .then(function(r) { return r.json(); })
         .then(function(data) {
             var urlText    = data.check_url ? '確認先: ' + data.check_url : '';
