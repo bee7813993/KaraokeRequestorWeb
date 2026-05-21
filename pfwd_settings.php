@@ -316,7 +316,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
   <?php endif; ?>
 
   <!-- 設定フォーム開始 -->
-  <form method="post" id="pfwd-main-form">
+  <form method="post" id="pfwd-main-form" name="allconfig">
     <input type="hidden" name="save_config" value="1">
 
     <!-- オンライン接続設定 -->
