@@ -409,6 +409,13 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
       </div>
     </div>
 
+  <!-- 設定反映ボタン -->
+  <div class="d-grid mb-3">
+    <button type="submit" class="btn btn-primary btn-lg">設定反映</button>
+  </div>
+
+  </form><!-- /設定フォーム -->
+
   <!-- DDNS 設定 -->
   <div class="card mb-3">
     <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">DDNS 登録（オンライン用）</div>
@@ -563,13 +570,6 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
       </div>
     </div>
   </div>
-
-  <!-- 設定反映ボタン -->
-  <div class="d-grid mb-3">
-    <button type="submit" class="btn btn-primary btn-lg">設定反映</button>
-  </div>
-
-  </form><!-- /設定フォーム -->
 
 </div><!-- /container -->
 
