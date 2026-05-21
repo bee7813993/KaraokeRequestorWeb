@@ -367,14 +367,14 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
         <?php if ($pfwdavailable): ?>
         <div class="mb-3">
           <label class="form-label fw-semibold">接続ホスト名:ポート</label>
-          <form id="pfwdconfig-host" method="post" action="pfwd_exec.php" class="d-flex gap-2 align-items-end">
+          <div class="d-flex gap-2 align-items-end">
             <div style="flex:1;">
-              <input type="text" name="pfwdserverhost" class="form-control font-monospace"
+              <input type="text" id="pfwdserverhost-input" class="form-control font-monospace"
                 value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdhost() . ':' . $pfwdinfo->get_pfwdport(), ENT_QUOTES, 'UTF-8') : '' ?>"
                 placeholder="例: ykr.moe:22" />
             </div>
-            <button type="submit" class="btn btn-secondary btn-sm">保存</button>
-          </form>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="savePfwdServerHost(this)">保存</button>
+          </div>
           <div class="form-text">pfwd リレーサーバーのホスト名とSSHポート。</div>
         </div>
         <?php endif; ?>
@@ -715,17 +715,27 @@ function updateGlobalhost() {
     }
 }
 
-// pfwdconfig-host フォームの AJAX 送信（ページ遷移なし）
-var pfwdconfigHostForm = document.getElementById('pfwdconfig-host');
-if (pfwdconfigHostForm) {
-    pfwdconfigHostForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        fetch(this.action, { method: 'POST', body: new FormData(this) })
-            .then(function() {
-                var btn = pfwdconfigHostForm.querySelector('[type=submit]');
-                if (btn) { var orig = btn.textContent; btn.textContent = '保存しました'; setTimeout(function(){ btn.textContent = orig; }, 2000); }
-            });
-    });
+// 接続ホスト名:ポート 保存（form ネスト回避のため直接 fetch）
+function savePfwdServerHost(btn) {
+    var input = document.getElementById('pfwdserverhost-input');
+    if (!input) return;
+    var value = input.value.trim();
+    if (!value) return;
+    var formData = new FormData();
+    formData.append('pfwdserverhost', value);
+    if (btn) btn.disabled = true;
+    fetch('pfwd_exec.php', { method: 'POST', body: formData })
+        .then(function() {
+            if (btn) {
+                btn.disabled = false;
+                var orig = btn.textContent;
+                btn.textContent = '保存しました';
+                setTimeout(function() { btn.textContent = orig; }, 2000);
+            }
+        })
+        .catch(function() {
+            if (btn) btn.disabled = false;
+        });
 }
 
 checkOnline();
