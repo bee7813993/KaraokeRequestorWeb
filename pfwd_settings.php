@@ -135,7 +135,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
 
 // --- 設定保存 ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
-    $str_keys  = ['pfwdplace', 'onlinechecktimeout', 'globalhost'];
+    $str_keys  = ['pfwdplace', 'onlinechecktimeout'];
     $int_keys  = ['usepfwdcheck'];
     foreach ($str_keys as $k) {
         if (isset($_POST[$k])) $config_ini[$k] = urlencode($_POST[$k]);
@@ -143,31 +143,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     foreach ($int_keys as $k) {
         if (isset($_POST[$k])) $config_ini[$k] = (int)$_POST[$k];
     }
+
+    // globalhost = ホスト名:ユーザー接続ポート として組み合わせて保存
+    $post_hostname = isset($_POST['globalhost']) ? trim($_POST['globalhost']) : '';
+    $post_openport = isset($_POST['pfwdserveropenport']) ? trim($_POST['pfwdserveropenport']) : '';
+    if (!empty($post_hostname)) {
+        $config_ini['globalhost'] = urlencode(
+            !empty($post_openport) ? $post_hostname . ':' . $post_openport : $post_hostname
+        );
+    }
+
     writeconfig2ini($config_ini, $configfile);
 
-    // globalhost のホスト名とポートを pfwd.ini に反映
-    if (!empty($_POST['globalhost'])) {
-        $gh       = trim($_POST['globalhost']);
-        $colonIdx = strrpos($gh, ':');
-        if ($colonIdx !== false) {
-            $hostname = substr($gh, 0, $colonIdx);
-            $newPort  = substr($gh, $colonIdx + 1);
-            if (ctype_digit($newPort) && !empty($hostname)) {
-                $pfwdplace_post = isset($_POST['pfwdplace']) && $_POST['pfwdplace'] !== ''
-                    ? $_POST['pfwdplace']
-                    : (array_key_exists('pfwdplace', $config_ini) ? urldecode($config_ini['pfwdplace']) : 'pfwd_forykr\\');
-                $pfwdinfo_save = new pfwd();
-                $pfwdinfo_save->pfwdpath = $pfwdplace_post;
-                ob_start();
-                $ok = $pfwdinfo_save->readpfwdcfg();
-                ob_end_clean();
-                if ($ok) {
-                    $pfwdinfo_save->set_pfwdhost($hostname);
-                    $pfwdinfo_save->set_pfwdopenport($newPort);
-                    $pfwdinfo_save->save_pfwdconfig();
-                }
-            }
+    // pfwd.ini 更新：ホスト名・ユーザー接続ポート・pfwd接続ポート
+    $pfwdplace_post = isset($_POST['pfwdplace']) && $_POST['pfwdplace'] !== ''
+        ? $_POST['pfwdplace']
+        : (array_key_exists('pfwdplace', $config_ini) ? urldecode($config_ini['pfwdplace']) : 'pfwd_forykr\\');
+    $pfwdinfo_save = new pfwd();
+    $pfwdinfo_save->pfwdpath = $pfwdplace_post;
+    ob_start();
+    $ok = $pfwdinfo_save->readpfwdcfg();
+    ob_end_clean();
+    if ($ok) {
+        if (!empty($post_hostname)) {
+            $pfwdinfo_save->set_pfwdhost($post_hostname);
         }
+        if (!empty($post_openport) && ctype_digit($post_openport)) {
+            $pfwdinfo_save->set_pfwdopenport($post_openport);
+        }
+        $post_pfwdport = isset($_POST['pfwdport']) ? trim($_POST['pfwdport']) : '';
+        if (!empty($post_pfwdport) && ctype_digit($post_pfwdport)) {
+            $pfwdinfo_save->set_pfwdport($post_pfwdport);
+        }
+        $pfwdinfo_save->save_pfwdconfig();
     }
 
     header('Location: pfwd_settings.php?saved=1');
@@ -196,18 +204,15 @@ $pfwdplace_val = array_key_exists('pfwdplace', $config_ini)
 $globalhost_val = array_key_exists('globalhost', $config_ini)
     ? urldecode($config_ini['globalhost']) : '';
 
-// globalhost からユーザー接続ポートを逆算（表示用）
-$pfwdopenport_display = '';
-if (!empty($globalhost_val)) {
-    $colonIdx = strrpos($globalhost_val, ':');
-    if ($colonIdx !== false) {
-        $pfwdopenport_display = substr($globalhost_val, $colonIdx + 1);
-    }
-}
-// globalhost にポートがない場合は pfwd.ini の値をフォールバック
-if ($pfwdopenport_display === '' && $pfwdavailable) {
-    $pfwdopenport_display = (string)$pfwdinfo->get_pfwdopenport();
-}
+// globalhost のホスト名部分のみ抽出（入力欄の初期値）
+$colonIdx2 = strrpos($globalhost_val, ':');
+$globalhost_hostname = ($colonIdx2 !== false) ? substr($globalhost_val, 0, $colonIdx2) : $globalhost_val;
+
+// ユーザー接続ポート（pfwd.ini から直接取得）
+$pfwdopenport_display = $pfwdavailable ? (string)$pfwdinfo->get_pfwdopenport() : '';
+
+// pfwd接続ポート＝SSH ポート（pfwd.ini から取得）
+$pfwdport_display = $pfwdavailable ? (string)$pfwdinfo->get_pfwdport() : '10090';
 
 // Auto-detect local IP for DDNS（ローカル接続用：IPv4のみ・ループバック除外）
 function get_first_non_loopback_ip() {
@@ -318,29 +323,32 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
     <div class="card mb-3">
       <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">オンライン接続設定</div>
       <div class="card-body">
-        <!-- ユーザー接続ポート（pfwdserveropenport）-->
-        <?php if ($pfwdavailable): ?>
+        <!-- ユーザー接続ポート -->
         <div class="mb-3">
           <label class="form-label fw-semibold">ユーザー接続ポート</label>
-          <div class="d-flex gap-2 align-items-end">
-            <div style="flex:1;">
-              <input type="text" id="pfwdserveropenport-input" class="form-control font-monospace"
-                value="<?= htmlspecialchars($pfwdopenport_display, ENT_QUOTES, 'UTF-8') ?>"
-                placeholder="例: 11002" />
-            </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="updateGlobalhost()">ホスト名に反映</button>
-          </div>
-          <div class="form-text">外部から接続するためのポート番号です。「ホスト名に反映」で自動的にオンライン接続用ホスト名を更新します。</div>
+          <input type="text" name="pfwdserveropenport" id="pfwdserveropenport-input"
+            class="form-control font-monospace" style="width:140px;"
+            value="<?= htmlspecialchars($pfwdopenport_display, ENT_QUOTES, 'UTF-8') ?>"
+            placeholder="例: 11002" oninput="updateAddressDisplay()" />
+          <div class="form-text">外部から接続するためのポート番号です。</div>
         </div>
-        <?php endif; ?>
 
-        <!-- オンライン接続用ホスト名 -->
+        <!-- オンライン接続用ホスト名（ホスト名のみ）-->
         <div class="mb-3">
           <label class="form-label fw-semibold">オンライン接続用ホスト名</label>
-          <input type="text" name="globalhost" class="form-control font-monospace"
-            value="<?= htmlspecialchars($globalhost_val, ENT_QUOTES, 'UTF-8') ?>"
-            placeholder="例: ykr.moe:11002" />
-          <div class="form-text">グローバルIPまたはDDNSホスト名。接続確認に使用します。</div>
+          <input type="text" name="globalhost" id="globalhost-input"
+            class="form-control font-monospace"
+            value="<?= htmlspecialchars($globalhost_hostname, ENT_QUOTES, 'UTF-8') ?>"
+            placeholder="例: ykr.moe" oninput="updateAddressDisplay()" />
+          <div class="form-text">グローバルIPまたはDDNSホスト名（ポートは除く）。</div>
+        </div>
+
+        <!-- オンライン接続用アドレス（表示のみ）-->
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-muted small">オンライン接続用アドレス（自動生成）</label>
+          <input type="text" id="online-address-display" class="form-control font-monospace"
+            readonly tabindex="-1"
+            value="<?= htmlspecialchars($globalhost_hostname . (!empty($pfwdopenport_display) ? ':' . $pfwdopenport_display : ''), ENT_QUOTES, 'UTF-8') ?>" />
         </div>
 
         <!-- 接続確認タイムアウト -->
@@ -363,21 +371,23 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
             value="<?= htmlspecialchars($pfwdplace_val, ENT_QUOTES, 'UTF-8') ?>" />
         </div>
 
-        <!-- 接続ホスト名:ポート（統合）-->
-        <?php if ($pfwdavailable): ?>
+        <!-- pfwd接続ポート（SSH ポート）-->
         <div class="mb-3">
-          <label class="form-label fw-semibold">接続ホスト名:ポート</label>
-          <div class="d-flex gap-2 align-items-end">
-            <div style="flex:1;">
-              <input type="text" id="pfwdserverhost-input" class="form-control font-monospace"
-                value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdhost() . ':' . $pfwdinfo->get_pfwdport(), ENT_QUOTES, 'UTF-8') : '' ?>"
-                placeholder="例: ykr.moe:22" />
-            </div>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="savePfwdServerHost(this)">保存</button>
-          </div>
-          <div class="form-text">pfwd リレーサーバーのホスト名とSSHポート。</div>
+          <label class="form-label fw-semibold">pfwd接続ポート</label>
+          <input type="text" name="pfwdport" id="pfwdport-input"
+            class="form-control font-monospace" style="width:140px;"
+            value="<?= htmlspecialchars($pfwdport_display, ENT_QUOTES, 'UTF-8') ?>"
+            placeholder="例: 10090" oninput="updateAddressDisplay()" />
+          <div class="form-text">pfwd がリレーサーバーに接続する SSH ポート番号です。</div>
         </div>
-        <?php endif; ?>
+
+        <!-- pfwd接続アドレス（表示のみ）-->
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-muted small">pfwd接続アドレス（自動生成）</label>
+          <input type="text" id="pfwd-address-display" class="form-control font-monospace"
+            readonly tabindex="-1"
+            value="<?= htmlspecialchars($globalhost_hostname . (!empty($pfwdport_display) ? ':' . $pfwdport_display : ''), ENT_QUOTES, 'UTF-8') ?>" />
+        </div>
 
         <!-- pfwd 自動再起動 -->
         <div class="mb-3">
@@ -554,9 +564,9 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
     </div>
   </div>
 
-  <!-- 設定を保存ボタン -->
+  <!-- 設定反映ボタン -->
   <div class="d-grid mb-3">
-    <button type="submit" class="btn btn-primary btn-lg">設定を保存</button>
+    <button type="submit" class="btn btn-primary btn-lg">設定反映</button>
   </div>
 
   </form><!-- /設定フォーム -->
@@ -681,61 +691,19 @@ document.getElementById('check-debug-btn').addEventListener('click', function() 
         .finally(function() { btn.disabled = false; btn.textContent = '詳細診断'; });
 });
 
-// ユーザー接続ポート → グローバルホスト反映
-function updateGlobalhost() {
-    var portInput = document.getElementById('pfwdserveropenport-input');
-    var globalhostInput = document.querySelector('input[name="globalhost"]');
-    var newPort = (portInput.value || '').trim();
+// 入力変化に合わせてアドレス表示を更新
+function updateAddressDisplay() {
+    var hostname = (document.getElementById('globalhost-input').value || '').trim();
+    var openport = (document.getElementById('pfwdserveropenport-input').value || '').trim();
+    var pfwdport = (document.getElementById('pfwdport-input').value || '').trim();
 
-    if (!newPort) {
-        alert('ポート番号を入力してください');
-        return;
-    }
+    var onlineAddr = hostname + (openport ? ':' + openport : '');
+    var pfwdAddr   = hostname + (pfwdport  ? ':' + pfwdport  : '');
 
-    var currentGlobalhost = (globalhostInput.value || '').trim();
-    if (!currentGlobalhost) {
-        alert('オンライン接続用ホスト名が未設定です');
-        return;
-    }
-
-    // "hostname:port" または "hostname" 形式で分割
-    var colonIdx = currentGlobalhost.lastIndexOf(':');
-    var hostname = (colonIdx > 0) ? currentGlobalhost.substring(0, colonIdx) : currentGlobalhost;
-
-    // ホスト名:ポート形式で新しい値を作成
-    var newGlobalhost = hostname + ':' + newPort;
-
-    // フィールドを更新
-    globalhostInput.value = newGlobalhost;
-
-    // メインフォームを送信
-    var mainForm = document.getElementById('pfwd-main-form');
-    if (mainForm) {
-        mainForm.submit();
-    }
-}
-
-// 接続ホスト名:ポート 保存（form ネスト回避のため直接 fetch）
-function savePfwdServerHost(btn) {
-    var input = document.getElementById('pfwdserverhost-input');
-    if (!input) return;
-    var value = input.value.trim();
-    if (!value) return;
-    var formData = new FormData();
-    formData.append('pfwdserverhost', value);
-    if (btn) btn.disabled = true;
-    fetch('pfwd_exec.php', { method: 'POST', body: formData })
-        .then(function() {
-            if (btn) {
-                btn.disabled = false;
-                var orig = btn.textContent;
-                btn.textContent = '保存しました';
-                setTimeout(function() { btn.textContent = orig; }, 2000);
-            }
-        })
-        .catch(function() {
-            if (btn) btn.disabled = false;
-        });
+    var onlineEl = document.getElementById('online-address-display');
+    var pfwdEl   = document.getElementById('pfwd-address-display');
+    if (onlineEl) onlineEl.value = onlineAddr;
+    if (pfwdEl)   pfwdEl.value   = pfwdAddr;
 }
 
 checkOnline();
