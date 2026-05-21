@@ -273,7 +273,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
   <?php endif; ?>
 
   <!-- 設定フォーム開始 -->
-  <form method="post">
+  <form method="post" id="pfwd-main-form">
     <input type="hidden" name="save_config" value="1">
 
     <!-- オンライン接続設定 -->
@@ -284,15 +284,15 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
         <?php if ($pfwdavailable): ?>
         <div class="mb-3">
           <label class="form-label fw-semibold">ユーザー接続ポート</label>
-          <form id="pfwdconfig-openport" method="post" action="pfwd_exec.php" class="d-flex gap-2 align-items-end">
+          <div class="d-flex gap-2 align-items-end">
             <div style="flex:1;">
-              <input type="text" name="pfwdserveropenport" class="form-control font-monospace"
+              <input type="text" id="pfwdserveropenport-input" class="form-control font-monospace"
                 value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdopenport(), ENT_QUOTES, 'UTF-8') : '' ?>"
                 placeholder="例: 11002" />
             </div>
-            <button type="submit" class="btn btn-secondary btn-sm">保存</button>
-          </form>
-          <div class="form-text">外部から接続するためのポート番号です。</div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="updateGlobalhost()">ホスト名に反映</button>
+          </div>
+          <div class="form-text">外部から接続するためのポート番号です。「ホスト名に反映」で自動的にオンライン接続用ホスト名を更新します。</div>
         </div>
         <?php endif; ?>
 
@@ -461,23 +461,43 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
       <?php
       require_once 'ipconfig.php';
       $result_ipconfig = getiplist();
+      $ips_to_show = array(); // 重複排除用
+
+      // すべてのインターフェースからIPを抽出（ループバック除外）
       foreach ($result_ipconfig as $ifinfo) {
-          $count = 0;
-          foreach ($ifinfo as $ips) {
-              if ($count != 0) {
-                  if (strpos($ips, ':') !== false) {
-                      $ips = '[' . substr($ips, 0, strpos($ips, '%')) . ']';
-                  }
-                  if (!empty($ips)) {
-                      $link = 'http://' . $ips . '/';
-                      if (array_key_exists('useeasyauth_word', $config_ini) && !empty($config_ini['useeasyauth_word'])) {
-                          $link = $link . '?easypass=' . $config_ini['useeasyauth_word'];
-                      }
-                      echo '<a href="' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '" target="_blank">' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '</a>' . "\n";
-                  }
+          foreach ($ifinfo as $idx => $ip_str) {
+              if ($idx === 0) continue; // インターフェース名をスキップ
+              $ip = trim($ip_str);
+              if (empty($ip)) continue;
+
+              // IPv6 zone ID を削除
+              if (strpos($ip, '%') !== false) {
+                  $ip = substr($ip, 0, strpos($ip, '%'));
               }
-              $count++;
+
+              // ループバック判定
+              if ($ip === '127.0.0.1' || $ip === '::1') {
+                  continue;
+              }
+
+              // 重複排除
+              if (in_array($ip, $ips_to_show, true)) {
+                  continue;
+              }
+
+              $ips_to_show[] = $ip;
           }
+      }
+
+      // リンク生成
+      foreach ($ips_to_show as $ip) {
+          $is_ipv6 = (strpos($ip, ':') !== false);
+          $url_ip = $is_ipv6 ? '[' . $ip . ']' : $ip;
+          $link = 'http://' . $url_ip . '/';
+          if (array_key_exists('useeasyauth_word', $config_ini) && !empty($config_ini['useeasyauth_word'])) {
+              $link = $link . '?easypass=' . $config_ini['useeasyauth_word'];
+          }
+          echo '<a href="' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '" target="_blank">' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '</a>' . "\n";
       }
       ?>
       </div>
@@ -623,17 +643,38 @@ document.getElementById('check-debug-btn').addEventListener('click', function() 
         .finally(function() { btn.disabled = false; btn.textContent = '詳細診断'; });
 });
 
-// pfwdconfig-openport フォームの AJAX 送信（ページ遷移なし）
-var pfwdconfigOpenportForm = document.getElementById('pfwdconfig-openport');
-if (pfwdconfigOpenportForm) {
-    pfwdconfigOpenportForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        fetch(this.action, { method: 'POST', body: new FormData(this) })
-            .then(function() {
-                var btn = pfwdconfigOpenportForm.querySelector('[type=submit]');
-                if (btn) { var orig = btn.textContent; btn.textContent = '保存しました'; setTimeout(function(){ btn.textContent = orig; }, 2000); }
-            });
-    });
+// ユーザー接続ポート → グローバルホスト反映
+function updateGlobalhost() {
+    var portInput = document.getElementById('pfwdserveropenport-input');
+    var globalhostInput = document.querySelector('input[name="globalhost"]');
+    var newPort = (portInput.value || '').trim();
+
+    if (!newPort) {
+        alert('ポート番号を入力してください');
+        return;
+    }
+
+    var currentGlobalhost = (globalhostInput.value || '').trim();
+    if (!currentGlobalhost) {
+        alert('オンライン接続用ホスト名が未設定です');
+        return;
+    }
+
+    // "hostname:port" または "hostname" 形式で分割
+    var colonIdx = currentGlobalhost.lastIndexOf(':');
+    var hostname = (colonIdx > 0) ? currentGlobalhost.substring(0, colonIdx) : currentGlobalhost;
+
+    // ホスト名:ポート形式で新しい値を作成
+    var newGlobalhost = hostname + ':' + newPort;
+
+    // フィールドを更新
+    globalhostInput.value = newGlobalhost;
+
+    // メインフォームを送信
+    var mainForm = document.getElementById('pfwd-main-form');
+    if (mainForm) {
+        mainForm.submit();
+    }
 }
 
 // pfwdconfig-host フォームの AJAX 送信（ページ遷移なし）
