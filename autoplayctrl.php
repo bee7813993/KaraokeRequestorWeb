@@ -253,24 +253,24 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 
   <!-- 自動再生コントロール -->
   <div class="card mb-3">
-    <div class="card-header fw-bold">自動再生コントロール</div>
+    <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">自動再生コントロール</div>
     <div class="card-body">
-      <p class="mb-3">
-        ステータス：
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="text-muted small">ステータス</span>
         <?php if ($ap != 0): ?>
           <span class="badge bg-success fs-6">実行中</span>
         <?php else: ?>
           <span class="badge bg-secondary fs-6">停止中</span>
         <?php endif; ?>
-      </p>
+      </div>
       <div class="d-flex gap-2">
-        <form method="GET">
+        <form method="GET" class="flex-fill">
           <input type="hidden" name="karaokeautorunaction" value="start">
-          <button type="submit" class="btn btn-success">▶ Start</button>
+          <button type="submit" class="btn btn-success btn-lg w-100">▶ Start</button>
         </form>
-        <form method="GET">
+        <form method="GET" class="flex-fill">
           <input type="hidden" name="karaokeautorunaction" value="stop">
-          <button type="submit" class="btn btn-danger">■ Stop</button>
+          <button type="submit" class="btn btn-danger btn-lg w-100">■ Stop</button>
         </form>
       </div>
     </div>
@@ -278,7 +278,7 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 
   <!-- 接続ステータス -->
   <div class="card mb-3">
-    <div class="card-header fw-bold">接続ステータス</div>
+    <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">接続ステータス</div>
     <div class="card-body">
 
       <!-- オンライン接続確認 -->
@@ -313,24 +313,24 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
   <!-- pfwd (SSH転送) -->
   <?php if ($pfwdavailable): ?>
   <div class="card mb-3">
-    <div class="card-header fw-bold">pfwd (SSH転送)</div>
+    <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">pfwd (SSH転送)</div>
     <div class="card-body">
 
       <!-- WireGuard 実行中かつ pfwd 停止中: 注意（pfwd が接続元でない可能性） -->
-      <div id="pfwd-online-alert" class="alert alert-warning py-2 <?= ($wg_running && !$pfwd_running) ? '' : 'd-none' ?>" role="alert">
-        WireGuard 実行中です。オンライン接続が確立されているため pfwd は起動しないでください。
+      <div id="pfwd-online-alert" class="alert alert-warning py-2 small <?= ($wg_running && !$pfwd_running) ? '' : 'd-none' ?>" role="alert">
+        WireGuard 実行中のためオンライン接続済みです。pfwd は起動しないでください。
       </div>
 
-      <p class="mb-3">
-        ステータス：
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="text-muted small">ステータス</span>
         <span id="pfwdstatus" class="badge fs-6 <?= $pfwd_running ? 'bg-success' : 'bg-secondary' ?>">
           <?= $pfwd_running ? '起動中' : '停止中' ?>
         </span>
-      </p>
+      </div>
       <div class="d-flex gap-2">
-        <button type="button" id="pfwd-start-btn" class="btn btn-success"
+        <button type="button" id="pfwd-start-btn" class="btn btn-success btn-lg flex-fill"
           <?= ($wg_running && !$pfwd_running) ? 'disabled' : '' ?> onclick="start_pfwdcmd()">起動</button>
-        <button type="button" class="btn btn-danger" onclick="stop_pfwdcmd()">停止</button>
+        <button type="button" class="btn btn-danger btn-lg flex-fill" onclick="stop_pfwdcmd()">停止</button>
       </div>
     </div>
   </div>
