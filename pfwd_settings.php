@@ -169,13 +169,34 @@ $pfwdplace_val = array_key_exists('pfwdplace', $config_ini)
     ? urldecode($config_ini['pfwdplace']) : 'pfwd_forykr\\';
 $globalhost_val = array_key_exists('globalhost', $config_ini)
     ? urldecode($config_ini['globalhost']) : '';
+
+// Auto-detect local IP for DDNS（ローカル接続用）
+function get_first_non_loopback_ip() {
+    require_once 'ipconfig.php';
+    $iplist = getiplist();
+    foreach ($iplist as $ifinfo) {
+        foreach ($ifinfo as $idx => $ip) {
+            if ($idx == 0) continue; // skip interface name
+            if (empty($ip)) continue;
+            // Remove IPv6 zone ID if present
+            if (strpos($ip, '%') !== false) {
+                $ip = substr($ip, 0, strpos($ip, '%'));
+            }
+            // Skip loopback addresses
+            if ($ip === '127.0.0.1' || $ip === '::1') continue;
+            return $ip;
+        }
+    }
+    return $_SERVER['SERVER_ADDR'] ?? '';
+}
+$local_ip_for_ddns = get_first_non_loopback_ip();
 ?>
 <!doctype html>
 <html lang="ja">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>pfwd・接続設定</title>
+<title>オンライン接続設定</title>
 <script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">
 <link rel="stylesheet" href="css/themes/_variables.css">
@@ -190,7 +211,7 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
 
 <div class="container" style="max-width:560px; padding-bottom:32px;">
 
-  <h5 class="mb-3">pfwd・接続設定</h5>
+  <h5 class="mb-3">オンライン接続設定</h5>
 
   <?php if (isset($_GET['saved'])): ?>
   <div class="alert alert-success alert-dismissible fade show py-2" role="alert">
@@ -251,12 +272,31 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
   </div>
   <?php endif; ?>
 
-  <!-- 接続設定 -->
+  <!-- 設定フォーム開始 -->
   <form method="post">
     <input type="hidden" name="save_config" value="1">
+
+    <!-- オンライン接続設定 -->
     <div class="card mb-3">
       <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">オンライン接続設定</div>
       <div class="card-body">
+        <!-- ユーザー接続ポート（pfwdserveropenport）-->
+        <?php if ($pfwdavailable): ?>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">ユーザー接続ポート</label>
+          <form id="pfwdconfig-openport" method="post" action="pfwd_exec.php" class="d-flex gap-2 align-items-end">
+            <div style="flex:1;">
+              <input type="text" name="pfwdserveropenport" class="form-control font-monospace"
+                value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdopenport(), ENT_QUOTES, 'UTF-8') : '' ?>"
+                placeholder="例: 11002" />
+            </div>
+            <button type="submit" class="btn btn-secondary btn-sm">保存</button>
+          </form>
+          <div class="form-text">外部から接続するためのポート番号です。</div>
+        </div>
+        <?php endif; ?>
+
+        <!-- オンライン接続用ホスト名 -->
         <div class="mb-3">
           <label class="form-label fw-semibold">オンライン接続用ホスト名</label>
           <input type="text" name="globalhost" class="form-control font-monospace"
@@ -264,6 +304,8 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
             placeholder="例: ykr.moe:11002" />
           <div class="form-text">グローバルIPまたはDDNSホスト名。接続確認に使用します。</div>
         </div>
+
+        <!-- 接続確認タイムアウト -->
         <div class="mb-3">
           <label class="form-label fw-semibold">接続確認タイムアウト (秒)</label>
           <input type="number" name="onlinechecktimeout" class="form-control" style="width:120px;"
@@ -273,6 +315,7 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
       </div>
     </div>
 
+    <!-- pfwd 設定 -->
     <div class="card mb-3">
       <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">pfwd 設定</div>
       <div class="card-body">
@@ -281,6 +324,24 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
           <input type="text" name="pfwdplace" class="form-control font-monospace"
             value="<?= htmlspecialchars($pfwdplace_val, ENT_QUOTES, 'UTF-8') ?>" />
         </div>
+
+        <!-- 接続ホスト名:ポート（統合）-->
+        <?php if ($pfwdavailable): ?>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">接続ホスト名:ポート</label>
+          <form id="pfwdconfig-host" method="post" action="pfwd_exec.php" class="d-flex gap-2 align-items-end">
+            <div style="flex:1;">
+              <input type="text" name="pfwdserverhost" class="form-control font-monospace"
+                value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdhost() . ':' . $pfwdinfo->get_pfwdport(), ENT_QUOTES, 'UTF-8') : '' ?>"
+                placeholder="例: ykr.moe:22" />
+            </div>
+            <button type="submit" class="btn btn-secondary btn-sm">保存</button>
+          </form>
+          <div class="form-text">pfwd リレーサーバーのホスト名とSSHポート。</div>
+        </div>
+        <?php endif; ?>
+
+        <!-- pfwd 自動再起動 -->
         <div class="mb-3">
           <label class="form-label fw-semibold">pfwd 自動再起動</label>
           <div class="form-text mb-1">通常時オンライン接続確認がOKになる環境で使用します。</div>
@@ -299,35 +360,6 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
         </div>
       </div>
     </div>
-
-    <div class="d-grid mb-3">
-      <button type="submit" class="btn btn-primary btn-lg">設定を保存</button>
-    </div>
-  </form>
-
-  <!-- pfwd サーバー設定 (pfwd_exec.php へ POST) -->
-  <?php if ($pfwdavailable): ?>
-  <div class="card mb-3">
-    <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">pfwd サーバー接続設定</div>
-    <div class="card-body">
-      <form id="pfwdconfig" method="post" action="pfwd_exec.php">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">接続ホスト名:ポート</label>
-          <input type="text" name="pfwdserverhost" class="form-control font-monospace"
-            value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdhost() . ':' . $pfwdinfo->get_pfwdport(), ENT_QUOTES, 'UTF-8') : '' ?>"
-            placeholder="例: ykr.moe:22" />
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">ユーザー接続ポート</label>
-          <input type="text" name="pfwdserveropenport" class="form-control font-monospace"
-            value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdopenport(), ENT_QUOTES, 'UTF-8') : '' ?>"
-            placeholder="例: 11002" />
-        </div>
-        <button type="submit" class="btn btn-secondary">pfwd サーバー設定を保存</button>
-      </form>
-    </div>
-  </div>
-  <?php endif; ?>
 
   <!-- DDNS 設定 -->
   <div class="card mb-3">
@@ -392,7 +424,7 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
           <div>
             <label class="form-label small">IP</label>
             <input type="text" name="ip" class="form-control form-control-sm font-monospace" style="width:130px;"
-              value="<?= htmlspecialchars($_SERVER['SERVER_ADDR'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
+              value="<?= htmlspecialchars($local_ip_for_ddns, ENT_QUOTES, 'UTF-8') ?>" />
           </div>
           <input type="hidden" name="ttl" value="30">
           <input type="hidden" name="autoreturn" value="1">
@@ -413,7 +445,7 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
           <div>
             <label class="form-label small">IP</label>
             <input type="text" name="IPV4ADDR" class="form-control form-control-sm font-monospace" style="width:120px;"
-              value="<?= htmlspecialchars($_SERVER['SERVER_ADDR'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
+              value="<?= htmlspecialchars($local_ip_for_ddns, ENT_QUOTES, 'UTF-8') ?>" />
           </div>
           <button type="submit" class="btn btn-sm btn-secondary mb-0">更新</button>
         </form>
@@ -421,12 +453,55 @@ $globalhost_val = array_key_exists('globalhost', $config_ini)
     </div>
   </div>
 
-  <!-- 設定ページへ戻る -->
-  <div class="d-grid mt-2">
-    <a href="init.php" class="btn btn-outline-secondary btn-sm player-refresh-btn">
-      設定ページへ戻る
-    </a>
+  <!-- 自IP一覧 -->
+  <div class="card mb-3">
+    <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">自IP一覧</div>
+    <div class="card-body">
+      <div style="font-family: monospace; white-space: pre-wrap; word-break: break-all; font-size: 0.875rem;">
+      <?php
+      require_once 'ipconfig.php';
+      $result_ipconfig = getiplist();
+      foreach ($result_ipconfig as $ifinfo) {
+          $count = 0;
+          foreach ($ifinfo as $ips) {
+              if ($count != 0) {
+                  if (strpos($ips, ':') !== false) {
+                      $ips = '[' . substr($ips, 0, strpos($ips, '%')) . ']';
+                  }
+                  if (!empty($ips)) {
+                      $link = 'http://' . $ips . '/';
+                      if (array_key_exists('useeasyauth_word', $config_ini) && !empty($config_ini['useeasyauth_word'])) {
+                          $link = $link . '?easypass=' . $config_ini['useeasyauth_word'];
+                      }
+                      echo '<a href="' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '" target="_blank">' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '</a>' . "\n";
+                  }
+              }
+              $count++;
+          }
+      }
+      ?>
+      </div>
+    </div>
   </div>
+
+  <!-- 操作ボタン -->
+  <div class="card mb-3">
+    <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">操作ボタン</div>
+    <div class="card-body">
+      <div class="d-grid">
+        <a href="init.php" class="btn btn-outline-secondary">
+          設定ページへ戻る
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 設定を保存ボタン -->
+  <div class="d-grid mb-3">
+    <button type="submit" class="btn btn-primary btn-lg">設定を保存</button>
+  </div>
+
+  </form><!-- /設定フォーム -->
 
 </div><!-- /container -->
 
@@ -533,14 +608,27 @@ document.getElementById('check-debug-btn').addEventListener('click', function() 
         .finally(function() { btn.disabled = false; btn.textContent = '詳細診断'; });
 });
 
-// pfwdconfig フォームの AJAX 送信（ページ遷移なし）
-var pfwdconfigForm = document.getElementById('pfwdconfig');
-if (pfwdconfigForm) {
-    pfwdconfigForm.addEventListener('submit', function(event) {
+// pfwdconfig-openport フォームの AJAX 送信（ページ遷移なし）
+var pfwdconfigOpenportForm = document.getElementById('pfwdconfig-openport');
+if (pfwdconfigOpenportForm) {
+    pfwdconfigOpenportForm.addEventListener('submit', function(event) {
         event.preventDefault();
         fetch(this.action, { method: 'POST', body: new FormData(this) })
             .then(function() {
-                var btn = pfwdconfigForm.querySelector('[type=submit]');
+                var btn = pfwdconfigOpenportForm.querySelector('[type=submit]');
+                if (btn) { var orig = btn.textContent; btn.textContent = '保存しました'; setTimeout(function(){ btn.textContent = orig; }, 2000); }
+            });
+    });
+}
+
+// pfwdconfig-host フォームの AJAX 送信（ページ遷移なし）
+var pfwdconfigHostForm = document.getElementById('pfwdconfig-host');
+if (pfwdconfigHostForm) {
+    pfwdconfigHostForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        fetch(this.action, { method: 'POST', body: new FormData(this) })
+            .then(function() {
+                var btn = pfwdconfigHostForm.querySelector('[type=submit]');
                 if (btn) { var orig = btn.textContent; btn.textContent = '保存しました'; setTimeout(function(){ btn.textContent = orig; }, 2000); }
             });
     });

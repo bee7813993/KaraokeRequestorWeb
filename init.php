@@ -290,7 +290,7 @@ print '</pre>';
      <a href="#otherroom" class="menulink" > 別部屋URL設定 </a>
     </li>
     <li class="menu">
-     <a href="pfwd_settings.php" class="menulink" > pfwd・接続設定 </a>
+     <a href="pfwd_settings.php" class="menulink" > オンライン接続設定 </a>
     </li>
     <li class="menu">
      <a href="#googlesync" class="menulink" > Google同期設定 </a>
@@ -394,6 +394,11 @@ request.send("");
   }
 print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
 ?>
+  </p>
+
+  <p>
+  <h3>オンライン接続設定</h3>
+    <a href="pfwd_settings.php" class="btn btn-secondary" > オンライン接続設定 </a>
   </p>
 
   <a href="requestlist_top.php" class="btn btn-secondary" > リクエストTOP画面に戻る　</a>
@@ -1453,9 +1458,9 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
   </div>
 
   <div class="mb-3">
-    <h3 id="pfwd" class="form-label menulink">pfwd・接続設定</h3>
+    <h3 id="pfwd" class="form-label menulink">オンライン接続設定</h3>
     <p class="small text-muted">pfwd フォルダ設定、オンライン接続用ホスト名、自動再起動、DDNS 登録などは専用ページで管理します。</p>
-    <a href="pfwd_settings.php" class="btn btn-secondary">pfwd・接続設定ページへ</a>
+    <a href="pfwd_settings.php" class="btn btn-secondary">オンライン接続設定ページへ</a>
   </div>
 
   <!---- 簡易認証設定 ----->
