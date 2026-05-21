@@ -102,6 +102,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
         ? "OK HTTP {$code} (接続先IP: {$ip})"
         : "NG curl({$en}): {$es2}";
 
+    // 8. ping パケットロス率 (Windows 環境)
+    $ping_cmd = 'ping -n 4 -w ' . ($timeout * 1000) . ' ' . escapeshellarg($h_host);
+    @exec($ping_cmd, $ping_output);
+    $ping_output_str = implode("\n", $ping_output);
+    // Windows ping 出力: "Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)"
+    if (preg_match('/Lost = (\d+) \((\d+)%/', $ping_output_str, $m)) {
+        $loss_percent = (int)$m[2];
+        $results['ping_loss'] = "Loss {$loss_percent}% (4回送信)";
+    } else {
+        $results['ping_loss'] = "失敗または全喪失";
+    }
+
     echo json_encode(['host' => $host_raw, 'timeout' => $timeout, 'results' => $results]);
     exit;
 }
@@ -447,13 +459,14 @@ document.getElementById('check-debug-btn').addEventListener('click', function() 
                 curl_auto:    'curl (IP自動選択)',
                 curl_v4:      'curl (IPv4強制)',
                 curl_v6:      'curl (IPv6強制)',
+                ping_loss:    'ping パケットロス率',
             };
             var row = '<tr><td colspan="2" class="fw-bold">確認先: ' +
                 data.host + ' (timeout:' + data.timeout + 's)</td></tr>';
             tbody.innerHTML = row;
             Object.keys(labels).forEach(function(key) {
                 var val = data.results[key] || '—';
-                var ok  = val.startsWith('OK');
+                var ok  = val.startsWith('OK') || val.startsWith('Loss 0%');
                 tbody.innerHTML += '<tr><td>' + labels[key] + '</td>' +
                     '<td class="' + (ok ? 'text-success' : 'text-danger') + '">' +
                     val + '</td></tr>';
