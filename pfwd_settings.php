@@ -144,6 +144,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
         if (isset($_POST[$k])) $config_ini[$k] = (int)$_POST[$k];
     }
     writeconfig2ini($config_ini, $configfile);
+
+    // globalhost のポートを pfwd.ini の openport に反映
+    if (!empty($_POST['globalhost'])) {
+        $gh       = trim($_POST['globalhost']);
+        $colonIdx = strrpos($gh, ':');
+        if ($colonIdx !== false) {
+            $newPort = substr($gh, $colonIdx + 1);
+            if (ctype_digit($newPort)) {
+                $pfwdplace_post = isset($_POST['pfwdplace']) && $_POST['pfwdplace'] !== ''
+                    ? $_POST['pfwdplace']
+                    : (array_key_exists('pfwdplace', $config_ini) ? urldecode($config_ini['pfwdplace']) : 'pfwd_forykr\\');
+                $pfwdinfo_save = new pfwd();
+                $pfwdinfo_save->pfwdpath = $pfwdplace_post;
+                ob_start();
+                $ok = $pfwdinfo_save->readpfwdcfg();
+                ob_end_clean();
+                if ($ok) {
+                    $pfwdinfo_save->set_pfwdopenport($newPort);
+                    $pfwdinfo_save->save_pfwdconfig();
+                }
+            }
+        }
+    }
+
     header('Location: pfwd_settings.php?saved=1');
     exit;
 }
@@ -170,24 +194,36 @@ $pfwdplace_val = array_key_exists('pfwdplace', $config_ini)
 $globalhost_val = array_key_exists('globalhost', $config_ini)
     ? urldecode($config_ini['globalhost']) : '';
 
-// Auto-detect local IP for DDNS（ローカル接続用）
+// globalhost からユーザー接続ポートを逆算（表示用）
+$pfwdopenport_display = '';
+if (!empty($globalhost_val)) {
+    $colonIdx = strrpos($globalhost_val, ':');
+    if ($colonIdx !== false) {
+        $pfwdopenport_display = substr($globalhost_val, $colonIdx + 1);
+    }
+}
+// globalhost にポートがない場合は pfwd.ini の値をフォールバック
+if ($pfwdopenport_display === '' && $pfwdavailable) {
+    $pfwdopenport_display = (string)$pfwdinfo->get_pfwdopenport();
+}
+
+// Auto-detect local IP for DDNS（ローカル接続用：IPv4のみ・ループバック除外）
 function get_first_non_loopback_ip() {
     require_once 'ipconfig.php';
     $iplist = getiplist();
     foreach ($iplist as $ifinfo) {
         foreach ($ifinfo as $idx => $ip) {
             if ($idx == 0) continue; // skip interface name
+            $ip = trim($ip);
             if (empty($ip)) continue;
-            // Remove IPv6 zone ID if present
-            if (strpos($ip, '%') !== false) {
-                $ip = substr($ip, 0, strpos($ip, '%'));
-            }
-            // Skip loopback addresses
-            if ($ip === '127.0.0.1' || $ip === '::1') continue;
+            // IPv6は除外（コロンを含む）
+            if (strpos($ip, ':') !== false) continue;
+            // ループバック除外
+            if ($ip === '127.0.0.1') continue;
             return $ip;
         }
     }
-    return $_SERVER['SERVER_ADDR'] ?? '';
+    return '';
 }
 $local_ip_for_ddns = get_first_non_loopback_ip();
 ?>
@@ -287,7 +323,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
           <div class="d-flex gap-2 align-items-end">
             <div style="flex:1;">
               <input type="text" id="pfwdserveropenport-input" class="form-control font-monospace"
-                value="<?= $pfwdavailable ? htmlspecialchars($pfwdinfo->get_pfwdopenport(), ENT_QUOTES, 'UTF-8') : '' ?>"
+                value="<?= htmlspecialchars($pfwdopenport_display, ENT_QUOTES, 'UTF-8') ?>"
                 placeholder="例: 11002" />
             </div>
             <button type="button" class="btn btn-secondary btn-sm" onclick="updateGlobalhost()">ホスト名に反映</button>
