@@ -145,13 +145,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     }
     writeconfig2ini($config_ini, $configfile);
 
-    // globalhost のポートを pfwd.ini の openport に反映
+    // globalhost のホスト名とポートを pfwd.ini に反映
     if (!empty($_POST['globalhost'])) {
         $gh       = trim($_POST['globalhost']);
         $colonIdx = strrpos($gh, ':');
         if ($colonIdx !== false) {
-            $newPort = substr($gh, $colonIdx + 1);
-            if (ctype_digit($newPort)) {
+            $hostname = substr($gh, 0, $colonIdx);
+            $newPort  = substr($gh, $colonIdx + 1);
+            if (ctype_digit($newPort) && !empty($hostname)) {
                 $pfwdplace_post = isset($_POST['pfwdplace']) && $_POST['pfwdplace'] !== ''
                     ? $_POST['pfwdplace']
                     : (array_key_exists('pfwdplace', $config_ini) ? urldecode($config_ini['pfwdplace']) : 'pfwd_forykr\\');
@@ -161,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
                 $ok = $pfwdinfo_save->readpfwdcfg();
                 ob_end_clean();
                 if ($ok) {
+                    $pfwdinfo_save->set_pfwdhost($hostname);
                     $pfwdinfo_save->set_pfwdopenport($newPort);
                     $pfwdinfo_save->save_pfwdconfig();
                 }
@@ -493,8 +495,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
   <div class="card mb-3">
     <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">自IP一覧</div>
     <div class="card-body">
-      <div style="font-family: monospace; white-space: pre-wrap; word-break: break-all; font-size: 0.875rem;">
-      <?php
+      <div style="font-family: monospace; white-space: pre-wrap; word-break: break-all; font-size: 0.875rem;"><?php
       require_once 'ipconfig.php';
       $result_ipconfig = getiplist();
       $ips_to_show = array(); // 重複排除用
@@ -525,7 +526,8 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
           }
       }
 
-      // リンク生成
+      // リンク生成（バッファに集める）
+      $link_output = '';
       foreach ($ips_to_show as $ip) {
           $is_ipv6 = (strpos($ip, ':') !== false);
           $url_ip = $is_ipv6 ? '[' . $ip . ']' : $ip;
@@ -533,10 +535,10 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
           if (array_key_exists('useeasyauth_word', $config_ini) && !empty($config_ini['useeasyauth_word'])) {
               $link = $link . '?easypass=' . $config_ini['useeasyauth_word'];
           }
-          echo '<a href="' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '" target="_blank">' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '</a>' . "\n";
+          $link_output .= '<a href="' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '" target="_blank">' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '</a>' . "\n";
       }
-      ?>
-      </div>
+      echo $link_output;
+      ?></div>
     </div>
   </div>
 
