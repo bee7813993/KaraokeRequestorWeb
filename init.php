@@ -97,6 +97,19 @@ if(array_key_exists("clearauth", $_REQUEST)) {
   display: block;
   margin-bottom: 0.25rem;
 }
+/* 設定セクションのカード化 */
+.cfg-card {
+  margin-bottom: 1.25rem;
+  border-left: 4px solid var(--bs-primary, #0d6efd);
+}
+.cfg-card > .card-body { padding: 1rem 1.25rem; }
+.cfg-card .menulink { scroll-margin-top: 80px; }
+.cfg-card > .card-body > h1.menulink,
+.cfg-card > .card-body > h1:first-child {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 0;
+}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -304,7 +317,7 @@ print '</pre>';
 </div>
 </div>
 <div class="col-lg-9 order-lg-first col-12 menulink">
-<div class="bg-info"  >
+<div class="card cfg-card mb-4"><div class="card-body">
   <h1 id="listctrl" class="menulink" > リクエストリスト操作 </h1>
   <h3> リストのダウンロード </h3>
   <a href ="listexport.php"  class="btn btn-secondary" > リクエストリストのダウンロード(UTF-8) </a>
@@ -340,11 +353,9 @@ print '</pre>';
   <li>
     <a href ="listtimesclear.php?times=1" class="btn btn-secondary" > 再生回数1クリア </a>【BGMモード(ジュークボックスモード)にて次から全てランダムに再生】
   </li>
-</div>
+</div></div>
 
-<hr />
-
-<div class="bg-info">
+<div class="card cfg-card mb-4"><div class="card-body">
   <p>
   <h1 id="opbuttom" class="menulink">各種操作ボタン </h1>
   <h3>ログイン情報クリア </h3>
@@ -402,14 +413,11 @@ print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.
   </p>
 
   <a href="requestlist_top.php" class="btn btn-secondary" > リクエストTOP画面に戻る　</a>
-</div>
+</div></div>
 
-<hr />
-
-
-<div class="bg-info">
-  <h1  id="workconfig"  class="menulink" >動作設定 </h1>
   <form name="allconfig" method="post" action="init.php" enctype="multipart/form-data">
+<div class="card cfg-card mb-4"><div class="card-body">
+  <h1  id="workconfig"  class="menulink" >動作設定 </h1>
 
   <div class="mb-3">
     <h3 title="未設定でパスワードチェックを省略">設定画面パスワード</h3>
@@ -432,6 +440,9 @@ print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.
     </select>
   </div>
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <h3 id="autoplay" class="menulink" >自動再生設定 </h3>
 <?php
 if(array_key_exists("autoplay_exec",$config_ini) && strlen($config_ini["autoplay_exec"]) > 0) {
@@ -480,6 +491,9 @@ print 'checked';
     </label>
   </div>
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
 <!---- トップ画面メッセージの設定 ----->
   <div class="mb-3">
     <h3 id="topmessage" class="menulink" >
@@ -513,6 +527,9 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
     </div>  
   </div>  
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <!---- トップ画面即時リロードの設定 ----->
   <div class="mb-3">
   <?php
@@ -625,6 +642,9 @@ print ' value="10" ';
              $bgcolor=urldecode($config_ini["bgcolor"]);
       }
   ?>
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3">
     <h3 id="bgcolor_t" class="radio form-label menulink"> ページ背景色  </h3>
     <input type="color" name="bgcolor" id="bgcolor" list="colors" value="<?php print $bgcolor ?>" />
@@ -656,6 +676,9 @@ print ' value="10" ';
           $bg_overlay_opacity = (int)$config_ini["bg_overlay_opacity"];
       }
   ?>
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3">
     <h3 id="bgimage_t" class="radio form-label menulink"> 背景画像 </h3>
     <label><small>画面全体の背景に画像を表示します。透過度で見やすさを調整できます。</small></label>
@@ -737,6 +760,9 @@ print ' value="10" ';
 
 
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3">
     <h3 id="movieplayer" class="menulink" > 動画プレーヤー設定 </h3>
     <h4 for="playerpath_select">MediaPlayerClassic PATH設定</h4>
@@ -1007,6 +1033,9 @@ print 'value="'.urldecode($config_ini["BGVCMDEND"]).'"';
     </div>
   </div>
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
 <h3 id=searchscreen class="menulink" > 検索画面設定 </h3>
   <div class="mb-3">
     <h4 for="comment"> リクエスト画面、コメント欄の説明書き </h4>
@@ -1091,6 +1120,7 @@ $si_sorted_indices = array_keys($si_order_map);
     </div>
 <?php } ?>
   </div>
+  </div>
 
   <div class="mb-3">
     <h4  > りすたーDBファイルパス  </h4>
@@ -1162,6 +1192,9 @@ $si_sorted_indices = array_keys($si_order_map);
   </div>
 
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3 ">
     <h3 id="useinternet" class="radio form-label menulink"> インターネット接続  </h3>
     <label class="form-label"> <small>(使用しないにするとインターネット接続が前提の機能を無効にします)</small> </label>
@@ -1173,6 +1206,9 @@ $si_sorted_indices = array_keys($si_order_map);
     </label>
   </div>
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3">
     <h3 id="commentserver" class="menulink">
     コメントサーバー設定
@@ -1245,7 +1281,8 @@ print 'value="名無しさん"';}
     </h3>
 	<label >
     <small>(ゆかりでの設定は不要になりました。MPC-BEにyoutube-dlの設定をしてください。<a href="https://github.com/bee7813993/KaraokeRequestorWeb/wiki/urlrequest"> https://github.com/bee7813993/KaraokeRequestorWeb/wiki/urlrequest </a> </small>
-	</label >    
+	</label >
+  </div>
 <!---
     <div class="mb-3">
       <h4 > ログインID(メールアドレス) </h4>
@@ -1288,6 +1325,9 @@ if(array_key_exists("downloadfolder",$config_ini)) {
     <input type="text" name="playerchecktimes" size="100" class="form-control" value="<?php echo $config_ini["playerchecktimes"]; ?>" />
   </div>
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <h3 id="otherroom" class="radio form-label menulink"> 別部屋URL設定 </h3>
   <table class="table table-striped table-bordered table-sm">
   <thead>
@@ -1457,6 +1497,9 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
     </label>
   </div>
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3">
     <h3 id="pfwd" class="form-label menulink">オンライン接続設定</h3>
     <p class="small text-muted">pfwd フォルダ設定、オンライン接続用ホスト名、自動再起動、DDNS 登録などは専用ページで管理します。</p>
@@ -1504,6 +1547,9 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
     </div>
   </div>
 
+</div></div>
+
+<div class="card cfg-card mb-4"><div class="card-body">
   <!---- Google同期設定 ----->
   <div class="mb-3">
     <h3 id="googlesync" class="radio form-label menulink"> Google同期設定 </h3>
@@ -1533,14 +1579,14 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
       value="<?php echo htmlspecialchars(urldecode($config_ini['google_relay_secret'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="中継サーバー管理者から入手したシークレット" />
   </div>
+</div></div>
 
   <input type="submit" class="btn btn-secondary btn-lg" value="設定" />
   </form>
-  </div>
 </div>
   <hr />
 
-<div class=”bg-info”>
+<div class="card cfg-card mb-4"><div class="card-body">
   <h1 id="myiplist" class="menulink"> 自IP一覧 </h1>
   <pre>
   <?php
@@ -1572,9 +1618,8 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
   
   ?>
   </pre>
-  
-  </div>
-</div>
+
+  </div></div>
 </div><!-- row -->
 
 </div><!-- container -->
