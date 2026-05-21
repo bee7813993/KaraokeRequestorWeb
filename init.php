@@ -429,8 +429,25 @@ print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.
 
   <div class="mb-3">
     <h3>DBファイル名</h3>
-    <input type="text" name="dbname" id="dbname" class="form-control" value=<?php echo  urldecode($config_ini["dbname"]); ?> >
+    <div class="input-group">
+      <input type="text" name="dbname" id="dbname" class="form-control" value="<?php echo htmlspecialchars(urldecode($config_ini["dbname"]), ENT_QUOTES); ?>" >
+      <button type="button" class="btn btn-outline-secondary" id="dbname_gen">日付ファイル名を生成</button>
+    </div>
+    <div class="form-text">「request_YYYYMMDD.db」形式のファイル名を生成します。</div>
   </div>
+  <script>
+  (function(){
+    var btn = document.getElementById('dbname_gen');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+      var d = new Date();
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      document.getElementById('dbname').value = 'request_' + y + m + day + '.db';
+    });
+  })();
+  </script>
   
   <div class="mb-3">
     <h3 for="playmode">動作モード選択</h3>
