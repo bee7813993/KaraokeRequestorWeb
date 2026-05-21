@@ -254,7 +254,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
   <div class="card mb-3">
     <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">pfwd 制御</div>
     <div class="card-body">
-      <div id="pfwd-online-alert" class="alert alert-warning py-2 small <?= ($wg_running && !$pfwd_running) ? '' : 'd-none' ?>" role="alert">
+      <div id="pfwd-online-alert" class="alert alert-warning py-2 small d-none" role="alert">
         WireGuard 実行中のためオンライン接続済みです。pfwd は起動しないでください。
       </div>
       <div class="d-flex align-items-center gap-2 mb-3">
@@ -265,7 +265,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
       </div>
       <div class="d-flex gap-2">
         <button type="button" id="pfwd-start-btn" class="btn btn-success btn-lg flex-fill"
-          <?= ($wg_running && !$pfwd_running) ? 'disabled' : '' ?> onclick="start_pfwdcmd()">起動</button>
+          onclick="start_pfwdcmd()">起動</button>
         <button type="button" class="btn btn-danger btn-lg flex-fill" onclick="stop_pfwdcmd()">停止</button>
       </div>
     </div>
@@ -508,14 +508,23 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
 <?php print_bg_style_block(true); ?>
 
 <script>
-var pfwdRunning = <?= $pfwdavailable && $pfwd_running ? 'true' : 'false' ?>;
-var wgRunning   = <?= $wg_running ? 'true' : 'false' ?>;
+var pfwdRunning  = <?= $pfwdavailable && $pfwd_running ? 'true' : 'false' ?>;
+var wgRunning    = <?= $wg_running ? 'true' : 'false' ?>;
+var onlineStatus = 'unknown'; // 'ok' | 'ng' | 'disabled' | 'unknown'
 
 function applyPfwdRestriction(pfwdIsRunning) {
-    var startBtn    = document.getElementById('pfwd-start-btn');
-    var onlineAlert = document.getElementById('pfwd-online-alert');
+    var startBtn       = document.getElementById('pfwd-start-btn');
+    var onlineAlert    = document.getElementById('pfwd-online-alert');
+    var autoRestartYes = document.getElementById('pfwdcheck_yes');
+
+    // pfwd 自動再起動「使用する」: オンライン接続OKの時のみ有効
+    if (autoRestartYes) {
+        autoRestartYes.disabled = (onlineStatus !== 'ok');
+    }
+
     if (!startBtn) return;
-    if (wgRunning && !pfwdIsRunning) {
+    // pfwd起動制限: オンラインOK かつ WireGuard実行中 かつ pfwd停止中の場合のみ
+    if (onlineStatus === 'ok' && wgRunning && !pfwdIsRunning) {
         startBtn.disabled = true;
         if (onlineAlert) onlineAlert.classList.remove('d-none');
     } else {
@@ -560,17 +569,23 @@ function checkOnline() {
             var infoText = (data.check_url ? '確認先: ' + data.check_url : '') +
                            (data.detail ? '  [' + data.detail + ']' : '');
             if (data.status === 'ok') {
+                onlineStatus = 'ok';
                 el.textContent = 'OK'; el.className = 'badge bg-success';
             } else if (data.status === 'ng') {
+                onlineStatus = 'ng';
                 el.textContent = 'NG'; el.className = 'badge bg-danger';
             } else {
+                onlineStatus = 'disabled';
                 el.textContent = '無効'; el.className = 'badge bg-secondary';
             }
             if (detailEl) detailEl.textContent = infoText || data.detail;
+            applyPfwdRestriction(pfwdRunning);
         })
         .catch(function() {
+            onlineStatus = 'unknown';
             el.textContent = 'エラー'; el.className = 'badge bg-danger';
             if (detailEl) detailEl.textContent = 'AJAX通信エラー';
+            applyPfwdRestriction(pfwdRunning);
         });
 }
 
