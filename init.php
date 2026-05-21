@@ -290,15 +290,12 @@ print '</pre>';
      <a href="#otherroom" class="menulink" > 別部屋URL設定 </a>
     </li>
     <li class="menu">
-     <a href="#pfwd" class="menulink" > pfwd </a>
+     <a href="pfwd_settings.php" class="menulink" > pfwd・接続設定 </a>
     </li>
     <li class="menu">
      <a href="#googlesync" class="menulink" > Google同期設定 </a>
     </li>
     </ul>
-    <li class="menu">
-     <a href="#hostname" class="menulink" > 接続設定（オンライン、ホスト名） </a>
-    </li>
     <li class="menu">
      <a href="#myiplist" class="menulink" > 自IP一覧 </a>
     </li>
@@ -1456,75 +1453,11 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
   </div>
 
   <div class="mb-3">
-    <h3 class="form-label"> pfwd.exeインストールフォルダ  </h3>
-    <input type="text" name="pfwdplace" class="form-control"
-<?php
-if(array_key_exists("pfwdplace",$config_ini)) {
-    print 'value="'.urldecode($config_ini["pfwdplace"]).'"';
-}else {
-    print 'value="pfwd_forykr\\"';
-    $config_ini["pfwdplace"] = "pfwd_forykr\\";
-}
-?>
-/>
-  </div>  
-  <!---- pfwd起動自動チェック ----->
-  <?php
-      $usepfwdcheck=false;
-      if(array_key_exists("usepfwdcheck",$config_ini)){
-          if($config_ini["usepfwdcheck"]==1 ){
-             $usepfwdcheck=true;
-          }
-      }
-  ?>
-
-<?php
-    $online_available_flg = false;
-    $ret = '設定無効';
-    if(array_key_exists('connectinternet',$config_ini ) && $config_ini["connectinternet"]==1 && array_key_exists('globalhost',$config_ini ) && array_key_exists('onlinechecktimeout',$config_ini ) ){
-        $ret = check_online_available($config_ini['globalhost'],$config_ini["onlinechecktimeout"]);
-       
-        if( $ret == 'OK' ){
-           $online_available_flg = true;
-        }
-    }
-?>
-  <div class="mb-3" id="usepfwdcheck" >
-    <h3 id="pfwd" class="radio form-label menulink"> pfwd 自動再起動 </h3>
-    <label class="form-label"><small>通常時オンライン版接続確認でOKになる環境で使用する</small> </label>
-<?php
-  if($online_available_flg == false) {
-      print '<div class="alert-danger" > オンライン版接続確認がNGの間は選択できません <br /> '.$ret ;
-      print '<button class="btn btn-secondary" role="button" onclick="location.reload();" >状態更新</button>'.'</div>';
-  } 
-
-?>
-    <label class="radio-inline">
-      <input type="radio" name="usepfwdcheck" value="1" <?php print ($usepfwdcheck)?'checked':' ';print ($online_available_flg == false)?' disabled':' '; ?> /> 使用する
-    </label>
-    <label class="radio-inline">
-      <input type="radio" name="usepfwdcheck" value="2" <?php print (!$usepfwdcheck)?'checked':' ';print ($online_available_flg == false)?' ':' '; ?> /> 使用しない
-    </label>
-
+    <h3 id="pfwd" class="form-label menulink">pfwd・接続設定</h3>
+    <p class="small text-muted">pfwd フォルダ設定、オンライン接続用ホスト名、自動再起動、DDNS 登録などは専用ページで管理します。</p>
+    <a href="pfwd_settings.php" class="btn btn-secondary">pfwd・接続設定ページへ</a>
   </div>
 
-  <!---- オンラインチェック、タイムアウト時間 ----->
-  <div class="mb-3">
-    <h3 class="form-label"> オンラインチェック、タイムアウト時間 </h3>
-    <label class="form-label"> <small>ブラウザではオンライン接続できるのに下の「オンライン版接続確認」がOKにならない場合この数値を増やしてください。</small> </label>
-    <input type="text" name="onlinechecktimeout" class="form-control"
-<?php
-if(array_key_exists("onlinechecktimeout",$config_ini)) {
-    print 'value="'.urldecode($config_ini["onlinechecktimeout"]).'"';
-}else {
-    print 'value="2"';
-    $config_ini["onlinechecktimeout"] = 2;
-}
-?>
-/>
-  </div>
-
-  
   <!---- 簡易認証設定 ----->
   <?php
       $useeasyauth=false;
@@ -1601,215 +1534,8 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
   </div>
 </div>
   <hr />
-<hr />
-<?php
 
-require_once 'pfwdctl.php';
-$pfwdavailable = true;
-$pfwdinfo = new pfwd();
-$pfwdinfo->pfwdpath = urldecode($config_ini["pfwdplace"]);
-$pfwdavailable = $pfwdinfo->readpfwdcfg();
-?>
-
-<div class="bg-info">
-  <h1 id="hostname" class="menulink" > ホスト名設定（オンライン接続およびDDNSの設定） </h1>
-  <h3> オンライン接続用</h3>
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  document.getElementById('onlinehost').addEventListener('submit', function(event) {
-    event.preventDefault();
-    fetch(this.action, { method: 'POST', body: new FormData(this) })
-      .then(function(){ window.location.href='init.php'; });
-  });
-});
-</script>
-  <h4> オンライン接続用ホスト名 </h4>
-  <form id="onlinehost" method="post"  action="toolinfo.php">
-  <div class="mb-3">
-    <label class="form-label" >ホスト名</label>
-    <input type="text" name="globalhost" class="form-control"  value="<?php
-        if(array_key_exists("globalhost",$config_ini)) {
-            print urldecode($config_ini["globalhost"]);
-        }
-        $btnvalue='更新';
-    ?>" />
-<?php
-    if(array_key_exists("globalhost",$config_ini)) {
-      if(!empty($config_ini['globalhost'])){
-        print '<dl class="dl-horizontal">';
-        print '<dt> オンライン版接続確認 </dt>';
-        $ret = check_online_available($config_ini['globalhost'],$config_ini["onlinechecktimeout"]);
-       
-        if( $ret == 'OK' ){
-           print '<dd > <div class="bg-success" >'.$ret .'</div></dd>';
-        }else {
-           print '<dd > <div class="alert-danger" > NG : '.$ret .'</div></dd>';
-        }
-        print '</dl>';
-      }
-    }
-?>
-  <input type="submit" class="btn btn-secondary" value="<?php print $btnvalue;?>" />
-  </div>
-  </form>
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  document.getElementById('pfwdconfig').addEventListener('submit', function(event) {
-    event.preventDefault();
-    fetch(this.action, { method: 'POST', body: new FormData(this) })
-      .then(function(){ window.location.href='init.php'; });
-  });
-});
-
-function createXMLHttpRequest() {
-  if (window.XMLHttpRequest) {
-    return new XMLHttpRequest();
-  } else if (window.ActiveXObject) {
-    try {
-      return new ActiveXObject("Msxml2.XMLHTTP");
-    } catch (e) {
-      try {
-        return new ActiveXObject("Microsoft.XMLHTTP");
-      } catch (e2) {
-        return null;
-      }
-    }
-  } else {
-    return null;
-  }
-}
-
-function start_pfwdcmd(){
-var request = createXMLHttpRequest();
-url="pfwd_exec.php?pfwdstart=1";
-request.open("GET", url, true);
-request.send("");
-}
-
-function stop_pfwdcmd(){
-var request = createXMLHttpRequest();
-url="pfwd_exec.php?pfwdstop=1";
-request.open("GET", url, true);
-request.send("");
-}
-
-var xmlhttp = createXMLHttpRequest();
-
-</script>
-      <h4> プライベートIPオンライン接続コマンド </h4>
-      <form id="pfwdconfig" method="post"  action="pfwd_exec.php">
-  <div class="mb-3">
-      <label class="form-label" >接続ホスト名</label>
-    <input type="text" name="pfwdserverhost" class="form-control"  value="<?php
-        if($pfwdavailable){
-            print $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdport();
-        }
-    ?>" />
-      <label class="form-label" >ユーザー接続ポート</label>
-    <input type="text" name="pfwdserveropenport" class="form-control"  value="<?php
-        if($pfwdavailable){
-            print $pfwdinfo->get_pfwdopenport();
-        }
-    ?>" />
-    <input type="submit" class="btn btn-secondary" value="設定" />
-    </div>
-    </form>
-  <div class="mb-3">
-      <h4 class="form-label" >pfwdプログラム起動停止</h4>
-      <button type="button" class="btn btn-secondary" onClick="start_pfwdcmd()" >起動</button>
-      <button type="button" class="btn btn-secondary" onClick="stop_pfwdcmd()" >停止</button>
-      
-      <?php
-          if($pfwdavailable == false){
-              print '<span class="alert-danger" > 利用不可</span>';
-          }
-          else if($pfwdinfo->statpfwdcmd()){
-              print '<span class="bg-success" > 起動中</span>';
-          } else {
-              print '<span class="alert-danger" >停止中</span>';
-          }
-      ?>
-      
-  </div>
-  <h4> DDNS登録 </h4>
-  <label> pcgame-r18.jp (アカウントを持っている人用) </label>
-  <form id="onlinehostpcg" method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">
-      <div class="mb-3">
-        <label class="form-label"> Hostname </label>
-        <div class="row">
-          <div class="col-8">
-            <input type="text" name="host" class="form-control" style=”width: 40%;” value="" />
-          </div>
-          <div class="col-4">
-          .pcgame-r18.jp
-          </div>
-        </div>
-        <label class="form-label"> IP</label>
-        <div >
-          <input type="text" name="ip" size="10" class="form-control" value="<?php echo get_globalipv4();?>" />
-        </div>
-        <input type="hidden" name="ttl" size="10" class="ttl" value="30" />
-        <input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
-      <input type="submit" class="btn btn-secondary" value="更新" />
-      </div>
-  </form>
-  <label> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></label>
-  <form method="post"  action="http://www.mydns.jp/directip.html">
-  <div class="mb-3">
-    <label class="form-label" >マスターID</label>
-    <input type="text" name="MID" class="form-control"  value=" " />
-
-    <label class="form-label ">パスワード</label>
-    <input type="text" name="PWD" class="form-control"  value=" " />
-
-    <label class="form-label ">IP</label>
-    <input type="text" name="IPV4ADDR" size="10" class="form-control" value="<?php echo get_globalipv4();?>" />
-  <input type="submit" class="btn btn-secondary" value="更新" />
-  </div>
-  </form>
-  <hr />
-  <h3> ローカル接続用DDNS登録 </h3>
-
-  <label> pcgame-r18.jp (アカウントを持っている人用) </label>
-  <form method="post"  action="https://pcgame-r18.jp/ddns/adddns.php">
-      <div class="mb-3">
-        <label class="form-label"> Hostname </label>
-        <div class="row">
-          <div class="col-8">
-            <input type="text" name="host" class="form-control" style=”width: 40%;” value=" " />
-          </div>
-          <div class="col-4">
-          .pcgame-r18.jp
-          </div>
-        </div>
-        <label class="form-label"> IP</label>
-        <div >
-          <input type="text" name="ip" size="10" class="form-control" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
-        </div>
-        <input type="hidden" name="ttl" size="10" class="ttl" value="30" />
-        <input type="hidden" name="autoreturn" size="10" class="autoreturn" value="1" />
-      <input type="submit" class="btn btn-secondary" value="更新" />
-      </div>
-  </form>
-
-  <label> <a href="http://jpn.www.mydns.jp/" >mydns.jp </a></label>
-  <form method="post"  action="http://www.mydns.jp/directip.html">
-  <div class="mb-3">
-    <label class="form-label" >マスターID</label>
-    <input type="text" name="MID" class="form-control"  value=" " />
-
-    <label class="form-label ">パスワード</label>
-    <input type="text" name="PWD" class="form-control"  value=" " />
-
-    <label class="form-label ">IP</label>
-    <input type="text" name="IPV4ADDR" size="10" class="form-control" value="<?php echo $_SERVER["SERVER_ADDR"];?>" />
-  <input type="submit" class="btn btn-secondary" value="更新" />
-  </div>
-  </form>
-</div>
-
-<div class="bg-info">
+<div class=”bg-info”>
   <h1 id="myiplist" class="menulink"> 自IP一覧 </h1>
   <pre>
   <?php
