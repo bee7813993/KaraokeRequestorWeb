@@ -101,11 +101,14 @@ if(array_key_exists("clearauth", $_REQUEST)) {
 .cfg-card {
   margin-bottom: 1.25rem;
   border-left: 4px solid var(--bs-primary, #0d6efd);
+  background-color: rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1));
+  color: var(--color-text, #212529);
 }
 .cfg-card > .card-body { padding: 1rem 1.25rem; }
 .cfg-card .menulink { scroll-margin-top: 80px; }
-.cfg-card > .card-body > h1.menulink,
-.cfg-card > .card-body > h1:first-child {
+/* セクション見出し(h1/h3 を問わず)を統一書式に */
+.cfg-card h1.menulink,
+.cfg-card h3.menulink {
   font-size: 1.3rem;
   font-weight: 700;
   margin-top: 0;
@@ -656,9 +659,17 @@ print ' value="10" ';
 		</datalist>
   </div>
   <script>
-  document.getElementById('bgcolor').addEventListener('change', function(){
-      document.body.style.backgroundColor = this.value;
-  });
+  (function(){
+      var bgEl = document.getElementById('bgcolor');
+      function applyBgColor(){
+          // 実際のページ背景は body::before の var(--bg-page) で描画されるため
+          // body 直下の background-color ではなく CSS 変数を更新する。
+          document.documentElement.style.setProperty('--bg-page', bgEl.value);
+          document.body.style.backgroundColor = bgEl.value;
+      }
+      bgEl.addEventListener('input', applyBgColor);
+      bgEl.addEventListener('change', applyBgColor);
+  })();
   </script>
 
 <!---- 背景画像 + 透過度設定 ----->
