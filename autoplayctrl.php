@@ -102,16 +102,19 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
         ? "OK HTTP {$code} (接続先IP: {$ip})"
         : "NG curl({$en}): {$es2}";
 
-    // 8. ping パケットロス率 (Windows 環境)
+    // 8. ping パケットロス率 (Windows 環境、日本語ロケール対応)
     $ping_cmd = 'ping -n 4 -w ' . ($timeout * 1000) . ' ' . escapeshellarg($h_host);
     @exec($ping_cmd, $ping_output);
     $ping_output_str = implode("\n", $ping_output);
-    // Windows ping 出力: "Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)"
-    if (preg_match('/Lost = (\d+) \((\d+)%/', $ping_output_str, $m)) {
-        $loss_percent = (int)$m[2];
-        $results['ping_loss'] = "Loss {$loss_percent}% (4回送信)";
+    // 送受信パケット数から計算（ロケール非依存）
+    // 英語: "Sent = 4, Received = 3"  日本語: "送信 = 4、受信 = 3"
+    if (preg_match('/(?:Sent|送信)\s*=\s*(\d+).*(?:Received|受信)\s*=\s*(\d+)/', $ping_output_str, $m)) {
+        $sent = (int)$m[1];
+        $recv = (int)$m[2];
+        $loss = $sent > 0 ? (int)(($sent - $recv) / $sent * 100) : 100;
+        $results['ping_loss'] = "Loss {$loss}% ({$sent}回送信)";
     } else {
-        $results['ping_loss'] = "失敗または全喪失";
+        $results['ping_loss'] = "実行失敗 (パース不可)";
     }
 
     echo json_encode(['host' => $host_raw, 'timeout' => $timeout, 'results' => $results]);
