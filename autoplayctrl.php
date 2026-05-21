@@ -316,15 +316,9 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
     <div class="card-header fw-bold">pfwd (SSH転送)</div>
     <div class="card-body">
 
-      <!-- WireGuard 実行中かつ pfwd も起動中: 危険警告 -->
-      <div id="pfwd-danger-alert" class="alert alert-danger py-2 <?= ($wg_running && $pfwd_running) ? '' : 'd-none' ?>" role="alert">
-        <strong>⚠ 警告:</strong> WireGuard 接続中にもかかわらず pfwd が起動しています。<br>
-        pfwd は WireGuard オフ時のみ使用してください。直ちに停止してください。
-      </div>
-
-      <!-- WireGuard 実行中かつ pfwd 停止中: 注意 -->
+      <!-- WireGuard 実行中かつ pfwd 停止中: 注意（pfwd が接続元でない可能性） -->
       <div id="pfwd-online-alert" class="alert alert-warning py-2 <?= ($wg_running && !$pfwd_running) ? '' : 'd-none' ?>" role="alert">
-        WireGuard 接続中です。pfwd は起動しないでください。
+        WireGuard 実行中です。オンライン接続が確立されているため pfwd は起動しないでください。
       </div>
 
       <p class="mb-3">
@@ -335,7 +329,7 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
       </p>
       <div class="d-flex gap-2">
         <button type="button" id="pfwd-start-btn" class="btn btn-success"
-          <?= $wg_running ? 'disabled' : '' ?> onclick="start_pfwdcmd()">起動</button>
+          <?= ($wg_running && !$pfwd_running) ? 'disabled' : '' ?> onclick="start_pfwdcmd()">起動</button>
         <button type="button" class="btn btn-danger" onclick="stop_pfwdcmd()">停止</button>
       </div>
     </div>
@@ -359,21 +353,15 @@ var wgRunning   = <?= $wg_running ? 'true' : 'false' ?>;
 
 function applyPfwdRestriction(pfwdIsRunning) {
     var startBtn    = document.getElementById('pfwd-start-btn');
-    var dangerAlert = document.getElementById('pfwd-danger-alert');
     var onlineAlert = document.getElementById('pfwd-online-alert');
     if (!startBtn) return;
-    if (wgRunning) {
+    if (wgRunning && !pfwdIsRunning) {
+        // WireGuard 実行中で pfwd 未起動 → オンライン接続済みなので pfwd 起動禁止
         startBtn.disabled = true;
-        if (pfwdIsRunning) {
-            if (dangerAlert) dangerAlert.classList.remove('d-none');
-            if (onlineAlert) onlineAlert.classList.add('d-none');
-        } else {
-            if (dangerAlert) dangerAlert.classList.add('d-none');
-            if (onlineAlert) onlineAlert.classList.remove('d-none');
-        }
+        if (onlineAlert) onlineAlert.classList.remove('d-none');
     } else {
+        // pfwd 起動中 (pfwd が接続元) または WireGuard 未実行 → 制限なし
         startBtn.disabled = false;
-        if (dangerAlert) dangerAlert.classList.add('d-none');
         if (onlineAlert) onlineAlert.classList.add('d-none');
     }
 }
