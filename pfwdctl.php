@@ -93,36 +93,47 @@ EOT;
 
 
     public function set_pfwdhost($hoststring){
-        $replaceline = false;
+        $found = false;
         foreach($this->pfwdini as $key => $line){
             if(substr($line,0,5) === 'Host=' ) {
-                $replaceline = $line;
-                $this->pfwdini[$key] = str_replace($replaceline,'Host='.$hoststring,$line);
+                // 単純に Host= から = の後ろだけを置換
+                $this->pfwdini[$key] = 'Host='.$hoststring;
+                $found = true;
                 break;
             }
+        }
+        // Host= が見つからない場合は新規追加
+        if (!$found) {
+            $this->pfwdini[] = 'Host='.$hoststring;
         }
         return $this->pfwdini;
     }
     public function set_pfwdport($portstring){
-        $replaceline = false;
+        $found = false;
         foreach($this->pfwdini as $key => $line){
             if(substr($line,0,5) === 'Port=' ) {
-                $replaceline = $line;
-                $this->pfwdini[$key] = str_replace($replaceline,'Port='.$portstring,$line);
+                $this->pfwdini[$key] = 'Port='.$portstring;
+                $found = true;
                 break;
             }
+        }
+        if (!$found) {
+            $this->pfwdini[] = 'Port='.$portstring;
         }
         return $this->pfwdini;
     }
 
     public function set_pfwdopenport($portstring){
-        $replaceline = false;
+        $found = false;
         foreach($this->pfwdini as $key => $line){
             if(substr($line,0,4) === '01=R' ) {
-                $replaceline = $line;
-                $this->pfwdini[$key] = str_replace($replaceline,'01=R'.$portstring.':localhost:80',$line);
+                $this->pfwdini[$key] = '01=R'.$portstring.':localhost:80';
+                $found = true;
                 break;
             }
+        }
+        if (!$found) {
+            $this->pfwdini[] = '01=R'.$portstring.':localhost:80';
         }
         return $this->pfwdini;
     }
