@@ -1856,10 +1856,19 @@ function print_bg_style_block($is_bs5 = false) {
     // 背景画像機能は BS5 ページのみ対象。BS3 ページでは $has_bgimage を false のまま維持する。
     $has_bgimage = false;
     $bgimg_url = '';
+    $bgimg_mobile_url = '';
     if ($is_bs5 && array_key_exists("bgimage", $config_ini) && !empty($config_ini["bgimage"])) {
         $bgimg_url = htmlspecialchars(urldecode($config_ini["bgimage"]), ENT_QUOTES, 'UTF-8');
         $vars[] = '--bg-page-image:url(\'' . $bgimg_url . '\');';
         $has_bgimage = true;
+    }
+    if ($is_bs5 && array_key_exists("bgimage_mobile", $config_ini) && !empty($config_ini["bgimage_mobile"])) {
+        $bgimg_mobile_url = htmlspecialchars(urldecode($config_ini["bgimage_mobile"]), ENT_QUOTES, 'UTF-8');
+    }
+    // スマホ用が未設定なら PC 用画像で代替する。
+    if ($has_bgimage) {
+        $mobile_css_url = ($bgimg_mobile_url !== '') ? $bgimg_mobile_url : $bgimg_url;
+        $vars[] = '--bg-page-image-mobile:url(\'' . $mobile_css_url . '\');';
     }
 
     $overlay_alpha = 1.0;
@@ -1889,6 +1898,9 @@ function print_bg_style_block($is_bs5 = false) {
         // theme-toggle.css の [data-theme="dark"] body { background-image: none !important }
         // を同一詳細度・後優先で上書きして、ダークモードでも背景画像を表示させる。
         print '[data-theme="dark"] body{background-image:var(--bg-page-image) !important;}';
+        // スマホ(縦長)幅では専用画像に切り替える(未設定時は PC 用にフォールバック済み)。
+        print '@media (max-width:768px){'
+            . 'body,[data-theme="dark"] body{background-image:var(--bg-page-image-mobile) !important;}}';
         print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
             . 'background-image:none !important;'
             . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));'

@@ -174,6 +174,9 @@ function readconfig_array()
     if(!array_key_exists("bgimage", $config_ini)){
         $config_ini["bgimage"] = "";
     }
+    if(!array_key_exists("bgimage_mobile", $config_ini)){
+        $config_ini["bgimage_mobile"] = "";
+    }
     if(!array_key_exists("bg_card_opacity", $config_ini)){
         $config_ini["bg_card_opacity"] = 100;
     }

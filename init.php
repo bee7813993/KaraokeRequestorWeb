@@ -27,35 +27,57 @@ $easyauth -> do_eashauthcheck();
 $newconfig = $_REQUEST;
 
 // 背景画像のアップロード/削除処理
+// クロップ済み画像はクライアントから data URL (base64) で送信される。
 $bgimage_upload_msg = '';
-if (isset($_FILES['bgimage_upload']) && is_array($_FILES['bgimage_upload']) && $_FILES['bgimage_upload']['error'] !== UPLOAD_ERR_NO_FILE) {
-    $f = $_FILES['bgimage_upload'];
-    if ($f['error'] === UPLOAD_ERR_OK && is_uploaded_file($f['tmp_name'])) {
-        $info = @getimagesize($f['tmp_name']);
-        $allowed = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'];
-        if ($info !== false && isset($allowed[$info[2]])) {
-            $ext = $allowed[$info[2]];
-            $bgdir = __DIR__ . '/images/bg';
-            if (!is_dir($bgdir)) { @mkdir($bgdir, 0777, true); }
-            $name = 'bg_' . date('YmdHis') . '_' . substr(bin2hex(random_bytes(4)),0,8) . '.' . $ext;
-            $dest = $bgdir . '/' . $name;
-            if (@move_uploaded_file($f['tmp_name'], $dest)) {
-                $newconfig['bgimage'] = 'images/bg/' . $name;
-                $bgimage_upload_msg = '背景画像をアップロードしました: ' . $name;
-            } else {
-                $bgimage_upload_msg = '背景画像の保存に失敗しました';
-            }
-        } else {
-            $bgimage_upload_msg = '画像ファイル (JPEG/PNG/GIF/WebP) を指定してください';
-        }
-    } else {
-        $bgimage_upload_msg = 'アップロードに失敗しました (code:' . $f['error'] . ')';
+
+// data URL を images/bg/ に保存し、相対パスを返す。失敗時は null。
+function save_bg_dataurl($dataurl, &$msg, $label) {
+    if (!is_string($dataurl) || $dataurl === '') return null;
+    if (!preg_match('#^data:image/(jpeg|png|webp|gif);base64,#', $dataurl, $m)) {
+        $msg = $label . 'の画像形式が不正です';
+        return null;
     }
+    $ext_map = ['jpeg' => 'jpg', 'png' => 'png', 'webp' => 'webp', 'gif' => 'gif'];
+    $ext = $ext_map[$m[1]];
+    $bin = base64_decode(substr($dataurl, strpos($dataurl, ',') + 1), true);
+    if ($bin === false) { $msg = $label . 'のデコードに失敗しました'; return null; }
+    if (@getimagesizefromstring($bin) === false) { $msg = $label . 'の画像を認識できませんでした'; return null; }
+    $bgdir = __DIR__ . '/images/bg';
+    if (!is_dir($bgdir)) { @mkdir($bgdir, 0777, true); }
+    $name = 'bg_' . date('YmdHis') . '_' . substr(bin2hex(random_bytes(4)), 0, 8) . '.' . $ext;
+    if (@file_put_contents($bgdir . '/' . $name, $bin) === false) {
+        $msg = $label . 'の保存に失敗しました';
+        return null;
+    }
+    return 'images/bg/' . $name;
 }
-if (isset($_REQUEST['bgimage_delete']) && $_REQUEST['bgimage_delete'] == '1') {
-    $newconfig['bgimage'] = '';
-    if (isset($newconfig['bgimage_delete'])) unset($newconfig['bgimage_delete']);
-    $bgimage_upload_msg = '背景画像をクリアしました';
+
+// PC用・スマホ用のクロップ結果を保存
+foreach ([
+    'bgimage_data'        => ['bgimage',        'PC用背景画像'],
+    'bgimage_mobile_data' => ['bgimage_mobile', 'スマホ用背景画像'],
+] as $field => $meta) {
+    if (isset($_REQUEST[$field]) && $_REQUEST[$field] !== '') {
+        $saved = save_bg_dataurl($_REQUEST[$field], $bgimage_upload_msg, $meta[1]);
+        if ($saved !== null) {
+            $newconfig[$meta[0]] = $saved;
+            $bgimage_upload_msg = $meta[1] . 'を保存しました';
+        }
+    }
+    // 一時フィールドは config.ini に書き込まない
+    unset($newconfig[$field]);
+}
+
+// 削除処理
+foreach ([
+    'bgimage_delete'        => ['bgimage',        'PC用背景画像'],
+    'bgimage_mobile_delete' => ['bgimage_mobile', 'スマホ用背景画像'],
+] as $field => $meta) {
+    if (isset($_REQUEST[$field]) && $_REQUEST[$field] == '1') {
+        $newconfig[$meta[0]] = '';
+        $bgimage_upload_msg = $meta[1] . 'をクリアしました';
+    }
+    unset($newconfig[$field]);
 }
 
 
@@ -112,6 +134,19 @@ if(array_key_exists("clearauth", $_REQUEST)) {
   font-size: 1.3rem;
   font-weight: 700;
   margin-top: 0;
+}
+/* 背景画像クロッパー */
+.bgimg-thumb { max-width: 160px; max-height: 120px; border: 1px solid #ccc; }
+.bgimg-viewport {
+  position: relative; overflow: hidden; background: #222;
+  touch-action: none; margin: 6px 0; border: 1px solid #ccc;
+  max-width: 100%;
+}
+.bgimg-block[data-target="pc"]     .bgimg-viewport { width: 320px; height: 180px; }
+.bgimg-block[data-target="mobile"] .bgimg-viewport { width: 180px; height: 320px; }
+.bgimg-cropimg {
+  position: absolute; top: 0; left: 0;
+  max-width: none; user-select: none; -webkit-user-drag: none; pointer-events: none;
 }
 </style>
 <script>
@@ -695,6 +730,10 @@ print ' value="10" ';
       if (array_key_exists("bgimage", $config_ini)) {
           $bgimage_path = urldecode($config_ini["bgimage"]);
       }
+      $bgimage_mobile_path = '';
+      if (array_key_exists("bgimage_mobile", $config_ini)) {
+          $bgimage_mobile_path = urldecode($config_ini["bgimage_mobile"]);
+      }
       $bg_card_opacity = 100;
       if (array_key_exists("bg_card_opacity", $config_ini)) {
           $bg_card_opacity = (int)$config_ini["bg_card_opacity"];
@@ -709,32 +748,67 @@ print ' value="10" ';
 <div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3">
     <h3 id="bgimage_t" class="radio form-label menulink"> 背景画像 </h3>
-    <label><small>画面全体の背景に画像を表示します。透過度で見やすさを調整できます。</small></label>
+    <label><small>画面全体の背景に画像を表示します。PC(横長)とスマホ(縦長)で別々の画像を登録でき、アップロード時に切り抜き範囲を調整できます。スマホ用が未設定のときはPC用画像が使われます。</small></label>
     <?php if (!empty($bgimage_upload_msg)) { ?>
       <div class="alert alert-info" style="margin-top:6px;"><?php echo htmlspecialchars($bgimage_upload_msg, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php } ?>
-    <?php if (!empty($bgimage_path)) { ?>
-      <div style="margin:6px 0;">
-        現在の背景画像: <code><?php echo htmlspecialchars($bgimage_path, ENT_QUOTES, 'UTF-8'); ?></code><br>
-        <img src="<?php echo htmlspecialchars($bgimage_path, ENT_QUOTES, 'UTF-8'); ?>" alt="背景画像プレビュー" style="max-width:280px; max-height:160px; border:1px solid #ccc; margin-top:4px;">
-      </div>
-    <?php } else { ?>
-      <div style="margin:6px 0;"><small>背景画像は未設定です。</small></div>
-    <?php } ?>
 
-    <div style="margin:8px 0;">
-      <label><small>背景画像ファイル(アップロード時に置き換え):</small></label>
-      <input type="file" name="bgimage_upload" accept="image/png,image/jpeg,image/gif,image/webp" />
-    </div>
-    <?php if (!empty($bgimage_path)) { ?>
-      <div style="margin:8px 0;">
-        <label class="checkbox-inline">
-          <input type="checkbox" name="bgimage_delete" value="1" /> 背景画像をクリアする (設定反映で適用)
-        </label>
+    <div class="row">
+      <?php
+        // PC用・スマホ用の2ブロックを共通テンプレートで描画
+        $bg_blocks = [
+            ['target' => 'pc',     'aspect' => 16/9, 'title' => 'PC用背景画像 (横長)',  'path' => $bgimage_path,        'field' => 'bgimage'],
+            ['target' => 'mobile', 'aspect' => 9/16, 'title' => 'スマホ用背景画像 (縦長)', 'path' => $bgimage_mobile_path, 'field' => 'bgimage_mobile'],
+        ];
+        foreach ($bg_blocks as $blk):
+          $cur = htmlspecialchars($blk['path'], ENT_QUOTES, 'UTF-8');
+      ?>
+      <div class="col-md-6 mb-3 bgimg-block" data-target="<?php echo $blk['target']; ?>" data-aspect="<?php echo round($blk['aspect'], 4); ?>">
+        <h4 style="font-size:1rem;font-weight:600;"><?php echo htmlspecialchars($blk['title'], ENT_QUOTES, 'UTF-8'); ?></h4>
+        <?php if (!empty($blk['path'])) { ?>
+          <div class="bgimg-current" style="margin:4px 0;">
+            <small>現在: <code><?php echo $cur; ?></code></small><br>
+            <img src="<?php echo $cur; ?>" alt="現在の背景画像" class="bgimg-thumb">
+          </div>
+        <?php } else { ?>
+          <div class="bgimg-current" style="margin:4px 0;"><small>未設定</small></div>
+        <?php } ?>
+
+        <div style="margin:6px 0;">
+          <input type="file" class="bgimg-file form-control form-control-sm" accept="image/png,image/jpeg,image/gif,image/webp" />
+        </div>
+
+        <div class="bgimg-cropper" hidden>
+          <div class="bgimg-viewport">
+            <img class="bgimg-cropimg" alt="" />
+          </div>
+          <div style="margin:6px 0;">
+            <label><small>拡大</small></label>
+            <input type="range" class="bgimg-zoom" min="1" max="4" step="0.01" value="1" style="width:100%;" />
+          </div>
+          <button type="button" class="btn btn-primary btn-sm bgimg-ok">この範囲で切り抜く</button>
+          <button type="button" class="btn btn-secondary btn-sm bgimg-cancel">キャンセル</button>
+          <div><small class="text-muted">画像をドラッグして位置を調整、スライダーで拡大できます。</small></div>
+        </div>
+
+        <div class="bgimg-result" style="margin:6px 0;" hidden>
+          <small class="text-success">切り抜き済み (設定反映で保存):</small><br>
+          <img alt="切り抜きプレビュー" class="bgimg-thumb" />
+        </div>
+
+        <?php if (!empty($blk['path'])) { ?>
+          <div style="margin:6px 0;">
+            <label class="checkbox-inline">
+              <input type="checkbox" class="bgimg-delete" name="<?php echo $blk['field']; ?>_delete" value="1" /> クリアする (設定反映で適用)
+            </label>
+          </div>
+        <?php } ?>
+
+        <input type="hidden" class="bgimg-data" name="<?php echo $blk['field']; ?>_data" value="" />
+        <input type="hidden" name="<?php echo $blk['field']; ?>" value="<?php echo $cur; ?>" />
       </div>
-    <?php } ?>
-    <!-- 現在のbgimage値を保持 -->
-    <input type="hidden" name="bgimage" value="<?php echo htmlspecialchars($bgimage_path, ENT_QUOTES, 'UTF-8'); ?>" />
+      <?php endforeach; ?>
+    </div>
 
     <div class="mb-3" style="margin-top:10px;">
       <label for="bg_card_opacity"><small>カード透過度: <span id="bg_card_opacity_val"><?php echo $bg_card_opacity; ?></span>%</small></label>
@@ -769,6 +843,107 @@ print ' value="10" ';
           document.getElementById(id).addEventListener('change', updateBgPreview);
       });
       updateBgPreview();
+  })();
+  </script>
+
+  <script>
+  // 背景画像クロッパー: 固定アスペクト比のビューポート内で画像をパン/ズームし、
+  // 確定時に canvas で切り抜いて data URL を hidden フィールドに格納する。
+  (function(){
+      function initCropper(block){
+          var aspect    = parseFloat(block.dataset.aspect);
+          var fileInput = block.querySelector('.bgimg-file');
+          var cropWrap  = block.querySelector('.bgimg-cropper');
+          var viewport  = block.querySelector('.bgimg-viewport');
+          var imgEl     = block.querySelector('.bgimg-cropimg');
+          var zoom      = block.querySelector('.bgimg-zoom');
+          var btnOk     = block.querySelector('.bgimg-ok');
+          var btnCancel = block.querySelector('.bgimg-cancel');
+          var dataInput = block.querySelector('.bgimg-data');
+          var resultBox = block.querySelector('.bgimg-result');
+          var resultImg = resultBox ? resultBox.querySelector('img') : null;
+          var deleteChk = block.querySelector('.bgimg-delete');
+
+          var natW = 0, natH = 0, minScale = 1, scale = 1, offX = 0, offY = 0;
+          var vw = 0, vh = 0, dragging = false, lastX = 0, lastY = 0, objUrl = null;
+
+          function clamp(){
+              var dispW = natW * scale, dispH = natH * scale;
+              if (offX > 0) offX = 0;
+              if (offX < vw - dispW) offX = vw - dispW;
+              if (offY > 0) offY = 0;
+              if (offY < vh - dispH) offY = vh - dispH;
+          }
+          function render(){
+              imgEl.style.width  = (natW * scale) + 'px';
+              imgEl.style.height = (natH * scale) + 'px';
+              imgEl.style.left   = offX + 'px';
+              imgEl.style.top    = offY + 'px';
+          }
+          fileInput.addEventListener('change', function(){
+              var f = fileInput.files && fileInput.files[0];
+              if (!f) return;
+              if (!/^image\//.test(f.type)) { alert('画像ファイルを選択してください'); return; }
+              if (objUrl) URL.revokeObjectURL(objUrl);
+              objUrl = URL.createObjectURL(f);
+              var im = new Image();
+              im.onload = function(){
+                  natW = im.naturalWidth; natH = im.naturalHeight;
+                  imgEl.src = objUrl;
+                  cropWrap.hidden = false; // 計測前に表示しないと幅が 0 になる
+                  vw = viewport.clientWidth; vh = viewport.clientHeight;
+                  minScale = Math.max(vw / natW, vh / natH);
+                  scale = minScale;
+                  zoom.value = 1;
+                  offX = (vw - natW * scale) / 2;
+                  offY = (vh - natH * scale) / 2;
+                  clamp(); render();
+              };
+              im.src = objUrl;
+          });
+          zoom.addEventListener('input', function(){
+              var cx = (vw / 2 - offX) / scale, cy = (vh / 2 - offY) / scale;
+              scale = minScale * parseFloat(zoom.value);
+              offX = vw / 2 - cx * scale;
+              offY = vh / 2 - cy * scale;
+              clamp(); render();
+          });
+          viewport.addEventListener('pointerdown', function(e){
+              dragging = true; lastX = e.clientX; lastY = e.clientY;
+              viewport.setPointerCapture(e.pointerId);
+          });
+          viewport.addEventListener('pointermove', function(e){
+              if (!dragging) return;
+              offX += e.clientX - lastX; offY += e.clientY - lastY;
+              lastX = e.clientX; lastY = e.clientY;
+              clamp(); render();
+          });
+          function endDrag(){ dragging = false; }
+          viewport.addEventListener('pointerup', endDrag);
+          viewport.addEventListener('pointercancel', endDrag);
+
+          btnCancel.addEventListener('click', function(){
+              cropWrap.hidden = true;
+              fileInput.value = '';
+              imgEl.removeAttribute('src');
+          });
+          btnOk.addEventListener('click', function(){
+              var sx = -offX / scale, sy = -offY / scale, sw = vw / scale, sh = vh / scale;
+              var outW, outH;
+              if (aspect >= 1) { outW = Math.min(1920, Math.round(sw)); outH = Math.round(outW / aspect); }
+              else             { outH = Math.min(1920, Math.round(sh)); outW = Math.round(outH * aspect); }
+              var c = document.createElement('canvas');
+              c.width = outW; c.height = outH;
+              c.getContext('2d').drawImage(imgEl, sx, sy, sw, sh, 0, 0, outW, outH);
+              var data = c.toDataURL('image/jpeg', 0.85);
+              dataInput.value = data;
+              if (resultImg) resultImg.src = data;
+              if (resultBox) resultBox.hidden = false;
+              cropWrap.hidden = true;
+              if (deleteChk) deleteChk.checked = false; // 新規画像を設定したのでクリアは解除
+          });
+      }
+      document.querySelectorAll('.bgimg-block').forEach(initCropper);
   })();
   </script>
 
