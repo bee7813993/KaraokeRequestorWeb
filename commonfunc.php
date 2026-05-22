@@ -1896,8 +1896,10 @@ function print_bg_style_block($is_bs5 = false) {
         print 'html::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;'
             . 'filter:none !important;'
             . 'background-image:var(--bg-page-image);background-size:cover;background-position:center;}';
-        // スマホ幅では専用画像(未設定時は PC 用にフォールバック済み)に切り替える。
-        print '@media (max-width:768px){html::before{background-image:var(--bg-page-image-mobile);}}';
+        // スマホ縦持ち(縦長表示)のときだけ専用画像に切り替える。
+        // orientation:portrait を条件に加えることで、小型端末を横持ちにした際
+        // (幅が 768px 以下のままでも)は PC 用の横長画像が使われるようにする。
+        print '@media (max-width:768px) and (orientation:portrait){html::before{background-image:var(--bg-page-image-mobile);}}';
         // body や外部 CSS (search.css / player.css / mypage インラインスタイル) が
         // body に background-image を設定すると html::before を隠してしまうため、
         // body 側の画像指定は明示的に無効化して html::before レイヤーに一本化する。
