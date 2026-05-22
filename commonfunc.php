@@ -1889,18 +1889,21 @@ function print_bg_style_block($is_bs5 = false) {
     print '<style>:root{' . implode('', $vars) . '}';
 
     if ($has_bgimage) {
-        // body 側に背景画像を貼り、body::before はオーバーレイ色のみに分離する。
-        // これによりダークモードの body::before に掛かる brightness フィルタが
-        // 背景画像を暗くするのを防ぐ(画像本体は body 直下に置くため影響を受けない)。
+        // html::before = 固定背景画像レイヤー。
+        // iOS Safari は body の background-attachment:fixed をサポートしていないため、
+        // position:fixed の疑似要素で代替することで全ブラウザ・全デバイスで背景を固定する。
         print 'html,body{background-color:transparent !important;}';
-        print 'body{background-image:var(--bg-page-image) !important;'
-            . 'background-size:cover;background-attachment:fixed;background-position:center;}';
-        // theme-toggle.css の [data-theme="dark"] body { background-image: none !important }
-        // を同一詳細度・後優先で上書きして、ダークモードでも背景画像を表示させる。
-        print '[data-theme="dark"] body{background-image:var(--bg-page-image) !important;}';
-        // スマホ(縦長)幅では専用画像に切り替える(未設定時は PC 用にフォールバック済み)。
-        print '@media (max-width:768px){'
-            . 'body,[data-theme="dark"] body{background-image:var(--bg-page-image-mobile) !important;}}';
+        print 'html::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;'
+            . 'filter:none !important;'
+            . 'background-image:var(--bg-page-image);background-size:cover;background-position:center;}';
+        // スマホ幅では専用画像(未設定時は PC 用にフォールバック済み)に切り替える。
+        print '@media (max-width:768px){html::before{background-image:var(--bg-page-image-mobile);}}';
+        // body や外部 CSS (search.css / player.css / mypage インラインスタイル) が
+        // body に background-image を設定すると html::before を隠してしまうため、
+        // body 側の画像指定は明示的に無効化して html::before レイヤーに一本化する。
+        print 'body{background-image:none !important;}';
+        // body::before = オーバーレイ色レイヤー。画像レイヤー(z-index:-2)の上に重ねる。
+        // ダークモードの brightness フィルタが背景画像に影響しないよう filter:none を指定。
         print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
             . 'background-image:none !important;'
             . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));'
@@ -1912,22 +1915,30 @@ function print_bg_style_block($is_bs5 = false) {
     }
 
     if ($has_bgimage && $card_alpha < 1.0) {
-        // カード系コンポーネントを透過させる(BS3 + BS5 + 本アプリ独自クラス)
+        // カード系コンポーネントを透過させる(BS3 + BS5 + 本アプリ独自クラス)。
         // .request-card は requestlist_swipe.php 側で per-status の rgba を持つため除外。
+        // .modal-content は別途不透明で上書きするためここには含めない。
+        // .badge は小さいステータス表示のため除外(.bg-info:not(.badge) 等で限定)。
         // フォールバック値を持たせて _variables.css 未ロード時(BS3)でも有効化。
         $card_bg = 'rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1))';
         print '.panel,.panel-default,.panel-body,.panel-heading,.panel-footer,'
-            . '.bg-info,.bg-light,.bg-white,.well,.alert,'
+            . '.bg-info:not(.badge),.bg-light:not(.badge),.bg-white,.well,.alert,'
             . '.card,.card-body,.card-header,.card-footer,'
             . '.list-group-item,.dropdown-menu,'
             . '.accordion-item,.accordion-body,.accordion-button,'
-            . '.modal-content,'
             . '.player-nowplaying,#stats-bar,'
             . '.dataTables_wrapper > .dataTable, table.dataTable tbody tr{'
             . 'background-color:' . $card_bg . ' !important;'
             . 'background-image:none !important;}';
-        // 背景色をインラインで持つ既存スタイル(bg-info の青 等)を直接上書きするための補強
-        print '.bg-info{background-color:' . $card_bg . ' !important;}';
+        // 背景色をインラインで持つ既存スタイル(bg-info の青 等)を直接上書きするための補強。
+        // バッジは除外して常に Bootstrap 本来の色を維持する。
+        print '.bg-info:not(.badge){background-color:' . $card_bg . ' !important;}';
+        // モーダル・ダイアログは透過させない。背景画像が透けると文字が読みにくくなるため、
+        // カード透過度の設定にかかわらず常に不透明な背景で表示する。
+        $card_bg_opaque = 'rgba(var(--bg-card-rgb, 255, 255, 255), 1)';
+        print '.modal-content{'
+            . 'background-color:' . $card_bg_opaque . ' !important;'
+            . 'background-image:none !important;}';
 
         // BS5 ページのみ: テーブル・フォームコントロール等の白抜き要素も透過対象に含める。
         // BS3 ページで .table や .form-control が登場するページに副作用が出るのを避けるため、
