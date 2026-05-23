@@ -1786,7 +1786,6 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
 
   <input type="submit" class="btn btn-secondary btn-lg" value="設定" />
   </form>
-</div>
   <hr />
 
 <div class="card cfg-card mb-4"><div class="card-body">
@@ -1823,6 +1822,7 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
   </pre>
 
   </div></div>
+</div><!-- col-lg-9 -->
 </div><!-- row -->
 
 </div><!-- container -->
