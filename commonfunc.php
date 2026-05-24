@@ -2569,6 +2569,36 @@ function mypage_save_keyword_link($keyword, $search_type, $search_params = '') {
 }
 
 /**
+ * requesttable の reqorder を連番（1始まり昇順）に正規化する。
+ * 現在の reqorder の大小関係を保持したまま隙間・重複を解消する。
+ * 同じ reqorder 値を持つ行は id の昇順で並べる。
+ * @param PDO $db
+ */
+function normalize_reqorder($db) {
+    $db->beginTransaction();
+    try {
+        $select = $db->query("SELECT id, reqorder FROM requesttable ORDER BY reqorder ASC, id ASC");
+        $rows = $select->fetchAll(PDO::FETCH_ASSOC);
+        $select->closeCursor();
+
+        $stmt = $db->prepare("UPDATE requesttable SET reqorder = :req WHERE id = :id");
+        $pos = 1;
+        foreach ($rows as $row) {
+            if ((int)$row['reqorder'] !== $pos) {
+                $stmt->bindValue(':req', $pos, PDO::PARAM_INT);
+                $stmt->bindValue(':id', (int)$row['id'], PDO::PARAM_INT);
+                $stmt->execute();
+            }
+            $pos++;
+        }
+        $db->commit();
+    } catch (Exception $e) {
+        $db->rollBack();
+        throw $e;
+    }
+}
+
+/**
  * マイページ用 JS (fetch + フィードバック表示) を出力する
  * <head> または <body> 内に一度だけ出力する
  */

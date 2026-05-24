@@ -27,8 +27,9 @@ try {
     $db->beginTransaction();
     $stmt = $db->prepare("UPDATE requesttable SET reqorder = :reqorder WHERE id = :id");
     foreach ($ids as $index => $id) {
-        // First item gets highest reqorder (displayed first, ORDER BY reqorder DESC)
-        $reqorder = ($total - $index) * 10;
+        // 先頭アイテム(index=0)が最大reqorder（ORDER BY reqorder DESC で先頭表示）
+        // 10倍間隔ではなく連番で割り当てることで他の処理との採番方式を統一する
+        $reqorder = $total - $index;
         $stmt->bindValue(':reqorder', $reqorder, PDO::PARAM_INT);
         $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
         $stmt->execute();
@@ -40,6 +41,9 @@ try {
     echo json_encode(['status' => 'error', 'message' => 'DB error']);
     exit;
 }
+
+// ドラッグ&ドロップ対象外のレコード（再生中など）も含めて連番に正規化する
+normalize_reqorder($db);
 
 $un = new UpdateNotice();
 $un->initdb();

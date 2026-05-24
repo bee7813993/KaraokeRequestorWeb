@@ -242,10 +242,17 @@ if (is_numeric($selectid)) {
         die();
     }
     $newid = (int)$db->lastInsertId();
-    $sql_u = 'UPDATE requesttable SET reqorder = ' . $newid . ', status = \'OK\' WHERE id = ' . $newid;
+    // reqorder は「現在の最大値+1」とし、新規予約を末尾（最後に再生）に追加する
+    $maxrow = $db->query(
+        "SELECT COALESCE(MAX(reqorder), 0) AS maxreq FROM requesttable WHERE id != " . $newid
+    )->fetch(PDO::FETCH_ASSOC);
+    $newreqorder = (int)$maxrow['maxreq'] + 1;
+    $stmt_u = $db->prepare('UPDATE requesttable SET reqorder = :reqorder, status = \'OK\' WHERE id = :id');
+    $stmt_u->bindValue(':reqorder', $newreqorder, PDO::PARAM_INT);
+    $stmt_u->bindValue(':id', $newid, PDO::PARAM_INT);
+    $stmt_u->execute();
     if (!empty($DEBUG))
-        print $sql_u . '<br />';
-    $db->exec($sql_u);
+        print "reqorder set to {$newreqorder} for id={$newid}<br />";
     if ($config_ini["request_automove"] == 1) {
         require_once('function_moveitem.php');
         $list = new MoveItem;
