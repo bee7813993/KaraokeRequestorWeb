@@ -1532,44 +1532,49 @@ if(array_key_exists("downloadfolder",$config_ini)) {
 
 <div class="card cfg-card mb-4"><div class="card-body">
   <h3 id="otherroom" class="radio form-label menulink"> 別部屋URL設定 </h3>
-  <table class="table table-striped table-bordered table-sm">
+  <small class="text-muted">ドラッグハンドル（⋮⋮）で行の順番を入れ替えられます</small>
+  <table class="table table-striped table-bordered table-sm mt-1">
   <thead>
     <tr>
-      <th class="col-3" >部屋番号</th>
-      <th class="col-8" >URL</th>
-      <th class="col-1" >表示</th>
+      <th style="width:32px"></th>
+      <th class="col-3">部屋番号</th>
+      <th class="col-7">URL</th>
+      <th class="col-1 text-center">表示</th>
     </tr>
   </thead>
-<?php 
+  <tbody id="roomurl-sortable">
+<?php
   $roomcount = 0;
   foreach ( $config_ini["roomurl"] as $key => $value ){
       if( empty($key) || empty($value) ){
           continue;
       }
-      print '  <tr>'."\n";
-      print '    <td><input type="text" class="form-control input-normal" placeholder="部屋'.$roomcount.'の部屋番号" name="roomno[]"';
-      print 'value="'.$key.'"' ;
+      $show_checked = (array_key_exists("roomurlshow", $config_ini) && array_key_exists($key, $config_ini["roomurlshow"]) && $config_ini["roomurlshow"][$key] == 1) ? ' checked' : '';
+      print '  <tr class="roomurl-row">'."\n";
+      print '    <td class="roomurl-drag-handle text-center align-middle" style="cursor:grab; color:#aaa; font-size:18px; user-select:none; touch-action:none;">&#8942;&#8942;</td>'."\n";
+      print '    <td><input type="text" class="form-control form-control-sm" placeholder="部屋番号" name="roomno[]"';
+      print ' value="'.htmlspecialchars($key).'"' ;
       print '    ></td>'."\n";
-      print '    <td><input type="text" class="form-control input-normal" placeholder="部屋'.$roomcount.'のURL" name="roomurl[]"';
-      print 'value="'.urldecode($value).'"' ;
+      print '    <td><input type="text" class="form-control form-control-sm" placeholder="部屋'.($roomcount+1).'のURL" name="roomurl[]"';
+      print ' value="'.htmlspecialchars(urldecode($value)).'"' ;
       print '    ></td>'."\n";
-      print '    <td><input type="checkbox" class="form-control input-normal" placeholder="部屋メニューに表示するかどうか" name="roomurlshow[]" value='.$roomcount;
-      if(array_key_exists("roomurlshow", $config_ini) && array_key_exists($key, $config_ini["roomurlshow"]) && $config_ini["roomurlshow"][$key] == 1){
-        print ' checked' ;
-      }
-      print '    ></td>'."\n";
+      print '    <td class="text-center align-middle"><input type="checkbox" class="form-check-input" name="roomurlshow[]" value="'.$roomcount.'"'.$show_checked.'></td>'."\n";
       print '  </tr>'."\n";
       $roomcount ++;
   }
-?>  
+?>
+  </tbody>
+  <tfoot>
   <tr>
-    <td><input type="text" class="form-control input-normal" placeholder="部屋<?php echo $roomcount;?>の部屋番号" name="roomno[]"
+    <td></td>
+    <td><input type="text" class="form-control form-control-sm" placeholder="新しい部屋番号" name="roomno[]"
     ></td>
-    <td><input type="text" class="form-control input-normal" placeholder="この部屋のURL" name="roomurl[]"
+    <td><input type="text" class="form-control form-control-sm" placeholder="新しい部屋のURL" name="roomurl[]"
     ></td>
-    <td><input type="checkbox" class="form-control input-normal" placeholder="オンライン用URLかどうか？" name="roomurlshow[]" value="<?php echo $roomcount;?>"
+    <td class="text-center align-middle"><input type="checkbox" class="form-check-input" name="roomurlshow[]" value="<?php echo $roomcount;?>"
     ></td>
   </tr>
+  </tfoot>
   </table>
 
   <div class="mb-3">
@@ -1840,6 +1845,24 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
             var rows = container.querySelectorAll('.searchitem-row');
             for (var i = 0; i < rows.length; i++) {
                 rows[i].querySelector('.searchitem-order-input').value = i + 1;
+            }
+        }
+    });
+})();
+
+// 別部屋URL ドラッグ並び替え
+(function() {
+    var tbody = document.getElementById('roomurl-sortable');
+    if (!tbody) return;
+    Sortable.create(tbody, {
+        handle: 'td:first-child',
+        animation: 150,
+        onEnd: function() {
+            // 並び替え後、チェックボックスの value を行番号（0始まり）に更新する
+            var rows = tbody.querySelectorAll('.roomurl-row');
+            for (var i = 0; i < rows.length; i++) {
+                var cb = rows[i].querySelector('input[name="roomurlshow[]"]');
+                if (cb) cb.value = i;
             }
         }
     });
