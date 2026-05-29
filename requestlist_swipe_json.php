@@ -20,7 +20,7 @@ try {
         "SELECT COALESCE(SUM(duration), 0) FROM requesttable WHERE nowplaying IN ('未再生', '1') AND duration > 0"
     )->fetchColumn();
 
-    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret, track, keychange, audiodelay, duration, volume FROM requesttable ORDER BY reqorder DESC";
+    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret, track, keychange, audiodelay, duration, volume, song_name, lister_artist, lister_work, lister_op_ed, lister_comment FROM requesttable ORDER BY reqorder DESC";
     if ($limit > 0) {
         $stmt = $db->prepare($sql . " LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
@@ -51,7 +51,12 @@ foreach ($rows as $idx => $row) {
         'reqorder'     => (int)$row['reqorder'],
         'songfile'     => $songfile,
         'display_name' => $display_name,
-        'singer'       => $row['singer'] ?? '',
+        'song_name'     => $row['song_name']     ?? '',
+        'lister_artist' => $row['lister_artist'] ?? '',
+        'lister_work'   => $row['lister_work']   ?? '',
+        'lister_op_ed'  => $row['lister_op_ed']  ?? '',
+        'lister_comment'=> $row['lister_comment']?? '',
+        'singer'        => $row['singer'] ?? '',
         'comment'      => $row['comment'] ?? '',
         'kind'         => $row['kind'] ?? '',
         'nowplaying'   => !empty($row['nowplaying']) ? $row['nowplaying'] : '1',

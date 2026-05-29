@@ -170,6 +170,14 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   color: var(--color-text, #212529);
   word-break: break-all;
   line-height: 1.4;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  padding: 2px 0;
+  border-radius: 3px;
+}
+.card-title:hover {
+  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.05);
 }
 .card-meta {
   font-size: 14px;
@@ -187,7 +195,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 5px;
   min-width: 64px;
 }
@@ -228,6 +236,29 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 .card-tweet-link:hover { text-decoration: underline; color: #0c85d0; }
 
+/* 展開ボタン（技術設定・Tweetを表示） */
+.card-expand-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 32px;
+  color: var(--color-text-muted, #aaa);
+  padding: 0;
+  line-height: 1;
+  transition: transform 0.2s ease, color 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
+}
+.card-expand-btn:hover { color: var(--bs-primary); }
+.request-card.card-expanded .card-expand-btn { transform: rotate(180deg); }
+/* 展開エリア（技術設定チップ＋Tweet） */
+.card-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.request-card.card-expanded .card-details { max-height: 200px; }
+
 /* ---- メタ情報チップ ---- */
 .meta-chips {
   display: flex;
@@ -247,8 +278,15 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   line-height: 1.6;
   white-space: nowrap;
 }
-.chip-singer   { background: #e8eaf6; color: #3949ab; }
-.chip-kind     { background: #e8f5e9; color: #2e7d32; }
+.chip-singer        { background: #e8eaf6; color: #3949ab; }
+.chip-kind          { background: #e8f5e9; color: #2e7d32; } /* fallback */
+.chip-kind-video    { background: #dbeafe; color: #1d4ed8; } /* 動画 */
+.chip-kind-karaoke  { background: #ffe4e6; color: #be123c; } /* カラオケ配信 */
+.chip-kind-pause    { background: #f1f5f9; color: #475569; } /* 小休止 */
+.chip-kind-url      { background: #fef3c7; color: #b45309; } /* URL指定 */
+.chip-kind-bgv      { background: #ede9fe; color: #6d28d9; } /* BGV選択 */
+.chip-kind-nico     { background: #cffafe; color: #0e7490; } /* ニコニコ動画 */
+.chip-lister-comment { background: #fce7f3; color: #be185d; font-size: 12px; }
 .chip-duration { background: #f1f3f5; color: #555;    }
 .chip-track    { background: #f3e5f5; color: #7b1fa2; }
 .chip-key-pos  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
@@ -375,7 +413,9 @@ if (!empty($config_ini['noticeof_listpage'])) {
   <div class="toolbar-left">
     <h4>現在の登録状況</h4>
     <button class="btn btn-secondary btn-sm" id="refresh-btn">更新</button>
-    <button class="btn btn-primary btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
+    <button id="title-toggle-btn" class="btn btn-secondary btn-sm"></button>
+    <button class="btn btn-warning btn-sm" id="undo-btn" style="display:none;">&#9100; 並び替え取り消し</button>
+    <button class="btn btn-primary btn-sm ms-auto" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
     <a href="simplelistexport_utf8.php" class="btn btn-secondary btn-sm">リクエストリストCSV</a>
@@ -488,6 +528,10 @@ var sortable        = null;
 var currentLimit    = REQUESTLIST_NUM; // 0 = ALL
 var shownCount      = 0;
 var totalCount      = 0;
+var titleDisplayMode = localStorage.getItem('ykari-title-display-mode') || 'songname'; // 'songname' or 'filename'
+
+// ---- 並び替え履歴 ----
+var lastOrderIds = null; // 直前の並び替え前の状態
 
 // ---- 件数選択のcookie保存/復元 ----
 function getCountCookie() {
@@ -563,7 +607,20 @@ function isUnplayed(nowplaying) {
     return nowplaying === '未再生' || nowplaying === '1';
 }
 
-function createCardHTML(item, idx) {
+function kindChipClass(kind) {
+    switch (kind) {
+        case '動画':        return 'chip-kind-video';
+        case 'カラオケ配信': return 'chip-kind-karaoke';
+        case '小休止':      return 'chip-kind-pause';
+        case 'URL指定':     return 'chip-kind-url';
+        case 'BGV選択':     return 'chip-kind-bgv';
+        case 'ニコニコ動画': return 'chip-kind-nico';
+        default:            return 'chip-kind';
+    }
+}
+
+function createCardHTML(item, idx, displayMode) {
+    displayMode = displayMode || titleDisplayMode; // デフォルトはグローバル設定
     var replaceLabel = (item.kind === 'カラオケ配信' && USE_BGV) ? 'BGV選択' : '曲差し替え';
 
     // コメント欄
@@ -586,14 +643,18 @@ function createCardHTML(item, idx) {
 
     // Tweet リンク
     var tweetHtml = '';
+    // 常に本来の曲名を保持（data属性用）
+    var actualSongName = item.song_name || item.display_name || item.songfile;
+    // displayMode に基づいて表示する曲名を決定
+    var displayName = (displayMode === 'filename') ? item.songfile : actualSongName;
     if (CONNECT_INTERNET && USE_POST_TWITTER) {
         var msg;
         if (isPlaying(item.nowplaying)) {
-            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌っています';
+            msg = '「' + item.singer + '」は「' + displayName + '」を歌っています';
         } else if (isUnplayed(item.nowplaying)) {
-            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌います';
+            msg = '「' + item.singer + '」は「' + displayName + '」を歌います';
         } else {
-            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌いました';
+            msg = '「' + item.singer + '」は「' + displayName + '」を歌いました';
         }
         tweetHtml = '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '" target="_blank" class="card-tweet-link">&#x1F426; Tweetする</a>';
     }
@@ -610,27 +671,26 @@ function createCardHTML(item, idx) {
     var position = item.position != null ? item.position : (totalCount - idx);
     var numHtml = '<span class="card-num">' + position + '</span>';
 
-    // 曲の長さチップ
-    var durationChip = '';
-    if (item.duration && item.duration > 0) {
-        var dm = Math.floor(item.duration / 60);
-        var ds = item.duration % 60;
-        durationChip = '<span class="meta-chip chip-duration">&#9201; ' + dm + ':' + ('0' + ds).slice(-2) + '</span>';
-    }
-
-    // メイン情報チップ（登録者・再生方法・曲の長さ）
+    // メイン情報チップ（登録者・再生方法）
     var mainChips = '<div class="meta-chips">'
         + '<span class="meta-chip chip-singer">&#128100; 登録者：' + esc(item.singer) + '</span>'
-        + '<span class="meta-chip chip-kind">&#9654; ' + esc(item.kind) + '</span>'
-        + durationChip
+        + '<span class="meta-chip ' + kindChipClass(item.kind) + '">&#9654; ' + esc(item.kind) + '</span>'
         + '</div>';
 
-    // トラック・キー・音ズレ・音量チップ
+    // 展開時表示用チップ（曲の長さ・トラック・キー・音ズレ・音量・lister_comment）
     var track = parseInt(item.track, 10);
     var keychange = parseInt(item.keychange, 10);
     var audiodelay = parseInt(item.audiodelay, 10);
     var volume = parseInt(item.volume, 10);
     var extraChips = [];
+
+    // 曲の長さ
+    if (item.duration && item.duration > 0) {
+        var dm = Math.floor(item.duration / 60);
+        var ds = item.duration % 60;
+        extraChips.push('<span class="meta-chip chip-duration">&#9201; ' + dm + ':' + ('0' + ds).slice(-2) + '</span>');
+    }
+
     if (track > 0) {
         extraChips.push('<span class="meta-chip chip-track">&#127926; トラック ' + (track + 1) + '</span>');
     }
@@ -641,11 +701,22 @@ function createCardHTML(item, idx) {
     if (audiodelay !== 0) {
         extraChips.push('<span class="meta-chip chip-delay">&#8987; 音ズレ ' + (audiodelay > 0 ? '+' : '') + audiodelay + 'ms</span>');
     }
-    if (!isNaN(volume) && volume !== 0) {
+    if (!isNaN(volume) && volume !== 0 && volume !== -1) {
         extraChips.push('<span class="meta-chip chip-volume">&#128266; 音量 ' + (volume > 0 ? '+' : '') + volume + '%</span>');
+    }
+    // ListerDB コメント
+    if (item.lister_comment) {
+        extraChips.push('<span class="meta-chip chip-lister-comment">' + esc(item.lister_comment) + '</span>');
     }
     var extraMetaHtml = extraChips.length > 0
         ? '<div class="meta-chips">' + extraChips.join('') + '</div>'
+        : '';
+    var hasDetails = extraChips.length > 0 || tweetHtml !== '';
+    var cardDetailsHtml = hasDetails
+        ? '<div class="card-details">' + extraMetaHtml + tweetHtml + '</div>'
+        : '';
+    var expandBtnHtml = hasDetails
+        ? '<button class="card-expand-btn" aria-label="詳細を展開">&#9662;</button>'
         : '';
 
     return [
@@ -678,11 +749,10 @@ function createCardHTML(item, idx) {
         '      <span class="drag-handle">&#8942;</span>',
         '    </div>',
         '    <div class="card-info">',
-        '      <div class="card-title">' + esc(item.display_name) + '</div>',
+        '      <div class="card-title" data-songname="' + esc(actualSongName) + '" data-filename="' + esc(item.songfile) + '" data-showing="' + displayMode + '">' + esc(displayName) + '</div>',
         '      ' + mainChips,
-        '      ' + extraMetaHtml,
         '      ' + commentHtml,
-        '      ' + tweetHtml,
+        '      ' + cardDetailsHtml,
         '    </div>',
         '    <div class="card-right">',
         '      <span class="status-badge-btn"',
@@ -692,6 +762,7 @@ function createCardHTML(item, idx) {
         '        ' + statusBadge(item.nowplaying),
         '      </span>',
         '      ' + ctrlBtn,
+        '      ' + expandBtnHtml,
         '    </div>',
         '  </div>',
         '</div>'
@@ -759,7 +830,7 @@ function renderList(items, total, hasMore, data) {
     emptyMsg.style.display = 'none';
     shownCount = items.length;
     container.innerHTML = items.map(function (item, idx) {
-        return createCardHTML(item, idx);
+        return createCardHTML(item, idx, titleDisplayMode);
     }).join('');
 
     var remaining = totalCount - shownCount;
@@ -786,12 +857,20 @@ function initSortable() {
     sortable = Sortable.create(container, {
         handle:      '.drag-handle',
         animation:    150,
+        delay:       500,
+        delayOnTouchOnly: true,
         ghostClass:  'sortable-ghost',
         chosenClass: 'sortable-chosen',
 
         onStart: function () {
             isDragging = true;
             if (openCard) closeCard(openCard);
+            // 並び替え前の状態を保存
+            var cards = container.querySelectorAll('.request-card');
+            lastOrderIds = Array.prototype.map.call(cards, function (c) {
+                return parseInt(c.dataset.id, 10);
+            });
+            updateUndoBtn();
         },
 
         onEnd: function (evt) {
@@ -803,13 +882,29 @@ function initSortable() {
                 return parseInt(c.dataset.id, 10);
             });
 
+            // 確認ダイアログ
+            if (!confirm('この順序でよろしいですか？')) {
+                // キャンセル → 前の状態に戻す
+                loadList();
+                lastOrderIds = null;
+                updateUndoBtn();
+                return;
+            }
+
             fetch('requestlist_reorder.php', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ ids: ids })
-            }).catch(function (e) {
+            })
+            .then(function () {
+                // 成功時は lastOrderIds を保持（Undo 用）
+                updateUndoBtn();
+            })
+            .catch(function (e) {
                 console.error('reorder error:', e);
                 loadList();
+                lastOrderIds = null;
+                updateUndoBtn();
             });
         }
     });
@@ -1082,6 +1177,21 @@ document.getElementById('request-list').addEventListener('click', function (e) {
         if (btn.classList.contains('action-change'))  changeItem(id, songfile);
         return;
     }
+    // 曲名タップ（個別切り替え）
+    var titleEl = e.target.closest('.card-title');
+    if (titleEl) {
+        var current = titleEl.dataset.showing || titleDisplayMode;
+        var next = (current === 'songname') ? 'filename' : 'songname';
+        titleEl.dataset.showing = next;
+        titleEl.textContent = (next === 'filename') ? titleEl.dataset.filename : titleEl.dataset.songname;
+        return;
+    }
+    // 展開ボタン
+    var expandBtn = e.target.closest('.card-expand-btn');
+    if (expandBtn) {
+        expandBtn.closest('.request-card').classList.toggle('card-expanded');
+        return;
+    }
     // コメント欄タップ
     var ca = e.target.closest('.card-comment-area');
     if (ca) {
@@ -1174,6 +1284,53 @@ function goToPlaying() {
         })
         .catch(function (e) { console.error('goToPlaying error:', e); });
 }
+
+// ---- 並び替え Undo ----
+function updateUndoBtn() {
+    var btn = document.getElementById('undo-btn');
+    if (lastOrderIds) {
+        btn.style.display = '';
+    } else {
+        btn.style.display = 'none';
+    }
+}
+
+document.getElementById('undo-btn').addEventListener('click', function () {
+    if (!lastOrderIds) return;
+    fetch('requestlist_reorder.php', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ids: lastOrderIds })
+    })
+    .then(function () {
+        // Undo 成功後は lastOrderIds をクリア（これ以上 Undo できない状態に）
+        lastOrderIds = null;
+        updateUndoBtn();
+        loadList();
+    })
+    .catch(function (e) {
+        console.error('undo error:', e);
+        loadList();
+    });
+});
+
+// ---- 曲名/ファイル名一括切り替えボタン ----
+function updateTitleToggleBtn() {
+    var btn = document.getElementById('title-toggle-btn');
+    if (!btn) return;
+    btn.textContent = (titleDisplayMode === 'songname') ? '&#128193; ファイル名' : '&#127925; 曲名';
+    btn.innerHTML   = (titleDisplayMode === 'songname') ? '&#128193; ファイル名' : '&#127925; 曲名';
+}
+document.getElementById('title-toggle-btn').addEventListener('click', function () {
+    titleDisplayMode = (titleDisplayMode === 'songname') ? 'filename' : 'songname';
+    localStorage.setItem('ykari-title-display-mode', titleDisplayMode);
+    updateTitleToggleBtn();
+    document.querySelectorAll('.card-title').forEach(function (el) {
+        el.dataset.showing = titleDisplayMode;
+        el.textContent = (titleDisplayMode === 'filename') ? el.dataset.filename : el.dataset.songname;
+    });
+});
+updateTitleToggleBtn();
 
 // ---- 更新ボタン ----
 document.getElementById('refresh-btn').addEventListener('click', function () { loadList(true); });
