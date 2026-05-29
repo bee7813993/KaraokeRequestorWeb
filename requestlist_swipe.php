@@ -271,6 +271,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 .chip-singer   { background: #e8eaf6; color: #3949ab; }
 .chip-kind     { background: #e8f5e9; color: #2e7d32; }
+.chip-filename { background: #f3e5f5; color: #6a1b9a; font-size: 11px; }
 .chip-duration { background: #f1f3f5; color: #555;    }
 .chip-track    { background: #f3e5f5; color: #7b1fa2; }
 .chip-key-pos  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
@@ -608,14 +609,15 @@ function createCardHTML(item, idx) {
 
     // Tweet リンク
     var tweetHtml = '';
+    var displayName = item.song_name || item.display_name || item.songfile;
     if (CONNECT_INTERNET && USE_POST_TWITTER) {
         var msg;
         if (isPlaying(item.nowplaying)) {
-            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌っています';
+            msg = '「' + item.singer + '」は「' + displayName + '」を歌っています';
         } else if (isUnplayed(item.nowplaying)) {
-            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌います';
+            msg = '「' + item.singer + '」は「' + displayName + '」を歌います';
         } else {
-            msg = '「' + item.singer + '」は「' + item.display_name + '」を歌いました';
+            msg = '「' + item.singer + '」は「' + displayName + '」を歌いました';
         }
         tweetHtml = '<a href="https://twitter.com/intent/tweet?text=' + encodeURIComponent(msg) + '" target="_blank" class="card-tweet-link">&#x1F426; Tweetする</a>';
     }
@@ -632,27 +634,31 @@ function createCardHTML(item, idx) {
     var position = item.position != null ? item.position : (totalCount - idx);
     var numHtml = '<span class="card-num">' + position + '</span>';
 
-    // 曲の長さチップ
-    var durationChip = '';
-    if (item.duration && item.duration > 0) {
-        var dm = Math.floor(item.duration / 60);
-        var ds = item.duration % 60;
-        durationChip = '<span class="meta-chip chip-duration">&#9201; ' + dm + ':' + ('0' + ds).slice(-2) + '</span>';
-    }
-
-    // メイン情報チップ（登録者・再生方法・曲の長さ）
+    // メイン情報チップ（登録者・再生方法）
     var mainChips = '<div class="meta-chips">'
         + '<span class="meta-chip chip-singer">&#128100; 登録者：' + esc(item.singer) + '</span>'
         + '<span class="meta-chip chip-kind">&#9654; ' + esc(item.kind) + '</span>'
-        + durationChip
         + '</div>';
 
-    // トラック・キー・音ズレ・音量チップ
+    // 展開時表示用チップ（ファイル名・曲の長さ・トラック・キー・音ズレ・音量）
     var track = parseInt(item.track, 10);
     var keychange = parseInt(item.keychange, 10);
     var audiodelay = parseInt(item.audiodelay, 10);
     var volume = parseInt(item.volume, 10);
     var extraChips = [];
+
+    // ファイル名
+    if (item.songfile) {
+        extraChips.push('<span class="meta-chip chip-filename">&#128193; ' + esc(item.songfile) + '</span>');
+    }
+
+    // 曲の長さ
+    if (item.duration && item.duration > 0) {
+        var dm = Math.floor(item.duration / 60);
+        var ds = item.duration % 60;
+        extraChips.push('<span class="meta-chip chip-duration">&#9201; ' + dm + ':' + ('0' + ds).slice(-2) + '</span>');
+    }
+
     if (track > 0) {
         extraChips.push('<span class="meta-chip chip-track">&#127926; トラック ' + (track + 1) + '</span>');
     }
@@ -663,7 +669,7 @@ function createCardHTML(item, idx) {
     if (audiodelay !== 0) {
         extraChips.push('<span class="meta-chip chip-delay">&#8987; 音ズレ ' + (audiodelay > 0 ? '+' : '') + audiodelay + 'ms</span>');
     }
-    if (!isNaN(volume) && volume !== 0) {
+    if (!isNaN(volume) && volume !== 0 && volume !== -1) {
         extraChips.push('<span class="meta-chip chip-volume">&#128266; 音量 ' + (volume > 0 ? '+' : '') + volume + '%</span>');
     }
     var extraMetaHtml = extraChips.length > 0
@@ -707,7 +713,7 @@ function createCardHTML(item, idx) {
         '      <span class="drag-handle">&#8942;</span>',
         '    </div>',
         '    <div class="card-info">',
-        '      <div class="card-title">' + esc(item.display_name) + '</div>',
+        '      <div class="card-title">' + esc(displayName) + '</div>',
         '      ' + mainChips,
         '      ' + commentHtml,
         '      ' + cardDetailsHtml,
