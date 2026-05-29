@@ -246,6 +246,8 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   padding: 0;
   line-height: 1;
   transition: transform 0.2s ease, color 0.2s ease;
+  min-width: 44px;
+  min-height: 44px;
 }
 .card-expand-btn:hover { color: var(--bs-primary); }
 .request-card.card-expanded .card-expand-btn { transform: rotate(180deg); }
