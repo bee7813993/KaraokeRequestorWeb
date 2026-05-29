@@ -525,6 +525,7 @@ var sortable        = null;
 var currentLimit    = REQUESTLIST_NUM; // 0 = ALL
 var shownCount      = 0;
 var totalCount      = 0;
+var titleDisplayMode = localStorage.getItem('ykari-title-display-mode') || 'songname'; // 'songname' or 'filename'
 
 // ---- 件数選択のcookie保存/復元 ----
 function getCountCookie() {
@@ -612,7 +613,8 @@ function kindChipClass(kind) {
     }
 }
 
-function createCardHTML(item, idx) {
+function createCardHTML(item, idx, displayMode) {
+    displayMode = displayMode || titleDisplayMode; // デフォルトはグローバル設定
     var replaceLabel = (item.kind === 'カラオケ配信' && USE_BGV) ? 'BGV選択' : '曲差し替え';
 
     // コメント欄
@@ -635,7 +637,10 @@ function createCardHTML(item, idx) {
 
     // Tweet リンク
     var tweetHtml = '';
-    var displayName = item.song_name || item.display_name || item.songfile;
+    // displayMode に基づいて表示する曲名を決定
+    var displayName = (displayMode === 'filename')
+        ? item.songfile
+        : (item.song_name || item.display_name || item.songfile);
     if (CONNECT_INTERNET && USE_POST_TWITTER) {
         var msg;
         if (isPlaying(item.nowplaying)) {
@@ -1143,13 +1148,18 @@ document.getElementById('request-list').addEventListener('click', function (e) {
         if (btn.classList.contains('action-change'))  changeItem(id, songfile);
         return;
     }
-    // 曲名タップ（タイトル/ファイル名切り替え）
+    // 曲名タップ（全カード一括で表示切り替え）
     var titleEl = e.target.closest('.card-title');
     if (titleEl) {
-        var isShowingFilename = titleEl.dataset.showing === 'filename';
-        var newText = isShowingFilename ? titleEl.dataset.songname : titleEl.dataset.filename;
-        titleEl.textContent = newText;
-        titleEl.dataset.showing = isShowingFilename ? 'songname' : 'filename';
+        // 表示モードを切り替え
+        titleDisplayMode = (titleDisplayMode === 'songname') ? 'filename' : 'songname';
+        localStorage.setItem('ykari-title-display-mode', titleDisplayMode);
+        // 全カードの曲名表示を更新
+        document.querySelectorAll('.card-title').forEach(function (el) {
+            el.textContent = (titleDisplayMode === 'filename')
+                ? el.dataset.filename
+                : el.dataset.songname;
+        });
         return;
     }
     // 展開ボタン
