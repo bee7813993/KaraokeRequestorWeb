@@ -897,7 +897,7 @@ function initSortable() {
                 body:    JSON.stringify({ ids: ids })
             })
             .then(function () {
-                lastOrderIds = null;
+                // 成功時は lastOrderIds を保持（Undo 用）
                 updateUndoBtn();
             })
             .catch(function (e) {
@@ -1303,6 +1303,7 @@ document.getElementById('undo-btn').addEventListener('click', function () {
         body:    JSON.stringify({ ids: lastOrderIds })
     })
     .then(function () {
+        // Undo 成功後は lastOrderIds をクリア（これ以上 Undo できない状態に）
         lastOrderIds = null;
         updateUndoBtn();
         loadList();
