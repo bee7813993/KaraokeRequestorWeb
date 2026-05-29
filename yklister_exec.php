@@ -2,6 +2,8 @@
 require_once 'commonfunc.php';
 require_once 'function_search_listerdb.php';
 
+header('Content-Type: application/json; charset=utf-8');
+
 $listerapi= new ListerDB();
 
 $runmode = 0;
@@ -10,7 +12,6 @@ if(array_key_exists("start", $_REQUEST)) {
 }
 
 if(array_key_exists("stop", $_REQUEST)) {
-    
     $runmode = 2;
 }
 
@@ -30,32 +31,32 @@ if(array_key_exists("start_yukkoview2", $_REQUEST)) {
     $runmode = 6;
 }
 
+$result = ['ok' => true, 'msg' => ''];
+
 switch($runmode) {
     case 1:
-        // start
         $listerapi->startyklistercmd();
         break;
     case 2:
-        // stop
         $listerapi->stopyklistercmd();
         break;
     case 3:
-        // restart
         $listerapi->stopyklistercmd();
         sleep(4);
         $listerapi->startyklistercmd();
         break;
     case 4:
-        // check
         break;
     case 5:
-        // start Windows Store版ゆかりすたー
-        $listerapi->startyklistercmd_store();
+        $result = $listerapi->startyklistercmd_store();
         break;
     case 6:
-        // start Windows Store版ゆっこビュー2
-        $listerapi->startYukkoView2cmd();
+        $result = $listerapi->startYukkoView2cmd();
+        break;
+    default:
+        $result = ['ok' => false, 'msg' => '不明なコマンドです'];
         break;
 }
 
+echo json_encode($result, JSON_UNESCAPED_UNICODE);
 ?>

@@ -55,30 +55,67 @@ class ListerDB {
     public function isInstalledYkListerStore() {
         $output = [];
         $retval = -1;
-        exec('powershell -Command "if (Get-AppxPackage -Name \'*YukaLister*\') { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
+        exec('powershell -NoProfile -Command "if (Get-AppxPackage -Name \'*YukaLister*\') { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
         return $retval === 0;
     }
 
-    // Windows Store版ゆかりすたーを起動
+    // Windows Store版ゆかりすたーを起動（Task Scheduler経由でユーザーセッションで起動）
     public function startyklistercmd_store() {
-        $cmd = 'powershell -WindowStyle Hidden -Command "$p=Get-AppxPackage -Name \'*YukaLister*\' | Select-Object -First 1; if($p){Start-Process (\'shell:AppsFolder\\\' + $p.PackageFamilyName + \'!App\')}"';
-        $fp = popen($cmd, 'r');
-        pclose($fp);
+        return $this->launchStoreApp('*YukaLister*', 'KaraokeYukaListerLaunch');
     }
 
     // Windows Store版ゆっこビュー2がインストール済みか確認
     public function isInstalledYukkoView2() {
         $output = [];
         $retval = -1;
-        exec('powershell -Command "if (Get-AppxPackage -Name \'*YukkoView*\') { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
+        exec('powershell -NoProfile -Command "if (Get-AppxPackage -Name \'*YukkoView*\') { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
         return $retval === 0;
     }
 
-    // Windows Store版ゆっこビュー2を起動
+    // Windows Store版ゆっこビュー2を起動（Task Scheduler経由でユーザーセッションで起動）
     public function startYukkoView2cmd() {
-        $cmd = 'powershell -WindowStyle Hidden -Command "$p=Get-AppxPackage -Name \'*YukkoView*\' | Select-Object -First 1; if($p){Start-Process (\'shell:AppsFolder\\\' + $p.PackageFamilyName + \'!App\')}"';
-        $fp = popen($cmd, 'r');
-        pclose($fp);
+        return $this->launchStoreApp('*YukkoView*', 'KaraokeYukkoView2Launch');
+    }
+
+    /**
+     * Windows Store アプリをTask Scheduler経由で対話型セッションで起動する。
+     * Apache がサービス(Session 0)で動いていても、ユーザーのデスクトップに表示される。
+     * @return array ['ok'=>bool, 'msg'=>string]
+     */
+    private function launchStoreApp($namePattern, $taskName) {
+        if (!function_exists('exec')) {
+            return ['ok' => false, 'msg' => 'exec() が無効です (php.ini の disable_functions を確認)'];
+        }
+
+        // パッケージファミリー名を取得
+        $psGetPfn = 'powershell -NoProfile -Command "(Get-AppxPackage -Name \'' . $namePattern . '\' | Select-Object -First 1).PackageFamilyName"';
+        exec($psGetPfn . ' 2>&1', $pfnOut, $pfnRet);
+        $pfn = trim(implode('', $pfnOut));
+
+        if (empty($pfn) || $pfnRet !== 0) {
+            return ['ok' => false, 'msg' => 'アプリが見つかりません (pattern: ' . $namePattern . ')'];
+        }
+
+        $appUri = 'shell:AppsFolder\\' . $pfn . '!App';
+
+        // schtasks でタスクを作成して即実行（/ru "" = 現在のインタラクティブユーザーで実行）
+        $tr = 'explorer.exe "' . $appUri . '"';
+        $createCmd = 'schtasks /create /f /tn "' . $taskName . '" /tr "' . $tr . '" /sc once /st 00:00 2>&1';
+        exec($createCmd, $createOut, $createRet);
+
+        if ($createRet !== 0) {
+            // schtasks 失敗時は直接 explorer.exe で試みる（XAMPP がユーザーセッションで動いている場合に有効）
+            $direct = 'explorer.exe "' . $appUri . '"';
+            popen($direct, 'r');
+            return ['ok' => true, 'msg' => 'direct: ' . $pfn];
+        }
+
+        exec('schtasks /run /tn "' . $taskName . '" 2>&1', $runOut, $runRet);
+        if ($runRet !== 0) {
+            return ['ok' => false, 'msg' => 'schtasks /run 失敗: ' . implode(' ', $runOut)];
+        }
+
+        return ['ok' => true, 'msg' => $pfn];
     }
 }
 

@@ -431,29 +431,35 @@ request.onreadystatechange = function() {
 }
 request.send("");
 }
-function start_yklisterstore_cmd(){
-var request = createXMLHttpRequest();
-url="yklister_exec.php?start_store=1";
-request.open("GET", url, true);
-request.onreadystatechange = function() {
-    if(request.readyState == 4) {
-        if (request.status === 200) {
+
+function storeAppLaunch(url, btnId, label) {
+    var btn = document.getElementById(btnId);
+    if (btn) { btn.disabled = true; btn.textContent = '起動中…'; }
+    var request = createXMLHttpRequest();
+    request.open("GET", url, true);
+    request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+            if (btn) { btn.disabled = false; btn.textContent = label; }
+            if (request.status === 200) {
+                try {
+                    var res = JSON.parse(request.responseText);
+                    if (!res.ok) {
+                        alert('起動に失敗しました:\n' + res.msg);
+                    }
+                } catch(e) {}
+            } else {
+                alert('通信エラー: ' + request.status);
+            }
         }
-    }
+    };
+    request.send("");
 }
-request.send("");
+
+function start_yklisterstore_cmd(){
+    storeAppLaunch("yklister_exec.php?start_store=1", "listerbt", "ゆかりすたー起動");
 }
 function start_yukkoview2_cmd(){
-var request = createXMLHttpRequest();
-url="yklister_exec.php?start_yukkoview2=1";
-request.open("GET", url, true);
-request.onreadystatechange = function() {
-    if(request.readyState == 4) {
-        if (request.status === 200) {
-        }
-    }
-}
-request.send("");
+    storeAppLaunch("yklister_exec.php?start_yukkoview2=1", "yukkoview2bt", "ゆっこビュー 2 起動");
 }
 </script>
   <p>
