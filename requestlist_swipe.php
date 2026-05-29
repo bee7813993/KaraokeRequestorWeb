@@ -271,7 +271,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 .chip-singer   { background: #e8eaf6; color: #3949ab; }
 .chip-kind     { background: #e8f5e9; color: #2e7d32; }
-.chip-filename { background: #f3e5f5; color: #6a1b9a; font-size: 11px; }
+.chip-filename { background: #f3e5f5; color: #6a1b9a; font-size: 11px; white-space: normal; word-break: break-all; }
 .chip-duration { background: #f1f3f5; color: #555;    }
 .chip-track    { background: #f3e5f5; color: #7b1fa2; }
 .chip-key-pos  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
