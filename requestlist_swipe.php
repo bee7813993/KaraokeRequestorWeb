@@ -415,6 +415,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
     <button class="btn btn-primary btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
+    <button id="title-toggle-btn" class="btn btn-secondary btn-sm"></button>
     <a href="simplelistexport_utf8.php" class="btn btn-secondary btn-sm">リクエストリストCSV</a>
     <a href="simplelist.php" class="btn btn-secondary btn-sm">シンプルリスト</a>
 <?php if ($requestlist_num > 0): ?>
@@ -744,7 +745,7 @@ function createCardHTML(item, idx, displayMode) {
         '      <span class="drag-handle">&#8942;</span>',
         '    </div>',
         '    <div class="card-info">',
-        '      <div class="card-title" data-songname="' + esc(actualSongName) + '" data-filename="' + esc(item.songfile) + '">' + esc(displayName) + '</div>',
+        '      <div class="card-title" data-songname="' + esc(actualSongName) + '" data-filename="' + esc(item.songfile) + '" data-showing="' + displayMode + '">' + esc(displayName) + '</div>',
         '      ' + mainChips,
         '      ' + commentHtml,
         '      ' + cardDetailsHtml,
@@ -1148,18 +1149,13 @@ document.getElementById('request-list').addEventListener('click', function (e) {
         if (btn.classList.contains('action-change'))  changeItem(id, songfile);
         return;
     }
-    // 曲名タップ（全カード一括で表示切り替え）
+    // 曲名タップ（個別切り替え）
     var titleEl = e.target.closest('.card-title');
     if (titleEl) {
-        // 表示モードを切り替え
-        titleDisplayMode = (titleDisplayMode === 'songname') ? 'filename' : 'songname';
-        localStorage.setItem('ykari-title-display-mode', titleDisplayMode);
-        // 全カードの曲名表示を更新
-        document.querySelectorAll('.card-title').forEach(function (el) {
-            el.textContent = (titleDisplayMode === 'filename')
-                ? el.dataset.filename
-                : el.dataset.songname;
-        });
+        var current = titleEl.dataset.showing || titleDisplayMode;
+        var next = (current === 'songname') ? 'filename' : 'songname';
+        titleEl.dataset.showing = next;
+        titleEl.textContent = (next === 'filename') ? titleEl.dataset.filename : titleEl.dataset.songname;
         return;
     }
     // 展開ボタン
@@ -1260,6 +1256,24 @@ function goToPlaying() {
         })
         .catch(function (e) { console.error('goToPlaying error:', e); });
 }
+
+// ---- 曲名/ファイル名一括切り替えボタン ----
+function updateTitleToggleBtn() {
+    var btn = document.getElementById('title-toggle-btn');
+    if (!btn) return;
+    btn.textContent = (titleDisplayMode === 'songname') ? '&#128193; ファイル名' : '&#127925; 曲名';
+    btn.innerHTML   = (titleDisplayMode === 'songname') ? '&#128193; ファイル名' : '&#127925; 曲名';
+}
+document.getElementById('title-toggle-btn').addEventListener('click', function () {
+    titleDisplayMode = (titleDisplayMode === 'songname') ? 'filename' : 'songname';
+    localStorage.setItem('ykari-title-display-mode', titleDisplayMode);
+    updateTitleToggleBtn();
+    document.querySelectorAll('.card-title').forEach(function (el) {
+        el.dataset.showing = titleDisplayMode;
+        el.textContent = (titleDisplayMode === 'filename') ? el.dataset.filename : el.dataset.songname;
+    });
+});
+updateTitleToggleBtn();
 
 // ---- 更新ボタン ----
 document.getElementById('refresh-btn').addEventListener('click', function () { loadList(true); });
