@@ -241,17 +241,16 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 32px;
   color: var(--color-text-muted, #aaa);
-  padding: 8px 14px;
+  padding: 0;
   line-height: 1;
   transition: transform 0.2s ease, color 0.2s ease;
-  min-width: 44px;
-  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   align-self: stretch;
+  min-width: 44px;
 }
 .card-expand-btn:hover { color: var(--bs-primary); }
 .request-card.card-expanded .card-expand-btn { transform: rotate(180deg); }
