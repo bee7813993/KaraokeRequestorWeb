@@ -170,6 +170,14 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   color: var(--color-text, #212529);
   word-break: break-all;
   line-height: 1.4;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  padding: 2px 0;
+  border-radius: 3px;
+}
+.card-title:hover {
+  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.05);
 }
 .card-meta {
   font-size: 14px;
@@ -731,7 +739,7 @@ function createCardHTML(item, idx) {
         '      <span class="drag-handle">&#8942;</span>',
         '    </div>',
         '    <div class="card-info">',
-        '      <div class="card-title">' + esc(displayName) + '</div>',
+        '      <div class="card-title" data-songname="' + esc(displayName) + '" data-filename="' + esc(item.songfile) + '">' + esc(displayName) + '</div>',
         '      ' + mainChips,
         '      ' + commentHtml,
         '      ' + cardDetailsHtml,
@@ -1133,6 +1141,15 @@ document.getElementById('request-list').addEventListener('click', function (e) {
         if (btn.classList.contains('action-next'))    playNext(id, songfile);
         if (btn.classList.contains('action-delete'))  deleteItem(id, songfile);
         if (btn.classList.contains('action-change'))  changeItem(id, songfile);
+        return;
+    }
+    // 曲名タップ（タイトル/ファイル名切り替え）
+    var titleEl = e.target.closest('.card-title');
+    if (titleEl) {
+        var isShowingFilename = titleEl.dataset.showing === 'filename';
+        var newText = isShowingFilename ? titleEl.dataset.songname : titleEl.dataset.filename;
+        titleEl.textContent = newText;
+        titleEl.dataset.showing = isShowingFilename ? 'songname' : 'filename';
         return;
     }
     // 展開ボタン
