@@ -228,6 +228,28 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 .card-tweet-link:hover { text-decoration: underline; color: #0c85d0; }
 
+/* 展開ボタン（技術設定・Tweetを表示） */
+.card-expand-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-text-muted, #aaa);
+  padding: 2px 4px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+  margin-top: 4px;
+}
+.card-expand-btn:hover { color: var(--bs-primary); }
+.request-card.card-expanded .card-expand-btn { transform: rotate(180deg); }
+/* 展開エリア（技術設定チップ＋Tweet） */
+.card-details {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.request-card.card-expanded .card-details { max-height: 200px; }
+
 /* ---- メタ情報チップ ---- */
 .meta-chips {
   display: flex;
@@ -647,6 +669,13 @@ function createCardHTML(item, idx) {
     var extraMetaHtml = extraChips.length > 0
         ? '<div class="meta-chips">' + extraChips.join('') + '</div>'
         : '';
+    var hasDetails = extraChips.length > 0 || tweetHtml !== '';
+    var cardDetailsHtml = hasDetails
+        ? '<div class="card-details">' + extraMetaHtml + tweetHtml + '</div>'
+        : '';
+    var expandBtnHtml = hasDetails
+        ? '<button class="card-expand-btn" aria-label="詳細を展開">&#9662;</button>'
+        : '';
 
     return [
         '<div class="request-card' + (IS_ADMIN ? ' admin-card' : '') + '"',
@@ -680,9 +709,8 @@ function createCardHTML(item, idx) {
         '    <div class="card-info">',
         '      <div class="card-title">' + esc(item.display_name) + '</div>',
         '      ' + mainChips,
-        '      ' + extraMetaHtml,
         '      ' + commentHtml,
-        '      ' + tweetHtml,
+        '      ' + cardDetailsHtml,
         '    </div>',
         '    <div class="card-right">',
         '      <span class="status-badge-btn"',
@@ -692,6 +720,7 @@ function createCardHTML(item, idx) {
         '        ' + statusBadge(item.nowplaying),
         '      </span>',
         '      ' + ctrlBtn,
+        '      ' + expandBtnHtml,
         '    </div>',
         '  </div>',
         '</div>'
@@ -1080,6 +1109,12 @@ document.getElementById('request-list').addEventListener('click', function (e) {
         if (btn.classList.contains('action-next'))    playNext(id, songfile);
         if (btn.classList.contains('action-delete'))  deleteItem(id, songfile);
         if (btn.classList.contains('action-change'))  changeItem(id, songfile);
+        return;
+    }
+    // 展開ボタン
+    var expandBtn = e.target.closest('.card-expand-btn');
+    if (expandBtn) {
+        expandBtn.closest('.request-card').classList.toggle('card-expanded');
         return;
     }
     // コメント欄タップ
