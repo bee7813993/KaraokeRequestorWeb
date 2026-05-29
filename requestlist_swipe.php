@@ -637,10 +637,10 @@ function createCardHTML(item, idx, displayMode) {
 
     // Tweet リンク
     var tweetHtml = '';
+    // 常に本来の曲名を保持（data属性用）
+    var actualSongName = item.song_name || item.display_name || item.songfile;
     // displayMode に基づいて表示する曲名を決定
-    var displayName = (displayMode === 'filename')
-        ? item.songfile
-        : (item.song_name || item.display_name || item.songfile);
+    var displayName = (displayMode === 'filename') ? item.songfile : actualSongName;
     if (CONNECT_INTERNET && USE_POST_TWITTER) {
         var msg;
         if (isPlaying(item.nowplaying)) {
@@ -744,7 +744,7 @@ function createCardHTML(item, idx, displayMode) {
         '      <span class="drag-handle">&#8942;</span>',
         '    </div>',
         '    <div class="card-info">',
-        '      <div class="card-title" data-songname="' + esc(displayName) + '" data-filename="' + esc(item.songfile) + '">' + esc(displayName) + '</div>',
+        '      <div class="card-title" data-songname="' + esc(actualSongName) + '" data-filename="' + esc(item.songfile) + '">' + esc(displayName) + '</div>',
         '      ' + mainChips,
         '      ' + commentHtml,
         '      ' + cardDetailsHtml,
