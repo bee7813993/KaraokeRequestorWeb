@@ -101,12 +101,16 @@ class ListerDB {
             return ['ok' => false, 'msg' => 'アプリが見つかりません (pattern: ' . $namePattern . ', exit: ' . $pfnRet . ', out: ' . implode('|', $pfnOut) . ')'];
         }
 
-        // cmd /c start で非同期起動（Apache がユーザーセッションで動作しているため直接起動可能）
-        $cmd = 'cmd /c start "" explorer.exe "shell:AppsFolder\\' . $pfn . '!App"';
-        $fp = popen($cmd, 'r');
-        if ($fp !== false) pclose($fp);
+        // Start-Process で非同期起動。
+        // popen+pclose は孫プロセスのハンドル継承でブロックするため使わない。
+        // exec(PowerShell Start-Process) はPowerShell終了で即リターンする。
+        $uri = 'shell:AppsFolder\\' . $pfn . '!App';
+        $psCmd = 'powershell -NoProfile -NonInteractive -Command "Start-Process \'' . str_replace("'", "''", $uri) . '\'" 2>NUL';
+        $launchOut = [];
+        $launchRet = -1;
+        exec($psCmd, $launchOut, $launchRet);
 
-        return ['ok' => true, 'msg' => $pfn];
+        return ['ok' => true, 'msg' => $pfn, 'launch_ret' => $launchRet];
     }
 }
 
