@@ -241,12 +241,17 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 18px;
   color: var(--color-text-muted, #aaa);
-  padding: 2px 4px;
+  padding: 6px 10px;
   line-height: 1;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, color 0.2s ease;
   margin-top: 4px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .card-expand-btn:hover { color: var(--bs-primary); }
 .request-card.card-expanded .card-expand-btn { transform: rotate(180deg); }
@@ -413,9 +418,9 @@ if (!empty($config_ini['noticeof_listpage'])) {
     <h4>現在の登録状況</h4>
     <button class="btn btn-secondary btn-sm" id="refresh-btn">更新</button>
     <button class="btn btn-primary btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
+    <button id="title-toggle-btn" class="btn btn-secondary btn-sm"></button>
   </div>
   <div class="toolbar-right">
-    <button id="title-toggle-btn" class="btn btn-secondary btn-sm"></button>
     <a href="simplelistexport_utf8.php" class="btn btn-secondary btn-sm">リクエストリストCSV</a>
     <a href="simplelist.php" class="btn btn-secondary btn-sm">シンプルリスト</a>
 <?php if ($requestlist_num > 0): ?>
