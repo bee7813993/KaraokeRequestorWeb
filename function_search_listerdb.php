@@ -65,6 +65,21 @@ class ListerDB {
         $fp = popen($cmd, 'r');
         pclose($fp);
     }
+
+    // Windows Store版ゆっこビュー2がインストール済みか確認
+    public function isInstalledYukkoView2() {
+        $output = [];
+        $retval = -1;
+        exec('powershell -Command "if (Get-AppxPackage -Name \'*YukkoView*\') { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
+        return $retval === 0;
+    }
+
+    // Windows Store版ゆっこビュー2を起動
+    public function startYukkoView2cmd() {
+        $cmd = 'powershell -WindowStyle Hidden -Command "$p=Get-AppxPackage -Name \'*YukkoView*\' | Select-Object -First 1; if($p){Start-Process (\'shell:AppsFolder\\\' + $p.PackageFamilyName + \'!App\')}"';
+        $fp = popen($cmd, 'r');
+        pclose($fp);
+    }
 }
 
 /**

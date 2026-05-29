@@ -26,6 +26,10 @@ if(array_key_exists("start_store", $_REQUEST)) {
     $runmode = 5;
 }
 
+if(array_key_exists("start_yukkoview2", $_REQUEST)) {
+    $runmode = 6;
+}
+
 switch($runmode) {
     case 1:
         // start
@@ -45,8 +49,12 @@ switch($runmode) {
         // check
         break;
     case 5:
-        // start Windows Store版
+        // start Windows Store版ゆかりすたー
         $listerapi->startyklistercmd_store();
+        break;
+    case 6:
+        // start Windows Store版ゆっこビュー2
+        $listerapi->startYukkoView2cmd();
         break;
 }
 

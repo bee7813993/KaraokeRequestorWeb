@@ -443,23 +443,37 @@ request.onreadystatechange = function() {
 }
 request.send("");
 }
+function start_yukkoview2_cmd(){
+var request = createXMLHttpRequest();
+url="yklister_exec.php?start_yukkoview2=1";
+request.open("GET", url, true);
+request.onreadystatechange = function() {
+    if(request.readyState == 4) {
+        if (request.status === 200) {
+        }
+    }
+}
+request.send("");
+}
 </script>
   <p>
 <?php
   require_once 'function_search_listerdb.php';
+  $listerapi_btn = new ListerDB();
+
   $yukalisterpath= 'YukaLister\YukaLister.exe';
   $addattr = '';
   if (file_exist_check_japanese_cf($yukalisterpath) ){
     $addattr = ' onClick="start_yklistercmd()"';
+  } elseif ($listerapi_btn->isInstalledYkListerStore()) {
+    $addattr = ' onClick="start_yklisterstore_cmd()"';
   } else {
-    $listerapi_btn = new ListerDB();
-    if ($listerapi_btn->isInstalledYkListerStore()) {
-      $addattr = ' onClick="start_yklisterstore_cmd()"';
-    } else {
-      $addattr = ' disabled ';
-    }
+    $addattr = ' disabled ';
   }
 print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
+
+  $yukkoattr = $listerapi_btn->isInstalledYukkoView2() ? ' onClick="start_yukkoview2_cmd()"' : ' disabled ';
+print '<button type="button" class="btn btn-secondary" id="yukkoview2bt" '.$yukkoattr.'> ゆっこビュー 2 起動 </button>';
 ?>
   </p>
 
