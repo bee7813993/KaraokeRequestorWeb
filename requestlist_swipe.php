@@ -269,9 +269,15 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   line-height: 1.6;
   white-space: nowrap;
 }
-.chip-singer   { background: #e8eaf6; color: #3949ab; }
-.chip-kind     { background: #e8f5e9; color: #2e7d32; }
-.chip-filename { background: #f3e5f5; color: #6a1b9a; font-size: 11px; white-space: normal; word-break: break-all; }
+.chip-singer        { background: #e8eaf6; color: #3949ab; }
+.chip-kind          { background: #e8f5e9; color: #2e7d32; } /* fallback */
+.chip-kind-video    { background: #dbeafe; color: #1d4ed8; } /* 動画 */
+.chip-kind-karaoke  { background: #ffe4e6; color: #be123c; } /* カラオケ配信 */
+.chip-kind-pause    { background: #f1f5f9; color: #475569; } /* 小休止 */
+.chip-kind-url      { background: #fef3c7; color: #b45309; } /* URL指定 */
+.chip-kind-bgv      { background: #ede9fe; color: #6d28d9; } /* BGV選択 */
+.chip-kind-nico     { background: #cffafe; color: #0e7490; } /* ニコニコ動画 */
+.chip-filename      { background: #f3e5f5; color: #6a1b9a; font-size: 11px; white-space: normal; word-break: break-all; }
 .chip-duration { background: #f1f3f5; color: #555;    }
 .chip-track    { background: #f3e5f5; color: #7b1fa2; }
 .chip-key-pos  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
@@ -586,6 +592,18 @@ function isUnplayed(nowplaying) {
     return nowplaying === '未再生' || nowplaying === '1';
 }
 
+function kindChipClass(kind) {
+    switch (kind) {
+        case '動画':        return 'chip-kind-video';
+        case 'カラオケ配信': return 'chip-kind-karaoke';
+        case '小休止':      return 'chip-kind-pause';
+        case 'URL指定':     return 'chip-kind-url';
+        case 'BGV選択':     return 'chip-kind-bgv';
+        case 'ニコニコ動画': return 'chip-kind-nico';
+        default:            return 'chip-kind';
+    }
+}
+
 function createCardHTML(item, idx) {
     var replaceLabel = (item.kind === 'カラオケ配信' && USE_BGV) ? 'BGV選択' : '曲差し替え';
 
@@ -637,7 +655,7 @@ function createCardHTML(item, idx) {
     // メイン情報チップ（登録者・再生方法）
     var mainChips = '<div class="meta-chips">'
         + '<span class="meta-chip chip-singer">&#128100; 登録者：' + esc(item.singer) + '</span>'
-        + '<span class="meta-chip chip-kind">&#9654; ' + esc(item.kind) + '</span>'
+        + '<span class="meta-chip ' + kindChipClass(item.kind) + '">&#9654; ' + esc(item.kind) + '</span>'
         + '</div>';
 
     // 展開時表示用チップ（ファイル名・曲の長さ・トラック・キー・音ズレ・音量）
