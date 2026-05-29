@@ -2481,6 +2481,94 @@ function update_fromarchive($version_str, &$errmsg) {
 
 // ---- ZIPアーカイブ方式ここまで ----
 
+// ---- Git メンテナンス / 初期化 ----
+
+function format_filesize($bytes) {
+    if ($bytes >= 1048576) return round($bytes / 1048576, 1) . ' MB';
+    if ($bytes >= 1024)    return round($bytes / 1024, 0) . ' KB';
+    return $bytes . ' B';
+}
+
+function get_git_dir_size() {
+    $git_dir = realpath(__DIR__) . DIRECTORY_SEPARATOR . '.git';
+    if (!is_dir($git_dir)) return null;
+    $size = 0;
+    try {
+        $iter = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($git_dir, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iter as $file) {
+            if ($file->isFile()) $size += $file->getSize();
+        }
+    } catch (Exception $e) {
+        return null;
+    }
+    return $size;
+}
+
+function run_git_gc(&$errmsg, $aggressive = false) {
+    global $config_ini;
+    if (!array_key_exists('gitcommandpath', $config_ini)) {
+        $errmsg = 'gitcommandpath が設定されていません';
+        return false;
+    }
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) {
+        $errmsg = 'git コマンドが見つかりません: ' . $gitcmd;
+        return false;
+    }
+    set_time_limit(600);
+    $flag = $aggressive ? ' --aggressive' : '';
+    exec($gitcmd . ' gc' . $flag . ' --prune=all 2>&1', $out, $ret);
+    if ($ret !== 0) {
+        $errmsg = 'git gc 失敗: ' . implode(' / ', $out);
+        return false;
+    }
+    return true;
+}
+
+function init_git_repo(&$errmsg) {
+    global $config_ini;
+    $app_root = realpath(__DIR__);
+
+    if (!array_key_exists('gitcommandpath', $config_ini)) {
+        $errmsg = 'gitcommandpath が設定されていません';
+        return false;
+    }
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) {
+        $errmsg = 'git コマンドが見つかりません: ' . $gitcmd;
+        return false;
+    }
+    if (is_dir($app_root . DIRECTORY_SEPARATOR . '.git')) {
+        $errmsg = '.git フォルダが既に存在します';
+        return false;
+    }
+
+    set_time_limit(900);
+    $origin = 'https://github.com/bee7813993/KaraokeRequestorWeb.git';
+
+    $steps = [
+        $gitcmd . ' init',
+        $gitcmd . ' remote add origin ' . $origin,
+        $gitcmd . ' config --global core.autoCRLF false',
+        $gitcmd . ' fetch --depth=1 origin master',
+        $gitcmd . ' reset --hard FETCH_HEAD',
+    ];
+
+    foreach ($steps as $cmd) {
+        exec($cmd . ' 2>&1', $out, $ret);
+        if ($ret !== 0) {
+            $errmsg = 'コマンド失敗 [' . $cmd . ']: ' . implode(' / ', $out);
+            return false;
+        }
+        $out = [];
+    }
+    return true;
+}
+
+// ---- Git メンテナンス / 初期化ここまで ----
+
 function make_preview_modal($filepath, $modalid) {
   global $everythinghost;
   
