@@ -825,7 +825,7 @@ function renderList(items, total, hasMore, data) {
     emptyMsg.style.display = 'none';
     shownCount = items.length;
     container.innerHTML = items.map(function (item, idx) {
-        return createCardHTML(item, idx);
+        return createCardHTML(item, idx, titleDisplayMode);
     }).join('');
 
     var remaining = totalCount - shownCount;
