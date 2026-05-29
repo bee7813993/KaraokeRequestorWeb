@@ -241,17 +241,17 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 24px;
   color: var(--color-text-muted, #aaa);
-  padding: 6px 10px;
+  padding: 8px 14px;
   line-height: 1;
   transition: transform 0.2s ease, color 0.2s ease;
-  margin-top: 4px;
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: stretch;
 }
 .card-expand-btn:hover { color: var(--bs-primary); }
 .request-card.card-expanded .card-expand-btn { transform: rotate(180deg); }
@@ -417,8 +417,8 @@ if (!empty($config_ini['noticeof_listpage'])) {
   <div class="toolbar-left">
     <h4>現在の登録状況</h4>
     <button class="btn btn-secondary btn-sm" id="refresh-btn">更新</button>
-    <button class="btn btn-primary btn-sm" id="goto-playing-btn">&#9654; 再生中へ</button>
     <button id="title-toggle-btn" class="btn btn-secondary btn-sm"></button>
+    <button class="btn btn-primary btn-sm ms-auto" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
     <a href="simplelistexport_utf8.php" class="btn btn-secondary btn-sm">リクエストリストCSV</a>
