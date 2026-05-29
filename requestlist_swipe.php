@@ -857,7 +857,7 @@ function initSortable() {
     sortable = Sortable.create(container, {
         handle:      '.drag-handle',
         animation:    150,
-        delay:       800,
+        delay:       500,
         delayOnTouchOnly: true,
         ghostClass:  'sortable-ghost',
         chosenClass: 'sortable-chosen',
