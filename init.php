@@ -420,8 +420,8 @@ print '</pre>';
   </p>
 <script type="text/javascript">
 function start_yklistercmd(){
-var request = createXMLHttpRequest();
-url="yklister_exec.php?start=1";
+var request = new XMLHttpRequest();
+var url="yklister_exec.php?start=1";
 request.open("GET", url, true);
 request.onreadystatechange = function() {
     if(request.readyState == 4) {
@@ -435,7 +435,7 @@ request.send("");
 function storeAppLaunch(url, btnId, label) {
     var btn = document.getElementById(btnId);
     if (btn) { btn.disabled = true; btn.textContent = '起動中…'; }
-    var request = createXMLHttpRequest();
+    var request = new XMLHttpRequest();
     request.open("GET", url, true);
     request.onreadystatechange = function() {
         if (request.readyState == 4) {
