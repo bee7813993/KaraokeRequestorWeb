@@ -22,6 +22,10 @@ if(array_key_exists("check", $_REQUEST)) {
     $runmode = 4;
 }
 
+if(array_key_exists("start_store", $_REQUEST)) {
+    $runmode = 5;
+}
+
 switch($runmode) {
     case 1:
         // start
@@ -39,6 +43,10 @@ switch($runmode) {
         break;
     case 4:
         // check
+        break;
+    case 5:
+        // start Windows Store版
+        $listerapi->startyklistercmd_store();
         break;
 }
 

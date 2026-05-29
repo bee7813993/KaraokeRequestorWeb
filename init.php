@@ -431,15 +431,33 @@ request.onreadystatechange = function() {
 }
 request.send("");
 }
+function start_yklisterstore_cmd(){
+var request = createXMLHttpRequest();
+url="yklister_exec.php?start_store=1";
+request.open("GET", url, true);
+request.onreadystatechange = function() {
+    if(request.readyState == 4) {
+        if (request.status === 200) {
+        }
+    }
+}
+request.send("");
+}
 </script>
   <p>
 <?php
+  require_once 'function_search_listerdb.php';
   $yukalisterpath= 'YukaLister\YukaLister.exe';
   $addattr = '';
   if (file_exist_check_japanese_cf($yukalisterpath) ){
-  $addattr = ' onClick="start_yklistercmd()"';
-  }else {
-  $addattr = ' disabled ';
+    $addattr = ' onClick="start_yklistercmd()"';
+  } else {
+    $listerapi_btn = new ListerDB();
+    if ($listerapi_btn->isInstalledYkListerStore()) {
+      $addattr = ' onClick="start_yklisterstore_cmd()"';
+    } else {
+      $addattr = ' disabled ';
+    }
   }
 print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
 ?>

@@ -50,6 +50,21 @@ class ListerDB {
         $yukalistercmd= 'YukaLister.exe';
         $cmd = 'taskkill /im "'.$yukalistercmd.'" -f';
     }
+
+    // Windows Store版ゆかりすたーがインストール済みか確認
+    public function isInstalledYkListerStore() {
+        $output = [];
+        $retval = -1;
+        exec('powershell -Command "if (Get-AppxPackage -Name \'*YukaLister*\') { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
+        return $retval === 0;
+    }
+
+    // Windows Store版ゆかりすたーを起動
+    public function startyklistercmd_store() {
+        $cmd = 'powershell -WindowStyle Hidden -Command "$p=Get-AppxPackage -Name \'*YukaLister*\' | Select-Object -First 1; if($p){Start-Process (\'shell:AppsFolder\\\' + $p.PackageFamilyName + \'!App\')}"';
+        $fp = popen($cmd, 'r');
+        pclose($fp);
+    }
 }
 
 /**
