@@ -286,7 +286,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .chip-kind-url      { background: #fef3c7; color: #b45309; } /* URL指定 */
 .chip-kind-bgv      { background: #ede9fe; color: #6d28d9; } /* BGV選択 */
 .chip-kind-nico     { background: #cffafe; color: #0e7490; } /* ニコニコ動画 */
-.chip-filename      { background: #f3e5f5; color: #6a1b9a; font-size: 11px; white-space: normal; word-break: break-all; }
+.chip-lister-comment { background: #fce7f3; color: #be185d; font-size: 12px; }
 .chip-duration { background: #f1f3f5; color: #555;    }
 .chip-track    { background: #f3e5f5; color: #7b1fa2; }
 .chip-key-pos  { background: #e8f5e9; color: #2e7d32; font-weight: 700; }
@@ -677,17 +677,12 @@ function createCardHTML(item, idx, displayMode) {
         + '<span class="meta-chip ' + kindChipClass(item.kind) + '">&#9654; ' + esc(item.kind) + '</span>'
         + '</div>';
 
-    // 展開時表示用チップ（ファイル名・曲の長さ・トラック・キー・音ズレ・音量）
+    // 展開時表示用チップ（曲の長さ・トラック・キー・音ズレ・音量・lister_comment）
     var track = parseInt(item.track, 10);
     var keychange = parseInt(item.keychange, 10);
     var audiodelay = parseInt(item.audiodelay, 10);
     var volume = parseInt(item.volume, 10);
     var extraChips = [];
-
-    // ファイル名
-    if (item.songfile) {
-        extraChips.push('<span class="meta-chip chip-filename">&#128193; ' + esc(item.songfile) + '</span>');
-    }
 
     // 曲の長さ
     if (item.duration && item.duration > 0) {
@@ -708,6 +703,10 @@ function createCardHTML(item, idx, displayMode) {
     }
     if (!isNaN(volume) && volume !== 0 && volume !== -1) {
         extraChips.push('<span class="meta-chip chip-volume">&#128266; 音量 ' + (volume > 0 ? '+' : '') + volume + '%</span>');
+    }
+    // ListerDB コメント
+    if (item.lister_comment) {
+        extraChips.push('<span class="meta-chip chip-lister-comment">' + esc(item.lister_comment) + '</span>');
     }
     var extraMetaHtml = extraChips.length > 0
         ? '<div class="meta-chips">' + extraChips.join('') + '</div>'
