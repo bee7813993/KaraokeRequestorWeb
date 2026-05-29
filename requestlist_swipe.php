@@ -414,6 +414,7 @@ if (!empty($config_ini['noticeof_listpage'])) {
     <h4>現在の登録状況</h4>
     <button class="btn btn-secondary btn-sm" id="refresh-btn">更新</button>
     <button id="title-toggle-btn" class="btn btn-secondary btn-sm"></button>
+    <button class="btn btn-warning btn-sm" id="undo-btn" style="display:none;">&#9100; 並び替え取り消し</button>
     <button class="btn btn-primary btn-sm ms-auto" id="goto-playing-btn">&#9654; 再生中へ</button>
   </div>
   <div class="toolbar-right">
@@ -528,6 +529,9 @@ var currentLimit    = REQUESTLIST_NUM; // 0 = ALL
 var shownCount      = 0;
 var totalCount      = 0;
 var titleDisplayMode = localStorage.getItem('ykari-title-display-mode') || 'songname'; // 'songname' or 'filename'
+
+// ---- 並び替え履歴 ----
+var lastOrderIds = null; // 直前の並び替え前の状態
 
 // ---- 件数選択のcookie保存/復元 ----
 function getCountCookie() {
@@ -854,12 +858,20 @@ function initSortable() {
     sortable = Sortable.create(container, {
         handle:      '.drag-handle',
         animation:    150,
+        delay:       800,
+        delayOnTouchOnly: true,
         ghostClass:  'sortable-ghost',
         chosenClass: 'sortable-chosen',
 
         onStart: function () {
             isDragging = true;
             if (openCard) closeCard(openCard);
+            // 並び替え前の状態を保存
+            var cards = container.querySelectorAll('.request-card');
+            lastOrderIds = Array.prototype.map.call(cards, function (c) {
+                return parseInt(c.dataset.id, 10);
+            });
+            updateUndoBtn();
         },
 
         onEnd: function (evt) {
@@ -871,13 +883,29 @@ function initSortable() {
                 return parseInt(c.dataset.id, 10);
             });
 
+            // 確認ダイアログ
+            if (!confirm('この順序でよろしいですか？')) {
+                // キャンセル → 前の状態に戻す
+                loadList();
+                lastOrderIds = null;
+                updateUndoBtn();
+                return;
+            }
+
             fetch('requestlist_reorder.php', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ ids: ids })
-            }).catch(function (e) {
+            })
+            .then(function () {
+                lastOrderIds = null;
+                updateUndoBtn();
+            })
+            .catch(function (e) {
                 console.error('reorder error:', e);
                 loadList();
+                lastOrderIds = null;
+                updateUndoBtn();
             });
         }
     });
@@ -1257,6 +1285,34 @@ function goToPlaying() {
         })
         .catch(function (e) { console.error('goToPlaying error:', e); });
 }
+
+// ---- 並び替え Undo ----
+function updateUndoBtn() {
+    var btn = document.getElementById('undo-btn');
+    if (lastOrderIds) {
+        btn.style.display = '';
+    } else {
+        btn.style.display = 'none';
+    }
+}
+
+document.getElementById('undo-btn').addEventListener('click', function () {
+    if (!lastOrderIds) return;
+    fetch('requestlist_reorder.php', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ ids: lastOrderIds })
+    })
+    .then(function () {
+        lastOrderIds = null;
+        updateUndoBtn();
+        loadList();
+    })
+    .catch(function (e) {
+        console.error('undo error:', e);
+        loadList();
+    });
+});
 
 // ---- 曲名/ファイル名一括切り替えボタン ----
 function updateTitleToggleBtn() {
