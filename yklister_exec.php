@@ -41,14 +41,14 @@ if (array_key_exists("debug", $_REQUEST)) {
         $steps['pkg_yukkoview'] = ['ret' => $ret, 'out' => $out];
     }
 
-    // Step 6: Start-Process で実際に起動テスト（YukaLister）
+    // Step 6: Start-Process で実際に起動テスト（YukkoView2）
     // ※ このステップで応答が止まる場合は Start-Process がブロックしている
-    if (function_exists('exec') && !empty($steps['pkg_yukalister']['out'][0])) {
-        $pfn = trim($steps['pkg_yukalister']['out'][0]);
+    if (function_exists('exec') && !empty($steps['pkg_yukkoview']['out'][0])) {
+        $pfn = trim($steps['pkg_yukkoview']['out'][0]);
         $uri = 'shell:AppsFolder\\' . $pfn . '!App';
         $out = []; $ret = -1;
         exec('powershell -NoProfile -NonInteractive -Command "Start-Process \'' . str_replace("'", "''", $uri) . '\'" 2>&1', $out, $ret);
-        $steps['launch_yukalister'] = ['ret' => $ret, 'out' => $out, 'uri' => $uri];
+        $steps['launch_yukkoview'] = ['ret' => $ret, 'out' => $out, 'uri' => $uri];
     }
 
     echo json_encode(['debug' => true, 'steps' => $steps], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
