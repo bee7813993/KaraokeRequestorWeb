@@ -74,6 +74,10 @@ body {
     padding: 0.5rem 0 0.25rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
+  /* ボタン2つを1行目に、Help等を2行目に分ける */
+  #gnavi .navbar-nav.ms-auto > li.nav-item.dropdown {
+    width: 100%;
+  }
 }
 
 /* --- ナビバー折りたたみ時のドロップダウン（< md = 768px） ---
