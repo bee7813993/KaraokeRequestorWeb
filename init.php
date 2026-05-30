@@ -420,8 +420,8 @@ print '</pre>';
   </p>
 <script type="text/javascript">
 function start_yklistercmd(){
-var request = createXMLHttpRequest();
-url="yklister_exec.php?start=1";
+var request = new XMLHttpRequest();
+var url="yklister_exec.php?start=1";
 request.open("GET", url, true);
 request.onreadystatechange = function() {
     if(request.readyState == 4) {
@@ -431,17 +431,55 @@ request.onreadystatechange = function() {
 }
 request.send("");
 }
+
+function storeAppLaunch(url, btnId, label) {
+    var btn = document.getElementById(btnId);
+    if (btn) { btn.disabled = true; btn.textContent = '起動中…'; }
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+            if (btn) { btn.disabled = false; btn.textContent = label; }
+            if (request.status === 200) {
+                try {
+                    var res = JSON.parse(request.responseText);
+                    if (!res.ok) {
+                        alert('起動に失敗しました:\n' + res.msg);
+                    }
+                } catch(e) {}
+            } else {
+                alert('通信エラー: ' + request.status);
+            }
+        }
+    };
+    request.send("");
+}
+
+function start_yklisterstore_cmd(){
+    storeAppLaunch("yklister_exec.php?start_store=1", "listerbt", "ゆかりすたー起動");
+}
+function start_yukkoview2_cmd(){
+    storeAppLaunch("yklister_exec.php?start_yukkoview2=1", "yukkoview2bt", "ゆっこビュー 2 起動");
+}
 </script>
   <p>
 <?php
+  require_once 'function_search_listerdb.php';
+  $listerapi_btn = new ListerDB();
+
   $yukalisterpath= 'YukaLister\YukaLister.exe';
   $addattr = '';
   if (file_exist_check_japanese_cf($yukalisterpath) ){
-  $addattr = ' onClick="start_yklistercmd()"';
-  }else {
-  $addattr = ' disabled ';
+    $addattr = ' onClick="start_yklistercmd()"';
+  } elseif ($listerapi_btn->isInstalledYkListerStore()) {
+    $addattr = ' onClick="start_yklisterstore_cmd()"';
+  } else {
+    $addattr = ' disabled ';
   }
 print '<button type="button" class="btn btn-secondary" id="listerbt" '.$addattr.'> ゆかりすたー起動 </button>';
+
+  $yukkoattr = $listerapi_btn->isInstalledYukkoView2() ? ' onClick="start_yukkoview2_cmd()"' : ' disabled ';
+print '<button type="button" class="btn btn-secondary" id="yukkoview2bt" '.$yukkoattr.'> ゆっこビュー 2 起動 </button>';
 ?>
   </p>
 

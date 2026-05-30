@@ -62,6 +62,55 @@ body {
   flex-shrink: 0;
 }
 
+/* --- ナビバー折りたたみ時：右側ボタン群を横並び・左寄せに ---
+   ms-auto による縦並び＆センター寄せを上書きする。           */
+@media (max-width: 767.98px) {
+  #gnavi .navbar-nav.ms-auto {
+    flex-direction: row !important;
+    align-items: center;
+    margin-left: 0 !important;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem 0 0.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  /* ボタン2つを1行目に、Help等を2行目に分ける */
+  #gnavi .navbar-nav.ms-auto > li.nav-item.dropdown {
+    width: 100%;
+  }
+}
+
+/* --- ナビバー折りたたみ時のドロップダウン（< md = 768px） ---
+   Bootstrap デフォルトは白いフローティングボックスになるため、
+   ナビバーの暗い背景に溶け込むようにリセットする。           */
+@media (max-width: 767.98px) {
+  .navbar .dropdown-menu {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0 0 0.25rem 0.5rem;
+    margin: 0;
+  }
+  .navbar .dropdown-item {
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+  }
+  .navbar .dropdown-item:hover,
+  .navbar .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+  .navbar .dropdown-divider {
+    border-color: rgba(255, 255, 255, 0.15);
+    margin: 0.25rem 0;
+  }
+  .navbar .dropdown-item-text {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
 /* --- 曲差し替えバナー --- */
 .swap-banner {
   background-color: var(--bg-swap-banner);

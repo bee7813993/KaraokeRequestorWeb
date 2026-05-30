@@ -50,6 +50,68 @@ class ListerDB {
         $yukalistercmd= 'YukaLister.exe';
         $cmd = 'taskkill /im "'.$yukalistercmd.'" -f';
     }
+
+    // Windows Store版ゆかりすたーがインストール済みか確認
+    public function isInstalledYkListerStore() {
+        $output = [];
+        $retval = -1;
+        exec('powershell -NoProfile -NonInteractive -Command "if (Get-AppxPackage -Name \'*YukaLister*\' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
+        return $retval === 0;
+    }
+
+    // Windows Store版ゆかりすたーを起動（Task Scheduler経由でユーザーセッションで起動）
+    public function startyklistercmd_store() {
+        return $this->launchStoreApp('*YukaLister*');
+    }
+
+    // Windows Store版ゆっこビュー2がインストール済みか確認
+    public function isInstalledYukkoView2() {
+        $output = [];
+        $retval = -1;
+        exec('powershell -NoProfile -NonInteractive -Command "if (Get-AppxPackage -Name \'*YukkoView*\' -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }" 2>NUL', $output, $retval);
+        return $retval === 0;
+    }
+
+    // Windows Store版ゆっこビュー2を起動（Task Scheduler経由でユーザーセッションで起動）
+    public function startYukkoView2cmd() {
+        return $this->launchStoreApp('*YukkoView*');
+    }
+
+    /**
+     * Windows Store アプリを起動する。
+     * Apache がユーザーセッションで動作している前提で cmd /c start 経由で非同期起動。
+     * @return array ['ok'=>bool, 'msg'=>string]
+     */
+    private function launchStoreApp($namePattern) {
+        if (!function_exists('exec')) {
+            return ['ok' => false, 'msg' => 'exec() が無効です (php.ini の disable_functions を確認)'];
+        }
+
+        // パッケージファミリー名を取得
+        $pfnOut = [];
+        $pfnRet = -1;
+        exec(
+            'powershell -NoProfile -NonInteractive -Command "(Get-AppxPackage -Name \'' . $namePattern . '\' -ErrorAction SilentlyContinue | Select-Object -First 1).PackageFamilyName" 2>&1',
+            $pfnOut,
+            $pfnRet
+        );
+        $pfn = trim(implode('', $pfnOut));
+
+        if (empty($pfn)) {
+            return ['ok' => false, 'msg' => 'アプリが見つかりません (pattern: ' . $namePattern . ', exit: ' . $pfnRet . ', out: ' . implode('|', $pfnOut) . ')'];
+        }
+
+        // Start-Process で非同期起動。
+        // popen+pclose は孫プロセスのハンドル継承でブロックするため使わない。
+        // exec(PowerShell Start-Process) はPowerShell終了で即リターンする。
+        $uri = 'shell:AppsFolder\\' . $pfn . '!App';
+        $psCmd = 'powershell -NoProfile -NonInteractive -Command "Start-Process \'' . str_replace("'", "''", $uri) . '\'" 2>NUL';
+        $launchOut = [];
+        $launchRet = -1;
+        exec($psCmd, $launchOut, $launchRet);
+
+        return ['ok' => true, 'msg' => $pfn, 'launch_ret' => $launchRet];
+    }
 }
 
 /**
