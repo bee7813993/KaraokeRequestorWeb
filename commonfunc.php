@@ -2572,10 +2572,14 @@ function mypage_save_keyword_link($keyword, $search_type, $search_params = '') {
  * requesttable の reqorder を連番（1始まり昇順）に正規化する。
  * 現在の reqorder の大小関係を保持したまま隙間・重複を解消する。
  * 同じ reqorder 値を持つ行は id の昇順で並べる。
- * @param PDO $db
+ * @param PDO  $db
+ * @param bool $in_transaction 呼び出し元が既にトランザクションを開始している場合は true。
+ *                             true の場合は BEGIN/COMMIT/ROLLBACK を行わない。
  */
-function normalize_reqorder($db) {
-    $db->beginTransaction();
+function normalize_reqorder($db, $in_transaction = false) {
+    if (!$in_transaction) {
+        $db->beginTransaction();
+    }
     try {
         $select = $db->query("SELECT id, reqorder FROM requesttable ORDER BY reqorder ASC, id ASC");
         $rows = $select->fetchAll(PDO::FETCH_ASSOC);
@@ -2591,9 +2595,13 @@ function normalize_reqorder($db) {
             }
             $pos++;
         }
-        $db->commit();
+        if (!$in_transaction) {
+            $db->commit();
+        }
     } catch (Exception $e) {
-        $db->rollBack();
+        if (!$in_transaction) {
+            $db->rollBack();
+        }
         throw $e;
     }
 }

@@ -24,7 +24,8 @@ if (empty($ids)) {
 
 $total = count($ids);
 try {
-    $db->beginTransaction();
+    // BEGIN IMMEDIATE で書き込みロックを先取りし、連番割り当て〜正規化を分断されずに一括処理する
+    $db->exec("BEGIN IMMEDIATE;");
     $stmt = $db->prepare("UPDATE requesttable SET reqorder = :reqorder WHERE id = :id");
     foreach ($ids as $index => $id) {
         // 先頭アイテム(index=0)が最大reqorder（ORDER BY reqorder DESC で先頭表示）
@@ -34,16 +35,17 @@ try {
         $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
         $stmt->execute();
     }
-    $db->commit();
-} catch (PDOException $e) {
-    $db->rollBack();
+    // ドラッグ&ドロップ対象外のレコード（再生中など）も含めて連番に正規化する
+    // 同一トランザクション内で実行することで、normalize と連番割り当ての間に
+    // 別プロセスが割り込んで reqorder を変更する競合状態を防ぐ
+    normalize_reqorder($db, true);
+    $db->exec("COMMIT;");
+} catch (Exception $e) {
+    $db->exec("ROLLBACK;");
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'DB error']);
     exit;
 }
-
-// ドラッグ&ドロップ対象外のレコード（再生中など）も含めて連番に正規化する
-normalize_reqorder($db);
 
 $un = new UpdateNotice();
 $un->initdb();
