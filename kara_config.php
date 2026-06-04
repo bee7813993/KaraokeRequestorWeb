@@ -320,11 +320,17 @@ function initdb(&$db,$dbname)
 {
 
 try {
-	$db = new PDO('sqlite:'. $dbname);
+	$db = new PDO('sqlite:'. $dbname, null, null, [
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_TIMEOUT => 5,
+	]);
+	// WAL モードで読み書きの並行性を向上し、busy_timeout で書き込みロック待ちを最大5秒許容する
+	$db->exec('PRAGMA journal_mode=WAL;');
+	$db->exec('PRAGMA busy_timeout=5000;');
 } catch(PDOException $e) {
 	printf("new PDO Error: %s\n", $e->getMessage());
 	die();
-} 
+}
 $sql = "create table IF NOT EXISTS requesttable (
  id INTEGER PRIMARY KEY AUTOINCREMENT, 
  songfile  varchar(1024), 

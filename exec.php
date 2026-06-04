@@ -234,34 +234,37 @@ if (is_numeric($selectid)) {
     }
 } else {
     // 新規追加: BEGIN IMMEDIATEで同時アクセス競合を防ぎ、INSERT〜reqorder割り当て〜自動整列を一括処理
-    $db->exec("BEGIN IMMEDIATE;");
-    $ret = $stmt->execute($arg);
-    if (!$ret) {
+    // PDO::ERRMODE_EXCEPTION 設定により、BEGIN IMMEDIATE が SQLITE_BUSY で失敗した場合も
+    // 例外が飛ぶため、try-catch でロールバックを確実に行う
+    try {
+        $db->exec("BEGIN IMMEDIATE;");
+        $stmt->execute($arg);
+        $newid = (int)$db->lastInsertId();
+        // reqorder は「現在の最大値+1」とし、新規予約を末尾（最後に再生）に追加する
+        $maxrow = $db->query(
+            "SELECT COALESCE(MAX(reqorder), 0) AS maxreq FROM requesttable WHERE id != " . $newid
+        )->fetch(PDO::FETCH_ASSOC);
+        $newreqorder = (int)$maxrow['maxreq'] + 1;
+        $stmt_u = $db->prepare('UPDATE requesttable SET reqorder = :reqorder, status = \'OK\' WHERE id = :id');
+        $stmt_u->bindValue(':reqorder', $newreqorder, PDO::PARAM_INT);
+        $stmt_u->bindValue(':id', $newid, PDO::PARAM_INT);
+        $stmt_u->execute();
+        if (!empty($DEBUG))
+            print "reqorder set to {$newreqorder} for id={$newid}<br />";
+        if ($config_ini["request_automove"] == 1) {
+            require_once('function_moveitem.php');
+            $list = new MoveItem;
+            $list->getturnlist($db);
+            $newreq = $list->get_new_reqorder($newid);
+            $list->insertreqorder($newid, $newreq);
+            $list->save_allrequest($db);
+        }
+        $db->exec("COMMIT;");
+    } catch (Exception $e) {
         $db->exec("ROLLBACK;");
-        print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加にしっぱいしました。");
+        print(htmlspecialchars((string)$l_filename, ENT_QUOTES, 'UTF-8') . " を追加に失敗しました。しばらく待ってから再試行してください。");
         die();
     }
-    $newid = (int)$db->lastInsertId();
-    // reqorder は「現在の最大値+1」とし、新規予約を末尾（最後に再生）に追加する
-    $maxrow = $db->query(
-        "SELECT COALESCE(MAX(reqorder), 0) AS maxreq FROM requesttable WHERE id != " . $newid
-    )->fetch(PDO::FETCH_ASSOC);
-    $newreqorder = (int)$maxrow['maxreq'] + 1;
-    $stmt_u = $db->prepare('UPDATE requesttable SET reqorder = :reqorder, status = \'OK\' WHERE id = :id');
-    $stmt_u->bindValue(':reqorder', $newreqorder, PDO::PARAM_INT);
-    $stmt_u->bindValue(':id', $newid, PDO::PARAM_INT);
-    $stmt_u->execute();
-    if (!empty($DEBUG))
-        print "reqorder set to {$newreqorder} for id={$newid}<br />";
-    if ($config_ini["request_automove"] == 1) {
-        require_once('function_moveitem.php');
-        $list = new MoveItem;
-        $list->getturnlist($db);
-        $newreq = $list->get_new_reqorder($newid);
-        $list->insertreqorder($newid, $newreq);
-        $list->save_allrequest($db);
-    }
-    $db->exec("COMMIT;");
 
     // ListerDB から曲情報を取得して保存
     if (!empty($l_fullpath) && array_key_exists('listerDBPATH', $config_ini)) {
