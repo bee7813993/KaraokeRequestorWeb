@@ -51,9 +51,9 @@ if (array_key_exists("scending", $_REQUEST) && in_array(strtoupper($_REQUEST["sc
 }
 if (empty($select_orderby))  $select_orderby  = 'found_last_write_time';
 if (empty($select_scending)) $select_scending = 'desc';
-$select_orderby_str = (!empty($select_orderby) && !empty($select_scending))
-    ? $select_orderby . ' ' . $select_scending
-    : 'found_last_write_time desc';
+$select_orderby_str = $select_orderby . ' ' . $select_scending;
+$myrequestarray["orderby"]  = $select_orderby;
+$myrequestarray["scending"] = $select_scending;
 
 $recommendation = 'on';
 if (array_key_exists("recommendation", $_REQUEST) && in_array($_REQUEST["recommendation"], ['on','off'])) {

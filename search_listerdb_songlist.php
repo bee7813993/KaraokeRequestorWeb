@@ -99,8 +99,6 @@ if(array_key_exists("tie_up_group_name", $_REQUEST)) {
 }
 
 
-$select_orderby_str ="song_name asc, found_file_size desc";
-
 $valid_orderby_cols = array('found_file_size', 'found_last_write_time', 'song_name', 'song_artist');
 $select_orderby = "";
 if(array_key_exists("orderby", $_REQUEST) && in_array($_REQUEST["orderby"], $valid_orderby_cols)) {
@@ -110,10 +108,11 @@ $select_scending ="";
 if(array_key_exists("scending", $_REQUEST) && in_array(strtoupper($_REQUEST["scending"]), array('ASC','DESC'))) {
     $select_scending = strtoupper($_REQUEST["scending"]);
 }
-
-if(!empty($select_orderby) && !empty($select_scending) ) {
-   $select_orderby_str = $select_orderby . ' ' . $select_scending;
-}
+if(empty($select_orderby))  $select_orderby  = "found_last_write_time";
+if(empty($select_scending)) $select_scending = "desc";
+$select_orderby_str = $select_orderby . ' ' . $select_scending;
+$myrequestarray["orderby"]  = $select_orderby;
+$myrequestarray["scending"] = $select_scending;
 
 
 $match = "";

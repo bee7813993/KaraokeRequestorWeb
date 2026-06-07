@@ -34,9 +34,11 @@ $select_orderby  = '';
 $select_scending = '';
 if (array_key_exists("orderby",   $_REQUEST) && in_array($_REQUEST["orderby"],   $valid_orderby))         $select_orderby  = $_REQUEST["orderby"];
 if (array_key_exists("scending",  $_REQUEST) && in_array(strtoupper($_REQUEST["scending"]), ['ASC','DESC'])) $select_scending = strtoupper($_REQUEST["scending"]);
-$select_orderby_str = (!empty($select_orderby) && !empty($select_scending))
-    ? $select_orderby . ' ' . $select_scending
-    : 'song_name asc, found_file_size desc';
+if (empty($select_orderby))  $select_orderby  = 'found_last_write_time';
+if (empty($select_scending)) $select_scending = 'desc';
+$select_orderby_str = $select_orderby . ' ' . $select_scending;
+$myrequestarray["orderby"]  = $select_orderby;
+$myrequestarray["scending"] = $select_scending;
 
 $selectid   = array_key_exists("selectid", $_REQUEST) ? $_REQUEST["selectid"] : '';
 $linkoption = !empty($selectid) ? '&selectid=' . rawurlencode($selectid) : '';
