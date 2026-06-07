@@ -50,7 +50,7 @@ body { background-color: var(--bg-page); background-image: var(--bg-page-image);
     display: block;
     font-size: .75rem;
     font-weight: 600;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--color-text-muted, #6c757d);
     margin-bottom: .1rem;
   }
   .fav-kw-table td.fav-kw-word { font-size: 1.05rem; font-weight: 600; }
