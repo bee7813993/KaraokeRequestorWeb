@@ -21,7 +21,43 @@ if (configbool("usemypage", true)) {
 <link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
 <link href="css/themes/_variables.css" rel="stylesheet">
 <link rel="stylesheet" href="css/themes/theme-toggle.css">
-<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
+<style>
+body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }
+/* 検索ワードは長い作品名でも自然に折り返す */
+.fav-kw-table td.fav-kw-word { white-space: normal; word-break: break-word; }
+/* スマホ幅ではテーブルを行ごとのカード表示に切り替える */
+@media (max-width: 767.98px) {
+  .fav-kw-table thead { display: none; }
+  .fav-kw-table, .fav-kw-table tbody, .fav-kw-table tr, .fav-kw-table td { display: block; width: 100%; }
+  .fav-kw-table tr {
+    margin-bottom: .75rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .5rem;
+    padding: .6rem .85rem;
+    background-color: rgba(var(--bg-card-rgb, 255,255,255), var(--bg-card-alpha, 1));
+  }
+  /* table-striped の縞模様はカード表示では無効化 */
+  .fav-kw-table.table-striped > tbody > tr:nth-of-type(odd) > td { background-color: transparent; }
+  .fav-kw-table td {
+    border: none !important;
+    padding: .2rem 0;
+    text-align: left !important;
+    white-space: normal !important;
+  }
+  /* 各セルの前に項目名ラベルを表示 */
+  .fav-kw-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #6c757d);
+    margin-bottom: .1rem;
+  }
+  .fav-kw-table td.fav-kw-word { font-size: 1.05rem; font-weight: 600; }
+  .fav-kw-table td.fav-kw-actions { padding-top: .5rem; }
+  .fav-kw-table td.fav-kw-actions .btn { min-width: 4.5rem; }
+}
+</style>
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
 <script src="js/theme-toggle.js"></script>
 </head>
@@ -97,7 +133,7 @@ function build_search_url($keyword, $search_type, $search_params) {
   </p>
   <?php else: ?>
   <div class="table-responsive">
-  <table class="table table-striped table-sm table-hover align-middle">
+  <table class="table table-striped table-sm table-hover align-middle fav-kw-table">
     <thead class="table-dark">
       <tr>
         <th>検索ワード</th>
@@ -124,10 +160,10 @@ function build_search_url($keyword, $search_type, $search_params) {
         $search_url  = build_search_url($kw, $search_type, $search_params);
     ?>
       <tr>
-        <td><?php echo htmlspecialchars($kw, ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="text-nowrap"><?php echo htmlspecialchars($type_label, ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="text-nowrap"><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
-        <td class="text-nowrap">
+        <td class="fav-kw-word" data-label="検索ワード"><?php echo htmlspecialchars($kw, ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="text-nowrap" data-label="検索種別"><?php echo htmlspecialchars($type_label, ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="text-nowrap" data-label="登録日時"><?php echo htmlspecialchars($added_dt, ENT_QUOTES, 'UTF-8'); ?></td>
+        <td class="text-nowrap fav-kw-actions" data-label="操作">
           <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">再検索</a>
           <form method="POST" action="mypage_favorite_keyword.php" class="d-inline"
                 onsubmit="return confirm('削除しますか？');">
