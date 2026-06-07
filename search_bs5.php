@@ -452,6 +452,14 @@ endif;
     var dropdown = document.getElementById("search-history-dropdown");
     if (!dropdown) return;
     var hist = getHistory();
+    // 入力中の文字で履歴を部分一致フィルタ（大文字小文字を区別しない）
+    var input = document.getElementById("anyword");
+    var filter = input ? input.value.trim().toLowerCase() : "";
+    if (filter) {
+      hist = hist.filter(function (h) {
+        return h.toLowerCase().indexOf(filter) !== -1;
+      });
+    }
     if (hist.length === 0) { dropdown.hidden = true; dropdown.innerHTML = ""; return; }
 
     var html = "<ul class=\"search-history-list\">";
@@ -503,6 +511,9 @@ endif;
     });
 
     input.addEventListener("focus", function () {
+      if (getHistory().length > 0) renderDropdown();
+    });
+    input.addEventListener("input", function () {
       if (getHistory().length > 0) renderDropdown();
     });
     input.addEventListener("blur", function () {
