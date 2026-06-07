@@ -138,6 +138,8 @@ if(!empty($select_orderby) && !empty($select_scending) ) {
    $select_orderby  = "found_last_write_time";
    $select_scending = "desc";
 }
+$myrequestarray["orderby"]  = $select_orderby;
+$myrequestarray["scending"] = $select_scending;
 
 
 $match = "";
