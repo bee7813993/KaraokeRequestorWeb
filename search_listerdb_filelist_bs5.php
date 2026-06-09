@@ -187,7 +187,10 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         echo '<a href="' . htmlspecialchars(create_requestconfirmlink_bs5($fi, $linkoption), ENT_QUOTES, 'UTF-8') . '" class="btn-request flex-shrink-0">リクエスト</a>';
         echo '<div class="flex-grow-1" style="min-width:0;">';
         if (!empty($comment)) echo '<div class="text-secondary mb-1" style="font-size:0.8rem;">【' . htmlspecialchars($comment, ENT_QUOTES, 'UTF-8') . '】</div>';
-        echo '<div class="fw-semibold text-break mb-1">' . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '</div>';
+        echo '<div class="fw-semibold text-break mb-1 filename-toggle" style="cursor:pointer;" title="タップでフルパス表示"'
+           . ' data-filename="' . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '"'
+           . ' data-fullpath="' . htmlspecialchars($fi['found_path'], ENT_QUOTES, 'UTF-8') . '">'
+           . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '</div>';
         echo '<div class="d-flex flex-wrap align-items-center gap-2" style="font-size:0.78rem;color:var(--color-text-muted);">';
         if (!empty($fi['found_track'])) {
             $vocal_badges = '';
@@ -431,7 +434,10 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
           <?php endif; ?>
           <?php echo mypage_action_links($program['found_path'], $display); ?>
         </div>
-        <div class="text-muted mt-1" style="font-size:0.7rem;word-break:break-all;"><?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?></div>
+        <div class="text-muted mt-1 filename-toggle" style="font-size:0.7rem;word-break:break-all;cursor:pointer;" title="タップでフルパス表示"
+             data-filename="<?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?>"
+             data-fullpath="<?php echo htmlspecialchars($program['found_path'], ENT_QUOTES, 'UTF-8'); ?>"
+        ><?php echo htmlspecialchars(basename_jp($program['found_path']), ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
       <?php if ($listerpreviewportenable): ?>
         <?php $pm = make_preview_modal_bs5($program['found_path'], 'pm_m_' . $k); ?>
@@ -450,5 +456,18 @@ build_pagination_bs5($displayfrom, $displaynum, $programlist['recordsTotal'], $m
 <?php endif; ?>
 <?php endif; ?>
 </div>
+<script>
+document.addEventListener("click", function (e) {
+  var el = e.target.closest(".filename-toggle");
+  if (!el) return;
+  if (el.dataset.showing === "fullpath") {
+    el.textContent = el.dataset.filename;
+    el.dataset.showing = "filename";
+  } else {
+    el.textContent = el.dataset.fullpath;
+    el.dataset.showing = "fullpath";
+  }
+});
+</script>
 </body>
 </html>
