@@ -113,7 +113,7 @@ function sort_link_l($label, $sort_key, $cur_sort, $cur_order) {
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">リクエスト</a>
             <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary btn-sm">再検索</a>
           <?php else: ?>
-            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm">曲名で再検索</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary btn-sm">曲名で再検索</a>
           <?php endif; ?>
           <form method="POST" action="mypage_later.php" class="d-inline"
                 onsubmit="return confirm('リストから削除しますか？');">

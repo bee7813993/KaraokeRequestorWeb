@@ -114,7 +114,7 @@ function sort_link_h($label, $sort_key, $cur_sort, $cur_order) {
           <?php if ($status['status'] === 'ok' || $status['status'] === 'relocated'): ?>
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">再選曲</a>
           <?php else: ?>
-            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm">再検索</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary btn-sm">再検索</a>
           <?php endif; ?>
           <form method="POST" action="mypage_history.php?sort=<?php echo urlencode($sort); ?>&order=<?php echo urlencode($order); ?>"
                 class="d-inline"
