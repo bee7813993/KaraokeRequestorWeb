@@ -73,7 +73,7 @@ if (!configbool("usemypage", true)) {
         <div class="col-12 col-sm-3 col-md-2 text-center mb-2 mb-sm-0">
           <img src="<?php echo htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8'); ?>"
                alt="マイページアイコン"
-               style="width:80px;height:80px;border-radius:50%;border:2px solid #ddd;object-fit:cover;" />
+               style="width:80px;height:80px;border-radius:50%;border:2px solid var(--color-border);object-fit:cover;" />
         </div>
         <div class="col-12 col-sm-9 col-md-10">
           <form method="POST" action="mypage.php" class="d-flex flex-wrap align-items-center gap-2 mb-2">

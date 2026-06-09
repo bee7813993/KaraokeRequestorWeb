@@ -1347,8 +1347,8 @@ $si_sorted_indices = array_keys($si_order_map);
     $def = $searchitem_defs[$idx];
     $checked = checkbox_check($config_ini['searchitem'], $def['id']) ? 'checked' : '';
 ?>
-    <div class="searchitem-row" data-index="<?php echo $idx; ?>" style="display:flex; align-items:center; padding:6px 10px; margin-bottom:4px; border:1px solid #ddd; background:#f9f9f9; border-radius:3px;">
-      <span class="searchitem-drag-handle" style="cursor:grab; color:#aaa; font-size:20px; padding:0 10px 0 0; line-height:1; user-select:none; touch-action:none;">&#8942;</span>
+    <div class="searchitem-row" data-index="<?php echo $idx; ?>" style="display:flex; align-items:center; padding:6px 10px; margin-bottom:4px; border:1px solid var(--color-border); background:var(--bg-card-alt); border-radius:3px;">
+      <span class="searchitem-drag-handle" style="cursor:grab; color:var(--color-text-muted); font-size:20px; padding:0 10px 0 0; line-height:1; user-select:none; touch-action:none;">&#8942;</span>
       <input type="checkbox" name="searchitem[]" value="<?php echo $def['id']; ?>" <?php echo $checked; ?> style="margin-right:8px;">
       <span><?php echo $def['label']; ?></span>
       <input type="hidden" name="searchitem_o[<?php echo $idx; ?>]" value="<?php echo $si_sorted_pos + 1; ?>" class="searchitem-order-input">
@@ -1583,7 +1583,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
       }
       $show_checked = (array_key_exists("roomurlshow", $config_ini) && array_key_exists($key, $config_ini["roomurlshow"]) && $config_ini["roomurlshow"][$key] == 1) ? ' checked' : '';
       print '  <tr class="roomurl-row">'."\n";
-      print '    <td class="roomurl-drag-handle text-center align-middle" style="cursor:grab; color:#aaa; font-size:18px; user-select:none; touch-action:none;">&#8942;&#8942;</td>'."\n";
+      print '    <td class="roomurl-drag-handle text-center align-middle" style="cursor:grab; color:var(--color-text-muted); font-size:18px; user-select:none; touch-action:none;">&#8942;&#8942;</td>'."\n";
       print '    <td><input type="text" class="form-control form-control-sm" placeholder="部屋番号" name="roomno[]"';
       print ' value="'.htmlspecialchars($key).'"' ;
       print '    ></td>'."\n";
