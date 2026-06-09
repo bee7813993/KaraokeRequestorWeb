@@ -476,6 +476,27 @@ body::before {
   font-weight: 600;
 }
 
+/* ナビバー内ドロップダウン: テーマに関わらず常にナビバーと同じ暗色で統一 */
+.navbar .dropdown-menu {
+  background-color: var(--bg-navbar);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.navbar .dropdown-item {
+  color: rgba(255, 255, 255, 0.85);
+}
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.navbar .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.15);
+  margin: 0.25rem 0;
+}
+.navbar .dropdown-item-text {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 /* ナビバー内検索ボタン */
 .navbar .navbar-search-btn {
   display: inline-flex;
@@ -521,12 +542,9 @@ body::before {
   }
 }
 
-/* ナビバー折りたたみ時のドロップダウン（< md = 768px）
-   transparent だとライトモードでページ背景が透けて白文字が見えなくなるため
-   ナビバーと同じ色を明示して常に暗い背景を保証する */
+/* ナビバー折りたたみ時のドロップダウン（< md = 768px）レイアウト調整 */
 @media (max-width: 767.98px) {
   .navbar .dropdown-menu {
-    background-color: var(--bg-navbar);
     border: none;
     box-shadow: none;
     border-radius: 0;
@@ -534,21 +552,8 @@ body::before {
     margin: 0;
   }
   .navbar .dropdown-item {
-    color: rgba(255, 255, 255, 0.85);
     padding: 0.4rem 1rem;
     border-radius: 4px;
-  }
-  .navbar .dropdown-item:hover,
-  .navbar .dropdown-item:focus {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-  }
-  .navbar .dropdown-divider {
-    border-color: rgba(255, 255, 255, 0.15);
-    margin: 0.25rem 0;
-  }
-  .navbar .dropdown-item-text {
-    color: rgba(255, 255, 255, 0.5);
   }
 }
 
