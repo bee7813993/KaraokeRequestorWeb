@@ -1339,16 +1339,35 @@ function commentenabledcheck(){
  * @param string $extra_css 追加で読み込むCSSファイルのパス（相対）
  */
 function print_bs5_search_head($extra_css = ''){
+    $page_css = ['css/themes/search.css'];
+    if(!empty($extra_css)){
+        $page_css[] = $extra_css;
+    }
+    print_bs5_head_core($page_css, ['jquery' => true]);
+}
+
+/**
+ * BS5ページ共通の <head> 核を出力する。
+ * テーマ初期化スクリプト（FOUC防止）+ Bootstrap5 + テーマ変数 + テーマ切替 を
+ * 一括出力し、ページ固有のCSSばらつきを排除する。
+ *
+ * @param array $page_css ページ固有CSSのhref配列（search.css / player.css / style.css 等）。
+ *                        テーマ変数の後・theme-toggle.css の前に挿入される。
+ * @param array $opts     'jquery' => true で jQuery を読み込む（既定: 読み込まない）。
+ */
+function print_bs5_head_core($page_css = [], $opts = []){
     // テーマ初期適用: フラッシュ防止のため head の最初に実行する
     print '<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>';
     print '<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">';
     print '<link rel="stylesheet" href="css/themes/_variables.css">';
-    print '<link rel="stylesheet" href="css/themes/search.css">';
-    print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
-    if(!empty($extra_css)){
-        print '<link rel="stylesheet" href="' . htmlspecialchars($extra_css, ENT_QUOTES, 'UTF-8') . '">';
+    foreach ((array)$page_css as $href){
+        if($href === '') continue;
+        print '<link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
     }
-    print '<script src="js/jquery.js"></script>';
+    print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
+    if(!empty($opts['jquery'])){
+        print '<script src="js/jquery.js"></script>';
+    }
     print '<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>';
     print '<script src="js/theme-toggle.js"></script>';
 }

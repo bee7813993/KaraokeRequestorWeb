@@ -17,10 +17,7 @@ if (configbool("usemypage", true)) {
 <head>
 <?php print_meta_header(); ?>
 <title>お気に入り検索ワード - マイページ</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
-<link href="css/themes/_variables.css" rel="stylesheet">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
+<?php print_bs5_head_core(); ?>
 <style>
 body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }
 /* 検索ワードは長い作品名でも自然に折り返す */
@@ -58,8 +55,6 @@ body { background-color: var(--bg-page); background-image: var(--bg-page-image);
   .fav-kw-table td.fav-kw-actions .btn { min-width: 4.5rem; }
 }
 </style>
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
 </head>
 <body>
 <?php
