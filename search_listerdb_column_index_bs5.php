@@ -177,11 +177,6 @@ if (!$json) {
   </div>
 </div>
 
-<?php if ($target === 'song_artist'): ?>
-  <a href="search_listerdb_artist.php<?php echo !empty($linkoption) ? '?' . $linkoption : ''; ?>"
-     class="btn-secondary-themed d-inline-block mt-2">登録数の多い順 歌手名リスト</a>
-<?php endif; ?>
-
 <?php endif; ?>
 </div>
 </body>
