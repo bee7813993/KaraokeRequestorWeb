@@ -399,9 +399,21 @@ if(is_numeric($selectid) && !empty($selectrequest) ){
 /* ファイルの存在チェック */
 $fullpath_utf8 = "";
 $audiotracklist = array();
+$videodetails = array();
+$duration_seconds = 0;
 if($shop_karaoke != 1 ){
     get_fullfilename($fullpath,$filename,$fullpath_utf8,$lister_dbpath);
     $filetype = extention_musiccheck($fullpath_utf8);
+    if(!empty($fullpath_utf8) && ($filetype == 1 || $filetype == 2)) {
+        $fileinfo = getfileinfo($fullpath_utf8);
+        $videodetails = $fileinfo['videodetails'];
+        if ($filetype == 1) {
+            $audiotracklist = $fileinfo['audiotracklist'];
+        }
+        if (isset($videodetails['duration_seconds'])) {
+            $duration_seconds = $videodetails['duration_seconds'];
+        }
+    }
 }
 
 /* キー変更が有効かどうかのチェック */
@@ -493,18 +505,6 @@ EOT;
 EOT;
 }
 
-$videodetails = array();
-$duration_seconds = 0;
-if ($shop_karaoke != 1 && !empty($fullpath_utf8) && ($filetype == 1 || $filetype == 2)) {
-    $fileinfo = getfileinfo($fullpath_utf8);
-    $videodetails = $fileinfo['videodetails'];
-    if ($filetype == 1) {
-        $audiotracklist = $fileinfo['audiotracklist'];
-    }
-    if (isset($videodetails['duration_seconds'])) {
-        $duration_seconds = $videodetails['duration_seconds'];
-    }
-}
 if ($shop_karaoke != 1 && $filetype == 1 && !empty($fullpath_utf8) && !empty($videodetails)) {
         print '<div class="card mt-2">'."\n";
         print '<div class="card-header" id="videoDetailsHeading">'."\n";
