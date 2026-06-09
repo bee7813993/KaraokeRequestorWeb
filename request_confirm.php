@@ -677,7 +677,7 @@ function resetVolume(){
 </div>
 <div class="checkbox">
 <label>
-<input type="checkbox" name="secret" value="1" /> シークレット予約(歌うまで曲名を表示しません)
+<input type="checkbox" name="secret" value="1" /> シークレットリクエスト(歌うまで曲名を表示しません)
 </label>
 </div>
 <?php
@@ -737,7 +737,7 @@ print '<div class="well">';
 print '<li>自分の番が回ってきたら、「デンモク」から歌いたい曲をリクエストしてください</li>';//★
 print '<li>歌い終わったら、「予約一覧」から「曲終了」ボタンを押してください</li>';//★
 if($config_ini['usebgv'] == 1 ){
-  print '<li>このカラオケ配信予約の後、「リスト操作」ボタンを押した後に出てくる「BGV選択」から配信曲の字幕の裏に流す動画を選ぶことができます</li>';
+  print '<li>このカラオケ配信リクエストの後、「リスト操作」ボタンを押した後に出てくる「BGV選択」から配信曲の字幕の裏に流す動画を選ぶことができます</li>';
 }
 print '</div>';
 }

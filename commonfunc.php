@@ -1766,7 +1766,7 @@ if (!empty($config_ini["downloadfolder"]) && (check_access_from_online() === fal
     if(!empty($id)){
         print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
     }
-    print '<input type="submit" name="UPL"   value="手元のファイルを転送して予約する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
+    print '<input type="submit" name="UPL"   value="手元のファイルを転送してリクエストする場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
   }else if($kind == 'dd'){

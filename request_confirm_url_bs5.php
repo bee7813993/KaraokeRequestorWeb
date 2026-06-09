@@ -299,7 +299,7 @@ EOT;
 
 <div class="mb-2 form-check">
 <input type="checkbox" class="form-check-input" name="secret" value="1" id="chk_secret" />
-<label class="form-check-label" for="chk_secret">シークレット予約(歌うまで曲名を表示しません)</label>
+<label class="form-check-label" for="chk_secret">シークレットリクエスト(歌うまで曲名を表示しません)</label>
 </div>
 <?php
 if($config_ini['usebgv'] == 1 ){

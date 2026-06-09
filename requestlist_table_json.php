@@ -272,8 +272,8 @@ EOD;
        $dialogsongname='「'.$value['songfile'].'」';
     }else{
        if($value['secret'] == 1 ){
-           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う【シークレット予約曲】';
-           $public_songname='シークレットで予約した曲';
+           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う【シークレットリクエスト曲】';
+           $public_songname='シークレットでリクエストした曲';
        }else{
            $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う「'.$value['songfile'].'」';
        }

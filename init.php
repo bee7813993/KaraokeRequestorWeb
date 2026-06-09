@@ -719,10 +719,10 @@ print ' value="10" ';
     </label>
   </div>
 
-<!---- シークレット予約の表示テキスト ----->
+<!---- シークレットリクエストの表示テキスト ----->
   <div class="mb-3">
-    <h4 class="radio form-label"> シークレット予約の表示テキスト </h4>
-    <label class="form-label"><small>未再生のシークレット予約の曲名の代わりに表示するテキストです。</small></label>
+    <h4 class="radio form-label"> シークレットリクエストの表示テキスト </h4>
+    <label class="form-label"><small>未再生のシークレットリクエストの曲名の代わりに表示するテキストです。</small></label>
     <input type="text" name="secret_display_text" class="form-control"
       value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)')), ENT_QUOTES, 'UTF-8'); ?>"
       placeholder="ヒ・ミ・ツ♪(シークレット予約)" />
@@ -1616,7 +1616,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
   </table>
 
   <div class="mb-3">
-    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >リクエスト時_順番ピッタリ移動 </span ></h3> 
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲をリクエストしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >リクエスト時_順番ピッタリ移動 </span ></h3> 
     <label class="checkbox-inline">
       <input type="radio" name="request_automove" value="1" 
 <?php 
@@ -1642,7 +1642,7 @@ if(array_key_exists("request_automove",$config_ini)) {
   </div>
 
   <div class="mb-3">
-    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >ピッタリ移動_小休止時リセット </span ></h3> 
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲をリクエストしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >ピッタリ移動_小休止時リセット </span ></h3> 
     <label class="checkbox-inline">
       <input type="radio" name="request_automove_reset" value="1" 
 <?php 
