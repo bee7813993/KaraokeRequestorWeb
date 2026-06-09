@@ -120,10 +120,13 @@ function _videodetails_from_info($info) {
 }
 
 // --- 内部ヘルパー: ファイルパスをホストエンコーディングに変換して存在確認し analyze する ---
+// $with_atom_data=true のときのみ QuickTime アトムデータを全量読み込む（重い）。
 // 成功時は getID3 の $info 配列を返す。失敗時は false を返す。
-function _getid3_analyze($filename) {
+function _getid3_analyze($filename, $with_atom_data = false) {
     $getID3 = new getID3();
-    $getID3->options_audiovideo_quicktime_ReturnAtomData = true;
+    if ($with_atom_data) {
+        $getID3->options_audiovideo_quicktime_ReturnAtomData = true;
+    }
     $workencode = (getphpversion_fa() < 70100) ? 'SJIS-win' : 'UTF-8';
     $filename_host = mb_convert_encoding($filename, $workencode, 'UTF-8');
     setlocale(LC_CTYPE, 'Japanese_Japan.932');
@@ -137,26 +140,27 @@ function _getid3_analyze($filename) {
 }
 
 // オーディオトラックリストと動画詳細を1回の analyze で取得する（request_confirm_bs5 用）
+// $need_tracklist=true のときだけ QuickTime アトムデータを読み込む。
 // 戻り値: ['audiotracklist' => array, 'videodetails' => array]
-function getfileinfo($filename) {
-    $info = _getid3_analyze($filename);
+function getfileinfo($filename, $need_tracklist = false) {
+    $info = _getid3_analyze($filename, $need_tracklist);
     if ($info === false) {
         return array('audiotracklist' => array(), 'videodetails' => array());
     }
     return array(
-        'audiotracklist' => _audiotracklist_from_info($info),
+        'audiotracklist' => $need_tracklist ? _audiotracklist_from_info($info) : array(),
         'videodetails'   => _videodetails_from_info($info),
     );
 }
 
 function getaudiotracklist($filename){
-    $info = _getid3_analyze($filename);
+    $info = _getid3_analyze($filename, true);
     if ($info === false) return array();
     return _audiotracklist_from_info($info);
 }
 
 function getvideodetails($filename) {
-    $info = _getid3_analyze($filename);
+    $info = _getid3_analyze($filename, false);
     if ($info === false) return array();
     return _videodetails_from_info($info);
 }

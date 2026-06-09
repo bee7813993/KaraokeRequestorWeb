@@ -405,7 +405,7 @@ if($shop_karaoke != 1 ){
     get_fullfilename($fullpath,$filename,$fullpath_utf8,$lister_dbpath);
     $filetype = extention_musiccheck($fullpath_utf8);
     if(!empty($fullpath_utf8) && ($filetype == 1 || $filetype == 2)) {
-        $fileinfo = getfileinfo($fullpath_utf8);
+        $fileinfo = getfileinfo($fullpath_utf8, $filetype == 1);
         $videodetails = $fileinfo['videodetails'];
         if ($filetype == 1) {
             $audiotracklist = $fileinfo['audiotracklist'];
