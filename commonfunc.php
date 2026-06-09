@@ -915,9 +915,12 @@ function searchresultcount_fromkeyword($word)
 
 function selectplayerfromextension($filepath)
 {
+if( is_url($filepath) ){
+    return "mpc";
+}
 $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-if( strcasecmp($extension,"mp3") == 0 
-    || strcasecmp($extension,"m4a") == 0 
+if( strcasecmp($extension,"mp3") == 0
+    || strcasecmp($extension,"m4a") == 0
     || strcasecmp($extension,"wav") == 0 ){
     $player="foobar";
 }else {
@@ -936,7 +939,13 @@ function getcurrentplayer(){
     if(count($currentsong) == 0){
         return "none";
     }else{
-        $player=selectplayerfromextension($currentsong[0]['fullpath']);
+        // kind に「URL指定」を含む場合は mpc 固定
+        if( mb_stristr($currentsong[0]['kind'], 'URL指定') !== FALSE ){
+            return "mpc";
+        }
+        // fullpath が空の場合は songfile で判定
+        $path = !empty($currentsong[0]['fullpath']) ? $currentsong[0]['fullpath'] : $currentsong[0]['songfile'];
+        $player=selectplayerfromextension($path);
     }
     return $player;
 }
