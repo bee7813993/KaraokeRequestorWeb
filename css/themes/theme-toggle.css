@@ -497,7 +497,7 @@ body::before {
   margin: 0.25rem 0;
 }
 .navbar .dropdown-item-text {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* ナビバー内検索ボタン */
