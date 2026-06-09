@@ -1287,12 +1287,6 @@ EOD;
     if($usebingo){
         print '      <li><a href="'.$prefix.'bingo_showresult.php">ビンゴ結果表示</a></li>';
     }
-    print '     <li ';
-    if($page == 'request.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="'.$prefix.'request.php">全部</a></li>';
     print '      <li class="dropdown-header" > ';
     print get_version();
     print '      </li>';
@@ -1586,8 +1580,6 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     if (!empty($usebingo)) {
         print '<li><a class="dropdown-item" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'bingo_showresult.php">ビンゴ結果表示</a></li>';
     }
-    $rq_active = ($page == 'request.php') ? ' active' : '';
-    print '<li><a class="dropdown-item' . $rq_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'request.php">全部</a></li>';
     print '<li><hr class="dropdown-divider"></li>';
     print '<li><span class="dropdown-item-text small text-muted">' . get_version() . '</span></li>';
     print '</ul>';
