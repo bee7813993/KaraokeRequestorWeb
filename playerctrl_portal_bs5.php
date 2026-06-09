@@ -40,7 +40,7 @@ if (array_key_exists('autoplay_exec', $config_ini) && !empty($config_ini['autopl
 
     if ($is_admin || $is_localhost || $autoplay_show_enabled) {
         echo '<div class="d-grid mt-2">';
-        echo '<a href="autoplayctrl.php" class="btn btn-outline-secondary btn-lg">自動実行開始・停止ページへ</a>';
+        echo '<a href="autoplayctrl.php" class="btn btn-secondary btn-lg">自動実行開始・停止ページへ</a>';
         echo '</div>';
     }
 }

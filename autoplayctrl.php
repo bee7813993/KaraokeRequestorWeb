@@ -354,7 +354,7 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 
   <!-- プレイヤーへ戻る -->
   <div class="d-grid mt-2">
-    <a href="playerctrl_portal_bs5.php" class="btn btn-outline-secondary btn-sm player-refresh-btn">
+    <a href="playerctrl_portal_bs5.php" class="btn btn-secondary btn-sm player-refresh-btn">
       プレイヤーコントローラーへ戻る
     </a>
   </div>
