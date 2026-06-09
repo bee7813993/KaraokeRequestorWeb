@@ -141,16 +141,44 @@ function _getid3_analyze($filename, $with_atom_data = false) {
 
 // オーディオトラックリストと動画詳細を1回の analyze で取得する（request_confirm_bs5 用）
 // $need_tracklist=true のときだけ QuickTime アトムデータを読み込む。
+// 結果はファイル更新日時ベースでディスクキャッシュされる（2回目以降は getID3 解析不要）。
 // 戻り値: ['audiotracklist' => array, 'videodetails' => array]
 function getfileinfo($filename, $need_tracklist = false) {
-    $info = _getid3_analyze($filename, $need_tracklist);
-    if ($info === false) {
-        return array('audiotracklist' => array(), 'videodetails' => array());
+    $cache_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . '_getid3_cache';
+
+    // ファイル更新日時取得（Windows パスのエンコーディング対応）
+    $workencode = (getphpversion_fa() < 70100) ? 'SJIS-win' : 'UTF-8';
+    $filename_host = mb_convert_encoding($filename, $workencode, 'UTF-8');
+    $mtime = @filemtime($filename_host);
+
+    // キャッシュキー: ファイルパス + アトムデータ有無 + ファイル更新日時
+    $cache_key  = md5($filename . '|' . (int)$need_tracklist . '|' . (string)$mtime);
+    $cache_file = $cache_dir . DIRECTORY_SEPARATOR . $cache_key;
+
+    // キャッシュヒット確認
+    if (is_file($cache_file)) {
+        $cached = @unserialize(file_get_contents($cache_file));
+        if ($cached !== false) {
+            return $cached;
+        }
     }
-    return array(
-        'audiotracklist' => $need_tracklist ? _audiotracklist_from_info($info) : array(),
-        'videodetails'   => _videodetails_from_info($info),
+
+    // getID3 解析
+    $info = _getid3_analyze($filename, $need_tracklist);
+    $result = array(
+        'audiotracklist' => ($need_tracklist && $info !== false) ? _audiotracklist_from_info($info) : array(),
+        'videodetails'   => ($info !== false) ? _videodetails_from_info($info) : array(),
     );
+
+    // キャッシュディレクトリ作成（初回のみ）
+    if (!is_dir($cache_dir)) {
+        @mkdir($cache_dir, 0755, true);
+        // Web からの直接アクセスを遮断
+        @file_put_contents($cache_dir . DIRECTORY_SEPARATOR . '.htaccess', "Deny from all\n");
+    }
+    @file_put_contents($cache_file, serialize($result));
+
+    return $result;
 }
 
 function getaudiotracklist($filename){
