@@ -1,127 +1,141 @@
-<html>
-<head>
 <?php
+// setcookie()/header() は HTML 出力前に呼ぶ必要があるため、
+// MypageUser の初期化と POST ハンドラ・リダイレクトをすべてここで処理する。
 require_once 'commonfunc.php';
 require_once 'mypage_class.php';
 require_once 'mypage_google_drive.php';
-print_meta_header();
+
+$mypage = null;
+$link   = null;
+$msg      = '';
+$msg_type = 'success';
+$is_configured = false;
+$relay_url    = '';
+
+if (configbool("usemypage", true)) {
+    global $config_ini, $db;
+    $relay_url    = $config_ini['google_relay_url'] ?? 'https://ykr.moe/mypage_google_callback.php';
+    $relay_secret = $config_ini['google_relay_secret'] ?? '';
+    $client_id    = $config_ini['google_client_id'] ?? '';
+    $is_configured = (!empty($client_id) && !empty($relay_secret));
+
+    $mypage = new MypageUser($db);
+    $link   = $mypage->getGoogleLink();
+
+    // エラー / 完了メッセージ
+    $error_map = [
+        'not_configured' => 'Google同期が設定されていません。管理者に設定を依頼してください。',
+        'no_payload'     => 'コールバックパラメーターがありません。',
+        'invalid_payload'=> 'コールバックデータが不正です。',
+        'hmac_mismatch'  => '署名の検証に失敗しました。',
+        'payload_expired'=> 'コールバックの有効期限が切れています。再度お試しください。',
+        'nonce_mismatch' => 'セキュリティトークンが一致しません。再度お試しください。',
+        'missing_token'  => 'Googleからトークンを取得できませんでした。',
+        'sync_failed'    => '同期に失敗しました。しばらく経ってから再度お試しください。',
+        'unlinked'       => 'Google連携を解除しました。',
+    ];
+    if (!empty($_GET['error'])) {
+        $msg      = $error_map[$_GET['error']] ?? ('エラーが発生しました: ' . htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8'));
+        $msg_type = 'danger';
+    } elseif (!empty($_GET['linked'])) {
+        $msg = 'Googleアカウントと連携しました。';
+    } elseif (!empty($_GET['synced'])) {
+        $msg = '同期が完了しました。';
+    }
+
+    // ---- アクション処理 ----
+
+    // 連携解除
+    if (isset($_POST['action']) && $_POST['action'] === 'unlink') {
+        $mypage->unlinkGoogle();
+        header('Location: mypage_google_sync.php?error=unlinked');
+        exit;
+    }
+
+    // 自動同期 オン/オフ切り替え
+    if (isset($_POST['action']) && $_POST['action'] === 'set_auto_sync') {
+        $mypage->setGoogleAutoSync(!empty($_POST['auto_sync']));
+        header('Location: mypage_google_sync.php');
+        exit;
+    }
+
+    // 手動同期（Drive → ローカル merge）
+    if (isset($_POST['action']) && $_POST['action'] === 'sync_from_drive') {
+        $link = $mypage->getGoogleLink();
+        if ($link) {
+            $drive = new GoogleDriveHelper(
+                $link['access_token'],
+                $link['refresh_token'],
+                $link['token_expires_at'],
+                $relay_url,
+                $relay_secret
+            );
+            $drive_data = $drive->readData();
+            if ($drive_data) {
+                $mypage->importData($drive_data, false);
+            }
+            [$new_at, $new_exp, $refreshed] = $drive->getNewTokens();
+            if ($refreshed) $mypage->updateGoogleTokens($new_at, $new_exp);
+            $mypage->updateGoogleSyncTime();
+            header('Location: mypage_google_sync.php?synced=1');
+            exit;
+        }
+    }
+
+    // 手動同期（ローカル → Drive）
+    if (isset($_POST['action']) && $_POST['action'] === 'sync_to_drive') {
+        $link = $mypage->getGoogleLink();
+        if ($link) {
+            $drive = new GoogleDriveHelper(
+                $link['access_token'],
+                $link['refresh_token'],
+                $link['token_expires_at'],
+                $relay_url,
+                $relay_secret
+            );
+            $ok = $drive->writeData($mypage->exportData());
+            [$new_at, $new_exp, $refreshed] = $drive->getNewTokens();
+            if ($refreshed) $mypage->updateGoogleTokens($new_at, $new_exp);
+            if ($ok) {
+                $mypage->updateGoogleSyncTime();
+                header('Location: mypage_google_sync.php?synced=1');
+            } else {
+                header('Location: mypage_google_sync.php?error=sync_failed');
+            }
+            exit;
+        }
+    }
+
+    $link = $mypage->getGoogleLink(); // 最新状態を再取得
+}
 ?>
+<!doctype html>
+<html lang="ja">
+<head>
+<?php print_meta_header(); ?>
 <title>Google同期 - マイページ</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
+<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/themes/_variables.css" rel="stylesheet">
+<link rel="stylesheet" href="css/themes/theme-toggle.css">
+<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
+<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="js/theme-toggle.js"></script>
 </head>
 <body>
 <?php
-shownavigatioinbar('mypage.php');
+shownavigatioinbar_bs5('mypage.php');
 
 if (!configbool("usemypage", true)) {
-    print '<div class="container" style="margin-top:80px;"><p>マイページ機能は無効です。</p></div>';
+    print '<div class="container py-3"><p>マイページ機能は無効です。</p></div>';
     print '</body></html>';
     exit;
 }
-
-global $config_ini, $db;
-$relay_url    = $config_ini['google_relay_url'] ?? 'https://ykr.moe/mypage_google_callback.php';
-$relay_secret = $config_ini['google_relay_secret'] ?? '';
-$client_id    = $config_ini['google_client_id'] ?? '';
-$is_configured = (!empty($client_id) && !empty($relay_secret));
-
-$mypage = new MypageUser($db);
-$link   = $mypage->getGoogleLink();
-
-$msg      = '';
-$msg_type = 'success';
-
-// エラー / 完了メッセージ
-$error_map = [
-    'not_configured' => 'Google同期が設定されていません。管理者に設定を依頼してください。',
-    'no_payload'     => 'コールバックパラメーターがありません。',
-    'invalid_payload'=> 'コールバックデータが不正です。',
-    'hmac_mismatch'  => '署名の検証に失敗しました。',
-    'payload_expired'=> 'コールバックの有効期限が切れています。再度お試しください。',
-    'nonce_mismatch' => 'セキュリティトークンが一致しません。再度お試しください。',
-    'missing_token'  => 'Googleからトークンを取得できませんでした。',
-    'sync_failed'    => '同期に失敗しました。しばらく経ってから再度お試しください。',
-    'unlinked'       => 'Google連携を解除しました。',
-];
-if (!empty($_GET['error'])) {
-    $msg      = $error_map[$_GET['error']] ?? ('エラーが発生しました: ' . htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8'));
-    $msg_type = 'danger';
-} elseif (!empty($_GET['linked'])) {
-    $msg = 'Googleアカウントと連携しました。';
-} elseif (!empty($_GET['synced'])) {
-    $msg = '同期が完了しました。';
-}
-
-// ---- アクション処理 ----
-
-// 連携解除
-if (isset($_POST['action']) && $_POST['action'] === 'unlink') {
-    $mypage->unlinkGoogle();
-    header('Location: mypage_google_sync.php?error=unlinked');
-    exit;
-}
-
-// 自動同期 オン/オフ切り替え
-if (isset($_POST['action']) && $_POST['action'] === 'set_auto_sync') {
-    $mypage->setGoogleAutoSync(!empty($_POST['auto_sync']));
-    header('Location: mypage_google_sync.php');
-    exit;
-}
-
-// 手動同期（Drive → ローカル merge）
-if (isset($_POST['action']) && $_POST['action'] === 'sync_from_drive') {
-    $link = $mypage->getGoogleLink();
-    if ($link) {
-        $drive = new GoogleDriveHelper(
-            $link['access_token'],
-            $link['refresh_token'],
-            $link['token_expires_at'],
-            $relay_url,
-            $relay_secret
-        );
-        $drive_data = $drive->readData();
-        if ($drive_data) {
-            $mypage->importData($drive_data, false);
-        }
-        [$new_at, $new_exp, $refreshed] = $drive->getNewTokens();
-        if ($refreshed) $mypage->updateGoogleTokens($new_at, $new_exp);
-        $mypage->updateGoogleSyncTime();
-        header('Location: mypage_google_sync.php?synced=1');
-        exit;
-    }
-}
-
-// 手動同期（ローカル → Drive）
-if (isset($_POST['action']) && $_POST['action'] === 'sync_to_drive') {
-    $link = $mypage->getGoogleLink();
-    if ($link) {
-        $drive = new GoogleDriveHelper(
-            $link['access_token'],
-            $link['refresh_token'],
-            $link['token_expires_at'],
-            $relay_url,
-            $relay_secret
-        );
-        $ok = $drive->writeData($mypage->exportData());
-        [$new_at, $new_exp, $refreshed] = $drive->getNewTokens();
-        if ($refreshed) $mypage->updateGoogleTokens($new_at, $new_exp);
-        if ($ok) {
-            $mypage->updateGoogleSyncTime();
-            header('Location: mypage_google_sync.php?synced=1');
-        } else {
-            header('Location: mypage_google_sync.php?error=sync_failed');
-        }
-        exit;
-    }
-}
-
-$link = $mypage->getGoogleLink(); // 最新状態を再取得
+// $mypage/$link/$msg/$msg_type/$is_configured は冒頭の PHP ブロックで設定済み
 ?>
-<div class="container" style="margin-top:80px;">
-  <h2>Google同期</h2>
-  <p><a href="mypage.php">&laquo; マイページに戻る</a></p>
+<div class="container py-3">
+  <h2 class="mb-2">Google同期</h2>
+  <p class="mb-3"><a href="mypage.php">&laquo; マイページへ戻る</a></p>
 
   <?php if ($msg): ?>
   <div class="alert alert-<?php echo htmlspecialchars($msg_type, ENT_QUOTES, 'UTF-8'); ?>">
@@ -136,21 +150,20 @@ $link = $mypage->getGoogleLink(); // 最新状態を再取得
   </div>
   <?php elseif (!$link): ?>
   <!-- 未連携 -->
-  <div class="panel panel-default">
-    <div class="panel-heading"><h4 class="panel-title">Googleアカウント連携</h4></div>
-    <div class="panel-body">
+  <div class="card mb-3">
+    <div class="card-header"><h5 class="card-title mb-0">Googleアカウント連携</h5></div>
+    <div class="card-body">
       <p>Googleアカウントと連携すると、マイページデータ（選曲履歴・お気に入りなど）をクラウドに保存し、複数の端末・サーバーで共有できます。</p>
       <a href="mypage_google_auth.php" class="btn btn-danger btn-lg">
-        <span class="glyphicon glyphicon-link"></span>
         Googleアカウントで連携する
       </a>
     </div>
   </div>
   <?php else: ?>
   <!-- 連携済み -->
-  <div class="panel panel-success">
-    <div class="panel-heading"><h4 class="panel-title">連携済み</h4></div>
-    <div class="panel-body">
+  <div class="card border-success mb-3">
+    <div class="card-header text-bg-success"><h5 class="card-title mb-0">連携済み</h5></div>
+    <div class="card-body">
       <p>
         <strong>メールアドレス:</strong>
         <?php echo htmlspecialchars($link['google_email'], ENT_QUOTES, 'UTF-8'); ?>
@@ -162,38 +175,34 @@ $link = $mypage->getGoogleLink(); // 最新状態を再取得
       </p>
       <?php endif; ?>
 
-      <div style="margin-top:14px;">
-        <form method="POST" action="mypage_google_sync.php" style="display:inline;">
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <form method="POST" action="mypage_google_sync.php">
           <input type="hidden" name="action" value="sync_to_drive" />
           <button type="submit" class="btn btn-primary">
-            <span class="glyphicon glyphicon-upload"></span>
             このサーバーのデータをDriveに保存
           </button>
         </form>
-        &nbsp;
-        <form method="POST" action="mypage_google_sync.php" style="display:inline;">
+        <form method="POST" action="mypage_google_sync.php">
           <input type="hidden" name="action" value="sync_from_drive" />
-          <button type="submit" class="btn btn-default">
-            <span class="glyphicon glyphicon-download-alt"></span>
+          <button type="submit" class="btn btn-outline-secondary">
             DriveのデータをこのサーバーにMerge
           </button>
         </form>
       </div>
 
-      <div style="margin-top:14px;">
+      <div class="mt-3">
         <form method="POST" action="mypage_google_sync.php">
           <input type="hidden" name="action" value="set_auto_sync" />
           <?php if (!empty($link['auto_sync'])): ?>
-            <p><span class="label label-success">自動同期: ON</span>
+            <p><span class="badge text-bg-success">自動同期: ON</span>
             &nbsp;お気に入り・検索ワードを追加・削除するたびに自動でDriveに保存されます。</p>
-            <button type="submit" class="btn btn-default btn-sm">自動同期を無効にする</button>
+            <button type="submit" class="btn btn-outline-secondary btn-sm">自動同期を無効にする</button>
           <?php else: ?>
-            <p><span class="label label-default">自動同期: OFF</span></p>
+            <p><span class="badge text-bg-secondary">自動同期: OFF</span></p>
             <button type="submit" name="auto_sync" value="1" class="btn btn-success btn-sm">
-              <span class="glyphicon glyphicon-refresh"></span>
               自動同期を有効にする
             </button>
-            <p class="text-muted" style="margin-top:6px;font-size:12px;">
+            <p class="text-muted small mt-2">
               有効にすると、お気に入り・検索ワードの追加・削除のたびに自動でDriveに保存されます。
             </p>
           <?php endif; ?>
@@ -205,7 +214,6 @@ $link = $mypage->getGoogleLink(); // 最新状態を再取得
             onsubmit="return confirm('Google連携を解除します。Driveのデータは削除されません。よろしいですか？');">
         <input type="hidden" name="action" value="unlink" />
         <button type="submit" class="btn btn-danger btn-sm">
-          <span class="glyphicon glyphicon-remove"></span>
           連携を解除する
         </button>
       </form>

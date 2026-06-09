@@ -30,28 +30,33 @@ if (configbool("usemypage", true)) {
     }
 }
 ?>
-<html>
+<!doctype html>
+<html lang="ja">
 <head>
 <?php print_meta_header(); ?>
 <title>デバイスリンク - マイページ</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
+<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/themes/_variables.css" rel="stylesheet">
+<link rel="stylesheet" href="css/themes/theme-toggle.css">
+<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
+<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="js/theme-toggle.js"></script>
 </head>
 <body>
 <?php
-shownavigatioinbar('mypage_link_device.php');
+shownavigatioinbar_bs5('mypage_link_device.php');
 
 if (!configbool("usemypage", true)) {
-    print '<div class="container" style="margin-top:80px;"><p>マイページ機能は無効です。</p></div>';
+    print '<div class="container py-3"><p>マイページ機能は無効です。</p></div>';
     print '</body></html>';
     exit;
 }
 // $mypage/$msg/$msg_type/$pair_code は冒頭の PHP ブロックで設定済み
 ?>
-<div class="container" style="margin-top:80px;">
-  <h2>デバイスリンク</h2>
-  <p><a href="mypage.php">&laquo; マイページへ戻る</a></p>
+<div class="container py-3">
+  <h2 class="mb-2">デバイスリンク</h2>
+  <p class="mb-3"><a href="mypage.php">&laquo; マイページへ戻る</a></p>
 
   <?php if ($msg): ?>
   <div class="alert alert-<?php echo htmlspecialchars($msg_type, ENT_QUOTES, 'UTF-8'); ?>">
@@ -59,14 +64,14 @@ if (!configbool("usemypage", true)) {
   </div>
   <?php endif; ?>
 
-  <div class="row">
+  <div class="row g-3">
     <!-- コード発行 (このデバイスのデータを新端末に引き継がせる) -->
-    <div class="col-xs-12 col-md-6">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">このデバイスのデータを別端末に引き継ぐ</h4>
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title mb-0">このデバイスのデータを別端末に引き継ぐ</h5>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
           <p>「コードを発行」を押すと6文字のコードが表示されます。<br>
             新しい端末でそのコードを入力してください。<br>
             <strong>コードの有効期限は5分です。</strong>
@@ -76,28 +81,28 @@ if (!configbool("usemypage", true)) {
             <button type="submit" class="btn btn-primary">コードを発行</button>
           </form>
           <?php if (!empty($pair_code)): ?>
-          <div class="well" style="margin-top:15px; font-size:2em; letter-spacing:0.3em; text-align:center;">
+          <div class="alert alert-secondary text-center mt-3 mb-1" style="font-size:2em; letter-spacing:0.3em;">
             <strong><?php echo htmlspecialchars($pair_code, ENT_QUOTES, 'UTF-8'); ?></strong>
           </div>
-          <p class="text-muted" style="font-size:small;">新端末で上記コードを入力してください（5分以内）。</p>
+          <p class="text-muted small">新端末で上記コードを入力してください（5分以内）。</p>
           <?php endif; ?>
         </div>
       </div>
     </div>
 
     <!-- コード入力 (別端末のデータをこのデバイスに引き継ぐ) -->
-    <div class="col-xs-12 col-md-6">
-      <div class="panel panel-default">
-        <div class="panel-heading">
-          <h4 class="panel-title">別端末のデータをこのデバイスに引き継ぐ</h4>
+    <div class="col-12 col-md-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title mb-0">別端末のデータをこのデバイスに引き継ぐ</h5>
         </div>
-        <div class="panel-body">
+        <div class="card-body">
           <p>別端末で発行したコードをここに入力してください。<br>
             入力後、この端末のマイページが別端末のデータに切り替わります。
           </p>
           <form method="POST" action="mypage_link_device.php">
             <input type="hidden" name="action" value="apply" />
-            <div class="form-group">
+            <div class="mb-3">
               <input type="text" name="code" class="form-control"
                      maxlength="6" placeholder="XXXXXX"
                      style="font-size:1.5em; letter-spacing:0.3em; text-transform:uppercase;"
@@ -110,8 +115,8 @@ if (!configbool("usemypage", true)) {
     </div>
   </div>
 
-  <hr>
-  <p class="text-muted" style="font-size:small;">
+  <hr class="my-4">
+  <p class="text-muted small">
     ※ 引き継ぎ後、古い端末のデータ（履歴・お気に入り等）は引き継ぎ元のデータに統合されません。
     引き継ぎ先のユーザーIDに切り替わります。
   </p>
