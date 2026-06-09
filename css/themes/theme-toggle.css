@@ -89,6 +89,7 @@ body::before {
   --bg-badge: #495057;
   --bg-input: #2a2a3c;
   --bg-swap-banner: #3d2f00;
+  --border-swap-banner: #8a6d00;
   --color-text: #e8e8ec;
   --color-text-muted: #a8acb8;
   --color-swap-banner: #ffd966;

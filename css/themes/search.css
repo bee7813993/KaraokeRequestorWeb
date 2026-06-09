@@ -7,7 +7,7 @@
 .swap-banner {
   background-color: var(--bg-swap-banner);
   color: var(--color-swap-banner);
-  border: 1px solid #ffc107;
+  border: 1px solid var(--border-swap-banner, #ffc107);
   border-radius: var(--radius-card);
   padding: var(--space-3) var(--space-4);
   margin-bottom: var(--space-4);

@@ -230,6 +230,7 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 .card-comment-area:hover { color: var(--bs-primary); border-color: var(--bs-primary); }
 .card-comment-icon { font-size: 13px; flex-shrink: 0; opacity: 0.6; }
 .card-comment-placeholder { color: var(--color-text-muted, #aaa); font-style: italic; }
+.card-comment-edit-icon { margin-left: 4px; opacity: 0.6; }
 /* Tweet リンク */
 .card-tweet-link {
   font-size: 11px;
@@ -651,7 +652,7 @@ function createCardHTML(item, idx, displayMode) {
     var commentHtml = '<div class="card-comment-area" data-id="' + item.id + '" data-comment="' + esc(item.comment) + '">'
         + '<span class="card-comment-icon">&#128172;</span>';
     if (item.comment) {
-        commentHtml += '<span>' + esc(item.comment) + '</span><small style="margin-left:4px;opacity:.6;">&#9998;</small>';
+        commentHtml += '<span>' + esc(item.comment) + '</span><small class="card-comment-edit-icon">&#9998;</small>';
     } else {
         commentHtml += '<span class="card-comment-placeholder">コメントを追加...</span>';
     }

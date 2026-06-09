@@ -20,6 +20,7 @@
   --bg-badge: #6c757d;
   --bg-input: #ffffff;
   --bg-swap-banner: #fff3cd;   /* 曲差し替えバナー */
+  --border-swap-banner: #ffc107; /* 曲差し替えバナーのボーダー */
 
   /* --- テキスト --- */
   --color-text: #212529;
