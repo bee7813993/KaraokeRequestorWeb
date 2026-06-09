@@ -41,7 +41,7 @@ if (configbool("usemypage", true)) {
 <head>
 <?php print_meta_header(); ?>
 <title>マイページ</title>
-<?php print_bs5_head_core(['css/style.css']); ?>
+<?php print_bs5_head_core(); ?>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('mypage.php'); ?>

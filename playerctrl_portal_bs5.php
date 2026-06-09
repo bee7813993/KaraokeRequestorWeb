@@ -23,7 +23,7 @@ if (!empty($config_ini['roomurl'])) {
 <body>
 <?php shownavigatioinbar_bs5('playerctrl_portal_bs5.php'); ?>
 
-<div class="container" style="max-width:540px; padding-top:16px; padding-bottom:32px;">
+<div class="container pt-3 pb-4" style="max-width:540px;">
 
 <?php
 if (strcmp('foobar', $playerkind) === 0) {
