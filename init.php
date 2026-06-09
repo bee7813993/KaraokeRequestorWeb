@@ -589,7 +589,7 @@ print 'checked';
     </h3>
 
     <div class="mb-3">
-    <h4 for=> 予約一覧（トップ）画面表示メッセージ  </h4>
+    <h4 for=> リクエスト一覧（トップ）画面表示メッセージ  </h4>
     <label for=> <small> HTML記述OK、「#yukarihost#」はホスト名に置換 </small> </label>
      <textarea name="noticeof_listpage" class="form-control" id="noticeof_listpage" >
 <?php
@@ -718,8 +718,8 @@ print ' value="10" ';
     <h4 class="radio form-label"> シークレットリクエストの表示テキスト </h4>
     <label class="form-label"><small>未再生のシークレットリクエストの曲名の代わりに表示するテキストです。</small></label>
     <input type="text" name="secret_display_text" class="form-control"
-      value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)')), ENT_QUOTES, 'UTF-8'); ?>"
-      placeholder="ヒ・ミ・ツ♪(シークレット予約)" />
+      value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレットリクエスト)')), ENT_QUOTES, 'UTF-8'); ?>"
+      placeholder="ヒ・ミ・ツ♪(シークレットリクエスト)" />
   </div>
 
 <!---- ページ背景色設定 ----->
@@ -1092,8 +1092,8 @@ print 'value="'.urldecode($config_ini["startvolume"]).'"';
   </div>
 
   <div class="mb-3">
-    <h4 class="radio form-label"><span data-bs-toggle="tooltip" data-bs-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。予約確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </h4>
-    <label class="radio-inline" data-bs-toggle="tooltip" data-bs-placement="top" title="予約確認画面に項目を追加するかどうか">
+    <h4 class="radio form-label"><span data-bs-toggle="tooltip" data-bs-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。リクエスト確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </h4>
+    <label class="radio-inline" data-bs-toggle="tooltip" data-bs-placement="top" title="リクエスト確認画面に項目を追加するかどうか">
       <input type="radio" name="useotherplayer" value="1" <?php 
       if(array_key_exists("useotherplayer",$config_ini)){
           print ($config_ini["useotherplayer"]==1)?'checked':' ';
@@ -1663,7 +1663,7 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
 
 
 <!---- 縛り曲リストの設定 ----->
-  <h3> <span data-bs-toggle="tooltip" data-bs-placement="top" title="検索予約メニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
+  <h3> <span data-bs-toggle="tooltip" data-bs-placement="top" title="検索リクエストメニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
   <?php 
   if(array_key_exists("limitlistname",$config_ini)) {
   for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){

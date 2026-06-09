@@ -145,7 +145,7 @@ function readconfig_array()
         $config_ini = array_merge($config_ini,array("usenewrequestlist" => 2));
     }
     if(!array_key_exists("secret_display_text", $config_ini)){
-        $config_ini["secret_display_text"] = urlencode("ヒ・ミ・ツ♪(シークレット予約)");
+        $config_ini["secret_display_text"] = urlencode("ヒ・ミ・ツ♪(シークレットリクエスト)");
     }
     if(!array_key_exists("usemypage", $config_ini)){
         $config_ini = array_merge($config_ini,array("usemypage" => 1));
