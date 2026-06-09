@@ -476,9 +476,12 @@ body::before {
   font-weight: 600;
 }
 
-/* ナビバー内ドロップダウン: テーマに関わらず常にナビバーと同じ暗色で統一 */
+/* ナビバー内ドロップダウン: テーマ・背景画像設定に関わらず常にナビバー色で統一。
+   背景画像有効時に print_bg_style_block が .dropdown-menu へ注入する
+   半透明カード色(!important)に勝つため、こちらも !important で上書きする。 */
 .navbar .dropdown-menu {
-  background-color: var(--bg-navbar);
+  background-color: var(--bg-navbar) !important;
+  background-image: none !important;
   border-color: rgba(255, 255, 255, 0.15);
 }
 .navbar .dropdown-item {
