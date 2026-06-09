@@ -411,9 +411,9 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 </style>
 </head>
 <body>
+<?php shownavigatioinbar_bs5(); ?>
 <div class="container">
 <?php
-shownavigatioinbar_bs5();
 showmode();
 
 if (!empty($config_ini['noticeof_listpage'])) {
