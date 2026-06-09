@@ -923,14 +923,25 @@ function start_song($db,$id,$addplaytimes = 0){
         return $row;
     }
 
-    //★ $filepath = get_fullfilename2($row["fullpath"],$row["songfile"],$filepath_utf8);
-    $filepath = get_fullfilename2_local($row["fullpath"],$row["songfile"],$filepath_utf8);  //★
-    if( $filepath === false){
-        logtocmd($word."<start_song>ファイルが見つかりませんでした、Skipします");
-        return false;
-    }
     // var_dump($row);
-    $filetype = check_filetype ($db,$id);
+    $filetype = check_filetype($db,$id);
+    if( $filetype === false ){ return false; }
+    if( $filetype == 3 ){
+        // URL指定：fullpath をそのまま使用
+        $filepath = $row["fullpath"];
+        $filepath_utf8 = $filepath;
+        if( empty($filepath) ){
+            logtocmd("<start_song>URLが空のため再生できません");
+            return false;
+        }
+    }else{
+        //★ $filepath = get_fullfilename2($row["fullpath"],$row["songfile"],$filepath_utf8);
+        $filepath = get_fullfilename2_local($row["fullpath"],$row["songfile"],$filepath_utf8);  //★
+        if( $filepath === false){
+            logtocmd($word."<start_song>ファイルが見つかりませんでした、Skipします");
+            return false;
+        }
+    }
     if( $filetype == 2 ){
         // とりあえず動画Playerを終了する。
         mpcstop();
@@ -991,11 +1002,13 @@ function start_song($db,$id,$addplaytimes = 0){
             /* key change */
             global $MPCCMDURL;
             global $MPCSTATURL;
-                    //★ 一時停止状態でファイルを開く。
+                    //★ 一時停止状態でファイルを開く。URL指定は上の filetype==3 ブロックで開済みのためスキップ。
+                    if($filetype != 3){  //★
                     global $ADDPATHCMD;  //★
                     $execcmd="$ADDPATHCMD & start  \"\" \"".$MPCPATH."\"" . " /open \"$filepath_utf8\"\n";  //★
                     $fp = popen($execcmd,'r');
                     pclose($fp);
+                    }  //★
 
             //★ MPCの再生開始時に音量を指定値に戻す（設定で有効にしている場合）
             //   制作者別音量増減（requesttable.volume != 0）が設定されている場合は
