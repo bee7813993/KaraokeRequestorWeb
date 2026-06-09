@@ -438,3 +438,47 @@ body::before {
   border-color: rgba(255, 255, 255, 0.55);
   color: #ffffff !important;
 }
+
+/* ============================================================
+   ダークモード: Bootstrap 標準ボタン（btn-secondary / btn-outline-secondary）
+   Bootstrap 5 の固定色をテーマ変数で上書きし、暗い背景でも視認できるようにする。
+   ============================================================ */
+[data-theme="dark"] .btn-secondary {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .btn-secondary:active,
+[data-theme="dark"] .btn-secondary.active,
+[data-theme="dark"] .btn-secondary:focus-visible {
+  background-color: var(--bg-card-hover);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .btn-check:checked + .btn-secondary,
+[data-theme="dark"] .btn-check:active + .btn-secondary {
+  background-color: var(--color-accent-secondary);
+  border-color: var(--color-accent-secondary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  background-color: transparent;
+}
+[data-theme="dark"] .btn-outline-secondary:hover,
+[data-theme="dark"] .btn-outline-secondary:active,
+[data-theme="dark"] .btn-outline-secondary.active,
+[data-theme="dark"] .btn-outline-secondary:focus-visible {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .btn-check:checked + .btn-outline-secondary,
+[data-theme="dark"] .btn-check:active + .btn-outline-secondary {
+  background-color: var(--color-accent-secondary);
+  border-color: var(--color-accent-secondary);
+  color: #ffffff;
+}

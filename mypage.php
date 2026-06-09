@@ -110,16 +110,16 @@ if (!configbool("usemypage", true)) {
 
   <div class="row g-2 mb-3">
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_history.php" class="btn btn-outline-secondary btn-lg w-100">選曲履歴</a>
+      <a href="mypage_history.php" class="btn btn-secondary btn-lg w-100">選曲履歴</a>
     </div>
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_later.php" class="btn btn-outline-secondary btn-lg w-100">後で歌う</a>
+      <a href="mypage_later.php" class="btn btn-secondary btn-lg w-100">後で歌う</a>
     </div>
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_favorite_song.php" class="btn btn-outline-secondary btn-lg w-100">お気に入り曲</a>
+      <a href="mypage_favorite_song.php" class="btn btn-secondary btn-lg w-100">お気に入り曲</a>
     </div>
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_favorite_keyword.php" class="btn btn-outline-secondary btn-lg w-100">お気に入り検索ワード</a>
+      <a href="mypage_favorite_keyword.php" class="btn btn-secondary btn-lg w-100">お気に入り検索ワード</a>
     </div>
   </div>
 
