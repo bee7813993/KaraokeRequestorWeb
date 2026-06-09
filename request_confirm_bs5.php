@@ -669,7 +669,7 @@ if($forcebgv == 1 ){
     print 'checked';
 }
 print ' />';
-print '<label class="form-check-label" for="chk_bgv">BGVモード <small class="text-muted"> この動画をカラオケ配信のBGVとして予約します。</small></label>';
+print '<label class="form-check-label" for="chk_bgv">BGVモード <small class="text-muted"> この動画をカラオケ配信のBGVとしてリクエストします。</small></label>';
 print '</div>';
 }
 
@@ -712,7 +712,7 @@ if($shop_karaoke == 1){
 print '<div class="alert alert-info mt-2">';
 print '<ul class="mb-0">';
 print '<li>自分の番が回ってきたら、「デンモク」から歌いたい曲をリクエストしてください</li>';
-print '<li>歌い終わったら、「予約一覧」から「曲終了」ボタンを押してください</li>';
+print '<li>歌い終わったら、「リクエスト一覧」から「曲終了」ボタンを押してください</li>';
 if($config_ini['usebgv'] == 1 ){
   print '<li>このカラオケ配信リクエストの後、「リスト操作」ボタンを押した後に出てくる「BGV選択」から配信曲の字幕の裏に流す動画を選ぶことができます</li>';
 }

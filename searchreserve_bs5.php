@@ -11,7 +11,7 @@ if (array_key_exists("id", $_REQUEST)) $selectid = $_REQUEST["id"];
 <html lang="ja">
 <head>
 <?php print_meta_header(); ?>
-<title>検索＆予約TOP</title>
+<title>検索＆リクエストTOP</title>
 <?php print_bs5_search_head(); ?>
 </head>
 <body>
