@@ -54,7 +54,7 @@ foreach($allrequest as $value ){
     $reqcount -= 1;
     $songfilename = '';
     if( ($value['secret'] == 1 ) && strcmp($value['nowplaying'],'未再生') == 0){
-        $secret_text  = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)'));
+        $secret_text  = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレットリクエスト)'));
         $songfilename = nl2br(htmlspecialchars(' ' . $secret_text . ' '));
     }else{
         $songfilename = nl2br(htmlspecialchars($value['songfile']));
@@ -272,8 +272,8 @@ EOD;
        $dialogsongname='「'.$value['songfile'].'」';
     }else{
        if($value['secret'] == 1 ){
-           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う【シークレット予約曲】';
-           $public_songname='シークレットで予約した曲';
+           $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う【シークレットリクエスト曲】';
+           $public_songname='シークレットでリクエストした曲';
        }else{
            $dialogsongname='<span class="text-danger">'.$value['singer'].'さん</span>が歌う「'.$value['songfile'].'」';
        }

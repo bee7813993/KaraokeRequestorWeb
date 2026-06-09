@@ -67,9 +67,8 @@ nav.navbar.navbar-fixed-top,
   }
 }
 
-/* 検索ボタン（全ページ共通・Bootstrap 3 navbar 内） */
-.navbar.navbar-fixed-top a.navbar-brand.navbar-search-btn,
-a.navbar-brand.navbar-search-btn {
+/* 検索ボタン（BS3 navbar 限定。BS5 ページは theme-toggle.css 側で統一） */
+.navbar.navbar-fixed-top a.navbar-brand.navbar-search-btn {
   display: inline-flex !important;
   align-items: center;
   gap: 5px;
@@ -87,8 +86,8 @@ a.navbar-brand.navbar-search-btn {
   transition: background 0.18s ease;
 }
 
-a.navbar-brand.navbar-search-btn:hover,
-a.navbar-brand.navbar-search-btn:focus {
+.navbar.navbar-fixed-top a.navbar-brand.navbar-search-btn:hover,
+.navbar.navbar-fixed-top a.navbar-brand.navbar-search-btn:focus {
   background: rgba(255, 255, 255, 0.32);
   color: #ffffff !important;
   text-decoration: none;

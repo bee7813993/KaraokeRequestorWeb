@@ -206,7 +206,7 @@ try {
 
             $sf = htmlspecialchars($row_next['songfile'], ENT_QUOTES, 'UTF-8');
             $sn = $sn_raw !== '' ? htmlspecialchars($sn_raw, ENT_QUOTES, 'UTF-8') : '';
-            $secret_text = htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)')), ENT_QUOTES, 'UTF-8');
+            $secret_text = htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレットリクエスト)')), ENT_QUOTES, 'UTF-8');
             $next_song = [
                 'title'    => $is_secret_next ? $secret_text : ($sn ?: $sf),
                 'songfile' => $is_secret_next ? '' : $sf,
@@ -259,7 +259,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
       <span class="player-kind-badge">MPC</span>
     </div>
     <!-- mpcctrl.js 互換用（非表示）: mpcctrl.js がここを書き換えるため残す -->
-    <div id="songtitle" style="display:none;" aria-hidden="true"></div>
+    <div id="songtitle" class="d-none" aria-hidden="true"></div>
     <!-- BS5 表示用: player_bs5.js が song_name で更新する -->
     <div id="player-title-display"
          data-song-title="<?= $song_title ?>"
@@ -278,12 +278,12 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
              <?php endif; ?>
         ><?= $song_title ?><?php if ($has_alt_file): ?><span class="player-title-toggle-icon" aria-hidden="true">⇄</span><?php endif; ?></div>
       <?php else: ?>
-        <div class="player-title text-muted" id="player-title-text" style="opacity:.5;">曲が選択されていません</div>
+        <div class="player-title text-muted player-title--idle" id="player-title-text">曲が選択されていません</div>
       <?php endif; ?>
     </div>
     <div class="player-nowplaying-singer<?= $playing_singer ? '' : ' d-none' ?>"
          id="player-singer"><?= $playing_singer ?></div>
-    <div class="progress mt-3 mb-2" style="height:6px;" role="progressbar"
+    <div class="progress mt-3 mb-2" role="progressbar"
          aria-valuenow="<?= round($prog_pct) ?>" aria-valuemin="0" aria-valuemax="100">
       <div class="progress-bar" id="divprogress" style="width:<?= $prog_pct ?>%;"></div>
     </div>
@@ -385,15 +385,13 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
     <div class="player-section-label">ボリューム</div>
     <!-- スライダー行 -->
     <div class="d-flex align-items-center gap-2 mb-2">
-      <button class="btn btn-outline-primary player-btn flex-shrink-0"
-              style="min-width:var(--tap-target);padding:8px;"
+      <button class="btn btn-outline-primary player-btn flex-shrink-0 player-vol-btn"
               onclick="vol_btn_down()" aria-label="ボリュームDOWN">
         <?= $ic_vol_d ?>
       </button>
       <input type="range" class="form-range flex-grow-1" id="volume-slider"
              min="0" max="100" value="50" aria-label="ボリューム">
-      <button class="btn btn-outline-primary player-btn flex-shrink-0"
-              style="min-width:var(--tap-target);padding:8px;"
+      <button class="btn btn-outline-primary player-btn flex-shrink-0 player-vol-btn"
               onclick="vol_btn_up()" aria-label="ボリュームUP">
         <?= $ic_vol_u ?>
       </button>
@@ -489,7 +487,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
       </button>
     </div>
     <?php else: ?>
-    <div id="currentkey" style="display:none;"></div>
+    <div id="currentkey" class="d-none"></div>
     <?php endif; ?>
 
   </div><!-- /card-body -->

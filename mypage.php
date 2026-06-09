@@ -41,14 +41,7 @@ if (configbool("usemypage", true)) {
 <head>
 <?php print_meta_header(); ?>
 <title>マイページ</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
-<link href="css/style.css" rel="stylesheet">
-<link href="css/themes/_variables.css" rel="stylesheet">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; }</style>
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
+<?php print_bs5_head_core(); ?>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('mypage.php'); ?>
@@ -79,7 +72,7 @@ if (!configbool("usemypage", true)) {
         <div class="col-12 col-sm-3 col-md-2 text-center mb-2 mb-sm-0">
           <img src="<?php echo htmlspecialchars($icon_path, ENT_QUOTES, 'UTF-8'); ?>"
                alt="マイページアイコン"
-               style="width:80px;height:80px;border-radius:50%;border:2px solid #ddd;object-fit:cover;" />
+               style="width:80px;height:80px;border-radius:50%;border:2px solid var(--color-border);object-fit:cover;" />
         </div>
         <div class="col-12 col-sm-9 col-md-10">
           <form method="POST" action="mypage.php" class="d-flex flex-wrap align-items-center gap-2 mb-2">
@@ -116,16 +109,16 @@ if (!configbool("usemypage", true)) {
 
   <div class="row g-2 mb-3">
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_history.php" class="btn btn-primary btn-lg w-100">選曲履歴</a>
+      <a href="mypage_history.php" class="btn btn-secondary btn-lg w-100">選曲履歴</a>
     </div>
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_later.php" class="btn btn-success btn-lg w-100">後で歌う</a>
+      <a href="mypage_later.php" class="btn btn-secondary btn-lg w-100">後で歌う</a>
     </div>
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_favorite_song.php" class="btn btn-warning btn-lg w-100">お気に入り曲</a>
+      <a href="mypage_favorite_song.php" class="btn btn-secondary btn-lg w-100">お気に入り曲</a>
     </div>
     <div class="col-12 col-sm-6 col-md-3">
-      <a href="mypage_favorite_keyword.php" class="btn btn-info btn-lg w-100">お気に入り検索ワード</a>
+      <a href="mypage_favorite_keyword.php" class="btn btn-secondary btn-lg w-100">お気に入り検索ワード</a>
     </div>
   </div>
 

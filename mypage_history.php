@@ -18,13 +18,7 @@ if (configbool("usemypage", true)) {
 <head>
 <?php print_meta_header(); ?>
 <title>選曲履歴 - マイページ</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
-<link href="css/themes/_variables.css" rel="stylesheet">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
+<?php print_bs5_head_core(); ?>
 </head>
 <body>
 <?php
@@ -119,7 +113,7 @@ function sort_link_h($label, $sort_key, $cur_sort, $cur_order) {
           <?php if ($status['status'] === 'ok' || $status['status'] === 'relocated'): ?>
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">再選曲</a>
           <?php else: ?>
-            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm">再検索</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary btn-sm">再検索</a>
           <?php endif; ?>
           <form method="POST" action="mypage_history.php?sort=<?php echo urlencode($sort); ?>&order=<?php echo urlencode($order); ?>"
                 class="d-inline"

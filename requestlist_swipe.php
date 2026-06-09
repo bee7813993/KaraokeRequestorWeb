@@ -13,11 +13,6 @@ if (!empty($config_ini['roomurl'])) {
     $titlePrefix = $roomnames[0] . '：';
 }
 
-$bgcolor = '#F8ECE0';
-if (!empty($config_ini['bgcolor'])) {
-    $bgcolor = urldecode($config_ini['bgcolor']);
-}
-
 $connectinternet = isset($config_ini['connectinternet']) ? (int)$config_ini['connectinternet'] : 1;
 $useposttwitter  = configbool('useposttwitter', true);
 $playmode        = isset($config_ini['playmode']) ? (int)$config_ini['playmode'] : 3;
@@ -36,6 +31,7 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 <title><?php echo htmlspecialchars($titlePrefix, ENT_QUOTES, 'UTF-8'); ?>リクエスト一覧</title>
 <script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
 <link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
+<link href="css/themes/_variables.css"         rel="stylesheet">
 <link href="css/style.css"                    rel="stylesheet">
 <link href="css/themes/theme-toggle.css"      rel="stylesheet">
 <script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
@@ -43,7 +39,15 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 <!-- SortableJS: js/Sortable.min.js に配置してください。取得先: https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js -->
 <script src="js/Sortable.min.js"></script>
 <style>
-body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-8'); ?>; }
+/* 再生状況別カード背景色 — CSS変数でライト/ダーク切替 */
+:root {
+  --card-bg-playing-rgb: 246, 255, 248;  /* 再生中: 緑がかった白 */
+  --card-bg-waiting-rgb: 255, 254, 245;  /* 再生開始待ち: 暖色がかった白 */
+}
+[data-theme="dark"] {
+  --card-bg-playing-rgb: 20, 40, 25;
+  --card-bg-waiting-rgb: 40, 35, 15;
+}
 
 #request-list {
   margin-top: 8px;
@@ -58,7 +62,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   background: rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1));
-  border-left: 4px solid #ced4da;
+  border-left: 4px solid var(--color-border, #ced4da);
   -webkit-user-select: none;
   user-select: none;
 }
@@ -66,12 +70,12 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .request-card[data-nowplaying="再生中"],
 .request-card[data-nowplaying="2"] {
   border-left-color: var(--bs-success);
-  background: rgba(246, 255, 248, var(--bg-card-alpha, 1));
+  background: rgba(var(--card-bg-playing-rgb), var(--bg-card-alpha, 1));
 }
 .request-card[data-nowplaying="再生開始待ち"],
 .request-card[data-nowplaying="6"] {
   border-left-color: var(--bs-warning);
-  background: rgba(255, 254, 245, var(--bg-card-alpha, 1));
+  background: rgba(var(--card-bg-waiting-rgb), var(--bg-card-alpha, 1));
 }
 .request-card[data-nowplaying="停止中"],
 .request-card[data-nowplaying="3"] {
@@ -81,7 +85,7 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 .request-card[data-nowplaying="再生済？"],
 .request-card[data-nowplaying="4"],
 .request-card[data-nowplaying="5"] {
-  border-left-color: #adb5bd;
+  border-left-color: var(--color-border, #adb5bd);
   background: rgba(var(--bg-card-alt-rgb, 248, 244, 240), var(--bg-card-alpha, 1));
 }
 
@@ -225,7 +229,8 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
 }
 .card-comment-area:hover { color: var(--bs-primary); border-color: var(--bs-primary); }
 .card-comment-icon { font-size: 13px; flex-shrink: 0; opacity: 0.6; }
-.card-comment-placeholder { color: #aaa; font-style: italic; }
+.card-comment-placeholder { color: var(--color-text-muted, #aaa); font-style: italic; }
+.card-comment-edit-icon { margin-left: 4px; opacity: 0.6; }
 /* Tweet リンク */
 .card-tweet-link {
   font-size: 11px;
@@ -384,12 +389,32 @@ body { background-color: <?php echo htmlspecialchars($bgcolor, ENT_QUOTES, 'UTF-
   line-height: 1;
   font-weight: 700;
 }
+
+/* ---- ダークモード: チップ色の上書き ---- */
+[data-theme="dark"] .chip-singer        { background: #1e2240; color: #9fa8da; }
+[data-theme="dark"] .chip-kind          { background: #1a2e1e; color: #81c784; }
+[data-theme="dark"] .chip-kind-video    { background: #0f1d3a; color: #60a5fa; }
+[data-theme="dark"] .chip-kind-karaoke  { background: #3a1014; color: #f87171; }
+[data-theme="dark"] .chip-kind-pause    { background: #1e2328; color: #94a3b8; }
+[data-theme="dark"] .chip-kind-url      { background: #2d1f00; color: #fbbf24; }
+[data-theme="dark"] .chip-kind-bgv      { background: #1e1430; color: #c084fc; }
+[data-theme="dark"] .chip-kind-nico     { background: #062832; color: #22d3ee; }
+[data-theme="dark"] .chip-lister-comment { background: #2d0d20; color: #f472b6; }
+[data-theme="dark"] .chip-duration      { background: #1a1d20; color: #adb5bd; }
+[data-theme="dark"] .chip-track         { background: #1f1030; color: #d8b4fe; }
+[data-theme="dark"] .chip-key-pos       { background: #0d2010; color: #86efac; }
+[data-theme="dark"] .chip-key-neg       { background: #2d0a12; color: #fca5a5; }
+[data-theme="dark"] .chip-volume        { background: #271500; color: #fb923c; }
+[data-theme="dark"] .chip-delay         { background: #0a1f3a; color: #60a5fa; }
+
+/* ---- ダークモード: SortableJS ---- */
+[data-theme="dark"] .sortable-ghost { background: #1a2a4a !important; }
 </style>
 </head>
 <body>
+<?php shownavigatioinbar_bs5(); ?>
 <div class="container">
 <?php
-shownavigatioinbar_bs5();
 showmode();
 
 if (!empty($config_ini['noticeof_listpage'])) {
@@ -627,7 +652,7 @@ function createCardHTML(item, idx, displayMode) {
     var commentHtml = '<div class="card-comment-area" data-id="' + item.id + '" data-comment="' + esc(item.comment) + '">'
         + '<span class="card-comment-icon">&#128172;</span>';
     if (item.comment) {
-        commentHtml += '<span>' + esc(item.comment) + '</span><small style="margin-left:4px;opacity:.6;">&#9998;</small>';
+        commentHtml += '<span>' + esc(item.comment) + '</span><small class="card-comment-edit-icon">&#9998;</small>';
     } else {
         commentHtml += '<span class="card-comment-placeholder">コメントを追加...</span>';
     }

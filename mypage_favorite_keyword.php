@@ -17,12 +17,8 @@ if (configbool("usemypage", true)) {
 <head>
 <?php print_meta_header(); ?>
 <title>お気に入り検索ワード - マイページ</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
-<link href="css/themes/_variables.css" rel="stylesheet">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
+<?php print_bs5_head_core(); ?>
 <style>
-body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }
 /* 検索ワードは長い作品名でも自然に折り返す */
 .fav-kw-table td.fav-kw-word { white-space: normal; word-break: break-word; }
 /* スマホ幅ではテーブルを行ごとのカード表示に切り替える */
@@ -31,7 +27,7 @@ body { background-color: var(--bg-page); background-image: var(--bg-page-image);
   .fav-kw-table, .fav-kw-table tbody, .fav-kw-table tr, .fav-kw-table td { display: block; width: 100%; }
   .fav-kw-table tr {
     margin-bottom: .75rem;
-    border: 1px solid var(--bs-border-color, #dee2e6);
+    border: 1px solid var(--color-border, #dee2e6);
     border-radius: .5rem;
     padding: .6rem .85rem;
     background-color: rgba(var(--bg-card-rgb, 255,255,255), var(--bg-card-alpha, 1));
@@ -58,8 +54,6 @@ body { background-color: var(--bg-page); background-image: var(--bg-page-image);
   .fav-kw-table td.fav-kw-actions .btn { min-width: 4.5rem; }
 }
 </style>
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
 </head>
 <body>
 <?php

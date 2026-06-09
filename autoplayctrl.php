@@ -251,14 +251,7 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 <meta http-equiv="refresh" content="1; url=<?= htmlspecialchars($l_nextpage, ENT_QUOTES, 'UTF-8') ?>">
 <?php endif; ?>
 <title>自動起動プログラム制御</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">
-<link rel="stylesheet" href="css/themes/_variables.css">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<link rel="stylesheet" href="css/themes/player.css">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
+<?php print_bs5_head_core(['css/themes/player.css'], ['jquery' => true]); ?>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('playerctrl_portal_bs5.php'); ?>
@@ -354,7 +347,7 @@ if (array_key_exists('globalhost', $config_ini) && !empty($config_ini['globalhos
 
   <!-- プレイヤーへ戻る -->
   <div class="d-grid mt-2">
-    <a href="playerctrl_portal_bs5.php" class="btn btn-outline-secondary btn-sm player-refresh-btn">
+    <a href="playerctrl_portal_bs5.php" class="btn btn-secondary btn-sm player-refresh-btn">
       プレイヤーコントローラーへ戻る
     </a>
   </div>

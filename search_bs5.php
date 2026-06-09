@@ -158,7 +158,7 @@ function print_everything_filenamesearch($first = false) {
     if ($is_swap = (is_numeric($selectid) && $selectid !== '')) {
         print '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />';
     }
-    print '<div class="search-hero" style="box-shadow:none;padding:0;margin-bottom:0;">';
+    print '<div class="search-hero search-hero--bare">';
     print '<div class="search-input-wrap">';
     print '<input type="text" name="searchword" id="filenamesearchword" class="form-control-themed"'
         . ' placeholder="曲名・歌手名・作品名などで検索"'
@@ -218,7 +218,7 @@ function print_everything_anisoninfosearch($first = false) {
     print '<div class="d-flex flex-wrap gap-3 mb-3">';
     print '<div>';
     print '<label class="form-label-sm" for="anison-year">放映/発売年指定</label>';
-    print '<select name="year" id="anison-year" class="form-control-themed" style="width:auto;">';
+    print '<select name="year" id="anison-year" class="form-control-themed w-auto">';
     print '<option value="">年指定なし</option>';
     $year = date('Y');
     for ($i = $year + 1; $i >= 1953; $i--) {
@@ -229,7 +229,7 @@ function print_everything_anisoninfosearch($first = false) {
 
     print '<div>';
     print '<label class="form-label-sm" for="anison-genre">ジャンル指定</label>';
-    print '<select name="genre" id="anison-genre" class="form-control-themed" style="width:auto;">';
+    print '<select name="genre" id="anison-genre" class="form-control-themed w-auto">';
     print '<option value="" selected>ジャンル指定なし</option>';
     $genres = [
         'anison' => 'アニメ/特撮/ゲーム', 'anime' => 'アニメーション', 'tv' => '　テレビアニメ',
@@ -259,12 +259,12 @@ function print_everything_banditsearch($first = false) {
     $searches  = [['label' => '歌手名', 'col' => '2'], ['label' => 'ゲームタイトル', 'col' => '3'], ['label' => 'ゲームブランド', 'col' => '1']];
     foreach ($searches as $s) {
         print '<div class="d-flex align-items-center gap-2 mb-3">';
-        print '<label class="form-label-sm mb-0" style="white-space:nowrap;min-width:6em;">' . $s['label'] . '</label>';
+        print '<label class="form-label-sm mb-0 search-label-nowrap">' . $s['label'] . '</label>';
         print '<form action="searchbandit.php" method="GET" class="d-flex gap-2 flex-grow-1">';
         print $sid_field;
         print '<input type="hidden" name="column" value="' . $s['col'] . '">';
         print '<input type="text" name="searchword" class="form-control-themed flex-grow-1">';
-        print '<button type="submit" class="btn-secondary-themed" style="white-space:nowrap;">検索</button>';
+        print '<button type="submit" class="btn-secondary-themed text-nowrap">検索</button>';
         print '</form>';
         print '</div>';
     }
@@ -306,9 +306,9 @@ if ($is_swap):
     $song_disp   = !empty($swap_song) ? htmlspecialchars($swap_song, ENT_QUOTES, 'UTF-8') : '（ID: ' . (int)$selectid . '）';
 ?>
 <div class="swap-banner" role="alert">
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" style="flex-shrink:0;"><path d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 0 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true" class="flex-shrink-0"><path d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 0 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"/></svg>
   <span>曲差し替え中: <?php echo $song_disp; ?></span>
-  <a href="<?php echo htmlspecialchars($cancel_href, ENT_QUOTES, 'UTF-8'); ?>" class="swap-cancel-btn btn-secondary-themed" style="font-size:0.8rem;padding:5px 12px;">キャンセル</a>
+  <a href="<?php echo htmlspecialchars($cancel_href, ENT_QUOTES, 'UTF-8'); ?>" class="swap-cancel-btn btn-secondary-themed">キャンセル</a>
 </div>
 <?php endif; ?>
 

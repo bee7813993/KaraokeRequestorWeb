@@ -18,19 +18,12 @@ if (!empty($config_ini['roomurl'])) {
     echo htmlspecialchars($roomnames[0], ENT_QUOTES, 'UTF-8') . '：';
 }
 ?>プレイヤーコントローラー</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">
-<link rel="stylesheet" href="css/themes/_variables.css">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<link rel="stylesheet" href="css/themes/player.css">
-<script src="js/jquery.js"></script>
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
+<?php print_bs5_head_core(['css/themes/player.css'], ['jquery' => true]); ?>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('playerctrl_portal_bs5.php'); ?>
 
-<div class="container" style="max-width:540px; padding-top:16px; padding-bottom:32px;">
+<div class="container pt-3 pb-4" style="max-width:540px;">
 
 <?php
 if (strcmp('foobar', $playerkind) === 0) {
@@ -47,7 +40,7 @@ if (array_key_exists('autoplay_exec', $config_ini) && !empty($config_ini['autopl
 
     if ($is_admin || $is_localhost || $autoplay_show_enabled) {
         echo '<div class="d-grid mt-2">';
-        echo '<a href="autoplayctrl.php" class="btn btn-outline-secondary btn-lg">自動実行開始・停止ページへ</a>';
+        echo '<a href="autoplayctrl.php" class="btn btn-secondary btn-lg">自動実行開始・停止ページへ</a>';
         echo '</div>';
     }
 }

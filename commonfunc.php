@@ -1287,12 +1287,6 @@ EOD;
     if($usebingo){
         print '      <li><a href="'.$prefix.'bingo_showresult.php">ビンゴ結果表示</a></li>';
     }
-    print '     <li ';
-    if($page == 'request.php')
-    {
-        print 'class="active" ';
-    }
-    print '><a href="'.$prefix.'request.php">全部</a></li>';
     print '      <li class="dropdown-header" > ';
     print get_version();
     print '      </li>';
@@ -1345,16 +1339,35 @@ function commentenabledcheck(){
  * @param string $extra_css 追加で読み込むCSSファイルのパス（相対）
  */
 function print_bs5_search_head($extra_css = ''){
+    $page_css = ['css/themes/search.css'];
+    if(!empty($extra_css)){
+        $page_css[] = $extra_css;
+    }
+    print_bs5_head_core($page_css, ['jquery' => true]);
+}
+
+/**
+ * BS5ページ共通の <head> 核を出力する。
+ * テーマ初期化スクリプト（FOUC防止）+ Bootstrap5 + テーマ変数 + テーマ切替 を
+ * 一括出力し、ページ固有のCSSばらつきを排除する。
+ *
+ * @param array $page_css ページ固有CSSのhref配列（search.css / player.css / style.css 等）。
+ *                        テーマ変数の後・theme-toggle.css の前に挿入される。
+ * @param array $opts     'jquery' => true で jQuery を読み込む（既定: 読み込まない）。
+ */
+function print_bs5_head_core($page_css = [], $opts = []){
     // テーマ初期適用: フラッシュ防止のため head の最初に実行する
     print '<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>';
     print '<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">';
     print '<link rel="stylesheet" href="css/themes/_variables.css">';
-    print '<link rel="stylesheet" href="css/themes/search.css">';
-    print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
-    if(!empty($extra_css)){
-        print '<link rel="stylesheet" href="' . htmlspecialchars($extra_css, ENT_QUOTES, 'UTF-8') . '">';
+    foreach ((array)$page_css as $href){
+        if($href === '') continue;
+        print '<link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
     }
-    print '<script src="js/jquery.js"></script>';
+    print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
+    if(!empty($opts['jquery'])){
+        print '<script src="js/jquery.js"></script>';
+    }
     print '<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>';
     print '<script src="js/theme-toggle.js"></script>';
 }
@@ -1376,6 +1389,9 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
     $icon_url     = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/><path d="M9 5a3 3 0 0 0 0 6h3a3 3 0 0 0 0-6H9zm0 1h3a2 2 0 1 1 0 4H9a2 2 0 0 1 0-4z"/></svg>';
     $icon_bgv     = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814l-3.5-2.5z"/><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm15 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>';
     $icon_notfound = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/></svg>';
+    $icon_list    = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>';
+    $icon_upload  = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path fill-rule="evenodd" d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>';
+    $icon_nico    = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2 3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2 3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2 3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z"/></svg>';
 
     $tabs = [];
 
@@ -1425,9 +1441,46 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
         ];
     }
 
+    // ピックアップ曲リスト（旧「いろいろ予約」より移動。設定された数だけタブを追加）
+    if (!empty($config_ini["limitlistname"][0])) {
+        for ($i = 0; $i < count($config_ini["limitlistname"]); $i++) {
+            if (empty($config_ini["limitlistname"][$i])) continue;
+            $tabs[] = [
+                'id'    => 'limitlist' . $i,
+                'label' => $config_ini["limitlistname"][$i],
+                'icon'  => $icon_list,
+                'href'  => $pfx . 'limitlist.php?data=' . rawurlencode($config_ini["limitlistfile"][$i]),
+            ];
+        }
+    }
+
+    // ファイル転送（旧「いろいろ予約」より移動）
+    // kara_config.php が未設定時に $_SERVER["TMP"] をデフォルト挿入するため、
+    // TMP 値と一致する場合は「未設定」とみなし表示しない。
+    $df_decoded = !empty($config_ini["downloadfolder"]) ? urldecode($config_ini["downloadfolder"]) : '';
+    $df_is_explicit = $df_decoded !== '' && rtrim($df_decoded, '\\') !== rtrim($_SERVER["TMP"], '\\');
+    if ($df_is_explicit && function_exists('check_access_from_online') && (check_access_from_online() === false)) {
+        $tabs[] = [
+            'id'    => 'upload',
+            'label' => 'ファイル転送',
+            'icon'  => $icon_upload,
+            'href'  => $pfx . 'file_uploader.php',
+        ];
+    }
+
+    // ニコニコ動画（旧「いろいろ予約」より移動）
+    if (function_exists('nicofuncenabled') && nicofuncenabled() === true) {
+        $tabs[] = [
+            'id'    => 'nico',
+            'label' => 'ニコニコ動画',
+            'icon'  => $icon_nico,
+            'href'  => $pfx . 'nicodownload_post.php',
+        ];
+    }
+
     if (count($tabs) <= 1) return '';
 
-    $html = '<div class="reservation-tabs" role="tablist" aria-label="予約方法">';
+    $html = '<div class="reservation-tabs" role="tablist" aria-label="リクエスト方法">';
     foreach ($tabs as $tab) {
         $active = ($tab['id'] === $current) ? ' active' : '';
         $aria   = ($tab['id'] === $current) ? ' aria-current="page"' : '';
@@ -1521,17 +1574,9 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
         print '</a></li>';
     }
 
-    // 予約一覧
+    // リクエスト一覧
     $rl_active = ($page == 'requestlist_only.php' || $page == 'requestlist_swipe.php' || $page == 'requestlist_top.php') ? ' active' : '';
-    print '<li class="nav-item"><a class="nav-link' . $rl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'requestlist_top.php">予約一覧</a></li>';
-
-    // いろいろ予約ドロップダウン
-    print '<li class="nav-item dropdown">';
-    print '<a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">いろいろ予約</a>';
-    print '<ul class="dropdown-menu">';
-    selectrequestkind_bs5_dd($prefix);
-    print '</ul>';
-    print '</li>';
+    print '<li class="nav-item"><a class="nav-link' . $rl_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'requestlist_top.php">リクエスト一覧</a></li>';
 
     // Player
     $pl_active = ($page == 'playerctrl_portal.php' || $page == 'playerctrl_portal_bs5.php') ? ' active' : '';
@@ -1586,8 +1631,6 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     if (!empty($usebingo)) {
         print '<li><a class="dropdown-item" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'bingo_showresult.php">ビンゴ結果表示</a></li>';
     }
-    $rq_active = ($page == 'request.php') ? ' active' : '';
-    print '<li><a class="dropdown-item' . $rq_active . '" href="' . htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . 'request.php">全部</a></li>';
     print '<li><hr class="dropdown-divider"></li>';
     print '<li><span class="dropdown-item-text small text-muted">' . get_version() . '</span></li>';
     print '</ul>';
@@ -1609,71 +1652,6 @@ function shownavigatioinbar_bs5($page = 'none', $prefix = '') {
     // CSS変数注入（BS3版と同じ）
     print_bg_style_block(true);
 }
-
-/**
- * BS5用「いろいろ予約」ドロップダウンの中身を出力する。
- * 既存 selectrequestkind('dd') と同じ並びを BS5 の dropdown-item クラスで出す。
- */
-function selectrequestkind_bs5_dd($prefix = '', $id = '') {
-    global $playmode, $connectinternet, $usenfrequset, $config_ini, $user;
-
-    $pfx = htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8');
-    $sid = !empty($id) ? '&selectid=' . rawurlencode($id) : '';
-
-    $items = [];
-    $items[] = ['href' => $pfx . 'searchreserve.php' . ($sid ? '?' . ltrim($sid, '&') : ''), 'label' => '検索＆予約MENU'];
-    $items[] = ['type' => 'divider'];
-
-    if (!empty($config_ini["limitlistname"][0])) {
-        for ($i = 0; $i < count($config_ini["limitlistname"]); $i++) {
-            if (empty($config_ini["limitlistname"][$i])) continue;
-            $items[] = [
-                'href' => $pfx . 'limitlist.php?data=' . rawurlencode($config_ini["limitlistfile"][$i]),
-                'label' => $config_ini["limitlistname"][$i],
-            ];
-        }
-        $items[] = ['type' => 'divider'];
-    }
-
-    if (!empty($config_ini["usebgv"]) && $config_ini["usebgv"] == 1 && !empty($config_ini["BGVfolder"])) {
-        $items[] = ['href' => $pfx . 'search_bgv.php', 'label' => 'BGV選択'];
-    }
-    $items[] = ['href' => $pfx . 'search.php', 'label' => 'ファイル検索'];
-
-    $pm = isset($playmode) ? (int)$playmode : 0;
-    if ($pm != 4 && $pm != 5) {
-        if (configbool("usehaishin", true)) {
-            $items[] = ['href' => $pfx . 'request_confirm_bs5.php?shop_karaoke=1', 'label' => 'カラオケ配信'];
-        }
-        if (configbool("useuserpause", false) || (isset($user) && $user == 'admin')) {
-            $items[] = ['href' => $pfx . 'request_confirm_bs5.php?pause=1', 'label' => '小休止'];
-        }
-    }
-
-    if (!empty($config_ini["downloadfolder"]) && function_exists('check_access_from_online') && (check_access_from_online() === false)) {
-        $items[] = ['href' => $pfx . 'file_uploader.php', 'label' => 'ファイル転送'];
-    }
-    if (function_exists('nicofuncenabled') && nicofuncenabled() === true) {
-        $items[] = ['href' => $pfx . 'nicodownload_post.php', 'label' => 'ニコニコ動画'];
-    }
-    $ci = isset($connectinternet) ? (int)$connectinternet : 0;
-    if ($ci == 1) {
-        $items[] = ['href' => $pfx . 'request_confirm_url_bs5.php?shop_karaoke=0&set_directurl=1', 'label' => 'URL(youtube等)'];
-    }
-    if (isset($usenfrequset) && $usenfrequset == 1) {
-        $items[] = ['href' => $pfx . 'notfoundrequest/notfoundrequest.php', 'label' => '未発見曲報告'];
-    }
-
-    foreach ($items as $it) {
-        if (isset($it['type']) && $it['type'] === 'divider') {
-            print '<li><hr class="dropdown-divider"></li>';
-            continue;
-        }
-        print '<li><a class="dropdown-item" href="' . htmlspecialchars($it['href'], ENT_QUOTES, 'UTF-8') . '">'
-            . htmlspecialchars($it['label'], ENT_QUOTES, 'UTF-8') . '</a></li>';
-    }
-}
-
 
 function showmode(){
 
@@ -1774,7 +1752,7 @@ if (!empty($config_ini["downloadfolder"]) && (check_access_from_online() === fal
     if(!empty($id)){
         print '<input type="hidden" name="selectid" value="'.$id.'" />'."\n";
     }
-    print '<input type="submit" name="UPL"   value="手元のファイルを転送して予約する場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
+    print '<input type="submit" name="UPL"   value="手元のファイルを転送してリクエストする場合はこちらから" class="topbtn btn btn-default btn-lg"/> ';
     print '</form>';
     print '</div>';
   }else if($kind == 'dd'){

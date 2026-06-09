@@ -110,12 +110,7 @@ function json_safe_encode($data){
 <html lang="ja">
 <head>
 <?php print_meta_header(); ?>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">
-<link rel="stylesheet" href="css/themes/_variables.css">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/jquery.js"></script>
+<?php print_bs5_head_core([], ['jquery' => true]); ?>
 <title>リクエスト確認画面</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <script type="text/javascript">
@@ -298,7 +293,7 @@ EOT;
 
 <div class="mb-2 form-check">
 <input type="checkbox" class="form-check-input" name="secret" value="1" id="chk_secret" />
-<label class="form-check-label" for="chk_secret">シークレット予約(歌うまで曲名を表示しません)</label>
+<label class="form-check-label" for="chk_secret">シークレットリクエスト(歌うまで曲名を表示しません)</label>
 </div>
 <?php
 if($config_ini['usebgv'] == 1 ){

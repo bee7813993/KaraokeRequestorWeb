@@ -17,13 +17,7 @@ if (configbool("usemypage", true)) {
 <head>
 <?php print_meta_header(); ?>
 <title>後で歌う - マイページ</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
-<link href="css/themes/_variables.css" rel="stylesheet">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
+<?php print_bs5_head_core(); ?>
 </head>
 <body>
 <?php
@@ -118,7 +112,7 @@ function sort_link_l($label, $sort_key, $cur_sort, $cur_order) {
             <a href="<?php echo htmlspecialchars($req_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-primary btn-sm">リクエスト</a>
             <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary btn-sm">再検索</a>
           <?php else: ?>
-            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-warning btn-sm">曲名で再検索</a>
+            <a href="<?php echo htmlspecialchars($search_url, ENT_QUOTES, 'UTF-8'); ?>" class="btn btn-outline-secondary btn-sm">曲名で再検索</a>
           <?php endif; ?>
           <form method="POST" action="mypage_later.php" class="d-inline"
                 onsubmit="return confirm('リストから削除しますか？');">

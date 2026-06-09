@@ -363,7 +363,7 @@ EOT;
 </div>
 <div class="checkbox">
 <label>
-<input type="checkbox" name="secret" value="1" /> シークレット予約(歌うまで曲名を表示しません)
+<input type="checkbox" name="secret" value="1" /> シークレットリクエスト(歌うまで曲名を表示しません)
 </label>
 </div>
 <?php

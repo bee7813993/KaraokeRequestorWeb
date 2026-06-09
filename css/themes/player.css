@@ -4,13 +4,7 @@
 /* _variables.css は <link> で先行ロード済みのため @import 不要 */
 
 body {
-  background-color: var(--bg-page);
-  background-image: var(--bg-page-image);
-  background-size: cover;
-  background-attachment: fixed;
-  padding-top: 70px;
-  color: var(--color-text);
-  /* ピンチズーム抑止 (touch-action) */
+  /* ピンチズーム抑止 (touch-action) — 共通スタイルは theme-toggle.css で定義 */
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
 }
@@ -25,45 +19,6 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   user-select: none;
   -webkit-user-select: none;
-}
-
-/* ナビバー */
-.navbar.bg-dark {
-  background-color: var(--bg-navbar) !important;
-  box-shadow: var(--shadow-navbar);
-}
-.navbar-dark .navbar-nav .nav-link {
-  color: rgba(255, 255, 255, 0.85);
-}
-.navbar-dark .navbar-nav .nav-link:hover,
-.navbar-dark .navbar-nav .nav-link:focus {
-  color: #ffffff;
-}
-.navbar-dark .navbar-nav .nav-link.active {
-  color: #ffffff;
-  font-weight: 600;
-}
-.navbar .navbar-search-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  padding: 6px 14px;
-  margin-right: 10px;
-  border-radius: var(--radius-button);
-  color: var(--color-text-on-navbar) !important;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  text-decoration: none;
-  transition: background var(--transition-base);
-  white-space: nowrap;
-  font-size: 0.95rem;
-}
-.navbar .navbar-search-btn:hover,
-.navbar .navbar-search-btn:focus {
-  background: rgba(255, 255, 255, 0.28);
-  color: #ffffff !important;
-  text-decoration: none;
 }
 
 /* --- Now Playing カード --- */
@@ -92,6 +47,11 @@ body {
   word-break: break-word;
   min-height: 1.4em;
   overflow-wrap: break-word;
+}
+
+/* 曲未再生時のタイトル（薄く表示） */
+.player-nowplaying .player-title--idle {
+  opacity: 0.5;
 }
 
 /* 曲名タップで ファイル名 ⇄ 曲名 切り替え可能であることを示すスタイル */
@@ -309,6 +269,12 @@ body {
   padding: 6px 10px;
   width: 90px;
   text-align: center;
+}
+
+/* ボリューム +/- ボタン */
+.player-vol-btn {
+  min-width: var(--tap-target);
+  padding: 8px;
 }
 
 /* ボリューム数値表示 */

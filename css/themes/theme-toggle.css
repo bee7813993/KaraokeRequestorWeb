@@ -11,6 +11,21 @@
    CSS filter: brightness() で自動暗転する。
    body 本体の背景はダークモードで transparent に切り替える。
    ============================================================ */
+/* ============================================================
+   BS5 ページ共通 body スタイル
+   background / padding-top / color をここで一元定義し、
+   search.css・player.css・各ページのインライン <style> への
+   重複記述を排除する。BS3 ページは style.css が担当。
+   ============================================================ */
+body {
+  background-color: var(--bg-page);
+  background-image: var(--bg-page-image);
+  background-size: cover;
+  background-attachment: fixed;
+  padding-top: 70px;
+  color: var(--color-text);
+}
+
 body::before {
   content: '';
   position: fixed;
@@ -74,6 +89,7 @@ body::before {
   --bg-badge: #495057;
   --bg-input: #2a2a3c;
   --bg-swap-banner: #3d2f00;
+  --border-swap-banner: #8a6d00;
   --color-text: #e8e8ec;
   --color-text-muted: #a8acb8;
   --color-swap-banner: #ffd966;
@@ -437,4 +453,162 @@ body::before {
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.55);
   color: #ffffff !important;
+}
+
+/* ============================================================
+   ナビバー共通スタイル（全BS5ページ共通）
+   ============================================================ */
+.navbar.bg-dark {
+  background-color: var(--bg-navbar) !important;
+  box-shadow: var(--shadow-navbar);
+}
+
+.navbar-dark .navbar-nav .nav-link {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link:focus {
+  color: #ffffff;
+}
+
+.navbar-dark .navbar-nav .nav-link.active {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* ナビバー内ドロップダウン: テーマ・背景画像設定に関わらず常にナビバー色で統一。
+   背景画像有効時に print_bg_style_block が .dropdown-menu へ注入する
+   半透明カード色(!important)に勝つため、こちらも !important で上書きする。 */
+.navbar .dropdown-menu {
+  background-color: var(--bg-navbar) !important;
+  background-image: none !important;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.navbar .dropdown-item {
+  color: rgba(255, 255, 255, 0.85);
+}
+.navbar .dropdown-item:hover,
+.navbar .dropdown-item:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.navbar .dropdown-divider {
+  border-color: rgba(255, 255, 255, 0.15);
+  margin: 0.25rem 0;
+}
+.navbar .dropdown-item-text {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ナビバー内検索ボタン */
+.navbar .navbar-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  padding: 6px 14px;
+  margin-right: 10px;
+  border-radius: var(--radius-button);
+  color: var(--color-text-on-navbar) !important;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  transition: background var(--transition-base);
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.navbar .navbar-search-btn:hover,
+.navbar .navbar-search-btn:focus {
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+.navbar .navbar-search-btn svg {
+  flex-shrink: 0;
+}
+
+/* ナビバー折りたたみ時：右側ボタン群を横並び・左寄せに */
+@media (max-width: 767.98px) {
+  #gnavi .navbar-nav.ms-auto {
+    flex-direction: row !important;
+    align-items: center;
+    margin-left: 0 !important;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem 0 0.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  #gnavi .navbar-nav.ms-auto > li.nav-item.dropdown {
+    width: 100%;
+  }
+}
+
+/* ナビバー折りたたみ時のドロップダウン（< md = 768px）レイアウト調整 */
+@media (max-width: 767.98px) {
+  .navbar .dropdown-menu {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0 0 0.25rem 0.5rem;
+    margin: 0;
+  }
+  .navbar .dropdown-item {
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+  }
+}
+
+/* ============================================================
+   ダークモード: Bootstrap 標準ボタン（btn-secondary / btn-outline-secondary）
+   Bootstrap 5 の固定色をテーマ変数で上書きし、暗い背景でも視認できるようにする。
+   ============================================================ */
+[data-theme="dark"] .btn-secondary {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .btn-secondary:hover,
+[data-theme="dark"] .btn-secondary:active,
+[data-theme="dark"] .btn-secondary.active,
+[data-theme="dark"] .btn-secondary:focus-visible {
+  background-color: var(--bg-card-hover);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .btn-check:checked + .btn-secondary,
+[data-theme="dark"] .btn-check:active + .btn-secondary {
+  background-color: var(--color-accent-secondary);
+  border-color: var(--color-accent-secondary);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
+  background-color: transparent;
+}
+[data-theme="dark"] .btn-outline-secondary:hover,
+[data-theme="dark"] .btn-outline-secondary:active,
+[data-theme="dark"] .btn-outline-secondary.active,
+[data-theme="dark"] .btn-outline-secondary:focus-visible {
+  background-color: var(--bg-card-alt);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+[data-theme="dark"] .btn-check:checked + .btn-outline-secondary,
+[data-theme="dark"] .btn-check:active + .btn-outline-secondary {
+  background-color: var(--color-accent-secondary);
+  border-color: var(--color-accent-secondary);
+  color: #ffffff;
+}
+
+/* ============================================================
+   btn-outline-* 系ボーダーを 2px に統一（ライト/ダーク共通）
+   Bootstrap デフォルト 1px より少し太くして視認性を向上させる。
+   ============================================================ */
+[class*="btn-outline-"] {
+  border-width: 2px;
 }

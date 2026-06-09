@@ -177,12 +177,7 @@ function extention_musiccheck($fn){
 <html lang="ja">
 <head>
 <?php print_meta_header(); ?>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">
-<link rel="stylesheet" href="css/themes/_variables.css">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/jquery.js"></script>
+<?php print_bs5_head_core([], ['jquery' => true]); ?>
 <title>リクエスト確認画面</title>
 <link type="text/css" rel="stylesheet" href="css/style.css" />
 <script type="text/javascript">
@@ -664,7 +659,7 @@ function resetVolume(){
 </div>
 <div class="mb-2 form-check">
 <input type="checkbox" class="form-check-input" name="secret" value="1" id="chk_secret" />
-<label class="form-check-label" for="chk_secret">シークレット予約(歌うまで曲名を表示しません)</label>
+<label class="form-check-label" for="chk_secret">シークレットリクエスト(歌うまで曲名を表示しません)</label>
 </div>
 <?php
 if($config_ini['usebgv'] == 1 && $shop_karaoke != 1 && $filetype == 1){
@@ -674,7 +669,7 @@ if($forcebgv == 1 ){
     print 'checked';
 }
 print ' />';
-print '<label class="form-check-label" for="chk_bgv">BGVモード <small class="text-muted"> この動画をカラオケ配信のBGVとして予約します。</small></label>';
+print '<label class="form-check-label" for="chk_bgv">BGVモード <small class="text-muted"> この動画をカラオケ配信のBGVとしてリクエストします。</small></label>';
 print '</div>';
 }
 
@@ -717,9 +712,9 @@ if($shop_karaoke == 1){
 print '<div class="alert alert-info mt-2">';
 print '<ul class="mb-0">';
 print '<li>自分の番が回ってきたら、「デンモク」から歌いたい曲をリクエストしてください</li>';
-print '<li>歌い終わったら、「予約一覧」から「曲終了」ボタンを押してください</li>';
+print '<li>歌い終わったら、「リクエスト一覧」から「曲終了」ボタンを押してください</li>';
 if($config_ini['usebgv'] == 1 ){
-  print '<li>このカラオケ配信予約の後、「リスト操作」ボタンを押した後に出てくる「BGV選択」から配信曲の字幕の裏に流す動画を選ぶことができます</li>';
+  print '<li>このカラオケ配信リクエストの後、「リスト操作」ボタンを押した後に出てくる「BGV選択」から配信曲の字幕の裏に流す動画を選ぶことができます</li>';
 }
 print '</ul>';
 print '</div>';

@@ -3,119 +3,11 @@
    ========================================================== */
 /* _variables.css は <link> で先行ロード済みのため @import 不要 */
 
-/* --- ページ基本 --- */
-body {
-  background-color: var(--bg-page);
-  background-image: var(--bg-page-image);
-  background-size: cover;
-  background-attachment: fixed;
-  padding-top: 70px;
-  color: var(--color-text);
-}
-
-/* --- ナビバー (Bootstrap 5) --- */
-.navbar.bg-dark {
-  background-color: var(--bg-navbar) !important;
-  box-shadow: var(--shadow-navbar);
-}
-
-.navbar-dark .navbar-nav .nav-link {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.navbar-dark .navbar-nav .nav-link:hover,
-.navbar-dark .navbar-nav .nav-link:focus {
-  color: #ffffff;
-}
-
-.navbar-dark .navbar-nav .nav-link.active {
-  color: #ffffff;
-  font-weight: 600;
-}
-
-/* 検索ボタン（ナビバー内・BS5用） */
-.navbar .navbar-search-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  padding: 6px 14px;
-  margin-right: 10px;
-  border-radius: var(--radius-button);
-  color: var(--color-text-on-navbar) !important;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  text-decoration: none;
-  transition: background var(--transition-base);
-  white-space: nowrap;
-  font-size: 0.95rem;
-}
-
-.navbar .navbar-search-btn:hover,
-.navbar .navbar-search-btn:focus {
-  background: rgba(255, 255, 255, 0.28);
-  color: #ffffff !important;
-  text-decoration: none;
-}
-
-.navbar .navbar-search-btn svg {
-  flex-shrink: 0;
-}
-
-/* --- ナビバー折りたたみ時：右側ボタン群を横並び・左寄せに ---
-   ms-auto による縦並び＆センター寄せを上書きする。           */
-@media (max-width: 767.98px) {
-  #gnavi .navbar-nav.ms-auto {
-    flex-direction: row !important;
-    align-items: center;
-    margin-left: 0 !important;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    padding: 0.5rem 0 0.25rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  /* ボタン2つを1行目に、Help等を2行目に分ける */
-  #gnavi .navbar-nav.ms-auto > li.nav-item.dropdown {
-    width: 100%;
-  }
-}
-
-/* --- ナビバー折りたたみ時のドロップダウン（< md = 768px） ---
-   Bootstrap デフォルトは白いフローティングボックスになるため、
-   ナビバーの暗い背景に溶け込むようにリセットする。           */
-@media (max-width: 767.98px) {
-  .navbar .dropdown-menu {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    padding: 0 0 0.25rem 0.5rem;
-    margin: 0;
-  }
-  .navbar .dropdown-item {
-    color: rgba(255, 255, 255, 0.85);
-    padding: 0.4rem 1rem;
-    border-radius: 4px;
-  }
-  .navbar .dropdown-item:hover,
-  .navbar .dropdown-item:focus {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-  }
-  .navbar .dropdown-divider {
-    border-color: rgba(255, 255, 255, 0.15);
-    margin: 0.25rem 0;
-  }
-  .navbar .dropdown-item-text {
-    color: rgba(255, 255, 255, 0.5);
-  }
-}
-
 /* --- 曲差し替えバナー --- */
 .swap-banner {
   background-color: var(--bg-swap-banner);
   color: var(--color-swap-banner);
-  border: 1px solid #ffc107;
+  border: 1px solid var(--border-swap-banner, #ffc107);
   border-radius: var(--radius-card);
   padding: var(--space-3) var(--space-4);
   margin-bottom: var(--space-4);
@@ -128,6 +20,22 @@ body {
 .swap-banner .swap-cancel-btn {
   margin-left: auto;
   flex-shrink: 0;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+/* ファイル名検索フォーム（アコーディオン内：枠なし・パディングなし） */
+.search-hero--bare {
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* バンディット検索ラベル（折り返し禁止・幅揃え） */
+.search-label-nowrap {
+  white-space: nowrap;
+  min-width: 6em;
 }
 
 /* --- メイン検索フォーム --- */
@@ -570,10 +478,7 @@ table.searchresult tbody td {
   }
 
   .reservation-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: var(--space-1);
+    flex-wrap: wrap;
   }
 
   .search-mode-nav {

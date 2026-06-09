@@ -781,7 +781,7 @@ function anisoninfo_display_finallist($list,$nexturlbase,$selectid = NULL)
                         $songinfo=str_replace(array("\r\n", "\r", "\n"), ' ', $songinfo.$value["oped"]);
                     }
                     print '<p>';
-                    print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信で予約する＞ </a>';
+                    print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信でリクエストする＞ </a>';
                     print mypage_action_links('', $songinfo, 'カラオケ配信');
                     print '</p>';
                 }
@@ -901,7 +901,7 @@ function anisoninfo_display_finallist2($list,$nexturlbase,$selectid = NULL)
                         $songinfo=str_replace(array("\r\n", "\r", "\n"), ' ', $songinfo.$value["oped"]);
                     }
                     print '<p>';
-                    print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信で予約する＞ </a>';
+                    print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信でリクエストする＞ </a>';
                     print mypage_action_links('', $songinfo, 'カラオケ配信');
                     print '</p>';
                 }
@@ -981,7 +981,7 @@ function anisoninfo_display_finallist2($list,$nexturlbase,$selectid = NULL)
                         $songinfo=str_replace(array("\r\n", "\r", "\n"), ' ', $songinfo.$value["oped"]);
                     }
                     print '<p>';
-                    print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信で予約する＞ </a>';
+                    print '<a href="request_confirm.php?shop_karaoke=1&filename='.urlencode($songinfo).'" > ＜配信でリクエストする＞ </a>';
                     print mypage_action_links('', $songinfo, 'カラオケ配信');
                     print '</p>';
                 }

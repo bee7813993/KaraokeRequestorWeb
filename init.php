@@ -96,13 +96,7 @@ if(array_key_exists("clearauth", $_REQUEST)) {
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires" content="0">
 <title>設定画面</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
-<link href="css/themes/_variables.css" rel="stylesheet">
-<link rel="stylesheet" href="css/themes/theme-toggle.css">
-<link type="text/css" rel="stylesheet" href="css/style.css">
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
+<?php print_bs5_head_core(['css/style.css']); ?>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
 <style>
 /* BS3 互換: radio-inline / checkbox-inline は BS5 に存在しないため独自定義 */
@@ -595,7 +589,7 @@ print 'checked';
     </h3>
 
     <div class="mb-3">
-    <h4 for=> 予約一覧（トップ）画面表示メッセージ  </h4>
+    <h4 for=> リクエスト一覧（トップ）画面表示メッセージ  </h4>
     <label for=> <small> HTML記述OK、「#yukarihost#」はホスト名に置換 </small> </label>
      <textarea name="noticeof_listpage" class="form-control" id="noticeof_listpage" >
 <?php
@@ -719,13 +713,13 @@ print ' value="10" ';
     </label>
   </div>
 
-<!---- シークレット予約の表示テキスト ----->
+<!---- シークレットリクエストの表示テキスト ----->
   <div class="mb-3">
-    <h4 class="radio form-label"> シークレット予約の表示テキスト </h4>
-    <label class="form-label"><small>未再生のシークレット予約の曲名の代わりに表示するテキストです。</small></label>
+    <h4 class="radio form-label"> シークレットリクエストの表示テキスト </h4>
+    <label class="form-label"><small>未再生のシークレットリクエストの曲名の代わりに表示するテキストです。</small></label>
     <input type="text" name="secret_display_text" class="form-control"
-      value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレット予約)')), ENT_QUOTES, 'UTF-8'); ?>"
-      placeholder="ヒ・ミ・ツ♪(シークレット予約)" />
+      value="<?php echo htmlspecialchars(urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレットリクエスト)')), ENT_QUOTES, 'UTF-8'); ?>"
+      placeholder="ヒ・ミ・ツ♪(シークレットリクエスト)" />
   </div>
 
 <!---- ページ背景色設定 ----->
@@ -1098,8 +1092,8 @@ print 'value="'.urldecode($config_ini["startvolume"]).'"';
   </div>
 
   <div class="mb-3">
-    <h4 class="radio form-label"><span data-bs-toggle="tooltip" data-bs-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。予約確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </h4>
-    <label class="radio-inline" data-bs-toggle="tooltip" data-bs-placement="top" title="予約確認画面に項目を追加するかどうか">
+    <h4 class="radio form-label"><span data-bs-toggle="tooltip" data-bs-placement="top" title="通常使用するプレイヤーとは別のプレイヤーを使えるようにします。リクエスト確認画面に項目を追加。次の曲に行くには曲終了時に「曲終了」ボタンを押す必要があります" > 別プレーヤー指定 </span> </h4>
+    <label class="radio-inline" data-bs-toggle="tooltip" data-bs-placement="top" title="リクエスト確認画面に項目を追加するかどうか">
       <input type="radio" name="useotherplayer" value="1" <?php 
       if(array_key_exists("useotherplayer",$config_ini)){
           print ($config_ini["useotherplayer"]==1)?'checked':' ';
@@ -1353,8 +1347,8 @@ $si_sorted_indices = array_keys($si_order_map);
     $def = $searchitem_defs[$idx];
     $checked = checkbox_check($config_ini['searchitem'], $def['id']) ? 'checked' : '';
 ?>
-    <div class="searchitem-row" data-index="<?php echo $idx; ?>" style="display:flex; align-items:center; padding:6px 10px; margin-bottom:4px; border:1px solid #ddd; background:#f9f9f9; border-radius:3px;">
-      <span class="searchitem-drag-handle" style="cursor:grab; color:#aaa; font-size:20px; padding:0 10px 0 0; line-height:1; user-select:none; touch-action:none;">&#8942;</span>
+    <div class="searchitem-row" data-index="<?php echo $idx; ?>" style="display:flex; align-items:center; padding:6px 10px; margin-bottom:4px; border:1px solid var(--color-border); background:var(--bg-card-alt); border-radius:3px;">
+      <span class="searchitem-drag-handle" style="cursor:grab; color:var(--color-text-muted); font-size:20px; padding:0 10px 0 0; line-height:1; user-select:none; touch-action:none;">&#8942;</span>
       <input type="checkbox" name="searchitem[]" value="<?php echo $def['id']; ?>" <?php echo $checked; ?> style="margin-right:8px;">
       <span><?php echo $def['label']; ?></span>
       <input type="hidden" name="searchitem_o[<?php echo $idx; ?>]" value="<?php echo $si_sorted_pos + 1; ?>" class="searchitem-order-input">
@@ -1589,7 +1583,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
       }
       $show_checked = (array_key_exists("roomurlshow", $config_ini) && array_key_exists($key, $config_ini["roomurlshow"]) && $config_ini["roomurlshow"][$key] == 1) ? ' checked' : '';
       print '  <tr class="roomurl-row">'."\n";
-      print '    <td class="roomurl-drag-handle text-center align-middle" style="cursor:grab; color:#aaa; font-size:18px; user-select:none; touch-action:none;">&#8942;&#8942;</td>'."\n";
+      print '    <td class="roomurl-drag-handle text-center align-middle" style="cursor:grab; color:var(--color-text-muted); font-size:18px; user-select:none; touch-action:none;">&#8942;&#8942;</td>'."\n";
       print '    <td><input type="text" class="form-control form-control-sm" placeholder="部屋番号" name="roomno[]"';
       print ' value="'.htmlspecialchars($key).'"' ;
       print '    ></td>'."\n";
@@ -1616,7 +1610,7 @@ if(array_key_exists("downloadfolder",$config_ini)) {
   </table>
 
   <div class="mb-3">
-    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >リクエスト時_順番ピッタリ移動 </span ></h3> 
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲をリクエストしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >リクエスト時_順番ピッタリ移動 </span ></h3> 
     <label class="checkbox-inline">
       <input type="radio" name="request_automove" value="1" 
 <?php 
@@ -1642,7 +1636,7 @@ if(array_key_exists("request_automove",$config_ini)) {
   </div>
 
   <div class="mb-3">
-    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲予約をしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >ピッタリ移動_小休止時リセット </span ></h3> 
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="曲をリクエストしたとき今までの順番を考慮した場所に自動移動します。Offでは一番上に登録されます" >ピッタリ移動_小休止時リセット </span ></h3> 
     <label class="checkbox-inline">
       <input type="radio" name="request_automove_reset" value="1" 
 <?php 
@@ -1669,7 +1663,7 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
 
 
 <!---- 縛り曲リストの設定 ----->
-  <h3> <span data-bs-toggle="tooltip" data-bs-placement="top" title="検索予約メニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
+  <h3> <span data-bs-toggle="tooltip" data-bs-placement="top" title="検索リクエストメニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
   <?php 
   if(array_key_exists("limitlistname",$config_ini)) {
   for($i = 0 ;  $i<count($config_ini["limitlistname"]) ; $i++){

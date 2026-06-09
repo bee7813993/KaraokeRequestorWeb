@@ -184,7 +184,7 @@ function filelistfromsong_bs5($filelist, $linkoption, $listerpreviewportenable) 
         $comment = preg_replace('/\,\/\/.*/', '', $fi['found_comment'] ?? '');
         $fname   = basename_jp($fi['found_path']);
         echo '<div class="d-flex align-items-start gap-3 py-2 border-top">';
-        echo '<a href="' . htmlspecialchars(create_requestconfirmlink_bs5($fi, $linkoption), ENT_QUOTES, 'UTF-8') . '" class="btn-request flex-shrink-0">予約</a>';
+        echo '<a href="' . htmlspecialchars(create_requestconfirmlink_bs5($fi, $linkoption), ENT_QUOTES, 'UTF-8') . '" class="btn-request flex-shrink-0">リクエスト</a>';
         echo '<div class="flex-grow-1" style="min-width:0;">';
         if (!empty($comment)) echo '<div class="text-secondary mb-1" style="font-size:0.8rem;">【' . htmlspecialchars($comment, ENT_QUOTES, 'UTF-8') . '】</div>';
         echo '<div class="fw-semibold text-break mb-1">' . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '</div>';
@@ -400,7 +400,7 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
     ?>
     <div class="file-item">
       <a href="<?php echo htmlspecialchars(create_requestconfirmlink_bs5($program, $linkoption), ENT_QUOTES, 'UTF-8'); ?>"
-         class="btn-request flex-shrink-0">予約</a>
+         class="btn-request flex-shrink-0">リクエスト</a>
       <div class="flex-grow-1" style="min-width:0;">
         <div class="fw-semibold text-break"><?php echo htmlspecialchars($display, ENT_QUOTES, 'UTF-8'); ?></div>
         <?php if (!empty($comment)): ?>
