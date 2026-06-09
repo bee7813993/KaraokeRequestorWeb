@@ -20,6 +20,22 @@
 .swap-banner .swap-cancel-btn {
   margin-left: auto;
   flex-shrink: 0;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+/* ファイル名検索フォーム（アコーディオン内：枠なし・パディングなし） */
+.search-hero--bare {
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* バンディット検索ラベル（折り返し禁止・幅揃え） */
+.search-label-nowrap {
+  white-space: nowrap;
+  min-width: 6em;
 }
 
 /* --- メイン検索フォーム --- */

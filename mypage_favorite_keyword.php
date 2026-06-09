@@ -27,7 +27,7 @@ if (configbool("usemypage", true)) {
   .fav-kw-table, .fav-kw-table tbody, .fav-kw-table tr, .fav-kw-table td { display: block; width: 100%; }
   .fav-kw-table tr {
     margin-bottom: .75rem;
-    border: 1px solid var(--bs-border-color, #dee2e6);
+    border: 1px solid var(--color-border, #dee2e6);
     border-radius: .5rem;
     padding: .6rem .85rem;
     background-color: rgba(var(--bg-card-rgb, 255,255,255), var(--bg-card-alpha, 1));

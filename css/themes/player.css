@@ -49,6 +49,11 @@ body {
   overflow-wrap: break-word;
 }
 
+/* 曲未再生時のタイトル（薄く表示） */
+.player-nowplaying .player-title--idle {
+  opacity: 0.5;
+}
+
 /* 曲名タップで ファイル名 ⇄ 曲名 切り替え可能であることを示すスタイル */
 .player-nowplaying .player-title-toggleable {
   cursor: pointer;
@@ -264,6 +269,12 @@ body {
   padding: 6px 10px;
   width: 90px;
   text-align: center;
+}
+
+/* ボリューム +/- ボタン */
+.player-vol-btn {
+  min-width: var(--tap-target);
+  padding: 8px;
 }
 
 /* ボリューム数値表示 */
