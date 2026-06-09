@@ -11,6 +11,21 @@
    CSS filter: brightness() で自動暗転する。
    body 本体の背景はダークモードで transparent に切り替える。
    ============================================================ */
+/* ============================================================
+   BS5 ページ共通 body スタイル
+   background / padding-top / color をここで一元定義し、
+   search.css・player.css・各ページのインライン <style> への
+   重複記述を排除する。BS3 ページは style.css が担当。
+   ============================================================ */
+body {
+  background-color: var(--bg-page);
+  background-image: var(--bg-page-image);
+  background-size: cover;
+  background-attachment: fixed;
+  padding-top: 70px;
+  color: var(--color-text);
+}
+
 body::before {
   content: '';
   position: fixed;

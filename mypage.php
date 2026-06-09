@@ -42,7 +42,6 @@ if (configbool("usemypage", true)) {
 <?php print_meta_header(); ?>
 <title>マイページ</title>
 <?php print_bs5_head_core(['css/style.css']); ?>
-<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; }</style>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('mypage.php'); ?>

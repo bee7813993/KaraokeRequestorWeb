@@ -4,13 +4,7 @@
 /* _variables.css は <link> で先行ロード済みのため @import 不要 */
 
 body {
-  background-color: var(--bg-page);
-  background-image: var(--bg-page-image);
-  background-size: cover;
-  background-attachment: fixed;
-  padding-top: 70px;
-  color: var(--color-text);
-  /* ピンチズーム抑止 (touch-action) */
+  /* ピンチズーム抑止 (touch-action) — 共通スタイルは theme-toggle.css で定義 */
   touch-action: pan-x pan-y;
   -ms-touch-action: pan-x pan-y;
 }

@@ -3,16 +3,6 @@
    ========================================================== */
 /* _variables.css は <link> で先行ロード済みのため @import 不要 */
 
-/* --- ページ基本 --- */
-body {
-  background-color: var(--bg-page);
-  background-image: var(--bg-page-image);
-  background-size: cover;
-  background-attachment: fixed;
-  padding-top: 70px;
-  color: var(--color-text);
-}
-
 /* --- ナビバー (Bootstrap 5) --- */
 .navbar.bg-dark {
   background-color: var(--bg-navbar) !important;

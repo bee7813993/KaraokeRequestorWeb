@@ -19,7 +19,6 @@ if (configbool("usemypage", true)) {
 <?php print_meta_header(); ?>
 <title>選曲履歴 - マイページ</title>
 <?php print_bs5_head_core(); ?>
-<style>body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }</style>
 </head>
 <body>
 <?php

@@ -19,7 +19,6 @@ if (configbool("usemypage", true)) {
 <title>お気に入り検索ワード - マイページ</title>
 <?php print_bs5_head_core(); ?>
 <style>
-body { background-color: var(--bg-page); background-image: var(--bg-page-image); background-size: cover; background-attachment: fixed; padding-top: 70px; }
 /* 検索ワードは長い作品名でも自然に折り返す */
 .fav-kw-table td.fav-kw-word { white-space: normal; word-break: break-word; }
 /* スマホ幅ではテーブルを行ごとのカード表示に切り替える */
