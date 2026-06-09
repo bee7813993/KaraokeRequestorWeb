@@ -560,10 +560,7 @@ table.searchresult tbody td {
   }
 
   .reservation-tabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: var(--space-1);
+    flex-wrap: wrap;
   }
 
   .search-mode-nav {
