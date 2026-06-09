@@ -71,6 +71,8 @@ function checktracktype($trackinfo){
 function _audiotracklist_from_info($info) {
     $audiotracklist = array();
     if (!array_key_exists('quicktime', $info)) return $audiotracklist;
+    // ④ moov がない場合（断片化MP4・破損ファイル等）は空リストを返す
+    if (!isset($info['quicktime']['moov']['subatoms'])) return $audiotracklist;
     $tracklist = $info['quicktime']['moov']['subatoms'];
     foreach ($tracklist as $trackinfo) {
         if ($trackinfo['name'] !== 'trak') continue;
@@ -132,7 +134,7 @@ function _getid3_analyze($filename, $with_atom_data = false) {
     setlocale(LC_CTYPE, 'Japanese_Japan.932');
     if (!file_exist_check_japanese($filename_host)) return false;
     $error_level = error_reporting();
-    error_reporting($error_level - E_WARNING);
+    error_reporting($error_level & ~E_WARNING); // ⑤ 算術減算ではなくビット演算で除外
     $info = $getID3->analyze($filename_host);
     error_reporting($error_level);
     getid3_lib::CopyTagsToComments($info);
@@ -151,12 +153,16 @@ function getfileinfo($filename, $need_tracklist = false) {
     $filename_host = mb_convert_encoding($filename, $workencode, 'UTF-8');
     $mtime = @filemtime($filename_host);
 
+    // ③ filemtime が失敗（false）した場合はキャッシュを使わない
+    //    空の結果を永続キャッシュしてしまうと、ファイルが復旧しても手動削除まで回復できない
+    $use_cache = ($mtime !== false);
+
     // キャッシュキー: ファイルパス + アトムデータ有無 + ファイル更新日時
-    $cache_key  = md5($filename . '|' . (int)$need_tracklist . '|' . (string)$mtime);
+    $cache_key  = md5($filename . '|' . (int)$need_tracklist . '|' . $mtime);
     $cache_file = $cache_dir . DIRECTORY_SEPARATOR . $cache_key;
 
     // キャッシュヒット確認
-    if (is_file($cache_file)) {
+    if ($use_cache && is_file($cache_file)) {
         $cached = @unserialize(file_get_contents($cache_file));
         if ($cached !== false) {
             return $cached;
@@ -170,13 +176,26 @@ function getfileinfo($filename, $need_tracklist = false) {
         'videodetails'   => ($info !== false) ? _videodetails_from_info($info) : array(),
     );
 
-    // キャッシュディレクトリ作成（初回のみ）
-    if (!is_dir($cache_dir)) {
-        @mkdir($cache_dir, 0755, true);
-        // Web からの直接アクセスを遮断
-        @file_put_contents($cache_dir . DIRECTORY_SEPARATOR . '.htaccess', "Deny from all\n");
+    // キャッシュ書き込み（filemtime が取れた場合のみ）
+    if ($use_cache) {
+        // ① キャッシュディレクトリが存在しない場合は作成
+        if (!is_dir($cache_dir)) {
+            if (!@mkdir($cache_dir, 0755, true)) {
+                // ② mkdir 失敗をログに記録してキャッシュをスキップ
+                error_log('[getfileinfo] cache dir creation failed: ' . $cache_dir);
+                return $result;
+            }
+        }
+        // ① .htaccess が存在しない場合は書き込む（再デプロイ後も確実に保護）
+        $htaccess = $cache_dir . DIRECTORY_SEPARATOR . '.htaccess';
+        if (!is_file($htaccess)) {
+            @file_put_contents($htaccess, "Deny from all\n");
+        }
+        // ② キャッシュ書き込み失敗をログに記録
+        if (@file_put_contents($cache_file, serialize($result)) === false) {
+            error_log('[getfileinfo] cache write failed: ' . $cache_file);
+        }
     }
-    @file_put_contents($cache_file, serialize($result));
 
     return $result;
 }
