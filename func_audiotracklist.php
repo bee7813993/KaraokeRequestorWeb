@@ -67,102 +67,149 @@ function checktracktype($trackinfo){
     return false;
 }
 
-function getaudiotracklist($filename){
-    $getID3 = new getID3();
-    $getID3->options_audiovideo_quicktime_ReturnAtomData = true;
+// --- 内部ヘルパー: analyze済み $info からオーディオトラックリストを抽出 ---
+function _audiotracklist_from_info($info) {
     $audiotracklist = array();
-    $workencode = 'UTF-8';
-    
-    if(getphpversion_fa() < 70100 ){
-       $workencode = 'SJIS-win';
-    }
-    $filename_host= mb_convert_encoding($filename, $workencode, 'UTF-8');
-    setlocale(LC_CTYPE, 'Japanese_Japan.932');
-    $res = file_exist_check_japanese($filename_host);
-    if($res){
-       //★request_confirm.phpの再生方法とキー変更の間にWarningが表示されないよう対応
-       $error_level = error_reporting();	//★エラーレベルを退避
-       error_reporting($error_level-E_WARNING);	//★エラーレベルから警告を除外
-       $info = $getID3->analyze($filename_host);
-       error_reporting($error_level);	//★エラーレベルを元に戻す
-    } else return $audiotracklist;
-
-    getid3_lib::CopyTagsToComments($info);
-    
-    if(!array_key_exists('quicktime',$info) ){
-       return $audiotracklist;
-    }
-
+    if (!array_key_exists('quicktime', $info)) return $audiotracklist;
+    // ④ moov がない場合（断片化MP4・破損ファイル等）は空リストを返す
+    if (!isset($info['quicktime']['moov']['subatoms'])) return $audiotracklist;
     $tracklist = $info['quicktime']['moov']['subatoms'];
-    foreach ($tracklist as $trackinfo){
-       if($trackinfo['name'] !== 'trak' ) continue;
-       $tracktype = checktracktype($trackinfo);
-       if(($tracktype != false) && ($tracktype[0] == 2) ){
-           $audiotracklist[] = $tracktype;
-       }
+    foreach ($tracklist as $trackinfo) {
+        if ($trackinfo['name'] !== 'trak') continue;
+        $tracktype = checktracktype($trackinfo);
+        if (($tracktype != false) && ($tracktype[0] == 2)) {
+            $audiotracklist[] = $tracktype;
+        }
     }
     return $audiotracklist;
 }
 
-function getvideodetails($filename) {
-    $getID3 = new getID3();
+// --- 内部ヘルパー: analyze済み $info から動画詳細を抽出 ---
+function _videodetails_from_info($info) {
     $details = array();
-    $workencode = 'UTF-8';
-
-    if (getphpversion_fa() < 70100) {
-        $workencode = 'SJIS-win';
-    }
-    $filename_host = mb_convert_encoding($filename, $workencode, 'UTF-8');
-    setlocale(LC_CTYPE, 'Japanese_Japan.932');
-    if (!file_exist_check_japanese($filename_host)) return $details;
-
-    $error_level = error_reporting();
-    error_reporting($error_level - E_WARNING);
-    $info = $getID3->analyze($filename_host);
-    error_reporting($error_level);
-
-    getid3_lib::CopyTagsToComments($info);
-
     if (!empty($info['playtime_seconds'])) {
         $total_seconds = (int)round($info['playtime_seconds']);
         $details['duration_seconds'] = $total_seconds;
         $minutes = (int)($total_seconds / 60);
-        $secs = $total_seconds % 60;
+        $secs    = $total_seconds % 60;
         $details['duration'] = sprintf('%d:%02d', $minutes, $secs);
     }
-
     if (!empty($info['video']['frame_rate'])) {
         $details['frame_rate'] = round($info['video']['frame_rate'], 2);
     }
-
     if (!empty($info['video']['resolution_x']) && !empty($info['video']['resolution_y'])) {
         $details['resolution'] = $info['video']['resolution_x'] . 'x' . $info['video']['resolution_y'];
     }
-
     if (!empty($info['video']['codec'])) {
         $details['video_codec'] = $info['video']['codec'];
     } elseif (!empty($info['video']['fourcc_lookup'])) {
         $details['video_codec'] = $info['video']['fourcc_lookup'];
     }
-
     if (!empty($info['audio']['codec'])) {
         $details['audio_codec'] = $info['audio']['codec'];
     }
-
     if (!empty($info['audio']['channels'])) {
         $ch = (int)$info['audio']['channels'];
         $details['audio_channels'] = $ch === 1 ? 'モノラル' : ($ch === 2 ? 'ステレオ' : $ch . 'ch');
     }
-
     if (!empty($info['audio']['sample_rate'])) {
         $details['audio_sample_rate'] = number_format($info['audio']['sample_rate']) . ' Hz';
     }
-
     if (!empty($info['bitrate'])) {
         $details['bitrate'] = round($info['bitrate'] / 1000) . ' kbps';
     }
-
     return $details;
+}
+
+// --- 内部ヘルパー: ファイルパスをホストエンコーディングに変換して存在確認し analyze する ---
+// $with_atom_data=true のときのみ QuickTime アトムデータを全量読み込む（重い）。
+// 成功時は getID3 の $info 配列を返す。失敗時は false を返す。
+function _getid3_analyze($filename, $with_atom_data = false) {
+    $getID3 = new getID3();
+    if ($with_atom_data) {
+        $getID3->options_audiovideo_quicktime_ReturnAtomData = true;
+    }
+    $workencode = (getphpversion_fa() < 70100) ? 'SJIS-win' : 'UTF-8';
+    $filename_host = mb_convert_encoding($filename, $workencode, 'UTF-8');
+    setlocale(LC_CTYPE, 'Japanese_Japan.932');
+    if (!file_exist_check_japanese($filename_host)) return false;
+    $error_level = error_reporting();
+    error_reporting($error_level & ~E_WARNING); // ⑤ 算術減算ではなくビット演算で除外
+    $info = $getID3->analyze($filename_host);
+    error_reporting($error_level);
+    getid3_lib::CopyTagsToComments($info);
+    return $info;
+}
+
+// オーディオトラックリストと動画詳細を1回の analyze で取得する（request_confirm_bs5 用）
+// $need_tracklist=true のときだけ QuickTime アトムデータを読み込む。
+// 結果はファイル更新日時ベースでディスクキャッシュされる（2回目以降は getID3 解析不要）。
+// 戻り値: ['audiotracklist' => array, 'videodetails' => array]
+function getfileinfo($filename, $need_tracklist = false) {
+    $cache_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . '_getid3_cache';
+
+    // ファイル更新日時取得（Windows パスのエンコーディング対応）
+    $workencode = (getphpversion_fa() < 70100) ? 'SJIS-win' : 'UTF-8';
+    $filename_host = mb_convert_encoding($filename, $workencode, 'UTF-8');
+    $mtime = @filemtime($filename_host);
+
+    // ③ filemtime が失敗（false）した場合はキャッシュを使わない
+    //    空の結果を永続キャッシュしてしまうと、ファイルが復旧しても手動削除まで回復できない
+    $use_cache = ($mtime !== false);
+
+    // キャッシュキー: ファイルパス + アトムデータ有無 + ファイル更新日時
+    $cache_key  = md5($filename . '|' . (int)$need_tracklist . '|' . $mtime);
+    $cache_file = $cache_dir . DIRECTORY_SEPARATOR . $cache_key;
+
+    // キャッシュヒット確認
+    if ($use_cache && is_file($cache_file)) {
+        $cached = @unserialize(file_get_contents($cache_file));
+        if ($cached !== false) {
+            return $cached;
+        }
+    }
+
+    // getID3 解析
+    $info = _getid3_analyze($filename, $need_tracklist);
+    $result = array(
+        'audiotracklist' => ($need_tracklist && $info !== false) ? _audiotracklist_from_info($info) : array(),
+        'videodetails'   => ($info !== false) ? _videodetails_from_info($info) : array(),
+    );
+
+    // キャッシュ書き込み（filemtime が取れた場合のみ）
+    if ($use_cache) {
+        // ① キャッシュディレクトリが存在しない場合は作成
+        if (!is_dir($cache_dir)) {
+            if (!@mkdir($cache_dir, 0755, true)) {
+                // ② mkdir 失敗をログに記録してキャッシュをスキップ
+                error_log('[getfileinfo] cache dir creation failed: ' . $cache_dir);
+                return $result;
+            }
+        }
+        // ① .htaccess が存在しない場合は書き込む（再デプロイ後も確実に保護）
+        $htaccess = $cache_dir . DIRECTORY_SEPARATOR . '.htaccess';
+        if (!is_file($htaccess)) {
+            @file_put_contents($htaccess, "Deny from all\n");
+        }
+        // ② キャッシュ書き込み失敗をログに記録
+        if (@file_put_contents($cache_file, serialize($result)) === false) {
+            error_log('[getfileinfo] cache write failed: ' . $cache_file);
+        }
+    }
+
+    return $result;
+}
+
+function getaudiotracklist($filename){
+    $info = _getid3_analyze($filename, true);
+    if ($info === false) return array();
+    return _audiotracklist_from_info($info);
+}
+
+function getvideodetails($filename) {
+    $info = _getid3_analyze($filename, false);
+    if ($info === false) return array();
+    return _videodetails_from_info($info);
 }
 
 // function from manage-mpc.php
