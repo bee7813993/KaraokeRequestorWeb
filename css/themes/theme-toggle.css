@@ -522,10 +522,11 @@ body::before {
 }
 
 /* ナビバー折りたたみ時のドロップダウン（< md = 768px）
-   Bootstrap デフォルトの白いフローティングボックスをナビバー背景に溶け込ませる */
+   transparent だとライトモードでページ背景が透けて白文字が見えなくなるため
+   ナビバーと同じ色を明示して常に暗い背景を保証する */
 @media (max-width: 767.98px) {
   .navbar .dropdown-menu {
-    background-color: transparent;
+    background-color: var(--bg-navbar);
     border: none;
     box-shadow: none;
     border-radius: 0;
