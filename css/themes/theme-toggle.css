@@ -482,3 +482,11 @@ body::before {
   border-color: var(--color-accent-secondary);
   color: #ffffff;
 }
+
+/* ============================================================
+   btn-outline-secondary のボーダーを 2px に統一（ライト/ダーク共通）
+   Bootstrap デフォルト 1px より少し太くして視認性を向上させる。
+   ============================================================ */
+.btn-outline-secondary {
+  border-width: 2px;
+}
