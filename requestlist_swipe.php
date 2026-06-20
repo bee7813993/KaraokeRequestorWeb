@@ -924,6 +924,7 @@ function initSortable() {
             .then(function () {
                 // 成功時は lastOrderIds を保持（Undo 用）
                 updateUndoBtn();
+                loadList();
             })
             .catch(function (e) {
                 console.error('reorder error:', e);

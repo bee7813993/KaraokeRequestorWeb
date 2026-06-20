@@ -22,22 +22,45 @@ if (empty($ids)) {
     exit;
 }
 
-$total = count($ids);
 try {
-    // BEGIN IMMEDIATE で書き込みロックを先取りし、連番割り当て〜正規化を分断されずに一括処理する
+    // ⑭ fix: 未再生アイテムのみ並び替え対象とし、再生中・再生済みの順番は保持する
     $db->exec("BEGIN IMMEDIATE;");
+
+    // DB上の現在の状態を取得
+    $state = [];
+    $rows = $db->query("SELECT id, nowplaying, reqorder FROM requesttable")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rows as $row) {
+        $state[(int)$row['id']] = $row;
+    }
+
+    // 再生済み・再生中の最大reqorder（未再生アイテムはこれより大きい値を割り当てる）
+    $played_max = 0;
+    foreach ($state as $row) {
+        if ($row['nowplaying'] !== '未再生') {
+            $played_max = max($played_max, (int)$row['reqorder']);
+        }
+    }
+
+    // ユーザーが指定した順序から未再生のみ抽出
+    $unplayed_ids = [];
+    foreach ($ids as $id) {
+        $iid = (int)$id;
+        if (isset($state[$iid]) && $state[$iid]['nowplaying'] === '未再生') {
+            $unplayed_ids[] = $iid;
+        }
+    }
+
+    $count = count($unplayed_ids);
     $stmt = $db->prepare("UPDATE requesttable SET reqorder = :reqorder WHERE id = :id");
-    foreach ($ids as $index => $id) {
+    foreach ($unplayed_ids as $index => $id) {
         // 先頭アイテム(index=0)が最大reqorder（ORDER BY reqorder DESC で先頭表示）
-        // 10倍間隔ではなく連番で割り当てることで他の処理との採番方式を統一する
-        $reqorder = $total - $index;
+        $reqorder = $played_max + ($count - $index);
         $stmt->bindValue(':reqorder', $reqorder, PDO::PARAM_INT);
-        $stmt->bindValue(':id', (int)$id, PDO::PARAM_INT);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
         $stmt->execute();
     }
-    // ドラッグ&ドロップ対象外のレコード（再生中など）も含めて連番に正規化する
-    // 同一トランザクション内で実行することで、normalize と連番割り当ての間に
-    // 別プロセスが割り込んで reqorder を変更する競合状態を防ぐ
+
+    // 全レコードを連番に正規化する（再生済みとの隙間も吸収）
     normalize_reqorder($db, true);
     $db->exec("COMMIT;");
 } catch (Exception $e) {
