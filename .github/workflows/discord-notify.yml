@@ -1,0 +1,41 @@
+name: Discord PR Merge Notification
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+
+jobs:
+  notify:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"✅ PR #${{ github.event.pull_request.number }} がマージされました\",
+                \"description\": \"${{ github.event.pull_request.title }}\",
+                \"url\": \"${{ github.event.pull_request.html_url }}\",
+                \"color\": 3066993,
+                \"fields\": [
+                  {
+                    \"name\": \"マージした人\",
+                    \"value\": \"${{ github.event.pull_request.merged_by.login }}\",
+                    \"inline\": true
+                  },
+                  {
+                    \"name\": \"ブランチ\",
+                    \"value\": \"`${{ github.event.pull_request.head.ref }}` → `master`\",
+                    \"inline\": true
+                  }
+                ],
+                \"footer\": {
+                  \"text\": \"KaraokeRequestorWeb\"
+                }
+              }]
+            }"
