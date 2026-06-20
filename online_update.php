@@ -165,8 +165,118 @@ if ($zip_check !== true):
         </a>
       </div>
     </div>
+<?php else:
+    $git_errmsg   = '';
+    $git_taglist  = get_gittaglist($git_errmsg);           // fetch もここで実行（--prune付き）
+    $git_branches = get_gitbranchlist($git_errmsg, false); // fetch 済みなのでスキップ
+    $fetch_failed = !empty($git_errmsg) && $git_errmsg !== 'none';
+    $current_branch = get_current_git_branch();
+?>
+
+    <!-- (1) 現在のブランチ表示 + アップデートボタン -->
+    <div class="panel panel-primary">
+      <div class="panel-heading"><strong>現在のブランチ</strong></div>
+      <div class="panel-body">
+<?php if ($current_branch !== null): ?>
+        <p style="margin-bottom:10px;">
+          <span class="label label-default" style="font-size:1em; padding:4px 10px;">
+            <?php echo htmlspecialchars($current_branch); ?>
+          </span>
+        </p>
+        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('origin/' . $current_branch); ?>&METHOD=git"
+           class="btn btn-primary"
+           onclick="return confirm('<?php echo htmlspecialchars($current_branch, ENT_QUOTES); ?> ブランチを最新に更新します。よろしいですか？');">
+          このブランチを最新に更新
+        </a>
 <?php else: ?>
-    <!-- .git サイズ表示 + 最適化ボタン -->
+        <p class="text-muted">ブランチ情報を取得できませんでした</p>
+<?php endif; ?>
+      </div>
+    </div>
+
+<?php if ($fetch_failed): ?>
+    <div class="alert alert-warning">リモート情報の取得に失敗しました: <?php echo htmlspecialchars($git_errmsg); ?></div>
+<?php else: ?>
+
+    <!-- (2) ブランチ選択（折りたたみ） -->
+<?php if (count($git_branches) > 0): ?>
+    <div class="panel panel-default">
+      <div class="panel-heading" style="cursor:pointer;" data-toggle="collapse" data-target="#branchList">
+        <strong>ブランチ選択</strong>
+        <span class="text-muted small">&nbsp;（<?php echo count($git_branches); ?> 件）&nbsp;▼</span>
+      </div>
+      <div id="branchList" class="panel-collapse collapse">
+        <div class="panel-body" style="padding:0;">
+          <dl class="dl-horizontal" style="margin:10px 0;">
+<?php   foreach ($git_branches as $branch):
+          $ver = 'origin/' . $branch;
+          $is_current = ($branch === $current_branch); ?>
+            <dt style="overflow:hidden; text-overflow:ellipsis;">
+              <?php echo htmlspecialchars($branch); ?>
+              <?php if ($is_current): ?><span class="label label-primary">現在</span><?php endif; ?>
+            </dt>
+            <dd>
+<?php       if (!$is_current): ?>
+              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($ver); ?>&METHOD=git"
+                 class="btn btn-default btn-sm"
+                 onclick="return confirm('<?php echo htmlspecialchars($branch, ENT_QUOTES); ?> ブランチに切り替えます。よろしいですか？');">切替</a>
+<?php       else: ?>
+              <span class="text-muted small">（選択中）</span>
+<?php       endif; ?>
+            </dd>
+<?php   endforeach; ?>
+          </dl>
+        </div>
+      </div>
+    </div>
+<?php endif; ?>
+
+    <!-- (3) タグ一覧（折りたたみ） -->
+<?php if (count($git_taglist) > 0): ?>
+    <div class="panel panel-default">
+      <div class="panel-heading" style="cursor:pointer;" data-toggle="collapse" data-target="#tagList">
+        <strong>タグ一覧（リリース版）</strong>
+        <span class="text-muted small">&nbsp;（<?php echo count($git_taglist); ?> 件）&nbsp;▼</span>
+      </div>
+      <div id="tagList" class="panel-collapse collapse">
+        <div class="panel-body" style="padding:0;">
+          <dl class="dl-horizontal" style="margin:10px 0;">
+<?php   foreach (array_reverse($git_taglist) as $tag):
+          if (strcmp($tag, 'v0.09.5-alpha') === 0): ?>
+            <dt><?php echo htmlspecialchars($tag); ?></dt>
+            <dd><span class="text-muted small">これ以前はコマンドプロンプトでの操作が必要です</span></dd>
+<?php       break; endif; ?>
+            <dt><?php echo htmlspecialchars($tag); ?></dt>
+            <dd>
+              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=git"
+                 class="btn btn-default btn-sm"
+                 onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
+            </dd>
+<?php   endforeach; ?>
+          </dl>
+        </div>
+      </div>
+    </div>
+<?php endif; ?>
+
+    <!-- (4) 任意ブランチ / タグ / ハッシュ -->
+    <div class="panel panel-default">
+      <div class="panel-heading"><strong>任意ブランチ / タグ / ハッシュ</strong></div>
+      <div class="panel-body">
+        <form method="GET" class="form-inline">
+          <input type="hidden" name="METHOD" value="git" />
+          <div class="form-group">
+            <input type="text" name="UPDATEVERSION" class="form-control" placeholder="例: origin/my-branch" style="width:280px;" />
+          </div>
+          &nbsp;<input type="submit" value="実行" class="btn btn-warning"
+                       onclick="return confirm('指定のブランチ/タグ/ハッシュに切り替えます。よろしいですか？');" />
+        </form>
+      </div>
+    </div>
+
+<?php endif; // fetch_failed ?>
+
+    <!-- (5) リポジトリ最適化 -->
 <?php
     $git_size = get_git_dir_size();
     $git_size_str = $git_size !== null ? format_filesize($git_size) : '取得失敗';
@@ -175,7 +285,7 @@ if ($zip_check !== true):
       <div class="panel-heading"><strong>リポジトリ最適化</strong></div>
       <div class="panel-body">
         <p><strong>.git フォルダ サイズ:</strong> <?php echo htmlspecialchars($git_size_str); ?>
-           &nbsp;<small class="text-muted">（アップデート後に <code>git gc</code> を実行すると削減できます）</small></p>
+           <small class="text-muted">&nbsp;（アップデート後に git gc を実行すると削減できます）</small></p>
         <a href="online_update.php?ACTION=git_gc&METHOD=git"
            class="btn btn-default btn-sm"
            onclick="return confirm('git gc --prune=all を実行します。通常数十秒かかります。よろしいですか？');">
@@ -193,79 +303,6 @@ if ($zip_check !== true):
       </div>
     </div>
 
-    <div class="alert alert-info" style="margin-top:0;">
-      Git 方式: <code>git fetch</code> + <code>git reset --hard</code> でアップデートします。
-    </div>
-<?php
-    $git_errmsg   = '';
-    $git_taglist  = get_gittaglist($git_errmsg);               // fetch もここで実行
-    $git_branches = get_gitbranchlist($git_errmsg, false);     // fetch 済みなのでスキップ
-    $fetch_failed = !empty($git_errmsg) && $git_errmsg !== 'none';
-?>
-<?php if ($fetch_failed): ?>
-    <div class="alert alert-warning">取得に失敗しました: <?php echo htmlspecialchars($git_errmsg); ?></div>
-<?php else: ?>
-
-    <!-- ブランチ一覧（折りたたみ） -->
-<?php if (count($git_branches) > 0): ?>
-    <div class="panel panel-default">
-      <div class="panel-heading" style="cursor:pointer;" data-toggle="collapse" data-target="#branchList">
-        <strong>ブランチ一覧</strong>
-        <span class="text-muted small">&nbsp;（<?php echo count($git_branches); ?> 件）&nbsp;▼</span>
-      </div>
-      <div id="branchList" class="panel-collapse collapse">
-        <div class="panel-body" style="padding-top:8px; padding-bottom:8px;">
-          <dl class="dl-horizontal" style="margin-bottom:0;">
-<?php   foreach ($git_branches as $branch):
-          $ver = 'origin/' . $branch; ?>
-            <dt style="overflow:hidden; text-overflow:ellipsis;"><?php echo htmlspecialchars($branch); ?></dt>
-            <dd>
-              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($ver); ?>&METHOD=git"
-                 class="btn btn-<?php echo ($branch === 'master') ? 'primary' : 'default'; ?> btn-sm"
-                 onclick="return confirm('<?php echo htmlspecialchars($branch, ENT_QUOTES); ?> ブランチに切り替えます。よろしいですか？');">更新</a>
-            </dd>
-<?php   endforeach; ?>
-          </dl>
-        </div>
-      </div>
-    </div>
-<?php endif; ?>
-
-    <!-- タグ一覧 -->
-<?php if (count($git_taglist) === 0): ?>
-    <div class="alert alert-info">タグが見つかりませんでした</div>
-<?php else: ?>
-    <h5><strong>タグ（リリース版）</strong></h5>
-    <dl class="dl-horizontal">
-<?php   foreach (array_reverse($git_taglist) as $tag):
-          if (strcmp($tag, 'v0.09.5-alpha') === 0): ?>
-      <dt><?php echo htmlspecialchars($tag); ?></dt>
-      <dd>これ以前のバージョンはコマンドプロンプトでのコマンド実行が必要です</dd>
-<?php       break; endif; ?>
-      <dt><?php echo htmlspecialchars($tag); ?></dt>
-      <dd>
-        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=git"
-           class="btn btn-default btn-sm"
-           onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
-      </dd>
-<?php   endforeach; ?>
-    </dl>
-<?php endif; // git_taglist ?>
-
-    <div class="panel panel-default" style="margin-top:10px;">
-      <div class="panel-body">
-        <form method="GET" class="form-inline">
-          <input type="hidden" name="METHOD" value="git" />
-          <div class="form-group">
-            <label>任意ブランチ / タグ / ハッシュ&nbsp;</label>
-            <input type="text" name="UPDATEVERSION" class="form-control" placeholder="例: origin/my-branch" />
-          </div>
-          &nbsp;<input type="submit" value="実行" class="btn btn-warning" />
-        </form>
-      </div>
-    </div>
-
-<?php endif; // fetch_failed ?>
 <?php endif; // git_repo_exists ?>
 
   </div><!-- /git tab pane -->

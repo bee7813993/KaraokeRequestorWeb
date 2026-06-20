@@ -2192,6 +2192,16 @@ function get_version(){
     }
 }
 
+function get_current_git_branch() {
+    global $config_ini;
+    if (!array_key_exists('gitcommandpath', $config_ini)) return null;
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) return null;
+    $branch = trim(exec($gitcmd . ' rev-parse --abbrev-ref HEAD 2>&1'));
+    if ($branch === '' || $branch === 'HEAD' || mb_strpos($branch, 'fatal') !== false) return null;
+    return $branch;
+}
+
 // $do_fetch=false を指定すると fetch をスキップ（get_gittaglist の直後に呼ぶ場合など）
 function get_gitbranchlist(&$errmsg = '', $do_fetch = true) {
     global $config_ini;
