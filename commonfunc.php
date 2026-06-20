@@ -2203,7 +2203,7 @@ function get_gitbranchlist(&$errmsg = '', $do_fetch = true) {
     if ($do_fetch) {
         exec($gitcmd . ' config --global core.autoCRLF false');
         set_time_limit(900);
-        exec($gitcmd . ' fetch origin 2>&1', $out);
+        exec($gitcmd . ' fetch --prune origin 2>&1', $out);
         $out = [];
     }
 
@@ -2228,7 +2228,7 @@ function get_gittaglist(&$errmsg = 'none'){
       if(file_exists($gitcmd)){
           $execcmd = $gitcmd.' config --global core.autoCRLF false';
           exec($execcmd);
-          $execcmd = $gitcmd.' fetch origin';
+          $execcmd = $gitcmd.' fetch --prune origin';
           set_time_limit (900);
           exec($execcmd,$result_str);
           foreach($result_str as $line){
@@ -2277,7 +2277,7 @@ function update_fromgit($version_str, &$errmsg){
           $execcmd = $gitcmd.' config --global core.autoCRLF false';
           exec($execcmd);
           
-          $execcmd = $gitcmd.' fetch origin';
+          $execcmd = $gitcmd.' fetch --prune origin';
           set_time_limit (900);
           exec($execcmd,$result_str);
           foreach($result_str as $line){

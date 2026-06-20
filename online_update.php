@@ -206,21 +206,29 @@ if ($zip_check !== true):
     <div class="alert alert-warning">取得に失敗しました: <?php echo htmlspecialchars($git_errmsg); ?></div>
 <?php else: ?>
 
-    <!-- ブランチ一覧 -->
+    <!-- ブランチ一覧（折りたたみ） -->
 <?php if (count($git_branches) > 0): ?>
-    <h5><strong>ブランチ</strong></h5>
-    <dl class="dl-horizontal">
+    <div class="panel panel-default">
+      <div class="panel-heading" style="cursor:pointer;" data-toggle="collapse" data-target="#branchList">
+        <strong>ブランチ一覧</strong>
+        <span class="text-muted small">&nbsp;（<?php echo count($git_branches); ?> 件）&nbsp;▼</span>
+      </div>
+      <div id="branchList" class="panel-collapse collapse">
+        <div class="panel-body" style="padding-top:8px; padding-bottom:8px;">
+          <dl class="dl-horizontal" style="margin-bottom:0;">
 <?php   foreach ($git_branches as $branch):
           $ver = 'origin/' . $branch; ?>
-      <dt style="overflow:hidden; text-overflow:ellipsis;"><?php echo htmlspecialchars($branch); ?></dt>
-      <dd>
-        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($ver); ?>&METHOD=git"
-           class="btn btn-<?php echo ($branch === 'master') ? 'primary' : 'default'; ?> btn-sm"
-           onclick="return confirm('<?php echo htmlspecialchars($branch, ENT_QUOTES); ?> ブランチに切り替えます。よろしいですか？');">更新</a>
-      </dd>
+            <dt style="overflow:hidden; text-overflow:ellipsis;"><?php echo htmlspecialchars($branch); ?></dt>
+            <dd>
+              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($ver); ?>&METHOD=git"
+                 class="btn btn-<?php echo ($branch === 'master') ? 'primary' : 'default'; ?> btn-sm"
+                 onclick="return confirm('<?php echo htmlspecialchars($branch, ENT_QUOTES); ?> ブランチに切り替えます。よろしいですか？');">更新</a>
+            </dd>
 <?php   endforeach; ?>
-    </dl>
-    <hr/>
+          </dl>
+        </div>
+      </div>
+    </div>
 <?php endif; ?>
 
     <!-- タグ一覧 -->
