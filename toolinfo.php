@@ -42,7 +42,12 @@ if (!empty($globalhost) && $config_ini['connectinternet'] == 1) {
 $easypass_q = ($config_ini['useeasyauth'] == 1)
     ? '?easypass=' . urlencode($config_ini['useeasyauth_word'])
     : '';
-$localhosturl = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $easypass_q;
+
+// ホスト名（localhost は除外）
+$http_host      = $_SERVER['HTTP_HOST'];
+$host_only      = strtolower(explode(':', $http_host)[0]);
+$localname_valid = ($host_only !== 'localhost');
+$localhosturl   = $localname_valid ? 'http://' . $http_host . '/' . $easypass_q : '';
 
 // IPv6・ループバックを除外した IPv4 アドレスのみ表示
 $server_addr   = $_SERVER['SERVER_ADDR'];
@@ -51,6 +56,8 @@ $localip_valid = (strpos($server_addr, ':') === false)   // IPv6除外
 $localipurl    = $localip_valid
     ? 'http://' . $server_addr . '/' . $easypass_q
     : '';
+
+$has_local_url = $localname_valid || $localip_valid;
 
 // --- WiFi情報 ---
 $wifi_ssid = isset($config_ini['SSID'])    ? urldecode($config_ini['SSID'])    : '';
@@ -170,7 +177,9 @@ $wifi_open   = true;
            class="accordion-collapse collapse <?= $local_open ? 'show' : '' ?>"
            aria-labelledby="headingLocal">
         <div class="accordion-body">
+          <?php if ($has_local_url): ?>
           <div class="row g-3">
+            <?php if ($localname_valid): ?>
             <div class="col-md-6">
               <div class="card h-100">
                 <div class="card-body text-center">
@@ -189,6 +198,7 @@ $wifi_open   = true;
                 </div>
               </div>
             </div>
+            <?php endif; ?>
             <?php if ($localip_valid): ?>
             <div class="col-md-6">
               <div class="card h-100">
@@ -210,6 +220,51 @@ $wifi_open   = true;
             </div>
             <?php endif; ?>
           </div>
+          <?php else: ?>
+          <?php /* ホスト名・IPアドレスがいずれも対象外のとき */ ?>
+          <div class="alert alert-info mb-3">
+            IPアドレスまたはホスト名を直接指定してアクセスしてください。
+          </div>
+          <?php
+            require_once 'ipconfig.php';
+            $_ic = getiplist();
+            $_v4 = []; $_v6 = []; $_seen = [];
+            foreach ($_ic as $_if) {
+                foreach ($_if as $_ki => $_s) {
+                    if ($_ki === 0) continue;
+                    $_ip = trim($_s);
+                    if (empty($_ip)) continue;
+                    if (strpos($_ip, '%') !== false) $_ip = substr($_ip, 0, strpos($_ip, '%'));
+                    if ($_ip === '127.0.0.1' || $_ip === '::1') continue;
+                    if (in_array($_ip, $_seen, true)) continue;
+                    $_seen[] = $_ip;
+                    $_is6 = (strpos($_ip, ':') !== false);
+                    $_lk  = 'http://' . ($_is6 ? '[' . $_ip . ']' : $_ip) . '/' . $easypass_q;
+                    if ($_is6) { $_v6[] = $_lk; } else { $_v4[] = $_lk; }
+                }
+            }
+          ?>
+          <div style="font-family:monospace; font-size:.875rem">
+            <?php foreach ($_v4 as $_lk): ?>
+            <a href="<?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?></a><br>
+            <?php endforeach; ?>
+          </div>
+          <?php if (!empty($_v6)): ?>
+          <div class="mt-2">
+            <button class="btn btn-sm btn-outline-secondary" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#local-ipv6-list">
+              IPv6アドレスを表示 (<?= count($_v6) ?>件)
+            </button>
+            <div class="collapse mt-1" id="local-ipv6-list">
+              <div style="font-family:monospace; font-size:.875rem">
+                <?php foreach ($_v6 as $_lk): ?>
+                <a href="<?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?></a><br>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+          <?php endif; ?>
+          <?php endif; ?>
         </div>
       </div>
     </div>

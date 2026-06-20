@@ -1875,36 +1875,49 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
 
 <div class="card cfg-card mb-4"><div class="card-body">
   <h1 id="myiplist" class="menulink"> 自IP一覧 </h1>
-  <pre>
   <?php
   require_once("ipconfig.php");
-  $result_ipconfig=getiplist();
-  
-  //var_dump($result_ipconfig);
-  foreach($result_ipconfig as $ifinfo){
-     $count= 0;
-     foreach($ifinfo as $ips){
-        if($count != 0){
-        if(strchr($ips,':') !== false){
-          $ips = '['.strchr($ips,'%',$before_needle=true).']';
-        }
-        if(!empty($ips)){
-           $link = 'http://'.$ips.'/';
-           if(array_key_exists('useeasyauth_word', $config_ini)){
-               if(!empty($config_ini['useeasyauth_word'])){
-                  $link = $link.'?easypass='.$config_ini['useeasyauth_word'];
-               }
-           }
-           print '<a href='.$link.' > '.$link.'</a><br />';
-        }
-        }
-        $count ++;
-     }
-     
+  $result_ipconfig = getiplist();
+  $init_v4 = []; $init_v6 = []; $init_seen = [];
+  foreach ($result_ipconfig as $ifinfo) {
+      foreach ($ifinfo as $idx => $ip_str) {
+          if ($idx === 0) continue;
+          $ip = trim($ip_str);
+          if (empty($ip)) continue;
+          if (strpos($ip, '%') !== false) $ip = substr($ip, 0, strpos($ip, '%'));
+          if ($ip === '127.0.0.1' || $ip === '::1') continue;
+          if (in_array($ip, $init_seen, true)) continue;
+          $init_seen[] = $ip;
+          $is_ipv6 = (strpos($ip, ':') !== false);
+          $url_ip  = $is_ipv6 ? '[' . $ip . ']' : $ip;
+          $link    = 'http://' . $url_ip . '/';
+          if (!empty($config_ini['useeasyauth_word'])) {
+              $link .= '?easypass=' . urlencode($config_ini['useeasyauth_word']);
+          }
+          if ($is_ipv6) { $init_v6[] = $link; } else { $init_v4[] = $link; }
+      }
   }
-  
   ?>
-  </pre>
+  <div style="font-family:monospace; font-size:0.875rem; word-break:break-all; margin-bottom:.5rem">
+    <?php foreach ($init_v4 as $link): ?>
+    <a href="<?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?></a><br>
+    <?php endforeach; ?>
+  </div>
+  <?php if (!empty($init_v6)): ?>
+  <div class="mb-2">
+    <button class="btn btn-sm btn-outline-secondary" type="button"
+            data-bs-toggle="collapse" data-bs-target="#init-ipv6-list">
+      IPv6アドレスを表示 (<?= count($init_v6) ?>件)
+    </button>
+    <div class="collapse mt-1" id="init-ipv6-list">
+      <div style="font-family:monospace; font-size:0.875rem; word-break:break-all">
+        <?php foreach ($init_v6 as $link): ?>
+        <a href="<?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?></a><br>
+        <?php endforeach; ?>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
 
   </div></div>
 </div><!-- col-lg-9 -->
