@@ -2394,9 +2394,19 @@ function check_zip_update_available() {
     return true;
 }
 
+// アップデート取得元リポジトリ（owner/repo）を config から取得。未設定時は既定値。
+function get_update_repo() {
+    global $config_ini;
+    if (array_key_exists('update_repo', $config_ini)) {
+        $repo = trim(urldecode($config_ini['update_repo']));
+        if ($repo !== '') return $repo;
+    }
+    return 'bee7813993/KaraokeRequestorWeb';
+}
+
 function get_archive_taglist(&$errmsg = '') {
     $taglist = [];
-    $url = 'https://api.github.com/repos/bee7813993/KaraokeRequestorWeb/tags';
+    $url = 'https://api.github.com/repos/' . get_update_repo() . '/tags';
     $data = _kara_http_get($url, $errmsg);
     if ($data === false) {
         return $taglist;
@@ -2461,12 +2471,13 @@ function update_fromarchive($version_str, &$errmsg) {
         return false;
     }
 
+    $repo = get_update_repo();
     $vs = trim($version_str);
     if ($vs === 'master' || $vs === 'origin/master') {
-        $zip_url = 'https://github.com/bee7813993/KaraokeRequestorWeb/archive/refs/heads/master.zip';
+        $zip_url = 'https://github.com/' . $repo . '/archive/refs/heads/master.zip';
     } else {
         $tag = ltrim($vs, 'refs/tags/');
-        $zip_url = 'https://github.com/bee7813993/KaraokeRequestorWeb/archive/refs/tags/' . rawurlencode($tag) . '.zip';
+        $zip_url = 'https://github.com/' . $repo . '/archive/refs/tags/' . rawurlencode($tag) . '.zip';
     }
 
     $app_root = realpath(__DIR__);
@@ -2605,7 +2616,7 @@ function init_git_repo(&$errmsg) {
     }
 
     set_time_limit(900);
-    $origin = 'https://github.com/bee7813993/KaraokeRequestorWeb.git';
+    $origin = 'https://github.com/' . get_update_repo() . '.git';
 
     $steps = [
         $gitcmd . ' init',

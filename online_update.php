@@ -71,8 +71,10 @@ if ($res === false) {
 
 $curver = get_version();
 if (!empty($curver)) {
-    echo '<p class="text-muted"><small>現在のバージョン: <strong>' . htmlspecialchars($curver) . '</strong></small></p>';
+    echo '<p class="text-muted mb-1"><small>現在のバージョン: <strong>' . htmlspecialchars($curver) . '</strong></small></p>';
 }
+echo '<p class="text-muted"><small>取得元リポジトリ: <code>' . htmlspecialchars(get_update_repo()) . '</code>'
+   . ' <span class="text-muted">（config.ini の <code>update_repo</code> で変更可能）</span></small></p>';
 ?>
 
 <?php if ($git_available): ?>
@@ -410,7 +412,7 @@ if ($zip_check !== true):
 <hr class="mt-4"/>
 <p class="text-muted small">
   バージョン情報:
-  <a href="https://github.com/bee7813993/KaraokeRequestorWeb/commits/master" target="_blank">
+  <a href="https://github.com/<?php echo htmlspecialchars(get_update_repo(), ENT_QUOTES); ?>/commits/master" target="_blank">
     GitHub コミット履歴
   </a>
 </p>
