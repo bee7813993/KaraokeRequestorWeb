@@ -638,20 +638,23 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
           <li><code>&lt;a href="..." class="btn btn-outline-secondary"&gt;ボタン&lt;/a&gt;</code> — 枠のみボタン（モード連動）</li>
         </ul>
         <p class="mb-1"><strong>ボタン</strong>（モードに関係なく常に同じ色）</p>
-        <ul class="mb-2">
+        <ul class="mb-3">
           <li><code>&lt;a href="..." class="btn btn-primary"&gt;ボタン&lt;/a&gt;</code> — 常に青</li>
           <li><code>&lt;a href="..." class="btn btn-danger"&gt;ボタン&lt;/a&gt;</code> — 常に赤</li>
           <li><code>&lt;a href="..." class="btn btn-success"&gt;ボタン&lt;/a&gt;</code> — 常に緑</li>
           <li><code>&lt;a href="..." class="btn btn-warning"&gt;ボタン&lt;/a&gt;</code> — 常に黄</li>
         </ul>
-        <p class="mb-1"><strong>テキスト・背景</strong>（モードに関係なく常に同じ色）</p>
-        <ul class="mb-2">
-          <li><code>style="color: #c0392b;"</code> のように16進数で直接指定 — 常に指定色</li>
-        </ul>
-        <p class="mb-1"><strong>色を直接書くと浮いてしまう例（モード追従させたい場合は避けてください）</strong></p>
+        <p class="mb-1"><strong>エリアをライトモード固定にする</strong>（ダークモードでも常に白背景・黒文字）</p>
+        <p class="mb-1 text-muted" style="font-size:0.82rem;">背景色と文字色を必ずセットで指定してください。どちらか一方だけだとモードによって読めなくなります。</p>
+        <pre class="mb-3" style="font-size:0.8rem; background:#f6f8fa; border:1px solid #dee2e6; border-radius:6px; padding:10px;">
+&lt;div style="background: white; color: black; padding: 12px; border-radius: 6px;"&gt;
+  &lt;p style="color: black;"&gt;ここは常に白背景・黒文字で表示されます。&lt;/p&gt;
+  &lt;a href="..." style="color: #1a0dab;"&gt;リンクも色を明示&lt;/a&gt;
+&lt;/div&gt;</pre>
+        <p class="mb-1"><strong>注意：色を片方だけ指定するのは避けてください</strong></p>
         <ul class="mb-0">
-          <li><code>style="color: black;"</code> — ダークモードで読みにくくなる</li>
-          <li><code>style="background: white;"</code> — ダークモードで明るく浮く</li>
+          <li><code>style="color: black;"</code> のみ — ダークモードで黒背景に黒文字になり読めなくなる</li>
+          <li><code>style="background: white;"</code> のみ — ダークモードで白背景にテーマの白文字になり読めなくなる</li>
         </ul>
       </div>
     </div>
