@@ -2192,6 +2192,65 @@ function get_version(){
     }
 }
 
+function get_git_command_version() {
+    global $config_ini;
+    if (!array_key_exists('gitcommandpath', $config_ini)) return null;
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) return null;
+    $ver = trim(exec($gitcmd . ' --version 2>&1'));
+    return ($ver !== '') ? $ver : null;
+}
+
+function get_current_git_branch() {
+    global $config_ini;
+    if (!array_key_exists('gitcommandpath', $config_ini)) return null;
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) return null;
+    $branch = trim(exec($gitcmd . ' rev-parse --abbrev-ref HEAD 2>&1'));
+    if ($branch === '' || $branch === 'HEAD' || mb_strpos($branch, 'fatal') !== false) return null;
+    return $branch;
+}
+
+// $do_fetch=false を指定すると fetch をスキップ（get_gittaglist の直後に呼ぶ場合など）
+function get_gitbranchlist(&$errmsg = '', $do_fetch = true) {
+    global $config_ini;
+    $branchlist = [];
+    if (!array_key_exists('gitcommandpath', $config_ini)) return $branchlist;
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) return $branchlist;
+
+    if ($do_fetch) {
+        exec($gitcmd . ' config --global core.autoCRLF false');
+        set_time_limit(900);
+        exec($gitcmd . ' fetch --prune origin 2>&1', $out);
+        $out = [];
+    }
+
+    // git for-each-ref は git 1.x から使えるため branch --sort より互換性が高い
+    exec($gitcmd . ' for-each-ref --sort=-committerdate --format=%(refname:short) refs/remotes/origin/ 2>&1', $lines, $ret);
+    if ($ret === 0 && count($lines) > 0) {
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || mb_strpos($line, 'origin/HEAD') !== false) continue;
+            if (mb_strpos($line, 'origin/') === 0) {
+                $branchlist[] = mb_substr($line, mb_strlen('origin/'));
+            }
+        }
+    } else {
+        // フォールバック: 古い git で for-each-ref も使えない場合
+        $lines = [];
+        exec($gitcmd . ' branch -r 2>&1', $lines);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (mb_strpos($line, '->') !== false) continue;
+            if (mb_strpos($line, 'origin/') === 0) {
+                $branchlist[] = mb_substr($line, mb_strlen('origin/'));
+            }
+        }
+    }
+    return $branchlist;
+}
+
 function get_gittaglist(&$errmsg = 'none'){
 
     global $config_ini;
@@ -2202,7 +2261,7 @@ function get_gittaglist(&$errmsg = 'none'){
       if(file_exists($gitcmd)){
           $execcmd = $gitcmd.' config --global core.autoCRLF false';
           exec($execcmd);
-          $execcmd = $gitcmd.' fetch origin';
+          $execcmd = $gitcmd.' fetch --prune origin';
           set_time_limit (900);
           exec($execcmd,$result_str);
           foreach($result_str as $line){
@@ -2251,7 +2310,7 @@ function update_fromgit($version_str, &$errmsg){
           $execcmd = $gitcmd.' config --global core.autoCRLF false';
           exec($execcmd);
           
-          $execcmd = $gitcmd.' fetch origin';
+          $execcmd = $gitcmd.' fetch --prune origin';
           set_time_limit (900);
           exec($execcmd,$result_str);
           foreach($result_str as $line){
@@ -2286,9 +2345,313 @@ function update_fromgit($version_str, &$errmsg){
     if($errorcnt > 0) {
         return false;
     }
-    
+
     return true;
 }
+
+// ---- ZIPアーカイブ方式アップデート ----
+
+function _kara_http_get($url, &$errmsg) {
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'KaraokeRequestorWeb-Updater');
+        curl_setopt($ch, CURLOPT_TIMEOUT, 300);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        $data = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($data === false || $httpcode !== 200) {
+            $errmsg = 'HTTP取得失敗 (HTTP ' . $httpcode . '): ' . $url;
+            return false;
+        }
+        return $data;
+    } elseif (ini_get('allow_url_fopen')) {
+        $context = stream_context_create(['http' => [
+            'method'  => 'GET',
+            'header'  => "User-Agent: KaraokeRequestorWeb-Updater\r\n",
+            'timeout' => 300,
+        ]]);
+        $data = @file_get_contents($url, false, $context);
+        if ($data === false) {
+            $errmsg = 'HTTP取得失敗: ' . $url;
+            return false;
+        }
+        return $data;
+    }
+    $errmsg = 'curl または allow_url_fopen が有効である必要があります';
+    return false;
+}
+
+function check_zip_update_available() {
+    if (!class_exists('ZipArchive')) {
+        return 'PHP の ZipArchive 拡張が無効です (php.ini で extension=zip を有効化してください)';
+    }
+    if (!function_exists('curl_init') && !ini_get('allow_url_fopen')) {
+        return 'curl または allow_url_fopen が必要です';
+    }
+    return true;
+}
+
+// アップデート取得元リポジトリ（owner/repo）を config から取得。未設定時は既定値。
+function get_update_repo() {
+    global $config_ini;
+    if (array_key_exists('update_repo', $config_ini)) {
+        $repo = trim(urldecode($config_ini['update_repo']));
+        if ($repo !== '') return $repo;
+    }
+    return 'bee7813993/KaraokeRequestorWeb';
+}
+
+function get_archive_taglist(&$errmsg = '') {
+    $taglist = [];
+    $url = 'https://api.github.com/repos/' . get_update_repo() . '/tags';
+    $data = _kara_http_get($url, $errmsg);
+    if ($data === false) {
+        return $taglist;
+    }
+    $items = json_decode($data, true);
+    if (!is_array($items)) {
+        $errmsg = 'GitHub API レスポンスの解析失敗';
+        return $taglist;
+    }
+    foreach ($items as $item) {
+        $name = $item['name'] ?? '';
+        if (mb_substr($name, 0, 1) === 'v' && is_numeric(mb_substr($name, 1, 1))) {
+            $taglist[] = $name;
+        }
+    }
+    return $taglist;
+}
+
+function _kara_update_copy_recursive($src, $dst, $exclude_list, $relative = '') {
+    $entries = scandir($src);
+    foreach ($entries as $entry) {
+        if ($entry === '.' || $entry === '..') continue;
+
+        $rel = $relative === '' ? $entry : $relative . '/' . $entry;
+
+        foreach ($exclude_list as $excl) {
+            if ($rel === $excl || strpos($rel, $excl . '/') === 0) {
+                continue 2;
+            }
+        }
+
+        $src_path = $src . DIRECTORY_SEPARATOR . $entry;
+        $dst_path = $dst . DIRECTORY_SEPARATOR . $entry;
+
+        if (is_dir($src_path)) {
+            if (!is_dir($dst_path)) {
+                mkdir($dst_path, 0755, true);
+            }
+            _kara_update_copy_recursive($src_path, $dst_path, $exclude_list, $rel);
+        } else {
+            copy($src_path, $dst_path);
+        }
+    }
+}
+
+function _kara_update_cleanup($dir) {
+    if (!is_dir($dir)) return;
+    foreach (scandir($dir) as $entry) {
+        if ($entry === '.' || $entry === '..') continue;
+        $path = $dir . DIRECTORY_SEPARATOR . $entry;
+        is_dir($path) ? _kara_update_cleanup($path) : unlink($path);
+    }
+    rmdir($dir);
+}
+
+function update_fromarchive($version_str, &$errmsg) {
+    global $config_ini;
+
+    $check = check_zip_update_available();
+    if ($check !== true) {
+        $errmsg = $check;
+        return false;
+    }
+
+    $repo = get_update_repo();
+    $vs = trim($version_str);
+    if ($vs === 'master' || $vs === 'origin/master') {
+        $zip_url = 'https://github.com/' . $repo . '/archive/refs/heads/master.zip';
+    } else {
+        // origin/ プレフィックスは除去（ブランチ指定との統一）
+        if (strpos($vs, 'origin/') === 0) {
+            $vs = substr($vs, strlen('origin/'));
+        }
+        $vs = ltrim($vs, '/');
+        // archive/<ref>.zip は ref にタグ・ブランチ・コミットハッシュのいずれも指定可。
+        // ブランチ名のスラッシュ(feature/x 等)は保持しつつ各セグメントをエンコード。
+        $encoded_ref = implode('/', array_map('rawurlencode', explode('/', $vs)));
+        $zip_url = 'https://github.com/' . $repo . '/archive/' . $encoded_ref . '.zip';
+    }
+
+    $app_root = realpath(__DIR__);
+    $tmp_dir  = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'kara_update_' . bin2hex(random_bytes(8));
+
+    if (!mkdir($tmp_dir, 0700, true)) {
+        $errmsg = '一時ディレクトリの作成に失敗しました';
+        return false;
+    }
+
+    $zip_file = $tmp_dir . DIRECTORY_SEPARATOR . 'update.zip';
+    set_time_limit(900);
+
+    $data = _kara_http_get($zip_url, $errmsg);
+    if ($data === false) {
+        // errmsg は _kara_http_get が設定済み（存在しないタグ/ブランチ/ハッシュなら HTTP 404）
+        _kara_update_cleanup($tmp_dir);
+        return false;
+    }
+    if (strlen($data) === 0) {
+        _kara_update_cleanup($tmp_dir);
+        $errmsg = 'ダウンロードしたファイルが空です';
+        return false;
+    }
+    file_put_contents($zip_file, $data);
+    unset($data);
+
+    $zip = new ZipArchive();
+    if ($zip->open($zip_file) !== true) {
+        _kara_update_cleanup($tmp_dir);
+        $errmsg = 'ZIP の展開に失敗しました';
+        return false;
+    }
+    $extract_dir = $tmp_dir . DIRECTORY_SEPARATOR . 'extracted';
+    mkdir($extract_dir, 0700, true);
+    $zip->extractTo($extract_dir);
+    $zip->close();
+
+    // アーカイブ内のトップレベルディレクトリを探す
+    $source_dir = null;
+    foreach (scandir($extract_dir) as $entry) {
+        if ($entry !== '.' && $entry !== '..' && is_dir($extract_dir . DIRECTORY_SEPARATOR . $entry)) {
+            $source_dir = $extract_dir . DIRECTORY_SEPARATOR . $entry;
+            break;
+        }
+    }
+
+    if ($source_dir === null ||
+        !file_exists($source_dir . DIRECTORY_SEPARATOR . 'commonfunc.php') ||
+        !file_exists($source_dir . DIRECTORY_SEPARATOR . 'kara_config.php')) {
+        _kara_update_cleanup($tmp_dir);
+        $errmsg = 'アーカイブの構造が不正です (commonfunc.php / kara_config.php が見つかりません)';
+        return false;
+    }
+
+    // ユーザーデータ保護: 上書き除外リスト (相対パス, / 区切り)
+    $exclude_list = ['config.ini', '.git', 'version'];
+    if (array_key_exists('dbname', $config_ini)) {
+        $dbname = basename(urldecode($config_ini['dbname']));
+        if ($dbname !== '' && !in_array($dbname, $exclude_list)) {
+            $exclude_list[] = $dbname;
+        }
+    } else {
+        $exclude_list[] = 'request.db';
+    }
+    $exclude_list[] = 'images/bg';
+
+    _kara_update_copy_recursive($source_dir, $app_root, $exclude_list);
+
+    // バージョンファイルを更新
+    file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $version_str);
+
+    _kara_update_cleanup($tmp_dir);
+    return true;
+}
+
+// ---- ZIPアーカイブ方式ここまで ----
+
+// ---- Git メンテナンス / 初期化 ----
+
+function format_filesize($bytes) {
+    if ($bytes >= 1048576) return round($bytes / 1048576, 1) . ' MB';
+    if ($bytes >= 1024)    return round($bytes / 1024, 0) . ' KB';
+    return $bytes . ' B';
+}
+
+function get_git_dir_size() {
+    $git_dir = realpath(__DIR__) . DIRECTORY_SEPARATOR . '.git';
+    if (!is_dir($git_dir)) return null;
+    $size = 0;
+    try {
+        $iter = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($git_dir, RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iter as $file) {
+            if ($file->isFile()) $size += $file->getSize();
+        }
+    } catch (Exception $e) {
+        return null;
+    }
+    return $size;
+}
+
+function run_git_gc(&$errmsg, $aggressive = false) {
+    global $config_ini;
+    if (!array_key_exists('gitcommandpath', $config_ini)) {
+        $errmsg = 'gitcommandpath が設定されていません';
+        return false;
+    }
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) {
+        $errmsg = 'git コマンドが見つかりません: ' . $gitcmd;
+        return false;
+    }
+    set_time_limit(600);
+    $flag = $aggressive ? ' --aggressive' : '';
+    exec($gitcmd . ' gc' . $flag . ' --prune=all 2>&1', $out, $ret);
+    if ($ret !== 0) {
+        $errmsg = 'git gc 失敗: ' . implode(' / ', $out);
+        return false;
+    }
+    return true;
+}
+
+function init_git_repo(&$errmsg) {
+    global $config_ini;
+    $app_root = realpath(__DIR__);
+
+    if (!array_key_exists('gitcommandpath', $config_ini)) {
+        $errmsg = 'gitcommandpath が設定されていません';
+        return false;
+    }
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) {
+        $errmsg = 'git コマンドが見つかりません: ' . $gitcmd;
+        return false;
+    }
+    if (is_dir($app_root . DIRECTORY_SEPARATOR . '.git')) {
+        $errmsg = '.git フォルダが既に存在します';
+        return false;
+    }
+
+    set_time_limit(900);
+    $origin = 'https://github.com/' . get_update_repo() . '.git';
+
+    $steps = [
+        $gitcmd . ' init',
+        $gitcmd . ' remote add origin ' . $origin,
+        $gitcmd . ' config --global core.autoCRLF false',
+        $gitcmd . ' fetch --depth=1 origin master',
+        $gitcmd . ' reset --hard FETCH_HEAD',
+        // タグ情報だけ取得（コミット本体なし）→ git describe --tags が動作するようになる
+        $gitcmd . ' fetch --tags origin',
+    ];
+
+    foreach ($steps as $cmd) {
+        exec($cmd . ' 2>&1', $out, $ret);
+        if ($ret !== 0) {
+            $errmsg = 'コマンド失敗 [' . $cmd . ']: ' . implode(' / ', $out);
+            return false;
+        }
+        $out = [];
+    }
+    return true;
+}
+
+// ---- Git メンテナンス / 初期化ここまで ----
 
 function make_preview_modal($filepath, $modalid) {
   global $everythinghost;

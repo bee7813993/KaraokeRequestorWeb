@@ -184,6 +184,14 @@ function readconfig_array()
         $config_ini["bg_overlay_opacity"] = 100;
     }
 
+    // アップデート取得元リポジトリ（owner/repo 形式）。
+    // 開発移譲などで取得元が変わった場合、config.ini でこの値を書き換えれば
+    // ZIP / git アップデート先を切り替えられる。
+    if(!array_key_exists("update_repo", $config_ini)){
+        $update_repo = 'bee7813993/KaraokeRequestorWeb';
+        $config_ini = array_merge($config_ini,array("update_repo" => urlencode($update_repo)));
+    }
+
     if($config_ini["playerpath_select"] == urlencode("その他PATH指定" )) {
         $config_ini = array_merge($config_ini,array("playerpath" => ($config_ini["playerpath_any"])));
     }else{
