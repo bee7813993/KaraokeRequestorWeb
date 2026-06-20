@@ -144,7 +144,7 @@ function qr_img(string $data, int $size): string {
               <?= $online_available ? '接続可' : '未接続' ?>
             </span>
           </span>
-          <span class="hd-short">Online</span>
+          <span class="hd-short">オンライン接続URL</span>
         </div>
         <div id="onlineUrlBody" class="collapse <?= $online_available ? 'show' : '' ?>">
         <div class="card-body">
@@ -179,7 +179,7 @@ function qr_img(string $data, int $size): string {
           <span class="hd-full d-flex align-items-center w-100">
             ローカル接続URL <small class="text-muted fw-normal ms-2">同じWiFi内</small>
           </span>
-          <span class="hd-short">Local</span>
+          <span class="hd-short">ローカル接続URL</span>
         </div>
         <div id="localUrlBody" class="collapse <?= !$online_available ? 'show' : '' ?>">
         <div class="card-body">
