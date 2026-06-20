@@ -284,12 +284,22 @@ if ($zip_check !== true):
 
     <!-- (5) リポジトリ最適化 -->
 <?php
-    $git_size = get_git_dir_size();
+    $git_size    = get_git_dir_size();
     $git_size_str = $git_size !== null ? format_filesize($git_size) : '取得失敗';
+    $git_cmd_ver  = get_git_command_version();
 ?>
     <div class="panel panel-default">
       <div class="panel-heading"><strong>リポジトリ最適化</strong></div>
       <div class="panel-body">
+        <p>
+          <strong>git バージョン:</strong>
+          <?php if ($git_cmd_ver !== null): ?>
+            <code><?php echo htmlspecialchars($git_cmd_ver); ?></code>
+            <small class="text-muted">&nbsp;（gitcmd フォルダの git.exe を差し替えると更新できます）</small>
+          <?php else: ?>
+            <span class="text-muted">取得失敗</span>
+          <?php endif; ?>
+        </p>
         <p><strong>.git フォルダ サイズ:</strong> <?php echo htmlspecialchars($git_size_str); ?>
            <small class="text-muted">&nbsp;（アップデート後に git gc を実行すると削減できます）</small></p>
         <a href="online_update.php?ACTION=git_gc&METHOD=git"

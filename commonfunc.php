@@ -2192,6 +2192,15 @@ function get_version(){
     }
 }
 
+function get_git_command_version() {
+    global $config_ini;
+    if (!array_key_exists('gitcommandpath', $config_ini)) return null;
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) return null;
+    $ver = trim(exec($gitcmd . ' --version 2>&1'));
+    return ($ver !== '') ? $ver : null;
+}
+
 function get_current_git_branch() {
     global $config_ini;
     if (!array_key_exists('gitcommandpath', $config_ini)) return null;
