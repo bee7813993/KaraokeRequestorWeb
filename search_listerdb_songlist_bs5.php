@@ -140,7 +140,7 @@ elseif  (!empty($maker_name))   { $_kp = 'maker_name';   $_kv = $maker_name; }
 else                            { $_kp = ''; $_kv = ''; }
 $_kw_savelink = '';
 if (!empty($_kv)) {
-    $_sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    $_sp = '';
     $_kw_sp = 'param=' . $_kp . (!empty($_sp) ? '&' . $_sp : '') . (!empty($match) ? '&match=' . urlencode($match) : '');
     $_kw_savelink = mypage_save_keyword_link($_kv, 'listerdb_songlist', $_kw_sp);
 }
@@ -175,7 +175,6 @@ if (!empty($_kv)) {
           <label class="d-flex align-items-center gap-1" style="cursor:pointer;"><input type="radio" name="match" value="part" <?php echo ($match === 'full' ? '' : 'checked'); ?>> 部分一致</label>
           <label class="d-flex align-items-center gap-1" style="cursor:pointer;"><input type="radio" name="match" value="full" <?php echo ($match === 'full' ? 'checked' : ''); ?>> 完全一致</label>
         </div>
-        <?php if (!empty($lister_dbpath)): ?><input type="hidden" name="lister_dbpath" value="<?php echo htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
         <?php if (!empty($selectid)): ?><input type="hidden" name="selectid" value="<?php echo htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
         <button type="submit" class="btn-secondary-themed">再検索</button>
       </form>
@@ -203,7 +202,6 @@ if (!empty($_kv)) {
     </select>
   </div>
   <?php echo $myformvalue; ?>
-  <?php if (!empty($lister_dbpath)): ?><input type="hidden" name="lister_dbpath" value="<?php echo htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
   <?php if (!empty($selectid)):       ?><input type="hidden" name="selectid"     value="<?php echo htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
   <button type="submit" class="btn-secondary-themed">並び替え</button>
 </form>
@@ -234,7 +232,6 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
 </div>
 
 <?php
-$myrequestarray['lister_dbpath'] = $lister_dbpath;
 if (!empty($selectid)) $myrequestarray['selectid'] = $selectid;
 build_pagination_bs5($displayfrom, $displaynum, $programlist['recordsTotal'], $myrequestarray, 'search_listerdb_songlist.php');
 ?>

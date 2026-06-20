@@ -661,8 +661,6 @@ if(!empty($myformvalue_shown)) {
 print '</div>';
 }
 print '</div>';
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print '<button type="submit" class="btn btn-default mb-2">再検索</button>';
@@ -684,7 +682,7 @@ if (!empty($anyword)) {
     $_kw_save  = '';  $_kw_param = 'song_name';
 }
 if (!empty($_kw_save)) {
-    $sp = !empty($lister_dbpath) ? 'lister_dbpath=' . urlencode($lister_dbpath) : '';
+    $sp = '';
     $kw_sp = 'param=' . $_kw_param . (!empty($sp) ? '&' . $sp : '');
     if (!empty($match)) $kw_sp .= '&match=' . urlencode($match);
     print mypage_save_keyword_link($_kw_save, 'listerdb_filelist', $kw_sp);
@@ -740,9 +738,6 @@ print '>降順</option>';
 print '</select>';
 print $myformvalue;
 print '</div>';
-if(!empty($lister_dbpath)){
-    print '<input type="hidden" name="lister_dbpath" value="'.($lister_dbpath).'" />';
-}
 if(!empty($selectid)){
     print '<input type="hidden" name="selectid" value="'.($selectid).'" />';
 }

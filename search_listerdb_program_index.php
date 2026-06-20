@@ -190,8 +190,6 @@ print <<<EOM
     <label>検索ワード (作品名)</label>
     <input type="test" name="program_name" id="program_name" class="form-control" placeholder="ファイル名の一部">
 EOM;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print <<<EOM

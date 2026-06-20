@@ -30,6 +30,13 @@ class getid3_lib
 	 * @return string
 	 */
 	public static function PrintHexBytes($string, $hex=true, $spaces=true, $htmlencoding='UTF-8') {
+		if (!is_string($string)) {
+			if (is_scalar($string) || ($string === null)) {
+				$string = (string) $string;
+			} else {
+				return '';
+			}
+		}
 		$returnstring = '';
 		for ($i = 0; $i < strlen($string); $i++) {
 			if ($hex) {

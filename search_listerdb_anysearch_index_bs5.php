@@ -47,10 +47,6 @@ function printfilenamesearch()
     $sid_field = !empty($selectid)
         ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
         : '';
-    $db_field = !empty($lister_dbpath)
-        ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
-        : '';
-
     print '<div class="container py-3">';
     print '<div class="search-hero">';
     print '  <p class="form-label-sm mb-2">検索ワード <small>（ふりがな・作品名・曲名・歌手名・ファイル名の一部）</small></p>';
@@ -63,7 +59,7 @@ function printfilenamesearch()
     print '      </div>';
     print '      <div id="search-history-dropdown" hidden></div>';
     print '    </div>';
-    print    $db_field . $sid_field;
+    print    $sid_field;
     print '  </form>';
     print '</div>';
     print '</div>';
@@ -74,9 +70,6 @@ printfilenamesearch();
 // --- 詳細検索フォーム ---
 $sid_field = !empty($selectid)
     ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
-    : '';
-$db_field = !empty($lister_dbpath)
-    ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
     : '';
 ?>
 <div class="container py-2">
@@ -93,7 +86,7 @@ $db_field = !empty($lister_dbpath)
     <div id="sec-detail-search" class="collapse">
       <div class="search-section-body">
         <form action="search_listerdb_songlist.php" method="GET">
-          <?php echo $db_field . $sid_field; ?>
+          <?php echo $sid_field; ?>
           <div class="row g-3 mb-3">
             <?php
             $fields = [

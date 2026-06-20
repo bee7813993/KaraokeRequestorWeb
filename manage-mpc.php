@@ -297,7 +297,7 @@ function mpc_waiting_start($db, $id){
    }
    // logtocmd("DEBUG:再生開始待ち への変更。$id<br>");
    $db->commit(); 
-   file_get_contents("http://localhost/updaterequestlist.php");
+   notify_requestlist_update();
 // status が 再生中になるのを待つ
    $state = 6;
    while($state == 6){
@@ -966,17 +966,15 @@ function start_song($db,$id,$addplaytimes = 0){
         }else{
             if($filetype == 3){
                 global $ADDPATHCMD;
+                global $MPCCMDURL;
                 // とりあえず動画Playerを終了する。
                 mpcstop();
                 $mpcpsflg = mpcpscheck();
-                print("mpcps1:".$mpcpsflg);
                 if($mpcpsflg){
-                    print("mpcps2:".$mpcpsflg);
                     sleep(1);
                     mpcstop();
                     $mpcpsflg = mpcpscheck();
                     if($mpcpsflg){
-                        print("mpcps3:".$mpcpsflg);
                         sleep(1);
                         mpcstop();
                     }
@@ -991,6 +989,15 @@ function start_song($db,$id,$addplaytimes = 0){
                 //exec($execcmd);
                 $fp = popen($execcmd,'r');
                 pclose($fp);
+                for($waitcount = 0; $waitcount < 10; $waitcount++){
+                    if(mpcrunningcheck($MPCPATH) !== FALSE){
+                        $mpc_ready = file_get_html_with_retry($MPCCMDURL, 1, 0, 4, 500);
+                        if($mpc_ready !== FALSE){
+                            break;
+                        }
+                    }
+                    usleep(300000);
+                }
             }else{
                 //★movie指定
 //★                // MPC起動チェック
@@ -1088,7 +1095,7 @@ function start_song($db,$id,$addplaytimes = 0){
         logtocmd("再生中 への変更に失敗しました。<br>");
     }
     $db->commit();
-    file_get_contents("http://localhost/updaterequestlist.php");
+    notify_requestlist_update();
     autoopenbingo($id); 
     return true;
 }
@@ -1417,7 +1424,7 @@ while(1){
               	logtocmd("再生中 への変更に失敗しました。<br>");
               }
               $db->commit();
-              file_get_contents("http://localhost/updaterequestlist.php");
+              notify_requestlist_update();
               autoopenbingo($l_id); 
           }        
           // カラオケ配信になっている場合、リクエストのリストで再生済みに変更されるまで待機する
@@ -1474,7 +1481,7 @@ while(1){
               	logtocmd("再生中 への変更に失敗しました。<br>");
               }
               $db->commit();
-              file_get_contents("http://localhost/updaterequestlist.php");
+              notify_requestlist_update();
               autoopenbingo($l_id); 
           }        
           // 小休止になっている場合、リクエストのリストで再生済みに変更されるまで待機する
@@ -1560,7 +1567,7 @@ echo "\n".date("H時i分s秒" )."start song stop ".__LINE__;
             logtocmd("再生済？ への変更に失敗しました。<br>");
         }
         logtocmd_dbg( '再生済みに状態変更終了:'.$sql."\n");
-        file_get_contents("http://localhost/updaterequestlist.php");
+        notify_requestlist_update();
 //     $db=null;
 //     sleep(1);
         $played=1;

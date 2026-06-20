@@ -319,15 +319,36 @@ function check_json_available_fromurl($url,$timeout = 10){
     else return true;
 }
 
+function get_everything_ipvar() {
+    global $everythinghost;
+    return isIPv4($everythinghost) ? 4 : 6;
+}
+
+function decode_everything_json($json, $url = '') {
+    if ($json === false || $json === '') {
+        error_log('Everything JSON request failed: ' . $url);
+        return null;
+    }
+    $result = json_decode($json, true);
+    if (!is_array($result)) {
+        error_log('Everything JSON decode failed: ' . $url);
+        return null;
+    }
+    return $result;
+}
+
 // 検索ワードからeverything検索件数だけ取得
 function count_onepriority($word)
 {
     global $everythinghost;
     $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($word) . '&json=1&count=5';
-//print     $jsonurl.'<br/>';
-    $json = file_get_html_with_retry($jsonurl, 5, 30);
-    $result_array = json_decode($json, true);
-    return $result_array['totalResults'];
+    $ipvar = get_everything_ipvar();
+    $json = file_get_html_with_retry($jsonurl, 5, 30, $ipvar);
+    $result_array = decode_everything_json($json, $jsonurl);
+    if (!is_array($result_array) || !isset($result_array['totalResults'])) {
+        return 0;
+    }
+    return (int) $result_array['totalResults'];
 }
 
 // プライオリティリストからプライオリティ順にしてプライオリティ無指定50を追加
@@ -395,7 +416,7 @@ function orderprioritylist($prioritylist){
 }
 
 // 検索ワードからプライオリティ順にして$start件目から$length件取得
-function search_order_priority($word,$start,$length)
+function search_order_priority($word,$start,$length,$order = 'sort=size&ascending=0')
 {
     global $priority_db;
     global $everythinghost;
@@ -441,19 +462,19 @@ function search_order_priority($word,$start,$length)
                 $c_length = $r_length;
                 $r_length = 0;
             }
-            $order = 'sort=size&ascending=0';
-            
             $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $order . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $c_length . '&offset=' .$c_start.'';
 //print $jsonurl;
-            $json = file_get_html_with_retry($jsonurl, 5, 30);
-            $result_array = json_decode($json, true);
+            $json = file_get_html_with_retry($jsonurl, 5, 30, get_everything_ipvar());
+            $result_array = decode_everything_json($json, $jsonurl);
             // print '###   P:'.$prioritylistone['prioritynum'].' W:'.$prioritylistone['priorityword']."\n";
             // print '##### P:'.$prioritylistone['prioritynum'].' offset:'.$c_start.' count'.$c_length."\n";
             // priority番号追加
             $resultslist_withp = array();
+            if (is_array($result_array) && isset($result_array['results']) && is_array($result_array['results'])) {
             foreach($result_array['results'] as $v) {
                $resultslist_withp[] =  ( $v + array("pcount" => $count_p ) );
                $count_p++;
+            }
             }
             $pickup_array = array_merge ($pickup_array,$resultslist_withp);
             // var_dump($resultslist_withp);
@@ -471,14 +492,14 @@ function search_order_priority($word,$start,$length)
 
 
 // 検索ワードから検索結果一覧を取得する処理
-function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length = 10, $order = null, $path = null)
+function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length = 10, $order = null, $path = null, $use_priority = true)
 {
 
 		global $everythinghost;
 		global $config_ini;
         global $priority_db;
 
-        $prioritylist = prioritydb_get($priority_db);
+        $prioritylist = $use_priority ? prioritydb_get($priority_db) : [];
 		
 		// IPv6check
 		// IPv6check
@@ -516,19 +537,21 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		    $orderstr = 'sort=size&ascending=0';
 		  if(empty($order)){
 		    $orderstr = 'sort=size&ascending=0';
-		  }else if($order[0]['column']==4  ){
+		  }else if(is_string($order)){
+		    $orderstr = $order;
+		  }else if(isset($order[0]['column']) && $order[0]['column']==4  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';
 		    }else {
 		       $orderstr='sort=size&ascending=0';
 		    }
-		  }else if($order[0]['column']==2  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==2  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=name&ascending=1';
 		    }else {
 		       $orderstr='sort=name&ascending=0';
 		    }
-		  }else if($order[0]['column']==5  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==5  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=path&ascending=1';
 		    }else {
@@ -539,19 +562,22 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		  if(empty($order)){
 		    $result_array = search_order_priority($kerwords,$start,$length);
 		    return $result_array;
-		  }else if($order[0]['column']==4  ){
+		  }else if(is_string($order)){
+		    $result_array = search_order_priority($kerwords,$start,$length,$order);
+		    return $result_array;
+		  }else if(isset($order[0]['column']) && $order[0]['column']==4  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';
 		    }else {
 		       $orderstr='sort=size&ascending=0';
 		    }
-		  }else if($order[0]['column']==2  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==2  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=name&ascending=1';
 		    }else {
 		       $orderstr='sort=name&ascending=0';
 		    }
-		  }else if($order[0]['column']==5  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==5  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=path&ascending=1';
 		    }else {
@@ -1044,14 +1070,16 @@ function commentpost_v3($nm,$col,$size,$msg,$commenturl)
     $curl=curl_init(($commenturl));
     curl_setopt($curl, CURLOPT_POST, TRUE);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 2);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 2);
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
-   
+
     if($output === false){
         return false;
     }else{
         return true;
-    }    
+    }
 }
 
 function commentpost_v4($cmd,$msg,$commenturl)
@@ -1069,14 +1097,27 @@ function commentpost_v4($cmd,$msg,$commenturl)
     $curl=curl_init(($commenturl));
     curl_setopt($curl, CURLOPT_POST, TRUE);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 2);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 2);
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
-   
+
     if($output === false){
         return false;
     }else{
         return true;
-    }    
+    }
+}
+
+function notify_requestlist_update(){
+    ob_start();
+    try {
+        require_once __DIR__.'/function_updatenotice.php';
+        $un = new UpdateNotice(); $un->initdb();
+        if ($un->db !== null){ $un->updaterequestlist(); $un->closedb(); }
+    } catch (Throwable $e){ error_log('requestlist update notice failed: '.$e->getMessage()); }
+    $out = ob_get_clean();
+    if ($out !== '') error_log('requestlist update notice output: '.trim($out));
 }
 
 function getallrequest_array(){

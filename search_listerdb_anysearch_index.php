@@ -97,8 +97,6 @@ print <<<EOM
     <label>検索ワード （「ふりがな」での検索も可能です）</label>
     <input type="test" name="anyword" id="anyword" class="form-control" placeholder="作品名、曲名、歌手名、ファイル名の一部">
 EOM;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value="'.$selectid.'" />';
 print <<<EOM
@@ -145,8 +143,6 @@ print <<<EOM
 	</label>
     </div>
 EOM;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value='.$selectid.'" />';
 print <<<EOM
