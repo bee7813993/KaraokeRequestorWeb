@@ -40,6 +40,10 @@ $active_tab = $git_available ? $req_method : 'zip';
 <?php print_meta_header(); ?>
 <title>オンラインアップデート</title>
 <?php print_bs5_head_core(); ?>
+<style>
+/* 非アクティブのタブ文字色をテーマカラーに合わせる */
+#updateTabs .nav-link:not(.active) { color: var(--color-text); }
+</style>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('online_update.php'); ?>
@@ -214,7 +218,7 @@ if ($zip_check !== true):
 <?php if (count($git_branches) > 0): ?>
   <div class="card mb-3">
     <div class="card-header p-0">
-      <button class="btn btn-link text-decoration-none text-start text-body w-100 px-3 py-2 fw-bold"
+      <button class="btn btn-link text-decoration-none text-start w-100 px-3 py-2 fw-bold" style="color: var(--color-text);"
               type="button" data-bs-toggle="collapse" data-bs-target="#branchList">
         ブランチ選択
         <span class="badge bg-secondary ms-1"><?php echo count($git_branches); ?></span>
@@ -253,7 +257,7 @@ if ($zip_check !== true):
 <?php if (count($git_taglist) > 0): ?>
   <div class="card mb-3">
     <div class="card-header p-0">
-      <button class="btn btn-link text-decoration-none text-start text-body w-100 px-3 py-2 fw-bold"
+      <button class="btn btn-link text-decoration-none text-start w-100 px-3 py-2 fw-bold" style="color: var(--color-text);"
               type="button" data-bs-toggle="collapse" data-bs-target="#tagList">
         タグ一覧（リリース版）
         <span class="badge bg-secondary ms-1"><?php echo count($git_taglist); ?></span>
