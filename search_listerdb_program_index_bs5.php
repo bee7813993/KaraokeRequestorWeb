@@ -186,9 +186,6 @@ showuppermenu('program_name', $linkoption);
   <div class="search-hero mb-4">
     <p class="form-label-sm mb-2">作品名キーワード検索</p>
     <form action="search_listerdb_songlist.php" method="GET">
-      <?php if (!empty($lister_dbpath)): ?>
-        <input type="hidden" name="lister_dbpath" value="<?php echo htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8'); ?>">
-      <?php endif; ?>
       <?php if (!empty($selectid)): ?>
         <input type="hidden" name="selectid" value="<?php echo htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8'); ?>">
       <?php endif; ?>

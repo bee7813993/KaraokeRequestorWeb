@@ -99,8 +99,6 @@ print <<<EOM
     <label>検索ワード （ファイル名の一部）</label>
     <input type="test" name="filename" id="filename" class="form-control" placeholder="ファイル名の一部">
 EOM;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value='.$selectid.'" />';
 print <<<EOM
@@ -147,8 +145,6 @@ print <<<EOM
 	</label>
     </div>
 EOM;
-if(!empty($lister_dbpath))
-    print '<input type="hidden" name="lister_dbpath" value="'.$lister_dbpath.'" />';
 if(!empty($selectid))
     print '<input type="hidden" name="selectid" value='.$selectid.'" />';
 print <<<EOM

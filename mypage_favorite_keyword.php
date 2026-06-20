@@ -92,9 +92,6 @@ function build_search_url($keyword, $search_type, $search_params) {
         case 'listerdb_filelist':
             $param = !empty($params['param']) ? $params['param'] : 'song_name';
             $url = 'search_listerdb_filelist.php?' . $param . '=' . urlencode($keyword);
-            if (!empty($params['lister_dbpath'])) {
-                $url .= '&lister_dbpath=' . urlencode($params['lister_dbpath']);
-            }
             if (!empty($params['match'])) {
                 $url .= '&match=' . urlencode($params['match']);
             }
@@ -102,9 +99,6 @@ function build_search_url($keyword, $search_type, $search_params) {
         case 'listerdb_songlist':
             $param = !empty($params['param']) ? $params['param'] : 'song_name';
             $url = 'search_listerdb_songlist.php?' . $param . '=' . urlencode($keyword);
-            if (!empty($params['lister_dbpath'])) {
-                $url .= '&lister_dbpath=' . urlencode($params['lister_dbpath']);
-            }
             if (!empty($params['match'])) {
                 $url .= '&match=' . urlencode($params['match']);
             }

@@ -416,7 +416,7 @@ function orderprioritylist($prioritylist){
 }
 
 // 検索ワードからプライオリティ順にして$start件目から$length件取得
-function search_order_priority($word,$start,$length)
+function search_order_priority($word,$start,$length,$order = 'sort=size&ascending=0')
 {
     global $priority_db;
     global $everythinghost;
@@ -462,8 +462,6 @@ function search_order_priority($word,$start,$length)
                 $c_length = $r_length;
                 $r_length = 0;
             }
-            $order = 'sort=size&ascending=0';
-            
             $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $order . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $c_length . '&offset=' .$c_start.'';
 //print $jsonurl;
             $json = file_get_html_with_retry($jsonurl, 5, 30, get_everything_ipvar());
@@ -539,19 +537,21 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		    $orderstr = 'sort=size&ascending=0';
 		  if(empty($order)){
 		    $orderstr = 'sort=size&ascending=0';
-		  }else if($order[0]['column']==4  ){
+		  }else if(is_string($order)){
+		    $orderstr = $order;
+		  }else if(isset($order[0]['column']) && $order[0]['column']==4  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';
 		    }else {
 		       $orderstr='sort=size&ascending=0';
 		    }
-		  }else if($order[0]['column']==2  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==2  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=name&ascending=1';
 		    }else {
 		       $orderstr='sort=name&ascending=0';
 		    }
-		  }else if($order[0]['column']==5  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==5  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=path&ascending=1';
 		    }else {
@@ -562,19 +562,22 @@ function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length 
 		  if(empty($order)){
 		    $result_array = search_order_priority($kerwords,$start,$length);
 		    return $result_array;
-		  }else if($order[0]['column']==4  ){
+		  }else if(is_string($order)){
+		    $result_array = search_order_priority($kerwords,$start,$length,$order);
+		    return $result_array;
+		  }else if(isset($order[0]['column']) && $order[0]['column']==4  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=size&ascending=1';
 		    }else {
 		       $orderstr='sort=size&ascending=0';
 		    }
-		  }else if($order[0]['column']==2  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==2  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=name&ascending=1';
 		    }else {
 		       $orderstr='sort=name&ascending=0';
 		    }
-		  }else if($order[0]['column']==5  ){
+		  }else if(isset($order[0]['column']) && $order[0]['column']==5  ){
 		    if($order[0]['dir']=='asc'){
 		       $orderstr='sort=path&ascending=1';
 		    }else {

@@ -75,10 +75,6 @@ function print_listerdb_fileonly() {
     $sid_field = !empty($selectid)
         ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
         : '';
-    $db_field = !empty($lister_dbpath)
-        ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
-        : '';
-
     print '<div class="search-hero">';
     print '  <p class="form-label-sm mb-2">検索ワード <small>（ふりがな・作品名・曲名・歌手名・ファイル名の一部）</small></p>';
     print '  <form action="search_listerdb_filelist.php" method="GET" id="anyword-form">';
@@ -90,7 +86,7 @@ function print_listerdb_fileonly() {
     print '      </div>';
     print '      <div id="search-history-dropdown" hidden></div>';
     print '    </div>';
-    print      $db_field . $sid_field;
+    print      $sid_field;
     print '  </form>';
     print '</div>';
 }
@@ -104,10 +100,6 @@ function print_listerdb_detailsearch() {
     $sid_field = !empty($selectid)
         ? '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />'
         : '';
-    $db_field = !empty($lister_dbpath)
-        ? '<input type="hidden" name="lister_dbpath" value="' . htmlspecialchars($lister_dbpath, ENT_QUOTES, 'UTF-8') . '" />'
-        : '';
-
     $fields = [
         ['name' => 'song_name',         'label' => '曲名'],
         ['name' => 'program_name',      'label' => '作品名'],
@@ -118,7 +110,7 @@ function print_listerdb_detailsearch() {
     ];
 
     print '<form action="search_listerdb_songlist.php" method="GET">';
-    print  $db_field . $sid_field;
+    print  $sid_field;
     print '<div class="row g-3 mb-3">';
     foreach ($fields as $f) {
         print '<div class="col-md-4">';
