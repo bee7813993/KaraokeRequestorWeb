@@ -184,7 +184,7 @@ $wifi_open   = true;
            aria-labelledby="headingLocal">
         <div class="accordion-body">
           <?php if ($has_local_url): ?>
-          <div class="row g-3">
+          <div class="row g-3 justify-content-center">
             <?php if ($localname_valid): ?>
             <div class="col-md-6">
               <div class="card h-100">
