@@ -86,24 +86,6 @@ function qr_img(string $data, int $size): string {
          . ' alt="QRコード" class="img-fluid d-block mx-auto" style="max-width:320px">';
 }
 
-// --- URL + QRコードを横並びで表示するブロックHTML ---
-// モバイル: QR上・URL下（縦積み）、md以上: QR左・URL右（横並び）
-function url_card_body(string $label, string $url, int $qrsize): string {
-    $h = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
-    $j = json_encode($url);
-    $hl = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
-    return '<div class="d-flex flex-column flex-md-row align-items-md-center gap-3">'
-         . '<div class="flex-shrink-0 text-center"><div class="qr-wrap mx-auto">' . qr_img($url, $qrsize) . '</div></div>'
-         . '<div class="flex-grow-1 w-100">'
-         . '<p class="fw-bold small mb-1">' . $hl . '</p>'
-         . '<div class="input-group input-group-sm">'
-         . '<input type="text" class="form-control url-display" value="' . $h . '" readonly>'
-         . '<button class="btn btn-outline-secondary btn-sm" type="button"'
-         . ' onclick="navigator.clipboard.writeText(' . $j . ');this.textContent=\'✓\'">コピー</button>'
-         . '</div>'
-         . '</div>'
-         . '</div>';
-}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -120,7 +102,7 @@ function url_card_body(string $label, string $url, int $qrsize): string {
 <body>
 <?php shownavigatioinbar_bs5('toolinfo.php'); ?>
 
-<div class="container py-3" style="max-width:800px">
+<div class="container py-3">
   <h4 class="mb-3">接続情報</h4>
 
 <?php if ($config_ini['useeasyauth'] == 1): ?>
@@ -135,36 +117,31 @@ function url_card_body(string $label, string $url, int $qrsize): string {
   </div>
 <?php endif; ?>
 
-<?php
-// アコーディオン初期開閉状態
-$online_open = $online_available;
-$local_open  = !$online_available;
-$wifi_open   = true;
-?>
-
-  <div class="accordion mb-3" id="infoAccordion">
+  <!-- lg以上: 3カラム横並び / lg未満: 縦積み -->
+  <div class="row g-3 mb-3">
 
     <!-- オンライン接続URL -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingOnline">
-        <button class="accordion-button <?= $online_open ? '' : 'collapsed' ?>" type="button"
-                data-bs-toggle="collapse" data-bs-target="#collapseOnline"
-                aria-expanded="<?= $online_open ? 'true' : 'false' ?>"
-                aria-controls="collapseOnline">
+    <div class="col-12 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header fw-bold d-flex align-items-center">
           オンライン接続URL
+          <span class="badge <?= $online_available ? 'bg-success' : 'bg-secondary' ?> ms-auto">
+            <?= $online_available ? '接続可' : '未接続' ?>
+          </span>
+        </div>
+        <div class="card-body">
           <?php if ($online_available): ?>
-            <span class="badge bg-success ms-2">接続可</span>
-          <?php else: ?>
-            <span class="badge bg-secondary ms-2">未接続</span>
-          <?php endif; ?>
-        </button>
-      </h2>
-      <div id="collapseOnline"
-           class="accordion-collapse collapse <?= $online_open ? 'show' : '' ?>"
-           aria-labelledby="headingOnline">
-        <div class="accordion-body">
-          <?php if ($online_available): ?>
-            <?= url_card_body('オンライン接続URL（WiFiなしでもアクセス可）', $globalurl, $l_qrsize) ?>
+            <div class="text-center mb-2">
+              <div class="qr-wrap mx-auto"><?= qr_img($globalurl, $l_qrsize) ?></div>
+            </div>
+            <div class="input-group input-group-sm">
+              <input type="text" class="form-control url-display"
+                     value="<?= htmlspecialchars($globalurl, ENT_QUOTES, 'UTF-8') ?>" readonly>
+              <button class="btn btn-outline-secondary btn-sm" type="button"
+                      onclick="navigator.clipboard.writeText(<?= json_encode($globalurl) ?>);this.textContent='✓'">
+                コピー
+              </button>
+            </div>
           <?php elseif (!empty($globalhost)): ?>
             <p class="text-muted small mb-0">設定されたホスト（<?= htmlspecialchars($globalhost, ENT_QUOTES, 'UTF-8') ?>）に接続できませんでした。</p>
           <?php else: ?>
@@ -175,98 +152,82 @@ $wifi_open   = true;
     </div>
 
     <!-- ローカル接続URL -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingLocal">
-        <button class="accordion-button <?= $local_open ? '' : 'collapsed' ?>" type="button"
-                data-bs-toggle="collapse" data-bs-target="#collapseLocal"
-                aria-expanded="<?= $local_open ? 'true' : 'false' ?>"
-                aria-controls="collapseLocal">
-          ローカル接続URL
-          <small class="text-muted fw-normal ms-2">同じWiFi内からアクセス</small>
-        </button>
-      </h2>
-      <div id="collapseLocal"
-           class="accordion-collapse collapse <?= $local_open ? 'show' : '' ?>"
-           aria-labelledby="headingLocal">
-        <div class="accordion-body">
+    <div class="col-12 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header fw-bold">
+          ローカル接続URL <small class="text-muted fw-normal">同じWiFi内</small>
+        </div>
+        <div class="card-body">
           <?php if ($has_local_url): ?>
-          <div class="row g-3 justify-content-center">
             <?php if ($localname_valid): ?>
-            <div class="col-md-6">
-              <div class="card h-100">
-                <div class="card-body">
-                  <?= url_card_body('ホスト名', $localhosturl, $l_qrsize) ?>
-                </div>
+              <p class="fw-bold small mb-1">ホスト名</p>
+              <div class="input-group input-group-sm mb-2">
+                <input type="text" class="form-control url-display"
+                       value="<?= htmlspecialchars($localhosturl, ENT_QUOTES, 'UTF-8') ?>" readonly>
+                <button class="btn btn-outline-secondary btn-sm" type="button"
+                        onclick="navigator.clipboard.writeText(<?= json_encode($localhosturl) ?>);this.textContent='✓'">
+                  コピー
+                </button>
               </div>
-            </div>
+              <div class="text-center <?= $localip_valid ? 'mb-3' : '' ?>">
+                <div class="qr-wrap mx-auto"><?= qr_img($localhosturl, $l_qrsize) ?></div>
+              </div>
             <?php endif; ?>
             <?php if ($localip_valid): ?>
-            <div class="col-md-6">
-              <div class="card h-100">
-                <div class="card-body">
-                  <?= url_card_body('IPアドレス', $localipurl, $l_qrsize) ?>
-                </div>
+              <?php if ($localname_valid): ?><hr class="my-2"><?php endif; ?>
+              <p class="fw-bold small mb-1">IPアドレス</p>
+              <div class="input-group input-group-sm mb-2">
+                <input type="text" class="form-control url-display"
+                       value="<?= htmlspecialchars($localipurl, ENT_QUOTES, 'UTF-8') ?>" readonly>
+                <button class="btn btn-outline-secondary btn-sm" type="button"
+                        onclick="navigator.clipboard.writeText(<?= json_encode($localipurl) ?>);this.textContent='✓'">
+                  コピー
+                </button>
               </div>
-            </div>
+              <div class="text-center">
+                <div class="qr-wrap mx-auto"><?= qr_img($localipurl, $l_qrsize) ?></div>
+              </div>
             <?php endif; ?>
-          </div>
           <?php else: ?>
-          <?php /* ホスト名・IPアドレスがいずれも対象外のとき */ ?>
-          <div class="alert alert-info mb-3">
-            IPアドレスまたはホスト名を直接指定してアクセスしてください。
-          </div>
-          <?php print_iplist($config_ini, 'local-ipv6-list'); ?>
+            <div class="alert alert-info mb-3">
+              IPアドレスまたはホスト名を直接指定してアクセスしてください。
+            </div>
+            <?php print_iplist($config_ini, 'local-ipv6-list'); ?>
           <?php endif; ?>
         </div>
       </div>
     </div>
 
     <!-- WiFi接続情報 -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingWifi">
-        <button class="accordion-button <?= $wifi_open ? '' : 'collapsed' ?>" type="button"
-                data-bs-toggle="collapse" data-bs-target="#collapseWifi"
-                aria-expanded="<?= $wifi_open ? 'true' : 'false' ?>"
-                aria-controls="collapseWifi">
-          WiFi接続情報
-        </button>
-      </h2>
-      <div id="collapseWifi"
-           class="accordion-collapse collapse <?= $wifi_open ? 'show' : '' ?>"
-           aria-labelledby="headingWifi">
-        <div class="accordion-body">
+    <div class="col-12 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header fw-bold">WiFi接続情報</div>
+        <div class="card-body">
           <form method="GET" class="mb-3">
             <input type="hidden" name="qrsize" value="<?= $l_qrsize ?>">
-            <div class="row g-3 align-items-end">
-              <div class="col-sm-5">
-                <label class="form-label">WiFi SSID</label>
-                <input type="text" name="SSID" class="form-control"
-                       value="<?= htmlspecialchars($wifi_ssid, ENT_QUOTES, 'UTF-8') ?>"
-                       placeholder="例: MyWifi">
-              </div>
-              <div class="col-sm-5">
-                <label class="form-label">WiFi パスワード</label>
-                <input type="text" name="wifipass" class="form-control"
-                       value="<?= htmlspecialchars($wifi_pass, ENT_QUOTES, 'UTF-8') ?>"
-                       placeholder="パスワード">
-              </div>
-              <div class="col-sm-2">
-                <button type="submit" class="btn btn-primary w-100">保存</button>
-              </div>
+            <div class="mb-2">
+              <label class="form-label small mb-1">WiFi SSID</label>
+              <input type="text" name="SSID" class="form-control form-control-sm"
+                     value="<?= htmlspecialchars($wifi_ssid, ENT_QUOTES, 'UTF-8') ?>"
+                     placeholder="例: MyWifi">
             </div>
+            <div class="mb-2">
+              <label class="form-label small mb-1">WiFi パスワード</label>
+              <input type="text" name="wifipass" class="form-control form-control-sm"
+                     value="<?= htmlspecialchars($wifi_pass, ENT_QUOTES, 'UTF-8') ?>"
+                     placeholder="パスワード">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm w-100">保存</button>
           </form>
           <?php if (!empty($wifi_ssid)): ?>
             <hr class="my-2">
-            <div class="text-center mt-2">
-              <div class="qr-wrap mx-auto">
-                <?= qr_img($wifi_qr_data, $l_qrsize) ?>
-              </div>
+            <div class="text-center">
+              <div class="qr-wrap mx-auto"><?= qr_img($wifi_qr_data, $l_qrsize) ?></div>
               <p class="small text-muted mt-2 mb-0">
-                SSID: <strong><?= htmlspecialchars($wifi_ssid, ENT_QUOTES, 'UTF-8') ?></strong>
-                &nbsp;/&nbsp;
+                SSID: <strong><?= htmlspecialchars($wifi_ssid, ENT_QUOTES, 'UTF-8') ?></strong><br>
                 パスワード: <strong><?= htmlspecialchars($wifi_pass, ENT_QUOTES, 'UTF-8') ?></strong>
               </p>
-              <p class="small text-muted">スマートフォンのカメラで読み取るとWiFiに自動接続できます</p>
+              <p class="small text-muted">カメラで読み取るとWiFiに自動接続できます</p>
             </div>
           <?php else: ?>
             <p class="text-muted small mb-0">SSIDを入力して保存すると、WiFi自動接続用QRコードが表示されます</p>
@@ -275,7 +236,7 @@ $wifi_open   = true;
       </div>
     </div>
 
-  </div><!-- /accordion -->
+  </div><!-- /row -->
 
   <!-- QRサイズ切り替え -->
   <div class="d-flex gap-2 justify-content-center mb-4">
