@@ -47,10 +47,12 @@ class UpdateNotice {
     public function initdb(){
         try {
         	$this->db = new PDO('sqlite:'. $this->updatedbfilename);
+            $this->db->setAttribute(PDO::ATTR_TIMEOUT, 1);
+            $this->db->exec('PRAGMA busy_timeout=1000');
         } catch(PDOException $e) {
         	printf("new PDO Error: %s\n", $e->getMessage());
         	return;
-        } 
+        }
         $sql = "create table IF NOT EXISTS updatenoticetable (
                     requestlist INTEGER default 0,
                     playerkind  INTEGER default 0,

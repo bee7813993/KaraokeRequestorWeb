@@ -1044,14 +1044,16 @@ function commentpost_v3($nm,$col,$size,$msg,$commenturl)
     $curl=curl_init(($commenturl));
     curl_setopt($curl, CURLOPT_POST, TRUE);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 2);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 2);
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
-   
+
     if($output === false){
         return false;
     }else{
         return true;
-    }    
+    }
 }
 
 function commentpost_v4($cmd,$msg,$commenturl)
@@ -1069,14 +1071,27 @@ function commentpost_v4($cmd,$msg,$commenturl)
     $curl=curl_init(($commenturl));
     curl_setopt($curl, CURLOPT_POST, TRUE);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 2);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 2);
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
-   
+
     if($output === false){
         return false;
     }else{
         return true;
-    }    
+    }
+}
+
+function notify_requestlist_update(){
+    ob_start();
+    try {
+        require_once __DIR__.'/function_updatenotice.php';
+        $un = new UpdateNotice(); $un->initdb();
+        if ($un->db !== null){ $un->updaterequestlist(); $un->closedb(); }
+    } catch (Throwable $e){ error_log('requestlist update notice failed: '.$e->getMessage()); }
+    $out = ob_get_clean();
+    if ($out !== '') error_log('requestlist update notice output: '.trim($out));
 }
 
 function getallrequest_array(){

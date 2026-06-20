@@ -286,7 +286,7 @@ if (is_numeric($selectid)) {
         }
     }
 }
-file_get_contents("http://localhost/updaterequestlist.php");
+notify_requestlist_update();
 
 // 歌う人名をクッキーに保存（次回 request_confirm.php でIP+UAマッチングの代わりに使われる）
 $nonameusername = urldecode($config_ini['nonameusername']);
