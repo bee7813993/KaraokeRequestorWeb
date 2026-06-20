@@ -512,49 +512,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
   <div class="card mb-3">
     <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">自IP一覧</div>
     <div class="card-body">
-      <?php
-      require_once 'ipconfig.php';
-      $result_ipconfig = getiplist();
-      $pfwd_v4 = []; $pfwd_v6 = []; $pfwd_seen = [];
-      foreach ($result_ipconfig as $ifinfo) {
-          foreach ($ifinfo as $idx => $ip_str) {
-              if ($idx === 0) continue;
-              $ip = trim($ip_str);
-              if (empty($ip)) continue;
-              if (strpos($ip, '%') !== false) $ip = substr($ip, 0, strpos($ip, '%'));
-              if ($ip === '127.0.0.1' || $ip === '::1') continue;
-              if (in_array($ip, $pfwd_seen, true)) continue;
-              $pfwd_seen[] = $ip;
-              $is_ipv6 = (strpos($ip, ':') !== false);
-              $url_ip  = $is_ipv6 ? '[' . $ip . ']' : $ip;
-              $link    = 'http://' . $url_ip . '/';
-              if (!empty($config_ini['useeasyauth_word'])) {
-                  $link .= '?easypass=' . urlencode($config_ini['useeasyauth_word']);
-              }
-              if ($is_ipv6) { $pfwd_v6[] = $link; } else { $pfwd_v4[] = $link; }
-          }
-      }
-      ?>
-      <div style="font-family:monospace; font-size:0.875rem; word-break:break-all">
-        <?php foreach ($pfwd_v4 as $link): ?>
-        <a href="<?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?>" target="_blank"><?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?></a><br>
-        <?php endforeach; ?>
-      </div>
-      <?php if (!empty($pfwd_v6)): ?>
-      <div class="mt-2">
-        <button class="btn btn-sm btn-outline-secondary" type="button"
-                data-bs-toggle="collapse" data-bs-target="#pfwd-ipv6-list">
-          IPv6アドレスを表示 (<?= count($pfwd_v6) ?>件)
-        </button>
-        <div class="collapse mt-1" id="pfwd-ipv6-list">
-          <div style="font-family:monospace; font-size:0.875rem; word-break:break-all">
-            <?php foreach ($pfwd_v6 as $link): ?>
-            <a href="<?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?>" target="_blank"><?= htmlspecialchars($link, ENT_QUOTES, 'UTF-8') ?></a><br>
-            <?php endforeach; ?>
-          </div>
-        </div>
-      </div>
-      <?php endif; ?>
+      <?php print_iplist($config_ini, 'pfwd-ipv6-list'); ?>
     </div>
   </div>
 

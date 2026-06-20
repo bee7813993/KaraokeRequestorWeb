@@ -1,5 +1,6 @@
 <?php
 require_once 'commonfunc.php';
+require_once 'ipconfig.php';
 require_once 'easyauth_class.php';
 $easyauth = new EasyAuth();
 $easyauth->do_eashauthcheck();
@@ -225,45 +226,7 @@ $wifi_open   = true;
           <div class="alert alert-info mb-3">
             IPアドレスまたはホスト名を直接指定してアクセスしてください。
           </div>
-          <?php
-            require_once 'ipconfig.php';
-            $_ic = getiplist();
-            $_v4 = []; $_v6 = []; $_seen = [];
-            foreach ($_ic as $_if) {
-                foreach ($_if as $_ki => $_s) {
-                    if ($_ki === 0) continue;
-                    $_ip = trim($_s);
-                    if (empty($_ip)) continue;
-                    if (strpos($_ip, '%') !== false) $_ip = substr($_ip, 0, strpos($_ip, '%'));
-                    if ($_ip === '127.0.0.1' || $_ip === '::1') continue;
-                    if (in_array($_ip, $_seen, true)) continue;
-                    $_seen[] = $_ip;
-                    $_is6 = (strpos($_ip, ':') !== false);
-                    $_lk  = 'http://' . ($_is6 ? '[' . $_ip . ']' : $_ip) . '/' . $easypass_q;
-                    if ($_is6) { $_v6[] = $_lk; } else { $_v4[] = $_lk; }
-                }
-            }
-          ?>
-          <div style="font-family:monospace; font-size:.875rem">
-            <?php foreach ($_v4 as $_lk): ?>
-            <a href="<?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?></a><br>
-            <?php endforeach; ?>
-          </div>
-          <?php if (!empty($_v6)): ?>
-          <div class="mt-2">
-            <button class="btn btn-sm btn-outline-secondary" type="button"
-                    data-bs-toggle="collapse" data-bs-target="#local-ipv6-list">
-              IPv6アドレスを表示 (<?= count($_v6) ?>件)
-            </button>
-            <div class="collapse mt-1" id="local-ipv6-list">
-              <div style="font-family:monospace; font-size:.875rem">
-                <?php foreach ($_v6 as $_lk): ?>
-                <a href="<?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($_lk, ENT_QUOTES, 'UTF-8') ?></a><br>
-                <?php endforeach; ?>
-              </div>
-            </div>
-          </div>
-          <?php endif; ?>
+          <?php print_iplist($config_ini, 'local-ipv6-list'); ?>
           <?php endif; ?>
         </div>
       </div>
