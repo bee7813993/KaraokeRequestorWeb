@@ -97,6 +97,18 @@ function qr_img(string $data, int $size): string {
 <style>
 .qr-wrap { background:#fff; display:inline-block; padding:4px; border-radius:4px; }
 .url-display { font-family: monospace; font-size:.85rem; word-break:break-all; }
+.card-header .hd-short { display: none; }
+.card-vtab { height: 100%; cursor: pointer; }
+.card-vtab .card-header {
+  writing-mode: vertical-rl;
+  min-height: 5rem;
+  padding: .5rem !important;
+  justify-content: center;
+  user-select: none;
+  letter-spacing: .05em;
+}
+.card-vtab .card-header .hd-full { display: none !important; }
+.card-vtab .card-header .hd-short { display: block; }
 </style>
 </head>
 <body>
@@ -121,14 +133,20 @@ function qr_img(string $data, int $size): string {
   <div class="row g-3 mb-3">
 
     <!-- オンライン接続URL -->
-    <div class="col-12 col-lg">
-      <div class="card">
-        <div class="card-header fw-bold d-flex align-items-center">
-          オンライン接続URL
-          <span class="badge <?= $online_available ? 'bg-success' : 'bg-secondary' ?> ms-auto">
-            <?= $online_available ? '接続可' : '未接続' ?>
+    <div id="col-online" class="col-12 <?= $online_available ? 'col-lg order-lg-1' : 'col-lg-auto order-lg-5' ?>">
+      <div class="<?= $online_available ? 'card' : 'card card-vtab' ?>">
+        <div class="card-header fw-bold d-flex align-items-center"
+             style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#onlineUrlBody"
+             aria-expanded="<?= $online_available ? 'true' : 'false' ?>" aria-controls="onlineUrlBody">
+          <span class="hd-full d-flex align-items-center w-100">
+            オンライン接続URL
+            <span class="badge <?= $online_available ? 'bg-success' : 'bg-secondary' ?> ms-2">
+              <?= $online_available ? '接続可' : '未接続' ?>
+            </span>
           </span>
+          <span class="hd-short">Online</span>
         </div>
+        <div id="onlineUrlBody" class="collapse <?= $online_available ? 'show' : '' ?>">
         <div class="card-body">
           <?php if ($online_available): ?>
             <div class="text-center mb-2">
@@ -148,21 +166,22 @@ function qr_img(string $data, int $size): string {
             <p class="text-muted small mb-0">オンライン接続URLは設定されていません。管理画面（init.php）で設定できます。</p>
           <?php endif; ?>
         </div>
+        </div><!-- /#onlineUrlBody -->
       </div>
     </div>
 
     <!-- ローカル接続URL -->
-    <div id="col-local" class="col-12 <?= $online_available ? 'col-lg-auto' : 'col-lg' ?>">
-      <div class="card">
-        <div class="card-header fw-bold d-flex align-items-center">
-          ローカル接続URL <small class="text-muted fw-normal ms-2">同じWiFi内</small>
-          <?php if ($online_available): ?>
-          <button id="localToggleBtn" class="btn btn-sm btn-outline-secondary ms-auto collapsed"
-                  type="button" data-bs-toggle="collapse" data-bs-target="#localUrlBody"
-                  aria-expanded="false" aria-controls="localUrlBody">表示</button>
-          <?php endif; ?>
+    <div id="col-local" class="col-12 <?= $online_available ? 'col-lg-auto order-lg-4' : 'col-lg order-lg-2' ?>">
+      <div class="<?= $online_available ? 'card card-vtab' : 'card' ?>">
+        <div class="card-header fw-bold d-flex align-items-center"
+             style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#localUrlBody"
+             aria-expanded="<?= $online_available ? 'false' : 'true' ?>" aria-controls="localUrlBody">
+          <span class="hd-full d-flex align-items-center w-100">
+            ローカル接続URL <small class="text-muted fw-normal ms-2">同じWiFi内</small>
+          </span>
+          <span class="hd-short">Local</span>
         </div>
-        <div id="localUrlBody" class="<?= $online_available ? 'collapse' : '' ?>">
+        <div id="localUrlBody" class="collapse <?= !$online_available ? 'show' : '' ?>">
         <div class="card-body">
           <?php if ($has_local_url): ?>
             <?php if ($localname_valid): ?>
@@ -206,7 +225,7 @@ function qr_img(string $data, int $size): string {
     </div>
 
     <!-- WiFi接続情報 -->
-    <div class="col-12 col-lg">
+    <div class="col-12 col-lg order-lg-3">
       <div class="card">
         <div class="card-header fw-bold">WiFi接続情報</div>
         <div class="card-body">
@@ -259,25 +278,27 @@ function qr_img(string $data, int $size): string {
 </div>
 
 <?php print_bg_style_block(true); ?>
-<?php if ($online_available): ?>
 <script>
 (function () {
-  var body = document.getElementById('localUrlBody');
-  var btn  = document.getElementById('localToggleBtn');
-  var col  = document.getElementById('col-local');
-  if (!body || !btn || !col) return;
-  body.addEventListener('show.bs.collapse', function () {
-    btn.textContent = '非表示';
-    col.classList.remove('col-lg-auto');
-    col.classList.add('col-lg');
-  });
-  body.addEventListener('hide.bs.collapse', function () {
-    btn.textContent = '表示';
-    col.classList.remove('col-lg');
-    col.classList.add('col-lg-auto');
-  });
+  function setupCol(bodyId, colId, expandOrder, collapseOrder) {
+    var body = document.getElementById(bodyId);
+    var col  = document.getElementById(colId);
+    if (!body || !col) return;
+    var card = col.querySelector('.card');
+    body.addEventListener('show.bs.collapse', function () {
+      col.classList.remove('col-lg-auto', 'order-lg-' + collapseOrder);
+      col.classList.add('col-lg', 'order-lg-' + expandOrder);
+      if (card) card.classList.remove('card-vtab');
+    });
+    body.addEventListener('hide.bs.collapse', function () {
+      col.classList.remove('col-lg', 'order-lg-' + expandOrder);
+      col.classList.add('col-lg-auto', 'order-lg-' + collapseOrder);
+      if (card) card.classList.add('card-vtab');
+    });
+  }
+  setupCol('onlineUrlBody', 'col-online', 1, 5);
+  setupCol('localUrlBody',  'col-local',  2, 4);
 })();
 </script>
-<?php endif; ?>
 </body>
 </html>
