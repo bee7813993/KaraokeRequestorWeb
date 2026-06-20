@@ -169,12 +169,12 @@ if ($zip_check !== true):
     $git_errmsg   = '';
     $git_taglist  = get_gittaglist($git_errmsg);           // fetch もここで実行（--prune付き）
     $git_branches = get_gitbranchlist($git_errmsg, false); // fetch 済みなのでスキップ
-    // master を先頭に並び替え
-    usort($git_branches, function($a, $b) {
-        if ($a === 'master') return -1;
-        if ($b === 'master') return 1;
-        return strcmp($a, $b);
-    });
+    // master を先頭に、残りは git が返した新しい順を維持
+    $master_key = array_search('master', $git_branches, true);
+    if ($master_key !== false) {
+        array_splice($git_branches, $master_key, 1);
+        array_unshift($git_branches, 'master');
+    }
     $fetch_failed = !empty($git_errmsg) && $git_errmsg !== 'none';
     $current_branch = get_current_git_branch();
 ?>
