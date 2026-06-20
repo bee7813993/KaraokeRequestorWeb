@@ -966,6 +966,7 @@ function start_song($db,$id,$addplaytimes = 0){
         }else{
             if($filetype == 3){
                 global $ADDPATHCMD;
+                global $MPCCMDURL;
                 // とりあえず動画Playerを終了する。
                 mpcstop();
                 $mpcpsflg = mpcpscheck();
