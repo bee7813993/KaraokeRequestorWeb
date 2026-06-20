@@ -2192,6 +2192,32 @@ function get_version(){
     }
 }
 
+// $do_fetch=false を指定すると fetch をスキップ（get_gittaglist の直後に呼ぶ場合など）
+function get_gitbranchlist(&$errmsg = '', $do_fetch = true) {
+    global $config_ini;
+    $branchlist = [];
+    if (!array_key_exists('gitcommandpath', $config_ini)) return $branchlist;
+    $gitcmd = urldecode($config_ini['gitcommandpath']);
+    if (!file_exists($gitcmd)) return $branchlist;
+
+    if ($do_fetch) {
+        exec($gitcmd . ' config --global core.autoCRLF false');
+        set_time_limit(900);
+        exec($gitcmd . ' fetch origin 2>&1', $out);
+        $out = [];
+    }
+
+    exec($gitcmd . ' branch -r 2>&1', $lines);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (mb_strpos($line, '->') !== false) continue;  // HEAD -> origin/master 等をスキップ
+        if (mb_strpos($line, 'origin/') === 0) {
+            $branchlist[] = mb_substr($line, mb_strlen('origin/'));
+        }
+    }
+    return $branchlist;
+}
+
 function get_gittaglist(&$errmsg = 'none'){
 
     global $config_ini;

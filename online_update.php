@@ -197,21 +197,38 @@ if ($zip_check !== true):
       Git 方式: <code>git fetch</code> + <code>git reset --hard</code> でアップデートします。
     </div>
 <?php
-    $git_errmsg  = '';
-    $git_taglist = get_gittaglist($git_errmsg);
-    if (!empty($git_errmsg) && $git_errmsg !== 'none'):
+    $git_errmsg   = '';
+    $git_taglist  = get_gittaglist($git_errmsg);               // fetch もここで実行
+    $git_branches = get_gitbranchlist($git_errmsg, false);     // fetch 済みなのでスキップ
+    $fetch_failed = !empty($git_errmsg) && $git_errmsg !== 'none';
 ?>
-    <div class="alert alert-warning">タグ一覧の取得に失敗しました: <?php echo htmlspecialchars($git_errmsg); ?></div>
-<?php elseif (count($git_taglist) === 0): ?>
+<?php if ($fetch_failed): ?>
+    <div class="alert alert-warning">取得に失敗しました: <?php echo htmlspecialchars($git_errmsg); ?></div>
+<?php else: ?>
+
+    <!-- ブランチ一覧 -->
+<?php if (count($git_branches) > 0): ?>
+    <h5><strong>ブランチ</strong></h5>
+    <dl class="dl-horizontal">
+<?php   foreach ($git_branches as $branch):
+          $ver = 'origin/' . $branch; ?>
+      <dt style="overflow:hidden; text-overflow:ellipsis;"><?php echo htmlspecialchars($branch); ?></dt>
+      <dd>
+        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($ver); ?>&METHOD=git"
+           class="btn btn-<?php echo ($branch === 'master') ? 'primary' : 'default'; ?> btn-sm"
+           onclick="return confirm('<?php echo htmlspecialchars($branch, ENT_QUOTES); ?> ブランチに切り替えます。よろしいですか？');">更新</a>
+      </dd>
+<?php   endforeach; ?>
+    </dl>
+    <hr/>
+<?php endif; ?>
+
+    <!-- タグ一覧 -->
+<?php if (count($git_taglist) === 0): ?>
     <div class="alert alert-info">タグが見つかりませんでした</div>
 <?php else: ?>
+    <h5><strong>タグ（リリース版）</strong></h5>
     <dl class="dl-horizontal">
-      <dt>最新版 (リリース前)</dt>
-      <dd>
-        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('origin/master'); ?>&METHOD=git"
-           class="btn btn-primary btn-sm"
-           onclick="return confirm('origin/master の最新版に更新します。よろしいですか？');">更新</a>
-      </dd>
 <?php   foreach (array_reverse($git_taglist) as $tag):
           if (strcmp($tag, 'v0.09.5-alpha') === 0): ?>
       <dt><?php echo htmlspecialchars($tag); ?></dt>
@@ -225,20 +242,22 @@ if ($zip_check !== true):
       </dd>
 <?php   endforeach; ?>
     </dl>
+<?php endif; // git_taglist ?>
 
     <div class="panel panel-default" style="margin-top:10px;">
       <div class="panel-body">
         <form method="GET" class="form-inline">
           <input type="hidden" name="METHOD" value="git" />
           <div class="form-group">
-            <label>任意バージョンハッシュ&nbsp;</label>
-            <input type="text" name="UPDATEVERSION" class="form-control" />
+            <label>任意ブランチ / タグ / ハッシュ&nbsp;</label>
+            <input type="text" name="UPDATEVERSION" class="form-control" placeholder="例: origin/my-branch" />
           </div>
           &nbsp;<input type="submit" value="実行" class="btn btn-warning" />
         </form>
       </div>
     </div>
-<?php endif; // git_taglist ?>
+
+<?php endif; // fetch_failed ?>
 <?php endif; // git_repo_exists ?>
 
   </div><!-- /git tab pane -->
