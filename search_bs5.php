@@ -19,18 +19,23 @@ $is_swap  = is_numeric($selectid) && $selectid !== '';
 $displayfrom = array_key_exists("start", $_REQUEST) ? max(0, (int)$_REQUEST["start"]) : 0;
 $displaynum  = 20;
 
-// ソート
-$_valid_ev_ob = ['size', 'name', 'date'];
-$select_orderby  = 'size';
+// ソート（Cookie保存: YukariEverythingOrderby / YukariEverythingScending）
+$_valid_ev_ob = ['date_modified', 'size', 'name', 'path'];
+$select_orderby  = 'date_modified';
 $select_scending = 'desc';
-if (array_key_exists("ev_orderby", $_REQUEST) && in_array($_REQUEST["ev_orderby"], $_valid_ev_ob)) {
-    $select_orderby = $_REQUEST["ev_orderby"];
+if (array_key_exists("orderby", $_REQUEST) && in_array($_REQUEST["orderby"], $_valid_ev_ob)) {
+    $select_orderby = $_REQUEST["orderby"];
+    setcookie("YukariEverythingOrderby", $select_orderby);
+} elseif (isset($_COOKIE['YukariEverythingOrderby']) && in_array($_COOKIE['YukariEverythingOrderby'], $_valid_ev_ob)) {
+    $select_orderby = $_COOKIE['YukariEverythingOrderby'];
 }
-if (array_key_exists("ev_scending", $_REQUEST) && in_array(strtolower($_REQUEST["ev_scending"]), ['asc', 'desc'])) {
-    $select_scending = strtolower($_REQUEST["ev_scending"]);
+if (array_key_exists("scending", $_REQUEST) && in_array(strtolower($_REQUEST["scending"]), ['asc', 'desc'])) {
+    $select_scending = strtolower($_REQUEST["scending"]);
+    setcookie("YukariEverythingScending", $select_scending);
+} elseif (isset($_COOKIE['YukariEverythingScending']) && in_array(strtolower($_COOKIE['YukariEverythingScending']), ['asc', 'desc'])) {
+    $select_scending = strtolower($_COOKIE['YukariEverythingScending']);
 }
-$_ev_sort_map = ['size' => 'sort=size', 'name' => 'sort=name', 'date' => 'sort=date_modified'];
-$everything_order_query = $_ev_sort_map[$select_orderby] . '&ascending=' . ($select_scending === 'asc' ? '1' : '0');
+$everything_order_query = 'sort=' . $select_orderby . '&ascending=' . ($select_scending === 'asc' ? '1' : '0');
 
 // ListerDB パス（config から取得）
 $everything_lister_dbpath = '';
@@ -273,27 +278,28 @@ function print_everything_filenamesearch($first = false) {
 
     // ソート選択
     $sort_options = [
-        ['ob' => 'size', 'sc' => 'desc', 'label' => 'サイズ大→小'],
-        ['ob' => 'size', 'sc' => 'asc',  'label' => 'サイズ小→大'],
-        ['ob' => 'name', 'sc' => 'asc',  'label' => 'ファイル名 A→Z'],
-        ['ob' => 'date', 'sc' => 'desc', 'label' => '更新日 新→旧'],
-        ['ob' => 'date', 'sc' => 'asc',  'label' => '更新日 旧→新'],
+        ['ob' => 'date_modified', 'sc' => 'desc', 'label' => '更新日 新→旧'],
+        ['ob' => 'date_modified', 'sc' => 'asc',  'label' => '更新日 旧→新'],
+        ['ob' => 'size',          'sc' => 'desc', 'label' => 'サイズ大→小'],
+        ['ob' => 'size',          'sc' => 'asc',  'label' => 'サイズ小→大'],
+        ['ob' => 'name',          'sc' => 'asc',  'label' => 'ファイル名 A→Z'],
+        ['ob' => 'path',          'sc' => 'asc',  'label' => 'パス A→Z'],
     ];
     print '<div class="d-flex flex-wrap gap-2 mb-2 align-items-center">';
     print '<label class="form-label-sm mb-0" for="_ev_sort">並び順:</label>';
     print '<select name="_ev_sort_dummy" id="_ev_sort" class="form-control-themed w-auto"'
-        . ' onchange="var p=this.value.split(\'_\');'
+        . ' onchange="var p=this.value.split(\'|\');'
         . 'document.getElementById(\'_ev_ob\').value=p[0];'
         . 'document.getElementById(\'_ev_sc\').value=p[1];'
         . 'this.form.submit();">';
     foreach ($sort_options as $opt) {
-        $key = $opt['ob'] . '_' . $opt['sc'];
+        $key = $opt['ob'] . '|' . $opt['sc'];
         $selected = ($select_orderby === $opt['ob'] && $select_scending === $opt['sc']) ? ' selected' : '';
         print '<option value="' . $key . '"' . $selected . '>' . htmlspecialchars($opt['label'], ENT_QUOTES, 'UTF-8') . '</option>';
     }
     print '</select>';
-    print '<input type="hidden" id="_ev_ob" name="ev_orderby" value="' . htmlspecialchars($select_orderby, ENT_QUOTES, 'UTF-8') . '">';
-    print '<input type="hidden" id="_ev_sc" name="ev_scending" value="' . htmlspecialchars($select_scending, ENT_QUOTES, 'UTF-8') . '">';
+    print '<input type="hidden" id="_ev_ob" name="orderby" value="' . htmlspecialchars($select_orderby, ENT_QUOTES, 'UTF-8') . '">';
+    print '<input type="hidden" id="_ev_sc" name="scending" value="' . htmlspecialchars($select_scending, ENT_QUOTES, 'UTF-8') . '">';
     print '</div>';
 
     print '<div class="search-hero search-hero--bare">';
@@ -316,7 +322,7 @@ function print_everything_filenamesearch($first = false) {
             . '<strong>' . (int)$result_count . '</strong> 件</div>';
         if ($result_count > 0 && !empty($everything_results['results'])) {
             render_everything_results_bs5($everything_results['results'], $selectid, $everything_lister_dbpath);
-            $pg_req = ['searchword' => $word, 'ev_orderby' => $select_orderby, 'ev_scending' => $select_scending];
+            $pg_req = ['searchword' => $word, 'orderby' => $select_orderby, 'scending' => $select_scending];
             if (!empty($selectid)) $pg_req['selectid'] = $selectid;
             build_pagination_bs5($displayfrom, $displaynum, $result_count, $pg_req, 'search_bs5.php');
         }
