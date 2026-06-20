@@ -154,9 +154,15 @@ function qr_img(string $data, int $size): string {
     <!-- ローカル接続URL -->
     <div class="col-12 col-lg-4">
       <div class="card h-100">
-        <div class="card-header fw-bold">
-          ローカル接続URL <small class="text-muted fw-normal">同じWiFi内</small>
+        <div class="card-header fw-bold d-flex align-items-center">
+          ローカル接続URL <small class="text-muted fw-normal ms-2">同じWiFi内</small>
+          <?php if ($online_available): ?>
+          <button id="localToggleBtn" class="btn btn-sm btn-outline-secondary ms-auto collapsed"
+                  type="button" data-bs-toggle="collapse" data-bs-target="#localUrlBody"
+                  aria-expanded="false" aria-controls="localUrlBody">表示</button>
+          <?php endif; ?>
         </div>
+        <div id="localUrlBody" class="<?= $online_available ? 'collapse' : '' ?>">
         <div class="card-body">
           <?php if ($has_local_url): ?>
             <?php if ($localname_valid): ?>
@@ -195,6 +201,7 @@ function qr_img(string $data, int $size): string {
             <?php print_iplist($config_ini, 'local-ipv6-list'); ?>
           <?php endif; ?>
         </div>
+        </div><!-- /#localUrlBody -->
       </div>
     </div>
 
@@ -252,5 +259,16 @@ function qr_img(string $data, int $size): string {
 </div>
 
 <?php print_bg_style_block(true); ?>
+<?php if ($online_available): ?>
+<script>
+(function () {
+  var body = document.getElementById('localUrlBody');
+  var btn  = document.getElementById('localToggleBtn');
+  if (!body || !btn) return;
+  body.addEventListener('show.bs.collapse', function () { btn.textContent = '非表示'; });
+  body.addEventListener('hide.bs.collapse', function () { btn.textContent = '表示'; });
+})();
+</script>
+<?php endif; ?>
 </body>
 </html>
