@@ -276,7 +276,7 @@ function print_listerdb_detailsearch() {
 
 function print_everything_filenamesearch($first = false) {
     global $config_ini, $word, $selectid, $result_count, $connectinternet;
-    global $displayfrom, $displaynum, $select_orderby, $select_scending, $everything_results, $everything_lister_dbpath;
+    global $displayfrom, $displaynum, $select_orderby, $select_scending, $everything_results, $everything_lister_dbpath, $recommendation;
 
     _section_open('sec-filesearch', 'ファイル名検索（Everything）', $first);
 
