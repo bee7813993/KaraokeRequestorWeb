@@ -2226,17 +2226,26 @@ function get_gitbranchlist(&$errmsg = '', $do_fetch = true) {
         $out = [];
     }
 
-    // --sort=-committerdate は git 2.7+ が必要。失敗時は通常の branch -r にフォールバック
-    exec($gitcmd . ' branch -r --sort=-committerdate 2>&1', $lines, $ret);
-    if ($ret !== 0) {
+    // git for-each-ref は git 1.x から使えるため branch --sort より互換性が高い
+    exec($gitcmd . ' for-each-ref --sort=-committerdate --format=%(refname:short) refs/remotes/origin/ 2>&1', $lines, $ret);
+    if ($ret === 0 && count($lines) > 0) {
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '' || mb_strpos($line, 'origin/HEAD') !== false) continue;
+            if (mb_strpos($line, 'origin/') === 0) {
+                $branchlist[] = mb_substr($line, mb_strlen('origin/'));
+            }
+        }
+    } else {
+        // フォールバック: 古い git で for-each-ref も使えない場合
         $lines = [];
         exec($gitcmd . ' branch -r 2>&1', $lines);
-    }
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if (mb_strpos($line, '->') !== false) continue;  // HEAD -> origin/master 等をスキップ
-        if (mb_strpos($line, 'origin/') === 0) {
-            $branchlist[] = mb_substr($line, mb_strlen('origin/'));
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (mb_strpos($line, '->') !== false) continue;
+            if (mb_strpos($line, 'origin/') === 0) {
+                $branchlist[] = mb_substr($line, mb_strlen('origin/'));
+            }
         }
     }
     return $branchlist;
