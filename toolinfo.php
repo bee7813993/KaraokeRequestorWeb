@@ -184,6 +184,22 @@ function qr_img(string $data, int $size): string {
         <div id="localUrlBody" class="collapse <?= !$online_available ? 'show' : '' ?>">
         <div class="card-body">
           <?php if ($has_local_url): ?>
+            <!-- QRコード（上部） -->
+            <div class="d-flex justify-content-center gap-4 mb-3">
+              <?php if ($localname_valid): ?>
+                <div class="text-center">
+                  <div class="qr-wrap"><?= qr_img($localhosturl, $l_qrsize) ?></div>
+                  <div class="small text-muted mt-1">ホスト名</div>
+                </div>
+              <?php endif; ?>
+              <?php if ($localip_valid): ?>
+                <div class="text-center">
+                  <div class="qr-wrap"><?= qr_img($localipurl, $l_qrsize) ?></div>
+                  <div class="small text-muted mt-1">IPアドレス</div>
+                </div>
+              <?php endif; ?>
+            </div>
+            <!-- URLコピー（下部） -->
             <?php if ($localname_valid): ?>
               <p class="fw-bold small mb-1">ホスト名</p>
               <div class="input-group input-group-sm mb-2">
@@ -194,12 +210,8 @@ function qr_img(string $data, int $size): string {
                   コピー
                 </button>
               </div>
-              <div class="text-center <?= $localip_valid ? 'mb-3' : '' ?>">
-                <div class="qr-wrap mx-auto"><?= qr_img($localhosturl, $l_qrsize) ?></div>
-              </div>
             <?php endif; ?>
             <?php if ($localip_valid): ?>
-              <?php if ($localname_valid): ?><hr class="my-2"><?php endif; ?>
               <p class="fw-bold small mb-1">IPアドレス</p>
               <div class="input-group input-group-sm mb-2">
                 <input type="text" class="form-control url-display"
@@ -208,9 +220,6 @@ function qr_img(string $data, int $size): string {
                         onclick="navigator.clipboard.writeText(<?= json_encode($localipurl) ?>);this.textContent='✓'">
                   コピー
                 </button>
-              </div>
-              <div class="text-center">
-                <div class="qr-wrap mx-auto"><?= qr_img($localipurl, $l_qrsize) ?></div>
               </div>
             <?php endif; ?>
           <?php else: ?>
@@ -229,7 +238,22 @@ function qr_img(string $data, int $size): string {
       <div class="card">
         <div class="card-header fw-bold">WiFi接続情報</div>
         <div class="card-body">
-          <form method="GET" class="mb-3">
+          <!-- QRコード（上部） -->
+          <?php if (!empty($wifi_ssid)): ?>
+            <div class="text-center mb-3">
+              <div class="qr-wrap mx-auto"><?= qr_img($wifi_qr_data, $l_qrsize) ?></div>
+              <p class="small text-muted mt-2 mb-0">
+                SSID: <strong><?= htmlspecialchars($wifi_ssid, ENT_QUOTES, 'UTF-8') ?></strong><br>
+                パスワード: <strong><?= htmlspecialchars($wifi_pass, ENT_QUOTES, 'UTF-8') ?></strong>
+              </p>
+              <p class="small text-muted mb-0">カメラで読み取るとWiFiに自動接続できます</p>
+            </div>
+            <hr class="my-3">
+          <?php else: ?>
+            <p class="text-muted small mb-3">SSIDを入力して保存すると、WiFi自動接続用QRコードが表示されます</p>
+          <?php endif; ?>
+          <!-- フォーム（下部） -->
+          <form method="GET">
             <input type="hidden" name="qrsize" value="<?= $l_qrsize ?>">
             <div class="mb-2">
               <label class="form-label small mb-1">WiFi SSID</label>
@@ -245,19 +269,6 @@ function qr_img(string $data, int $size): string {
             </div>
             <button type="submit" class="btn btn-primary btn-sm w-100">保存</button>
           </form>
-          <?php if (!empty($wifi_ssid)): ?>
-            <hr class="my-2">
-            <div class="text-center">
-              <div class="qr-wrap mx-auto"><?= qr_img($wifi_qr_data, $l_qrsize) ?></div>
-              <p class="small text-muted mt-2 mb-0">
-                SSID: <strong><?= htmlspecialchars($wifi_ssid, ENT_QUOTES, 'UTF-8') ?></strong><br>
-                パスワード: <strong><?= htmlspecialchars($wifi_pass, ENT_QUOTES, 'UTF-8') ?></strong>
-              </p>
-              <p class="small text-muted">カメラで読み取るとWiFiに自動接続できます</p>
-            </div>
-          <?php else: ?>
-            <p class="text-muted small mb-0">SSIDを入力して保存すると、WiFi自動接続用QRコードが表示されます</p>
-          <?php endif; ?>
         </div>
       </div>
     </div>
