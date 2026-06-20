@@ -85,6 +85,25 @@ function qr_img(string $data, int $size): string {
     return '<img src="' . htmlspecialchars($src, ENT_QUOTES, 'UTF-8') . '"'
          . ' alt="QRコード" class="img-fluid d-block mx-auto" style="max-width:320px">';
 }
+
+// --- URL + QRコードを横並びで表示するブロックHTML ---
+// モバイル: QR上・URL下（縦積み）、md以上: QR左・URL右（横並び）
+function url_card_body(string $label, string $url, int $qrsize): string {
+    $h = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+    $j = json_encode($url);
+    $hl = htmlspecialchars($label, ENT_QUOTES, 'UTF-8');
+    return '<div class="d-flex flex-column flex-md-row align-items-md-center gap-3">'
+         . '<div class="flex-shrink-0 text-center"><div class="qr-wrap mx-auto">' . qr_img($url, $qrsize) . '</div></div>'
+         . '<div class="flex-grow-1 w-100">'
+         . '<p class="fw-bold small mb-1">' . $hl . '</p>'
+         . '<div class="input-group input-group-sm">'
+         . '<input type="text" class="form-control url-display" value="' . $h . '" readonly>'
+         . '<button class="btn btn-outline-secondary btn-sm" type="button"'
+         . ' onclick="navigator.clipboard.writeText(' . $j . ');this.textContent=\'✓\'">コピー</button>'
+         . '</div>'
+         . '</div>'
+         . '</div>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -145,20 +164,7 @@ $wifi_open   = true;
            aria-labelledby="headingOnline">
         <div class="accordion-body">
           <?php if ($online_available): ?>
-            <p class="text-muted small mb-2">WiFiに接続しなくてもアクセスできるURLです</p>
-            <div class="input-group mb-3">
-              <input type="text" class="form-control url-display"
-                     value="<?= htmlspecialchars($globalurl, ENT_QUOTES, 'UTF-8') ?>" readonly>
-              <button class="btn btn-outline-secondary" type="button"
-                      onclick="navigator.clipboard.writeText(<?= json_encode($globalurl) ?>);this.textContent='コピー済'">
-                コピー
-              </button>
-            </div>
-            <div class="text-center">
-              <div class="qr-wrap mx-auto">
-                <?= qr_img($globalurl, $l_qrsize) ?>
-              </div>
-            </div>
+            <?= url_card_body('オンライン接続URL（WiFiなしでもアクセス可）', $globalurl, $l_qrsize) ?>
           <?php elseif (!empty($globalhost)): ?>
             <p class="text-muted small mb-0">設定されたホスト（<?= htmlspecialchars($globalhost, ENT_QUOTES, 'UTF-8') ?>）に接続できませんでした。</p>
           <?php else: ?>
@@ -188,19 +194,8 @@ $wifi_open   = true;
             <?php if ($localname_valid): ?>
             <div class="col-md-6">
               <div class="card h-100">
-                <div class="card-body text-center">
-                  <p class="fw-bold small mb-2">ホスト名</p>
-                  <div class="input-group input-group-sm mb-2">
-                    <input type="text" class="form-control url-display"
-                           value="<?= htmlspecialchars($localhosturl, ENT_QUOTES, 'UTF-8') ?>" readonly>
-                    <button class="btn btn-outline-secondary btn-sm" type="button"
-                            onclick="navigator.clipboard.writeText(<?= json_encode($localhosturl) ?>);this.textContent='✓'">
-                      コピー
-                    </button>
-                  </div>
-                  <div class="qr-wrap mx-auto">
-                    <?= qr_img($localhosturl, $l_qrsize) ?>
-                  </div>
+                <div class="card-body">
+                  <?= url_card_body('ホスト名', $localhosturl, $l_qrsize) ?>
                 </div>
               </div>
             </div>
@@ -208,19 +203,8 @@ $wifi_open   = true;
             <?php if ($localip_valid): ?>
             <div class="col-md-6">
               <div class="card h-100">
-                <div class="card-body text-center">
-                  <p class="fw-bold small mb-2">IPアドレス</p>
-                  <div class="input-group input-group-sm mb-2">
-                    <input type="text" class="form-control url-display"
-                           value="<?= htmlspecialchars($localipurl, ENT_QUOTES, 'UTF-8') ?>" readonly>
-                    <button class="btn btn-outline-secondary btn-sm" type="button"
-                            onclick="navigator.clipboard.writeText(<?= json_encode($localipurl) ?>);this.textContent='✓'">
-                      コピー
-                    </button>
-                  </div>
-                  <div class="qr-wrap mx-auto">
-                    <?= qr_img($localipurl, $l_qrsize) ?>
-                  </div>
+                <div class="card-body">
+                  <?= url_card_body('IPアドレス', $localipurl, $l_qrsize) ?>
                 </div>
               </div>
             </div>
