@@ -52,7 +52,7 @@ $prioritylist = prioritydb_get($priority_db);
         <tbody>
           <tr><td><strong>51 以上</strong></td><td>設定なしのファイルより <strong>優先して上に</strong> 表示</td></tr>
           <tr><td><strong>50</strong></td><td>設定なしのファイルのデフォルト値（通常表示）</td></tr>
-          <tr><td><strong>49 以下</strong></td><td>おすすめ順「有効」時は <strong>検索結果に表示しない</strong>（非表示・除外）</td></tr>
+          <tr><td><strong>49 以下</strong></td><td>設定なしのファイルより <strong>後ろに</strong> 表示</td></tr>
         </tbody>
       </table>
       <p class="mb-0" style="font-size:0.82rem;color:var(--color-text-muted);">
