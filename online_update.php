@@ -1,15 +1,13 @@
 <?php
 require_once 'commonfunc.php';
-print_meta_header();
 
-$res    = 2;   // 2=何もしていない, true=成功, false=失敗
+$res    = 2;
 $errmsg = '';
 
 $req_version = isset($_REQUEST['UPDATEVERSION']) ? urldecode($_REQUEST['UPDATEVERSION']) : null;
 $req_method  = (isset($_REQUEST['METHOD']) && $_REQUEST['METHOD'] === 'git') ? 'git' : 'zip';
 $req_action  = isset($_REQUEST['ACTION']) ? $_REQUEST['ACTION'] : '';
 
-// アクション処理
 if ($req_action === 'git_gc') {
     $res = run_git_gc($errmsg, false);
 } elseif ($req_action === 'git_gc_aggressive') {
@@ -24,7 +22,6 @@ if ($req_action === 'git_gc') {
     }
 }
 
-// git 状態判定
 $git_configured  = false;
 $git_available   = false;
 $git_repo_exists = is_dir(realpath(__DIR__) . DIRECTORY_SEPARATOR . '.git');
@@ -37,378 +34,376 @@ if (array_key_exists('gitcommandpath', $config_ini)) {
 
 $active_tab = $git_available ? $req_method : 'zip';
 ?>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-    <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-  <title>オンラインアップデート</title>
-  <link type="text/css" rel="stylesheet" href="css/style.css" />
-  <script type="text/javascript" charset="utf8" src="js/jquery.js"></script>
-  <script src="js/bootstrap.min.js"></script>
+<!doctype html>
+<html lang="ja">
+<head>
+<?php print_meta_header(); ?>
+<title>オンラインアップデート</title>
+<?php print_bs5_head_core(); ?>
 </head>
 <body>
-<?php shownavigatioinbar(); ?>
+<?php shownavigatioinbar_bs5('online_update.php'); ?>
 
-<div class="container" style="margin-top:20px;">
-  <h3>オンラインアップデート</h3>
+<div class="container py-3">
+  <h4 class="mb-3">オンラインアップデート</h4>
 
 <?php
-// 実行結果表示
 if ($res === false) {
-    echo '<div class="alert alert-danger">' . htmlspecialchars($errmsg) . '</div>';
+    echo '<div class="alert alert-danger alert-dismissible">'
+       . htmlspecialchars($errmsg)
+       . '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
 } elseif ($res === true) {
     if ($req_action === 'git_gc' || $req_action === 'git_gc_aggressive') {
-        $action_label = 'リポジトリの最適化';
+        $label = 'リポジトリの最適化';
     } elseif ($req_action === 'git_init') {
-        $action_label = 'Git リポジトリの初期化';
+        $label = 'Git リポジトリの初期化';
     } else {
-        $action_label = 'アップデート';
+        $label = 'アップデート';
     }
-    echo '<div class="alert alert-success">' . htmlspecialchars($action_label) . 'に成功しました</div>';
+    echo '<div class="alert alert-success alert-dismissible">'
+       . htmlspecialchars($label) . 'に成功しました'
+       . '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
 }
 
-// 現在バージョン表示
 $curver = get_version();
 if (!empty($curver)) {
-    echo '<p><strong>現在のバージョン:</strong> ' . htmlspecialchars($curver) . '</p>';
+    echo '<p class="text-muted"><small>現在のバージョン: <strong>' . htmlspecialchars($curver) . '</strong></small></p>';
 }
 ?>
 
 <?php if ($git_available): ?>
-<!-- タブ（git が設定されている場合のみ） -->
-<ul class="nav nav-tabs" id="updateTabs">
-  <li role="presentation" <?php if ($active_tab === 'zip') echo 'class="active"'; ?>>
-    <a href="#tab-zip" data-toggle="tab">ZIP方式（推奨）</a>
+<!-- タブ -->
+<ul class="nav nav-tabs mb-3" id="updateTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link <?php echo ($active_tab === 'zip') ? 'active' : ''; ?>"
+            id="zip-tab" data-bs-toggle="tab" data-bs-target="#tab-zip"
+            type="button" role="tab">ZIP方式（推奨）</button>
   </li>
-  <li role="presentation" <?php if ($active_tab === 'git') echo 'class="active"'; ?>>
-    <a href="#tab-git" data-toggle="tab">Git方式</a>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link <?php echo ($active_tab === 'git') ? 'active' : ''; ?>"
+            id="git-tab" data-bs-toggle="tab" data-bs-target="#tab-git"
+            type="button" role="tab">Git方式</button>
   </li>
 </ul>
-<div class="tab-content" style="margin-top:15px;">
+<div class="tab-content" id="updateTabsContent">
 
-  <!-- ZIP 方式タブ -->
-  <div role="tabpanel" class="tab-pane <?php echo ($active_tab === 'zip') ? 'active' : ''; ?>" id="tab-zip">
+<div class="tab-pane fade <?php echo ($active_tab === 'zip') ? 'show active' : ''; ?>" id="tab-zip" role="tabpanel">
 <?php else: ?>
-<div><div>
+<div>
 <?php endif; ?>
 
-<?php /* ========== ZIP 方式コンテンツ ========== */ ?>
+<?php /* ========== ZIP 方式 ========== */ ?>
 <?php
 $zip_check = check_zip_update_available();
 if ($zip_check !== true):
 ?>
-    <div class="alert alert-warning">
-      ZIP方式は現在利用できません: <?php echo htmlspecialchars($zip_check); ?>
-    </div>
+  <div class="alert alert-warning"><?php echo htmlspecialchars($zip_check); ?></div>
 <?php else:
     $zip_errmsg  = '';
     $zip_taglist = get_archive_taglist($zip_errmsg);
     if (!empty($zip_errmsg)):
 ?>
-    <div class="alert alert-warning">タグ一覧の取得に失敗しました: <?php echo htmlspecialchars($zip_errmsg); ?></div>
+  <div class="alert alert-warning">タグ一覧の取得に失敗しました: <?php echo htmlspecialchars($zip_errmsg); ?></div>
 <?php elseif (count($zip_taglist) === 0): ?>
-    <div class="alert alert-info">タグ情報を取得できませんでした（ネットワークを確認してください）</div>
+  <div class="alert alert-info">タグ情報を取得できませんでした（ネットワークを確認してください）</div>
 <?php else: ?>
-    <dl class="dl-horizontal">
-      <dt>最新版 (master)</dt>
-      <dd>
-        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('master'); ?>&METHOD=zip"
-           class="btn btn-primary btn-sm"
-           onclick="return confirm('master ブランチの最新版に更新します。よろしいですか？');">更新</a>
-      </dd>
+  <div class="card mb-3">
+    <div class="card-header fw-bold">バージョン選択</div>
+    <div class="card-body p-0">
+      <table class="table table-sm table-hover mb-0">
+        <tbody>
+          <tr>
+            <td class="align-middle"><strong>最新版 (master)</strong></td>
+            <td class="text-end">
+              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('master'); ?>&METHOD=zip"
+                 class="btn btn-primary btn-sm"
+                 onclick="return confirm('master ブランチの最新版に更新します。よろしいですか？');">更新</a>
+            </td>
+          </tr>
 <?php   foreach ($zip_taglist as $tag):
           if (strcmp($tag, 'v0.09.5-alpha') === 0): ?>
-      <dt><?php echo htmlspecialchars($tag); ?></dt>
-      <dd>これ以前のバージョンはコマンドプロンプトでのコマンド実行が必要です</dd>
+          <tr>
+            <td colspan="2" class="text-muted small"><?php echo htmlspecialchars($tag); ?> 以前はコマンドプロンプトでの操作が必要です</td>
+          </tr>
 <?php       break; endif; ?>
-      <dt><?php echo htmlspecialchars($tag); ?></dt>
-      <dd>
-        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=zip"
-           class="btn btn-default btn-sm"
-           onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
-      </dd>
+          <tr>
+            <td class="align-middle"><?php echo htmlspecialchars($tag); ?></td>
+            <td class="text-end">
+              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=zip"
+                 class="btn btn-outline-secondary btn-sm"
+                 onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
+            </td>
+          </tr>
 <?php   endforeach; ?>
-    </dl>
-
-    <div class="panel panel-default" style="margin-top:10px;">
-      <div class="panel-body">
-        <form method="GET" class="form-inline">
-          <input type="hidden" name="METHOD" value="zip" />
-          <div class="form-group">
-            <label>任意タグ / コミットハッシュ&nbsp;</label>
-            <input type="text" name="UPDATEVERSION" class="form-control" placeholder="例: v0.09.9-alpha" />
-          </div>
-          &nbsp;<input type="submit" value="実行" class="btn btn-warning"
-                       onclick="return confirm('指定バージョンで更新します。よろしいですか？');" />
-        </form>
-      </div>
+        </tbody>
+      </table>
     </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header fw-bold">任意タグ / コミットハッシュ</div>
+    <div class="card-body">
+      <form method="GET" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="METHOD" value="zip" />
+        <input type="text" name="UPDATEVERSION" class="form-control form-control-sm" style="max-width:280px;"
+               placeholder="例: v0.09.9-alpha" />
+        <button type="submit" class="btn btn-warning btn-sm"
+                onclick="return confirm('指定バージョンで更新します。よろしいですか？');">実行</button>
+      </form>
+    </div>
+  </div>
 <?php endif; endif; // zip_check / taglist ?>
 
-  </div><!-- /zip tab pane -->
+<?php if ($git_available): ?>
+</div><!-- /tab-zip -->
 
-<?php if ($git_available): /* ========== Git 方式タブ ========== */ ?>
-
-  <div role="tabpanel" class="tab-pane <?php echo ($active_tab === 'git') ? 'active' : ''; ?>" id="tab-git">
+<?php /* ========== Git 方式 ========== */ ?>
+<div class="tab-pane fade <?php echo ($active_tab === 'git') ? 'show active' : ''; ?>" id="tab-git" role="tabpanel">
 
 <?php if (!$git_repo_exists): ?>
-    <!-- .git フォルダなし → 初期化案内 -->
-    <div class="panel panel-warning">
-      <div class="panel-heading"><strong>.git フォルダが見つかりません</strong></div>
-      <div class="panel-body">
-        <p>Git 方式でアップデートするには、まずリポジトリを初期化してください。<br>
-           <small class="text-muted">初期化後は <code>.git</code> フォルダが作成されます（数 MB、shallow clone）。</small></p>
-        <a href="online_update.php?ACTION=git_init&METHOD=git"
-           class="btn btn-warning"
-           onclick="return confirm('リポジトリを初期化します（git init + fetch --depth=1 + reset --hard）。\nconfig.ini・request.db などのユーザーデータは保護されます。よろしいですか？');">
-          Git リポジトリを初期化する
-        </a>
-      </div>
+  <div class="card border-warning mb-3">
+    <div class="card-header bg-warning bg-opacity-25 fw-bold">.git フォルダが見つかりません</div>
+    <div class="card-body">
+      <p class="mb-2">Git 方式でアップデートするには、まずリポジトリを初期化してください。<br>
+         <small class="text-muted">初期化後は <code>.git</code> フォルダが作成されます（数 MB、shallow clone）。</small></p>
+      <a href="online_update.php?ACTION=git_init&METHOD=git" class="btn btn-warning"
+         onclick="return confirm('リポジトリを初期化します（git init + fetch --depth=1 + reset --hard）。\nconfig.ini・request.db などのユーザーデータは保護されます。よろしいですか？');">
+        Git リポジトリを初期化する
+      </a>
     </div>
+  </div>
 <?php else:
-    $git_errmsg   = '';
-    $git_taglist  = get_gittaglist($git_errmsg);           // fetch もここで実行（--prune付き）
-    $git_branches = get_gitbranchlist($git_errmsg, false); // fetch 済みなのでスキップ
-    // master を先頭に、残りは git が返した新しい順を維持
+    $git_errmsg     = '';
+    $git_taglist    = get_gittaglist($git_errmsg);
+    $git_branches   = get_gitbranchlist($git_errmsg, false);
+    $fetch_failed   = !empty($git_errmsg) && $git_errmsg !== 'none';
+    $current_branch = get_current_git_branch();
+
+    // master を先頭に、残りは新しい順を維持
     $master_key = array_search('master', $git_branches, true);
     if ($master_key !== false) {
         array_splice($git_branches, $master_key, 1);
         array_unshift($git_branches, 'master');
     }
-    $fetch_failed = !empty($git_errmsg) && $git_errmsg !== 'none';
-    $current_branch = get_current_git_branch();
 ?>
 
-    <!-- (1) 現在のブランチ表示 + アップデートボタン -->
-    <div class="panel panel-primary">
-      <div class="panel-heading"><strong>現在のブランチ</strong></div>
-      <div class="panel-body">
+  <!-- (1) 現在のブランチ + アップデートボタン -->
+  <div class="card border-primary mb-3">
+    <div class="card-header bg-primary bg-opacity-10 fw-bold">現在のブランチ</div>
+    <div class="card-body">
 <?php if ($current_branch !== null): ?>
-        <p style="margin-bottom:10px;">
-          <span class="label label-default" style="font-size:1em; padding:4px 10px;">
-            <?php echo htmlspecialchars($current_branch); ?>
-          </span>
-        </p>
-        <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('origin/' . $current_branch); ?>&METHOD=git"
-           class="btn btn-primary"
-           onclick="return confirm('<?php echo htmlspecialchars($current_branch, ENT_QUOTES); ?> ブランチを最新に更新します。よろしいですか？');">
-          このブランチを最新に更新
-        </a>
+      <p class="mb-2">
+        <span class="badge bg-secondary fs-6"><?php echo htmlspecialchars($current_branch); ?></span>
+      </p>
+      <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('origin/' . $current_branch); ?>&METHOD=git"
+         class="btn btn-primary"
+         onclick="return confirm('<?php echo htmlspecialchars($current_branch, ENT_QUOTES); ?> ブランチを最新に更新します。よろしいですか？');">
+        このブランチを最新に更新
+      </a>
 <?php else: ?>
-        <p class="text-muted">ブランチ情報を取得できませんでした</p>
+      <p class="text-muted mb-0">ブランチ情報を取得できませんでした</p>
 <?php endif; ?>
-      </div>
     </div>
+  </div>
 
 <?php if ($fetch_failed): ?>
-    <div class="alert alert-warning">リモート情報の取得に失敗しました: <?php echo htmlspecialchars($git_errmsg); ?></div>
+  <div class="alert alert-warning">リモート情報の取得に失敗しました: <?php echo htmlspecialchars($git_errmsg); ?></div>
 <?php else: ?>
 
-    <!-- (2) ブランチ選択（折りたたみ） -->
+  <!-- (2) ブランチ選択（折りたたみ） -->
 <?php if (count($git_branches) > 0): ?>
-    <div class="panel panel-default">
-      <div class="panel-heading" style="cursor:pointer;" data-toggle="collapse" data-target="#branchList">
-        <strong>ブランチ選択</strong>
-        <span class="text-muted small">&nbsp;（<?php echo count($git_branches); ?> 件）&nbsp;▼</span>
-      </div>
-      <div id="branchList" class="panel-collapse collapse">
-        <div class="panel-body" style="padding:0;">
-          <dl class="dl-horizontal" style="margin:10px 0;">
+  <div class="card mb-3">
+    <div class="card-header p-0">
+      <button class="btn btn-link text-decoration-none text-start w-100 px-3 py-2 fw-bold"
+              type="button" data-bs-toggle="collapse" data-bs-target="#branchList">
+        ブランチ選択
+        <span class="badge bg-secondary ms-1"><?php echo count($git_branches); ?></span>
+      </button>
+    </div>
+    <div id="branchList" class="collapse">
+      <div class="card-body p-0">
+        <table class="table table-sm table-hover mb-0">
+          <tbody>
 <?php   foreach ($git_branches as $branch):
-          $ver = 'origin/' . $branch;
           $is_current = ($branch === $current_branch); ?>
-            <dt style="overflow:hidden; text-overflow:ellipsis;">
-              <?php echo htmlspecialchars($branch); ?>
-              <?php if ($is_current): ?><span class="label label-primary">現在</span><?php endif; ?>
-            </dt>
-            <dd>
+            <tr class="<?php echo $is_current ? 'table-active' : ''; ?>">
+              <td class="align-middle">
+                <?php echo htmlspecialchars($branch); ?>
+                <?php if ($is_current): ?><span class="badge bg-primary ms-1">現在</span><?php endif; ?>
+              </td>
+              <td class="text-end align-middle">
 <?php       if (!$is_current): ?>
-              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($ver); ?>&METHOD=git"
-                 class="btn btn-default btn-sm"
-                 onclick="return confirm('<?php echo htmlspecialchars($branch, ENT_QUOTES); ?> ブランチに切り替えます。よろしいですか？');">切替</a>
+                <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('origin/' . $branch); ?>&METHOD=git"
+                   class="btn btn-outline-secondary btn-sm"
+                   onclick="return confirm('<?php echo htmlspecialchars($branch, ENT_QUOTES); ?> ブランチに切り替えます。よろしいですか？');">切替</a>
 <?php       else: ?>
-              <span class="text-muted small">（選択中）</span>
+                <span class="text-muted small">選択中</span>
 <?php       endif; ?>
-            </dd>
+              </td>
+            </tr>
 <?php   endforeach; ?>
-          </dl>
-        </div>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 <?php endif; ?>
 
-    <!-- (3) タグ一覧（折りたたみ） -->
+  <!-- (3) タグ一覧（折りたたみ） -->
 <?php if (count($git_taglist) > 0): ?>
-    <div class="panel panel-default">
-      <div class="panel-heading" style="cursor:pointer;" data-toggle="collapse" data-target="#tagList">
-        <strong>タグ一覧（リリース版）</strong>
-        <span class="text-muted small">&nbsp;（<?php echo count($git_taglist); ?> 件）&nbsp;▼</span>
-      </div>
-      <div id="tagList" class="panel-collapse collapse">
-        <div class="panel-body" style="padding:0;">
-          <dl class="dl-horizontal" style="margin:10px 0;">
+  <div class="card mb-3">
+    <div class="card-header p-0">
+      <button class="btn btn-link text-decoration-none text-start w-100 px-3 py-2 fw-bold"
+              type="button" data-bs-toggle="collapse" data-bs-target="#tagList">
+        タグ一覧（リリース版）
+        <span class="badge bg-secondary ms-1"><?php echo count($git_taglist); ?></span>
+      </button>
+    </div>
+    <div id="tagList" class="collapse">
+      <div class="card-body p-0">
+        <table class="table table-sm table-hover mb-0">
+          <tbody>
 <?php   foreach (array_reverse($git_taglist) as $tag):
           if (strcmp($tag, 'v0.09.5-alpha') === 0): ?>
-            <dt><?php echo htmlspecialchars($tag); ?></dt>
-            <dd><span class="text-muted small">これ以前はコマンドプロンプトでの操作が必要です</span></dd>
+            <tr>
+              <td colspan="2" class="text-muted small"><?php echo htmlspecialchars($tag); ?> 以前はコマンドプロンプトでの操作が必要です</td>
+            </tr>
 <?php       break; endif; ?>
-            <dt><?php echo htmlspecialchars($tag); ?></dt>
-            <dd>
-              <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=git"
-                 class="btn btn-default btn-sm"
-                 onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
-            </dd>
+            <tr>
+              <td class="align-middle"><?php echo htmlspecialchars($tag); ?></td>
+              <td class="text-end align-middle">
+                <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=git"
+                   class="btn btn-outline-secondary btn-sm"
+                   onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
+              </td>
+            </tr>
 <?php   endforeach; ?>
-          </dl>
-        </div>
+          </tbody>
+        </table>
       </div>
     </div>
+  </div>
 <?php endif; ?>
 
-    <!-- (4) 任意ブランチ / タグ / ハッシュ -->
-    <div class="panel panel-default">
-      <div class="panel-heading"><strong>任意ブランチ / タグ / ハッシュ</strong></div>
-      <div class="panel-body">
-        <form method="GET" class="form-inline">
-          <input type="hidden" name="METHOD" value="git" />
-          <div class="form-group">
-            <input type="text" name="UPDATEVERSION" class="form-control" placeholder="例: origin/my-branch" style="width:280px;" />
-          </div>
-          &nbsp;<input type="submit" value="実行" class="btn btn-warning"
-                       onclick="return confirm('指定のブランチ/タグ/ハッシュに切り替えます。よろしいですか？');" />
-        </form>
-      </div>
+  <!-- (4) 任意ブランチ / タグ / ハッシュ -->
+  <div class="card mb-3">
+    <div class="card-header fw-bold">任意ブランチ / タグ / ハッシュ</div>
+    <div class="card-body">
+      <form method="GET" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="METHOD" value="git" />
+        <input type="text" name="UPDATEVERSION" class="form-control form-control-sm" style="max-width:280px;"
+               placeholder="例: origin/my-branch" />
+        <button type="submit" class="btn btn-warning btn-sm"
+                onclick="return confirm('指定のブランチ/タグ/ハッシュに切り替えます。よろしいですか？');">実行</button>
+      </form>
     </div>
+  </div>
 
 <?php endif; // fetch_failed ?>
 
-    <!-- (5) リポジトリ最適化 -->
+  <!-- (5) リポジトリ最適化 -->
 <?php
-    $git_size    = get_git_dir_size();
+    $git_size     = get_git_dir_size();
     $git_size_str = $git_size !== null ? format_filesize($git_size) : '取得失敗';
     $git_cmd_ver  = get_git_command_version();
 ?>
-    <div class="panel panel-default">
-      <div class="panel-heading"><strong>リポジトリ最適化</strong></div>
-      <div class="panel-body">
-        <p>
-          <strong>git バージョン:</strong>
-          <?php if ($git_cmd_ver !== null): ?>
-            <code><?php echo htmlspecialchars($git_cmd_ver); ?></code>
-            <small class="text-muted">&nbsp;（gitcmd フォルダの git.exe を差し替えると更新できます）</small>
-          <?php else: ?>
-            <span class="text-muted">取得失敗</span>
-          <?php endif; ?>
-        </p>
-        <p><strong>.git フォルダ サイズ:</strong> <?php echo htmlspecialchars($git_size_str); ?>
-           <small class="text-muted">&nbsp;（アップデート後に git gc を実行すると削減できます）</small></p>
-        <a href="online_update.php?ACTION=git_gc&METHOD=git"
-           class="btn btn-default btn-sm"
+  <div class="card mb-3">
+    <div class="card-header fw-bold">リポジトリ最適化</div>
+    <div class="card-body">
+      <p class="mb-1">
+        <small class="text-muted">git バージョン: </small>
+        <?php if ($git_cmd_ver !== null): ?>
+          <code class="small"><?php echo htmlspecialchars($git_cmd_ver); ?></code>
+          <small class="text-muted">（gitcmd フォルダの git.exe を差し替えると更新できます）</small>
+        <?php else: ?>
+          <span class="text-muted small">取得失敗</span>
+        <?php endif; ?>
+      </p>
+      <p class="mb-2">
+        <small class="text-muted">.git フォルダ サイズ: </small>
+        <strong><?php echo htmlspecialchars($git_size_str); ?></strong>
+        <small class="text-muted">（アップデート後に git gc を実行すると削減できます）</small>
+      </p>
+      <div class="d-flex gap-2">
+        <a href="online_update.php?ACTION=git_gc&METHOD=git" class="btn btn-outline-secondary btn-sm"
            onclick="return confirm('git gc --prune=all を実行します。通常数十秒かかります。よろしいですか？');">
           最適化（git gc）
         </a>
-        &nbsp;
-        <a href="online_update.php?ACTION=git_gc_aggressive&METHOD=git"
-           class="btn btn-default btn-sm"
+        <a href="online_update.php?ACTION=git_gc_aggressive&METHOD=git" class="btn btn-outline-secondary btn-sm"
            onclick="return confirm('git gc --aggressive --prune=all を実行します。通常数分かかります。よろしいですか？');">
           徹底最適化（--aggressive）
         </a>
-        <p class="text-muted" style="margin-top:8px; margin-bottom:0;">
-          <small>通常最適化で大半の不要データを除去できます。徹底最適化はより小さくなりますが時間がかかります。</small>
-        </p>
       </div>
+      <p class="text-muted mt-2 mb-0"><small>通常最適化で大半の不要データを除去できます。徹底最適化はより小さくなりますが時間がかかります。</small></p>
     </div>
+  </div>
 
 <?php endif; // git_repo_exists ?>
-
-  </div><!-- /git tab pane -->
-
+</div><!-- /tab-git -->
 </div><!-- /tab-content -->
 
-<?php else: /* git_available が false → ZIP のみ表示 + セットアップ案内 */
-    echo '</div></div>';
-?>
+<?php else: // git_available が false ?>
+</div>
 
-<!-- ============================================================ -->
-<!-- Git 方式を有効にする手順（git 未設定時に表示）              -->
-<!-- ============================================================ -->
-<div class="panel-group" id="gitSetupAccordion" style="margin-top:20px;">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#gitSetupAccordion" href="#collapseGitSetup">
-          Git 方式を有効にする手順（任意）
-        </a>
-      </h4>
-    </div>
-    <div id="collapseGitSetup" class="panel-collapse collapse">
-      <div class="panel-body">
-
+<!-- Git 方式を有効にする手順 -->
+<div class="accordion mt-4" id="gitSetupAccordion">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button"
+              data-bs-toggle="collapse" data-bs-target="#collapseGitSetup">
+        Git 方式を有効にする手順（任意）
+      </button>
+    </h2>
+    <div id="collapseGitSetup" class="accordion-collapse collapse">
+      <div class="accordion-body">
         <div class="alert alert-info">
           Git 方式を使うと過去の任意バージョンへの巻き戻しが可能になります。
-          ただし <code>.git</code> フォルダのぶんディスクを多く使います（初期数 MB、以後増加）。
-          通常は ZIP 方式で十分です。
+          ただし <code>.git</code> フォルダのぶんディスクを多く使います。通常は ZIP 方式で十分です。
         </div>
 
-        <!-- Step 1 -->
-        <h4>Step 1 &mdash; Portable Git を配置する</h4>
+        <h6>Step 1 &mdash; Portable Git を配置する</h6>
         <ol>
-          <li>
-            <a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a> から
-            <strong>Portable ("thumbdrive edition")</strong> 版をダウンロードします。
-          </li>
-          <li>
-            ダウンロードした EXE を実行し、アプリフォルダ直下の <code>gitcmd</code> フォルダへ展開します。<br>
-            <code>（例: C:\xampp\htdocs\gitcmd\）</code>
-          </li>
-          <li>
-            展開後に <code>gitcmd\cmd\git.exe</code> が存在することを確認します。
-          </li>
+          <li><a href="https://git-scm.com/download/win" target="_blank">git-scm.com</a> から <strong>Portable ("thumbdrive edition")</strong> 版をダウンロード</li>
+          <li>ダウンロードした EXE を実行し、アプリフォルダ直下の <code>gitcmd</code> フォルダへ展開<br>
+              <code class="small">例: C:\xampp\htdocs\gitcmd\</code></li>
+          <li><code>gitcmd\cmd\git.exe</code> が存在することを確認</li>
         </ol>
 
-        <!-- Step 2 -->
-        <h4>Step 2 &mdash; 管理画面でパスを設定する</h4>
+        <h6>Step 2 &mdash; 管理画面でパスを設定する</h6>
         <ol>
-          <li><a href="init.php" target="_blank">管理画面 (init.php)</a> を開きます。</li>
-          <li>
-            <strong>gitcommandpath</strong> の項目に <code>git.exe</code> の絶対パスを入力して保存します。<br>
-            <code>（例: C:\xampp\htdocs\gitcmd\cmd\git.exe）</code>
-          </li>
-          <li>このページをリロードすると「Git 方式」タブが追加されます。</li>
+          <li><a href="init.php" target="_blank">管理画面 (init.php)</a> を開く</li>
+          <li><strong>gitcommandpath</strong> に <code>git.exe</code> の絶対パスを入力して保存<br>
+              <code class="small">例: C:\xampp\htdocs\gitcmd\cmd\git.exe</code></li>
+          <li>このページをリロードすると「Git 方式」タブが追加されます</li>
         </ol>
 
 <?php if ($git_configured && !$git_available): ?>
         <div class="alert alert-warning">
-          <strong>注意:</strong> <code>gitcommandpath</code> は設定されていますが、
-          ファイルが見つかりません。パスを確認してください。<br>
+          <strong>注意:</strong> <code>gitcommandpath</code> は設定されていますが、ファイルが見つかりません。パスを確認してください。<br>
           設定値: <code><?php echo htmlspecialchars(urldecode($config_ini['gitcommandpath'])); ?></code>
         </div>
 <?php endif; ?>
 
 <?php if ($git_configured && $git_available && !$git_repo_exists): ?>
-        <!-- git コマンドは使えるが .git がない → 初期化ボタンを表示 -->
-        <h4>Step 3 &mdash; リポジトリを初期化する</h4>
+        <h6>Step 3 &mdash; リポジトリを初期化する</h6>
         <p>git コマンドが利用可能です。下のボタンでリポジトリを初期化できます。</p>
-        <a href="online_update.php?ACTION=git_init&METHOD=git"
-           class="btn btn-warning"
+        <a href="online_update.php?ACTION=git_init&METHOD=git" class="btn btn-warning"
            onclick="return confirm('リポジトリを初期化します（git init + fetch --depth=1）。\nconfig.ini・request.db などのユーザーデータは保護されます。よろしいですか？');">
           Git リポジトリを初期化する
         </a>
 <?php else: ?>
-        <!-- Step 3 (generic) -->
-        <h4>Step 3 &mdash; リポジトリを初期化する</h4>
-        <p>Step 2 完了後にこのページをリロードすると、「Git リポジトリを初期化する」ボタンが表示されます。
-           ボタンを押すと <code>git init + fetch --depth=1</code> が自動実行されます。</p>
+        <h6>Step 3 &mdash; リポジトリを初期化する</h6>
+        <p class="text-muted">Step 2 完了後にこのページをリロードすると「Git リポジトリを初期化する」ボタンが表示されます。</p>
 <?php endif; ?>
 
-      </div><!-- /panel-body -->
-    </div><!-- /collapse -->
-  </div><!-- /panel -->
-</div><!-- /accordion -->
+      </div>
+    </div>
+  </div>
+</div>
 
 <?php endif; // git_available ?>
 
-<hr/>
+<hr class="mt-4"/>
 <p class="text-muted small">
   バージョン情報:
   <a href="https://github.com/bee7813993/KaraokeRequestorWeb/commits/master" target="_blank">
@@ -416,6 +411,6 @@ if ($zip_check !== true):
   </a>
 </p>
 </div><!-- /container -->
-
+<?php print_bg_style_block(true); ?>
 </body>
 </html>
