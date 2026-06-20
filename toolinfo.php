@@ -121,8 +121,8 @@ function qr_img(string $data, int $size): string {
   <div class="row g-3 mb-3">
 
     <!-- オンライン接続URL -->
-    <div class="col-12 col-lg-4">
-      <div class="card h-100">
+    <div class="col-12 col-lg">
+      <div class="card">
         <div class="card-header fw-bold d-flex align-items-center">
           オンライン接続URL
           <span class="badge <?= $online_available ? 'bg-success' : 'bg-secondary' ?> ms-auto">
@@ -152,8 +152,8 @@ function qr_img(string $data, int $size): string {
     </div>
 
     <!-- ローカル接続URL -->
-    <div class="col-12 col-lg-4">
-      <div class="card h-100">
+    <div id="col-local" class="col-12 <?= $online_available ? 'col-lg-auto' : 'col-lg' ?>">
+      <div class="card">
         <div class="card-header fw-bold d-flex align-items-center">
           ローカル接続URL <small class="text-muted fw-normal ms-2">同じWiFi内</small>
           <?php if ($online_available): ?>
@@ -206,8 +206,8 @@ function qr_img(string $data, int $size): string {
     </div>
 
     <!-- WiFi接続情報 -->
-    <div class="col-12 col-lg-4">
-      <div class="card h-100">
+    <div class="col-12 col-lg">
+      <div class="card">
         <div class="card-header fw-bold">WiFi接続情報</div>
         <div class="card-body">
           <form method="GET" class="mb-3">
@@ -264,9 +264,18 @@ function qr_img(string $data, int $size): string {
 (function () {
   var body = document.getElementById('localUrlBody');
   var btn  = document.getElementById('localToggleBtn');
-  if (!body || !btn) return;
-  body.addEventListener('show.bs.collapse', function () { btn.textContent = '非表示'; });
-  body.addEventListener('hide.bs.collapse', function () { btn.textContent = '表示'; });
+  var col  = document.getElementById('col-local');
+  if (!body || !btn || !col) return;
+  body.addEventListener('show.bs.collapse', function () {
+    btn.textContent = '非表示';
+    col.classList.remove('col-lg-auto');
+    col.classList.add('col-lg');
+  });
+  body.addEventListener('hide.bs.collapse', function () {
+    btn.textContent = '表示';
+    col.classList.remove('col-lg');
+    col.classList.add('col-lg-auto');
+  });
 })();
 </script>
 <?php endif; ?>
