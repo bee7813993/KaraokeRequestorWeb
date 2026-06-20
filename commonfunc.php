@@ -319,15 +319,36 @@ function check_json_available_fromurl($url,$timeout = 10){
     else return true;
 }
 
+function get_everything_ipvar() {
+    global $everythinghost;
+    return isIPv4($everythinghost) ? 4 : 6;
+}
+
+function decode_everything_json($json, $url = '') {
+    if ($json === false || $json === '') {
+        error_log('Everything JSON request failed: ' . $url);
+        return null;
+    }
+    $result = json_decode($json, true);
+    if (!is_array($result)) {
+        error_log('Everything JSON decode failed: ' . $url);
+        return null;
+    }
+    return $result;
+}
+
 // 検索ワードからeverything検索件数だけ取得
 function count_onepriority($word)
 {
     global $everythinghost;
     $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($word) . '&json=1&count=5';
-//print     $jsonurl.'<br/>';
-    $json = file_get_html_with_retry($jsonurl, 5, 30);
-    $result_array = json_decode($json, true);
-    return $result_array['totalResults'];
+    $ipvar = get_everything_ipvar();
+    $json = file_get_html_with_retry($jsonurl, 5, 30, $ipvar);
+    $result_array = decode_everything_json($json, $jsonurl);
+    if (!is_array($result_array) || !isset($result_array['totalResults'])) {
+        return 0;
+    }
+    return (int) $result_array['totalResults'];
 }
 
 // プライオリティリストからプライオリティ順にしてプライオリティ無指定50を追加
@@ -445,15 +466,17 @@ function search_order_priority($word,$start,$length)
             
             $jsonurl = 'http://' . $everythinghost . ':81/?search=' . urlencode($kerwords) . '&'. $order . '&path=1&path_column=3&size_column=4&case=0&json=1&count=' . $c_length . '&offset=' .$c_start.'';
 //print $jsonurl;
-            $json = file_get_html_with_retry($jsonurl, 5, 30);
-            $result_array = json_decode($json, true);
+            $json = file_get_html_with_retry($jsonurl, 5, 30, get_everything_ipvar());
+            $result_array = decode_everything_json($json, $jsonurl);
             // print '###   P:'.$prioritylistone['prioritynum'].' W:'.$prioritylistone['priorityword']."\n";
             // print '##### P:'.$prioritylistone['prioritynum'].' offset:'.$c_start.' count'.$c_length."\n";
             // priority番号追加
             $resultslist_withp = array();
+            if (is_array($result_array) && isset($result_array['results']) && is_array($result_array['results'])) {
             foreach($result_array['results'] as $v) {
                $resultslist_withp[] =  ( $v + array("pcount" => $count_p ) );
                $count_p++;
+            }
             }
             $pickup_array = array_merge ($pickup_array,$resultslist_withp);
             // var_dump($resultslist_withp);
