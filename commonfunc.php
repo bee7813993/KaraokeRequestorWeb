@@ -2476,8 +2476,15 @@ function update_fromarchive($version_str, &$errmsg) {
     if ($vs === 'master' || $vs === 'origin/master') {
         $zip_url = 'https://github.com/' . $repo . '/archive/refs/heads/master.zip';
     } else {
-        $tag = ltrim($vs, 'refs/tags/');
-        $zip_url = 'https://github.com/' . $repo . '/archive/refs/tags/' . rawurlencode($tag) . '.zip';
+        // origin/ プレフィックスは除去（ブランチ指定との統一）
+        if (strpos($vs, 'origin/') === 0) {
+            $vs = substr($vs, strlen('origin/'));
+        }
+        $vs = ltrim($vs, '/');
+        // archive/<ref>.zip は ref にタグ・ブランチ・コミットハッシュのいずれも指定可。
+        // ブランチ名のスラッシュ(feature/x 等)は保持しつつ各セグメントをエンコード。
+        $encoded_ref = implode('/', array_map('rawurlencode', explode('/', $vs)));
+        $zip_url = 'https://github.com/' . $repo . '/archive/' . $encoded_ref . '.zip';
     }
 
     $app_root = realpath(__DIR__);
@@ -2492,9 +2499,14 @@ function update_fromarchive($version_str, &$errmsg) {
     set_time_limit(900);
 
     $data = _kara_http_get($zip_url, $errmsg);
-    if ($data === false || strlen($data) === 0) {
+    if ($data === false) {
+        // errmsg は _kara_http_get が設定済み（存在しないタグ/ブランチ/ハッシュなら HTTP 404）
         _kara_update_cleanup($tmp_dir);
-        if (strlen($data) === 0) $errmsg = 'ダウンロードしたファイルが空です';
+        return false;
+    }
+    if (strlen($data) === 0) {
+        _kara_update_cleanup($tmp_dir);
+        $errmsg = 'ダウンロードしたファイルが空です';
         return false;
     }
     file_put_contents($zip_file, $data);

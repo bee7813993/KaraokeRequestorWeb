@@ -147,12 +147,12 @@ if ($zip_check !== true):
   </div>
 
   <div class="card mb-3">
-    <div class="card-header fw-bold">任意タグ / コミットハッシュ</div>
+    <div class="card-header fw-bold">任意タグ / ブランチ / コミットハッシュ</div>
     <div class="card-body">
       <form method="GET" class="d-flex gap-2 align-items-center">
         <input type="hidden" name="METHOD" value="zip" />
         <input type="text" name="UPDATEVERSION" class="form-control form-control-sm" style="max-width:280px;"
-               placeholder="例: v0.09.9-alpha" />
+               placeholder="例: v0.09.9-alpha / 3a4b5c6" />
         <button type="submit" class="btn btn-warning btn-sm"
                 onclick="return confirm('指定バージョンで更新します。よろしいですか？');">実行</button>
       </form>
