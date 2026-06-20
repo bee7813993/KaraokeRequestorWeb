@@ -232,7 +232,6 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
 </div>
 
 <?php
-$myrequestarray['lister_dbpath'] = $lister_dbpath;
 if (!empty($selectid)) $myrequestarray['selectid'] = $selectid;
 build_pagination_bs5($displayfrom, $displaynum, $programlist['recordsTotal'], $myrequestarray, 'search_listerdb_songlist.php');
 ?>

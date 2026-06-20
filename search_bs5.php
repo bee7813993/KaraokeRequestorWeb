@@ -1,6 +1,8 @@
 <?php
 require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
+require_once 'search_listerdb_commonfunc_bs5.php';
+require_once 'function_search_listerdb.php';
 $easyauth = new EasyAuth();
 $easyauth->do_eashauthcheck();
 
@@ -12,6 +14,29 @@ if (!empty($word) && $historylog == 1) {
 $l_order  = array_key_exists("order", $_REQUEST) ? $_REQUEST["order"] : '';
 $selectid = array_key_exists("selectid", $_REQUEST) ? $_REQUEST["selectid"] : '';
 $is_swap  = is_numeric($selectid) && $selectid !== '';
+
+// ページネーション
+$displayfrom = array_key_exists("start", $_REQUEST) ? max(0, (int)$_REQUEST["start"]) : 0;
+$displaynum  = 20;
+
+// ソート
+$_valid_ev_ob = ['size', 'name', 'date'];
+$select_orderby  = 'size';
+$select_scending = 'desc';
+if (array_key_exists("ev_orderby", $_REQUEST) && in_array($_REQUEST["ev_orderby"], $_valid_ev_ob)) {
+    $select_orderby = $_REQUEST["ev_orderby"];
+}
+if (array_key_exists("ev_scending", $_REQUEST) && in_array(strtolower($_REQUEST["ev_scending"]), ['asc', 'desc'])) {
+    $select_scending = strtolower($_REQUEST["ev_scending"]);
+}
+$_ev_sort_map = ['size' => 'sort=size', 'name' => 'sort=name', 'date' => 'sort=date_modified'];
+$everything_order_query = $_ev_sort_map[$select_orderby] . '&ascending=' . ($select_scending === 'asc' ? '1' : '0');
+
+// ListerDB パス（config から取得）
+$everything_lister_dbpath = '';
+if (array_key_exists("listerDBPATH", $config_ini)) {
+    $everything_lister_dbpath = urldecode($config_ini['listerDBPATH']);
+}
 
 // 差し替え元の曲名取得
 $swap_song = '';
@@ -29,10 +54,12 @@ if ($is_swap) {
     }
 }
 
-// 検索結果件数の先行取得
+// 検索実行（ページネーション対応）
+$everything_results = null;
 $result_count = false;
 if (!empty($word)) {
-    $result_count = searchresultcount_fromkeyword($word);
+    searchlocalfilename_part($word, $everything_results, $displayfrom, $displaynum, $everything_order_query);
+    $result_count = isset($everything_results['totalResults']) ? (int)$everything_results['totalResults'] : 0;
 }
 
 // --- 関数定義 ---
@@ -55,6 +82,98 @@ function _section_open($id, $title, $first) {
 
 function _section_close() {
     print '</div></div></div>'; // body / collapse / section
+}
+
+function _make_preview_modal_ev_bs5($filepath, $modalid) {
+    $ext = strtolower(pathinfo($filepath, PATHINFO_EXTENSION));
+    $ftmap = ['mp4' => 'video/mp4', 'flv' => 'video/x-flv'];
+    if (!isset($ftmap[$ext])) return null;
+    $filetype = $ftmap[$ext];
+    $furl    = 'preview_video_stream.php?path=' . urlencode($filepath);
+    $sources = '<source src="' . htmlspecialchars($furl, ENT_QUOTES, 'UTF-8') . '" type="' . $filetype . '">';
+    $btn = '<a href="#" data-bs-toggle="modal" data-bs-target="#' . $modalid . '" class="btn-secondary-themed" style="font-size:0.8rem;padding:4px 10px;">プレビュー</a>';
+    $js  = '<script>document.addEventListener("DOMContentLoaded",function(){'
+         . 'var el=document.getElementById("' . $modalid . '");'
+         . 'if(!el)return;'
+         . 'var vid=document.getElementById("preview_video_' . $modalid . 'a");'
+         . 'el.addEventListener("hidden.bs.modal",function(){'
+         .   'if(vid){vid.pause();vid.currentTime=0;}'
+         . '});'
+         . '});</script>';
+    $modal = '<div class="modal fade" id="' . $modalid . '" tabindex="-1">'
+           . '<div class="modal-dialog modal-lg"><div class="modal-content">'
+           . '<div class="modal-header"><h5 class="modal-title">動画プレビュー</h5>'
+           . '<button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>'
+           . '<div class="modal-body p-0"><video id="preview_video_' . $modalid . 'a" controls muted playsinline preload="none" style="width:100%;max-height:70vh;display:block;">' . $sources . '</video></div>'
+           . '<div class="modal-footer"><button type="button" class="btn-secondary-themed" data-bs-dismiss="modal">閉じる</button></div>'
+           . '</div></div></div>';
+    return $btn . $js . $modal;
+}
+
+function render_everything_results_bs5($results, $selectid, $lister_dbpath) {
+    $listerpreviewportenable = !check_access_from_online() || configbool('online_preview', false);
+    $k = 0;
+    foreach ($results as $v) {
+        if ($v['size'] <= 1) continue;
+        $fullpath = $v['path'] . '\\' . $v['name'];
+        $fname    = $v['name'];
+
+        // ListerDB 照合
+        $linfo = null;
+        if (!empty($lister_dbpath)) {
+            $linfo = listerdb_lookup_songinfo($fullpath, $lister_dbpath);
+        }
+
+        $display_name = (!empty($linfo['song_name'])) ? $linfo['song_name'] : makesongnamefromfilename($fname);
+
+        $req_href = 'request_confirm_bs5.php?filename=' . urlencode($fname) . '&fullpath=' . urlencode($fullpath);
+        if (!empty($selectid)) $req_href .= '&selectid=' . urlencode($selectid);
+
+        print '<div class="file-item">';
+        print '<a href="' . htmlspecialchars($req_href, ENT_QUOTES, 'UTF-8') . '" class="btn-request flex-shrink-0">リクエスト</a>';
+        print '<div class="flex-grow-1" style="min-width:0;">';
+        print '<div class="fw-semibold text-break mb-1">' . htmlspecialchars($display_name, ENT_QUOTES, 'UTF-8') . '</div>';
+
+        if ($linfo) {
+            print '<div class="d-flex flex-wrap gap-2 mb-1" style="font-size:0.82rem;">';
+            if (!empty($linfo['lister_artist'])) {
+                foreach (explode(',', $linfo['lister_artist']) as $a) {
+                    $a = trim($a);
+                    $sid_q = !empty($selectid) ? '&selectid=' . urlencode($selectid) : '';
+                    print '<a href="search_listerdb_filelist_bs5.php?artist=' . urlencode($a) . '&match=part' . $sid_q . '"'
+                        . ' class="text-muted text-decoration-none">' . htmlspecialchars($a, ENT_QUOTES, 'UTF-8') . '</a>';
+                }
+            }
+            if (!empty($linfo['lister_work'])) {
+                $work_disp = htmlspecialchars($linfo['lister_work'], ENT_QUOTES, 'UTF-8');
+                if (!empty($linfo['lister_op_ed'])) $work_disp .= '&nbsp;' . htmlspecialchars($linfo['lister_op_ed'], ENT_QUOTES, 'UTF-8');
+                $sid_q = !empty($selectid) ? '&selectid=' . urlencode($selectid) : '';
+                print '<a href="search_listerdb_songlist_bs5.php?program_name=' . urlencode($linfo['lister_work']) . $sid_q . '"'
+                    . ' class="text-muted text-decoration-none">' . $work_disp . '</a>';
+            }
+            if (!empty($linfo['lister_comment'])) {
+                print '<span class="text-secondary">【' . htmlspecialchars($linfo['lister_comment'], ENT_QUOTES, 'UTF-8') . '】</span>';
+            }
+            print '</div>';
+        }
+
+        print '<div class="d-flex flex-wrap align-items-center gap-2" style="font-size:0.78rem;color:var(--color-text-muted);">';
+        print '<span>' . htmlspecialchars(formatBytes($v['size']), ENT_QUOTES, 'UTF-8') . '</span>';
+        print mypage_action_links($fullpath, $display_name);
+        print '</div>';
+        print '<div class="text-muted mt-1 filename-toggle" style="font-size:0.7rem;word-break:break-all;cursor:pointer;" title="タップでフルパス表示"'
+            . ' data-filename="' . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '"'
+            . ' data-fullpath="' . htmlspecialchars($fullpath, ENT_QUOTES, 'UTF-8') . '">'
+            . htmlspecialchars($fname, ENT_QUOTES, 'UTF-8') . '</div>';
+        print '</div>';
+
+        if ($listerpreviewportenable) {
+            $pm = _make_preview_modal_ev_bs5($fullpath, 'pm_ev_' . $k);
+            if ($pm) print '<div class="flex-shrink-0 mt-1">' . $pm . '</div>';
+        }
+        print '</div>';
+        $k++;
+    }
 }
 
 function print_listerdb_search() {
@@ -142,14 +261,41 @@ function print_listerdb_detailsearch() {
 }
 
 function print_everything_filenamesearch($first = false) {
-    global $config_ini, $word, $selectid, $result_count, $l_order, $connectinternet;
+    global $config_ini, $word, $selectid, $result_count, $connectinternet;
+    global $displayfrom, $displaynum, $select_orderby, $select_scending, $everything_results, $everything_lister_dbpath;
 
     _section_open('sec-filesearch', 'ファイル名検索（Everything）', $first);
 
-    print '<form action="search.php" method="GET">';
-    if ($is_swap = (is_numeric($selectid) && $selectid !== '')) {
+    print '<form action="search_bs5.php" method="GET">';
+    if (is_numeric($selectid) && $selectid !== '') {
         print '<input type="hidden" name="selectid" value="' . htmlspecialchars($selectid, ENT_QUOTES, 'UTF-8') . '" />';
     }
+
+    // ソート選択
+    $sort_options = [
+        ['ob' => 'size', 'sc' => 'desc', 'label' => 'サイズ大→小'],
+        ['ob' => 'size', 'sc' => 'asc',  'label' => 'サイズ小→大'],
+        ['ob' => 'name', 'sc' => 'asc',  'label' => 'ファイル名 A→Z'],
+        ['ob' => 'date', 'sc' => 'desc', 'label' => '更新日 新→旧'],
+        ['ob' => 'date', 'sc' => 'asc',  'label' => '更新日 旧→新'],
+    ];
+    print '<div class="d-flex flex-wrap gap-2 mb-2 align-items-center">';
+    print '<label class="form-label-sm mb-0" for="_ev_sort">並び順:</label>';
+    print '<select name="_ev_sort_dummy" id="_ev_sort" class="form-control-themed w-auto"'
+        . ' onchange="var p=this.value.split(\'_\');'
+        . 'document.getElementById(\'_ev_ob\').value=p[0];'
+        . 'document.getElementById(\'_ev_sc\').value=p[1];'
+        . 'this.form.submit();">';
+    foreach ($sort_options as $opt) {
+        $key = $opt['ob'] . '_' . $opt['sc'];
+        $selected = ($select_orderby === $opt['ob'] && $select_scending === $opt['sc']) ? ' selected' : '';
+        print '<option value="' . $key . '"' . $selected . '>' . htmlspecialchars($opt['label'], ENT_QUOTES, 'UTF-8') . '</option>';
+    }
+    print '</select>';
+    print '<input type="hidden" id="_ev_ob" name="ev_orderby" value="' . htmlspecialchars($select_orderby, ENT_QUOTES, 'UTF-8') . '">';
+    print '<input type="hidden" id="_ev_sc" name="ev_scending" value="' . htmlspecialchars($select_scending, ENT_QUOTES, 'UTF-8') . '">';
+    print '</div>';
+
     print '<div class="search-hero search-hero--bare">';
     print '<div class="search-input-wrap">';
     print '<input type="text" name="searchword" id="filenamesearchword" class="form-control-themed"'
@@ -165,10 +311,15 @@ function print_everything_filenamesearch($first = false) {
     print '</div>';
     print '</form>';
 
-    if (!empty($word)) {
+    if (!empty($word) && $result_count !== false) {
         print '<div class="search-result-count mt-3"><strong>' . htmlspecialchars($word, ENT_QUOTES, 'UTF-8') . '</strong> の検索結果: '
             . '<strong>' . (int)$result_count . '</strong> 件</div>';
-        PrintLocalFileListfromkeyword_ajax($word, $l_order, 'searchresult', 0, $selectid);
+        if ($result_count > 0 && !empty($everything_results['results'])) {
+            render_everything_results_bs5($everything_results['results'], $selectid, $everything_lister_dbpath);
+            $pg_req = ['searchword' => $word, 'ev_orderby' => $select_orderby, 'ev_scending' => $select_scending];
+            if (!empty($selectid)) $pg_req['selectid'] = $selectid;
+            build_pagination_bs5($displayfrom, $displaynum, $result_count, $pg_req, 'search_bs5.php');
+        }
     } elseif ($result_count === 0) {
         print '<div class="notice-box mt-3">検索結果が見つかりませんでした。</div>';
     }
@@ -281,9 +432,6 @@ if (!empty($config_ini['roomurl'])) {
 }
 ?>動画検索</title>
 <?php print_bs5_search_head(); ?>
-<link rel="stylesheet" href="css/jquery.dataTables.css">
-<script src="js/jquery.dataTables.js"></script>
-<script src="js/currency.js"></script>
 </head>
 <body>
 
@@ -516,6 +664,18 @@ endif;
     });
   });
 })();
+
+document.addEventListener("click", function (e) {
+  var el = e.target.closest(".filename-toggle");
+  if (!el) return;
+  if (el.dataset.showing === "fullpath") {
+    el.textContent = el.dataset.filename;
+    el.dataset.showing = "filename";
+  } else {
+    el.textContent = el.dataset.fullpath;
+    el.dataset.showing = "fullpath";
+  }
+});
 </script>
 
 </body>
