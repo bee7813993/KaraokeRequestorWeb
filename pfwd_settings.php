@@ -512,50 +512,7 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
   <div class="card mb-3">
     <div class="card-header fw-semibold py-2 px-3" style="font-size:1rem;">自IP一覧</div>
     <div class="card-body">
-      <div style="font-family: monospace; white-space: pre-wrap; word-break: break-all; font-size: 0.875rem;"><?php
-      require_once 'ipconfig.php';
-      $result_ipconfig = getiplist();
-      $ips_to_show = array(); // 重複排除用
-
-      // すべてのインターフェースからIPを抽出（ループバック除外）
-      foreach ($result_ipconfig as $ifinfo) {
-          foreach ($ifinfo as $idx => $ip_str) {
-              if ($idx === 0) continue; // インターフェース名をスキップ
-              $ip = trim($ip_str);
-              if (empty($ip)) continue;
-
-              // IPv6 zone ID を削除
-              if (strpos($ip, '%') !== false) {
-                  $ip = substr($ip, 0, strpos($ip, '%'));
-              }
-
-              // ループバック判定
-              if ($ip === '127.0.0.1' || $ip === '::1') {
-                  continue;
-              }
-
-              // 重複排除
-              if (in_array($ip, $ips_to_show, true)) {
-                  continue;
-              }
-
-              $ips_to_show[] = $ip;
-          }
-      }
-
-      // リンク生成（バッファに集める）
-      $link_output = '';
-      foreach ($ips_to_show as $ip) {
-          $is_ipv6 = (strpos($ip, ':') !== false);
-          $url_ip = $is_ipv6 ? '[' . $ip . ']' : $ip;
-          $link = 'http://' . $url_ip . '/';
-          if (array_key_exists('useeasyauth_word', $config_ini) && !empty($config_ini['useeasyauth_word'])) {
-              $link = $link . '?easypass=' . $config_ini['useeasyauth_word'];
-          }
-          $link_output .= '<a href="' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '" target="_blank">' . htmlspecialchars($link, ENT_QUOTES, 'UTF-8') . '</a>' . "\n";
-      }
-      echo $link_output;
-      ?></div>
+      <?php print_iplist($config_ini, 'pfwd-ipv6-list'); ?>
     </div>
   </div>
 

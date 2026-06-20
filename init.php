@@ -1875,36 +1875,10 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
 
 <div class="card cfg-card mb-4"><div class="card-body">
   <h1 id="myiplist" class="menulink"> 自IP一覧 </h1>
-  <pre>
   <?php
-  require_once("ipconfig.php");
-  $result_ipconfig=getiplist();
-  
-  //var_dump($result_ipconfig);
-  foreach($result_ipconfig as $ifinfo){
-     $count= 0;
-     foreach($ifinfo as $ips){
-        if($count != 0){
-        if(strchr($ips,':') !== false){
-          $ips = '['.strchr($ips,'%',$before_needle=true).']';
-        }
-        if(!empty($ips)){
-           $link = 'http://'.$ips.'/';
-           if(array_key_exists('useeasyauth_word', $config_ini)){
-               if(!empty($config_ini['useeasyauth_word'])){
-                  $link = $link.'?easypass='.$config_ini['useeasyauth_word'];
-               }
-           }
-           print '<a href='.$link.' > '.$link.'</a><br />';
-        }
-        }
-        $count ++;
-     }
-     
-  }
-  
+  require_once 'ipconfig.php';
+  print_iplist($config_ini, 'init-ipv6-list');
   ?>
-  </pre>
 
   </div></div>
 </div><!-- col-lg-9 -->
