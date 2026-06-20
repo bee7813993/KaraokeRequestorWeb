@@ -133,7 +133,7 @@ function qr_img(string $data, int $size): string {
   <div class="row g-3 mb-3">
 
     <!-- オンライン接続URL -->
-    <div id="col-online" class="col-12 <?= $online_available ? 'col-lg order-lg-1' : 'col-lg-auto order-lg-5' ?>">
+    <div id="col-online" class="col-12 <?= $online_available ? 'col-lg order-lg-1' : 'col-lg-auto order-lg-last' ?>">
       <div class="<?= $online_available ? 'card' : 'card card-vtab' ?>">
         <div class="card-header fw-bold d-flex align-items-center"
              style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#onlineUrlBody"
@@ -171,7 +171,7 @@ function qr_img(string $data, int $size): string {
     </div>
 
     <!-- ローカル接続URL -->
-    <div id="col-local" class="col-12 <?= $online_available ? 'col-lg-auto order-lg-4' : 'col-lg order-lg-2' ?>">
+    <div id="col-local" class="col-12 <?= $online_available ? 'col-lg-auto order-lg-last' : 'col-lg order-lg-2' ?>">
       <div class="<?= $online_available ? 'card card-vtab' : 'card' ?>">
         <div class="card-header fw-bold d-flex align-items-center"
              style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#localUrlBody"
@@ -234,9 +234,15 @@ function qr_img(string $data, int $size): string {
     </div>
 
     <!-- WiFi接続情報 -->
-    <div class="col-12 col-lg order-lg-3">
-      <div class="card">
-        <div class="card-header fw-bold">WiFi接続情報</div>
+    <div id="col-wifi" class="col-12 <?= !empty($wifi_ssid) ? 'col-lg order-lg-3' : 'col-lg-auto order-lg-last' ?>">
+      <div class="<?= !empty($wifi_ssid) ? 'card' : 'card card-vtab' ?>">
+        <div class="card-header fw-bold d-flex align-items-center"
+             style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#wifiUrlBody"
+             aria-expanded="<?= !empty($wifi_ssid) ? 'true' : 'false' ?>" aria-controls="wifiUrlBody">
+          <span class="hd-full">WiFi接続情報</span>
+          <span class="hd-short">WiFi接続情報</span>
+        </div>
+        <div id="wifiUrlBody" class="collapse <?= !empty($wifi_ssid) ? 'show' : '' ?>">
         <div class="card-body">
           <!-- QRコード（上部） -->
           <?php if (!empty($wifi_ssid)): ?>
@@ -270,6 +276,7 @@ function qr_img(string $data, int $size): string {
             <button type="submit" class="btn btn-primary btn-sm w-100">保存</button>
           </form>
         </div>
+        </div><!-- /#wifiUrlBody -->
       </div>
     </div>
 
@@ -291,24 +298,25 @@ function qr_img(string $data, int $size): string {
 <?php print_bg_style_block(true); ?>
 <script>
 (function () {
-  function setupCol(bodyId, colId, expandOrder, collapseOrder) {
+  function setupCol(bodyId, colId, expandOrder) {
     var body = document.getElementById(bodyId);
     var col  = document.getElementById(colId);
     if (!body || !col) return;
     var card = col.querySelector('.card');
     body.addEventListener('show.bs.collapse', function () {
-      col.classList.remove('col-lg-auto', 'order-lg-' + collapseOrder);
+      col.classList.remove('col-lg-auto', 'order-lg-last');
       col.classList.add('col-lg', 'order-lg-' + expandOrder);
       if (card) card.classList.remove('card-vtab');
     });
     body.addEventListener('hide.bs.collapse', function () {
       col.classList.remove('col-lg', 'order-lg-' + expandOrder);
-      col.classList.add('col-lg-auto', 'order-lg-' + collapseOrder);
+      col.classList.add('col-lg-auto', 'order-lg-last');
       if (card) card.classList.add('card-vtab');
     });
   }
-  setupCol('onlineUrlBody', 'col-online', 1, 5);
-  setupCol('localUrlBody',  'col-local',  2, 4);
+  setupCol('onlineUrlBody', 'col-online', 1);
+  setupCol('localUrlBody',  'col-local',  2);
+  setupCol('wifiUrlBody',   'col-wifi',   3);
 })();
 </script>
 </body>
