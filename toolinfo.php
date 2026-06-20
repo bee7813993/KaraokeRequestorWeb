@@ -58,6 +58,11 @@ $localipurl    = $localip_valid
     ? 'http://' . $server_addr . '/' . $easypass_q
     : '';
 
+// ホスト名とIPが同じURLになる場合はどちらか一方を無効化
+if ($localname_valid && $localip_valid && $localhosturl === $localipurl) {
+    $localip_valid = false;
+}
+
 $has_local_url = $localname_valid || $localip_valid;
 
 // --- WiFi情報 ---
