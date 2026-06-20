@@ -57,11 +57,13 @@ $active_tab = $git_available ? $req_method : 'zip';
 if ($res === false) {
     echo '<div class="alert alert-danger">' . htmlspecialchars($errmsg) . '</div>';
 } elseif ($res === true) {
-    $action_label = match($req_action) {
-        'git_gc', 'git_gc_aggressive' => 'リポジトリの最適化',
-        'git_init'                    => 'Git リポジトリの初期化',
-        default                       => 'アップデート',
-    };
+    if ($req_action === 'git_gc' || $req_action === 'git_gc_aggressive') {
+        $action_label = 'リポジトリの最適化';
+    } elseif ($req_action === 'git_init') {
+        $action_label = 'Git リポジトリの初期化';
+    } else {
+        $action_label = 'アップデート';
+    }
     echo '<div class="alert alert-success">' . htmlspecialchars($action_label) . 'に成功しました</div>';
 }
 
