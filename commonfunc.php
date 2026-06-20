@@ -2217,7 +2217,12 @@ function get_gitbranchlist(&$errmsg = '', $do_fetch = true) {
         $out = [];
     }
 
-    exec($gitcmd . ' branch -r --sort=-committerdate 2>&1', $lines);
+    // --sort=-committerdate は git 2.7+ が必要。失敗時は通常の branch -r にフォールバック
+    exec($gitcmd . ' branch -r --sort=-committerdate 2>&1', $lines, $ret);
+    if ($ret !== 0) {
+        $lines = [];
+        exec($gitcmd . ' branch -r 2>&1', $lines);
+    }
     foreach ($lines as $line) {
         $line = trim($line);
         if (mb_strpos($line, '->') !== false) continue;  // HEAD -> origin/master 等をスキップ
