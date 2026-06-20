@@ -2613,6 +2613,8 @@ function init_git_repo(&$errmsg) {
         $gitcmd . ' config --global core.autoCRLF false',
         $gitcmd . ' fetch --depth=1 origin master',
         $gitcmd . ' reset --hard FETCH_HEAD',
+        // タグ情報だけ取得（コミット本体なし）→ git describe --tags が動作するようになる
+        $gitcmd . ' fetch --tags origin',
     ];
 
     foreach ($steps as $cmd) {
