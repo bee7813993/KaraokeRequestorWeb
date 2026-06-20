@@ -637,7 +637,18 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
           <li><code>&lt;a href="..." class="btn btn-secondary"&gt;ボタン&lt;/a&gt;</code> — グレーボタン（モード連動）</li>
           <li><code>&lt;a href="..." class="btn btn-outline-secondary"&gt;ボタン&lt;/a&gt;</code> — 枠のみボタン（モード連動）</li>
         </ul>
-        <p class="mb-1"><strong>色を直接書くと浮いてしまう例（避けてください）</strong></p>
+        <p class="mb-1"><strong>ボタン</strong>（モードに関係なく常に同じ色）</p>
+        <ul class="mb-2">
+          <li><code>&lt;a href="..." class="btn btn-primary"&gt;ボタン&lt;/a&gt;</code> — 常に青</li>
+          <li><code>&lt;a href="..." class="btn btn-danger"&gt;ボタン&lt;/a&gt;</code> — 常に赤</li>
+          <li><code>&lt;a href="..." class="btn btn-success"&gt;ボタン&lt;/a&gt;</code> — 常に緑</li>
+          <li><code>&lt;a href="..." class="btn btn-warning"&gt;ボタン&lt;/a&gt;</code> — 常に黄</li>
+        </ul>
+        <p class="mb-1"><strong>テキスト・背景</strong>（モードに関係なく常に同じ色）</p>
+        <ul class="mb-2">
+          <li><code>style="color: #c0392b;"</code> のように16進数で直接指定 — 常に指定色</li>
+        </ul>
+        <p class="mb-1"><strong>色を直接書くと浮いてしまう例（モード追従させたい場合は避けてください）</strong></p>
         <ul class="mb-0">
           <li><code>style="color: black;"</code> — ダークモードで読みにくくなる</li>
           <li><code>style="background: white;"</code> — ダークモードで明るく浮く</li>
