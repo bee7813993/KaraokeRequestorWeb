@@ -560,7 +560,7 @@ else:
                 case 5:
                     if (checkbox_check($config_ini['searchitem'], "searchmessage")) {
                         if (!empty($config_ini["noticeof_searchpage"])) {
-                            print '<div class="notice-box">';
+                            print '<div class="notice-box notice-embedded-html">';
                             print str_replace('#yukarihost#', $_SERVER["HTTP_HOST"], urldecode($config_ini["noticeof_searchpage"]));
                             print '</div>';
                         }

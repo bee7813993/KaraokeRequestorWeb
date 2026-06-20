@@ -210,7 +210,7 @@ showmode();
 // トップページメッセージ表示
 if(array_key_exists("noticeof_listpage",$config_ini)) {
     if(!empty($config_ini["noticeof_listpage"])){
-        print '<div class="well">';
+        print '<div class="well notice-embedded-html">';
         print str_replace('#yukarihost#',$_SERVER["HTTP_HOST"],urldecode($config_ini["noticeof_listpage"]));
         print '</div>';
     }

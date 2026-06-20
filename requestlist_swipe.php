@@ -418,7 +418,7 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 showmode();
 
 if (!empty($config_ini['noticeof_listpage'])) {
-    echo '<div class="p-3 mb-3 border rounded bg-light">';
+    echo '<div class="p-3 mb-3 border rounded bg-light notice-embedded-html">';
     echo str_replace('#yukarihost#', $_SERVER['HTTP_HOST'], urldecode($config_ini['noticeof_listpage']));
     echo '</div>';
 }

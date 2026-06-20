@@ -606,6 +606,25 @@ body::before {
 }
 
 /* ============================================================
+   notice-embedded-html: 管理者埋め込みHTMLボックスのダークモード対応
+   ============================================================ */
+[data-theme="dark"] .notice-embedded-html {
+  background-color: var(--bg-card-alt) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .notice-embedded-html p,
+[data-theme="dark"] .notice-embedded-html li,
+[data-theme="dark"] .notice-embedded-html span,
+[data-theme="dark"] .notice-embedded-html td,
+[data-theme="dark"] .notice-embedded-html th {
+  color: var(--color-text) !important;
+}
+[data-theme="dark"] .notice-embedded-html a {
+  color: var(--color-accent) !important;
+}
+
+/* ============================================================
    btn-outline-* 系ボーダーを 2px に統一（ライト/ダーク共通）
    Bootstrap デフォルト 1px より少し太くして視認性を向上させる。
    ============================================================ */

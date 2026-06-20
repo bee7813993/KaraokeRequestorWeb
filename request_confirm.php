@@ -127,6 +127,12 @@ function json_safe_encode($data){
     return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 }
 
+function track_select_size_attr_rc($maxtrack) {
+    if (!array_key_exists('HTTP_USER_AGENT', $_SERVER)) return ' size="' . (int)$maxtrack . '"';
+    if (stripos((string)$_SERVER['HTTP_USER_AGENT'], 'Android') !== false) return '';
+    return ' size="' . (int)$maxtrack . '"';
+}
+
 function extention_musiccheck($fn){
     if(empty($fn)) return 0;
     $extension = pathinfo($fn, PATHINFO_EXTENSION);
@@ -507,7 +513,7 @@ EOT;
         if(  $maxtrack == 1  &&   (  strlen($audiotracklist[0][1]) == 0 || strpos( $audiotracklist[0][1] , 'Sound Media Handler' ) !== false || strpos( $audiotracklist[0][1] , 'GPAC ISO Audio Handler' ) !== false || strpos( $audiotracklist[0][1] , 'SoundHandler' ) !== false )){
         print "<pre> 1トラックのみ </pre>";
         }else {
-        print '<select size="'. $maxtrack .'" name="track"  class="form-control">';
+        print '<select' . track_select_size_attr_rc($maxtrack) . ' name="track"  class="form-control">';
         for($c = 0; $c < $maxtrack ; $c++ ){
           if($c == 0 ){
               print '  <option value="'.$c.'" selected >'.($c+1).'トラック目：'.$audiotracklist[$c][1].'</option>'."\n";
