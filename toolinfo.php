@@ -98,17 +98,20 @@ function qr_img(string $data, int $size): string {
 .qr-wrap { background:#fff; display:inline-block; padding:4px; border-radius:4px; }
 .url-display { font-family: monospace; font-size:.85rem; word-break:break-all; }
 .card-header .hd-short { display: none; }
-.card-vtab { height: 100%; cursor: pointer; }
-.card-vtab .card-header {
-  writing-mode: vertical-rl;
-  min-height: 5rem;
-  padding: .5rem !important;
-  justify-content: center;
-  user-select: none;
-  letter-spacing: .05em;
+.card-vtab { cursor: pointer; }
+@media (min-width: 992px) {
+  .card-vtab { height: 100%; }
+  .card-vtab .card-header {
+    writing-mode: vertical-rl;
+    min-height: 5rem;
+    padding: .5rem !important;
+    justify-content: center;
+    user-select: none;
+    letter-spacing: .05em;
+  }
+  .card-vtab .card-header .hd-full { display: none !important; }
+  .card-vtab .card-header .hd-short { display: block; }
 }
-.card-vtab .card-header .hd-full { display: none !important; }
-.card-vtab .card-header .hd-short { display: block; }
 </style>
 </head>
 <body>
