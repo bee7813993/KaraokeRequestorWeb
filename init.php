@@ -611,8 +611,42 @@ if(array_key_exists("noticeof_searchpage",$config_ini)) {
     print '';
 }
 ?></textarea>
-    </div>  
-  </div>  
+    </div>
+
+  <!-- ダークモード対応HTMLの書き方ガイド -->
+  <div class="mt-2">
+    <a class="small text-muted text-decoration-none" data-bs-toggle="collapse" href="#html-darkmode-guide" role="button" aria-expanded="false">
+      ▶ ダークモード対応HTMLの書き方
+    </a>
+    <div class="collapse mt-2" id="html-darkmode-guide">
+      <div class="card card-body bg-light" style="font-size:0.85rem;">
+        <p class="mb-2">ライト／ダークモード両対応にするには、色を直接指定せず <strong>CSSカスタムプロパティ（変数）</strong> またはテーマ対応クラスを使ってください。</p>
+        <table class="table table-sm table-bordered mb-3">
+          <thead class="table-secondary"><tr><th>用途</th><th>書き方</th></tr></thead>
+          <tbody>
+            <tr><td>本文テキスト色</td><td><code>style="color: var(--color-text);"</code></td></tr>
+            <tr><td>薄いテキスト色</td><td><code>style="color: var(--color-text-muted);"</code></td></tr>
+            <tr><td>カード背景色</td><td><code>style="background-color: var(--bg-card);"</code></td></tr>
+            <tr><td>枠線色</td><td><code>style="border-color: var(--color-border);"</code></td></tr>
+            <tr><td>リンク色（赤系）</td><td><code>style="color: var(--color-accent);"</code></td></tr>
+          </tbody>
+        </table>
+        <p class="mb-1"><strong>ボタン</strong>（ライト／ダーク自動追従）</p>
+        <ul class="mb-2">
+          <li><code>&lt;a href="..." class="btn-secondary-themed"&gt;ボタン&lt;/a&gt;</code> — 青ボタン（白文字）</li>
+          <li><code>&lt;a href="..." class="btn btn-secondary"&gt;ボタン&lt;/a&gt;</code> — グレーボタン（モード連動）</li>
+          <li><code>&lt;a href="..." class="btn btn-outline-secondary"&gt;ボタン&lt;/a&gt;</code> — 枠のみボタン（モード連動）</li>
+        </ul>
+        <p class="mb-1"><strong>色を直接書くと浮いてしまう例（避けてください）</strong></p>
+        <ul class="mb-0">
+          <li><code>style="color: black;"</code> — ダークモードで読みにくくなる</li>
+          <li><code>style="background: white;"</code> — ダークモードで明るく浮く</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  </div>
 
 </div></div>
 
