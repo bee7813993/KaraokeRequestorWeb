@@ -22,12 +22,14 @@ if (isset($_REQUEST['qrsize'])) {
     $l_qrsize = max(1, min(16, (int)$_REQUEST['qrsize']));
 }
 
-// --- グローバルURL ---
-$globalhost      = isset($config_ini['globalhost']) ? urldecode($config_ini['globalhost']) : '';
+// --- グローバルURL（5秒タイムアウトで1回だけ試行）---
+$globalhost       = isset($config_ini['globalhost']) ? urldecode($config_ini['globalhost']) : '';
 $online_available = false;
-$globalurl       = '';
-if (!empty($globalhost)) {
-    if (check_online_available($globalhost) === 'OK') {
+$globalurl        = '';
+if (!empty($globalhost) && $config_ini['connectinternet'] == 1) {
+    $checkurl = 'http://' . $globalhost;
+    $ret = file_get_html_with_retry($checkurl, 1, 5);
+    if ($ret !== false) {
         $online_available = true;
     }
     $globalurl = 'http://' . $globalhost . '/';
@@ -37,17 +39,18 @@ if (!empty($globalhost)) {
 }
 
 // --- ローカルURL ---
-$server_addr = $_SERVER['SERVER_ADDR'];
-$server_addr_url = (strpos($server_addr, ':') !== false)
-    ? addipv6blanket($server_addr)
-    : $server_addr;
-$localhosturl = 'http://' . $_SERVER['HTTP_HOST'] . '/';
-$localipurl   = 'http://' . $server_addr_url . '/';
-if ($config_ini['useeasyauth'] == 1) {
-    $easypass_q    = '?easypass=' . urlencode($config_ini['useeasyauth_word']);
-    $localhosturl .= $easypass_q;
-    $localipurl   .= $easypass_q;
-}
+$easypass_q = ($config_ini['useeasyauth'] == 1)
+    ? '?easypass=' . urlencode($config_ini['useeasyauth_word'])
+    : '';
+$localhosturl = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $easypass_q;
+
+// IPv6・ループバックを除外した IPv4 アドレスのみ表示
+$server_addr   = $_SERVER['SERVER_ADDR'];
+$localip_valid = (strpos($server_addr, ':') === false)   // IPv6除外
+              && ($server_addr !== '127.0.0.1');           // ループバック除外
+$localipurl    = $localip_valid
+    ? 'http://' . $server_addr . '/' . $easypass_q
+    : '';
 
 // --- WiFi情報 ---
 $wifi_ssid = isset($config_ini['SSID'])    ? urldecode($config_ini['SSID'])    : '';
@@ -186,6 +189,7 @@ $wifi_open   = true;
                 </div>
               </div>
             </div>
+            <?php if ($localip_valid): ?>
             <div class="col-md-6">
               <div class="card h-100">
                 <div class="card-body text-center">
@@ -204,6 +208,7 @@ $wifi_open   = true;
                 </div>
               </div>
             </div>
+            <?php endif; ?>
           </div>
         </div>
       </div>
