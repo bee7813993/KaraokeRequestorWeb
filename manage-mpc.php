@@ -969,14 +969,11 @@ function start_song($db,$id,$addplaytimes = 0){
                 // とりあえず動画Playerを終了する。
                 mpcstop();
                 $mpcpsflg = mpcpscheck();
-                print("mpcps1:".$mpcpsflg);
                 if($mpcpsflg){
-                    print("mpcps2:".$mpcpsflg);
                     sleep(1);
                     mpcstop();
                     $mpcpsflg = mpcpscheck();
                     if($mpcpsflg){
-                        print("mpcps3:".$mpcpsflg);
                         sleep(1);
                         mpcstop();
                     }
@@ -991,6 +988,15 @@ function start_song($db,$id,$addplaytimes = 0){
                 //exec($execcmd);
                 $fp = popen($execcmd,'r');
                 pclose($fp);
+                for($waitcount = 0; $waitcount < 10; $waitcount++){
+                    if(mpcrunningcheck($MPCPATH) !== FALSE){
+                        $mpc_ready = file_get_html_with_retry($MPCCMDURL, 1, 0, 4, 500);
+                        if($mpc_ready !== FALSE){
+                            break;
+                        }
+                    }
+                    usleep(300000);
+                }
             }else{
                 //★movie指定
 //★                // MPC起動チェック
