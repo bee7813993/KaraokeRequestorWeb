@@ -5,7 +5,7 @@
 
 
 [Setup]
-AppName=u‚ä‚©‚èvUniversal KAraoke REquest Web tool
+AppName=ï¿½uï¿½ä‚©ï¿½ï¿½vUniversal KAraoke REquest Web tool
 AppVersion=0.09.9
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
@@ -26,8 +26,8 @@ AppPublisherURL=https://github.com/bee7813993/KaraokeRequestorWeb
 Name: japanese; MessagesFile: compiler:Languages\Japanese.isl 
 
 [Messages]
-WelcomeLabel2=‚±‚ÌƒvƒƒOƒ‰ƒ€‚Í‚²g—p‚ÌƒRƒ“ƒsƒ…[ƒ^[‚Ö [name/ver] ‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ü‚·B%n%n‚±‚ÌƒvƒƒOƒ‰ƒ€‚ÌÀs‚É‚Í–‘O‚Éxampp‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚Ä‚¨‚­•K—v‚ª‚ ‚è‚Ü‚·B%n(Œã‚©‚çxampp‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚æ‚¤‚Æ‚·‚é‚Æxampp‚ÌƒZƒbƒgƒAƒbƒv‚ª¸”s‚µ‚Ü‚·)%nhttps://www.apachefriends.org/jp/index.html
-SelectDirLabel3=[name] ‚ğƒCƒ“ƒXƒg[ƒ‹‚·‚éXAMPP‚ğƒCƒ“ƒXƒg[ƒ‹‚µ‚½ƒtƒHƒ‹ƒ_“à‚ÌhtdocsƒtƒHƒ‹ƒ_‚ğw’è‚µ‚ÄAuŸ‚Öv‚ğƒNƒŠƒbƒN‚µ‚Ä‚­‚¾‚³‚¢B
+WelcomeLabel2=ï¿½ï¿½ï¿½Ìƒvï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½Í‚ï¿½ï¿½gï¿½pï¿½ÌƒRï¿½ï¿½ï¿½sï¿½ï¿½ï¿½[ï¿½^ï¿½[ï¿½ï¿½ [name/ver] ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Xï¿½gï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B%n%nï¿½ï¿½ï¿½Ìƒvï¿½ï¿½ï¿½Oï¿½ï¿½ï¿½ï¿½ï¿½Ìï¿½ï¿½sï¿½É‚Íï¿½ï¿½Oï¿½ï¿½xamppï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Xï¿½gï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½Kï¿½vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B%n(ï¿½ã‚©ï¿½ï¿½xamppï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Xï¿½gï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½æ‚¤ï¿½Æ‚ï¿½ï¿½ï¿½ï¿½xamppï¿½ÌƒZï¿½bï¿½gï¿½Aï¿½bï¿½vï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½Ü‚ï¿½)%nhttps://www.apachefriends.org/jp/index.html
+SelectDirLabel3=[name] ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Xï¿½gï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½XAMPPï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½Xï¿½gï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½tï¿½Hï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½ï¿½htdocsï¿½tï¿½Hï¿½ï¿½ï¿½_ï¿½ï¿½ï¿½wï¿½è‚µï¿½ÄAï¿½uï¿½ï¿½ï¿½Övï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½bï¿½Nï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B
 
 [Files]
 ;;Source: "package\xampp-win32-5.6.12-0-VC11-installer.exe"; DestDir: {tmp}; Components: xampp
@@ -45,7 +45,7 @@ Source: "cms\*"; DestDir: "{app}\cms"; Flags: IgnoreVersion; Components: main
 Source: "video-js\*"; DestDir: "{app}\js"; Flags: IgnoreVersion; Components: main
 Source: "modules\*"; DestDir: "{app}\modules"; Flags: IgnoreVersion; Components: main
 Source: "notfoundrequest\*.php"; DestDir: "{app}\notfoundrequest"; Flags: IgnoreVersion; Components: main
-Source: "ƒjƒRƒJƒ‰ƒRƒƒ“ƒgPlayer2.exe"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "ï¿½jï¿½Rï¿½Jï¿½ï¿½ï¿½Rï¿½ï¿½ï¿½ï¿½ï¿½gPlayer2.exe"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "ini.ini"; DestDir: "{app}"; Flags: onlyifdoesntexist; Components: main
 Source: "foobar2000\*"; DestDir: "{app}\foobar2000";Flags: IgnoreVersion recursesubdirs; Components: main
 Source: "commentPlayer\*"; DestDir: "{app}\commentPlayer";Flags: IgnoreVersion recursesubdirs; Components: main
@@ -72,3 +72,28 @@ Name: main;  Description: main files ; Types: full compact custom; Flags: fixed
 
 [Icons]
 Name: "{group}\KaraokeRequestorWeb for xampp"; Filename: "{app}\krw.ico"
+
+[code]
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  phpIni: String;
+  content: AnsiString;
+begin
+  if CurStep = ssPostInstall then
+  begin
+    phpIni := ExpandConstant('C:\xampp\php\php.ini');
+    if FileExists(phpIni) then
+    begin
+      if LoadStringFromFile(phpIni, content) then
+      begin
+        // Enable the php zip extension (required by the ZIP update method).
+        // Idempotent: append only when missing, otherwise uncomment.
+        if Pos('extension=zip', content) = 0 then
+          content := content + #13#10 + 'extension=zip' + #13#10
+        else
+          StringChangeEx(content, ';extension=zip', 'extension=zip', True);
+        SaveStringToFile(phpIni, content, False);
+      end;
+    end;
+  end;
+end;

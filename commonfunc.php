@@ -2385,13 +2385,60 @@ function _kara_http_get($url, &$errmsg) {
 }
 
 function check_zip_update_available() {
-    if (!class_exists('ZipArchive')) {
-        return 'PHP の ZipArchive 拡張が無効です (php.ini で extension=zip を有効化してください)';
+    if (!zip_extract_available()) {
+        return 'ZIP 展開手段がありません (php.ini で extension=zip を有効化するか、PowerShell が利用できる Windows 環境が必要です)';
     }
     if (!function_exists('curl_init') && !ini_get('allow_url_fopen')) {
         return 'curl または allow_url_fopen が必要です';
     }
     return true;
+}
+
+// ZIP 展開が可能か（ZipArchive または PowerShell Expand-Archive）
+function zip_extract_available() {
+    if (class_exists('ZipArchive')) return true;
+    return is_powershell_available();
+}
+
+// PowerShell が利用可能か（Windows 環境を想定）
+function is_powershell_available() {
+    if (stripos(PHP_OS, 'WIN') !== 0) return false;
+    if (!function_exists('exec')) return false;
+    @exec('powershell -NoProfile -Command "exit 0" 2>&1', $out, $ret);
+    return ($ret === 0);
+}
+
+// ZIP ファイルを展開先へ展開。ZipArchive 優先、無ければ PowerShell にフォールバック。
+function extract_zip_archive($zip_file, $extract_dir, &$errmsg = '') {
+    if (!is_dir($extract_dir)) {
+        @mkdir($extract_dir, 0700, true);
+    }
+    if (class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        if ($zip->open($zip_file) !== true) {
+            $errmsg = 'ZIP の展開に失敗しました (ZipArchive)';
+            return false;
+        }
+        $zip->extractTo($extract_dir);
+        $zip->close();
+        return true;
+    }
+    if (is_powershell_available()) {
+        // Expand-Archive は PowerShell 5.0+ (Windows 10 / Server 2016 以降は標準)
+        $cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -Command '
+             . escapeshellarg(
+                 "Expand-Archive -LiteralPath '" . $zip_file . "' "
+               . "-DestinationPath '" . $extract_dir . "' -Force"
+             );
+        @exec($cmd . ' 2>&1', $out, $ret);
+        if ($ret !== 0) {
+            $errmsg = 'ZIP の展開に失敗しました (PowerShell): ' . implode(' / ', $out);
+            return false;
+        }
+        return true;
+    }
+    $errmsg = 'ZIP を展開する手段がありません';
+    return false;
 }
 
 // アップデート取得元リポジトリ（owner/repo）を config から取得。未設定時は既定値。
@@ -2512,16 +2559,11 @@ function update_fromarchive($version_str, &$errmsg) {
     file_put_contents($zip_file, $data);
     unset($data);
 
-    $zip = new ZipArchive();
-    if ($zip->open($zip_file) !== true) {
+    $extract_dir = $tmp_dir . DIRECTORY_SEPARATOR . 'extracted';
+    if (!extract_zip_archive($zip_file, $extract_dir, $errmsg)) {
         _kara_update_cleanup($tmp_dir);
-        $errmsg = 'ZIP の展開に失敗しました';
         return false;
     }
-    $extract_dir = $tmp_dir . DIRECTORY_SEPARATOR . 'extracted';
-    mkdir($extract_dir, 0700, true);
-    $zip->extractTo($extract_dir);
-    $zip->close();
 
     // アーカイブ内のトップレベルディレクトリを探す
     $source_dir = null;
