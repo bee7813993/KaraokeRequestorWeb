@@ -29,7 +29,7 @@ $online_available = false;
 $globalurl        = '';
 if (!empty($globalhost) && $config_ini['connectinternet'] == 1) {
     $checkurl = 'http://' . $globalhost;
-    $ret = file_get_html_with_retry($checkurl, 1, 5);
+    $ret = file_get_html_with_retry($checkurl, 2, 3);
     if ($ret !== false) {
         $online_available = true;
     }
