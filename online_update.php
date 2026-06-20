@@ -135,7 +135,7 @@ if ($zip_check !== true):
             <td class="text-end">
               <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=zip"
                  class="btn btn-outline-secondary btn-sm"
-                 onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
+                 onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> を反映します。よろしいですか？');">反映</a>
             </td>
           </tr>
 <?php   endforeach; ?>
@@ -202,7 +202,7 @@ if ($zip_check !== true):
       <a href="online_update.php?UPDATEVERSION=<?php echo urlencode('origin/' . $current_branch); ?>&METHOD=git"
          class="btn btn-primary"
          onclick="return confirm('<?php echo htmlspecialchars($current_branch, ENT_QUOTES); ?> ブランチを最新に更新します。よろしいですか？');">
-        このブランチを最新に更新
+        このブランチの最新に更新
       </a>
 <?php else: ?>
       <p class="text-muted mb-0">ブランチ情報を取得できませんでした</p>
@@ -278,7 +278,7 @@ if ($zip_check !== true):
               <td class="text-end align-middle">
                 <a href="online_update.php?UPDATEVERSION=<?php echo urlencode($tag); ?>&METHOD=git"
                    class="btn btn-outline-secondary btn-sm"
-                   onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> に更新します。よろしいですか？');">更新</a>
+                   onclick="return confirm('<?php echo htmlspecialchars($tag, ENT_QUOTES); ?> を反映します。よろしいですか？');">反映</a>
               </td>
             </tr>
 <?php   endforeach; ?>
