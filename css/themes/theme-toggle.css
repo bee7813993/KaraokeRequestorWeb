@@ -620,7 +620,7 @@ body::before {
 [data-theme="dark"] .notice-embedded-html th {
   color: var(--color-text) !important;
 }
-[data-theme="dark"] .notice-embedded-html a {
+[data-theme="dark"] .notice-embedded-html a:not([class*="btn"]) {
   color: var(--color-accent) !important;
 }
 
