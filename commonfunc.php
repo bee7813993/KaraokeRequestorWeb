@@ -492,14 +492,14 @@ function search_order_priority($word,$start,$length,$order = 'sort=size&ascendin
 
 
 // 検索ワードから検索結果一覧を取得する処理
-function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length = 10, $order = null, $path = null)
+function searchlocalfilename_part($kerwords, &$result_array,$start = 0, $length = 10, $order = null, $path = null, $use_priority = true)
 {
 
 		global $everythinghost;
 		global $config_ini;
         global $priority_db;
 
-        $prioritylist = prioritydb_get($priority_db);
+        $prioritylist = $use_priority ? prioritydb_get($priority_db) : [];
 		
 		// IPv6check
 		// IPv6check

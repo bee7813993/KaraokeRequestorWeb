@@ -37,6 +37,15 @@ if (array_key_exists("scending", $_REQUEST) && in_array(strtolower($_REQUEST["sc
 }
 $everything_order_query = 'sort=' . $select_orderby . '&ascending=' . ($select_scending === 'asc' ? '1' : '0');
 
+// おすすめ順（優先度）Cookie: YukariEverythingRecommendation
+$recommendation = 'on';
+if (array_key_exists("recommendation", $_REQUEST) && in_array($_REQUEST["recommendation"], ['on', 'off'])) {
+    $recommendation = $_REQUEST["recommendation"];
+    setcookie("YukariEverythingRecommendation", $recommendation);
+} elseif (isset($_COOKIE['YukariEverythingRecommendation']) && in_array($_COOKIE['YukariEverythingRecommendation'], ['on', 'off'])) {
+    $recommendation = $_COOKIE['YukariEverythingRecommendation'];
+}
+
 // ListerDB パス（config から取得）
 $everything_lister_dbpath = '';
 if (array_key_exists("listerDBPATH", $config_ini)) {
@@ -63,7 +72,7 @@ if ($is_swap) {
 $everything_results = null;
 $result_count = false;
 if (!empty($word)) {
-    searchlocalfilename_part($word, $everything_results, $displayfrom, $displaynum, $everything_order_query);
+    searchlocalfilename_part($word, $everything_results, $displayfrom, $displaynum, $everything_order_query, null, $recommendation !== 'off');
     $result_count = isset($everything_results['totalResults']) ? (int)$everything_results['totalResults'] : 0;
 }
 
@@ -300,6 +309,11 @@ function print_everything_filenamesearch($first = false) {
     print '</select>';
     print '<input type="hidden" id="_ev_ob" name="orderby" value="' . htmlspecialchars($select_orderby, ENT_QUOTES, 'UTF-8') . '">';
     print '<input type="hidden" id="_ev_sc" name="scending" value="' . htmlspecialchars($select_scending, ENT_QUOTES, 'UTF-8') . '">';
+    print '<label class="form-label-sm mb-0 ms-2" for="_ev_reco">おすすめ順</label>';
+    print '<select name="recommendation" id="_ev_reco" class="form-control-themed w-auto" onchange="this.form.submit();">';
+    print '<option value="on"'  . ($recommendation === 'on'  ? ' selected' : '') . '>有効</option>';
+    print '<option value="off"' . ($recommendation === 'off' ? ' selected' : '') . '>無効</option>';
+    print '</select>';
     print '</div>';
 
     print '<div class="search-hero search-hero--bare">';
@@ -322,7 +336,7 @@ function print_everything_filenamesearch($first = false) {
             . '<strong>' . (int)$result_count . '</strong> 件</div>';
         if ($result_count > 0 && !empty($everything_results['results'])) {
             render_everything_results_bs5($everything_results['results'], $selectid, $everything_lister_dbpath);
-            $pg_req = ['searchword' => $word, 'orderby' => $select_orderby, 'scending' => $select_scending];
+            $pg_req = ['searchword' => $word, 'orderby' => $select_orderby, 'scending' => $select_scending, 'recommendation' => $recommendation];
             if (!empty($selectid)) $pg_req['selectid'] = $selectid;
             build_pagination_bs5($displayfrom, $displaynum, $result_count, $pg_req, 'search_bs5.php');
         }
