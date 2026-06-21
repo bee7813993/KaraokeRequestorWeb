@@ -2441,6 +2441,63 @@ function extract_zip_archive($zip_file, $extract_dir, &$errmsg = '') {
     return false;
 }
 
+// ZIP 作成が可能か（ZipArchive または PowerShell Compress-Archive）
+function zip_create_available() {
+    if (class_exists('ZipArchive')) return true;
+    return is_powershell_available();
+}
+
+// ファイルを ZIP に圧縮する。ZipArchive 優先、無ければ PowerShell にフォールバック。
+// $files_map: ['追加するフルパス' => 'ZIP内パス', ...] または
+//             [['dir' => $dir, 'prefix' => $zip_prefix], ...]  ← ディレクトリ一括追加は呼び元で展開済みを渡す
+// $output_file: 出力ZIPのフルパス（上書き）
+function create_zip_archive($files_map, $output_file, &$errmsg = '') {
+    if (class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        if ($zip->open($output_file, ZipArchive::OVERWRITE) !== true) {
+            $errmsg = 'ZIPの作成に失敗しました (ZipArchive::open)';
+            return false;
+        }
+        foreach ($files_map as $src => $dst) {
+            if (is_file($src)) {
+                $zip->addFile($src, $dst);
+            }
+        }
+        $zip->close();
+        return true;
+    }
+    if (is_powershell_available()) {
+        // 一時ディレクトリにZIP内パス構造でファイルをコピーしてから Compress-Archive する
+        $tmpdir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ykbak_' . uniqid();
+        if (!@mkdir($tmpdir, 0700, true)) {
+            $errmsg = '一時ディレクトリの作成に失敗しました';
+            return false;
+        }
+        foreach ($files_map as $src => $dst) {
+            if (!is_file($src)) continue;
+            $dstfull = $tmpdir . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $dst);
+            $dstdir  = dirname($dstfull);
+            if (!is_dir($dstdir)) @mkdir($dstdir, 0777, true);
+            @copy($src, $dstfull);
+        }
+        if (@file_exists($output_file)) @unlink($output_file);
+        $ps_src = addslashes($tmpdir);
+        $ps_dst = addslashes($output_file);
+        $ps_cmd = "Get-ChildItem -Path '$ps_src' | Compress-Archive -DestinationPath '$ps_dst' -Force";
+        $cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -Command ' . escapeshellarg($ps_cmd);
+        @exec($cmd . ' 2>&1', $out, $ret);
+        // 一時ディレクトリ削除
+        _kara_update_cleanup($tmpdir);
+        if ($ret !== 0) {
+            $errmsg = 'ZIPの作成に失敗しました (PowerShell): ' . implode(' / ', $out);
+            return false;
+        }
+        return true;
+    }
+    $errmsg = 'ZIP を作成する手段がありません (php.ini で extension=zip を有効化するか、PowerShell が利用できる Windows 環境が必要です)';
+    return false;
+}
+
 // アップデート取得元リポジトリ（owner/repo）を config から取得。未設定時は既定値。
 function get_update_repo() {
     global $config_ini;

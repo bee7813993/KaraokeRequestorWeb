@@ -1878,31 +1878,11 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
 
 <div class="card cfg-card mb-4"><div class="card-body">
   <h1 id="backup" class="menulink">設定バックアップ</h1>
-
-  <h3>バックアップのダウンロード</h3>
   <p class="text-muted" style="font-size:0.9rem;">
-    config.ini・各種JSON設定ファイルをZIPにまとめてダウンロードします。<br>
+    設定ファイル一式をZIPでバックアップ・復元します。<br>
     クリーンインストール後の設定復元にご利用ください。
   </p>
-  <form method="get" action="backup_download.php" target="_blank" class="mb-3">
-    <div class="form-check mb-2">
-      <input type="checkbox" class="form-check-input" id="bak_db" name="db" value="1">
-      <label class="form-check-label" for="bak_db">データベース (<code><?php echo htmlspecialchars($config_ini['dbname'] ?? 'request.db'); ?></code>) を含める</label>
-      <div class="form-text">リクエスト履歴も保存されます。ファイルサイズが大きくなる場合があります。</div>
-    </div>
-    <div class="form-check mb-2">
-      <input type="checkbox" class="form-check-input" id="bak_bgimg" name="bgimg" value="1" checked>
-      <label class="form-check-label" for="bak_bgimg">背景画像 (<code>images/bg/</code>) を含める</label>
-    </div>
-    <button type="submit" class="btn btn-primary">バックアップをダウンロード</button>
-  </form>
-
-  <h3>バックアップから復元</h3>
-  <p class="text-muted" style="font-size:0.9rem;">
-    ダウンロードしたZIPをアップロードして設定を上書き復元します。
-  </p>
-  <a href="backup_restore.php" class="btn btn-warning">復元ページを開く</a>
-
+  <a href="backup_restore.php" class="btn btn-primary">設定バックアップ / 復元ページを開く</a>
 </div></div>
 
 <div class="card cfg-card mb-4"><div class="card-body">
