@@ -2424,13 +2424,22 @@ function extract_zip_archive($zip_file, $extract_dir, &$errmsg = '') {
         return true;
     }
     if (is_powershell_available()) {
-        // Expand-Archive は PowerShell 5.0+ (Windows 10 / Server 2016 以降は標準)
+        // Expand-Archive は .zip 拡張子が必須。一時ファイルが .tmp 等の場合は .zip にコピーして渡す。
+        if (strtolower(pathinfo($zip_file, PATHINFO_EXTENSION)) !== 'zip') {
+            $zip_copy = $zip_file . '.zip';
+            if (!@copy($zip_file, $zip_copy)) {
+                $errmsg = 'ZIP の展開に失敗しました (PowerShell: 一時ファイルのコピーに失敗)';
+                return false;
+            }
+        } else {
+            $zip_copy = null;
+        }
+        $ps_src = addslashes($zip_copy ?? $zip_file);
+        $ps_dst = addslashes($extract_dir);
         $cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -Command '
-             . escapeshellarg(
-                 "Expand-Archive -LiteralPath '" . $zip_file . "' "
-               . "-DestinationPath '" . $extract_dir . "' -Force"
-             );
+             . escapeshellarg("Expand-Archive -LiteralPath '$ps_src' -DestinationPath '$ps_dst' -Force");
         @exec($cmd . ' 2>&1', $out, $ret);
+        if ($zip_copy !== null) @unlink($zip_copy);
         if ($ret !== 0) {
             $errmsg = 'ZIP の展開に失敗しました (PowerShell): ' . implode(' / ', $out);
             return false;
