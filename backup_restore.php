@@ -36,6 +36,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'download' && $zip_ok) {
         'listerdb_config.ini',
         'search_sort_priority.json',
         'search_sort_priority_auth.json',
+        'pfwd_forykr/pfwd.ini',
     ];
     foreach ($candidates as $f) {
         if (file_exists($base . '/' . $f)) {
@@ -88,6 +89,7 @@ $allowed_files = [
     'listerdb_config.ini',
     'search_sort_priority.json',
     'search_sort_priority_auth.json',
+    'pfwd_forykr/pfwd.ini',
 ];
 $allowed_images_prefix = 'images/bg/';
 
@@ -232,6 +234,7 @@ $dbname = $config_ini['dbname'] ?? 'request.db';
         <li><code>listerdb_config.ini</code> — りすたーDB設定</li>
         <li><code>search_sort_priority.json</code> — 検索ソート優先度</li>
         <li><code>search_sort_priority_auth.json</code> — 検索ソート優先度（認証）</li>
+        <li><code>pfwd_forykr/pfwd.ini</code> — オンライン接続設定</li>
       </ul>
       <form method="get" action="backup_restore.php">
         <input type="hidden" name="action" value="download">
