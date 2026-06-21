@@ -388,7 +388,10 @@ $select_where = $select_where . ' GROUP BY song_name, program_name';
 
 
 if (!empty($select_orderby) ){
-    $select_where = $select_where .  ' ORDER BY '. $select_orderby . ' ' . $select_scending ;
+    // テキストカラムは大文字小文字を同一扱いにする
+    $orderby_sql = preg_replace('/\bsong_name\b/', 'song_name COLLATE NOCASE', $select_orderby);
+    $orderby_sql = preg_replace('/\bsong_artist\b/', 'song_artist COLLATE NOCASE', $orderby_sql);
+    $select_where = $select_where .  ' ORDER BY '. $orderby_sql . ' ' . $select_scending ;
 }
 
 if(!empty($select_where) ){
