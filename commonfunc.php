@@ -2327,21 +2327,49 @@ function update_fromgit($version_str, &$errmsg){
               return false;
           }
 
-          $execcmd = $gitcmd.' reset --hard '.$version_str;
-          exec($execcmd,$result_str);
+          // origin/ プレフィックスあり → ブランチ切り替え (checkout -B)
+          // タグ / ハッシュ → 現在ブランチのまま reset --hard
+          $result_str = [];
+          if (strpos($version_str, 'origin/') === 0) {
+              $branch_name = substr($version_str, strlen('origin/'));
+              $execcmd = $gitcmd . ' checkout -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str);
+          } else {
+              $execcmd = $gitcmd . ' reset --hard ' . $version_str;
+          }
+          exec($execcmd, $result_str);
           foreach($result_str as $line){
               $err_str_pos = mb_strpos($line, "unknown revision");
               if( $err_str_pos  !== false) {
                   $errmsg .= "no version : $version_str";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg .= "reset --hard unknown error: $line";
+                  $errmsg .= "checkout/reset unknown error: $line";
                   $errorcnt ++;
+              }
+          }
+
+          if ($errorcnt === 0) {
+              // タグを最新化してから version ファイルに書き込む
+              // shallow clone では git describe が失敗する場合があるため GitHub API でフォールバック
+              exec($gitcmd . ' fetch --tags origin 2>&1');
+              $desc = trim(exec($gitcmd . ' describe --tags 2>&1'));
+              $app_root = realpath(__DIR__);
+              if ($desc !== '' && mb_substr($desc, 0, 1) === 'v' && is_numeric(mb_substr($desc, 1, 1))) {
+                  file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $desc);
+              } else {
+                  // shallow clone 等で describe 失敗 → GitHub API で取得
+                  $sha = trim(exec($gitcmd . ' rev-parse HEAD 2>&1'));
+                  if (preg_match('/^[0-9a-f]{40}$/', $sha)) {
+                      $api_ver = _kara_github_describe_version(get_update_repo(), $sha);
+                      if ($api_ver !== null) {
+                          file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $api_ver);
+                      }
+                  }
               }
           }
       }
     }
-    
+
     if($errorcnt > 0) {
         return false;
     }
@@ -2424,13 +2452,22 @@ function extract_zip_archive($zip_file, $extract_dir, &$errmsg = '') {
         return true;
     }
     if (is_powershell_available()) {
-        // Expand-Archive は PowerShell 5.0+ (Windows 10 / Server 2016 以降は標準)
+        // Expand-Archive は .zip 拡張子が必須。一時ファイルが .tmp 等の場合は .zip にコピーして渡す。
+        if (strtolower(pathinfo($zip_file, PATHINFO_EXTENSION)) !== 'zip') {
+            $zip_copy = $zip_file . '.zip';
+            if (!@copy($zip_file, $zip_copy)) {
+                $errmsg = 'ZIP の展開に失敗しました (PowerShell: 一時ファイルのコピーに失敗)';
+                return false;
+            }
+        } else {
+            $zip_copy = null;
+        }
+        $ps_src = addslashes($zip_copy ?? $zip_file);
+        $ps_dst = addslashes($extract_dir);
         $cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -Command '
-             . escapeshellarg(
-                 "Expand-Archive -LiteralPath '" . $zip_file . "' "
-               . "-DestinationPath '" . $extract_dir . "' -Force"
-             );
+             . escapeshellarg("Expand-Archive -LiteralPath '$ps_src' -DestinationPath '$ps_dst' -Force");
         @exec($cmd . ' 2>&1', $out, $ret);
+        if ($zip_copy !== null) @unlink($zip_copy);
         if ($ret !== 0) {
             $errmsg = 'ZIP の展開に失敗しました (PowerShell): ' . implode(' / ', $out);
             return false;
@@ -2438,6 +2475,63 @@ function extract_zip_archive($zip_file, $extract_dir, &$errmsg = '') {
         return true;
     }
     $errmsg = 'ZIP を展開する手段がありません';
+    return false;
+}
+
+// ZIP 作成が可能か（ZipArchive または PowerShell Compress-Archive）
+function zip_create_available() {
+    if (class_exists('ZipArchive')) return true;
+    return is_powershell_available();
+}
+
+// ファイルを ZIP に圧縮する。ZipArchive 優先、無ければ PowerShell にフォールバック。
+// $files_map: ['追加するフルパス' => 'ZIP内パス', ...] または
+//             [['dir' => $dir, 'prefix' => $zip_prefix], ...]  ← ディレクトリ一括追加は呼び元で展開済みを渡す
+// $output_file: 出力ZIPのフルパス（上書き）
+function create_zip_archive($files_map, $output_file, &$errmsg = '') {
+    if (class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        if ($zip->open($output_file, ZipArchive::OVERWRITE) !== true) {
+            $errmsg = 'ZIPの作成に失敗しました (ZipArchive::open)';
+            return false;
+        }
+        foreach ($files_map as $src => $dst) {
+            if (is_file($src)) {
+                $zip->addFile($src, $dst);
+            }
+        }
+        $zip->close();
+        return true;
+    }
+    if (is_powershell_available()) {
+        // 一時ディレクトリにZIP内パス構造でファイルをコピーしてから Compress-Archive する
+        $tmpdir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ykbak_' . uniqid();
+        if (!@mkdir($tmpdir, 0700, true)) {
+            $errmsg = '一時ディレクトリの作成に失敗しました';
+            return false;
+        }
+        foreach ($files_map as $src => $dst) {
+            if (!is_file($src)) continue;
+            $dstfull = $tmpdir . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $dst);
+            $dstdir  = dirname($dstfull);
+            if (!is_dir($dstdir)) @mkdir($dstdir, 0777, true);
+            @copy($src, $dstfull);
+        }
+        if (@file_exists($output_file)) @unlink($output_file);
+        $ps_src = addslashes($tmpdir);
+        $ps_dst = addslashes($output_file);
+        $ps_cmd = "Get-ChildItem -Path '$ps_src' | Compress-Archive -DestinationPath '$ps_dst' -Force";
+        $cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -Command ' . escapeshellarg($ps_cmd);
+        @exec($cmd . ' 2>&1', $out, $ret);
+        // 一時ディレクトリ削除
+        _kara_update_cleanup($tmpdir);
+        if ($ret !== 0) {
+            $errmsg = 'ZIPの作成に失敗しました (PowerShell): ' . implode(' / ', $out);
+            return false;
+        }
+        return true;
+    }
+    $errmsg = 'ZIP を作成する手段がありません (php.ini で extension=zip を有効化するか、PowerShell が利用できる Windows 環境が必要です)';
     return false;
 }
 
@@ -2470,6 +2564,37 @@ function get_archive_taglist(&$errmsg = '') {
         }
     }
     return $taglist;
+}
+
+// GitHub API を使い git describe --tags 相当の文字列を返す。失敗時は null。
+function _kara_github_describe_version($repo, $ref) {
+    $dummy = '';
+    $data = _kara_http_get('https://api.github.com/repos/' . $repo . '/commits/' . rawurlencode($ref), $dummy);
+    if ($data === false) return null;
+    $commit_info = json_decode($data, true);
+    if (!is_array($commit_info) || empty($commit_info['sha'])) return null;
+
+    $full_sha  = $commit_info['sha'];
+    $short_sha = substr($full_sha, 0, 7);
+
+    $taglist = get_archive_taglist($dummy);
+    if (empty($taglist)) return null;
+
+    foreach ($taglist as $tag) {
+        $cdata = _kara_http_get(
+            'https://api.github.com/repos/' . $repo . '/compare/' . rawurlencode($tag) . '...' . $full_sha,
+            $dummy
+        );
+        if ($cdata === false) continue;
+        $compare = json_decode($cdata, true);
+        if (!is_array($compare)) continue;
+        $status   = $compare['status']    ?? '';
+        $ahead_by = (int)($compare['ahead_by'] ?? -1);
+        if ($status === 'identical') return $tag;
+        if ($status === 'ahead')     return $tag . '-' . $ahead_by . '-g' . $short_sha;
+        // behind / diverged は次のタグを試す
+    }
+    return null;
 }
 
 function _kara_update_copy_recursive($src, $dst, $exclude_list, $relative = '') {
@@ -2596,8 +2721,9 @@ function update_fromarchive($version_str, &$errmsg) {
 
     _kara_update_copy_recursive($source_dir, $app_root, $exclude_list);
 
-    // バージョンファイルを更新
-    file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $version_str);
+    // バージョンファイルを更新（git describe 相当の形式を GitHub API で取得）
+    $describe_ver = _kara_github_describe_version($repo, $vs);
+    file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $describe_ver !== null ? $describe_ver : $version_str);
 
     _kara_update_cleanup($tmp_dir);
     return true;

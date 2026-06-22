@@ -342,6 +342,9 @@ print '</pre>';
     </li>
     </ul>
     <li class="menu">
+     <a href="#backup" class="menulink" > 設定バックアップ </a>
+    </li>
+    <li class="menu">
      <a href="#myiplist" class="menulink" > 自IP一覧 </a>
     </li>
     </ul>
@@ -1872,6 +1875,15 @@ if(array_key_exists("useeasyauth_word",$config_ini)) {
   <input type="submit" class="btn btn-secondary btn-lg" value="設定" />
   </form>
   <hr />
+
+<div class="card cfg-card mb-4"><div class="card-body">
+  <h1 id="backup" class="menulink">設定バックアップ</h1>
+  <p class="text-muted" style="font-size:0.9rem;">
+    設定ファイル一式をZIPでバックアップ・復元します。<br>
+    クリーンインストール後の設定復元にご利用ください。
+  </p>
+  <a href="backup_restore.php" class="btn btn-primary">設定バックアップ / 復元ページを開く</a>
+</div></div>
 
 <div class="card cfg-card mb-4"><div class="card-body">
   <h1 id="myiplist" class="menulink"> 自IP一覧 </h1>

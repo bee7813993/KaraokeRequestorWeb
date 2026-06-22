@@ -402,6 +402,10 @@ table.searchresult tbody td {
   margin-bottom: var(--space-4);
   font-size: 0.9rem;
 }
+.notice-box--warning {
+  border-left-color: #e67e22;
+  background: color-mix(in srgb, #e67e22 8%, var(--bg-card-alt));
+}
 
 /* --- モバイル --- */
 @media (max-width: 767px) {

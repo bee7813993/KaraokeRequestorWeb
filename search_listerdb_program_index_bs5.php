@@ -49,6 +49,7 @@ function checkandbuild_headerlink($oneheader, $headlist, $lister_dbpath)
 
 function sortcategorylist($categorylist)
 {
+    if (!is_array($categorylist)) return [];
     $lister_config = parse_ini_file("listerdb_config.ini", true);
     if ($lister_config === false) return $categorylist;
     if (!array_key_exists("category_order", $lister_config)) return $categorylist;
@@ -146,11 +147,21 @@ $errmsg     = '';
 $categorylist = [];
 $geturl = 'http://localhost/search_listerdb_head_json.php?list=1';
 $categorylist_json = @file_get_contents($geturl);
-if (!$categorylist_json) {
-    $errmsg = 'カテゴリーリストの取得に失敗';
+if ($categorylist_json === false || $categorylist_json === '') {
+    $errmsg = 'カテゴリーリストの取得に失敗しました。';
 } else {
-    $categorylist = json_decode($categorylist_json, true);
-    if (!$categorylist) $errmsg = 'カテゴリーリストのJSON parse 失敗';
+    $decoded = json_decode($categorylist_json, true);
+    if ($decoded === null) {
+        $errmsg = 'カテゴリーリストの解析に失敗しました。';
+    } elseif (isset($decoded['error'])) {
+        if ($decoded['error'] === 'db_not_found') {
+            $errmsg = 'ListerDB（リスターのデータベースファイル）が見つかりません。ゆかりすたー等のツールでDBを生成してください。';
+        } else {
+            $errmsg = 'ListerDB エラー: ' . $decoded['error'];
+        }
+    } else {
+        $categorylist = $decoded;
+    }
 }
 $categorylist = sortcategorylist($categorylist);
 

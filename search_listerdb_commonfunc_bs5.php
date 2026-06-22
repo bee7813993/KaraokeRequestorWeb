@@ -20,6 +20,22 @@ function headerlistcheck_column($oneheaderlist,$headerlist,$key){
 }
 
 
+function listerdb_is_generating() {
+    global $config_ini;
+    $lister_dbpath = 'list\List.sqlite3';
+    if (array_key_exists('listerDBPATH', $config_ini)) {
+        $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+    }
+    if (!file_exists($lister_dbpath)) return false;
+    try {
+        $pdo = new PDO('sqlite:' . $lister_dbpath);
+        $row = $pdo->query("SELECT 1 FROM t_found WHERE song_name != '' LIMIT 1")->fetch();
+        return ($row === false);
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
 function showuppermenu($target, $linkoption) {
     $items = [
         ['key' => 'filename',         'label' => '詳細検索（キーワード）', 'href' => 'search_listerdb_anysearch_index.php?' . $linkoption],
@@ -42,6 +58,14 @@ function showuppermenu($target, $linkoption) {
     print '</div>';
     print '</div>';
     print '</div>';
+
+    if (listerdb_is_generating()) {
+        print '<div class="container mt-2">';
+        print '<div class="notice-box notice-box--warning" role="status">';
+        print 'ゆかりすたーがDBを生成中です。現在はファイル名でのみ検索できます。';
+        print '</div>';
+        print '</div>';
+    }
 }
 
 function buildgetquery($queries){
