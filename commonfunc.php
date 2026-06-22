@@ -2327,21 +2327,49 @@ function update_fromgit($version_str, &$errmsg){
               return false;
           }
 
-          $execcmd = $gitcmd.' reset --hard '.$version_str;
-          exec($execcmd,$result_str);
+          // origin/ プレフィックスあり → ブランチ切り替え (checkout -B)
+          // タグ / ハッシュ → 現在ブランチのまま reset --hard
+          $result_str = [];
+          if (strpos($version_str, 'origin/') === 0) {
+              $branch_name = substr($version_str, strlen('origin/'));
+              $execcmd = $gitcmd . ' checkout -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str);
+          } else {
+              $execcmd = $gitcmd . ' reset --hard ' . $version_str;
+          }
+          exec($execcmd, $result_str);
           foreach($result_str as $line){
               $err_str_pos = mb_strpos($line, "unknown revision");
               if( $err_str_pos  !== false) {
                   $errmsg .= "no version : $version_str";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg .= "reset --hard unknown error: $line";
+                  $errmsg .= "checkout/reset unknown error: $line";
                   $errorcnt ++;
+              }
+          }
+
+          if ($errorcnt === 0) {
+              // タグを最新化してから version ファイルに書き込む
+              // shallow clone では git describe が失敗する場合があるため GitHub API でフォールバック
+              exec($gitcmd . ' fetch --tags origin 2>&1');
+              $desc = trim(exec($gitcmd . ' describe --tags 2>&1'));
+              $app_root = realpath(__DIR__);
+              if ($desc !== '' && mb_substr($desc, 0, 1) === 'v' && is_numeric(mb_substr($desc, 1, 1))) {
+                  file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $desc);
+              } else {
+                  // shallow clone 等で describe 失敗 → GitHub API で取得
+                  $sha = trim(exec($gitcmd . ' rev-parse HEAD 2>&1'));
+                  if (preg_match('/^[0-9a-f]{40}$/', $sha)) {
+                      $api_ver = _kara_github_describe_version(get_update_repo(), $sha);
+                      if ($api_ver !== null) {
+                          file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $api_ver);
+                      }
+                  }
               }
           }
       }
     }
-    
+
     if($errorcnt > 0) {
         return false;
     }
@@ -2538,6 +2566,37 @@ function get_archive_taglist(&$errmsg = '') {
     return $taglist;
 }
 
+// GitHub API を使い git describe --tags 相当の文字列を返す。失敗時は null。
+function _kara_github_describe_version($repo, $ref) {
+    $dummy = '';
+    $data = _kara_http_get('https://api.github.com/repos/' . $repo . '/commits/' . rawurlencode($ref), $dummy);
+    if ($data === false) return null;
+    $commit_info = json_decode($data, true);
+    if (!is_array($commit_info) || empty($commit_info['sha'])) return null;
+
+    $full_sha  = $commit_info['sha'];
+    $short_sha = substr($full_sha, 0, 7);
+
+    $taglist = get_archive_taglist($dummy);
+    if (empty($taglist)) return null;
+
+    foreach ($taglist as $tag) {
+        $cdata = _kara_http_get(
+            'https://api.github.com/repos/' . $repo . '/compare/' . rawurlencode($tag) . '...' . $full_sha,
+            $dummy
+        );
+        if ($cdata === false) continue;
+        $compare = json_decode($cdata, true);
+        if (!is_array($compare)) continue;
+        $status   = $compare['status']    ?? '';
+        $ahead_by = (int)($compare['ahead_by'] ?? -1);
+        if ($status === 'identical') return $tag;
+        if ($status === 'ahead')     return $tag . '-' . $ahead_by . '-g' . $short_sha;
+        // behind / diverged は次のタグを試す
+    }
+    return null;
+}
+
 function _kara_update_copy_recursive($src, $dst, $exclude_list, $relative = '') {
     $entries = scandir($src);
     foreach ($entries as $entry) {
@@ -2662,8 +2721,9 @@ function update_fromarchive($version_str, &$errmsg) {
 
     _kara_update_copy_recursive($source_dir, $app_root, $exclude_list);
 
-    // バージョンファイルを更新
-    file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $version_str);
+    // バージョンファイルを更新（git describe 相当の形式を GitHub API で取得）
+    $describe_ver = _kara_github_describe_version($repo, $vs);
+    file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $describe_ver !== null ? $describe_ver : $version_str);
 
     _kara_update_cleanup($tmp_dir);
     return true;
