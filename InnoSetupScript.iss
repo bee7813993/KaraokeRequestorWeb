@@ -57,7 +57,7 @@ Source: "notfoundrequest\*"; DestDir: "{app}\notfoundrequest"; Flags: IgnoreVers
 Source: "samples\*"; DestDir: "{app}\samples"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "fortest\*"; DestDir: "{app}\fortest"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "test_race\*"; DestDir: "{app}\test_race"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
-Source: "allinone\*"; DestDir: "{app}\allinone"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
+;;Source: "allinone\*"; DestDir: "{app}\allinone"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 
 ; --- foobar2000（.gitignore除外分は手動で配置が必要）---
 Source: "foobar2000\*"; DestDir: "{app}\foobar2000"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
