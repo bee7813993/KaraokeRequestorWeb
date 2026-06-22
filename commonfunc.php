@@ -2327,15 +2327,23 @@ function update_fromgit($version_str, &$errmsg){
               return false;
           }
 
-          $execcmd = $gitcmd.' reset --hard '.$version_str;
-          exec($execcmd,$result_str);
+          // origin/ プレフィックスあり → ブランチ切り替え (checkout -B)
+          // タグ / ハッシュ → 現在ブランチのまま reset --hard
+          $result_str = [];
+          if (strpos($version_str, 'origin/') === 0) {
+              $branch_name = substr($version_str, strlen('origin/'));
+              $execcmd = $gitcmd . ' checkout -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str);
+          } else {
+              $execcmd = $gitcmd . ' reset --hard ' . $version_str;
+          }
+          exec($execcmd, $result_str);
           foreach($result_str as $line){
               $err_str_pos = mb_strpos($line, "unknown revision");
               if( $err_str_pos  !== false) {
                   $errmsg .= "no version : $version_str";
                   $errorcnt ++;
               }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg .= "reset --hard unknown error: $line";
+                  $errmsg .= "checkout/reset unknown error: $line";
                   $errorcnt ++;
               }
           }
