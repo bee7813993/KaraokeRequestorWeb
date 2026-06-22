@@ -17,12 +17,21 @@ if(array_key_exists("list", $_REQUEST)) {
     $list = $_REQUEST["list"];
 }
 
+header('Content-Type: application/json; charset=utf-8');
+
+// DBファイル存在確認
+if (!file_exists($lister_dbpath)) {
+    echo json_encode(['error' => 'db_not_found']);
+    exit;
+}
+
 // DB初期化
 $lister = new ListerDB();
 $lister->listerdbfile = $lister_dbpath;
 $listerdb = $lister->initdb();
 if( !$listerdb ) {
-    die();
+    echo json_encode(['error' => 'db_init_failed']);
+    exit;
 }
 
 if(!empty($list)) {
@@ -30,8 +39,8 @@ if(!empty($list)) {
   $sql = 'select DISTINCT program_category from t_found ;';
   $alldbdata =  $lister->select($sql);
   if($alldbdata === false){
-       print 'failed :'.$sql;
-       die();
+       echo json_encode(['error' => 'db_query_failed']);
+       exit;
   }
 
   $returnarray = $alldbdata;
@@ -51,8 +60,8 @@ if(!empty($list)) {
   $sql = 'select DISTINCT found_head from t_found '. $select_where.';';
   $alldbdata =  $lister->select($sql);
   if($alldbdata === false){
-     print $sql;
-     die();
+     echo json_encode(['error' => 'db_query_failed']);
+     exit;
   }
 
   $returnarray = array( "program_category" => $program_category, "data" => $alldbdata);
