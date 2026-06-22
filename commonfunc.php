@@ -2538,6 +2538,37 @@ function get_archive_taglist(&$errmsg = '') {
     return $taglist;
 }
 
+// GitHub API を使い git describe --tags 相当の文字列を返す。失敗時は null。
+function _kara_github_describe_version($repo, $ref) {
+    $dummy = '';
+    $data = _kara_http_get('https://api.github.com/repos/' . $repo . '/commits/' . rawurlencode($ref), $dummy);
+    if ($data === false) return null;
+    $commit_info = json_decode($data, true);
+    if (!is_array($commit_info) || empty($commit_info['sha'])) return null;
+
+    $full_sha  = $commit_info['sha'];
+    $short_sha = substr($full_sha, 0, 7);
+
+    $taglist = get_archive_taglist($dummy);
+    if (empty($taglist)) return null;
+
+    foreach ($taglist as $tag) {
+        $cdata = _kara_http_get(
+            'https://api.github.com/repos/' . $repo . '/compare/' . rawurlencode($tag) . '...' . $full_sha,
+            $dummy
+        );
+        if ($cdata === false) continue;
+        $compare = json_decode($cdata, true);
+        if (!is_array($compare)) continue;
+        $status   = $compare['status']    ?? '';
+        $ahead_by = (int)($compare['ahead_by'] ?? -1);
+        if ($status === 'identical') return $tag;
+        if ($status === 'ahead')     return $tag . '-' . $ahead_by . '-g' . $short_sha;
+        // behind / diverged は次のタグを試す
+    }
+    return null;
+}
+
 function _kara_update_copy_recursive($src, $dst, $exclude_list, $relative = '') {
     $entries = scandir($src);
     foreach ($entries as $entry) {
@@ -2662,8 +2693,9 @@ function update_fromarchive($version_str, &$errmsg) {
 
     _kara_update_copy_recursive($source_dir, $app_root, $exclude_list);
 
-    // バージョンファイルを更新
-    file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $version_str);
+    // バージョンファイルを更新（git describe 相当の形式を GitHub API で取得）
+    $describe_ver = _kara_github_describe_version($repo, $vs);
+    file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $describe_ver !== null ? $describe_ver : $version_str);
 
     _kara_update_cleanup($tmp_dir);
     return true;
