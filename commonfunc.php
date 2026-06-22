@@ -2347,9 +2347,29 @@ function update_fromgit($version_str, &$errmsg){
                   $errorcnt ++;
               }
           }
+
+          if ($errorcnt === 0) {
+              // タグを最新化してから version ファイルに書き込む
+              // shallow clone では git describe が失敗する場合があるため GitHub API でフォールバック
+              exec($gitcmd . ' fetch --tags origin 2>&1');
+              $desc = trim(exec($gitcmd . ' describe --tags 2>&1'));
+              $app_root = realpath(__DIR__);
+              if ($desc !== '' && mb_substr($desc, 0, 1) === 'v' && is_numeric(mb_substr($desc, 1, 1))) {
+                  file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $desc);
+              } else {
+                  // shallow clone 等で describe 失敗 → GitHub API で取得
+                  $sha = trim(exec($gitcmd . ' rev-parse HEAD 2>&1'));
+                  if (preg_match('/^[0-9a-f]{40}$/', $sha)) {
+                      $api_ver = _kara_github_describe_version(get_update_repo(), $sha);
+                      if ($api_ver !== null) {
+                          file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $api_ver);
+                      }
+                  }
+              }
+          }
       }
     }
-    
+
     if($errorcnt > 0) {
         return false;
     }
