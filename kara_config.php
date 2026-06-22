@@ -141,8 +141,11 @@ function readconfig_array()
         $usebgv = 2;
         $config_ini = array_merge($config_ini,array("usebgv" => $usebgv));
     }
+    if(!array_key_exists("usenewsearchui", $config_ini)){
+        $config_ini = array_merge($config_ini,array("usenewsearchui" => 1));
+    }
     if(!array_key_exists("usenewrequestlist", $config_ini)){
-        $config_ini = array_merge($config_ini,array("usenewrequestlist" => 2));
+        $config_ini = array_merge($config_ini,array("usenewrequestlist" => 1));
     }
     if(!array_key_exists("secret_display_text", $config_ini)){
         $config_ini["secret_display_text"] = urlencode("ヒ・ミ・ツ♪(シークレットリクエスト)");
