@@ -396,7 +396,7 @@ $displaylast = min($displayfrom + $displaynum, $programlist['recordsTotal']);
   <?php foreach ($programlist['data'] as $k => $program): ?>
     <?php
     $display = $program['song_name'];
-    if (empty($display)) $display = '未分類';
+    if (empty($display)) $display = makesongnamefromfilename(basename_jp($program['found_path']));
     $comment = preg_replace('/\,\/\/.*/', '', $program['found_comment'] ?? '');
     ?>
     <div class="file-item">
