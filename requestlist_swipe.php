@@ -1096,6 +1096,7 @@ function changeItem(id, songfile) {
 
 // 曲終了
 function songEnd() {
+    if (!confirm('曲を停止しますか？')) return;
     fetch('playerctrl_portal.php?songnext=1').then(loadList);
 }
 
