@@ -74,6 +74,14 @@ function apply_player_compensation_full() {
 /* ---- AJAX / コマンドリクエスト処理 ---- */
 if (!empty($_REQUEST['songnext'])) {
     songnext();
+    // ★ 曲終了後に音量をベースラインに戻す（startvolume50 が有効な場合）
+    //   次の曲が始まるまで offset 音量のまま残らないようにする。
+    if (array_key_exists('startvolume50', $config_ini) && intval($config_ini['startvolume50']) === 1) {
+        $base = (array_key_exists('startvolume', $config_ini) && $config_ini['startvolume'] !== '')
+                ? intval($config_ini['startvolume']) : 50;
+        if ($base <= 0) $base = 50;
+        set_volume($base);
+    }
     die();
 }
 if (array_key_exists('songstart', $_REQUEST)) {
