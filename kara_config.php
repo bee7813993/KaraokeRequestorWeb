@@ -147,6 +147,15 @@ function readconfig_array()
     if(!array_key_exists("usenewrequestlist", $config_ini)){
         $config_ini = array_merge($config_ini,array("usenewrequestlist" => 1));
     }
+    if(!array_key_exists("ui_skin_preset", $config_ini)){
+        $config_ini["ui_skin_preset"] = urlencode("default");
+    }
+    if(!array_key_exists("ui_skin_shape", $config_ini)){
+        $config_ini["ui_skin_shape"] = urlencode("preset");
+    }
+    if(!array_key_exists("ui_skin_card_opacity", $config_ini)){
+        $config_ini["ui_skin_card_opacity"] = 100;
+    }
     if(!array_key_exists("secret_display_text", $config_ini)){
         $config_ini["secret_display_text"] = urlencode("ヒ・ミ・ツ♪(シークレットリクエスト)");
     }

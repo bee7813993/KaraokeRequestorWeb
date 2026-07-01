@@ -113,7 +113,7 @@ mypage_action_script();
 <title>anison.info検索</title>
 <?php print_bs5_search_head(); ?>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php shownavigatioinbar_bs5('searchreserve.php'); ?>
 <?php showuppermenu('', $linkoption); ?>
 

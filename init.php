@@ -25,6 +25,15 @@ $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
 
 $newconfig = $_REQUEST;
+if (array_key_exists('ui_skin_preset', $newconfig)) {
+  $newconfig['ui_skin_preset'] = get_ui_skin_preset($newconfig['ui_skin_preset']);
+}
+if (array_key_exists('ui_skin_shape', $newconfig)) {
+  $newconfig['ui_skin_shape'] = get_ui_skin_shape($newconfig['ui_skin_shape']);
+}
+if (array_key_exists('ui_skin_card_opacity', $newconfig)) {
+  $newconfig['ui_skin_card_opacity'] = (string)get_ui_skin_card_opacity($newconfig['ui_skin_card_opacity']);
+}
 
 // 背景画像のアップロード/削除処理
 // クロップ済み画像はクライアントから data URL (base64) で送信される。
@@ -164,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php
 shownavigatioinbar_bs5('init.php');
 ?>
@@ -315,6 +324,9 @@ print '</pre>';
     </li>
     <li class="menu">
      <a href="#bgcolor_t" class="menulink" > ページ背景色 </a>
+    </li>
+    <li class="menu">
+     <a href="#ui_skin_preset_t" class="menulink" > 外観プリセット </a>
     </li>
     <li class="menu">
      <a href="#bgimage_t" class="menulink" > 背景画像 </a>
@@ -779,6 +791,9 @@ print ' value="10" ';
       if(array_key_exists("bgcolor",$config_ini)){
              $bgcolor=urldecode($config_ini["bgcolor"]);
       }
+      $current_ui_skin_preset = get_ui_skin_preset();
+            $current_ui_skin_shape = get_ui_skin_shape();
+            $current_ui_skin_card_opacity = get_ui_skin_card_opacity();
   ?>
 </div></div>
 
@@ -804,6 +819,58 @@ print ' value="10" ';
       }
       bgEl.addEventListener('input', applyBgColor);
       bgEl.addEventListener('change', applyBgColor);
+  })();
+  </script>
+
+  <div class="mb-3" style="margin-top:12px;">
+    <h3 id="ui_skin_preset_t" class="radio form-label menulink"> 外観プリセット </h3>
+    <label for="ui_skin_preset" class="form-label"><small>BS5画面のカード形状、影、枠線、アクセント色をまとめて切り替えます。既存の背景画像・背景色・透過度設定はそのまま併用されます。</small></label>
+    <select name="ui_skin_preset" id="ui_skin_preset" class="form-select" style="max-width:320px;">
+      <option value="default" <?php echo selectedcheck($current_ui_skin_preset, 'default'); ?>>標準</option>
+      <option value="glass" <?php echo selectedcheck($current_ui_skin_preset, 'glass'); ?>>ガラス</option>
+      <option value="live" <?php echo selectedcheck($current_ui_skin_preset, 'live'); ?>>ライブ</option>
+      <option value="wa" <?php echo selectedcheck($current_ui_skin_preset, 'wa'); ?>>和風</option>
+      <option value="minimal" <?php echo selectedcheck($current_ui_skin_preset, 'minimal'); ?>>ミニマル</option>
+      <option value="oshi" <?php echo selectedcheck($current_ui_skin_preset, 'oshi'); ?>>推し活</option>
+    </select>
+    <small>未設定・空欄・不正値は自動で標準になります。</small>
+  </div>
+  <div class="mb-3">
+    <label for="ui_skin_shape" class="form-label"><small>図形・ボタンの形状</small></label>
+    <select name="ui_skin_shape" id="ui_skin_shape" class="form-select" style="max-width:320px;">
+      <option value="preset" <?php echo selectedcheck($current_ui_skin_shape, 'preset'); ?>>プリセット準拠</option>
+      <option value="default" <?php echo selectedcheck($current_ui_skin_shape, 'default'); ?>>標準の図形</option>
+    </select>
+    <small>色や質感はプリセットを維持したまま、カードを標準寄りに戻せます。</small>
+  </div>
+  <div class="mb-3">
+    <label for="ui_skin_card_opacity"><small>プリセット面の透過度: <span id="ui_skin_card_opacity_val"><?php echo $current_ui_skin_card_opacity; ?></span>%</small></label>
+    <input type="range" name="ui_skin_card_opacity" id="ui_skin_card_opacity" min="0" max="100" step="1" value="<?php echo $current_ui_skin_card_opacity; ?>" style="max-width:320px;" />
+    <small>プリセットが加えるカード面・ヘッダー面の見え方だけを調整します。既存のカード透過度設定とも併用されます。</small>
+  </div>
+  <script>
+  (function(){
+      var skinEl = document.getElementById('ui_skin_preset');
+      var shapeEl = document.getElementById('ui_skin_shape');
+      var opacityEl = document.getElementById('ui_skin_card_opacity');
+      var opacityLabel = document.getElementById('ui_skin_card_opacity_val');
+      if (!skinEl || !shapeEl || !opacityEl || !opacityLabel) return;
+      function applySkinPreview(){
+          var value = skinEl.value || 'default';
+          var shape = shapeEl.value || 'preset';
+          var opacity = Math.max(0, Math.min(100, parseInt(opacityEl.value, 10) || 0));
+          document.body.setAttribute('data-ykr-skin', value);
+          document.body.setAttribute('data-ykr-shape', shape);
+          document.documentElement.style.setProperty('--ykr-skin-card-opacity', String(opacity / 100));
+          opacityLabel.textContent = String(opacity);
+      }
+      skinEl.addEventListener('input', applySkinPreview);
+      skinEl.addEventListener('change', applySkinPreview);
+      shapeEl.addEventListener('input', applySkinPreview);
+      shapeEl.addEventListener('change', applySkinPreview);
+      opacityEl.addEventListener('input', applySkinPreview);
+      opacityEl.addEventListener('change', applySkinPreview);
+      applySkinPreview();
   })();
   </script>
 
