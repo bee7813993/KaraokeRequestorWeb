@@ -139,18 +139,18 @@ class MoveItem {
             $rounds[] = $cur_round;
         }
 
-        // 挿入ラウンド: 新歌い手を含まない最初のラウンド
-        $target_idx = count($rounds);
-        foreach ($rounds as $idx => $round) {
-            $has = false;
-            foreach ($round as $r) {
-                if ($r['singer'] === $newsinger) { $has = true; break; }
-            }
-            if (!$has) {
-                $target_idx = $idx;
-                break;
-            }
+// 挿入ラウンド: 歌い手が最後に登場したラウンドの次
+// 初回参加は last=-1+1=0、途中参加者も含め
+// 最後の出現ラウンド+1を正しく参照する
+$last_singer_idx = -1;
+foreach ($rounds as $idx => $round) {
+    foreach ($round as $r) {
+        if ($r['singer'] === $newsinger) {
+            $last_singer_idx = $idx; break;
         }
+    }
+}
+$target_idx = $last_singer_idx + 1;
 
         // 全ラウンドに既に存在 → 末尾に追加
         if ($target_idx >= count($rounds)) {

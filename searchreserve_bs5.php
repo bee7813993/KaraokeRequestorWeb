@@ -14,7 +14,7 @@ if (array_key_exists("id", $_REQUEST)) $selectid = $_REQUEST["id"];
 <title>検索＆リクエストTOP</title>
 <?php print_bs5_search_head(); ?>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php shownavigatioinbar_bs5('searchreserve.php'); ?>
 <div class="container py-4">
 <?php

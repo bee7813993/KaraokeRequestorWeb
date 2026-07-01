@@ -453,7 +453,7 @@ if (!empty($config_ini['roomurl'])) {
 ?>動画検索</title>
 <?php print_bs5_search_head(); ?>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 
 <?php shownavigatioinbar_bs5('searchreserve.php'); ?>
 
@@ -530,15 +530,16 @@ else:
                         print_listerdb_fileonly();
                     }
                     break;
-                case 1:
-                    if (checkbox_check($config_ini['searchitem'], "listerDB")) {
-                        // 作品名インデックス検索は常時開いた状態にする
-                        _section_open('sec-listerdb', '作品名インデックス検索', true);
-                        print_listerdb_search();
-                        _section_close();
-                        $first = false;
-                    }
-                    break;
+case 1:
+    if (checkbox_check($config_ini['searchitem'], "listerDB")) {
+        // 作品名インデックス検索は他セクションと同様に先頭時だけ展開する
+        _section_open('sec-listerdb', '作品名インデックス検索', $first);
+        print_listerdb_search();
+        _section_close();
+
+        $first = false;
+    }
+    break;
                 case 2:
                     if (checkbox_check($config_ini['searchitem'], "filesearch_e")) {
                         print_everything_filenamesearch($first);

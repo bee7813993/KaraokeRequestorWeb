@@ -170,7 +170,7 @@ if (empty($includepage)) {
     print_meta_header();
     print_bs5_search_head();
     print '<title>作品名インデックス検索</title>';
-    print '</head><body>';
+    print '</head><body' . bs5_skin_data_attr() . '>';
     shownavigatioinbar_bs5('searchreserve.php');
 }
 showuppermenu('program_name', $linkoption);

@@ -29,13 +29,7 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 <meta http-equiv="cache-control" content="no-cache">
 <meta http-equiv="expires"       content="0">
 <title><?php echo htmlspecialchars($titlePrefix, ENT_QUOTES, 'UTF-8'); ?>リクエスト一覧</title>
-<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
-<link href="css/bootstrap5/bootstrap.min.css" rel="stylesheet">
-<link href="css/themes/_variables.css"         rel="stylesheet">
-<link href="css/style.css"                    rel="stylesheet">
-<link href="css/themes/theme-toggle.css"      rel="stylesheet">
-<script src="js/bootstrap5/bootstrap.bundle.min.js"></script>
-<script src="js/theme-toggle.js"></script>
+<?php print_bs5_head_core(['css/style.css']); ?>
 <!-- SortableJS: js/Sortable.min.js に配置してください。取得先: https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js -->
 <script src="js/Sortable.min.js"></script>
 <style>
@@ -59,9 +53,13 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
   position: relative;
   overflow: hidden;
   margin-bottom: 6px;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    border-radius: var(--ykr-request-card-radius, 6px);
+    box-shadow: var(--ykr-request-card-shadow, 0 1px 3px rgba(0,0,0,0.15));
   background: rgba(var(--bg-card-rgb, 255, 255, 255), var(--bg-card-alpha, 1));
+    background-image: var(--ykr-card-gradient, none);
+    border-top: 1px solid var(--ykr-card-border, rgba(0,0,0,0));
+    border-right: 1px solid var(--ykr-card-border, rgba(0,0,0,0));
+    border-bottom: 1px solid var(--ykr-card-border, rgba(0,0,0,0));
   border-left: 4px solid var(--color-border, #ced4da);
   -webkit-user-select: none;
   user-select: none;
@@ -222,9 +220,9 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
   padding: 4px 8px;
   min-height: 24px;
   margin-top: 5px;
-  background: var(--bg-card-alt, #f8f9fa);
-  border-radius: 6px;
-  border: 1px solid var(--color-border, #e9ecef);
+    background: rgba(var(--bg-card-alt-rgb, 248, 244, 240), var(--bg-card-alpha, 1));
+    border-radius: var(--ykr-request-chip-radius, 6px);
+    border: 1px solid var(--ykr-card-border, var(--color-border, #e9ecef));
   transition: border-color 0.15s, color 0.15s;
 }
 .card-comment-area:hover { color: var(--bs-primary); border-color: var(--bs-primary); }
@@ -411,14 +409,14 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 [data-theme="dark"] .sortable-ghost { background: #1a2a4a !important; }
 </style>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php shownavigatioinbar_bs5(); ?>
 <div class="container">
 <?php
 showmode();
 
 if (!empty($config_ini['noticeof_listpage'])) {
-    echo '<div class="p-3 mb-3 border rounded bg-light notice-embedded-html">';
+  echo '<div class="p-3 mb-3 notice-embedded-html ykr-notice-embedded">';
     echo str_replace('#yukarihost#', $_SERVER['HTTP_HOST'], urldecode($config_ini['noticeof_listpage']));
     echo '</div>';
 }
@@ -1096,6 +1094,7 @@ function changeItem(id, songfile) {
 
 // 曲終了
 function songEnd() {
+    if (!confirm('曲を停止しますか？')) return;
     fetch('playerctrl_portal.php?songnext=1').then(loadList);
 }
 

@@ -183,9 +183,8 @@ function extention_musiccheck($fn){
 <html lang="ja">
 <head>
 <?php print_meta_header(); ?>
-<?php print_bs5_head_core([], ['jquery' => true]); ?>
+<?php print_bs5_head_core(['css/style.css'], ['jquery' => true]); ?>
 <title>リクエスト確認画面</title>
-<link type="text/css" rel="stylesheet" href="css/style.css" />
 <script type="text/javascript">
 
 function check(selectf){
@@ -222,7 +221,7 @@ $nanasyname = $config_ini["nonameusername"];
 > </script>
 
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php
 $YkariUsername = "";
 if(array_key_exists("YkariUsername", $_COOKIE)) {

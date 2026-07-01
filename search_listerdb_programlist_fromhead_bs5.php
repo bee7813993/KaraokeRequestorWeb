@@ -52,7 +52,7 @@ if (!empty($header)) {
 <title>作品名一覧</title>
 <?php print_bs5_search_head(); ?>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php shownavigatioinbar_bs5('searchreserve.php'); ?>
 <?php showuppermenu('program_name', ltrim($linkoption, '&')); ?>
 
