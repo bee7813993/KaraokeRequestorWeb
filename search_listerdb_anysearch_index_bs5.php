@@ -32,7 +32,7 @@ if (empty($includepage)) {
     print_meta_header();
     print_bs5_search_head();
     print '<title>りすたーDB検索</title>';
-    print '</head><body>';
+    print '</head><body' . bs5_skin_data_attr() . '>';
     if (empty($filesearch)) {
         shownavigatioinbar_bs5('searchreserve.php');
     }

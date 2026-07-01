@@ -20,7 +20,7 @@ if (!empty($config_ini['roomurl'])) {
 ?>プレイヤーコントローラー</title>
 <?php print_bs5_head_core(['css/themes/player.css'], ['jquery' => true]); ?>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php shownavigatioinbar_bs5('playerctrl_portal_bs5.php'); ?>
 
 <div class="container pt-3 pb-4" style="max-width:540px;">

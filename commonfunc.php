@@ -1397,6 +1397,67 @@ function print_bs5_search_head($extra_css = ''){
     print_bs5_head_core($page_css, ['jquery' => true]);
 }
 
+function get_ui_skin_preset($value = null){
+    static $allowed = ['default', 'glass', 'live', 'wa', 'minimal', 'oshi'];
+
+    if ($value === null) {
+        global $config_ini;
+        $value = $config_ini['ui_skin_preset'] ?? 'default';
+    }
+
+    if (is_array($value)) {
+        return 'default';
+    }
+
+    $preset = trim(urldecode((string)$value));
+    if ($preset === '' || !in_array($preset, $allowed, true)) {
+        return 'default';
+    }
+
+    return $preset;
+}
+
+function get_ui_skin_shape($value = null){
+    static $allowed = ['preset', 'default'];
+
+    if ($value === null) {
+        global $config_ini;
+        $value = $config_ini['ui_skin_shape'] ?? 'preset';
+    }
+
+    if (is_array($value)) {
+        return 'preset';
+    }
+
+    $shape = trim(urldecode((string)$value));
+    if ($shape === '' || !in_array($shape, $allowed, true)) {
+        return 'preset';
+    }
+
+    return $shape;
+}
+
+function get_ui_skin_card_opacity($value = null){
+    if ($value === null) {
+        global $config_ini;
+        $value = $config_ini['ui_skin_card_opacity'] ?? 100;
+    }
+
+    if (is_array($value) || $value === '') {
+        return 100;
+    }
+
+    $opacity = (int)$value;
+    if ($opacity < 0) $opacity = 0;
+    if ($opacity > 100) $opacity = 100;
+    return $opacity;
+}
+
+function bs5_skin_data_attr(){
+    return ' data-ykr-skin="' . htmlspecialchars(get_ui_skin_preset(), ENT_QUOTES, 'UTF-8') . '"'
+        . ' data-ykr-shape="' . htmlspecialchars(get_ui_skin_shape(), ENT_QUOTES, 'UTF-8') . '"';
+}
+
 /**
  * BS5ページ共通の <head> 核を出力する。
  * テーマ初期化スクリプト（FOUC防止）+ Bootstrap5 + テーマ変数 + テーマ切替 を
@@ -1411,10 +1472,12 @@ function print_bs5_head_core($page_css = [], $opts = []){
     print '<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>';
     print '<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">';
     print '<link rel="stylesheet" href="css/themes/_variables.css">';
+    print '<style>:root{--ykr-skin-card-opacity:' . (get_ui_skin_card_opacity() / 100) . ';}</style>';
     foreach ((array)$page_css as $href){
         if($href === '') continue;
         print '<link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
     }
+    print '<link rel="stylesheet" href="css/themes/skin-presets.css">';
     print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
     if(!empty($opts['jquery'])){
         print '<script src="js/jquery.js"></script>';

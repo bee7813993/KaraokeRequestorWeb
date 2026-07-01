@@ -20,7 +20,7 @@ $linkoption = !empty($selectid) ? 'selectid=' . rawurlencode($selectid) : '';
 <script src="js/jquery.dataTables.js"></script>
 <script src="js/currency.js"></script>
 </head>
-<body>
+<body<?php echo bs5_skin_data_attr(); ?>>
 <?php shownavigatioinbar_bs5('searchreserve.php'); ?>
 <?php showuppermenu('', $linkoption); ?>
 
