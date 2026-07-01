@@ -1017,7 +1017,8 @@ function print_meta_header(){
     print "\n";
     print '<meta http-equiv="Content-Script-Type" content="text/javascript" />';
     print "\n";
-    print '<meta name="viewport" content="width=device-width,initial-scale=1.0" />';
+    // iPhone の safe area まで背景・UI を拡張できるよう viewport-fit=cover を付与する。
+    print '<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />';
     print "\n";
 }
 
@@ -1920,10 +1921,23 @@ function print_bg_style_block($is_bs5 = false) {
         // html::before = 固定背景画像レイヤー。
         // iOS Safari は body の background-attachment:fixed をサポートしていないため、
         // position:fixed の疑似要素で代替することで全ブラウザ・全デバイスで背景を固定する。
-        print 'html,body{background-color:transparent !important;}';
-        print 'html::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;'
-            . 'filter:none !important;'
-            . 'background-image:var(--bg-page-image);background-size:cover;background-position:center;}';
+        // iPhone Safari はブラウザUI背面に root 背景色を使うことがあるため、
+        // html 側には常にページ背景色を持たせて白抜けを防ぐ。body は透過のままにする。
+        print 'html{background-color:var(--bg-page, #F8ECE0) !important;}body{background-color:transparent !important;}';
+        // iOS Safari は visual viewport の高さ変化(URLバー表示/非表示)に合わせて
+        // inset:0 の fixed 要素を伸縮させるため、background-size:cover が再計算されて
+        // 背景が拡大縮小して見える。100lvh ベースの固定高に切り替え、さらに safe area と
+        // オーバースキャン分だけ大きめに描画して、iPhone 下端の白い帯露出も防ぐ。
+        print 'html::before{content:"";position:fixed;'
+            . 'top:calc(-24px - env(safe-area-inset-top, 0px));left:calc(-24px - env(safe-area-inset-left, 0px));'
+            . 'width:calc(100vw + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px) + 48px);'
+            . 'height:calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
+            . 'height:calc(100lvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
+            . 'z-index:-2;pointer-events:none;filter:none !important;'
+            . 'background-image:var(--bg-page-image);background-repeat:no-repeat;'
+            . 'background-size:cover;background-position:center center;'
+            . 'transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);'
+            . '-webkit-backface-visibility:hidden;backface-visibility:hidden;}';
         // スマホ縦持ち(縦長表示)のときだけ専用画像に切り替える。
         // orientation:portrait を条件に加えることで、小型端末を横持ちにした際
         // (幅が 768px 以下のままでも)は PC 用の横長画像が使われるようにする。
@@ -1934,8 +1948,12 @@ function print_bg_style_block($is_bs5 = false) {
         print 'body{background-image:none !important;}';
         // body::before = オーバーレイ色レイヤー。画像レイヤー(z-index:-2)の上に重ねる。
         // ダークモードの brightness フィルタが背景画像に影響しないよう filter:none を指定。
-        print 'body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;'
-            . 'background-image:none !important;'
+        print 'body::before{content:"";position:fixed;'
+            . 'top:calc(-24px - env(safe-area-inset-top, 0px));left:calc(-24px - env(safe-area-inset-left, 0px));'
+            . 'width:calc(100vw + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px) + 48px);'
+            . 'height:calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
+            . 'height:calc(100lvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
+            . 'z-index:-1;pointer-events:none;background-image:none !important;'
             . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));'
             . 'filter:none !important;}';
         // ダークモード時はユーザー指定の明るい bgcolor をそのままオーバーレイに使うと
