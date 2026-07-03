@@ -1962,6 +1962,10 @@ function print_bg_style_block($is_bs5 = false) {
         // 違和感が出るため、暗色オーバーレイに置き換える。透過率は --bg-overlay-alpha を共用。
         print '[data-theme="dark"] body::before{'
             . 'background-color:rgba(18, 18, 30, var(--bg-overlay-alpha, 1));}';
+        // 下記の計測スクリプトが固定px高を確定できた場合は vh/lvh 指定より優先する。
+        // (JS無効時は data-ykr-bgfix が付かず、上の lvh フォールバックがそのまま使われる)
+        print 'html[data-ykr-bgfix="1"]::before{height:var(--ykr-bg-fixed-h);}';
+        print 'html[data-ykr-bgfix="1"] body::before{height:var(--ykr-bg-fixed-h);}';
     }
 
     if ($has_bgimage && $card_alpha < 1.0) {
@@ -2022,6 +2026,32 @@ function print_bg_style_block($is_bs5 = false) {
     }
 
     print '</style>';
+
+    if ($has_bgimage) {
+        // Chrome iOS(CriOS)や各種アプリ内ブラウザは、ツールバー開閉時に WebView
+        // 自体をリサイズするため、vh も lvh もすべて動的に変わり、CSS 単体では
+        // 背景疑似要素の伸縮(=cover 再計算によるズーム)を止められない。
+        // (Safari はレイアウトビューポート固定方式なので lvh 指定だけで足りる)
+        // そこで実測した最大ビューポート高を固定 px として CSS 変数に焼き付け、
+        // ビューポート単位の再計算そのものを背景の高さから排除する。
+        // - 同一幅の間は「観測した最大の高さ」のみ採用(ツールバー格納時の値に収束)
+        // - 幅が変わったとき(画面回転・ウィンドウリサイズ)は測り直す
+        // - キーボード表示などの高さ減少では更新しない
+        print '<script>(function(){'
+            . 'var doc=document.documentElement,maxH=0,lastW=0;'
+            . 'function apply(){'
+            . 'var w=window.innerWidth,h=window.innerHeight;'
+            . 'if(!w||!h)return;'
+            . 'if(w!==lastW){lastW=w;maxH=0;}'
+            . 'if(h>maxH){maxH=h;'
+            . 'doc.style.setProperty("--ykr-bg-fixed-h",(maxH+160)+"px");'
+            . 'doc.setAttribute("data-ykr-bgfix","1");}'
+            . '}'
+            . 'apply();'
+            . 'window.addEventListener("resize",apply);'
+            . 'window.addEventListener("orientationchange",function(){setTimeout(apply,350);});'
+            . '})();</script>';
+    }
 }
 
 function writeconfig2ini($config_ini,$configfile)
