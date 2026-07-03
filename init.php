@@ -1712,6 +1712,32 @@ if(array_key_exists("request_automove_reset",$config_ini)) {
     </label>
   </div>
 
+  <div class="mb-3">
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="有効にすると、途中参加した人のリクエストをできるだけ早い周に割り込ませます。無効(標準)では、その人が最後に歌った周の次に配置されます" >ピッタリ移動_途中参加者を早い周へ </span ></h3>
+    <label class="checkbox-inline">
+      <input type="radio" name="request_automove_midjoin_first" value="1"
+<?php
+if(array_key_exists("request_automove_midjoin_first",$config_ini)) {
+  print ($config_ini["request_automove_midjoin_first"]==1)?'checked':' ' ;
+}
+?>
+ />
+      有効
+    </label>
+    <label class="checkbox-inline">
+      <input type="radio" name="request_automove_midjoin_first" value="2"
+<?php
+if(array_key_exists("request_automove_midjoin_first",$config_ini)) {
+  print ($config_ini["request_automove_midjoin_first"]!=1)?'checked':' ' ;
+}else{
+  print 'checked';
+}
+?>
+ />
+      無効
+    </label>
+  </div>
+
 
 <!---- 縛り曲リストの設定 ----->
   <h3> <span data-bs-toggle="tooltip" data-bs-placement="top" title="検索リクエストメニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
