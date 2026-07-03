@@ -271,15 +271,7 @@ Always `require_once 'commonfunc.php'` — it also loads `kara_config.php` and `
 ## PHP Coding Conventions
 
 ### CRITICAL: Header-before-output rule
-`setcookie()` and `header()` **must** be called before any HTML output. Violations cause "headers already sent" errors. This has caused bugs in mypage files in the past. When adding cookie/redirect logic, always place it at the top of the file before `?>` or any echo/print.
-
-```php
-<?php
-// ALL setcookie() and header() calls here
-require_once 'commonfunc.php';
-$mypage = new MypageUser($db); // may call setcookie internally
-// ... then HTML output below
-```
+`setcookie()` and `header()` **must** be called before any HTML output. Violations cause "headers already sent" errors. This has caused bugs in mypage files in the past. 詳細な配置ルールとテンプレートは `.claude/skills/new-bs5-page/SKILL.md` を参照。
 
 ### Database access
 Always use parameterized queries. Never interpolate user input into SQL.
@@ -291,24 +283,7 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 ```
 
 ### Common page structure (BS5)
-```php
-<?php
-require_once 'commonfunc.php';
-// easyauth check if needed
-$easyauth = new EasyAuth();
-$easyauth->do_eashauthcheck();
-// cookie/header operations before any output
-?>
-<!DOCTYPE html>
-<html>
-<?php print_bs5_search_head(); ?>
-<body>
-<?php shownavigatioinbar_bs5('pagename'); ?>
-<!-- content -->
-<?php print_bg_style_block(true); ?>
-</body>
-</html>
-```
+新規 BS5 ページの作成手順・テンプレート・呼び出し順序・チェックリストは `.claude/skills/new-bs5-page/SKILL.md` を参照。
 
 ### IPv6 handling
 Server addresses may be IPv6. Use `addipv6blanket()` when constructing URLs with server IP.
@@ -392,6 +367,12 @@ Key pages: `mypage.php` (hub), `mypage_history.php`, `mypage_favorite_song.php`,
 - `get_version()` and `get_git_version()` in `commonfunc.php` read version from git
 - `online_update.php` / `update.php` — in-app git-based update
 - `gitcommandpath` config key sets path to git executable
+
+---
+
+## Web テスト (Playwright MCP / Chrome MCP)
+
+実ブラウザでの動作確認手順(試験サーバー URL: `http://ykr.moe:11004/` / `http://ykr.moe:11002/`、ToolSearch によるツールのロード方法、Playwright と Chrome MCP の使い分け、主なツール一覧)は `.claude/skills/web-test/SKILL.md` を参照。
 
 ---
 
