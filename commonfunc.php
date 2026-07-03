@@ -1926,13 +1926,15 @@ function print_bg_style_block($is_bs5 = false) {
         print 'html{background-color:var(--bg-page, #F8ECE0) !important;}body{background-color:transparent !important;}';
         // iOS Safari は visual viewport の高さ変化(URLバー表示/非表示)に合わせて
         // inset:0 の fixed 要素を伸縮させるため、background-size:cover が再計算されて
-        // 背景が拡大縮小して見える。100lvh ベースの固定高に切り替え、さらに safe area と
-        // オーバースキャン分だけ大きめに描画して、iPhone 下端の白い帯露出も防ぐ。
+        // 背景が拡大縮小して見える。100lvh ベースの固定高に切り替える。
+        // 注意: env(safe-area-inset-bottom) はバー表示中=0px ↔ 格納時=約34px と
+        // 動的に変わるため、サイズ計算に含めると伸縮が再発する。オーバースキャン分は
+        // env() を使わず固定マージン(上下80px/左右40px)で確保する。
         print 'html::before{content:"";position:fixed;'
-            . 'top:calc(-24px - env(safe-area-inset-top, 0px));left:calc(-24px - env(safe-area-inset-left, 0px));'
-            . 'width:calc(100vw + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px) + 48px);'
-            . 'height:calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
-            . 'height:calc(100lvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
+            . 'top:-80px;left:-40px;'
+            . 'width:calc(100vw + 80px);'
+            . 'height:calc(100vh + 160px);'
+            . 'height:calc(100lvh + 160px);'
             . 'z-index:-2;pointer-events:none;filter:none !important;'
             . 'background-image:var(--bg-page-image);background-repeat:no-repeat;'
             . 'background-size:cover;background-position:center center;'
@@ -1949,10 +1951,10 @@ function print_bg_style_block($is_bs5 = false) {
         // body::before = オーバーレイ色レイヤー。画像レイヤー(z-index:-2)の上に重ねる。
         // ダークモードの brightness フィルタが背景画像に影響しないよう filter:none を指定。
         print 'body::before{content:"";position:fixed;'
-            . 'top:calc(-24px - env(safe-area-inset-top, 0px));left:calc(-24px - env(safe-area-inset-left, 0px));'
-            . 'width:calc(100vw + env(safe-area-inset-left, 0px) + env(safe-area-inset-right, 0px) + 48px);'
-            . 'height:calc(100vh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
-            . 'height:calc(100lvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 120px);'
+            . 'top:-80px;left:-40px;'
+            . 'width:calc(100vw + 80px);'
+            . 'height:calc(100vh + 160px);'
+            . 'height:calc(100lvh + 160px);'
             . 'z-index:-1;pointer-events:none;background-image:none !important;'
             . 'background-color:rgba(var(--bg-page-rgb, 248, 236, 224), var(--bg-overlay-alpha, 1));'
             . 'filter:none !important;}';
