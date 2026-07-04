@@ -1,0 +1,65 @@
+﻿/*
+Theme Name: ライブ
+Author: つぼはち
+*/
+:root {
+  --bg-card-rgb: 253, 250, 247;
+  --bg-card-alt-rgb: 246, 239, 243;
+  --bg-input: #fffdfd;
+  --color-text: #2c1f2c;
+  --color-text-muted: #6a5d6b;
+  --color-text-on-accent: #ffffff;
+  --color-accent: #ff4f9a;
+  --color-accent-hover: #ea327f;
+  --color-accent-secondary: #2dc9ff;
+  --color-accent-secondary-hover: #18b1e7;
+  --color-border: rgba(145, 110, 144, 0.28);
+  --color-border-active: #ff4f9a;
+  --bg-index-btn: #f8f0f5;
+  --bg-index-btn-hover: #f0e3ec;
+  --bg-index-btn-has-data: #22b7ef;
+  --bg-index-btn-has-data-hover: #10a4db;
+  --color-index-btn: #594d5b;
+  --radius-card: 18px;
+  --radius-button: 14px;
+  --radius-input: 14px;
+  --shadow-card: 0 10px 26px rgba(83, 48, 88, 0.14);
+  --shadow-card-hover: 0 16px 36px rgba(83, 48, 88, 0.18);
+  --shadow-navbar: 0 8px 26px rgba(44, 26, 52, 0.24);
+  --ykr-request-card-radius: 18px;
+  --ykr-request-chip-radius: 14px;
+  --ykr-request-card-shadow: 0 10px 26px rgba(83, 48, 88, 0.14);
+  --ykr-card-border: rgba(201, 155, 184, 0.44);
+  --ykr-card-border-strong: rgba(201, 155, 184, 0.64);
+  --ykr-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.66));
+  --ykr-card-header-gradient: linear-gradient(90deg, rgba(255, 79, 154, 0.08), rgba(45, 201, 255, 0.08));
+  --ykr-navbar-bg: rgba(84, 50, 80, 0.92);
+  --ykr-navbar-border: rgba(255, 255, 255, 0.16);
+  --ykr-input-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  --ykr-accent-glow: 0 0 16px rgba(255, 79, 154, 0.22);
+}
+
+[data-theme="dark"] {
+  --bg-card-rgb: 18, 20, 32;
+  --bg-card-alt-rgb: 27, 30, 48;
+  --bg-input: #171b2a;
+  --color-text: #f8fbff;
+  --color-text-muted: #aeb6ca;
+  --color-border: rgba(80, 110, 164, 0.45);
+  --bg-index-btn: #151a29;
+  --bg-index-btn-hover: #1d2337;
+  --bg-index-btn-has-data: #204f7d;
+  --bg-index-btn-has-data-hover: #276494;
+  --color-index-btn: #dce7ff;
+  --shadow-card: 0 10px 26px rgba(0, 0, 0, 0.32);
+  --shadow-card-hover: 0 16px 36px rgba(0, 0, 0, 0.42);
+  --shadow-navbar: 0 8px 26px rgba(0, 0, 0, 0.40);
+  --ykr-request-card-shadow: 0 10px 26px rgba(0, 0, 0, 0.32);
+  --ykr-card-border: rgba(61, 92, 141, 0.58);
+  --ykr-card-border-strong: rgba(69, 116, 177, 0.72);
+  --ykr-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  --ykr-card-header-gradient: linear-gradient(90deg, rgba(255, 79, 154, 0.15), rgba(45, 201, 255, 0.12));
+  --ykr-navbar-bg: rgba(9, 12, 20, 0.92);
+  --ykr-navbar-border: rgba(255, 79, 154, 0.18);
+  --ykr-input-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}

@@ -1398,6 +1398,82 @@ function print_bs5_search_head($extra_css = ''){
 }
 
 /**
+ * css/themes/skins/ 配下の外観プリセット(テーマ)定義ファイルを走査し、一覧を返す。
+ * 各ファイルは CSS変数の上書きのみで構成する（詳細は css/themes/skins/*.css 参照）。
+ * ファイル先頭の "Theme Name: xxx" コメントを表示名として使う（省略時はファイル名）。
+ * ファイルを1つ追加するだけで一覧・設定画面に反映され、コード変更は不要。
+ *
+ * @return array スラッグ => ['name' => 表示名, 'file' => 相対パス]
+ */
+function get_ui_skin_list(){
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $list = [];
+    $paths = glob(__DIR__ . '/css/themes/skins/*.css');
+    if (is_array($paths)) {
+        sort($paths, SORT_STRING);
+        foreach ($paths as $path) {
+            $slug = basename($path, '.css');
+            if ($slug === '' || !preg_match('/^[A-Za-z0-9_-]+$/', $slug)) {
+                continue; // ファイル名がスラッグとして安全でないものは除外
+            }
+            $name = $slug;
+            $head = @file_get_contents($path, false, null, 0, 2048);
+            if ($head !== false && preg_match('/Theme\s*Name\s*:\s*([^\r\n*]+)/u', $head, $m)) {
+                $name = trim($m[1]);
+            }
+            $list[$slug] = ['name' => $name, 'file' => 'css/themes/skins/' . $slug . '.css'];
+        }
+    }
+    return $cache = $list;
+}
+
+/**
+ * 現在の外観プリセット(スキン)のスラッグを返す。
+ * 'default'（標準・上書きなし）は css/themes/skins/ に対応ファイルを置かない特別値。
+ * 未設定・空欄・存在しないスラッグは自動的に 'default' へフォールバックする。
+ */
+function get_ui_skin_preset($value = null){
+    if ($value === null) {
+        global $config_ini;
+        $value = $config_ini['ui_skin_preset'] ?? 'default';
+    }
+
+    if (is_array($value)) {
+        return 'default';
+    }
+
+    $preset = trim(urldecode((string)$value));
+    if ($preset === '' || $preset === 'default') {
+        return 'default';
+    }
+    if (!array_key_exists($preset, get_ui_skin_list())) {
+        return 'default';
+    }
+
+    return $preset;
+}
+
+function get_ui_skin_card_opacity($value = null){
+    if ($value === null) {
+        global $config_ini;
+        $value = $config_ini['ui_skin_card_opacity'] ?? 100;
+    }
+
+    if (is_array($value) || $value === '') {
+        return 100;
+    }
+
+    $opacity = (int)$value;
+    if ($opacity < 0) $opacity = 0;
+    if ($opacity > 100) $opacity = 100;
+    return $opacity;
+}
+
+/**
  * BS5ページ共通の <head> 核を出力する。
  * テーマ初期化スクリプト（FOUC防止）+ Bootstrap5 + テーマ変数 + テーマ切替 を
  * 一括出力し、ページ固有のCSSばらつきを排除する。
@@ -1411,9 +1487,20 @@ function print_bs5_head_core($page_css = [], $opts = []){
     print '<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>';
     print '<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">';
     print '<link rel="stylesheet" href="css/themes/_variables.css">';
+    print '<style>:root{--ykr-skin-card-opacity:' . (get_ui_skin_card_opacity() / 100) . ';}</style>';
     foreach ((array)$page_css as $href){
         if($href === '') continue;
         print '<link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
+    }
+    // 外観プリセット: 'default'（標準）はファイルを読み込まず、既存の見た目のまま。
+    // 非標準プリセットのときだけ、テーマ本体（変数定義）+ 共通コンポーネント適用ルールを読み込む。
+    $skin = get_ui_skin_preset();
+    if ($skin !== 'default') {
+        $skin_list = get_ui_skin_list();
+        if (isset($skin_list[$skin]['file'])) {
+            print '<link rel="stylesheet" href="' . htmlspecialchars($skin_list[$skin]['file'], ENT_QUOTES, 'UTF-8') . '">';
+            print '<link rel="stylesheet" href="css/themes/skin-components.css">';
+        }
     }
     print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
     if(!empty($opts['jquery'])){

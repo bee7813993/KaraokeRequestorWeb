@@ -1,0 +1,81 @@
+﻿/*
+Theme Name: ガラス
+Author: つぼはち
+*/
+:root {
+  --bg-card-rgb: 255, 251, 255;
+  --bg-card-alt-rgb: 244, 236, 247;
+  --bg-input: #fffafc;
+  --color-text: #2f2238;
+  --color-text-muted: #6c5a72;
+  --color-text-on-accent: #ffffff;
+  --color-accent: #ff4fa1;
+  --color-accent-hover: #ff2f92;
+  --color-accent-secondary: #8a6cff;
+  --color-accent-secondary-hover: #7656f5;
+  --color-border: rgba(154, 44, 156, 0.28);
+  --color-border-active: #ff79bc;
+  --bg-index-btn: #f7eff8;
+  --bg-index-btn-hover: #efe2f2;
+  --bg-index-btn-has-data: #ff66ba;
+  --bg-index-btn-has-data-hover: #ff4fa1;
+  --color-index-btn: #5a465d;
+  --radius-card: 22px;
+  --radius-button: 12px;
+  --radius-input: 16px;
+  --shadow-card: 0 12px 28px rgba(94, 52, 110, 0.14);
+  --shadow-card-hover: 0 18px 38px rgba(94, 52, 110, 0.18);
+  --shadow-navbar: 0 8px 24px rgba(58, 28, 72, 0.22);
+  --ykr-request-card-radius: 22px;
+  --ykr-request-chip-radius: 12px;
+  --ykr-request-card-shadow: 0 12px 28px rgba(94, 52, 110, 0.14);
+  --ykr-card-border: rgba(205, 162, 208, 0.56);
+  --ykr-card-border-strong: rgba(205, 162, 208, 0.78);
+  --ykr-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.60));
+  --ykr-card-header-gradient: linear-gradient(90deg, rgba(255, 79, 161, 0.08), rgba(138, 108, 255, 0.08));
+  --ykr-navbar-bg: rgba(92, 62, 108, 0.90);
+  --ykr-navbar-border: rgba(255, 255, 255, 0.18);
+  --ykr-input-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  --ykr-accent-glow: 0 0 22px rgba(255, 79, 161, 0.32);
+}
+
+[data-theme="dark"] {
+  --bg-card-rgb: 34, 26, 58;
+  --bg-card-alt-rgb: 48, 38, 78;
+  --bg-input: rgba(30, 24, 54, 0.92);
+  --color-text: #f7efff;
+  --color-text-muted: #d9c7f4;
+  --color-border: rgba(255, 255, 255, 0.20);
+  --bg-index-btn: rgba(255, 255, 255, 0.08);
+  --bg-index-btn-hover: rgba(255, 255, 255, 0.16);
+  --color-index-btn: #f7efff;
+  --shadow-card: 0 16px 40px rgba(20, 12, 38, 0.30);
+  --shadow-card-hover: 0 24px 52px rgba(20, 12, 38, 0.40);
+  --shadow-navbar: 0 8px 30px rgba(8, 8, 20, 0.35);
+  --ykr-request-card-shadow: 0 16px 40px rgba(20, 12, 38, 0.30);
+  --ykr-card-border: rgba(255, 255, 255, 0.20);
+  --ykr-card-border-strong: rgba(255, 255, 255, 0.24);
+  --ykr-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05));
+  --ykr-card-header-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+  --ykr-navbar-bg: rgba(14, 12, 24, 0.86);
+  --ykr-navbar-border: rgba(255, 255, 255, 0.14);
+  --ykr-input-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* ガラス質感特有のレイヤリング調整（検索履歴ドロップダウン等の重なり順） */
+.search-hero {
+  position: relative;
+}
+.search-hero:focus-within {
+  z-index: 1202;
+}
+.search-section {
+  position: relative;
+  z-index: 1;
+}
+.search-history-wrap {
+  isolation: isolate;
+}
+#search-history-dropdown {
+  z-index: 1203;
+}
