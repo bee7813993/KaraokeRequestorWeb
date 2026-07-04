@@ -2,7 +2,7 @@
 ; KaraokeRequestorWeb インストーラースクリプト
 
 [Setup]
-AppName=ゆかりすたー Universal KAraoke REquest Web tool
+AppName=「ゆかり」Universal KAraoke REquest Web tool
 AppVersion=0.10.0-beta
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
