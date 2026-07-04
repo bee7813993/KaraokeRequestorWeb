@@ -121,7 +121,9 @@ function readconfig_array()
         $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl))); 
      }    
     if(!array_key_exists("downloadfolder", $config_ini)){
-        $downloadfolder = $_SERVER["TMP"];
+        // $_SERVER["TMP"] は Apache 以外 (ビルトインサーバー等) では未定義のことがあり、
+        // Warning が JSON 応答の先頭に混入するため sys_get_temp_dir() でフォールバックする
+        $downloadfolder = $_SERVER["TMP"] ?? sys_get_temp_dir();
         $config_ini = array_merge($config_ini,array("downloadfolder" => urlencode($downloadfolder)));            
     }
     //print mb_substr(urldecode($config_ini["downloadfolder"]),-1);
