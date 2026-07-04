@@ -1487,22 +1487,25 @@ function print_bs5_head_core($page_css = [], $opts = []){
     print '<script>(function(){if(window.__ykThemeInit)return;window.__ykThemeInit=true;try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>';
     print '<link rel="stylesheet" href="css/bootstrap5/bootstrap.min.css">';
     print '<link rel="stylesheet" href="css/themes/_variables.css">';
-    print '<style>:root{--ykr-skin-card-opacity:' . (get_ui_skin_card_opacity() / 100) . ';}</style>';
     foreach ((array)$page_css as $href){
         if($href === '') continue;
         print '<link rel="stylesheet" href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">';
     }
-    // 外観プリセット: 'default'（標準）はファイルを読み込まず、既存の見た目のまま。
+    print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
+    // 外観プリセット: 'default'（標準）は何も読み込まず、既存の見た目のまま。
     // 非標準プリセットのときだけ、テーマ本体（変数定義）+ 共通コンポーネント適用ルールを読み込む。
+    // theme-toggle.css より後に置くこと（theme-toggle の [data-theme="dark"] 既定パレットを
+    // スキン側のダークモード変数が上書きできるようにするため）。
+    // id はプレビューJS（init.php）が <link> を差し替えるために使う。
     $skin = get_ui_skin_preset();
     if ($skin !== 'default') {
         $skin_list = get_ui_skin_list();
         if (isset($skin_list[$skin]['file'])) {
-            print '<link rel="stylesheet" href="' . htmlspecialchars($skin_list[$skin]['file'], ENT_QUOTES, 'UTF-8') . '">';
-            print '<link rel="stylesheet" href="css/themes/skin-components.css">';
+            print '<style>:root{--ykr-skin-card-opacity:' . (get_ui_skin_card_opacity() / 100) . ';}</style>';
+            print '<link rel="stylesheet" id="ykr-skin-css" href="' . htmlspecialchars($skin_list[$skin]['file'], ENT_QUOTES, 'UTF-8') . '">';
+            print '<link rel="stylesheet" id="ykr-skin-components-css" href="css/themes/skin-components.css">';
         }
     }
-    print '<link rel="stylesheet" href="css/themes/theme-toggle.css">';
     if(!empty($opts['jquery'])){
         print '<script src="js/jquery.js"></script>';
     }

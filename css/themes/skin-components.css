@@ -86,3 +86,51 @@
 .index-btn.has-data {
   box-shadow: var(--ykr-accent-glow);
 }
+
+/* ============================================================
+   Bootstrap 標準ボタンへのテーマ適用。
+   標準（プリセット未選択）時は本ファイル自体が読み込まれないため、
+   既存の見た目には一切影響しない。
+   ============================================================ */
+.btn-primary {
+  --bs-btn-bg: var(--color-accent);
+  --bs-btn-border-color: var(--color-accent);
+  --bs-btn-hover-bg: var(--color-accent-hover);
+  --bs-btn-hover-border-color: var(--color-accent-hover);
+  --bs-btn-active-bg: var(--color-accent-hover);
+  --bs-btn-active-border-color: var(--color-accent-hover);
+}
+.btn-secondary,
+.btn-outline-secondary {
+  --bs-btn-border-radius: var(--radius-button);
+}
+
+/* ============================================================
+   notice-embedded-html: 管理者埋め込みHTMLボックスへのテーマ適用
+   ============================================================ */
+.notice-embedded-html,
+.ykr-notice-embedded {
+  color: var(--color-text);
+  border: 1px solid var(--ykr-card-border, var(--color-border));
+  border-radius: var(--radius-card);
+  background-image: var(--ykr-card-gradient, none);
+  background-color: rgba(var(--bg-card-rgb, 255, 255, 255), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+  box-shadow: var(--shadow-card);
+}
+.notice-embedded-html :where(h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, span, small, strong, em, div, label, th, td, blockquote, code, pre) {
+  color: inherit;
+}
+/* ボタン型リンク(a.btn)は Bootstrap のボタン文字色(白等)を維持するため除外する */
+.notice-embedded-html a:not(.btn) {
+  color: var(--color-accent-secondary);
+}
+.notice-embedded-html :where(.card, .alert, .well, .accordion-item, .accordion-button, .accordion-body, .list-group-item, .dropdown-menu, .bg-light, .bg-white, .bg-info:not(.badge)) {
+  border-color: var(--ykr-card-border-strong, var(--color-border));
+  background-image: var(--ykr-card-gradient, none);
+  background-color: rgba(var(--bg-card-alt-rgb, 248, 244, 240), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+  color: var(--color-text);
+}
+.notice-embedded-html :where(.btn, .btn-primary, .btn-secondary, .btn-outline-secondary) {
+  --bs-btn-border-radius: var(--radius-button);
+  border-radius: var(--radius-button);
+}

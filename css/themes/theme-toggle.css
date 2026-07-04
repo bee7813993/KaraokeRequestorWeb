@@ -607,56 +607,6 @@ body::before {
 }
 
 /* ============================================================
-   btn-primary / btn-secondary / btn-outline-secondary:
-   サイトのアクセントカラー・形状トークンに常時追従させる。
-   外観プリセット（css/themes/skins/*.css）未選択時も
-   --color-accent・--radius-button の既定値でBootstrap標準色を上書きする。
-   ============================================================ */
-.btn-primary {
-  --bs-btn-bg: var(--color-accent);
-  --bs-btn-border-color: var(--color-accent);
-  --bs-btn-hover-bg: var(--color-accent-hover);
-  --bs-btn-hover-border-color: var(--color-accent-hover);
-  --bs-btn-active-bg: var(--color-accent-hover);
-  --bs-btn-active-border-color: var(--color-accent-hover);
-}
-.btn-secondary,
-.btn-outline-secondary {
-  --bs-btn-border-radius: var(--radius-button);
-}
-
-/* ============================================================
-   notice-embedded-html: 管理者埋め込みHTMLボックス（常時適用）
-   外観プリセットのCSS変数を消費するが、フォールバック値のみで
-   標準の見た目（--color-border・--radius-card 等の既定値）になる。
-   ============================================================ */
-.notice-embedded-html,
-.ykr-notice-embedded {
-  color: var(--color-text);
-  border: 1px solid var(--ykr-card-border, var(--color-border));
-  border-radius: var(--radius-card);
-  background-image: var(--ykr-card-gradient, none);
-  background-color: rgba(var(--bg-card-rgb, 255, 255, 255), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
-  box-shadow: var(--shadow-card);
-}
-.notice-embedded-html :where(h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, span, small, strong, em, div, label, th, td, blockquote, code, pre) {
-  color: inherit;
-}
-.notice-embedded-html a {
-  color: var(--color-accent-secondary);
-}
-.notice-embedded-html :where(.card, .alert, .well, .accordion-item, .accordion-button, .accordion-body, .list-group-item, .dropdown-menu, .bg-light, .bg-white, .bg-info:not(.badge)) {
-  border-color: var(--ykr-card-border-strong, var(--color-border));
-  background-image: var(--ykr-card-gradient, none);
-  background-color: rgba(var(--bg-card-alt-rgb, 248, 244, 240), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
-  color: var(--color-text);
-}
-.notice-embedded-html :where(.btn, .btn-primary, .btn-secondary, .btn-outline-secondary) {
-  --bs-btn-border-radius: var(--radius-button);
-  border-radius: var(--radius-button);
-}
-
-/* ============================================================
    notice-embedded-html: 管理者埋め込みHTMLボックスのダークモード対応
    ============================================================ */
 [data-theme="dark"] .notice-embedded-html {

@@ -90,10 +90,9 @@ Author: つぼはち
   color: var(--color-text);
 }
 
-.btn,
-.btn-outline-secondary,
-.btn-secondary,
-.notice-embedded-html :where(.btn, .btn-secondary, .btn-outline-secondary, .bg-light, .bg-white, .card, .alert, .well),
+/* ボタン(.btn系)は Bootstrap の文字色(--bs-btn-color)を尊重するため対象にしない。
+   一括で color を当てると灰色地+白文字の btn-secondary 等が読めなくなる。 */
+.notice-embedded-html :where(.bg-light, .bg-white, .card, .alert, .well),
 .notice-embedded-html :where(h1, h2, h3, h4, h5, h6, p, li, span, small, strong, em, div, label, th, td, code, pre) {
   color: var(--color-text);
 }

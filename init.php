@@ -853,8 +853,11 @@ print ' value="10" ';
           }
           echo json_encode($skin_files_js, JSON_UNESCAPED_SLASHES);
       ?>;
-      var LINK_ID_SKIN = 'ykr-skin-preview-file';
-      var LINK_ID_COMPONENTS = 'ykr-skin-preview-components';
+      // print_bs5_head_core() がサーバー側で出力する <link> と同じ id を使い、
+      // 保存済みテーマの <link> を「差し替え」る。別 id で追加すると保存済み
+      // テーマのCSSが残ったまま重なり、プレビューが実際の見た目と一致しなくなる。
+      var LINK_ID_SKIN = 'ykr-skin-css';
+      var LINK_ID_COMPONENTS = 'ykr-skin-components-css';
 
       function setPreviewLink(id, href){
           var el = document.getElementById(id);
