@@ -1,3 +1,55 @@
+<?php
+// format=json のとき: リクエスト1件のデータを JSON で返す（モバイルアプリ等の Web UI 以外からの取得用）
+// HTML 出力前に処理して exit するため、既存の編集画面（HTML）には影響しない
+if (isset($_REQUEST['format']) && $_REQUEST['format'] === 'json') {
+    require_once 'commonfunc.php';
+    require_once 'easyauth_class.php';
+    $easyauth = new EasyAuth();
+    $easyauth->do_eashauthcheck();
+
+    header('Content-Type: application/json; charset=utf-8');
+
+    // id は整数のみ受け付ける
+    $l_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+    if ($l_id === false || $l_id === null) {
+        $l_id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+    }
+    if ($l_id === false || $l_id === null) {
+        http_response_code(400);
+        echo json_encode(['error' => 'invalid id']);
+        exit;
+    }
+
+    try {
+        $stmt = $db->prepare("SELECT * FROM requesttable WHERE id = :id");
+        $stmt->bindValue(':id', $l_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'DB error']);
+        exit;
+    }
+
+    if ($row === false) {
+        http_response_code(404);
+        echo json_encode(['error' => 'not found']);
+        exit;
+    }
+
+    // 数値カラムは型を揃えて返す（requestlist_swipe_json.php と同じ流儀）
+    foreach (['id', 'reqorder', 'secret', 'loop', 'keychange', 'track',
+              'pause', 'audiodelay', 'duration', 'volume', 'playtimes'] as $intkey) {
+        if (array_key_exists($intkey, $row) && $row[$intkey] !== null && $row[$intkey] !== '') {
+            $row[$intkey] = (int)$row[$intkey];
+        }
+    }
+
+    echo json_encode($row, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+?>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <?php

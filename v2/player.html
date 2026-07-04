@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Player - ゆかり API v2</title>
+<script>(function(){try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
+<link rel="stylesheet" href="../css/bootstrap5/bootstrap.min.css">
+<link rel="stylesheet" href="../css/themes/_variables.css">
+<link rel="stylesheet" href="../css/themes/player.css">
+<link rel="stylesheet" href="../css/themes/theme-toggle.css">
+<script src="../js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="v2common.js"></script>
+<style>
+.pbtn { min-width: 5.2rem; }
+.section-label { font-size: .8rem; color: var(--bs-secondary-color, #6c757d); margin: .75rem 0 .25rem; }
+</style>
+</head>
+<body>
+<div class="container py-3" style="max-width:720px">
+  <div class="d-flex align-items-center mb-2 gap-2">
+    <h4 class="mb-0">Player</h4>
+    <span id="playerKind" class="badge bg-secondary">-</span>
+  </div>
+
+  <!-- 再生状態 -->
+  <div class="card mb-3">
+    <div class="card-body py-2">
+      <div id="nowSong" class="fw-bold">-</div>
+      <div id="nowTime" class="small text-muted">--:-- / --:--</div>
+      <div class="progress mt-1" style="height:6px"><div id="prog" class="progress-bar" style="width:0%"></div></div>
+      <div id="nextSong" class="small text-muted mt-1"></div>
+    </div>
+  </div>
+
+  <!-- 基本操作 (mpcctrl_bs5 のメインボタン構成) -->
+  <div class="d-flex gap-2 flex-wrap mb-2">
+    <button class="btn btn-outline-secondary pbtn" onclick="pact('start_first')">曲の最初から</button>
+    <button class="btn btn-outline-primary pbtn" onclick="pact('playpause')">一時停止・再開</button>
+    <button class="btn btn-outline-danger pbtn" onclick="if(confirm('曲を終了しますか？'))pact('next')">曲終了</button>
+    <button class="btn btn-outline-success pbtn" onclick="pact('start')">曲開始</button>
+  </div>
+
+  <div class="section-label">シーク</div>
+  <div class="d-flex gap-2 flex-wrap">
+    <button class="btn btn-outline-secondary" onclick="pact('seek_back_large')">−20秒</button>
+    <button class="btn btn-outline-secondary" onclick="pact('seek_back')">−5秒</button>
+    <button class="btn btn-outline-secondary" onclick="pact('seek_forward')">+5秒</button>
+    <button class="btn btn-outline-secondary" onclick="pact('seek_forward_large')">+20秒</button>
+  </div>
+
+  <div class="section-label">ボリューム</div>
+  <div class="d-flex gap-2 align-items-center flex-wrap">
+    <button class="btn btn-outline-secondary" onclick="pact('volume_down')">🔉−</button>
+    <input type="range" id="volSlider" class="form-range" style="max-width:220px" min="0" max="100" value="50"
+           onchange="setVolume(this.value)">
+    <button class="btn btn-outline-secondary" onclick="pact('volume_up')">🔊＋</button>
+    <span id="volVal" class="small text-muted">-</span>
+    <button class="btn btn-outline-secondary btn-sm" onclick="pact('mute')">ミュート</button>
+    <button class="btn btn-outline-secondary btn-sm" onclick="pact('fadeout')">フェードアウト</button>
+  </div>
+
+  <div class="section-label">映像</div>
+  <div class="d-flex gap-2 flex-wrap">
+    <button class="btn btn-outline-secondary" onclick="pact('subtitle_toggle')">字幕</button>
+    <button class="btn btn-outline-secondary" onclick="pact('audiotrack_next')">音声切替</button>
+    <button class="btn btn-outline-secondary" onclick="pact('fullscreen')">全画面</button>
+  </div>
+
+  <div class="section-label">キー変更</div>
+  <div class="d-flex gap-2 flex-wrap">
+    <button class="btn btn-outline-secondary" onclick="keych('down')">↓ キーダウン</button>
+    <button class="btn btn-outline-secondary" onclick="keych('up')">↑ キーアップ</button>
+    <button class="btn btn-outline-secondary" onclick="keych(0)">♪ 原曲キー</button>
+  </div>
+
+  <!-- 詳細設定 (mpcctrl_bs5 の詳細設定パネル構成) -->
+  <div class="card mt-3">
+    <div class="card-header py-2" style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#advBody">
+      詳細設定
+    </div>
+    <div id="advBody" class="collapse">
+      <div class="card-body">
+        <div class="section-label mt-0">音ズレ修正 ←映像を遅く／映像を早く→</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('audiodelay_down',{step:100})">−100ms</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('audiodelay_down')">−10ms</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('audiodelay_up')">+10ms</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('audiodelay_up',{step:100})">+100ms</button>
+        </div>
+        <div class="section-label">再生スピード</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('speed_down')">スピードダウン</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('speed_normal')">標準スピード</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('speed_up')">スピードアップ</button>
+        </div>
+        <div class="section-label">映像オプション</div>
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('size_small')">サイズ縮小</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('size_normal')">サイズ標準</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('size_large')">サイズ拡大</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('d3d_fullscreen')">D3Dフルスクリーン</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('mirror')">左右反転</button>
+          <button class="btn btn-outline-secondary btn-sm" onclick="pact('show_time')">時刻表示</button>
+        </div>
+        <div class="section-label">任意コード送出</div>
+        <div class="input-group input-group-sm" style="max-width:240px">
+          <input type="number" id="rawCmd" class="form-control" placeholder="コード">
+          <button class="btn btn-outline-secondary" onclick="sendRaw()">送出</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+renderNavbar('player');
+
+/* action 実行 (player 指定なし = getcurrentplayer() による自動判定) */
+function pact(action, extra) {
+    var params = Object.assign({ action: action }, extra || {});
+    apiCall('api/player.php', params).then(function (d) {
+        showToast(action + ' OK' + (d.message ? ' : ' + d.message : '') +
+                  (typeof d.volume !== 'undefined' ? ' (音量 ' + d.volume + ')' : ''));
+        if (typeof d.volume !== 'undefined') updateVolUi(d.volume);
+    }).catch(function (e) { showToast(action + ' 失敗: ' + e.message, true); });
+}
+
+function setVolume(v) { pact('volume_set', { value: v }); }
+
+function keych(k) {
+    pact('keychange', { key: k });
+}
+
+function sendRaw() {
+    var v = document.getElementById('rawCmd').value;
+    if (v === '') return;
+    pact('command', { value: v });
+}
+
+function updateVolUi(v) {
+    document.getElementById('volSlider').value = v;
+    document.getElementById('volVal').textContent = v;
+}
+
+/* プレイヤー種別と音量の初期取得 */
+apiCall('api/player.php', { action: 'info' }).then(function (d) {
+    document.getElementById('playerKind').textContent =
+        d.player + ' (playmode ' + d.playmode + ')';
+});
+apiCall('api/player.php', { action: 'volume_get' }).then(function (d) {
+    updateVolUi(d.volume);
+}).catch(function () { /* プレイヤー未起動時は無視 */ });
+
+/* 再生状態ポーリング (get_playingstatus_json は停止中に空応答 → null) */
+function pollStatus() {
+    jsonCall('get_playingstatus_json.php').then(function (d) {
+        if (!d) {
+            document.getElementById('nowSong').textContent = '(再生中の曲はありません)';
+            document.getElementById('nowTime').textContent = '--:-- / --:--';
+            document.getElementById('prog').style.width = '0%';
+            document.getElementById('nextSong').textContent = '';
+            return;
+        }
+        document.getElementById('nowSong').textContent = d.title || d.file || '-';
+        if (d.position_txt || d.duration_txt) {
+            document.getElementById('nowTime').textContent =
+                (d.position_txt || '--:--') + ' / ' + (d.duration_txt || '--:--');
+        }
+        if (d.position && d.duration) {
+            document.getElementById('prog').style.width =
+                Math.min(100, d.position / d.duration * 100) + '%';
+        }
+        document.getElementById('nextSong').textContent =
+            d.nextsong ? ('次の曲: ' + d.nextsong.title + (d.nextsong.singer ? ' (' + d.nextsong.singer + ')' : '')) : '';
+    }).catch(function () { /* ポーリング失敗は無視 */ });
+}
+pollStatus();
+setInterval(pollStatus, 2000);
+</script>
+</body>
+</html>
