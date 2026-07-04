@@ -304,7 +304,7 @@ function updatedb($db){
         $rows = $rowsdb->fetchAll(PDO::FETCH_ASSOC);
         $rowsdb->closeCursor();
     } catch(PDOException $e) {
-        printf("DB PDO Error: %s\n", $e->getMessage());
+        error_log("updatedb PDO Error: " . $e->getMessage());
         return false;
     }
     
@@ -319,12 +319,11 @@ function updatedb($db){
         }
         if( ! $foundflg ){
             $addcolumnsql = "ALTER TABLE requesttable ADD COLUMN ".$nc['name'].'['.$nc['type'].']';
-            echo $addcolumnsql;
-            echo "\n";
+            error_log("updatedb: " . $addcolumnsql);
             try {
                 $res = $db->exec($addcolumnsql);
             } catch(PDOException $e) {
-                printf("DB PDO Error: %s\n", $e->getMessage());
+                error_log("updatedb PDO Error: " . $e->getMessage());
                 return false;
             }
         }
@@ -345,7 +344,7 @@ try {
 	$db->exec('PRAGMA journal_mode=WAL;');
 	$db->exec('PRAGMA busy_timeout=5000;');
 } catch(PDOException $e) {
-	printf("new PDO Error: %s\n", $e->getMessage());
+	error_log("initdb PDO Error: " . $e->getMessage());
 	die();
 }
 $sql = "create table IF NOT EXISTS requesttable (
@@ -372,7 +371,7 @@ $sql = "create table IF NOT EXISTS requesttable (
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){
-	print("Create table 失敗しました。<br>");
+	error_log("initdb: requesttable の作成に失敗しました");
 	die();
 }
  updatedb($db);
