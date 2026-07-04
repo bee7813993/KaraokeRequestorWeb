@@ -17,6 +17,9 @@ function getallrequest_fromdb($db) {
  *  - 同一人物が2つ入れていても別の人は1周目扱い（ターン[0]末尾）
  *  - 2周目以降: 1つ前の周と同じ順番
  *  - 2周目以降の新規参加者: 未再生先頭へ
+ *  - 途中参加者の2曲目以降: 最後に登場した周の次へ（標準）
+ *    request_automove_midjoin_first=1 時は旧動作（本人を含まない最初の周へ割り込み =
+ *    途中参加者ができるだけ早い周で歌える）
  *  - reset_on_pause=true時: 最後の小休止以降を1周目扱いに
  */
 class MoveItem {
@@ -26,12 +29,16 @@ class MoveItem {
     public $max_reqorder = 0;
     public $db = null;
     private $reset_on_pause = false;
+    private $midjoin_first = false;
 
     public function getturnlist($db) {
         $this->db = $db;
         global $config_ini;
         if (array_key_exists('request_automove_reset', $config_ini)) {
             $this->reset_on_pause = ($config_ini['request_automove_reset'] == 1);
+        }
+        if (array_key_exists('request_automove_midjoin_first', $config_ini)) {
+            $this->midjoin_first = ($config_ini['request_automove_midjoin_first'] == 1);
         }
         $this->allrequest = getallrequest_fromdb($db);
         $this->allrequest_new = $this->allrequest;
@@ -139,17 +146,35 @@ class MoveItem {
             $rounds[] = $cur_round;
         }
 
-        // 挿入ラウンド: 新歌い手を含まない最初のラウンド
-        $target_idx = count($rounds);
-        foreach ($rounds as $idx => $round) {
-            $has = false;
-            foreach ($round as $r) {
-                if ($r['singer'] === $newsinger) { $has = true; break; }
+        // 挿入ラウンドの決定
+        if ($this->midjoin_first) {
+            // 旧動作: 新歌い手を含まない最初のラウンドへ割り込む
+            // （途中参加者ができるだけ早い周で歌える）
+            $target_idx = count($rounds);
+            foreach ($rounds as $idx => $round) {
+                $has = false;
+                foreach ($round as $r) {
+                    if ($r['singer'] === $newsinger) { $has = true; break; }
+                }
+                if (!$has) {
+                    $target_idx = $idx;
+                    break;
+                }
             }
-            if (!$has) {
-                $target_idx = $idx;
-                break;
+        } else {
+            // 標準: 歌い手が最後に登場したラウンドの次
+            // （初回参加は last=-1+1=0 となり新規参加者ルールが適用される。
+            //   途中参加者も次周以降は自分の最後の出現位置を基準に並ぶ）
+            $last_singer_idx = -1;
+            foreach ($rounds as $idx => $round) {
+                foreach ($round as $r) {
+                    if ($r['singer'] === $newsinger) {
+                        $last_singer_idx = $idx;
+                        break;
+                    }
+                }
             }
+            $target_idx = $last_singer_idx + 1;
         }
 
         // 全ラウンドに既に存在 → 末尾に追加
@@ -161,6 +186,7 @@ class MoveItem {
 
         if ($target_idx == 0) {
             // 新歌い手（どのラウンドにも存在しない）
+            // ※旧動作(midjoin_first)時は先頭ラウンド未登場の途中参加者もここに来る
             if (!$this->reset_on_pause && $this->_turn_has_veteran($rounds[0])) {
                 // rule5: 2周目以降の新規参加者 → 未再生先頭へ
                 return $this->_first_unplayed_reqorder_after($history, $insert_floor);

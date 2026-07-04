@@ -149,8 +149,9 @@ function changerequeststatus(myel){
 
 function song_end(myel, id){
   var url;
+  if (!confirm('曲を停止しますか？')) return false;
   var table = $('#request_table').DataTable();
-  
+
   myel.setAttribute('disabled', true);
   url = "playerctrl_portal.php?songnext=1";
   var request = createXMLHttpRequest();

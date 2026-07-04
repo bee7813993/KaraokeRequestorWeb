@@ -2,7 +2,7 @@
 ; KaraokeRequestorWeb インストーラースクリプト
 
 [Setup]
-AppName=ゆかりすたー Universal KAraoke REquest Web tool
+AppName=「ゆかり」Universal KAraoke REquest Web tool
 AppVersion=0.10.0-beta
 DefaultDirName=C:\xampp\htdocs
 UsePreviousAppDir=yes
@@ -11,7 +11,7 @@ DefaultGroupName=KaraokeRequestorWeb
 Compression=lzma2
 SolidCompression=yes
 OutputDir=userdocs:Inno Setup Examples Output
-SetupIconFile=krw.ico
+SetupIconFile=ykr.ico
 OutputBaseFilename=KaraokeRequestorWebSetup
 AppPublisher=KaraokeRequestorWeb
 AppPublisherURL=https://github.com/bee7813993/KaraokeRequestorWeb
@@ -34,7 +34,7 @@ Source: "*.txt"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "version"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "LICENSE"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "README.md"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
-Source: "krw.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
+Source: "ykr.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "favicon.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: ".htaccess"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "ini.ini"; DestDir: "{app}"; Flags: onlyifdoesntexist; Components: main
@@ -74,7 +74,7 @@ Source: "pfwd_forykr\*"; DestDir: "{app}\pfwd_forykr"; Flags: IgnoreVersion recu
 Name: main; Description: main files; Types: full compact custom; Flags: fixed
 
 [Icons]
-Name: "{group}\KaraokeRequestorWeb for xampp"; Filename: "{app}\krw.ico"
+Name: "{group}\KaraokeRequestorWeb for xampp"; Filename: "{app}\ykr.ico"
 
 [Code]
 var

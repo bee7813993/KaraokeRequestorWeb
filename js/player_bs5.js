@@ -20,6 +20,7 @@ function _sendCmd(url) {
 
 /* 曲終了 (DB更新 + UI更新) */
 function cmd_songnext() {
+    if (!confirm('曲を停止しますか？')) return;
     _sendCmd(_playerCtrlUrl + '?songnext=1').then(function () {
         setTimeout(function () {
             var pg = document.getElementById('proglessbase');
@@ -61,6 +62,7 @@ function comp_apply() { _compFetch('comp_apply'); }
 
 /* foobar 曲終了 */
 function foobar_cmd_songnext() {
+    if (!confirm('曲を停止しますか？')) return;
     _sendCmd(_foobarCtrlUrl + '?songnext=1').then(function () {
         setTimeout(function () { location.reload(); }, 400);
     });

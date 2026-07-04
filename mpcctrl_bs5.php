@@ -18,9 +18,14 @@ function reset_initial_volume_bs5() {
             }
         }
     } catch (Exception $e) { /* silent */ }
-    $base = isset($config_ini['startvolume']) ? intval($config_ini['startvolume']) : 50;
+    $base = 50;
+    if (array_key_exists('startvolume', $config_ini) && is_numeric(trim(urldecode((string)$config_ini['startvolume'])))) {
+        $base = max(0, min(100, intval(urldecode((string)$config_ini['startvolume']))));
+    }
     $applied = max(0, min(100, $base + $offset));
     set_volume($applied);
+    // 手動リセット後も曲終了時の差し戻しが正しく効くよう適用量を記録する
+    save_applied_volume_offset($applied - $base);
     print $applied;
     return $applied;
 }
