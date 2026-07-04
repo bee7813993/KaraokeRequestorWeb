@@ -1,0 +1,136 @@
+﻿/* ==========================================================
+   BS5 外観プリセット: 共通コンポーネント適用ルール
+   css/themes/skins/*.css が定義する CSS変数を実際のコンポーネントへ
+   反映させるための共通ルール。標準（プリセット未選択）のときは
+   このファイル自体を読み込まないため、ここに書くセレクタは
+   常に「非標準プリセットが選択されている」前提で良い。
+
+   新しいプリセットを追加するときはこのファイルを変更する必要はない。
+   css/themes/skins/ に変数定義ファイルを1つ追加するだけでよい。
+   逆に、新しいコンポーネント（新画面の部品など）にプリセットを
+   反映させたいときは、このファイルに一度だけルールを追加すれば、
+   既存・将来のプリセットすべてに自動的に適用される。
+   ========================================================== */
+
+.navbar.bg-dark {
+  background: var(--ykr-navbar-bg) !important;
+  border-bottom: 1px solid var(--ykr-navbar-border);
+  box-shadow: var(--shadow-navbar);
+}
+
+.search-hero,
+.search-section,
+.player-nowplaying,
+.player-controls-card,
+.cfg-card,
+.card,
+.accordion-item,
+.dropdown-menu,
+.modal-content,
+.swap-banner,
+#stats-bar,
+.list-toolbar {
+  border: 1px solid var(--ykr-card-border);
+  background-image: var(--ykr-card-gradient);
+  background-color: rgba(var(--bg-card-rgb, 255, 255, 255), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+  box-shadow: var(--shadow-card);
+}
+
+.list-toolbar {
+  border-radius: var(--radius-card);
+  padding: 10px 12px;
+}
+
+.search-section-header,
+.card-header,
+.accordion-button,
+#stats-bar {
+  background-image: var(--ykr-card-header-gradient);
+  background-color: rgba(var(--bg-card-alt-rgb, 248, 244, 240), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+}
+
+.accordion-button:not(.collapsed) {
+  background-image: var(--ykr-card-header-gradient);
+  color: var(--color-accent-secondary);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+  border-color: var(--ykr-card-border-strong);
+  background-color: rgba(var(--bg-card-rgb, 255, 255, 255), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+  box-shadow: var(--ykr-input-shadow);
+}
+
+.search-history-wrap,
+.search-history-word,
+.search-history-del,
+.search-history-footer,
+#search-history-clear,
+.card-comment-area {
+  background-color: rgba(var(--bg-card-alt-rgb, 248, 244, 240), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+}
+
+.btn,
+.reservation-tab-btn,
+.index-btn,
+.card-comment-area,
+.player-key-display {
+  border-radius: var(--radius-button);
+}
+
+.btn-primary,
+.search-hero .btn-search-submit,
+.btn-request,
+.reservation-tab-btn.active,
+.index-btn.has-data {
+  box-shadow: var(--ykr-accent-glow);
+}
+
+/* ============================================================
+   Bootstrap 標準ボタンへのテーマ適用。
+   標準（プリセット未選択）時は本ファイル自体が読み込まれないため、
+   既存の見た目には一切影響しない。
+   ============================================================ */
+.btn-primary {
+  --bs-btn-bg: var(--color-accent);
+  --bs-btn-border-color: var(--color-accent);
+  --bs-btn-hover-bg: var(--color-accent-hover);
+  --bs-btn-hover-border-color: var(--color-accent-hover);
+  --bs-btn-active-bg: var(--color-accent-hover);
+  --bs-btn-active-border-color: var(--color-accent-hover);
+}
+.btn-secondary,
+.btn-outline-secondary {
+  --bs-btn-border-radius: var(--radius-button);
+}
+
+/* ============================================================
+   notice-embedded-html: 管理者埋め込みHTMLボックスへのテーマ適用
+   ============================================================ */
+.notice-embedded-html,
+.ykr-notice-embedded {
+  color: var(--color-text);
+  border: 1px solid var(--ykr-card-border, var(--color-border));
+  border-radius: var(--radius-card);
+  background-image: var(--ykr-card-gradient, none);
+  background-color: rgba(var(--bg-card-rgb, 255, 255, 255), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+  box-shadow: var(--shadow-card);
+}
+.notice-embedded-html :where(h1, h2, h3, h4, h5, h6, p, ul, ol, li, dl, dt, dd, span, small, strong, em, div, label, th, td, blockquote, code, pre) {
+  color: inherit;
+}
+/* ボタン型リンク(a.btn)は Bootstrap のボタン文字色(白等)を維持するため除外する */
+.notice-embedded-html a:not(.btn) {
+  color: var(--color-accent-secondary);
+}
+.notice-embedded-html :where(.card, .alert, .well, .accordion-item, .accordion-button, .accordion-body, .list-group-item, .dropdown-menu, .bg-light, .bg-white, .bg-info:not(.badge)) {
+  border-color: var(--ykr-card-border-strong, var(--color-border));
+  background-image: var(--ykr-card-gradient, none);
+  background-color: rgba(var(--bg-card-alt-rgb, 248, 244, 240), calc(var(--bg-card-alpha, 1) * var(--ykr-skin-card-opacity, 1)));
+  color: var(--color-text);
+}
+.notice-embedded-html :where(.btn, .btn-primary, .btn-secondary, .btn-outline-secondary) {
+  --bs-btn-border-radius: var(--radius-button);
+  border-radius: var(--radius-button);
+}

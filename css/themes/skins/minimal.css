@@ -1,0 +1,51 @@
+﻿/*
+Theme Name: ミニマル
+Author: つぼはち
+*/
+:root {
+  --bg-card-rgb: 255, 255, 255;
+  --bg-card-alt-rgb: 246, 248, 250;
+  --bg-input: #ffffff;
+  --color-text: #1f2937;
+  --color-text-muted: #667085;
+  --color-text-on-accent: #ffffff;
+  --color-accent: #3559a8;
+  --color-accent-hover: #29488a;
+  --color-accent-secondary: #4b5563;
+  --color-accent-secondary-hover: #374151;
+  --color-border: rgba(100, 116, 139, 0.24);
+  --color-border-active: #3559a8;
+  --bg-index-btn: #f6f8fb;
+  --bg-index-btn-hover: #edf1f6;
+  --bg-index-btn-has-data: #3559a8;
+  --bg-index-btn-has-data-hover: #29488a;
+  --color-index-btn: #475467;
+  --radius-card: 12px;
+  --radius-button: 10px;
+  --radius-input: 10px;
+  --shadow-card: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --shadow-card-hover: 0 8px 18px rgba(15, 23, 42, 0.10);
+  --shadow-navbar: 0 4px 16px rgba(15, 23, 42, 0.14);
+  --ykr-request-card-radius: 12px;
+  --ykr-request-chip-radius: 10px;
+  --ykr-request-card-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --ykr-card-border: rgba(100, 116, 139, 0.18);
+  --ykr-card-border-strong: rgba(100, 116, 139, 0.28);
+  --ykr-card-gradient: none;
+  --ykr-card-header-gradient: none;
+  --ykr-navbar-bg: rgba(28, 33, 42, 0.96);
+  --ykr-navbar-border: rgba(255, 255, 255, 0.08);
+  --ykr-input-shadow: none;
+  --ykr-accent-glow: none;
+}
+
+[data-theme="dark"] {
+  --bg-card-rgb: 28, 31, 40;
+  --bg-card-alt-rgb: 36, 41, 53;
+  --bg-input: #1d2230;
+  --color-text: #eff3f8;
+  --color-text-muted: #b0b8c5;
+  --color-index-btn: #d7deea;
+  --ykr-card-border: rgba(148, 163, 184, 0.24);
+  --ykr-card-border-strong: rgba(148, 163, 184, 0.34);
+}

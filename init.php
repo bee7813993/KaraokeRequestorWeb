@@ -25,6 +25,12 @@ $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
 
 $newconfig = $_REQUEST;
+if (array_key_exists('ui_skin_preset', $newconfig)) {
+  $newconfig['ui_skin_preset'] = get_ui_skin_preset($newconfig['ui_skin_preset']);
+}
+if (array_key_exists('ui_skin_card_opacity', $newconfig)) {
+  $newconfig['ui_skin_card_opacity'] = (string)get_ui_skin_card_opacity($newconfig['ui_skin_card_opacity']);
+}
 
 // 背景画像のアップロード/削除処理
 // クロップ済み画像はクライアントから data URL (base64) で送信される。
@@ -315,6 +321,9 @@ print '</pre>';
     </li>
     <li class="menu">
      <a href="#bgcolor_t" class="menulink" > ページ背景色 </a>
+    </li>
+    <li class="menu">
+     <a href="#ui_skin_preset_t" class="menulink" > 外観プリセット </a>
     </li>
     <li class="menu">
      <a href="#bgimage_t" class="menulink" > 背景画像 </a>
@@ -806,6 +815,85 @@ print ' value="10" ';
       bgEl.addEventListener('change', applyBgColor);
   })();
   </script>
+</div></div>
+
+<?php
+    $current_ui_skin_preset = get_ui_skin_preset();
+    $current_ui_skin_card_opacity = get_ui_skin_card_opacity();
+    $ui_skin_list = get_ui_skin_list();
+?>
+<div class="card cfg-card mb-4"><div class="card-body">
+  <div class="mb-3">
+    <h3 id="ui_skin_preset_t" class="radio form-label menulink"> 外観プリセット </h3>
+    <label for="ui_skin_preset" class="form-label"><small>BS5画面のカード形状、影、枠線、アクセント色をまとめて切り替えます。既存の背景画像・背景色・透過度設定はそのまま併用されます。プリセットは <code>css/themes/skins/</code> に置かれたCSSファイルから自動的に読み込まれるため、ファイルを追加するだけで一覧に反映されます。</small></label>
+    <select name="ui_skin_preset" id="ui_skin_preset" class="form-select" style="max-width:320px;">
+      <option value="default" <?php echo selectedcheck($current_ui_skin_preset, 'default'); ?>>標準</option>
+      <?php foreach ($ui_skin_list as $slug => $skin): ?>
+      <option value="<?php echo htmlspecialchars($slug, ENT_QUOTES, 'UTF-8'); ?>" <?php echo selectedcheck($current_ui_skin_preset, $slug); ?>><?php echo htmlspecialchars($skin['name'], ENT_QUOTES, 'UTF-8'); ?></option>
+      <?php endforeach; ?>
+    </select>
+    <small>未設定・空欄・不正値は自動で標準になります。</small>
+  </div>
+  <div class="mb-3">
+    <label for="ui_skin_card_opacity"><small>プリセット面の透過度: <span id="ui_skin_card_opacity_val"><?php echo $current_ui_skin_card_opacity; ?></span>%</small></label>
+    <input type="range" name="ui_skin_card_opacity" id="ui_skin_card_opacity" min="0" max="100" step="1" value="<?php echo $current_ui_skin_card_opacity; ?>" style="max-width:320px;" />
+    <small>プリセットが加えるカード面・ヘッダー面の見え方だけを調整します。既存のカード透過度設定とも併用されます。</small>
+  </div>
+  <script>
+  (function(){
+      var skinEl = document.getElementById('ui_skin_preset');
+      var opacityEl = document.getElementById('ui_skin_card_opacity');
+      var opacityLabel = document.getElementById('ui_skin_card_opacity_val');
+      if (!skinEl || !opacityEl || !opacityLabel) return;
+      // スラッグ => CSSファイルパス（プレビュー用に <link> を差し替える）
+      var skinFiles = <?php
+          $skin_files_js = [];
+          foreach ($ui_skin_list as $slug => $skin) {
+              $skin_files_js[$slug] = $skin['file'];
+          }
+          echo json_encode($skin_files_js, JSON_UNESCAPED_SLASHES);
+      ?>;
+      // print_bs5_head_core() がサーバー側で出力する <link> と同じ id を使い、
+      // 保存済みテーマの <link> を「差し替え」る。別 id で追加すると保存済み
+      // テーマのCSSが残ったまま重なり、プレビューが実際の見た目と一致しなくなる。
+      var LINK_ID_SKIN = 'ykr-skin-css';
+      var LINK_ID_COMPONENTS = 'ykr-skin-components-css';
+
+      function setPreviewLink(id, href){
+          var el = document.getElementById(id);
+          if (!href) {
+              if (el) el.remove();
+              return;
+          }
+          if (!el) {
+              el = document.createElement('link');
+              el.id = id;
+              el.rel = 'stylesheet';
+              document.head.appendChild(el);
+          }
+          el.href = href;
+      }
+
+      function applySkinPreview(){
+          var value = skinEl.value || 'default';
+          var opacity = Math.max(0, Math.min(100, parseInt(opacityEl.value, 10) || 0));
+          if (value !== 'default' && skinFiles[value]) {
+              setPreviewLink(LINK_ID_SKIN, skinFiles[value]);
+              setPreviewLink(LINK_ID_COMPONENTS, 'css/themes/skin-components.css');
+          } else {
+              setPreviewLink(LINK_ID_SKIN, null);
+              setPreviewLink(LINK_ID_COMPONENTS, null);
+          }
+          document.documentElement.style.setProperty('--ykr-skin-card-opacity', String(opacity / 100));
+          opacityLabel.textContent = String(opacity);
+      }
+      skinEl.addEventListener('input', applySkinPreview);
+      skinEl.addEventListener('change', applySkinPreview);
+      opacityEl.addEventListener('input', applySkinPreview);
+      opacityEl.addEventListener('change', applySkinPreview);
+  })();
+  </script>
+</div></div>
 
 <!---- 背景画像 + 透過度設定 ----->
   <?php
@@ -826,7 +914,6 @@ print ' value="10" ';
           $bg_overlay_opacity = (int)$config_ini["bg_overlay_opacity"];
       }
   ?>
-</div></div>
 
 <div class="card cfg-card mb-4"><div class="card-body">
   <div class="mb-3">
