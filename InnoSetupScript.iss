@@ -38,6 +38,7 @@ Source: "ykr.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "favicon.ico"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: ".htaccess"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
 Source: "ini.ini"; DestDir: "{app}"; Flags: onlyifdoesntexist; Components: main
+Source: "listerdb_config.ini"; DestDir: "{app}"; Flags: onlyifdoesntexist; Components: main
 Source: "search_sort_priority.json"; DestDir: "{app}"; Flags: onlyifdoesntexist; Components: main
 Source: "search_sort_priority_auth.json"; DestDir: "{app}"; Flags: onlyifdoesntexist; Components: main
 Source: "limitlist_sample.json"; DestDir: "{app}"; Flags: IgnoreVersion; Components: main
