@@ -61,22 +61,51 @@ function checkandbuild_headerlink( $oneheader, $headerlist ,$lister_dbpath) {
 }
 
 
+// listerdb_config.ini の [category_hidden] に設定された非表示カテゴリー名の一覧
+function get_listerdb_hidden_categories(){
+    static $hiddenlist = null;
+    if( $hiddenlist !== null ) return $hiddenlist;
+    $hiddenlist = array();
+    $lister_config = @parse_ini_file("listerdb_config.ini", true);
+    if( $lister_config !== FALSE
+        && array_key_exists("category_hidden",$lister_config)
+        && array_key_exists("category_name",$lister_config["category_hidden"])
+        && is_array($lister_config["category_hidden"]["category_name"]) ){
+        $hiddenlist = $lister_config["category_hidden"]["category_name"];
+    }
+    return $hiddenlist;
+}
+
+// カテゴリー未設定(NULL)は「その他」として判定する
+function is_hidden_category($category){
+    if( $category === NULL ) $category = 'その他';
+    return in_array($category, get_listerdb_hidden_categories(), true);
+}
+
 //カテゴリーリストの並べ替え
 function sortcategorylist($categorylist){
-    $lister_config = parse_ini_file("listerdb_config.ini", true);
+    if(! is_array($categorylist) ) return array();
+
+    foreach($categorylist as $key => $value ){
+        if( is_hidden_category($value["program_category"]) ) unset($categorylist[$key]);
+    }
+    $categorylist = array_values($categorylist);
+
+    $lister_config = @parse_ini_file("listerdb_config.ini", true);
     if( $lister_config === FALSE ){
         // ファイルがない場合、DBの順番
         return $categorylist;
     }
     $nullcategory_exists = 0;
     $allcategory_exists = 0;
-    
+
     $newcategorylist = array();
     if(! array_key_exists("category_order",$lister_config) )  return $categorylist;
     if(! array_key_exists("category_name",$lister_config["category_order"]) )  return $categorylist;
-    
+
     foreach($lister_config["category_order"]["category_name"] as $ordercat ){
     // print $ordercat;
+        if( is_hidden_category($ordercat) ) continue;
         if($ordercat === "全部" ){
             $newcategorylist[] = array("program_category" => $ordercat);
             $allcategory_exists++;
@@ -107,7 +136,7 @@ function sortcategorylist($categorylist){
         $result = array_merge($newcategorylist,$categorylist);
         $newcategorylist = $result;
     }
-    if($nullcategory_exists == 0 ) {
+    if($nullcategory_exists == 0 && !is_hidden_category('その他') ) {
         $foundkey = false;
         foreach($newcategorylist as $key => $value ){
            if($value["program_category"] == NULL ){
@@ -115,11 +144,13 @@ function sortcategorylist($categorylist){
                break;
            }
         }
-        $split = array_splice($newcategorylist,$foundkey,1);
+        if( $foundkey !== FALSE ){
+            $split = array_splice($newcategorylist,$foundkey,1);
+        }
         $newcategorylist[] = array("program_category" => NULL);
     }
-    
-    if($allcategory_exists == 0 ) {
+
+    if($allcategory_exists == 0 && !is_hidden_category('全部') ) {
         $newcategorylist[] = array("program_category" => '全部');
     }
     return $newcategorylist;
@@ -332,7 +363,7 @@ print '</div>';
 }
 
 // その他のカテゴリーは最後
-if($nullcategory_exists == 0 ){
+if($nullcategory_exists == 0 && !is_hidden_category('その他') ){
   $cur_category = 'その他';
   $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
 
@@ -399,7 +430,7 @@ print '</div>';
 }
 }
 
-if($allcategory_exists == 0 ){
+if($allcategory_exists == 0 && !is_hidden_category('全部') ){
 // カテゴリ分けしない全部表示
   $cur_category = '全部';
   $url = 'http://localhost/search_listerdb_head_json.php?'.$linkoption;
