@@ -1966,15 +1966,20 @@ function print_bg_style_block($is_bs5 = false) {
         // (JS無効時は data-ykr-bgfix が付かず、上の lvh フォールバックがそのまま使われる)
         print 'html[data-ykr-bgfix="1"]::before{height:var(--ykr-bg-fixed-h);}';
         print 'html[data-ykr-bgfix="1"] body::before{height:var(--ykr-bg-fixed-h);}';
-        // WebViewリサイズ型ブラウザ(Chrome iOS 等)は上下両方のバーが開閉して
-        // ビューポートの上端も動くため、上端アンカーだと背景が上バーの変化量ぶん
-        // 縦にずれる。中央アンカーなら、ずれは上下バーの変化量の差の半分(数px)まで
-        // 縮み実質静止して見える。Safari は上端が動かず現行の上端アンカーが完全
-        // 静止のため対象外(下記スクリプトが UA で切り替える)。
+        // === バー開閉時に動くビューポート辺はブラウザごとに異なるため、
+        //     アンカー辺を UA に応じて切り替える(下記スクリプトが属性を付与) ===
+        // - iOS Safari: 下辺のみ動く → 上端アンカー(既定)で完全静止
+        // - Android Chrome 等: 上辺のみ動く(下端=画面下端で不動) → 下端アンカーで静止
+        // - iOS Chrome 系: 上下両方動く → どのアンカーでも数十px残る。中央なら
+        //   ずれ=上下の変化量の差の半分。実測比較用に ?bganchor=top|center|bottom で
+        //   上書き可能にしてある。
         print 'html[data-ykr-bganchor="center"]::before,'
             . 'html[data-ykr-bganchor="center"] body::before{'
             . 'top:50%;'
             . 'transform:translate3d(0,-50%,0);-webkit-transform:translate3d(0,-50%,0);}';
+        print 'html[data-ykr-bganchor="bottom"]::before,'
+            . 'html[data-ykr-bganchor="bottom"] body::before{'
+            . 'top:auto;bottom:-80px;}';
     }
 
     if ($has_bgimage && $card_alpha < 1.0) {
@@ -2048,7 +2053,12 @@ function print_bg_style_block($is_bs5 = false) {
         // - キーボード表示などの高さ減少では更新しない
         print '<script>(function(){'
             . 'var doc=document.documentElement,maxH=0,lastW=0;'
-            . 'if(/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent)){doc.setAttribute("data-ykr-bganchor","center");}'
+            . 'var ua=navigator.userAgent,anchor="";'
+            . 'if(/Android/i.test(ua)){anchor="bottom";}'
+            . 'else if(/CriOS|FxiOS|EdgiOS/.test(ua)){anchor="center";}'
+            . 'var am=location.search.match(/[?&]bganchor=(top|center|bottom)/);'
+            . 'if(am){anchor=(am[1]==="top")?"":am[1];}'
+            . 'if(anchor){doc.setAttribute("data-ykr-bganchor",anchor);}'
             . 'function apply(){'
             . 'var w=window.innerWidth,h=window.innerHeight;'
             . 'if(!w||!h)return;'
