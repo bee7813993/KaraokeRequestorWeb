@@ -221,7 +221,7 @@ print '</div >';
                 </div >
                 <div class="col-xs-6">
                     <form method="post"action="playerctrl_portal.php" style="display: inline" >
-                        <input type="submit" value="曲終了" name="songnext" class=" pcbuttom btn btn-default" onClick="song_next()" />
+                        <input type="submit" value="曲終了" name="songnext" class=" pcbuttom btn btn-default" onClick="if(!confirm('曲を停止しますか？'))return false; song_next();" />
                     </form>
                 </div >
             </div>

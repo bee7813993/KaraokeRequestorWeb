@@ -76,7 +76,7 @@
             <button type="submit" value="再生開始" name="songstart" class="pcbuttom btn btn-default" onClick="song_play()" /> 再生開始 </button>
             </div >
             <div class="col-xs-4">
-            <button type="submit" value="曲終了" name="songnext" class="pcbuttom  btn btn-default" onClick="song_next()" />曲終了</button>
+            <button type="submit" value="曲終了" name="songnext" class="pcbuttom  btn btn-default" onClick="if(!confirm('曲を停止しますか？'))return false; song_next();" />曲終了</button>
             </div >
         </div>
     </div>

@@ -21,7 +21,8 @@ body {
   background-color: var(--bg-page);
   background-image: var(--bg-page-image);
   background-size: cover;
-  background-attachment: fixed;
+  /* background-attachment:fixed は iOS Safari 非対応のため削除。
+     背景画像固定は html::before (position:fixed + GPU layer) が担当。 */
   padding-top: 70px;
   color: var(--color-text);
 }
@@ -34,7 +35,7 @@ body::before {
   background-color: var(--bg-page, #F8ECE0);
   background-image: var(--bg-page-image, none);
   background-size: cover;
-  background-attachment: fixed;
+  /* background-attachment:fixed 削除: position:fixed 済みで不要かつ iOS でズーム原因になる */
 }
 
 /* ============================================================
