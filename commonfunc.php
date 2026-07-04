@@ -1970,9 +1970,9 @@ function print_bg_style_block($is_bs5 = false) {
         //     アンカー辺を UA に応じて切り替える(下記スクリプトが属性を付与) ===
         // - iOS Safari: 下辺のみ動く → 上端アンカー(既定)で完全静止
         // - Android Chrome 等: 上辺のみ動く(下端=画面下端で不動) → 下端アンカーで静止
-        // - iOS Chrome 系: 上下両方動く → どのアンカーでも数十px残る。中央なら
-        //   ずれ=上下の変化量の差の半分。実測比較用に ?bganchor=top|center|bottom で
-        //   上書き可能にしてある。
+        // - iOS Chrome 系: 上下両方動くためどのアンカーでも多少残る。実機比較の結果、
+        //   上端アンカー(既定)が最小だったため専用分岐は持たない。
+        //   ?bganchor=top|center|bottom で上書きして再比較できる。
         print 'html[data-ykr-bganchor="center"]::before,'
             . 'html[data-ykr-bganchor="center"] body::before{'
             . 'top:50%;'
@@ -2055,7 +2055,6 @@ function print_bg_style_block($is_bs5 = false) {
             . 'var doc=document.documentElement,maxH=0,lastW=0;'
             . 'var ua=navigator.userAgent,anchor="";'
             . 'if(/Android/i.test(ua)){anchor="bottom";}'
-            . 'else if(/CriOS|FxiOS|EdgiOS/.test(ua)){anchor="center";}'
             . 'var am=location.search.match(/[?&]bganchor=(top|center|bottom)/);'
             . 'if(am){anchor=(am[1]==="top")?"":am[1];}'
             . 'if(anchor){doc.setAttribute("data-ykr-bganchor",anchor);}'
