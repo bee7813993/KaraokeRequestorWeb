@@ -46,7 +46,7 @@ Source: "limitlist_sample.json"; DestDir: "{app}"; Flags: IgnoreVersion; Compone
 ; --- サブディレクトリ ---
 Source: "css\*"; DestDir: "{app}\css"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "js\*"; DestDir: "{app}\js"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
-Source: "images\*"; DestDir: "{app}\images"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
+Source: "images\*"; DestDir: "{app}\images"; Excludes: "\マスコット\*"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "fonts\*"; DestDir: "{app}\fonts"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "modules\*"; DestDir: "{app}\modules"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
 Source: "cms\*"; DestDir: "{app}\cms"; Flags: IgnoreVersion recursesubdirs createallsubdirs; Components: main
