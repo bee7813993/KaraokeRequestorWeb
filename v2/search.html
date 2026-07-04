@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>検索 - ゆかり API v2</title>
+<script>(function(){try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
+<link rel="stylesheet" href="../css/bootstrap5/bootstrap.min.css">
+<link rel="stylesheet" href="../css/themes/_variables.css">
+<link rel="stylesheet" href="../css/themes/search.css">
+<link rel="stylesheet" href="../css/themes/theme-toggle.css">
+<script src="../js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="v2common.js"></script>
+</head>
+<body>
+<div class="container py-3" style="max-width:860px">
+  <h4 class="mb-3">曲検索</h4>
+
+  <form class="input-group mb-3" onsubmit="doSearch();return false;">
+    <input type="text" id="keyword" class="form-control" placeholder="曲名・アーティスト名など" autofocus>
+    <button class="btn btn-primary" type="submit">検索</button>
+  </form>
+
+  <div id="resultInfo" class="text-muted small mb-2"></div>
+  <div id="results"></div>
+</div>
+
+<!-- リクエスト確認モーダル (request_confirm_bs5 相当の簡易版) -->
+<div class="modal" id="reqModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">リクエスト確認</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="fw-bold" id="reqSongName"></p>
+        <div class="mb-2">
+          <label class="form-label small">歌う人の名前</label>
+          <input type="text" id="reqSinger" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label small">コメント</label>
+          <input type="text" id="reqComment" class="form-control" placeholder="曲への思い入れとか雑談とかどうぞ">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">やめる</button>
+        <button type="button" class="btn btn-primary" onclick="submitRequest()">リクエストする</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+renderNavbar('search');
+
+var currentTarget = null;
+var reqModal = null;
+
+function fmtBytes(b) {
+    if (b >= 1073741824) return (b / 1073741824).toFixed(2) + ' GB';
+    if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MB';
+    return Math.round(b / 1024) + ' KB';
+}
+
+function doSearch() {
+    var kw = document.getElementById('keyword').value.trim();
+    if (kw === '') return;
+    document.getElementById('resultInfo').textContent = '検索中...';
+    document.getElementById('results').innerHTML = '';
+    apiCall('api/search.php', { keyword: kw }).then(function (d) {
+        document.getElementById('resultInfo').textContent =
+            d.count + '件ヒット (total: ' + d.total + ')';
+        var html = d.items.slice(0, 100).map(function (it, i) {
+            return '<div class="card mb-2"><div class="card-body py-2">' +
+                '<div class="d-flex align-items-center gap-2">' +
+                '<div class="flex-grow-1">' +
+                '<div class="fw-bold">' + esc(it.name) + '</div>' +
+                '<div class="small text-muted">' + esc(it.path) + ' ・ ' + fmtBytes(it.size) + '</div>' +
+                '</div>' +
+                '<button class="btn btn-primary btn-sm" onclick=\'openRequest(' + JSON.stringify(i) + ')\'>リクエスト</button>' +
+                '</div></div></div>';
+        }).join('');
+        if (d.items.length > 100) {
+            html += '<p class="text-muted small">(先頭100件のみ表示)</p>';
+        }
+        window._searchItems = d.items;
+        document.getElementById('results').innerHTML = html || '<p class="text-muted">見つかりませんでした</p>';
+    }).catch(function (e) {
+        document.getElementById('resultInfo').textContent = '';
+        showToast('検索失敗: ' + e.message, true);
+    });
+}
+
+function openRequest(index) {
+    currentTarget = window._searchItems[index];
+    document.getElementById('reqSongName').textContent = currentTarget.name;
+    document.getElementById('reqSinger').value = localStorage.getItem('v2-singer') || '';
+    document.getElementById('reqComment').value = '';
+    reqModal = new bootstrap.Modal(document.getElementById('reqModal'));
+    reqModal.show();
+}
+
+function submitRequest() {
+    if (!currentTarget) return;
+    var singer = document.getElementById('reqSinger').value.trim();
+    if (singer === '') { showToast('名前を入力してください', true); return; }
+    localStorage.setItem('v2-singer', singer);
+    postRequest({
+        filename: currentTarget.name,
+        fullpath: currentTarget.fullpath,
+        singer: '',
+        freesinger: singer,
+        comment: document.getElementById('reqComment').value,
+        kind: '動画'
+    }).then(function (d) {
+        reqModal.hide();
+        showToast('リクエストしました (id=' + d.newid + ')');
+    }).catch(function (e) {
+        showToast('リクエスト失敗: ' + e.message, true);
+    });
+}
+</script>
+</body>
+</html>
