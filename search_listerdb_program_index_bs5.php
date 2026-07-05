@@ -47,10 +47,39 @@ function checkandbuild_headerlink($oneheader, $headlist, $lister_dbpath)
     return '<span class="index-btn no-data">' . htmlspecialchars($oneheader, ENT_QUOTES, 'UTF-8') . '</span>';
 }
 
+// listerdb_config.ini の [category_hidden] に設定された非表示カテゴリー名の一覧
+function get_listerdb_hidden_categories()
+{
+    static $hiddenlist = null;
+    if ($hiddenlist !== null) return $hiddenlist;
+    $hiddenlist = [];
+    $lister_config = @parse_ini_file("listerdb_config.ini", true);
+    if ($lister_config !== false
+        && array_key_exists("category_hidden", $lister_config)
+        && array_key_exists("category_name", $lister_config["category_hidden"])
+        && is_array($lister_config["category_hidden"]["category_name"])) {
+        $hiddenlist = $lister_config["category_hidden"]["category_name"];
+    }
+    return $hiddenlist;
+}
+
+// カテゴリー未設定(NULL)は「その他」として判定する
+function is_hidden_category($category)
+{
+    if ($category === null) $category = 'その他';
+    return in_array($category, get_listerdb_hidden_categories(), true);
+}
+
 function sortcategorylist($categorylist)
 {
     if (!is_array($categorylist)) return [];
-    $lister_config = parse_ini_file("listerdb_config.ini", true);
+
+    foreach ($categorylist as $key => $value) {
+        if (is_hidden_category($value["program_category"])) unset($categorylist[$key]);
+    }
+    $categorylist = array_values($categorylist);
+
+    $lister_config = @parse_ini_file("listerdb_config.ini", true);
     if ($lister_config === false) return $categorylist;
     if (!array_key_exists("category_order", $lister_config)) return $categorylist;
     if (!array_key_exists("category_name", $lister_config["category_order"])) return $categorylist;
@@ -59,6 +88,7 @@ function sortcategorylist($categorylist)
     $nullcategory_exists = 0;
     $allcategory_exists  = 0;
     foreach ($lister_config["category_order"]["category_name"] as $ordercat) {
+        if (is_hidden_category($ordercat)) continue;
         if ($ordercat === '全部') {
             $newcategorylist[] = ['program_category' => $ordercat];
             $allcategory_exists++;
@@ -80,7 +110,7 @@ function sortcategorylist($categorylist)
     if (count($categorylist) > 0) {
         $newcategorylist = array_merge($newcategorylist, $categorylist);
     }
-    if ($nullcategory_exists == 0) {
+    if ($nullcategory_exists == 0 && !is_hidden_category('その他')) {
         $foundkey = false;
         foreach ($newcategorylist as $key => $value) {
             if ($value["program_category"] == null) { $foundkey = $key; break; }
@@ -88,7 +118,7 @@ function sortcategorylist($categorylist)
         if ($foundkey !== false) array_splice($newcategorylist, $foundkey, 1);
         $newcategorylist[] = ['program_category' => null];
     }
-    if ($allcategory_exists == 0) {
+    if ($allcategory_exists == 0 && !is_hidden_category('全部')) {
         $newcategorylist[] = ['program_category' => '全部'];
     }
     return $newcategorylist;
@@ -228,6 +258,7 @@ showuppermenu('program_name', $linkoption);
 
   $nullcategory_exists = 0;
   $allcategory_exists  = 0;
+  $category_index      = 0;
 
   foreach ($categorylist as $category):
       $cur_category = $category["program_category"];
@@ -246,42 +277,78 @@ showuppermenu('program_name', $linkoption);
       if (!$headlist_json) continue;
       $headlist = json_decode($headlist_json, true);
       if (empty($headlist['data'])) continue;
+      $collapse_id = 'program-index-category-' . $category_index++;
   ?>
   <div class="search-section mb-3">
-    <div class="search-section-body">
-      <h3 class="h6 mb-2"><?php echo htmlspecialchars($cur_category, ENT_QUOTES, 'UTF-8'); ?></h3>
+    <div class="search-section-body py-2">
+      <button class="btn btn-link text-decoration-none p-0 w-100 text-start collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#<?php echo $collapse_id; ?>"
+              aria-expanded="false"
+              aria-controls="<?php echo $collapse_id; ?>">
+        <h3 class="h6 mb-0"><?php echo htmlspecialchars($cur_category, ENT_QUOTES, 'UTF-8'); ?></h3>
+      </button>
+    </div>
+    <div id="<?php echo $collapse_id; ?>" class="collapse">
+      <div class="search-section-body pt-0">
       <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
+      </div>
     </div>
   </div>
   <?php endforeach; ?>
 
-  <?php if ($nullcategory_exists == 0): ?>
+  <?php if ($nullcategory_exists == 0 && !is_hidden_category('その他')): ?>
     <?php
     $headlist_json = @file_get_contents('http://localhost/search_listerdb_head_json.php?program_category=ISNULL');
     if ($headlist_json):
         $headlist = json_decode($headlist_json, true);
         if (!empty($headlist['data'])):
+        $collapse_id = 'program-index-category-' . $category_index++;
     ?>
     <div class="search-section mb-3">
-      <div class="search-section-body">
-        <h3 class="h6 mb-2">その他</h3>
+      <div class="search-section-body py-2">
+        <button class="btn btn-link text-decoration-none p-0 w-100 text-start collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#<?php echo $collapse_id; ?>"
+                aria-expanded="false"
+                aria-controls="<?php echo $collapse_id; ?>">
+          <h3 class="h6 mb-0">その他</h3>
+        </button>
+      </div>
+      <div id="<?php echo $collapse_id; ?>" class="collapse">
+        <div class="search-section-body pt-0">
         <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
+        </div>
       </div>
     </div>
     <?php endif; endif; ?>
   <?php endif; ?>
 
-  <?php if ($allcategory_exists == 0): ?>
+  <?php if ($allcategory_exists == 0 && !is_hidden_category('全部')): ?>
     <?php
     $headlist_json = @file_get_contents('http://localhost/search_listerdb_head_json.php?' . $linkoption);
     if ($headlist_json):
         $headlist = json_decode($headlist_json, true);
         if ($headlist):
+        $collapse_id = 'program-index-category-' . $category_index++;
     ?>
     <div class="search-section mb-3">
-      <div class="search-section-body">
-        <h3 class="h6 mb-2">全部</h3>
+      <div class="search-section-body py-2">
+        <button class="btn btn-link text-decoration-none p-0 w-100 text-start collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#<?php echo $collapse_id; ?>"
+                aria-expanded="false"
+                aria-controls="<?php echo $collapse_id; ?>">
+          <h3 class="h6 mb-0">全部</h3>
+        </button>
+      </div>
+      <div id="<?php echo $collapse_id; ?>" class="collapse">
+        <div class="search-section-body pt-0">
         <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
+        </div>
       </div>
     </div>
     <?php endif; endif; ?>

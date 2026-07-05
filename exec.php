@@ -251,7 +251,9 @@ if (is_numeric($selectid)) {
         $stmt_u->execute();
         if (!empty($DEBUG))
             print "reqorder set to {$newreqorder} for id={$newid}<br />";
-        if ($config_ini["request_automove"] == 1) {
+        // request_automove は config.ini に無い場合があるため未定義 Warning を防ぐ
+        // (Warning が XHR の JSON 応答 {"newid":N} に混入するのを避ける)
+        if (($config_ini["request_automove"] ?? 0) == 1) {
             require_once('function_moveitem.php');
             $list = new MoveItem;
             $list->getturnlist($db);

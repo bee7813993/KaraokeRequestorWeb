@@ -1,0 +1,98 @@
+﻿/*
+Theme Name: 推し活
+Author: つぼはち
+*/
+:root {
+  --bg-card-rgb: 255, 248, 252;
+  --bg-card-alt-rgb: 250, 240, 248;
+  --bg-input: #fffafd;
+  --color-text: #35122f;
+  --color-text-muted: #6f4168;
+  --color-text-on-accent: #ffffff;
+  --color-accent: #ff4aa7;
+  --color-accent-hover: #f72b95;
+  --color-accent-secondary: #6f5df8;
+  --color-accent-secondary-hover: #5b49e6;
+  --color-border: rgba(187, 87, 146, 0.34);
+  --color-border-active: #ff62b0;
+  --bg-index-btn: #f8f0ff;
+  --bg-index-btn-hover: #f1e3fb;
+  --bg-index-btn-has-data: #54c5ff;
+  --bg-index-btn-has-data-hover: #32b7fb;
+  --color-index-btn: #60335b;
+  --color-index-btn-has-data: #10263c;
+  --radius-card: 20px;
+  --radius-button: 12px;
+  --radius-input: 16px;
+  --shadow-card: 0 14px 34px rgba(161, 88, 162, 0.22);
+  --shadow-card-hover: 0 20px 42px rgba(161, 88, 162, 0.28);
+  --shadow-navbar: 0 8px 26px rgba(72, 34, 96, 0.28);
+  --ykr-request-card-radius: 20px;
+  --ykr-request-chip-radius: 12px;
+  --ykr-request-card-shadow: 0 14px 34px rgba(161, 88, 162, 0.22);
+  --ykr-card-border: rgba(224, 122, 186, 0.54);
+  --ykr-card-border-strong: rgba(224, 122, 186, 0.74);
+  --ykr-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.44));
+  --ykr-card-header-gradient: linear-gradient(90deg, rgba(255, 74, 167, 0.18), rgba(84, 197, 255, 0.18));
+  --ykr-navbar-bg: rgba(74, 38, 87, 0.92);
+  --ykr-navbar-border: rgba(255, 197, 228, 0.34);
+  --ykr-input-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+  --ykr-accent-glow: 0 0 18px rgba(255, 98, 176, 0.24);
+}
+
+[data-theme="dark"] {
+  --bg-card-rgb: 58, 34, 62;
+  --bg-card-alt-rgb: 76, 48, 84;
+  --bg-input: #432849;
+  --color-text: #fff0fb;
+  --color-text-muted: #f2c8e8;
+  --bg-index-btn: #6d4d73;
+  --bg-index-btn-hover: #7b5980;
+  --ykr-card-gradient: linear-gradient(180deg, rgba(72, 40, 82, 0.82), rgba(52, 28, 60, 0.58));
+  --ykr-card-header-gradient: linear-gradient(90deg, rgba(255, 74, 167, 0.20), rgba(84, 197, 255, 0.14));
+  --color-index-btn: #fff0fb;
+  --color-index-btn-has-data: #13283a;
+  --ykr-card-border: rgba(255, 168, 223, 0.34);
+  --ykr-card-border-strong: rgba(255, 168, 223, 0.48);
+}
+
+/* 推し活テーマは彩度が高いため、本文系テキストは基準色へ寄せて可読性を確保する */
+.search-section,
+.search-hero,
+.player-nowplaying,
+.player-controls-card,
+.card,
+.cfg-card,
+#stats-bar,
+.list-toolbar,
+.request-card {
+  color: var(--color-text);
+}
+
+.search-section-header,
+.card-header,
+.accordion-button,
+.search-hero label,
+.search-result-count,
+.search-tips,
+.index-section-label,
+.card-label,
+.card-meta {
+  color: var(--color-text) !important;
+}
+
+.reservation-tab-btn,
+.page-btn,
+.search-history-word,
+.search-history-del,
+#search-history-clear,
+.index-btn {
+  color: var(--color-text);
+}
+
+/* ボタン(.btn系)は Bootstrap の文字色(--bs-btn-color)を尊重するため対象にしない。
+   一括で color を当てると灰色地+白文字の btn-secondary 等が読めなくなる。 */
+.notice-embedded-html :where(.bg-light, .bg-white, .card, .alert, .well),
+.notice-embedded-html :where(h1, h2, h3, h4, h5, h6, p, li, span, small, strong, em, div, label, th, td, code, pre) {
+  color: var(--color-text);
+}

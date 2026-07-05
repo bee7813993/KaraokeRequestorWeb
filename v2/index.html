@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>予約一覧 - ゆかり API v2</title>
+<script>(function(){try{var t=localStorage.getItem("ykari-theme")||"light",f=localStorage.getItem("ykari-fontsize")||"normal";document.documentElement.setAttribute("data-theme",t);document.documentElement.setAttribute("data-fontsize",f);}catch(e){}})();</script>
+<link rel="stylesheet" href="../css/bootstrap5/bootstrap.min.css">
+<link rel="stylesheet" href="../css/themes/_variables.css">
+<link rel="stylesheet" href="../css/themes/theme-toggle.css">
+<script src="../js/bootstrap5/bootstrap.bundle.min.js"></script>
+<script src="v2common.js"></script>
+</head>
+<body>
+<div class="container py-3" style="max-width:860px">
+  <div class="d-flex align-items-center mb-3 gap-2">
+    <h4 class="mb-0">予約一覧</h4>
+    <span id="summary" class="text-muted small"></span>
+    <div class="ms-auto d-flex gap-2 align-items-center">
+      <div class="form-check form-switch mb-0">
+        <input class="form-check-input" type="checkbox" id="autoreload" checked>
+        <label class="form-check-label small" for="autoreload">自動更新</label>
+      </div>
+      <button class="btn btn-outline-secondary btn-sm" onclick="loadList()">更新</button>
+    </div>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<!-- 詳細モーダル (change.php?format=json) -->
+<div class="modal" id="detailModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">予約詳細 (change.php?format=json)</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body"><pre id="detailBody" class="small" style="white-space:pre-wrap"></pre></div>
+    </div>
+  </div>
+</div>
+
+<script>
+renderNavbar('list');
+
+var NP_BADGE = {
+    '再生中':       'bg-success',
+    '再生開始待ち': 'bg-warning text-dark',
+    '停止中':       'bg-secondary',
+    '再生済':       'bg-dark',
+    '再生済？':     'bg-dark',
+    '変更中':       'bg-info text-dark',
+    '未再生':       'bg-primary'
+};
+
+function fmtDuration(sec) {
+    if (!sec) return '';
+    var m = Math.floor(sec / 60), s = sec % 60;
+    return m + '分' + (s < 10 ? '0' : '') + s + '秒';
+}
+
+function rowActions(item) {
+    var id = item.id;
+    var b = [];
+    b.push('<button class="btn btn-sm btn-outline-secondary" onclick="moveReq(' + id + ',\'up\')">上へ</button>');
+    b.push('<button class="btn btn-sm btn-outline-secondary" onclick="moveReq(' + id + ',\'down\')">下へ</button>');
+    b.push('<button class="btn btn-sm btn-outline-primary" onclick="moveReq(' + id + ',\'warikomi\')">次に再生</button>');
+    if (item.nowplaying === '未再生' || item.nowplaying === '1') {
+        b.push('<button class="btn btn-sm btn-outline-dark" onclick="setStatus(' + id + ',4)">再生済に</button>');
+    } else {
+        b.push('<button class="btn btn-sm btn-outline-dark" onclick="setStatus(' + id + ',1)">未再生に</button>');
+    }
+    b.push('<button class="btn btn-sm btn-outline-info" onclick="showDetail(' + id + ')">詳細</button>');
+    b.push('<button class="btn btn-sm btn-outline-danger" onclick="deleteReq(' + id + ',this)">削除</button>');
+    return b.join(' ');
+}
+
+function loadList() {
+    jsonCall('requestlist_swipe_json.php', { limit: 100, offset: 0 }).then(function (d) {
+        if (!d) return;
+        document.getElementById('summary').textContent =
+            '全' + d.total + '件 / 残り' + d.remaining_count + '曲' +
+            (d.remaining_seconds ? ' (約' + fmtDuration(d.remaining_seconds) + ')' : '');
+        var html = d.items.map(function (it) {
+            var badge = NP_BADGE[it.nowplaying] || 'bg-primary';
+            var sub = [];
+            if (it.song_name) sub.push(esc(it.song_name));
+            if (it.lister_artist) sub.push(esc(it.lister_artist));
+            if (it.keychange) sub.push('キー' + (it.keychange > 0 ? '+' : '') + it.keychange);
+            if (it.duration) sub.push(fmtDuration(it.duration));
+            return '<div class="card mb-2"><div class="card-body py-2">' +
+                '<div class="d-flex align-items-center gap-2 flex-wrap">' +
+                '<span class="badge ' + badge + '">' + esc(it.nowplaying) + '</span>' +
+                '<strong>' + esc(it.display_name) + '</strong>' +
+                '<span class="text-muted small">#' + it.position + '</span>' +
+                '</div>' +
+                '<div class="small text-muted">' + esc(it.singer) + ' / ' + esc(it.kind) +
+                (sub.length ? ' ｜ ' + sub.join(' ・ ') : '') +
+                (it.comment ? '<br>💬 ' + esc(it.comment) : '') + '</div>' +
+                '<div class="mt-1 d-flex gap-1 flex-wrap">' + rowActions(it) + '</div>' +
+                '</div></div>';
+        }).join('');
+        document.getElementById('list').innerHTML = html || '<p class="text-muted">予約はありません</p>';
+    }).catch(function (e) { showToast('一覧取得失敗: ' + e.message, true); });
+}
+
+function moveReq(id, action) {
+    apiCall('api/request_move.php', { id: id, action: action }).then(function (d) {
+        showToast(d.message || ('移動しました (' + action + ')'));
+        loadList();
+    }).catch(function (e) { showToast('移動失敗: ' + e.message, true); });
+}
+
+function setStatus(id, np) {
+    apiCall('api/playstatus.php', { id: id, nowplaying: np }).then(function (d) {
+        showToast('状態変更: ' + d.nowplaying);
+        loadList();
+    }).catch(function (e) { showToast('状態変更失敗: ' + e.message, true); });
+}
+
+function deleteReq(id, btn) {
+    if (!confirm('id=' + id + ' の予約を削除しますか？')) return;
+    apiCall('api/request_delete.php', { id: id }).then(function () {
+        showToast('削除しました');
+        loadList();
+    }).catch(function (e) { showToast('削除失敗: ' + e.message, true); });
+}
+
+function showDetail(id) {
+    fetch(V2_BASE + '/change.php?format=json&id=' + id)
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+            document.getElementById('detailBody').textContent = JSON.stringify(j, null, 2);
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        })
+        .catch(function (e) { showToast('詳細取得失敗: ' + e.message, true); });
+}
+
+loadList();
+setInterval(function () {
+    if (document.getElementById('autoreload').checked) loadList();
+}, 5000);
+</script>
+</body>
+</html>

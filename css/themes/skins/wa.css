@@ -1,0 +1,51 @@
+﻿/*
+Theme Name: 和風
+Author: つぼはち
+*/
+:root {
+  --bg-card-rgb: 251, 245, 235;
+  --bg-card-alt-rgb: 244, 232, 213;
+  --bg-input: #fffaf3;
+  --color-text: #2f1b16;
+  --color-text-muted: #71584a;
+  --color-text-on-accent: #fff8ef;
+  --color-accent: #a53a2b;
+  --color-accent-hover: #8d2f22;
+  --color-accent-secondary: #b48a3a;
+  --color-accent-secondary-hover: #9d762f;
+  --color-border: rgba(120, 45, 35, 0.24);
+  --color-border-active: #a53a2b;
+  --bg-index-btn: #f5e8d7;
+  --bg-index-btn-hover: #edd9bf;
+  --bg-index-btn-has-data: #8e3124;
+  --bg-index-btn-has-data-hover: #79281d;
+  --color-index-btn: #4a3123;
+  --radius-card: 16px;
+  --radius-button: 10px;
+  --radius-input: 10px;
+  --shadow-card: 0 10px 24px rgba(58, 29, 20, 0.14);
+  --shadow-card-hover: 0 16px 30px rgba(58, 29, 20, 0.18);
+  --shadow-navbar: 0 6px 20px rgba(35, 18, 12, 0.28);
+  --ykr-request-card-radius: 16px;
+  --ykr-request-chip-radius: 10px;
+  --ykr-request-card-shadow: 0 10px 24px rgba(58, 29, 20, 0.14);
+  --ykr-card-border: rgba(149, 89, 57, 0.28);
+  --ykr-card-border-strong: rgba(149, 89, 57, 0.42);
+  --ykr-card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.12));
+  --ykr-card-header-gradient: linear-gradient(90deg, rgba(165, 58, 43, 0.08), rgba(180, 138, 58, 0.12));
+  --ykr-navbar-bg: rgba(36, 24, 18, 0.90);
+  --ykr-navbar-border: rgba(210, 174, 97, 0.22);
+  --ykr-input-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.52);
+  --ykr-accent-glow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+[data-theme="dark"] {
+  --bg-card-rgb: 40, 26, 24;
+  --bg-card-alt-rgb: 58, 38, 34;
+  --bg-input: #2d1d1b;
+  --color-text: #f5e8d8;
+  --color-text-muted: #d0b49d;
+  --color-index-btn: #f5e8d8;
+  --ykr-card-border: rgba(212, 170, 116, 0.26);
+  --ykr-card-border-strong: rgba(212, 170, 116, 0.38);
+}

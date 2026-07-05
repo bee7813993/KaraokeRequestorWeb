@@ -121,7 +121,9 @@ function readconfig_array()
         $config_ini = array_merge($config_ini,array("commenturl" => urlencode($commenturl))); 
      }    
     if(!array_key_exists("downloadfolder", $config_ini)){
-        $downloadfolder = $_SERVER["TMP"];
+        // $_SERVER["TMP"] は Apache 以外 (ビルトインサーバー等) では未定義のことがあり、
+        // Warning が JSON 応答の先頭に混入するため sys_get_temp_dir() でフォールバックする
+        $downloadfolder = $_SERVER["TMP"] ?? sys_get_temp_dir();
         $config_ini = array_merge($config_ini,array("downloadfolder" => urlencode($downloadfolder)));            
     }
     //print mb_substr(urldecode($config_ini["downloadfolder"]),-1);
@@ -146,6 +148,12 @@ function readconfig_array()
     }
     if(!array_key_exists("usenewrequestlist", $config_ini)){
         $config_ini = array_merge($config_ini,array("usenewrequestlist" => 1));
+    }
+    if(!array_key_exists("ui_skin_preset", $config_ini)){
+        $config_ini["ui_skin_preset"] = urlencode("default");
+    }
+    if(!array_key_exists("ui_skin_card_opacity", $config_ini)){
+        $config_ini["ui_skin_card_opacity"] = 100;
     }
     if(!array_key_exists("secret_display_text", $config_ini)){
         $config_ini["secret_display_text"] = urlencode("ヒ・ミ・ツ♪(シークレットリクエスト)");
@@ -298,7 +306,7 @@ function updatedb($db){
         $rows = $rowsdb->fetchAll(PDO::FETCH_ASSOC);
         $rowsdb->closeCursor();
     } catch(PDOException $e) {
-        printf("DB PDO Error: %s\n", $e->getMessage());
+        error_log("updatedb PDO Error: " . $e->getMessage());
         return false;
     }
     
@@ -313,12 +321,11 @@ function updatedb($db){
         }
         if( ! $foundflg ){
             $addcolumnsql = "ALTER TABLE requesttable ADD COLUMN ".$nc['name'].'['.$nc['type'].']';
-            echo $addcolumnsql;
-            echo "\n";
+            error_log("updatedb: " . $addcolumnsql);
             try {
                 $res = $db->exec($addcolumnsql);
             } catch(PDOException $e) {
-                printf("DB PDO Error: %s\n", $e->getMessage());
+                error_log("updatedb PDO Error: " . $e->getMessage());
                 return false;
             }
         }
@@ -339,7 +346,7 @@ try {
 	$db->exec('PRAGMA journal_mode=WAL;');
 	$db->exec('PRAGMA busy_timeout=5000;');
 } catch(PDOException $e) {
-	printf("new PDO Error: %s\n", $e->getMessage());
+	error_log("initdb PDO Error: " . $e->getMessage());
 	die();
 }
 $sql = "create table IF NOT EXISTS requesttable (
@@ -366,7 +373,7 @@ $sql = "create table IF NOT EXISTS requesttable (
 )";
 $stmt = $db->query($sql);
 if ($stmt === false ){
-	print("Create table 失敗しました。<br>");
+	error_log("initdb: requesttable の作成に失敗しました");
 	die();
 }
  updatedb($db);
