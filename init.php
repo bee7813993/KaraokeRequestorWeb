@@ -1473,6 +1473,7 @@ foreach ($searchitem_defs as $idx => $def) {
 }
 asort($si_order_map);
 $si_sorted_indices = array_keys($si_order_map);
+$listerdb_index_default_collapsed = configbool("listerdb_index_default_collapsed", false);
 
 ?>
 
@@ -1489,6 +1490,17 @@ $si_sorted_indices = array_keys($si_order_map);
       <span class="searchitem-drag-handle" style="cursor:grab; color:var(--color-text-muted); font-size:20px; padding:0 10px 0 0; line-height:1; user-select:none; touch-action:none;">&#8942;</span>
       <input type="checkbox" name="searchitem[]" value="<?php echo $def['id']; ?>" <?php echo $checked; ?> style="margin-right:8px;">
       <span><?php echo $def['label']; ?></span>
+      <?php if ($def['id'] === 'listerDB'): ?>
+      <span style="margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-size:0.9rem;">
+        <span class="text-muted">初期状態で閉じる</span>
+        <label class="radio-inline" style="margin-right:0;">
+          <input type="radio" name="listerdb_index_default_collapsed" value="1" <?php echo $listerdb_index_default_collapsed ? 'checked' : ''; ?>> オン
+        </label>
+        <label class="radio-inline" style="margin-right:0;">
+          <input type="radio" name="listerdb_index_default_collapsed" value="2" <?php echo !$listerdb_index_default_collapsed ? 'checked' : ''; ?>> オフ
+        </label>
+      </span>
+      <?php endif; ?>
       <input type="hidden" name="searchitem_o[<?php echo $idx; ?>]" value="<?php echo $si_sorted_pos + 1; ?>" class="searchitem-order-input">
     </div>
 <?php } ?>
