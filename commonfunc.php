@@ -2877,6 +2877,8 @@ function update_fromarchive($version_str, &$errmsg) {
         $exclude_list[] = 'request.db';
     }
     $exclude_list[] = 'images/bg';
+    $exclude_list[] = 'search_sort_priority.json';
+    $exclude_list[] = 'search_sort_priority_auth.json';
 
     _kara_update_copy_recursive($source_dir, $app_root, $exclude_list);
 
