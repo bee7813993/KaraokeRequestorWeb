@@ -2335,20 +2335,20 @@ function get_git_version(){
 
 // バージョン情報
 function get_version(){
-    
     $localversion = '';
 
-    if(file_exists('version')){
-        $localversion = file_get_contents('version');
+    if (file_exists('version')) {
+        $localversion = trim(file_get_contents('version'));
     }
-    
-    $gitversion = get_git_version();
-    
-    if(empty($gitversion)){
-        return $localversion;
-    }else {
-        return $gitversion;
+
+    $gitversion = trim((string)get_git_version());
+    $baseversion = empty($gitversion) ? $localversion : $gitversion;
+
+    if ($baseversion === '') {
+        return '';
     }
+
+    return $baseversion . '-つぼはち改良';
 }
 
 function get_git_command_version() {
