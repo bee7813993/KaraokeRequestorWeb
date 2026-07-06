@@ -303,9 +303,30 @@ GET /mpcctrl_bs5.php?cmd=comp_get | comp_inc | comp_dec | comp_reset | comp_appl
 
 ---
 
-## マイページ（既存 API）
+## マイページ
 
 `usemypage=1` 時のみ。ユーザー識別は Cookie `YkariUserID` (UUID)。
+モバイルアプリは端末で生成した UUID を Cookie ヘッダーで送る (Web 版と同じ UUID ならデータ共有できる)。
+
+### GET /api/mypage_list.php — 一覧取得（エンベロープ版）
+
+| パラメータ | 必須 | 説明 |
+|---|---|---|
+| `kind` | ○ | `history` (履歴) / `later` (あとで歌う) / `favorite_song` (お気に入り曲) |
+| `sort` | - | `date` (既定) / `count` (history のみ) / `filedate` |
+| `order` | - | `desc` (既定) / `asc` |
+| `limit` | - | history の取得上限 (既定 200) |
+
+```json
+{ "ok":true, "data": { "kind":"later", "userid":"UUID", "displayname":"...",
+  "items": [ { "fullpath":"...", "songfile":"...", "kind":"動画", "added_at":N } ] } }
+// history の items は { fullpath, songfile, kind, times, last_requested_at, first_id }
+```
+
+- Cookie が無い場合は新規 UUID が発行され (Set-Cookie)、一覧は空で返る
+- `usemypage=0` のサーバーでは 404
+
+### GET /mypage_api.php — 追加・削除（既存）
 
 ```
 GET /mypage_api.php?action=<action>&...
