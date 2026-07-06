@@ -32,6 +32,9 @@
  *     },
  *     "request": {
  *       "noname_username": string  // 匿名リクエスト時のデフォルト名
+ *     },
+ *     "server": {
+ *       "room_name": string  // 部屋名 (別部屋URL設定の先頭の部屋番号)。未設定時は空文字
  *     }
  *   }
  * }
@@ -66,8 +69,24 @@ $request = [
     'otherplayer_disc' => $otherplayer_disc !== '' ? $otherplayer_disc : '別プレイヤー再生',
 ];
 
+// 部屋名: 別部屋URL設定 (roomurl) の先頭エントリの部屋番号を Web 版の「〇〇部屋」と同じ規則で返す。
+// roomurl 未設定時は kara_config.php がアクセス URL からキー 0 で自動生成するため、
+// キーが 0 または空のときは「名前なし」として空文字を返す (アプリ側は接続先 URL を表示する)
+$room_name = '';
+if (!empty($config_ini['roomurl']) && is_array($config_ini['roomurl'])) {
+    foreach ($config_ini['roomurl'] as $key => $value) {
+        if ((string)$key !== '' && (string)$key !== '0') {
+            $room_name = (string)$key;
+        }
+        break;
+    }
+}
+
 api_ok([
     'features' => $features,
     'player'   => $player,
     'request'  => $request,
+    'server'   => [
+        'room_name' => $room_name,
+    ],
 ]);
