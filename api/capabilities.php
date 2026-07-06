@@ -34,7 +34,10 @@
  *       "noname_username": string  // 匿名リクエスト時のデフォルト名
  *     },
  *     "server": {
- *       "room_name": string  // 部屋名 (別部屋URL設定の先頭の部屋番号)。未設定時は空文字
+ *       "room_name": string,  // 部屋名 (別部屋URL設定の先頭の部屋番号)。未設定時は空文字
+ *       "rooms": [            // 移動できる部屋の一覧 (Web 版の部屋ドロップダウンと同じ条件)
+ *         { "name": string, "url": string }
+ *       ]
  *     }
  *   }
  * }
@@ -82,11 +85,33 @@ if (!empty($config_ini['roomurl']) && is_array($config_ini['roomurl'])) {
     }
 }
 
+// 移動できる部屋の一覧: Web 版の部屋ドロップダウンと同じ条件
+// (URL が設定されていて、かつ「表示する」(roomurlshow=1) のものだけ)
+$rooms = [];
+if (!empty($config_ini['roomurl']) && is_array($config_ini['roomurl'])) {
+    foreach ($config_ini['roomurl'] as $key => $value) {
+        if (empty($value)) {
+            continue;
+        }
+        if (!(array_key_exists('roomurlshow', $config_ini)
+            && is_array($config_ini['roomurlshow'])
+            && array_key_exists($key, $config_ini['roomurlshow'])
+            && $config_ini['roomurlshow'][$key] == 1)) {
+            continue;
+        }
+        $rooms[] = [
+            'name' => (string)$key,
+            'url'  => urldecode($value),
+        ];
+    }
+}
+
 api_ok([
     'features' => $features,
     'player'   => $player,
     'request'  => $request,
     'server'   => [
         'room_name' => $room_name,
+        'rooms'     => $rooms,
     ],
 ]);
