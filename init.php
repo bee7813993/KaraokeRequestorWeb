@@ -426,13 +426,27 @@ print '</pre>';
   </p>
   <h3>クール一覧データ同期</h3>
   <?php
-    $setlist_search_backend_label = (urldecode($config_ini['setlist_search_backend'] ?? 'listerdb') === 'everything') ? 'Everything' : 'ゆかりすたー';
+    $setlist_search_backend = urldecode($config_ini['setlist_search_backend'] ?? 'listerdb');
+    if ($setlist_search_backend !== 'everything') {
+        $setlist_search_backend = 'listerdb';
+    }
+    $setlist_search_backend_label = ($setlist_search_backend === 'everything') ? 'Everything' : 'ゆかりすたー';
   ?>
   <p>
     <button type="button" class="btn btn-secondary" id="setlistSyncBtn" onclick="sync_setlist_stats()">クール一覧を最新情報に同期</button>
     <span class="small text-muted ms-2">検索先: <?php echo htmlspecialchars($setlist_search_backend_label, ENT_QUOTES, 'UTF-8'); ?></span>
     <span id="setlistSyncStatus" class="small text-muted ms-2"></span>
   </p>
+  <form method="post" action="init.php" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <span class="small text-muted">クール一覧から開く検索先</span>
+    <label class="radio-inline mb-0">
+      <input type="radio" name="setlist_search_backend" value="listerdb" <?php print ($setlist_search_backend === 'listerdb') ? 'checked' : ' '; ?> /> ゆかりすたー
+    </label>
+    <label class="radio-inline mb-0">
+      <input type="radio" name="setlist_search_backend" value="everything" <?php print ($setlist_search_backend === 'everything') ? 'checked' : ' '; ?> /> Everything
+    </label>
+    <button type="submit" class="btn btn-outline-secondary btn-sm">検索先を保存</button>
+  </form>
 <script type="text/javascript">
 function start_yklistercmd(){
 var request = new XMLHttpRequest();
@@ -1551,23 +1565,6 @@ $listerdb_index_default_collapsed = configbool("listerdb_index_default_collapsed
         }
     ?>
     <input type="text" name="listerDBPATH" size="100" class="form-control" value="<?php echo $listerDBPATH; ?>" />
-  </div>
-
-  <div class="mb-3">
-    <?php
-        $setlist_search_backend = urldecode($config_ini['setlist_search_backend'] ?? 'listerdb');
-        if ($setlist_search_backend !== 'everything') {
-            $setlist_search_backend = 'listerdb';
-        }
-    ?>
-    <h4 class="radio form-label"> クール一覧の検索先 </h4>
-    <label class="form-label"><small>クール一覧から曲を開くときの検索先を選びます。</small></label>
-    <label class="radio-inline">
-      <input type="radio" name="setlist_search_backend" value="listerdb" <?php print ($setlist_search_backend === 'listerdb') ? 'checked' : ' '; ?> /> ゆかりすたー
-    </label>
-    <label class="radio-inline">
-      <input type="radio" name="setlist_search_backend" value="everything" <?php print ($setlist_search_backend === 'everything') ? 'checked' : ' '; ?> /> Everything
-    </label>
   </div>
 
   <div class="mb-3">
