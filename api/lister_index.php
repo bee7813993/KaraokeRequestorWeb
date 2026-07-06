@@ -15,16 +15,22 @@
  *   years                        → 年ごとの曲数 (降順)
  *   quarters&year=YYYY           → 指定年の期ごとの曲数・作品数 (q: 1=1〜3月:冬 ... 4=10〜12月:秋)
  *   programs&year=YYYY&quarter=N → 期内の作品一覧 (作品名 / シリーズ名 / 曲数)
+ *   programs&group=シリーズ名     → シリーズ内の作品一覧 (シリーズ再検索用)
  *   songs&program=|artist=|group=|worker= → 完全一致の曲一覧 (複数指定は AND)
+ *   songs&anyword=キーワード      → あいまい検索 (スペース区切り AND、読み仮名対応)
+ *
+ * songs の応答は曲単位にグルーピングされ、同じ曲の複数ファイル (別動画) が files に並ぶ。
  *
  * 応答例:
  *   years:    { "ok":true, "data":{ "years":[{"year":2026,"songs":492},...], "no_date":28260 } }
  *   quarters: { "ok":true, "data":{ "year":2026, "quarters":[{"q":2,"label":"4月〜6月：春","songs":196,"programs":45},...] } }
  *   programs: { "ok":true, "data":{ "year":2026, "quarter":2, "label":"4月〜6月：春",
  *               "programs":[{"program":"...","group":"シリーズ名 or null","songs":5},...] } }
- *   songs:    { "ok":true, "data":{ "total":5, "items":[{ song_name, song_ruby, song_artist,
- *               program_name, tie_up_group_name, song_op_ed, found_worker, found_path,
- *               found_file_size, found_comment },...] } }
+ *   songs:    { "ok":true, "data":{ "total":2, "files_total":3, "items":[
+ *               { "song_name":"...", "song_artist":"...", "program_name":"...",
+ *                 "tie_up_group_name":"...", "song_op_ed":"3rdシングル",
+ *                 "files":[{ "found_path":"...", "found_comment":"リリックビデオ",
+ *                            "found_worker":"...", "found_file_size":123 },...] },...] } }
  */
 require_once __DIR__ . '/_common.php';
 
@@ -67,6 +73,59 @@ function quarter_label($q)
 {
     static $labels = [1 => '1月〜3月：冬', 2 => '4月〜6月：春', 3 => '7月〜9月：夏', 4 => '10月〜12月：秋'];
     return $labels[$q] ?? '';
+}
+
+// ---- あいまい検索 (search_listerdb_songlist_json.php の anyword と同じ規則) ----
+
+/** 濁点外し・小文字大文字化・ひらがな→カタカナ (読み仮名カラム検索用)。 */
+function lister_kanabuild($str)
+{
+    $from = 'ガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポァィゥェォャュョッ';
+    $to   = 'カキクケコサシスセソタチツテトハヒフヘホハヒフヘホアイウエオヤユヨツ';
+    $temp = mb_convert_kana($str, 'C'); // ひらがな→カタカナ
+    $result = '';
+    $len = mb_strlen($temp);
+    for ($i = 0; $i < $len; $i++) {
+        $ch = mb_substr($temp, $i, 1);
+        $pos = mb_strpos($from, $ch);
+        $result .= ($pos !== false) ? mb_substr($to, $pos, 1) : $ch;
+    }
+    return $result;
+}
+
+/** 作品一覧クエリの行を応答形式に変換する。 */
+function lister_program_rows($rows)
+{
+    $programs = [];
+    foreach ($rows as $row) {
+        $programs[] = [
+            'program' => $row['program_name'],
+            'group'   => ($row['group_name'] !== '' && $row['group_name'] !== null)
+                ? $row['group_name'] : null,
+            'songs'   => (int)$row['songs'],
+        ];
+    }
+    return $programs;
+}
+
+/**
+ * 1カラム分のあいまい条件 (スペース区切りの語をすべて含む。読み仮名カラムも OR で見る)。
+ */
+function lister_like_cond(PDO $db, $column, $rubyColumn, $word)
+{
+    $words = explode(' ', mb_convert_kana($word, 's'));
+    $conds = [];
+    foreach ($words as $w) {
+        if ($w === '') {
+            continue;
+        }
+        $cond = "($column LIKE " . $db->quote('%' . $w . '%');
+        if ($rubyColumn !== null) {
+            $cond .= " OR $rubyColumn LIKE " . $db->quote('%' . lister_kanabuild($w) . '%');
+        }
+        $conds[] = $cond . ')';
+    }
+    return implode(' AND ', $conds);
 }
 
 $mode = api_param('mode', '');
@@ -112,6 +171,22 @@ if ($mode === 'quarters') {
 }
 
 if ($mode === 'programs') {
+    $group = api_param('group', '');
+    if ($group !== '' && $group !== null) {
+        // シリーズ内の作品一覧 (シリーズ再検索用。リリース日は不問)
+        $stmt = $ldb->prepare(
+            'SELECT program_name, MAX(tie_up_group_name) AS group_name, COUNT(*) AS songs,'
+            . ' MIN(found_head) AS head, MIN(tie_up_ruby) AS ruby FROM t_found'
+            . " WHERE tie_up_group_name = :group AND $program_where AND $base_where"
+            . ' GROUP BY program_name ORDER BY head, ruby, program_name'
+        );
+        $stmt->execute([':group' => $group]);
+        api_ok([
+            'group'    => $group,
+            'programs' => lister_program_rows($stmt->fetchAll(PDO::FETCH_ASSOC)),
+        ]);
+    }
+
     $year = (int)api_param('year', 0);
     $quarter = (int)api_param('quarter', 0);
     if ($year < 1900 || $year > 2200 || $quarter < 1 || $quarter > 4) {
@@ -128,32 +203,25 @@ if ($mode === 'programs') {
         . ' GROUP BY program_name ORDER BY head, ruby, program_name'
     );
     $stmt->execute([':mjd_start' => $mjdStart, ':mjd_end' => $mjdEnd]);
-    $programs = [];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $programs[] = [
-            'program' => $row['program_name'],
-            'group'   => $row['group_name'] !== '' ? $row['group_name'] : null,
-            'songs'   => (int)$row['songs'],
-        ];
-    }
     api_ok([
         'year'     => $year,
         'quarter'  => $quarter,
         'label'    => quarter_label($quarter),
-        'programs' => $programs,
+        'programs' => lister_program_rows($stmt->fetchAll(PDO::FETCH_ASSOC)),
     ]);
 }
 
 if ($mode === 'songs') {
-    // 完全一致フィルタ (複数指定は AND)。再検索と「作品の曲一覧」の両方が使う
+    $where = [$base_where];
+    $params = [];
+
+    // 完全一致フィルタ (複数指定は AND)。再検索と「作品の曲一覧」が使う
     $filters = [
         'program' => 'program_name',
         'artist'  => 'song_artist',
         'group'   => 'tie_up_group_name',
         'worker'  => 'found_worker',
     ];
-    $where = [$base_where];
-    $params = [];
     foreach ($filters as $key => $column) {
         $value = api_param($key, '');
         if ($value !== '' && $value !== null) {
@@ -161,25 +229,70 @@ if ($mode === 'songs') {
             $params[":$key"] = $value;
         }
     }
-    if (count($params) === 0) {
-        api_error('program / artist / group / worker のいずれかを指定してください');
+
+    // あいまい検索 (検索トップのキーワード検索用)
+    $anyword = api_param('anyword', '');
+    if ($anyword !== '' && $anyword !== null) {
+        $orConds = [
+            lister_like_cond($ldb, 'song_name', 'song_ruby', $anyword),
+            lister_like_cond($ldb, 'song_artist', 'found_artist_ruby', $anyword),
+            lister_like_cond($ldb, 'program_name', 'tie_up_ruby', $anyword),
+            lister_like_cond($ldb, 'tie_up_group_name', 'tie_up_group_ruby', $anyword),
+            lister_like_cond($ldb, 'maker_name', 'maker_ruby', $anyword),
+            lister_like_cond($ldb, 'found_path', null, $anyword),
+        ];
+        $where[] = '(' . implode(' OR ', $orConds) . ')';
+    }
+
+    if (count($params) === 0 && ($anyword === '' || $anyword === null)) {
+        api_error('anyword または program / artist / group / worker を指定してください');
     }
     $whereSql = implode(' AND ', $where);
 
-    $countStmt = $ldb->prepare("SELECT COUNT(DISTINCT found_path) FROM t_found WHERE $whereSql");
-    $countStmt->execute($params);
-    $total = (int)$countStmt->fetchColumn();
-
-    // 同一ファイルの重複行 (タグ違い等) は GROUP BY found_path でまとめる
+    // ファイル単位で引いて (重複行は found_path でまとめる)、PHP 側で曲単位にグルーピングする
     $stmt = $ldb->prepare(
         'SELECT song_name, song_ruby, song_artist, program_name, tie_up_group_name,'
         . ' song_op_ed, found_worker, found_path, found_file_size, found_comment'
         . " FROM t_found WHERE $whereSql"
-        . ' GROUP BY found_path ORDER BY song_ruby, song_name, found_path LIMIT 300'
+        . ' GROUP BY found_path ORDER BY song_ruby, song_name, program_name, found_path LIMIT 600'
     );
     $stmt->execute($params);
-    $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    api_ok(['total' => $total, 'items' => $items]);
+
+    $items = [];
+    $index = [];
+    $filesTotal = 0;
+    $maxSongs = 150;
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $key = ($row['song_name'] ?? '') . "\x1f" . ($row['program_name'] ?? '')
+            . "\x1f" . ($row['song_artist'] ?? '');
+        if (!array_key_exists($key, $index)) {
+            if (count($items) >= $maxSongs) {
+                continue;
+            }
+            $index[$key] = count($items);
+            $items[] = [
+                'song_name'         => $row['song_name'],
+                'song_artist'       => $row['song_artist'],
+                'program_name'      => $row['program_name'],
+                'tie_up_group_name' => $row['tie_up_group_name'],
+                'song_op_ed'        => $row['song_op_ed'],
+                'files'             => [],
+            ];
+        }
+        // コメントの ",//" 以降は内部メモのため除去 (listerdb_lookup_songinfo と同じ)
+        $comment = '';
+        if (!empty($row['found_comment'])) {
+            $comment = trim(preg_replace('/\,\/\/.*/', '', $row['found_comment']));
+        }
+        $items[$index[$key]]['files'][] = [
+            'found_path'      => $row['found_path'],
+            'found_comment'   => $comment,
+            'found_worker'    => $row['found_worker'],
+            'found_file_size' => (int)$row['found_file_size'],
+        ];
+        $filesTotal++;
+    }
+    api_ok(['total' => count($items), 'files_total' => $filesTotal, 'items' => $items]);
 }
 
 api_error('mode が不正です (years / quarters / programs / songs)');
