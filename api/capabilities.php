@@ -47,6 +47,7 @@ $features = [
     'userpause'        => configbool('useuserpause',        false),
     'haishin'          => configbool('usehaishin',          true),
     'nonamerequest'    => configbool('nonamerequest',       false),
+    'otherplayer'      => configbool('useotherplayer',      false),
     'google_sync'      => !empty($config_ini['google_client_id']),
     'easyauth'         => configbool('useeasyauth',         false),
     'new_request_list' => configbool('usenewrequestlist',   false),
@@ -58,8 +59,11 @@ $player = [
     'autoplay' => configbool('autoplay_exec', false),
 ];
 
+$otherplayer_disc = urldecode($config_ini['otherplayer_disc'] ?? '');
 $request = [
-    'noname_username' => urldecode($config_ini['nonameusername'] ?? '名無しさん'),
+    'noname_username'  => urldecode($config_ini['nonameusername'] ?? '名無しさん'),
+    // 別プレイヤー再生チェックボックスの表示名 (運用者がカスタムできる)
+    'otherplayer_disc' => $otherplayer_disc !== '' ? $otherplayer_disc : '別プレイヤー再生',
 ];
 
 api_ok([
