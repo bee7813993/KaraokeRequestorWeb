@@ -152,6 +152,9 @@ function readconfig_array()
     if(!array_key_exists("listerdb_index_default_collapsed", $config_ini)){
         $config_ini["listerdb_index_default_collapsed"] = 2;
     }
+    if(!array_key_exists("setlist_search_backend", $config_ini)){
+        $config_ini["setlist_search_backend"] = urlencode("listerdb");
+    }
     if(!array_key_exists("ui_skin_preset", $config_ini)){
         $config_ini["ui_skin_preset"] = urlencode("default");
     }

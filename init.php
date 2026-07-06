@@ -424,6 +424,15 @@ print '</pre>';
   <p>
     <a href ="online_update.php" class="btn btn-secondary" > オンラインアップデート画面 </a>
   </p>
+  <h3>クール一覧データ同期</h3>
+  <?php
+    $setlist_search_backend_label = (urldecode($config_ini['setlist_search_backend'] ?? 'listerdb') === 'everything') ? 'Everything' : 'ゆかりすたー';
+  ?>
+  <p>
+    <button type="button" class="btn btn-secondary" id="setlistSyncBtn" onclick="sync_setlist_stats()">クール一覧を最新情報に同期</button>
+    <span class="small text-muted ms-2">検索先: <?php echo htmlspecialchars($setlist_search_backend_label, ENT_QUOTES, 'UTF-8'); ?></span>
+    <span id="setlistSyncStatus" class="small text-muted ms-2"></span>
+  </p>
 <script type="text/javascript">
 function start_yklistercmd(){
 var request = new XMLHttpRequest();
@@ -459,6 +468,32 @@ function storeAppLaunch(url, btnId, label) {
         }
     };
     request.send("");
+}
+
+function sync_setlist_stats(){
+    var btn = document.getElementById('setlistSyncBtn');
+    var status = document.getElementById('setlistSyncStatus');
+    if (btn) { btn.disabled = true; btn.textContent = '同期中...'; }
+    if (status) { status.textContent = '最新HTMLから取得しています...'; }
+
+    fetch('setlist_stats_sync.php', {method: 'POST', credentials: 'same-origin'})
+      .then(function(res) { return res.json().then(function(body) { return {ok: res.ok, body: body}; }); })
+      .then(function(result) {
+        var body = result.body || {};
+        if (!result.ok || !body.ok) {
+          throw new Error(body.error || body.warning || 'sync_failed');
+        }
+        if (status) {
+          var backend = body.search_backend === 'everything' ? 'Everything' : 'ゆかりすたー';
+          status.textContent = '同期しました: ' + (body.updated_at || '-') + ' / 検索先: ' + backend;
+        }
+      })
+      .catch(function(err) {
+        if (status) { status.textContent = '同期に失敗しました: ' + err.message; }
+      })
+      .finally(function() {
+        if (btn) { btn.disabled = false; btn.textContent = 'クール一覧を最新情報に同期'; }
+      });
 }
 
 function start_yklisterstore_cmd(){
@@ -1509,13 +1544,30 @@ $listerdb_index_default_collapsed = configbool("listerdb_index_default_collapsed
 
   <div class="mb-3">
     <h4  > りすたーDBファイルパス  </h4>
-    <?php 
+    <?php
         $listerDBPATH = 'list\List.sqlite3';
         if(array_key_exists("listerDBPATH",$config_ini)) {
            $listerDBPATH = urldecode($config_ini["listerDBPATH"]);
         }
     ?>
     <input type="text" name="listerDBPATH" size="100" class="form-control" value="<?php echo $listerDBPATH; ?>" />
+  </div>
+
+  <div class="mb-3">
+    <?php
+        $setlist_search_backend = urldecode($config_ini['setlist_search_backend'] ?? 'listerdb');
+        if ($setlist_search_backend !== 'everything') {
+            $setlist_search_backend = 'listerdb';
+        }
+    ?>
+    <h4 class="radio form-label"> クール一覧の検索先 </h4>
+    <label class="form-label"><small>クール一覧から曲を開くときの検索先を選びます。</small></label>
+    <label class="radio-inline">
+      <input type="radio" name="setlist_search_backend" value="listerdb" <?php print ($setlist_search_backend === 'listerdb') ? 'checked' : ' '; ?> /> ゆかりすたー
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="setlist_search_backend" value="everything" <?php print ($setlist_search_backend === 'everything') ? 'checked' : ' '; ?> /> Everything
+    </label>
   </div>
 
   <div class="mb-3">

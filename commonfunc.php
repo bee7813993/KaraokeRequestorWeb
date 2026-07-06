@@ -1516,7 +1516,7 @@ function print_bs5_head_core($page_css = [], $opts = []){
 /**
  * searchreserve 相当の予約方法タブHTMLを返す。
  * selectid が指定されている場合は各リンクに引き継ぐ。
- * $current には現在のページ ('search' | 'karaoke' | 'url' | 'pause' | 'bgv') を渡す。
+ * $current には現在のページ ('search' | 'setlist' | 'karaoke' | 'url' | 'pause' | 'bgv') を渡す。
  */
 function build_reservation_tabs($selectid = '', $current = 'search', $prefix = ''){
     global $config_ini, $playmode, $user, $connectinternet, $usenfrequset;
@@ -1533,6 +1533,7 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
     $icon_list    = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>';
     $icon_upload  = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path fill-rule="evenodd" d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path fill-rule="evenodd" d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/></svg>';
     $icon_nico    = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2 3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2 3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2 3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z"/></svg>';
+    $icon_setlist = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2.5A1.5 1.5 0 0 1 3.5 1h9A1.5 1.5 0 0 1 14 2.5v11A1.5 1.5 0 0 1 12.5 15h-9A1.5 1.5 0 0 1 2 13.5v-11zM3.5 2a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5h-9z"/><path d="M5 5.5A.5.5 0 0 1 5.5 5h5a.5.5 0 0 1 0 1h-5A.5.5 0 0 1 5 5.5zm0 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5A.5.5 0 0 1 5 8zm0 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z"/></svg>';
 
     $tabs = [];
 
@@ -1541,6 +1542,13 @@ function build_reservation_tabs($selectid = '', $current = 'search', $prefix = '
         'label' => 'ファイル検索',
         'icon'  => $icon_search,
         'href'  => $pfx . 'search.php' . ($sid ? '?' . ltrim($sid, '&') : ''),
+    ];
+
+    $tabs[] = [
+        'id'    => 'setlist',
+        'label' => 'クール一覧',
+        'icon'  => $icon_setlist,
+        'href'  => $pfx . 'setlist_cool_bs5.php' . ($sid ? '?' . ltrim($sid, '&') : ''),
     ];
 
     $pm = isset($playmode) ? (int)$playmode : 0;
