@@ -264,9 +264,11 @@ function keychange($keycmd){
 
     $requesturl=$EASYKEYCHANGERURL.'?key='.$keycmd.'&token='.$clienttoken;
     $res = file_get_html_with_retry($requesturl,5,1);
-    // EasyKeyChanger に届かなかった時は DB のキー値更新もスキップする
-    if( $res === false ) return false;
-    update_requestdb_key();
+    /* キー送信に失敗した場合は現在キーの取得も失敗するだけなのでスキップ
+       (呼び出し元は $res === false で不達を判定できる) */
+    if($res !== false){
+        update_requestdb_key();
+    }
     return $res;
 }
 
@@ -277,9 +279,10 @@ function update_requestdb_key(){
 
     // 自己 HTTP 呼び出し (getcurrentkey.php) はアクセス元 URL 依存で /api/ 配下から
     // 呼ぶと解決に失敗するため、EasyKeyChanger へ直接現在キーを問い合わせる
+    // (キー送信成功直後にしか呼ばれず到達性は確認済みのためリトライは2回で十分)
     require_once 'func_keychange.php';
     $kc = new EasyKeychanger();
-    $status = $kc->getstatus();
+    $status = $kc->getstatus(2);
 
     if( $status === false ) return;
     if( !isset($status["currentkey"]) || !is_numeric($status["currentkey"]) ) return;

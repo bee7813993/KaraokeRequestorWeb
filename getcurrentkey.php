@@ -7,7 +7,8 @@
 
    if($cfg["usekeychange"] == 1) {
        $kc = new EasyKeychanger();
-       $status = $kc->getstatus();
+       /* キーチェンジャー不達時に接続試行が積み上がらないようリトライは2回まで */
+       $status = $kc->getstatus(2);
        if($status){
            print $status["currentkey"];
        }else {

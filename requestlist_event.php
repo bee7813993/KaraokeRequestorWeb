@@ -50,8 +50,10 @@
                print "data:"."None"."\n\n";
              }
            }
+           print ": ping\n\n"; /* SSEコメント行。切断済みクライアントへの書き込み失敗で即終了させる */
            ob_flush();
            flush();
+           if (connection_aborted()) break;
            usleep(500000); /* サーバー側では0.5秒おきにチェック */
        }
    set_time_limit(30);

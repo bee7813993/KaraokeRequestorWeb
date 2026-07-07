@@ -132,6 +132,9 @@ function file_get_html_with_retry($url, $retrytimes = 5, $timeoutsec = 1, $ipvar
         curl_setopt($ch, CURLOPT_TIMEOUT_MS, $timeoutsec_ms);
         }
         curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        /* サーバー側から先に切断させる。先に切断した側に TIME_WAIT (約2分) が残るため、
+           これがないと localhost への定期呼び出しで httpd のエフェメラルポートが枯渇する */
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Connection: close'));
         //リダイレクト先追従
         //Locationをたどる
         curl_setopt($ch,CURLOPT_FOLLOWLOCATION,true);
@@ -1073,8 +1076,10 @@ function commentpost_v3($nm,$col,$size,$msg,$commenturl)
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 2);
     curl_setopt($curl, CURLOPT_TIMEOUT, 2);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Connection: close'));
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
+    curl_close($curl);
 
     if($output === false){
         return false;
@@ -1100,8 +1105,10 @@ function commentpost_v4($cmd,$msg,$commenturl)
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 2);
     curl_setopt($curl, CURLOPT_TIMEOUT, 2);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Connection: close'));
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($POST_DATA));
     $output= curl_exec($curl);
+    curl_close($curl);
 
     if($output === false){
         return false;

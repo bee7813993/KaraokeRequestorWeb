@@ -3,18 +3,19 @@ class EasyKeychanger {
     public $KeychangerURL = 'http://localhost:13580/';
     public $Keychangertimeout = 1;
     
-    public function getstatus() {
+    public function getstatus($retrytimes = 10) {
         require_once 'commonfunc.php';
-        
+
         $url = $this->KeychangerURL.'command.html?help=ver';
-        
-        for ($i=0; $i<10; $i++) {
+
+        $res = false;
+        for ($i=0; $i<$retrytimes; $i++) {
             $res = @file_get_html_with_retry($url,2,$this->Keychangertimeout,4);
             if($res !== false) break;
         }
-        if($i == 10 ) return false;
+        if($res === false ) return false;
         return $this->build_result($res);
-        
+
     }
     
     public function keyup($token = "") {
