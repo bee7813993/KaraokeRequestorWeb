@@ -65,6 +65,8 @@ $features = [
     // 検索タブの出し分け用 (旧サーバーではキー欠落 = アプリ側は表示扱い)
     'lister_search'     => $lister_dbpath !== '' && file_exists($lister_dbpath),
     'everything_search' => everything_available(),
+    // インターネット接続系 (URL 指定リクエスト等) の可否
+    'internet'          => configbool('connectinternet', true),
     'mypage'           => configbool('usemypage',           true),
     'bingo'            => configbool('usebingo',            false),
     'keychange'        => configbool('usekeychange',        false),
