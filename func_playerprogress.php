@@ -17,12 +17,16 @@ class PlayerProgress {
     public $playercommandname = "";
 
     public $http_ch = null;
+    public $http_keepalive = false;
     public $running_cache = null;
     public $running_cache_time = 0;
 
-    /* SSE ループから0.5秒間隔で呼ばれるため、curl ハンドルを使い回して接続を
-       keep-alive させる。毎回新規に TCP 接続を張るとエフェメラルポートを
-       食い潰す (TIME_WAIT が約2分残る) */
+    /* curl ハンドルを使い回して接続数を抑える。
+       既定 ($http_keepalive = false) では Connection: close を付けてサーバー側から
+       先に切断させる (先に切断した側に TIME_WAIT が約2分残り、httpd 側だと
+       エフェメラルポートを食い潰すため)。
+       SSE のように同一リクエスト内で連続呼び出しする場合のみ $http_keepalive = true
+       にして keep-alive で接続を維持する */
     public function http_get($url) {
         if ($this->http_ch === null) {
             $this->http_ch = curl_init();
@@ -31,6 +35,9 @@ class PlayerProgress {
             curl_setopt($this->http_ch, CURLOPT_CONNECTTIMEOUT, 1);
             curl_setopt($this->http_ch, CURLOPT_TIMEOUT, 2);
             curl_setopt($this->http_ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            if (!$this->http_keepalive) {
+                curl_setopt($this->http_ch, CURLOPT_HTTPHEADER, array('Connection: close'));
+            }
         }
         curl_setopt($this->http_ch, CURLOPT_URL, $url);
         return curl_exec($this->http_ch);

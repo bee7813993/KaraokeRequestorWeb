@@ -11,6 +11,7 @@
    $readconfig = new ReadConfig();
    $cfg = $readconfig->read_config();
    $playstat = new PlayerProgress;
+   $playstat->http_keepalive = true; /* SSE ループ内で連続呼び出しするため接続を維持する */
    $playerstatus_old = false;
    
    $status_progress=false;
