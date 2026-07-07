@@ -29,7 +29,7 @@ function build_requestlist_data($db, $config_ini, $limit = 0, $offset = 0)
         "SELECT COALESCE(SUM(duration), 0) FROM requesttable WHERE nowplaying IN ('未再生', '1') AND duration > 0"
     )->fetchColumn();
 
-    $sql = "SELECT id, songfile, singer, comment, kind, reqorder, nowplaying, secret, track, keychange, audiodelay, duration, volume, song_name, lister_artist, lister_work, lister_op_ed, lister_comment FROM requesttable ORDER BY reqorder DESC";
+    $sql = "SELECT id, songfile, fullpath, singer, comment, kind, reqorder, nowplaying, secret, loop, pause, track, keychange, audiodelay, duration, volume, song_name, lister_artist, lister_work, lister_op_ed, lister_comment FROM requesttable ORDER BY reqorder DESC";
     if ($limit > 0) {
         $stmt = $db->prepare($sql . " LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
@@ -64,6 +64,11 @@ function build_requestlist_data($db, $config_ini, $limit = 0, $offset = 0)
             'comment'      => $row['comment'] ?? '',
             'kind'         => $row['kind'] ?? '',
             'nowplaying'   => !empty($row['nowplaying']) ? $row['nowplaying'] : '1',
+            // 予約の変更 (アプリの編集画面) 用: 現在のオプション値一式
+            'fullpath'     => $row['fullpath'] ?? '',
+            'secret'       => (int)($row['secret'] ?? 0),
+            'loop'         => (int)($row['loop']   ?? 0),
+            'pause'        => (int)($row['pause']  ?? 0),
             'track'        => (int)($row['track']      ?? 0),
             'keychange'    => (int)($row['keychange']   ?? 0),
             'audiodelay'   => (int)($row['audiodelay']  ?? 0),
