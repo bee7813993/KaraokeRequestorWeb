@@ -163,7 +163,7 @@ shownavigatioinbar_bs5();
 <div class="mb-3">
 <label class="form-label">URL</label>
 <input type="text" name="fullpath" id="fullpath" class="form-control"
-    placeholder="直接再生できるURLを指定を入れてください(youtubeやニコニコ動画のURLもOK)"
+    placeholder="直接再生できるURLを入れてください (YouTube等)"
     value="<?php echo htmlspecialchars((string)$filename, ENT_QUOTES, 'UTF-8'); ?>" />
 </div>
 <div class="mb-3">
