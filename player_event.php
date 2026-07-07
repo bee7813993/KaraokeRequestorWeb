@@ -62,12 +62,14 @@
            $response_array_json = json_encode($response_array);
            if($response_array_json)
                print "data:".$response_array_json."\n\n";
-           ob_flush();
-           flush();
        }
-       
+       print ": ping\n\n"; /* SSEコメント行。切断済みクライアントへの書き込み失敗で即終了させる */
+       ob_flush();
+       flush();
+       if(connection_aborted()) break;
+
        usleep(500000); /* サーバー側では0.5秒おきにチェック */
-       
+
    }
    
 
