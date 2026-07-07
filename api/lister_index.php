@@ -19,6 +19,9 @@
  *   programs&group=シリーズ名     → シリーズ内の作品一覧 (シリーズ再検索用)
  *   songs&program=|artist=|group=|worker= → 完全一致の曲一覧 (複数指定は AND)
  *   songs&anyword=キーワード      → あいまい検索 (スペース区切り AND、読み仮名対応)
+ *   initials&target=program|artist|group  → 頭文字 (ひらがな清音 + その他) ごとの名前数
+ *   names&target=...&initial=あ   → 頭文字が一致する名前一覧 (作品名 / 歌手名 / シリーズ名)
+ *   names&target=...&keyword=...  → 名前の部分一致一覧 (読み仮名対応)
  *
  * songs の応答は曲単位にグルーピングされ、同じ曲の複数ファイル (別動画) が files に並ぶ。
  * songs&flat=1 でグルーピングせずファイル単位 (1アイテム=1ファイル) で返す (応答構造は同じ)。
@@ -131,7 +134,135 @@ function lister_like_cond(PDO $db, $column, $rubyColumn, $word)
     return implode(' AND ', $conds);
 }
 
+// ---- 頭文字インデックス (作品名 / 歌手名 / シリーズ名で探す) ----
+
+/** 頭文字インデックスの対象定義。head は頭文字の式、name は一覧に出す名前カラム。 */
+function lister_index_target($target)
+{
+    global $base_where, $program_where;
+    switch ($target) {
+        case 'program':
+            return [
+                'head'  => 'found_head',
+                'name'  => 'program_name',
+                'ruby'  => 'tie_up_ruby',
+                'where' => "$program_where AND $base_where",
+            ];
+        case 'artist':
+            return [
+                'head'  => 'substr(found_artist_ruby, 1, 1)',
+                'name'  => 'song_artist',
+                'ruby'  => 'found_artist_ruby',
+                'where' => "song_artist IS NOT NULL AND song_artist != '' AND $base_where",
+            ];
+        case 'group':
+            return [
+                'head'  => 'substr(tie_up_group_ruby, 1, 1)',
+                'name'  => 'tie_up_group_name',
+                'ruby'  => 'tie_up_group_ruby',
+                'where' => "tie_up_group_name IS NOT NULL AND tie_up_group_name != '' AND $base_where",
+            ];
+    }
+    api_error('invalid target (program|artist|group)');
+}
+
+/** 頭文字をひらがな清音1文字に正規化する (かな以外は「その他」)。 */
+function lister_normalize_initial($head)
+{
+    if ($head === null || $head === '' || $head === 'その他') {
+        return 'その他';
+    }
+    $ch = mb_substr($head, 0, 1);
+    $ch = mb_convert_kana($ch, 'cH'); // カタカナ (半角含む) → ひらがな
+    $from = 'がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉゃゅょっゎゔ';
+    $to   = 'かきくけこさしすせそたちつてとはひふへほはひふへほあいうえおやゆよつわう';
+    $pos = mb_strpos($from, $ch);
+    if ($pos !== false) {
+        $ch = mb_substr($to, $pos, 1);
+    }
+    return preg_match('/^[ぁ-ん]$/u', $ch) ? $ch : 'その他';
+}
+
 $mode = api_param('mode', '');
+
+if ($mode === 'initials') {
+    $targetKey = (string)api_param('target', '');
+    $t = lister_index_target($targetKey);
+    $rows = $ldb->query(
+        "SELECT {$t['head']} AS h, COUNT(DISTINCT {$t['name']}) AS names FROM t_found"
+        . " WHERE {$t['where']} GROUP BY h"
+    )->fetchAll(PDO::FETCH_ASSOC);
+    // 濁音・小文字・カタカナ表記を清音ひらがなに畳んで集計する
+    $counts = [];
+    foreach ($rows as $row) {
+        $key = lister_normalize_initial($row['h']);
+        $counts[$key] = ($counts[$key] ?? 0) + (int)$row['names'];
+    }
+    $initials = [];
+    foreach ($counts as $head => $names) {
+        $initials[] = ['head' => $head, 'names' => $names];
+    }
+    api_ok(['target' => $targetKey, 'initials' => $initials]);
+}
+
+if ($mode === 'names') {
+    $targetKey = (string)api_param('target', '');
+    $t = lister_index_target($targetKey);
+    $initial = (string)api_param('initial', '');
+    $keyword = (string)api_param('keyword', '');
+
+    $where = $t['where'];
+    $params = [];
+    if ($initial !== '') {
+        // 正規化後の頭文字が一致する生の頭文字を集めて IN で絞る
+        $rawRows = $ldb->query(
+            "SELECT DISTINCT {$t['head']} AS h FROM t_found WHERE {$t['where']}"
+        )->fetchAll(PDO::FETCH_COLUMN);
+        $ph = [];
+        foreach ($rawRows as $i => $raw) {
+            if (lister_normalize_initial($raw) !== $initial) {
+                continue;
+            }
+            $key = ':h' . $i;
+            $ph[] = $key;
+            $params[$key] = $raw;
+        }
+        if (count($ph) === 0) {
+            api_ok(['target' => $targetKey, 'names' => []]);
+        }
+        $where .= " AND {$t['head']} IN (" . implode(',', $ph) . ')';
+    } elseif ($keyword !== '') {
+        $cond = lister_like_cond($ldb, $t['name'], $t['ruby'], $keyword);
+        if ($cond === '') {
+            api_error('keyword が不正です');
+        }
+        $where .= " AND ($cond)";
+    } else {
+        api_error('initial か keyword を指定してください');
+    }
+
+    // program は所属シリーズ、artist / group は参加作品数を添える
+    $extra = ($targetKey === 'program')
+        ? ', MAX(tie_up_group_name) AS group_name'
+        : ', COUNT(DISTINCT program_name) AS programs';
+    $stmt = $ldb->prepare(
+        "SELECT {$t['name']} AS name, COUNT(*) AS songs, MIN({$t['ruby']}) AS ruby$extra FROM t_found"
+        . " WHERE $where GROUP BY {$t['name']} ORDER BY ruby, name LIMIT 500"
+    );
+    $stmt->execute($params);
+    $names = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $entry = ['name' => $row['name'], 'songs' => (int)$row['songs']];
+        if ($targetKey === 'program') {
+            $entry['group'] = ($row['group_name'] !== '' && $row['group_name'] !== null)
+                ? $row['group_name'] : null;
+        } else {
+            $entry['programs'] = (int)$row['programs'];
+        }
+        $names[] = $entry;
+    }
+    api_ok(['target' => $targetKey, 'names' => $names]);
+}
 
 if ($mode === 'years') {
     $rows = $ldb->query(
