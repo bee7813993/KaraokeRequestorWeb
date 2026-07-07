@@ -255,7 +255,10 @@ function keychange($keycmd){
     $res = TRUE;
     $requesturl=$EASYKEYCHANGERURL.'?key='.$keycmd.'&token='.$clienttoken;
     $res = file_get_html_with_retry($requesturl,5,1);
-    update_requestdb_key();
+    /* キー送信に失敗した場合は現在キーの取得も失敗するだけなのでスキップ */
+    if($res !== false){
+        update_requestdb_key();
+    }
     return $res;
 }
 

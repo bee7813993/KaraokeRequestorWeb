@@ -15,8 +15,35 @@ class PlayerProgress {
     public $playingfile = "";
     public $playingsinger = "";
     public $playercommandname = "";
-    
-    
+
+    public $http_ch = null;
+    public $http_keepalive = false;
+    public $running_cache = null;
+    public $running_cache_time = 0;
+
+    /* curl ハンドルを使い回して接続数を抑える。
+       既定 ($http_keepalive = false) では Connection: close を付けてサーバー側から
+       先に切断させる (先に切断した側に TIME_WAIT が約2分残り、httpd 側だと
+       エフェメラルポートを食い潰すため)。
+       SSE のように同一リクエスト内で連続呼び出しする場合のみ $http_keepalive = true
+       にして keep-alive で接続を維持する */
+    public function http_get($url) {
+        if ($this->http_ch === null) {
+            $this->http_ch = curl_init();
+            curl_setopt($this->http_ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($this->http_ch, CURLOPT_HEADER, false);
+            curl_setopt($this->http_ch, CURLOPT_CONNECTTIMEOUT, 1);
+            curl_setopt($this->http_ch, CURLOPT_TIMEOUT, 2);
+            curl_setopt($this->http_ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            if (!$this->http_keepalive) {
+                curl_setopt($this->http_ch, CURLOPT_HTTPHEADER, array('Connection: close'));
+            }
+        }
+        curl_setopt($this->http_ch, CURLOPT_URL, $url);
+        return curl_exec($this->http_ch);
+    }
+
+
     public function show_progress_text(){
 /*
         print '<script language="javascript" type="text/javascript">';
@@ -47,7 +74,7 @@ class PlayerProgress {
         }
         $result = array();
     
-        $status = file_get_html_with_retry($this->MPCVARIABLESURL);
+        $status = $this->http_get($this->MPCVARIABLESURL);
         if($status === FALSE) return $status;
         $status_array = preg_match_all("/\<p .*?>(.*?)<\/p>/", $status, $result);
         //var_dump($result);
@@ -142,20 +169,26 @@ class PlayerProgress {
     
     public function runningcheck_player() {
         global $config_ini;
+        /* tasklist はプロセス起動コストが高いため、SSE ループ内での連続呼び出しに備えて10秒キャッシュする */
+        if ($this->running_cache !== null && (microtime(true) - $this->running_cache_time) < 10) {
+            return $this->running_cache;
+        }
         $this->playercommandname = basename(urldecode($config_ini["playerpath"]));
         $pscheck_cmd='tasklist /fi "imagename eq '.$this->playercommandname.'"';
         //print $pscheck_cmd;
         exec($pscheck_cmd, $psresult );
         // sleep(1);
-        
+
         $process_found = false;
-        
+
         foreach( $psresult as $psline ){
           $pos = strpos($psline,$this->playercommandname);
           if ( $pos !== FALSE) {
              $process_found = true;
           }
         }
+        $this->running_cache = $process_found;
+        $this->running_cache_time = microtime(true);
         return $process_found;
     }
 }
