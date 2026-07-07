@@ -14,7 +14,8 @@
  * mode:
  *   years                        → 年ごとの曲数 (降順)
  *   quarters&year=YYYY           → 指定年の期ごとの曲数・作品数 (q: 1=1〜3月:冬 ... 4=10〜12月:秋)
- *   programs&year=YYYY&quarter=N → 期内の作品一覧 (作品名 / シリーズ名 / 曲数)
+ *   programs&year=YYYY&quarter=N → 期内の作品一覧 (作品名 / シリーズ名 / 曲数)。
+ *                                  quarter=0 で年全体 (年代別ビュー)
  *   programs&group=シリーズ名     → シリーズ内の作品一覧 (シリーズ再検索用)
  *   songs&program=|artist=|group=|worker= → 完全一致の曲一覧 (複数指定は AND)
  *   songs&anyword=キーワード      → あいまい検索 (スペース区切り AND、読み仮名対応)
@@ -191,12 +192,18 @@ if ($mode === 'programs') {
 
     $year = (int)api_param('year', 0);
     $quarter = (int)api_param('quarter', 0);
-    if ($year < 1900 || $year > 2200 || $quarter < 1 || $quarter > 4) {
+    if ($year < 1900 || $year > 2200 || $quarter < 0 || $quarter > 4) {
         api_error('year / quarter が不正です');
     }
-    // 期の範囲は「開始月 1 日 <= リリース日 < 翌期の 1 日」(本家と同じ半開区間)
-    $mjdStart = mjd_of_month($year, ($quarter - 1) * 3 + 1);
-    $mjdEnd   = mjd_of_month($year, $quarter * 3 + 1);
+    // 期の範囲は「開始月 1 日 <= リリース日 < 翌期の 1 日」(本家と同じ半開区間)。
+    // quarter=0 は年全体 (1月1日 〜 翌年1月1日)
+    if ($quarter === 0) {
+        $mjdStart = mjd_of_month($year, 1);
+        $mjdEnd   = mjd_of_month($year, 13);
+    } else {
+        $mjdStart = mjd_of_month($year, ($quarter - 1) * 3 + 1);
+        $mjdEnd   = mjd_of_month($year, $quarter * 3 + 1);
+    }
     $stmt = $ldb->prepare(
         'SELECT program_name, MAX(tie_up_group_name) AS group_name, COUNT(*) AS songs,'
         . ' MIN(found_head) AS head, MIN(tie_up_ruby) AS ruby FROM t_found'
@@ -208,7 +215,7 @@ if ($mode === 'programs') {
     api_ok([
         'year'     => $year,
         'quarter'  => $quarter,
-        'label'    => quarter_label($quarter),
+        'label'    => $quarter === 0 ? '1月〜12月' : quarter_label($quarter),
         'programs' => lister_program_rows($stmt->fetchAll(PDO::FETCH_ASSOC)),
     ]);
 }
