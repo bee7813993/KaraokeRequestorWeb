@@ -356,7 +356,11 @@ try {
                     ob_end_clean();
                     api_error('key is required');
                 }
-                keychange($key);
+                if (keychange($key) === false) {
+                    // EasyKeyChanger (localhost:13580) が応答しない
+                    ob_end_clean();
+                    api_error('key changer not reachable', 502);
+                }
             } else {
                 ob_end_clean();
                 api_unsupported($action, $player);
