@@ -20,6 +20,7 @@
  *   songs&anyword=キーワード      → あいまい検索 (スペース区切り AND、読み仮名対応)
  *
  * songs の応答は曲単位にグルーピングされ、同じ曲の複数ファイル (別動画) が files に並ぶ。
+ * songs&flat=1 でグルーピングせずファイル単位 (1アイテム=1ファイル) で返す (応答構造は同じ)。
  * songs の order: date_desc (既定。ファイル更新日の新しい順) / date_asc / name (曲名順)。
  *
  * 応答例:
@@ -272,13 +273,18 @@ if ($mode === 'songs') {
     );
     $stmt->execute($params);
 
+    // flat=1: グルーピングせずファイル単位で返す (キーを found_path にするだけで応答構造は同じ)
+    $flat = api_param('flat', '') === '1';
+
     $items = [];
     $index = [];
     $filesTotal = 0;
     $maxSongs = 150;
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $key = ($row['song_name'] ?? '') . "\x1f" . ($row['program_name'] ?? '')
-            . "\x1f" . ($row['song_artist'] ?? '');
+        $key = $flat
+            ? $row['found_path']
+            : ($row['song_name'] ?? '') . "\x1f" . ($row['program_name'] ?? '')
+                . "\x1f" . ($row['song_artist'] ?? '');
         if (!array_key_exists($key, $index)) {
             if (count($items) >= $maxSongs) {
                 continue;
