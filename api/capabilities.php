@@ -44,7 +44,27 @@
  */
 require_once __DIR__ . '/_common.php';
 
+/** Everything (ファイル名検索) の HTTP サーバーが応答するか。 */
+function everything_available()
+{
+    global $everythinghost;
+    $url = 'http://' . $everythinghost . ':81/?search=&json=1&count=0';
+    $ctx = stream_context_create(['http' => ['timeout' => 1, 'header' => "Connection: close\r\n"]]);
+    $res = @file_get_contents($url, false, $ctx);
+    if ($res === false) {
+        return false;
+    }
+    return json_decode($res, true) !== null;
+}
+
+// リスター (アニソンDB) 検索の可否 = ListerDB ファイルが設定されて存在するか
+$lister_dbpath = array_key_exists('listerDBPATH', $config_ini)
+    ? urldecode($config_ini['listerDBPATH']) : '';
+
 $features = [
+    // 検索タブの出し分け用 (旧サーバーではキー欠落 = アプリ側は表示扱い)
+    'lister_search'     => $lister_dbpath !== '' && file_exists($lister_dbpath),
+    'everything_search' => everything_available(),
     'mypage'           => configbool('usemypage',           true),
     'bingo'            => configbool('usebingo',            false),
     'keychange'        => configbool('usekeychange',        false),
