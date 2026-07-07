@@ -20,6 +20,7 @@
  *   songs&anyword=キーワード      → あいまい検索 (スペース区切り AND、読み仮名対応)
  *
  * songs の応答は曲単位にグルーピングされ、同じ曲の複数ファイル (別動画) が files に並ぶ。
+ * songs の order: date_desc (既定。ファイル更新日の新しい順) / date_asc / name (曲名順)。
  *
  * 応答例:
  *   years:    { "ok":true, "data":{ "years":[{"year":2026,"songs":492},...], "no_date":28260 } }
@@ -249,12 +250,25 @@ if ($mode === 'songs') {
     }
     $whereSql = implode(' AND ', $where);
 
+    // 並び順 (曲の順序はファイル行の出現順で決まる)
+    switch (api_param('order', 'date_desc')) {
+        case 'date_asc':
+            $orderSql = 'found_last_write_time ASC';
+            break;
+        case 'name':
+            $orderSql = 'song_ruby, song_name, program_name, found_path';
+            break;
+        default: // date_desc: ファイル更新日の新しい順 (既定)
+            $orderSql = 'found_last_write_time DESC';
+            break;
+    }
+
     // ファイル単位で引いて (重複行は found_path でまとめる)、PHP 側で曲単位にグルーピングする
     $stmt = $ldb->prepare(
         'SELECT song_name, song_ruby, song_artist, program_name, tie_up_group_name,'
         . ' song_op_ed, found_worker, found_path, found_file_size, found_comment'
         . " FROM t_found WHERE $whereSql"
-        . ' GROUP BY found_path ORDER BY song_ruby, song_name, program_name, found_path LIMIT 600'
+        . " GROUP BY found_path ORDER BY $orderSql LIMIT 600"
     );
     $stmt->execute($params);
 
