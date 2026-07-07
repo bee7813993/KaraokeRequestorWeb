@@ -26,6 +26,23 @@ function build_playingstatus_data($db, $config_ini)
 
     $ret = json_decode($result, true);
 
+    /* プレイヤー種別 (mpc | foobar | none)。リモコン UI のバッジ表示用 */
+    $ret['player'] = getcurrentplayer();
+
+    /* 再生中の曲の現在キー (キー変更操作時に requesttable へ反映された値) */
+    $ret['keychange'] = 0;
+    try {
+        $sql_cur = "SELECT keychange FROM requesttable WHERE nowplaying = '再生中' ORDER BY reqorder ASC LIMIT 1";
+        $sel_cur = $db->query($sql_cur);
+        if ($sel_cur) {
+            $row_cur = $sel_cur->fetch(PDO::FETCH_ASSOC);
+            $sel_cur->closeCursor();
+            if ($row_cur && is_numeric($row_cur['keychange'])) {
+                $ret['keychange'] = (int)$row_cur['keychange'];
+            }
+        }
+    } catch (Exception $e) { /* silent */ }
+
     /* 次の曲情報を追加 */
     $ret['nextsong'] = null;
     try {

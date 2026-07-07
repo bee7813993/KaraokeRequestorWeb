@@ -48,16 +48,18 @@
  *   command      | command_mpc(value) 汎用 | (非対応)
  *                |   ※value=wm_command番号。名前付きにない操作の逃がし
  *
- * 字幕補正 (明るさ/コントラスト/彩度の一括調整) はレベル永続化を伴う独自実装のため
- * 本 API には含めない。既に JSON ({"level":N}) を返す既存エンドポイントを使うこと:
- *   mpcctrl_bs5.php?cmd=comp_get | comp_inc | comp_dec | comp_reset | comp_apply
  *   fadeout      | volume_fadeout()        | (非対応)
  *   mute         | toggle_mute_mpc()       | (非対応)
  *   volume_get   | get_volume()            | (非対応)
  *   volume_set   | set_volume(value)       | (非対応)
  *   volume_up    | 現在音量 +5             | foobar_song_vup()
  *   volume_down  | 現在音量 -5             | foobar_song_vdown()
+ *   volume_reset | 曲開始時の初期音量に戻す | (非対応)
+ *                |   (startvolume + 制作者別オフセット)
  *   keychange    | keychange(key)          | (非対応)
+ *   comp_get / comp_up / comp_down / comp_reset
+ *                | 字幕補正 (白飛び対策)。レベルは comp_level で返す | (非対応)
+ *                |   (mpcctrl_bs5.php?cmd=comp_* と同じ実装を共用)
  *
  * 応答: { "ok":true, "data": { "player":"mpc", "action":"...", ... } }
  *       非対応操作は 501 + {"ok":false,"error":"not supported ..."}
@@ -71,7 +73,8 @@ $valid_actions = ['info', 'next', 'start', 'play', 'pause', 'playpause', 'stop',
                   'size_small', 'size_normal', 'size_large',
                   'd3d_fullscreen', 'mirror', 'show_time',
                   'command', 'fadeout', 'mute',
-                  'volume_get', 'volume_set', 'volume_up', 'volume_down', 'keychange'];
+                  'volume_get', 'volume_set', 'volume_up', 'volume_down', 'volume_reset',
+                  'keychange', 'comp_get', 'comp_up', 'comp_down', 'comp_reset'];
 
 // MPC 専用の名前付きアクション → wm_command 番号
 // (BS3 mpcctrl.js / BS5 mpcctrl_bs5.php 詳細設定と同じ番号)
@@ -130,6 +133,8 @@ if ($player === 'foobar') {
     require_once __DIR__ . '/../foobar_func.php';
 } else {
     require_once __DIR__ . '/../mpcctrl_func.php';
+    // 音量初期値リセット / 字幕補正 (mpcctrl_bs5.php と共用、command_mpc に依存)
+    require_once __DIR__ . '/../function_playeradjust.php';
 }
 
 // 既存関数は結果を print するため出力を捕捉し、JSON の message に載せる
@@ -312,6 +317,35 @@ try {
                 $newvol = max(0, min(100, (int)$vol + $delta));
                 set_volume($newvol);
                 $extra['volume'] = $newvol;
+            }
+            break;
+
+        case 'volume_reset':
+            // 曲開始時の初期音量 (startvolume + 制作者別オフセット) に戻す
+            if ($player === 'mpc') {
+                $extra['volume'] = reset_initial_volume_bs5();
+            } else {
+                ob_end_clean();
+                api_unsupported($action, $player);
+            }
+            break;
+
+        case 'comp_get':
+        case 'comp_up':
+        case 'comp_down':
+        case 'comp_reset':
+            // 字幕補正 (白飛び対策)。レベルは player_compensation.json に永続化される
+            if ($player === 'mpc') {
+                switch ($action) {
+                    case 'comp_up':    $level = player_compensation_inc();   break;
+                    case 'comp_down':  $level = player_compensation_dec();   break;
+                    case 'comp_reset': $level = player_compensation_reset(); break;
+                    default:           $level = get_player_compensation_level();
+                }
+                $extra['comp_level'] = $level;
+            } else {
+                ob_end_clean();
+                api_unsupported($action, $player);
             }
             break;
 

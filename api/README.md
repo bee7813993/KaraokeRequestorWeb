@@ -188,8 +188,12 @@ ListerDB 未設定時は 503。
 { "ok":true, "data": { "playing": true,
   "status":"...", "playtime":N, "totaltime":N, "playtime_txt":"...", "totaltime_txt":"...",
   "playingtitle":"...", "playingfile":"...", "playingsinger":"...",
+  "player":"mpc|foobar|none", "keychange":N,
   "nextsong": { "title":"..", "songfile":"..", "show_file":bool, "singer":"..", "kind":".." } } }
 ```
+
+`status` は MPC の状態番号 (文字列)。`"2"`=再生中 / `"1"`=一時停止。
+`keychange` は再生中の曲の現在キー (半音、キー変更操作時に DB へ反映された値)。
 
 ### GET /get_playingstatus_json.php — 再生状態（既存）
 
@@ -293,6 +297,7 @@ MPC-BE / foobar2000 の差を吸収する。プレイヤーは再生中の曲か
 | `volume_get` | ○ | - | 現在音量取得 → `data.volume` |
 | `volume_set` | ○ | - | 音量設定 (value=0〜100) |
 | `volume_up` / `volume_down` | ○ | ○ | 音量 ±5 (mpc は `data.volume` で新値を返す) |
+| `volume_reset` | ○ | - | 曲開始時の初期音量に戻す (startvolume + 制作者別オフセット) → `data.volume` |
 | `mute` | ○ | - | ミュートトグル |
 | `fadeout` | ○ | - | フェードアウト |
 | `keychange` | ○ | - | キー変更 |
@@ -303,6 +308,7 @@ MPC-BE / foobar2000 の差を吸収する。プレイヤーは再生中の曲か
 | `speed_down` / `speed_normal` / `speed_up` | ○ | - | 再生スピード |
 | `size_small` / `size_normal` / `size_large` | ○ | - | 表示サイズ |
 | `mirror` / `show_time` | ○ | - | 左右反転 / 時刻表示 |
+| `comp_get` / `comp_up` / `comp_down` / `comp_reset` | ○ | - | 字幕補正 (白飛び対策) → `data.comp_level` |
 | `command` | ○ | - | 汎用 wm_command 送出 (value=番号)。名前付きにない操作の逃がし |
 
 非対応の組み合わせは 501 を返す。
@@ -316,12 +322,9 @@ MPC-BE / foobar2000 の差を吸収する。プレイヤーは再生中の曲か
 
 ### 字幕補正（明るさ/コントラスト/彩度）
 
-レベル永続化を伴う独自実装のため `/api/` には含まれない。既存の JSON エンドポイントを使う:
-
-```
-GET /mpcctrl_bs5.php?cmd=comp_get | comp_inc | comp_dec | comp_reset | comp_apply
-→ {"level": N}
-```
+`action=comp_*` で操作できる (上表)。実装は `function_playeradjust.php` を
+Web 版 (`mpcctrl_bs5.php?cmd=comp_*` → `{"level": N}`) と共用しており、
+レベルは `player_compensation.json` に永続化される。
 
 ---
 
