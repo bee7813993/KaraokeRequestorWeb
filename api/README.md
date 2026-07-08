@@ -346,6 +346,56 @@ GET /mypage_api.php?action=<action>&...
 
 ---
 
+## マイページ（アプリ連携 API）
+
+```
+GET/POST /api/mypage.php?action=<action>&userid=<UUID>&...
+→ {"ok":true, "data":{...}} / {"ok":false, "error":"..."}
+```
+
+`usemypage=1` 時のみ (無効時は 503)。Web 版が Cookie `YkariUserID` で識別するのに対し、
+アプリはクエリ/POST の `userid` で識別する。**userid (UUID) を知っていること自体が認可**
+(Web の cookie と同じモデル)。
+
+### デバイスリンク
+
+| action | パラメータ | 応答 data |
+|---|---|---|
+| `pair_apply` | `code` (Web のデバイスリンクで発行した6文字) | `{userid}`。コードは消費される。無効/期限切れは 404 |
+| `pair_generate` | `userid` | `{code}` (5分有効) |
+
+### データ読み書き
+
+| action | パラメータ | 応答 data |
+|---|---|---|
+| `summary` | `userid` | 表示名・各リスト件数・`google_linked` |
+| `history` | `userid`, `sort`, `order` | `{items:[{fullpath,songfile,kind,times,last_requested_at}]}` |
+| `history_add` / `history_remove` | `fullpath` (+`songfile`,`kind`) | — |
+| `later` / `favorite` | `userid` | `{items:[{fullpath,songfile,kind,added_at}]}` |
+| `later_add` / `later_remove` / `favorite_add` / `favorite_remove` | `fullpath` (+`songfile`,`kind`) | — |
+| `keyword` | `userid` | `{items:[{id,keyword,search_type,search_params,added_at}]}` |
+| `keyword_add` | `keyword`, `search_type`, `search_params` | — |
+| `keyword_remove` | `id` **または** `keyword`+`search_type`+`search_params` (条件一致) | — |
+| `import` | `data` (POST。Web 版エクスポート形式 version 1 の JSON) | `{counts}`。マージ取り込みで冪等 (履歴は fullpath+日時、他は完全一致の重複をスキップ) |
+
+書き込み系アクションの成功時は、Google 連携済み + 自動同期オンなら Drive へも自動保存する
+(Web 版 `mypage_api.php` と同じ挙動。同期失敗しても書き込みの応答は成功のまま)。
+
+### Google 同期
+
+| action | パラメータ | 応答 data / エラー |
+|---|---|---|
+| `google_status` | `userid` | `{linked, email, auto_sync, last_synced_at}` |
+| `google_sync` | `userid`, `direction=to_drive\|from_drive` | `{synced, direction}`。未設定 503 / 未連携 404 / Drive 失敗 502 |
+| `google_token_get` | `userid` | トークン一式 + 発行元 `client_id` (アプリの「同期の持ち歩き」用)。未連携 404 |
+| `google_register` | POST: `google_sub`, `google_email`, `access_token`, `refresh_token`, `token_expires_at`, `client_id` | この部屋にその Google アカウントのユーザーを用意し (既存は `google_sub` で再利用)、Drive から復元して `{userid, access_token, token_expires_at, refreshed}` を返す |
+
+`google_register` のエラー: Google 同期未設定の部屋は **503** (アプリは静かにスキップ)、
+`client_id` がこの部屋の設定と不一致は **409** (別の Google 連携設定 = 持ち歩き対象外)、
+トークン無効 (読めず・更新できず・期限切れ) は **401** (アプリは持ち歩きを破棄して再連携を促す)。
+
+---
+
 ## 既知の注意点
 
 - `exec.php` の XHR 応答は先頭に改行を含む → パース前に trim すること
