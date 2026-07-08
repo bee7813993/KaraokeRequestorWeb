@@ -11,10 +11,19 @@ class MypageUser {
     const COOKIE_DAYS    = 365;
     const PAIR_CODE_TTL  = 300; // ペアリングコード有効秒数
 
-    public function __construct($db) {
+    public function __construct($db, $userid = null) {
         $this->db = $db;
         $this->initTables();
-        $this->userid = $this->resolveUserId();
+        if ($userid !== null) {
+            // API (アプリ連携) 用: cookie を使わず userid を直接指定する。
+            // 有効な UUID のときだけユーザー登録する ('' を渡すとペアコード照会のみできる)
+            $this->userid = $this->isValidUuid($userid) ? $userid : '';
+            if ($this->userid !== '') {
+                $this->upsertUser($this->userid);
+            }
+        } else {
+            $this->userid = $this->resolveUserId();
+        }
     }
 
     // ---- テーブル初期化 ----
@@ -583,6 +592,26 @@ class MypageUser {
      * コードを検証して自分のCookieを相手のuseridに切り替える
      * @return string|false 成功時は元のuserid、失敗時はfalse
      */
+    /**
+     * ペアコードを検証して対応する userid を返す (コードは使用済みにする)。
+     * cookie は変更しない。アプリ (API) 連携用。
+     * @return string|null 無効・期限切れなら null
+     */
+    public function lookupPairingCode($code) {
+        $code = strtoupper(trim($code));
+        if ($code === '') return null;
+        $stmt = $this->db->prepare(
+            "SELECT userid FROM mypage_pair_code
+             WHERE code = ? AND expires_at >= ?"
+        );
+        $stmt->execute([$code, time()]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) return null;
+        $this->db->prepare("DELETE FROM mypage_pair_code WHERE code = ?")
+                 ->execute([$code]);
+        return $row['userid'];
+    }
+
     public function applyPairingCode($code) {
         $code = strtoupper(trim($code));
         $stmt = $this->db->prepare(
