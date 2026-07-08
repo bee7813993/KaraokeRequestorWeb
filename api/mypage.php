@@ -22,6 +22,12 @@
  *                   マージ取り込み。重複はスキップされるため何度実行しても安全
  *   google_status   userid=      → 連携有無・メール・自動同期・最終同期時刻
  *   google_sync     userid= direction=to_drive|from_drive → Google Drive と同期
+ *   google_token_get userid=     → Google トークン一式 (アプリの「同期の持ち歩き」用。
+ *                   userid を知っている = 本人という Web cookie と同じ認可モデル)
+ *   google_register (POST: google_sub= google_email= access_token= refresh_token=
+ *                   token_expires_at=) → この部屋にその Google アカウントのユーザーを
+ *                   用意し (既存があれば再利用)、Drive から復元して userid を返す。
+ *                   Google 同期未設定の部屋では 503
  *
  * 書き込み系アクションの成功時は、Google 連携済み+自動同期オンなら Drive へも
  * 自動保存する (Web 版 mypage_api.php と同じ挙動)。
@@ -46,6 +52,56 @@ if ($action === 'pair_apply') {
         api_error('コードが無効または有効期限切れです (有効期限は5分です)', 404);
     }
     api_ok(['userid' => $userid]);
+}
+
+// ---- Google トークンによる自動引き継ぎ (userid 不要。アプリの部屋またぎ同期用) ----
+if ($action === 'google_register') {
+    $relay_url    = $config_ini['google_relay_url'] ?? 'https://ykr.moe/mypage_google_callback.php';
+    $relay_secret = $config_ini['google_relay_secret'] ?? '';
+    $client_id    = $config_ini['google_client_id'] ?? '';
+    if (empty($client_id) || empty($relay_secret)) {
+        api_error('Google同期が設定されていません', 503);
+    }
+    $google_sub    = (string)api_param('google_sub', '');
+    $google_email  = (string)api_param('google_email', '');
+    $access_token  = (string)api_param('access_token', '');
+    $refresh_token = (string)api_param('refresh_token', '');
+    $expires_at    = (int)api_param('token_expires_at', 0);
+    if ($google_sub === '' || $access_token === '') {
+        api_error('google_sub and access_token are required');
+    }
+
+    // この Google アカウントのユーザーが既にいればそれを、いなければ新規作成して紐付ける
+    $existing = MypageUser::findUserByGoogleSub($db, $google_sub);
+    $mypage = new MypageUser($db, $existing !== null ? $existing : '');
+    if ($mypage->getUserId() === '') {
+        $mypage->createNewUser();
+    }
+    $mypage->linkGoogle($google_sub, $google_email, $access_token, $refresh_token, $expires_at);
+
+    // Drive から復元 (マージ)。mypage_google_callback.php の初回同期と同じ流れ
+    require_once __DIR__ . '/../mypage_google_drive.php';
+    $drive = new GoogleDriveHelper($access_token, $refresh_token, $expires_at,
+        $relay_url, $relay_secret);
+    $drive_data = $drive->readData();
+    if ($drive_data) {
+        $mypage->importData($drive_data, false);
+    }
+    list($new_at, $new_exp, $refreshed) = $drive->getNewTokens();
+    if ($refreshed) {
+        $mypage->updateGoogleTokens($new_at, $new_exp);
+    }
+    // 読めず・更新もできず・期限切れ = トークン無効 (アプリは持ち歩きを破棄して再連携を促す)
+    if (!$drive_data && !$refreshed && $expires_at < time()) {
+        api_error('Google のトークンが無効です (連携をやり直してください)', 401);
+    }
+    $mypage->updateGoogleSyncTime();
+    api_ok([
+        'userid'           => $mypage->getUserId(),
+        'access_token'     => $refreshed ? $new_at : $access_token,
+        'token_expires_at' => $refreshed ? (int)$new_exp : $expires_at,
+        'refreshed'        => (bool)$refreshed,
+    ]);
 }
 
 // ---- 以降は userid 必須 ----
@@ -188,6 +244,20 @@ switch ($action) {
         }
         mypage_auto_sync($mypage); // 統合結果も Drive へ反映
         api_ok(['counts' => $result['counts']]);
+        break;
+
+    case 'google_token_get':
+        $link = $mypage->getGoogleLink();
+        if ($link === null) {
+            api_error('Google アカウントと連携されていません', 404);
+        }
+        api_ok([
+            'google_sub'       => $link['google_sub'],
+            'google_email'     => $link['google_email'],
+            'access_token'     => $link['access_token'],
+            'refresh_token'    => $link['refresh_token'],
+            'token_expires_at' => (int)$link['token_expires_at'],
+        ]);
         break;
 
     case 'google_status':

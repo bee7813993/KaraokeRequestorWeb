@@ -176,6 +176,17 @@ class MypageUser {
         return $this->userid;
     }
 
+    /**
+     * 新しいユーザー ID を発行して登録し、このインスタンスのユーザーにする
+     * (cookie は変更しない)。アプリの Google 自動引き継ぎ用。
+     */
+    public function createNewUser() {
+        $uid = $this->generateUuid();
+        $this->upsertUser($uid);
+        $this->userid = $uid;
+        return $uid;
+    }
+
     public function getDisplayName() {
         $stmt = $this->db->prepare(
             "SELECT displayname FROM mypage_user WHERE userid = ?"
