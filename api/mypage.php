@@ -89,6 +89,11 @@ switch ($action) {
         api_ok(['added' => true]);
         break;
 
+    case 'history_remove':
+        $mypage->removeHistory((string)api_param('fullpath', ''));
+        api_ok(['removed' => true]);
+        break;
+
     case 'later':
         api_ok(['items' => $mypage->getLaterList()]);
         break;
@@ -135,7 +140,16 @@ switch ($action) {
         break;
 
     case 'keyword_remove':
-        $mypage->removeFavoriteKeyword((int)api_param('id', 0));
+        // id 指定 (Web と同じ) または条件指定 (id を持たないアプリからの解除)
+        $id = (int)api_param('id', 0);
+        if ($id > 0) {
+            $mypage->removeFavoriteKeyword($id);
+        } else {
+            $mypage->removeFavoriteKeywordByCondition(
+                (string)api_param('keyword', ''),
+                (string)api_param('search_type', ''),
+                (string)api_param('search_params', ''));
+        }
         api_ok(['removed' => true]);
         break;
 

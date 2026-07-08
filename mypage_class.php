@@ -258,6 +258,14 @@ class MypageUser {
         $stmt->execute([$this->userid, $fullpath, $songfile, $kind, time()]);
     }
 
+    /** 指定ファイルの履歴 (全回数分) を削除する。アプリの履歴行削除用。 */
+    public function removeHistory($fullpath) {
+        $stmt = $this->db->prepare(
+            "DELETE FROM mypage_history WHERE userid = ? AND fullpath = ?"
+        );
+        $stmt->execute([$this->userid, $fullpath]);
+    }
+
     /**
      * @param string $sort  'date'|'count'|'filedate'
      * @param string $order 'desc'|'asc'
@@ -417,6 +425,15 @@ class MypageUser {
             "DELETE FROM mypage_favorite_keyword WHERE id = ? AND userid = ?"
         );
         $stmt->execute([(int)$id, $this->userid]);
+    }
+
+    /** 条件一致でお気に入り検索を削除する (id を持たないアプリからの解除用)。 */
+    public function removeFavoriteKeywordByCondition($keyword, $search_type, $search_params) {
+        $stmt = $this->db->prepare(
+            "DELETE FROM mypage_favorite_keyword
+             WHERE userid = ? AND keyword = ? AND search_type = ? AND search_params = ?"
+        );
+        $stmt->execute([$this->userid, $keyword, $search_type, $search_params]);
     }
 
     public function getFavoriteKeywords() {
