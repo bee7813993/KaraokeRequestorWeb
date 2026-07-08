@@ -71,24 +71,30 @@ function extention_musiccheck($fn){
     }    
 }
 
-// 曲情報取得
-$url = 'http://localhost/search_listerdb_filelist_json.php?uid='.$uid;
-$programlist_json = file_get_contents($url);
-   if(!$programlist_json) {
-      $errmsg = '曲情報取得に失敗';
-   }else {
-      $programlist = json_decode($programlist_json,true);
-   }
-   $v=$programlist["data"][0];
+// 曲情報取得 (uid 指定時のみ。fullpath 直接指定なら ListerDB 照会は不要)
+// ※ 従来は uid=0 でも内部アクセスして失敗し、Warning が JSON 応答に混入していた
+$v = null;
+if(!empty($uid)) {
+    $url = 'http://localhost/search_listerdb_filelist_json.php?uid='.$uid;
+    $programlist_json = file_get_contents($url);
+    if($programlist_json) {
+        $programlist = json_decode($programlist_json,true);
+        if(isset($programlist["data"][0])) {
+            $v = $programlist["data"][0];
+        }
+    }
+}
 
-      $displayname = $v["song_name"];
-      if (empty($v["song_name"]) )
-          $displayname = basename_jp($v["found_path"]);
+if($v !== null) {
+    $displayname = $v["song_name"];
+    if (empty($v["song_name"]) )
+        $displayname = basename_jp($v["found_path"]);
+}
 
 $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
 
-if(empty($fullpath) ){
+if(empty($fullpath) && $v !== null){
     $fullpath=$v["found_path"];
     if(!empty($fullpath) ) {
         $filename = basename_jp($fullpath);

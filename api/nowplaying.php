@@ -13,7 +13,10 @@
  *             "status":"...", "playtime":N, "totaltime":N,
  *             "playtime_txt":"...", "totaltime_txt":"...",
  *             "playingtitle":"...", "playingfile":"...", "playingsinger":"...",
+ *             "player":"mpc|foobar|none",  // プレイヤー種別
+ *             "keychange":N,               // 再生中の曲の現在キー (半音)
  *             "nextsong": { title, songfile, show_file, singer, kind } | null } }
+ *   status は MPC の状態番号 (文字列): "2"=再生中 / "1"=一時停止 など
  */
 require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/../function_playingstatus.php';

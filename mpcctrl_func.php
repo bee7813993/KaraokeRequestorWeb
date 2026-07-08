@@ -4,6 +4,7 @@ require_once 'commonfunc.php';
 
 $MPCCMDURL='http://localhost:13579/command.html';
 $MPCSTATUSURL='http://localhost:13579/status.html';
+$MPCVARIABLESURL='http://localhost:13579/variables.html';
 $EASYKEYCHANGERURL='http://localhost:13580/command.html';
 
   function timestring(){
@@ -146,7 +147,16 @@ function set_volume($c_volume){
 
 function get_volume(){
 
-    global $MPCSTATUSURL;
+    global $MPCVARIABLESURL, $MPCSTATUSURL;
+
+    // status.html はカンマ区切りのため、曲名にカンマを含むと位置がズレて
+    // 誤った値 (muted フラグ等) を返す。id 付きで取れる variables.html を優先する
+    $vars = file_get_html_with_retry($MPCVARIABLESURL);
+    if($vars !== FALSE && preg_match('/<p id="volumelevel">(\d+)<\/p>/', $vars, $m)){
+        return (int)$m[1];
+    }
+
+    // フォールバック (旧バージョン向け): status.html のカンマ区切りパース
     $statusformat = 'OnStatus(\'%s\', \'%s\', %d, \'%s\', %d, \'%s\', %d, %d, \'%s\')';
 
     $status = file_get_html_with_retry($MPCSTATUSURL);
@@ -249,13 +259,13 @@ function volume_fadeout(){
 
 function keychange($keycmd){
     global $EASYKEYCHANGERURL;
-    
+
     $clienttoken=mkclienthash();
 
-    $res = TRUE;
     $requesturl=$EASYKEYCHANGERURL.'?key='.$keycmd.'&token='.$clienttoken;
     $res = file_get_html_with_retry($requesturl,5,1);
-    /* キー送信に失敗した場合は現在キーの取得も失敗するだけなのでスキップ */
+    /* キー送信に失敗した場合は現在キーの取得も失敗するだけなのでスキップ
+       (呼び出し元は $res === false で不達を判定できる) */
     if($res !== false){
         update_requestdb_key();
     }
@@ -266,19 +276,21 @@ function keychange($keycmd){
 
 function update_requestdb_key(){
     global $db;
-    
-    $keyinfourl = createUri((empty($_SERVER["HTTPS"]) ? "http://" : "https://") . $_SERVER["HTTP_HOST"] . ':'. $_SERVER["SERVER_PORT"]. $_SERVER["REQUEST_URI"],"getcurrentkey.php");
 
-    $res = file_get_html_with_retry($keyinfourl,2,2);
+    // 自己 HTTP 呼び出し (getcurrentkey.php) はアクセス元 URL 依存で /api/ 配下から
+    // 呼ぶと解決に失敗するため、EasyKeyChanger へ直接現在キーを問い合わせる
+    // (キー送信成功直後にしか呼ばれず到達性は確認済みのためリトライは2回で十分)
+    require_once 'func_keychange.php';
+    $kc = new EasyKeychanger();
+    $status = $kc->getstatus(2);
 
-    if( $res === false ) return;
-    if( $res == "None" ) return;
-    if( !is_numeric($res) ) return;
+    if( $status === false ) return;
+    if( !isset($status["currentkey"]) || !is_numeric($status["currentkey"]) ) return;
 
-    $sql = 'UPDATE requesttable SET keychange='.$res.' WHERE nowplaying="再生中";';
+    $sql = 'UPDATE requesttable SET keychange='.(int)$status["currentkey"].' WHERE nowplaying="再生中";';
     $db->beginTransaction();
     $ret = $db->exec($sql);
     $db->commit();
-    
+
 }
 ?>

@@ -268,25 +268,33 @@ if (is_numeric($selectid)) {
         die();
     }
 
-    // ListerDB から曲情報を取得して保存
-    if (!empty($l_fullpath) && array_key_exists('listerDBPATH', $config_ini)) {
-        $lister_dbpath = urldecode($config_ini['listerDBPATH']);
-        if (file_exists($lister_dbpath)) {
-            require_once 'function_search_listerdb.php';
-            $lfd_row = listerdb_lookup_songinfo($l_fullpath, $lister_dbpath);
-            if ($lfd_row) {
-                $db->exec(
-                    'UPDATE requesttable SET '
-                    . 'song_name='      . $db->quote($lfd_row['song_name'])      . ','
-                    . 'lister_artist='  . $db->quote($lfd_row['lister_artist'])  . ','
-                    . 'lister_work='    . $db->quote($lfd_row['lister_work'])    . ','
-                    . 'lister_op_ed='   . $db->quote($lfd_row['lister_op_ed'])   . ','
-                    . 'lister_comment=' . $db->quote($lfd_row['lister_comment'])
-                    . ' WHERE id=' . $newid
-                );
-            }
-        }
+}
+
+// ListerDB から曲情報 (song_name / lister_*) を取得して保存。
+// 新規・差し替えの両方で行う。差し替え (selectid) は曲が変わっている可能性があるため、
+// ListerDB に見つからない場合も旧曲の情報が残らないよう空で上書きする
+$lfd_row = false;
+if (!empty($l_fullpath) && array_key_exists('listerDBPATH', $config_ini)) {
+    $lister_dbpath = urldecode($config_ini['listerDBPATH']);
+    if (file_exists($lister_dbpath)) {
+        require_once 'function_search_listerdb.php';
+        $lfd_row = listerdb_lookup_songinfo($l_fullpath, $lister_dbpath);
     }
+}
+if (!$lfd_row && is_numeric($selectid)) {
+    $lfd_row = ['song_name' => '', 'lister_artist' => '', 'lister_work' => '',
+                'lister_op_ed' => '', 'lister_comment' => ''];
+}
+if ($lfd_row) {
+    $db->exec(
+        'UPDATE requesttable SET '
+        . 'song_name='      . $db->quote($lfd_row['song_name'])      . ','
+        . 'lister_artist='  . $db->quote($lfd_row['lister_artist'])  . ','
+        . 'lister_work='    . $db->quote($lfd_row['lister_work'])    . ','
+        . 'lister_op_ed='   . $db->quote($lfd_row['lister_op_ed'])   . ','
+        . 'lister_comment=' . $db->quote($lfd_row['lister_comment'])
+        . ' WHERE id=' . $newid
+    );
 }
 notify_requestlist_update();
 

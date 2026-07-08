@@ -183,7 +183,7 @@ shownavigatioinbar();
 <label>
 URL
 </label>
-    <input type="text" name="fullpath" id="fullpath" style="width:100%" placeholder="直接再生できるURLを指定を入れてください(youtubeやニコニコ動画のURLもOK)" value="<?php echo htmlspecialchars((string)$filename, ENT_QUOTES, 'UTF-8'); ?>" />
+    <input type="text" name="fullpath" id="fullpath" style="width:100%" placeholder="直接再生できるURLを入れてください (YouTube等)" value="<?php echo htmlspecialchars((string)$filename, ENT_QUOTES, 'UTF-8'); ?>" />
 <label>
 曲名
 </label>
