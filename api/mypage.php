@@ -70,6 +70,12 @@ if ($action === 'google_register') {
     if ($google_sub === '' || $access_token === '') {
         api_error('google_sub and access_token are required');
     }
+    // トークンの発行元クライアント ID がこの部屋の設定と違うなら持ち歩き対象外
+    // (トークン更新ができず後で必ず失敗するため、先に分かるエラーで返す)
+    $token_client_id = (string)api_param('client_id', '');
+    if ($token_client_id !== '' && $token_client_id !== $client_id) {
+        api_error('この部屋は別の Google 連携設定のため持ち歩きできません', 409);
+    }
 
     // この Google アカウントのユーザーが既にいればそれを、いなければ新規作成して紐付ける
     $existing = MypageUser::findUserByGoogleSub($db, $google_sub);
@@ -257,6 +263,8 @@ switch ($action) {
             'access_token'     => $link['access_token'],
             'refresh_token'    => $link['refresh_token'],
             'token_expires_at' => (int)$link['token_expires_at'],
+            // 発行元のクライアント ID (別設定の部屋を google_register 側で見分けるため)
+            'client_id'        => $config_ini['google_client_id'] ?? '',
         ]);
         break;
 
