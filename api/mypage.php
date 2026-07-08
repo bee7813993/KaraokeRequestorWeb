@@ -18,8 +18,13 @@
  *   keyword         userid=
  *   keyword_add     userid= keyword= [search_type=] [search_params=]
  *   keyword_remove  userid= id=
+ *   import          userid= data= (POST) → Web 版エクスポート形式 (version 1) の JSON を
+ *                   マージ取り込み。重複はスキップされるため何度実行しても安全
  *   google_status   userid=      → 連携有無・メール・自動同期・最終同期時刻
  *   google_sync     userid= direction=to_drive|from_drive → Google Drive と同期
+ *
+ * 書き込み系アクションの成功時は、Google 連携済み+自動同期オンなら Drive へも
+ * 自動保存する (Web 版 mypage_api.php と同じ挙動)。
  *
  * 応答: { "ok":true, "data":{...} } / { "ok":false, "error":"..." }
  */
@@ -61,6 +66,16 @@ function mypage_song_params()
     return [$fullpath, $songfile, (string)api_param('kind', '')];
 }
 
+/** 書き込み成功後の自動 Drive 同期。同期失敗で書き込み自体の応答は壊さない。 */
+function mypage_auto_sync($mypage)
+{
+    try {
+        $mypage->autoSyncToDrive();
+    } catch (Exception $e) {
+        // 自動同期は best effort (次回の書き込みまたは手動同期で追い付く)
+    }
+}
+
 switch ($action) {
     case 'pair_generate':
         api_ok(['code' => $mypage->generatePairingCode()]);
@@ -86,11 +101,13 @@ switch ($action) {
     case 'history_add':
         list($fullpath, $songfile, $kind) = mypage_song_params();
         $mypage->addHistory($fullpath, $songfile, $kind);
+        mypage_auto_sync($mypage);
         api_ok(['added' => true]);
         break;
 
     case 'history_remove':
         $mypage->removeHistory((string)api_param('fullpath', ''));
+        mypage_auto_sync($mypage);
         api_ok(['removed' => true]);
         break;
 
@@ -101,11 +118,13 @@ switch ($action) {
     case 'later_add':
         list($fullpath, $songfile, $kind) = mypage_song_params();
         $mypage->addLater($fullpath, $songfile, $kind);
+        mypage_auto_sync($mypage);
         api_ok(['added' => true]);
         break;
 
     case 'later_remove':
         $mypage->removeLater((string)api_param('fullpath', ''));
+        mypage_auto_sync($mypage);
         api_ok(['removed' => true]);
         break;
 
@@ -116,11 +135,13 @@ switch ($action) {
     case 'favorite_add':
         list($fullpath, $songfile, $kind) = mypage_song_params();
         $mypage->addFavoriteSong($fullpath, $songfile, $kind);
+        mypage_auto_sync($mypage);
         api_ok(['added' => true]);
         break;
 
     case 'favorite_remove':
         $mypage->removeFavoriteSong((string)api_param('fullpath', ''));
+        mypage_auto_sync($mypage);
         api_ok(['removed' => true]);
         break;
 
@@ -136,6 +157,7 @@ switch ($action) {
         if (!$ok) {
             api_error('keyword is required');
         }
+        mypage_auto_sync($mypage);
         api_ok(['added' => true]);
         break;
 
@@ -150,7 +172,22 @@ switch ($action) {
                 (string)api_param('search_type', ''),
                 (string)api_param('search_params', ''));
         }
+        mypage_auto_sync($mypage);
         api_ok(['removed' => true]);
+        break;
+
+    case 'import':
+        // 端末内データの一括統合 (アプリのデバイスリンク時・再接続時に使う)
+        $data = json_decode((string)api_param('data', ''), true);
+        if (!is_array($data)) {
+            api_error('data (JSON) is required');
+        }
+        $result = $mypage->importData($data, false);
+        if (empty($result['ok'])) {
+            api_error(isset($result['error']) ? $result['error'] : 'import failed');
+        }
+        mypage_auto_sync($mypage); // 統合結果も Drive へ反映
+        api_ok(['counts' => $result['counts']]);
         break;
 
     case 'google_status':
