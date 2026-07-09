@@ -381,18 +381,11 @@ GET/POST /api/mypage.php?action=<action>&userid=<UUID>&...
 書き込み系アクションの成功時は、Google 連携済み + 自動同期オンなら Drive へも自動保存する
 (Web 版 `mypage_api.php` と同じ挙動。同期失敗しても書き込みの応答は成功のまま)。
 
-### Google 同期
-
-| action | パラメータ | 応答 data / エラー |
-|---|---|---|
-| `google_status` | `userid` | `{linked, email, auto_sync, last_synced_at}` |
-| `google_sync` | `userid`, `direction=to_drive\|from_drive` | `{synced, direction}`。未設定 503 / 未連携 404 / Drive 失敗 502 |
-| `google_token_get` | `userid` | トークン一式 + 発行元 `client_id` (アプリの「同期の持ち歩き」用)。未連携 404 |
-| `google_register` | POST: `google_sub`, `google_email`, `access_token`, `refresh_token`, `token_expires_at`, `client_id` | この部屋にその Google アカウントのユーザーを用意し (既存は `google_sub` で再利用)、Drive から復元して `{userid, access_token, token_expires_at, refreshed}` を返す |
-
-`google_register` のエラー: Google 同期未設定の部屋は **503** (アプリは静かにスキップ)、
-`client_id` がこの部屋の設定と不一致は **409** (別の Google 連携設定 = 持ち歩き対象外)、
-トークン無効 (読めず・更新できず・期限切れ) は **401** (アプリは持ち歩きを破棄して再連携を促す)。
+※ アプリ (ゆかナビ) の Google 同期は、アプリ自身が relay
+(`mypage_google_relay_server.php` の `app_auth` / `app_poll` / `app_refresh`) 経由で
+認証して Google Drive を直接読み書きする方式のため、この API に Google 系アクションは
+無い (トークンを返す API を持たない)。Web 版の部屋単位の Google 連携
+(`mypage_google_sync.php`) とは Drive 上の同一ファイル (`mypage_data.json`) を共有する。
 
 ---
 
