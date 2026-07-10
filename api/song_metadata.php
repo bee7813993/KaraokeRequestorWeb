@@ -19,11 +19,40 @@
  *   読み仮名は requesttable に列が無いため記録のみ
  *   (後で ListerDB の登録情報を直す材料。CSV 出力は metadata_correction_csv.php)。
  *   送られなかった項目は変更なしとして扱う。
+ *   読み仮名はゆかりすたーの登録規則 (全角カタカナ・濁点なし) へ保存時に正規化する。
+ *   かな以外 (英数字・漢字等) が含まれる読みは 400 エラー。
  *
  * 応答: { "ok":true, "data":{...} } / { "ok":false, "error":"..." }
  */
 require_once __DIR__ . '/_common.php';
 require_once __DIR__ . '/../function_search_listerdb.php';
+
+/**
+ * 読み仮名をゆかりすたーの登録規則へ正規化する。
+ * ひらがな・カタカナ・半角カタカナのどれで入力されても
+ * 「全角カタカナ・濁点/半濁点なし」にそろえる。
+ * かな以外 (英数字・漢字・記号) が含まれる場合は null (呼び出し元でエラー)。
+ */
+function normalize_ruby($value)
+{
+    // 半角カナ→全角 (K) + 濁点合成 (V)、ひらがな→カタカナ (C)
+    $value = mb_convert_kana(trim((string)$value), 'KVC', 'UTF-8');
+    // 濁点・半濁点を除いた清音へ
+    $value = strtr($value, [
+        'ガ' => 'カ', 'ギ' => 'キ', 'グ' => 'ク', 'ゲ' => 'ケ', 'ゴ' => 'コ',
+        'ザ' => 'サ', 'ジ' => 'シ', 'ズ' => 'ス', 'ゼ' => 'セ', 'ゾ' => 'ソ',
+        'ダ' => 'タ', 'ヂ' => 'チ', 'ヅ' => 'ツ', 'デ' => 'テ', 'ド' => 'ト',
+        'バ' => 'ハ', 'ビ' => 'ヒ', 'ブ' => 'フ', 'ベ' => 'ヘ', 'ボ' => 'ホ',
+        'パ' => 'ハ', 'ピ' => 'ヒ', 'プ' => 'フ', 'ペ' => 'ヘ', 'ポ' => 'ホ',
+        'ヴ' => 'ウ', 'ヷ' => 'ワ', 'ヸ' => 'ヰ', 'ヹ' => 'ヱ', 'ヺ' => 'ヲ',
+        '゛' => '', '゜' => '',
+    ]);
+    // 全角カタカナ・長音・空白だけになっていることを確認
+    if (!preg_match('/\A[ァ-ヶー \x{3000}]*\z/u', $value)) {
+        return null;
+    }
+    return $value;
+}
 
 /** ListerDB から現在の曲情報 + 読み仮名を引く (未設定・未ヒットは全項目 "")。 */
 function song_metadata_lookup($fullpath)
@@ -77,6 +106,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)api_param('action', '') ===
     $request_columns = ['song_name', 'lister_artist', 'lister_work',
                         'lister_op_ed', 'lister_comment'];
 
+    $ruby_labels = ['song_ruby' => '曲名の読み',
+                    'lister_artist_ruby' => '歌手名の読み',
+                    'lister_work_ruby' => '作品名の読み'];
+
     $updates = [];  // requesttable へ反映する項目
     $changes = [];  // metadata_correction へ記録する項目 [field, old, new]
     foreach ($before as $field => $old) {
@@ -85,6 +118,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)api_param('action', '') ===
             continue; // 送られていない項目は変更なし
         }
         $value = trim((string)$value);
+        if (isset($ruby_labels[$field])) {
+            // 読み仮名はゆかりすたーの登録規則 (全角カタカナ・濁点なし) へそろえる
+            $value = normalize_ruby($value);
+            if ($value === null) {
+                api_error($ruby_labels[$field] . 'に使えるのは ひらがな・カタカナ だけです');
+            }
+        }
         if ($value === $old) {
             continue;
         }
