@@ -118,18 +118,24 @@ class ListerDB {
  * fullpath から t_found を検索し、requesttable 保存用の連想配列を返す。
  * 見つからない場合は null。
  * キー: song_name, lister_artist, lister_work, lister_op_ed, lister_comment
+ * $with_ruby を true にすると読み仮名 (song_ruby, lister_artist_ruby,
+ * lister_work_ruby) も含める (曲情報の修正 API 用)。
  */
-function listerdb_lookup_songinfo($fullpath, $lister_dbpath) {
+function listerdb_lookup_songinfo($fullpath, $lister_dbpath, $with_ruby = false) {
     if (empty($fullpath) || !file_exists($lister_dbpath)) return null;
     $lister = new ListerDB();
     $lister->listerdbfile = $lister_dbpath;
     $lfd = $lister->initdb();
     if (!$lfd) return null;
 
+    $columns = 'song_name, song_artist, program_name, song_op_ed, found_comment';
+    if ($with_ruby) {
+        $columns .= ', song_ruby, found_artist_ruby, tie_up_ruby';
+    }
     $row = null;
     foreach ([$fullpath, basename($fullpath)] as $search) {
         $res = $lister->select(
-            'SELECT song_name, song_artist, program_name, song_op_ed, found_comment'
+            'SELECT ' . $columns
             . ' FROM t_found WHERE found_path LIKE ' . $lfd->quote('%' . $search . '%')
             . " AND song_name != '' LIMIT 1"
         );
@@ -142,13 +148,20 @@ function listerdb_lookup_songinfo($fullpath, $lister_dbpath) {
         $fc = trim(preg_replace('/\,\/\/.*/', '', $row['found_comment']));
     }
 
-    return [
+    $has_work = !empty($row['program_name']) && $row['program_name'] !== 'その他';
+    $info = [
         'song_name'      => $row['song_name']    ?? '',
         'lister_artist'  => $row['song_artist']  ?? '',
-        'lister_work'    => (!empty($row['program_name']) && $row['program_name'] !== 'その他') ? $row['program_name'] : '',
+        'lister_work'    => $has_work ? $row['program_name'] : '',
         'lister_op_ed'   => $row['song_op_ed']   ?? '',
         'lister_comment' => $fc,
     ];
+    if ($with_ruby) {
+        $info['song_ruby']          = $row['song_ruby'] ?? '';
+        $info['lister_artist_ruby'] = $row['found_artist_ruby'] ?? '';
+        $info['lister_work_ruby']   = $has_work ? ($row['tie_up_ruby'] ?? '') : '';
+    }
+    return $info;
 }
 
 function exceltime2unixtime ($exceltime){

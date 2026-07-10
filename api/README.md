@@ -136,6 +136,18 @@ ListerDB 未設定時は 503。
 | `programs` | `year`, `quarter` (1〜4) | `{ "year","quarter","label", "programs":[{"program":"作品名","group":"シリーズ名 or null","songs":5},...] }` |
 | `songs` | `program` / `artist` / `group` / `worker` のいずれか（複数は AND、完全一致） | `{ "total":N, "items":[{ song_name, song_ruby, song_artist, program_name, tie_up_group_name, song_op_ed, found_worker, found_path, found_file_size, found_comment },...] }` (最大300件) |
 
+### /api/song_metadata.php — 曲メタデータの取得と修正
+
+アプリの「曲の情報を修正する」画面が使う。修正内容は予約行の `song_name` / `lister_*`
+に反映され (予約一覧の表示が正しくなる)、変更があった項目だけ `metadata_correction`
+テーブル (request.db 内、自動作成) に修正前後が記録される。記録の CSV 出力は
+`metadata_correction_csv.php` (管理者 Basic 認証)。
+
+| メソッド | パラメータ | 応答 (data) |
+|---|---|---|
+| GET | `fullpath` | `{ song_name, song_ruby, lister_artist, lister_artist_ruby, lister_work, lister_work_ruby, lister_op_ed, lister_comment }`。ListerDB 未設定・未ヒットの項目は `""` |
+| POST | `action=correct`, `id` (予約ID) + 上記8項目 (送った項目だけ変更扱い) | `{ updated:N, logged:N }`。読み仮名 (`*_ruby`) は requesttable に列が無いため記録のみ |
+
 ### GET /api/requests.php — 予約一覧（エンベロープ版）
 
 下記 `requestlist_swipe_json.php` と同一のデータを `{ "ok":true, "data": {...} }` に包んで返す。

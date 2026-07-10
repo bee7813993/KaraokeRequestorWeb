@@ -366,6 +366,9 @@ print '</pre>';
   <h3> リストのダウンロード </h3>
   <a href ="listexport.php"  class="btn btn-secondary" > リクエストリストのダウンロード(UTF-8) </a>
   <a href ="listexport_sjis.php"  class="btn btn-secondary" > (SJIS) </a>
+  <h3> 曲情報の修正ログ </h3>
+  <p class="form-label"> ユーザーが予約時に修正した曲名・歌手・作品などの変更前後の一覧です。ゆかりすたーの登録情報を直す材料に使えます。 </p>
+  <a href ="metadata_correction_csv.php"  class="btn btn-secondary" > 修正ログのダウンロード(CSV) </a>
   <h3> リストのインポート(csvより) </h3>
   <form action="listimport.php" method="post" enctype="multipart/form-data">
     <label > 
