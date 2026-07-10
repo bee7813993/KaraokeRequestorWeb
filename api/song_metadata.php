@@ -118,15 +118,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (string)api_param('action', '') ===
             continue; // 送られていない項目は変更なし
         }
         $value = trim((string)$value);
+        if ($value === $old) {
+            continue; // 変更なし (既存の登録が規則外 [英字など] でもそのまま)
+        }
         if (isset($ruby_labels[$field])) {
-            // 読み仮名はゆかりすたーの登録規則 (全角カタカナ・濁点なし) へそろえる
+            // 変更された読み仮名はゆかりすたーの登録規則 (全角カタカナ・濁点なし) へそろえる
             $value = normalize_ruby($value);
             if ($value === null) {
                 api_error($ruby_labels[$field] . 'に使えるのは ひらがな・カタカナ だけです');
             }
-        }
-        if ($value === $old) {
-            continue;
+            if ($value === $old) {
+                continue; // 正規化したら既存の登録と同じになった
+            }
         }
         $changes[] = [$field, $old, $value];
         if (in_array($field, $request_columns, true)) {
