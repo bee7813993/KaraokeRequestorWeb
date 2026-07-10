@@ -24,7 +24,8 @@
  *       "google_sync":    bool,   // Google Drive 同期
  *       "easyauth":       bool,   // 簡易認証の有効/無効
  *       "new_request_list": bool, // スワイプ版リクエストリスト
- *       "new_search_ui":  bool    // BS5 検索UI
+ *       "new_search_ui":  bool,   // BS5 検索UI
+ *       "metadata_edit":  bool    // 曲情報の修正 (/api/song_metadata.php)
  *     },
  *     "player": {
  *       "mode":   int,    // 1=MPC-BE, 2=foobar2000, 3=自動, 4=その他
@@ -80,6 +81,8 @@ $features = [
     'easyauth'         => configbool('useeasyauth',         false),
     'new_request_list' => configbool('usenewrequestlist',   false),
     'new_search_ui'    => configbool('usenewsearchui',      false),
+    // 曲情報の修正 (/api/song_metadata.php)。旧サーバーではキー欠落 = アプリ側は非表示
+    'metadata_edit'    => true,
 ];
 
 $player = [
