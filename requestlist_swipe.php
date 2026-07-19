@@ -243,6 +243,17 @@ $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['req
 }
 .card-tweet-link:hover { text-decoration: underline; color: #0c85d0; }
 
+/* 曲情報修正リンク */
+.card-metaedit-link {
+  font-size: 11px;
+  color: var(--bs-primary, #0d6efd);
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 3px;
+  margin-right: 10px;
+}
+.card-metaedit-link:hover { text-decoration: underline; }
+
 /* 展開ボタン（技術設定・Tweetを表示） */
 .card-expand-btn {
   background: none;
@@ -738,9 +749,15 @@ function createCardHTML(item, idx, displayMode) {
     var extraMetaHtml = extraChips.length > 0
         ? '<div class="meta-chips">' + extraChips.join('') + '</div>'
         : '';
-    var hasDetails = extraChips.length > 0 || tweetHtml !== '';
+    // 曲情報修正リンク (小休止には不要。マスク行 = 非所有者の未再生シークレットには出さない。
+    // 出し分けはサーバー側の masked フラグに従う)
+    var metaEditHtml = '';
+    if (item.kind !== '小休止' && !item.masked) {
+        metaEditHtml = '<a href="song_metadata_edit_bs5.php?id=' + item.id + '" class="card-metaedit-link">&#9998; 曲情報を修正</a>';
+    }
+    var hasDetails = extraChips.length > 0 || tweetHtml !== '' || metaEditHtml !== '';
     var cardDetailsHtml = hasDetails
-        ? '<div class="card-details">' + extraMetaHtml + tweetHtml + '</div>'
+        ? '<div class="card-details">' + extraMetaHtml + metaEditHtml + tweetHtml + '</div>'
         : '';
     var expandBtnHtml = hasDetails
         ? '<button class="card-expand-btn" aria-label="詳細を展開">&#9662;</button>'

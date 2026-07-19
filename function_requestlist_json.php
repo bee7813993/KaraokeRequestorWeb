@@ -19,6 +19,8 @@
  */
 function build_requestlist_data($db, $config_ini, $limit = 0, $offset = 0)
 {
+    global $user;
+
     $total = (int)$db->query("SELECT COUNT(*) FROM requesttable")->fetchColumn();
 
     $remaining_count = (int)$db->query(
@@ -29,7 +31,8 @@ function build_requestlist_data($db, $config_ini, $limit = 0, $offset = 0)
         "SELECT COALESCE(SUM(duration), 0) FROM requesttable WHERE nowplaying IN ('未再生', '1') AND duration > 0"
     )->fetchColumn();
 
-    $sql = "SELECT id, songfile, fullpath, singer, comment, kind, reqorder, nowplaying, secret, loop, pause, track, keychange, audiodelay, duration, volume, song_name, lister_artist, lister_work, lister_op_ed, lister_comment FROM requesttable ORDER BY reqorder DESC";
+    // clientip / clientua は所有者判定 (シークレットのマスク除外) にのみ使い、出力には含めない
+    $sql = "SELECT id, songfile, fullpath, singer, comment, kind, reqorder, nowplaying, secret, loop, pause, track, keychange, audiodelay, duration, volume, song_name, lister_artist, lister_work, lister_op_ed, lister_comment, clientip, clientua FROM requesttable ORDER BY reqorder DESC";
     if ($limit > 0) {
         $stmt = $db->prepare($sql . " LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
@@ -41,31 +44,48 @@ function build_requestlist_data($db, $config_ini, $limit = 0, $offset = 0)
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $stmt->closeCursor();
 
+    // シークレット予約のマスク除外判定用 (本人と管理者には曲情報を渡してよい)
+    $is_admin  = (isset($user) && $user === 'admin');
+    $myname    = function_exists('returnusername_self') ? returnusername_self() : '';
+    $remote_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+    $remote_ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
     $items = [];
     foreach ($rows as $idx => $row) {
         $songfile     = $row['songfile'];
         $display_name = $songfile;
         $nowplaying_val = !empty($row['nowplaying']) ? $row['nowplaying'] : '1';
-        if (!empty($row['secret']) && $row['secret'] == 1
-            && ($nowplaying_val === '未再生' || $nowplaying_val === '1')) {
+        $is_hidden_secret = (!empty($row['secret']) && $row['secret'] == 1
+            && ($nowplaying_val === '未再生' || $nowplaying_val === '1'));
+        if ($is_hidden_secret) {
             $display_name = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレットリクエスト)'));
         }
+        // 未再生シークレットは display_name だけでなく曲情報そのものを非所有者へ渡さない
+        // (song_name があるとカードにタイトルが出てしまう漏えいの修正)。
+        // 所有者判定は既存の流儀に合わせて「リクエスト端末 (clientip+clientua) が同じ」
+        // または「登録者名が自分 (returnusername_self) と同じ」
+        $is_owner = (($row['clientip'] ?? '') !== '' && ($row['clientip'] ?? '') === $remote_ip
+                     && ($row['clientua'] ?? '') === $remote_ua)
+                 || (($row['singer'] ?? '') !== '' && ($row['singer'] ?? '') === $myname);
+        $mask = ($is_hidden_secret && !$is_owner && !$is_admin);
         $items[] = [
             'id'           => (int)$row['id'],
             'reqorder'     => (int)$row['reqorder'],
-            'songfile'     => $songfile,
+            'songfile'     => $mask ? $display_name : $songfile,
             'display_name' => $display_name,
-            'song_name'     => $row['song_name']     ?? '',
-            'lister_artist' => $row['lister_artist'] ?? '',
-            'lister_work'   => $row['lister_work']   ?? '',
-            'lister_op_ed'  => $row['lister_op_ed']  ?? '',
-            'lister_comment'=> $row['lister_comment']?? '',
+            'song_name'     => $mask ? '' : ($row['song_name']     ?? ''),
+            'lister_artist' => $mask ? '' : ($row['lister_artist'] ?? ''),
+            'lister_work'   => $mask ? '' : ($row['lister_work']   ?? ''),
+            'lister_op_ed'  => $mask ? '' : ($row['lister_op_ed']  ?? ''),
+            'lister_comment'=> $mask ? '' : ($row['lister_comment']?? ''),
             'singer'        => $row['singer'] ?? '',
             'comment'      => $row['comment'] ?? '',
             'kind'         => $row['kind'] ?? '',
             'nowplaying'   => !empty($row['nowplaying']) ? $row['nowplaying'] : '1',
+            // この行の曲情報をマスクして返したか (クライアントは曲情報系 UI の出し分けに使う)
+            'masked'       => $mask ? 1 : 0,
             // 予約の変更 (アプリの編集画面) 用: 現在のオプション値一式
-            'fullpath'     => $row['fullpath'] ?? '',
+            'fullpath'     => $mask ? '' : ($row['fullpath'] ?? ''),
             'secret'       => (int)($row['secret'] ?? 0),
             'loop'         => (int)($row['loop']   ?? 0),
             'pause'        => (int)($row['pause']  ?? 0),
