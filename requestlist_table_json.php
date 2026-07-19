@@ -43,6 +43,7 @@ $json = json_encode($allrequest,JSON_PRETTY_PRINT);
 
 $requsetlisttable = array();
 $reqcount = count(getallrequest_array()) - $displayfrom;
+$myname = returnusername_self();
 
 foreach($allrequest as $value ){
     $playingid = 'id="id_'.$value['id'].'" ';
@@ -191,6 +192,14 @@ if($value['kind'] == 'カラオケ配信' && $config_ini['usebgv'] == 1 ) {
 } else {
   $sasikaemenu = '<li> <a class="requestmove" name="changesong" id="changesong" href="searchreserve.php?id='.$value['id'].'" value="changesong"  > 曲差し替え</a> </li>';
 }
+// 曲情報の修正 (小休止には不要。未再生シークレットは本人と管理者のみ)
+if($value['kind'] != '小休止'){
+    $metaedit_hidden = ($value['secret'] == 1 && $value['nowplaying'] === '未再生'
+        && $value['singer'] !== $myname && $user !== 'admin');
+    if(!$metaedit_hidden){
+        $sasikaemenu = $sasikaemenu.'<li> <a href="song_metadata_edit_bs5.php?id='.$value['id'].'" > 曲情報の修正</a> </li>';
+    }
+}
 if($user === "admin"){
     if($usebingo){
         $list_bingoinput='<li> <a class="requestmove" name="bingoinput" id="bingoinput" href="bingo_openinput.php?id='.$value['id'].'" value="bingoinput"  > ビンゴ入力</a> </li>';
@@ -267,7 +276,6 @@ EOD;
     // シークレット予約時の曲対応
     // 条件：表示している人が本人かどうか
     $public_songname=$value['songfile'];
-    $myname = returnusername_self();
     if($value['singer'] === $myname ){
        $dialogsongname='「'.$value['songfile'].'」';
     }else{
