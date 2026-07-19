@@ -749,11 +749,10 @@ function createCardHTML(item, idx, displayMode) {
     var extraMetaHtml = extraChips.length > 0
         ? '<div class="meta-chips">' + extraChips.join('') + '</div>'
         : '';
-    // 曲情報修正リンク (小休止には不要。未再生シークレットは本人と管理者のみ)
+    // 曲情報修正リンク (小休止には不要。マスク行 = 非所有者の未再生シークレットには出さない。
+    // 出し分けはサーバー側の masked フラグに従う)
     var metaEditHtml = '';
-    if (item.kind !== '小休止'
-        && (!(item.secret == 1 && isUnplayed(item.nowplaying))
-            || IS_ADMIN || item.singer === getUsernameFromCookie())) {
+    if (item.kind !== '小休止' && !item.masked) {
         metaEditHtml = '<a href="song_metadata_edit_bs5.php?id=' + item.id + '" class="card-metaedit-link">&#9998; 曲情報を修正</a>';
     }
     var hasDetails = extraChips.length > 0 || tweetHtml !== '' || metaEditHtml !== '';

@@ -44,6 +44,7 @@ $json = json_encode($allrequest,JSON_PRETTY_PRINT);
 $requsetlisttable = array();
 $reqcount = count(getallrequest_array()) - $displayfrom;
 $myname = returnusername_self();
+$secret_text = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレットリクエスト)'));
 
 foreach($allrequest as $value ){
     $playingid = 'id="id_'.$value['id'].'" ';
@@ -53,9 +54,21 @@ foreach($allrequest as $value ){
     $onerequset = array();
     $onerequset += array("no" => $reqcount);
     $reqcount -= 1;
+
+    // 未再生シークレットの所有者判定 (本人と管理者以外には曲名を一切出さない)
+    $is_hidden_secret = ($value['secret'] == 1
+        && (strcmp($value['nowplaying'],'未再生') == 0 || $value['nowplaying'] === '1' || empty($value['nowplaying'])));
+    $is_secret_owner = ((($value['clientip'] ?? '') !== ''
+            && ($value['clientip'] ?? '') === ($_SERVER['REMOTE_ADDR'] ?? '')
+            && ($value['clientua'] ?? '') === ($_SERVER['HTTP_USER_AGENT'] ?? ''))
+        || ($value['singer'] !== '' && $value['singer'] === $myname));
+    // hidden input や onclick 属性に埋め込む曲名 (HTML ソース経由の漏えい防止。
+    // delete.php / changeplaystatus.php は songfile パラメータを使わないため動作に影響しない)
+    $form_songfile = ($is_hidden_secret && !$is_secret_owner && $user !== 'admin')
+        ? $secret_text : $value['songfile'];
+
     $songfilename = '';
-    if( ($value['secret'] == 1 ) && strcmp($value['nowplaying'],'未再生') == 0){
-        $secret_text  = urldecode($config_ini['secret_display_text'] ?? urlencode('ヒ・ミ・ツ♪(シークレットリクエスト)'));
+    if($is_hidden_secret){
         $songfilename = nl2br(htmlspecialchars(' ' . $secret_text . ' '));
     }else{
         $songfilename = nl2br(htmlspecialchars($value['songfile']));
@@ -175,7 +188,7 @@ $playstatus_pf = <<<EOD
 </div>
 EOD;
 
-    $playstatus = sprintf($playstatus_pf, $value['nowplaying'], $value['id'], $value['songfile']);
+    $playstatus = sprintf($playstatus_pf, $value['nowplaying'], $value['id'], htmlspecialchars($form_songfile));
     if($config_ini['playmode'] == 1){
         $onerequset += array("playstatus" => $playstatus);
     }elseif($config_ini['playmode'] == 2){
@@ -194,9 +207,7 @@ if($value['kind'] == 'カラオケ配信' && $config_ini['usebgv'] == 1 ) {
 }
 // 曲情報の修正 (小休止には不要。未再生シークレットは本人と管理者のみ)
 if($value['kind'] != '小休止'){
-    $metaedit_hidden = ($value['secret'] == 1 && $value['nowplaying'] === '未再生'
-        && $value['singer'] !== $myname && $user !== 'admin');
-    if(!$metaedit_hidden){
+    if(!($is_hidden_secret && !$is_secret_owner && $user !== 'admin')){
         $sasikaemenu = $sasikaemenu.'<li> <a href="song_metadata_edit_bs5.php?id='.$value['id'].'" > 曲情報の修正</a> </li>';
     }
 }
@@ -290,8 +301,13 @@ EOD;
     $useposttwitter = configbool("useposttwitter", true);
       $tweet_link = ' ';
       if($useposttwitter) {
+        // 曲名は $form_songfile (未再生シークレットの非所有者にはマスク済み) を使う。
+        // nowplaying が '1'/空 の未再生別表記でも生の songfile が漏れないようにする。
         if($value['nowplaying'] === '再生中'){
                 $tweet_message = sprintf("「%s」は「%s」を歌っています",$value['singer'],$value['songfile']);
+        }
+        elseif($is_hidden_secret){
+                $tweet_message = sprintf("「%s」は「%s」を歌います",$value['singer'],$form_songfile);
         }
         elseif($value['nowplaying'] === '未再生'){
                 $tweet_message = sprintf("「%s」は「%s」を歌います",$value['singer'],$public_songname);
@@ -306,7 +322,7 @@ EOD;
     }
     $tweet_link = $songstop.$tweet_link;
     
-    $action = sprintf($action_pf,$value['id'],htmlspecialchars($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$value['id'],urlencode($value['songfile']),$sasikaemenu,$value['id'],$value['id'],$dialogsongname,$value['id'],htmlspecialchars($value['songfile']), $tweet_link);
+    $action = sprintf($action_pf,$value['id'],htmlspecialchars($form_songfile),$value['id'],urlencode($form_songfile),$value['id'],urlencode($form_songfile),$value['id'],urlencode($form_songfile),$sasikaemenu,$value['id'],$value['id'],$dialogsongname,$value['id'],htmlspecialchars($form_songfile), $tweet_link);
     $onerequset += array("action" => $action);
     
     if($user === "admin"){

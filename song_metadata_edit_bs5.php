@@ -25,7 +25,8 @@ if ($l_id === false || $l_id === null || $l_id <= 0) {
 }
 
 $stmt = $db->prepare('SELECT id, songfile, fullpath, singer, kind, nowplaying, secret,'
-    . ' song_name, lister_artist, lister_work, lister_op_ed, lister_comment'
+    . ' song_name, lister_artist, lister_work, lister_op_ed, lister_comment,'
+    . ' clientip, clientua'
     . ' FROM requesttable WHERE id = :id');
 $stmt->bindValue(':id', $l_id, PDO::PARAM_INT);
 $stmt->execute();
@@ -37,10 +38,15 @@ if (!$request) {
 }
 
 // シークレット予約 (未再生) は本人と管理者以外には曲情報を見せない
+// (所有者判定は function_requestlist_json.php のマスク判定と同じ基準:
+//  リクエスト端末 clientip+clientua の一致、または登録者名の一致)
 $nowplaying_val = !empty($request['nowplaying']) ? $request['nowplaying'] : '未再生';
 $is_hidden_secret = ((int)$request['secret'] === 1
     && ($nowplaying_val === '未再生' || $nowplaying_val === '1'));
-$is_owner = ($request['singer'] !== '' && $request['singer'] === returnusername_self());
+$is_owner = (($request['clientip'] ?? '') !== ''
+        && ($request['clientip'] ?? '') === ($_SERVER['REMOTE_ADDR'] ?? '')
+        && ($request['clientua'] ?? '') === ($_SERVER['HTTP_USER_AGENT'] ?? ''))
+    || ($request['singer'] !== '' && $request['singer'] === returnusername_self());
 $is_admin = (isset($user) && $user === 'admin');
 $secret_blocked = ($is_hidden_secret && !$is_owner && !$is_admin);
 
