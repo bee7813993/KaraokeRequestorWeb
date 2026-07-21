@@ -157,7 +157,7 @@ function sortcategorylist($categorylist){
 }
 
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_head_json.php?list=1';
+   $geturl = listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?list=1');
    $categorylist_json = file_get_contents($geturl);
    if(!$categorylist_json) {
       $errmsg = 'カテゴリーリストの取得に失敗';
@@ -274,16 +274,16 @@ $allcategory_exists = 0;
 foreach ($categorylist as $category ){
 $cur_category = $category["program_category"];
 if($category["program_category"] == '全部'){
-  $url = 'http://localhost/search_listerdb_head_json.php';
+  $url = listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php');
   $allcategory_exists ++;
 } else {
-    $url = 'http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]);
+    $url = listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?program_category='.urlencode($category["program_category"]));
 }
 if($cur_category === NULL ) {
   $nullcategory_exists++;
 //  continue;
   $cur_category = 'その他';
-  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
+  $url = listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?program_category=ISNULL');
 }
 
 $headlist_json = file_get_contents($url);
@@ -365,7 +365,7 @@ print '</div>';
 // その他のカテゴリーは最後
 if($nullcategory_exists == 0 && !is_hidden_category('その他') ){
   $cur_category = 'その他';
-  $url = 'http://localhost/search_listerdb_head_json.php?program_category=ISNULL';
+  $url = listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?program_category=ISNULL');
 
 $headlist_json = file_get_contents($url);
 if(!$headlist_json) {
@@ -433,7 +433,7 @@ print '</div>';
 if($allcategory_exists == 0 && !is_hidden_category('全部') ){
 // カテゴリ分けしない全部表示
   $cur_category = '全部';
-  $url = 'http://localhost/search_listerdb_head_json.php?'.$linkoption;
+  $url = listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?'.$linkoption);
 
 print '<h2> ' . $cur_category . '</h2>';
 $headlist_json = file_get_contents($url);

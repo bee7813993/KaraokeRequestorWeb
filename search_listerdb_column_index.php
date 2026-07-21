@@ -216,7 +216,7 @@ if(!empty($errmsg)){
 
 // 項目ヘッダリスト取得
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_column_json.php?start='.$displayfrom.'&length='.$displaynum.'&column='.urlencode($column);
+   $geturl = listerdb_forward_agelimit('http://localhost/search_listerdb_column_json.php?start='.$displayfrom.'&length='.$displaynum.'&column='.urlencode($column));
    $columnlist_json = file_get_contents($geturl);
    if(!$columnlist_json) {
       $errmsg = '項目リストの取得に失敗';

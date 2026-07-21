@@ -221,6 +221,7 @@ function print_listerdb_fileonly() {
     print '    </div>';
     print      $sid_field;
     print '  </form>';
+    print_agelimit_optin_check();
     print '</div>';
 }
 

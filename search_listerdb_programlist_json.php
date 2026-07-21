@@ -57,6 +57,8 @@ if( !empty($header ) && !empty($category ) ) {
 }else if( !empty($header ) ){
     $select_where = $select_where . ' WHERE found_head =' . $listerdb->quote($header);
 }
+// 年齢制限タイアップ曲の絞り込み (既定は除外、include_agelimit=1 の利用者のみ含める)
+$select_where = listerdb_apply_agelimit_clause($select_where);
 if (!empty($select_orderby) ){
     $select_where = $select_where .  ' ORDER BY '. $select_orderby . ' ' . $select_scending ;
 }

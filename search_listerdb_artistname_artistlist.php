@@ -45,7 +45,7 @@ if(array_key_exists("draw", $_REQUEST)) {
 }
 
 // build query url
-$url = 'http://localhost/search_listerdb_artistlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&artist='.$artist.'&match='.$match;
+$url = listerdb_forward_agelimit('http://localhost/search_listerdb_artistlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&artist='.$artist.'&match='.$match);
 
 ?>
 

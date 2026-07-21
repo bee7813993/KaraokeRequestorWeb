@@ -88,7 +88,7 @@ print_meta_header();
 
 <?php
    $errmsg = "";
-   $geturl = 'http://localhost/search_listerdb_artistmany_json.php?list=1&start='.$displayfrom.'&length='.$displaynum;
+   $geturl = listerdb_forward_agelimit('http://localhost/search_listerdb_artistmany_json.php?list=1&start='.$displayfrom.'&length='.$displaynum);
    $artistmanylist_json = file_get_contents($geturl);
    if(!$artistmanylist_json) {
       $errmsg = '歌手名リストの取得に失敗';

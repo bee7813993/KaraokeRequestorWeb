@@ -83,6 +83,8 @@ function checkandbuild_column_headerlink($oneheader, $columnmany, $target, $colu
 $errmsg    = '';
 $columnmany = null;
 $geturl    = 'http://localhost/search_listerdb_column_json.php?start=' . $displayfrom . '&length=' . $displaynum . '&column=' . urlencode($column);
+// 年齢制限曲を含める設定 (Cookie) をサーバー内の JSON 呼び出しへ転送する
+$geturl    = listerdb_forward_agelimit($geturl);
 $json      = @file_get_contents($geturl);
 if (!$json) {
     $errmsg = '項目リストの取得に失敗しました';

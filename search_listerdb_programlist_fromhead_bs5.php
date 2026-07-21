@@ -25,6 +25,8 @@ $url = 'http://localhost/search_listerdb_programlist_json.php?start=' . $display
     . '&length=' . $displaynum
     . '&header=' . urlencode($header)
     . '&category=' . urlencode($category);
+// 年齢制限曲を含める設定 (Cookie) をサーバー内の JSON 呼び出しへ転送する
+if (listerdb_include_agelimit()) { $url .= '&include_agelimit=1'; }
 
 $errmsg      = '';
 $programlist = null;

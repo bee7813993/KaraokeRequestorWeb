@@ -44,8 +44,11 @@ if( !$listerdb ) {
   $select_where = "";
   $select_where_limit = $select_where . ' LIMIT '. $displaynum .' OFFSET '. $displayfrom;
 
+  // 年齢制限タイアップ曲の絞り込み (既定は除外、include_agelimit=1 の利用者のみ含める)
+  $agelimit_clause = listerdb_apply_agelimit_clause('');
+
 // 総件数のみ取得
-$sql = 'select COUNT(DISTINCT song_artist) from t_found;';
+$sql = 'select COUNT(DISTINCT song_artist) from t_found'. $agelimit_clause .';';
 $alldbdata =  $lister->select($sql);
 if(!$alldbdata){
      print $sql;
@@ -53,7 +56,7 @@ if(!$alldbdata){
 }
 $totalrequest = $alldbdata[0]["COUNT(DISTINCT song_artist)"];
 
-  $sql = 'select song_artist,COUNT(*) AS COUNT from t_found GROUP BY song_artist ORDER BY COUNT DESC '. $select_where_limit.';';
+  $sql = 'select song_artist,COUNT(*) AS COUNT from t_found'. $agelimit_clause .' GROUP BY song_artist ORDER BY COUNT DESC '. $select_where_limit.';';
   $alldbdata =  $lister->select($sql);
   if(!$alldbdata){
      print $sql;

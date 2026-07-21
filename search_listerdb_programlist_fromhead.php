@@ -48,7 +48,7 @@ if(array_key_exists("selectid", $_REQUEST)) {
 }
 
 // build query url
-$url = 'http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category);
+$url = listerdb_forward_agelimit('http://localhost/search_listerdb_programlist_json.php?start='.$displayfrom.'&length='.$displaynum.'&header='.urlencode($header).'&category='.urlencode($category));
 
 ?>
 

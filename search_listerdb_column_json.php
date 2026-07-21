@@ -84,6 +84,11 @@ if(!empty($tie_up_group_name)) {
     $where_conditions[] = '(tie_up_group_ruby LIKE ' . $listerdb->quote('%'.kanabuild($tie_up_group_name).'%') .
                           ' OR tie_up_group_name LIKE ' . $listerdb->quote('%'.$tie_up_group_name.'%') . ')';
 }
+// 年齢制限タイアップ曲の絞り込み (既定は除外、include_agelimit=1 の利用者のみ含める)
+$agelimit_where = listerdb_agelimit_where();
+if ($agelimit_where !== '') {
+    $where_conditions[] = $agelimit_where;
+}
 $select_where = empty($where_conditions) ? '' : 'WHERE ' . implode(' AND ', $where_conditions);
 $select_where_limit = $select_where . ' GROUP BY '.$column. ' LIMIT '. $displaynum .' OFFSET '. $displayfrom;
 

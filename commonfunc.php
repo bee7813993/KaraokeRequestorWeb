@@ -3373,4 +3373,94 @@ function mypageAction(el, type) {
 </script>
 JS;
 }
+
+// ==================== リスターDB検索の年齢制限オプトイン ====================
+
+/**
+ * 年齢制限タイアップ曲 (tie_up_age_limit >= 18) を検索結果に含めるかどうか。
+ * 利用者ごとのオプトイン方式: 既定は含めない。検索画面のチェックで有効化すると
+ * Cookie (YkariIncludeAgelimit=1) が保存され、その利用者の検索にだけ含まれる。
+ * リクエストパラメータ include_agelimit はサーバー内の JSON 呼び出しへの転送と
+ * アプリ (ゆかナビ) からの明示指定用 (Cookie より優先)。
+ */
+function listerdb_include_agelimit() {
+    if (array_key_exists('include_agelimit', $_REQUEST)) {
+        return $_REQUEST['include_agelimit'] == 1;
+    }
+    return isset($_COOKIE['YkariIncludeAgelimit']) && $_COOKIE['YkariIncludeAgelimit'] == 1;
+}
+
+/**
+ * 年齢制限タイアップ曲の絞り込み SQL 条件を返す。
+ * 含める設定の利用者には絞り込まない (空文字を返す)。
+ * 各リスターDB検索エンドポイントの WHERE 構築で共通に使う。
+ */
+function listerdb_agelimit_where() {
+    if (listerdb_include_agelimit()) {
+        return '';
+    }
+    return '(tie_up_age_limit IS NULL OR tie_up_age_limit < 18)';
+}
+
+/**
+ * 組み立て済みの WHERE 条件文字列 (WHERE キーワードなし) に年齢制限の絞り込みを
+ * AND で足す。既存条件は括弧で包む (anyword 検索の OR 連結が外側括弧なしのため、
+ * そのまま AND すると演算子の優先順位で誤結合する)。
+ */
+function listerdb_apply_agelimit($select_where) {
+    $agelimit = listerdb_agelimit_where();
+    if ($agelimit === '') {
+        return $select_where;
+    }
+    if (empty($select_where)) {
+        return $agelimit;
+    }
+    return '(' . $select_where . ') AND ' . $agelimit;
+}
+
+/**
+ * 年齢制限曲を含めるかのチェックボックス (BS5 検索ページ用)。
+ * 状態は js/agelimit_optin.js が Cookie で管理する (初回オン時に確認あり)。
+ * 同一ページで複数回呼んでもよい (スクリプトの読み込みは1回だけ出力)。
+ */
+function print_agelimit_optin_check() {
+    static $printed_script = false;
+    print '<div class="form-check mt-2">'
+        . '<label class="form-check-label small">'
+        . '<input class="form-check-input include-agelimit-check" type="checkbox"> '
+        . '年齢制限のある曲を検索結果に含める</label>'
+        . '</div>' . "\n";
+    if (!$printed_script) {
+        print '<script src="js/agelimit_optin.js"></script>' . "\n";
+        $printed_script = true;
+    }
+}
+
+/**
+ * サーバー内の JSON 呼び出し URL に、年齢制限曲を含める設定を転送する。
+ * ブラウザの Cookie はサーバー内 HTTP (localhost への file_get_contents) には
+ * 乗らないため、URL パラメータとして渡す。
+ */
+function listerdb_forward_agelimit($url) {
+    if (!listerdb_include_agelimit()) {
+        return $url;
+    }
+    return $url . (strpos($url, '?') === false ? '?' : '&') . 'include_agelimit=1';
+}
+
+/**
+ * ' WHERE ...' 形式 (または空) の句文字列に年齢制限の絞り込みを足す。
+ * 既に WHERE があれば AND、なければ WHERE として付ける。
+ * ORDER BY / LIMIT 等を連結する前に呼ぶこと。
+ */
+function listerdb_apply_agelimit_clause($where_clause) {
+    $agelimit = listerdb_agelimit_where();
+    if ($agelimit === '') {
+        return $where_clause;
+    }
+    if (trim($where_clause) === '') {
+        return ' WHERE ' . $agelimit;
+    }
+    return $where_clause . ' AND ' . $agelimit;
+}
 ?>

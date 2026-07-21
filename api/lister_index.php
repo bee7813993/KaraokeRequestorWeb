@@ -9,7 +9,8 @@
  * 期の判別は t_found.song_release_date (修正ユリウス日)。この値はゆかりすたーが
  * タイアップのリリース日を優先して書き込むマージ値 (無ければ曲の発売日) のため、
  * ゆかりすたー本家の期別リストと同じ基準になる。
- * 現状は一般向けのみ対象 (tie_up_age_limit < 18。成人向けは対象外)。
+ * 既定は一般向けのみ対象 (tie_up_age_limit < 18)。include_agelimit=1 を付けると
+ * 年齢制限のあるタイアップ曲も対象になる (検索画面で有効化した利用者ごとのオプトイン)。
  *
  * mode:
  *   years                        → 年ごとの曲数 (降順)
@@ -55,8 +56,13 @@ try {
     api_error('ListerDB を開けません', 503);
 }
 
-// 共通の対象条件: 一般向けのみ (ゆかりすたー本家は 18 歳以上対象を成人向けとして分離する)
-$base_where = '(tie_up_age_limit IS NULL OR tie_up_age_limit < 18)';
+// 共通の対象条件: 既定は一般向けのみ (ゆかりすたー本家は 18 歳以上対象を成人向けとして分離する)。
+// include_agelimit=1 のとき (検索画面のチェックで有効化した利用者) は年齢制限曲も含める
+if (api_param('include_agelimit', '') == 1) {
+    $base_where = '1=1';
+} else {
+    $base_where = '(tie_up_age_limit IS NULL OR tie_up_age_limit < 18)';
+}
 // 期別系はタイアップ (作品) が付いている曲のみ (本家の期別リストと同じ)
 $program_where = "program_name IS NOT NULL AND program_name != ''";
 
@@ -373,15 +379,21 @@ if ($mode === 'songs') {
     // あいまい検索 (検索トップのキーワード検索用)
     $anyword = api_param('anyword', '');
     if ($anyword !== '' && $anyword !== null) {
-        $orConds = [
+        // 空白のみの anyword では各条件が空文字になる。そのまま連結すると
+        // "( OR  OR ...)" の不正な SQL になるため、空の条件を除いてから組み立てる
+        $orConds = array_filter([
             lister_like_cond($ldb, 'song_name', 'song_ruby', $anyword),
             lister_like_cond($ldb, 'song_artist', 'found_artist_ruby', $anyword),
             lister_like_cond($ldb, 'program_name', 'tie_up_ruby', $anyword),
             lister_like_cond($ldb, 'tie_up_group_name', 'tie_up_group_ruby', $anyword),
             lister_like_cond($ldb, 'maker_name', 'maker_ruby', $anyword),
             lister_like_cond($ldb, 'found_path', null, $anyword),
-        ];
-        $where[] = '(' . implode(' OR ', $orConds) . ')';
+        ], function ($cond) { return $cond !== ''; });
+        if (count($orConds) > 0) {
+            $where[] = '(' . implode(' OR ', $orConds) . ')';
+        } else {
+            $anyword = ''; // 空白のみは未指定として扱う (下の必須チェックへ)
+        }
     }
 
     if (count($params) === 0 && ($anyword === '' || $anyword === null)) {

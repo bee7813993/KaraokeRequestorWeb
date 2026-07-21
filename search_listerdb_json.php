@@ -67,6 +67,8 @@ $select_where = "";
 if(!empty($select_word) && !empty($select_column)) {
     $select_where = ' WHERE ' . $select_column . ' = ' . $listerdb->quote($select_word);
 }
+// 年齢制限タイアップ曲の絞り込み (既定は除外、含める設定の利用者のみ表示)
+$select_where = listerdb_apply_agelimit_clause($select_where);
 if(!empty($select_orderby)) {
     $select_where = $select_where . ' ORDER BY ' . $select_orderby . ' ' . $select_scending;
 }
