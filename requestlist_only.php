@@ -159,9 +159,16 @@ function event_initial(){
           // alert("EventSourceが利用できません。");
           return;
       }
-      var source = new EventSource('requestlist_event.php?kind=requestlist');
+      // ページが見えていない間は SSE を切断して接続枠を手放す。
+      // バックグラウンドタブの持続接続がブラウザの同一サーバー接続枠
+      // (HTTP/1.1 は最大6本) を占有し続けると、他ページの表示や予約送信が
+      // ブラウザ内で送信待ちのまま止まる (特に Android は接続を保持し続ける)
+      var source = null;
       var lastkey = 0;
-      source.onmessage = function(event){
+      function rl_openEventStream(){
+        if (source) return;
+        source = new EventSource('requestlist_event.php?kind=requestlist');
+        source.onmessage = function(event){
           if (event.data == "Bye"){
               event.target.close();
               // alert('終了しました。');
@@ -183,7 +190,24 @@ function event_initial(){
                 }
             }
           }
-      };
+        };
+      }
+      function rl_closeEventStream(){
+        if (source){ source.close(); source = null; }
+      }
+      document.addEventListener('visibilitychange', function(){
+        if (document.hidden){
+            rl_closeEventStream();
+        } else {
+            rl_openEventStream();
+            // 非表示中の変更を取り込む
+            if($("[name=autoreload]").prop("checked")){
+                reloadtable();
+            }
+        }
+      });
+      window.addEventListener('pagehide', rl_closeEventStream);
+      rl_openEventStream();
     }
     else {
       tm();

@@ -1417,16 +1417,38 @@ function initAutoReload() {
             }
             return;
         }
-        var source  = new ES('requestlist_event.php?kind=requestlist');
+        // ページが見えていない間は SSE を切断して接続枠を手放す。
+        // バックグラウンドタブの持続接続がブラウザの同一サーバー接続枠
+        // (HTTP/1.1 は最大6本) を占有し続けると、他ページの表示や予約送信が
+        // ブラウザ内で送信待ちのまま止まる (特に Android は接続を保持し続ける)
+        var source  = null;
         var lastkey = 0;
-        source.onmessage = function (e) {
-            if (e.data === 'Bye') { source.close(); return; }
-            var nowkey = e.data;
-            if (nowkey && nowkey !== 'None' && lastkey !== nowkey) {
+        function openEventStream() {
+            if (source) return;
+            source = new ES('requestlist_event.php?kind=requestlist');
+            source.onmessage = function (e) {
+                if (e.data === 'Bye') { closeEventStream(); return; }
+                var nowkey = e.data;
+                if (nowkey && nowkey !== 'None' && lastkey !== nowkey) {
+                    if (!isDragging && shouldAutoReload()) reloadCurrent();
+                    lastkey = nowkey;
+                }
+            };
+        }
+        function closeEventStream() {
+            if (source) { source.close(); source = null; }
+        }
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                closeEventStream();
+            } else {
+                openEventStream();
+                // 非表示中の変更を取り込む
                 if (!isDragging && shouldAutoReload()) reloadCurrent();
-                lastkey = nowkey;
             }
-        };
+        });
+        window.addEventListener('pagehide', closeEventStream);
+        openEventStream();
     } else {
         setInterval(function () {
             if (!isDragging && shouldAutoReload()) reloadCurrent();

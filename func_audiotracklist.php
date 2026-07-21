@@ -1,6 +1,39 @@
 <?php
 require_once('modules/getid3/getid3.php');
 
+// ==================== NAS I/O 停滞の連鎖ガード ====================
+// NAS/SMB の I/O 停滞中に同じファイルへアクセスした後続リクエストが次々ブロックし、
+// PHP ワーカーを食い潰す事故 (確認画面が開かない・予約の応答が返らない) を防ぐ。
+// ファイル単位の非ブロッキングロックを取り、取れないとき (= 別プロセスが同じファイルの
+// I/O で停滞している可能性) は待たずに「情報なし」で即応答させる。
+// ロックはリクエスト終了時に自動解放される (明示解放しないことで、同一リクエスト内の
+// 存在チェック → getID3 解析の間もロックを保持し続ける)。
+
+$GLOBALS['_fileguard_handles'] = array();
+
+// ファイルへの I/O を始めてよければ true。false ならこのファイルには触らないこと。
+function _fileguard_enter($path) {
+    if (empty($path)) return true;
+    $key = md5($path);
+    // 同一リクエスト内の再入 (存在チェック → 解析) は許可
+    if (isset($GLOBALS['_fileguard_handles'][$key])) return true;
+
+    $lock_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . '_getid3_cache';
+    if (!is_dir($lock_dir) && !@mkdir($lock_dir, 0755, true)) {
+        return true; // ロックを用意できない環境ではガードなしで従来どおり動作
+    }
+    $fp = @fopen($lock_dir . DIRECTORY_SEPARATOR . $key . '.lock', 'c');
+    if ($fp === false) {
+        return true; // 同上
+    }
+    if (!flock($fp, LOCK_EX | LOCK_NB)) {
+        fclose($fp);
+        return false;
+    }
+    $GLOBALS['_fileguard_handles'][$key] = $fp; // リクエスト終了まで保持
+    return true;
+}
+
 function getphpversion_fa(){
   if (!defined('PHP_VERSION_ID')) {
     $version = explode('.', PHP_VERSION);
@@ -125,6 +158,8 @@ function _videodetails_from_info($info) {
 // $with_atom_data=true のときのみ QuickTime アトムデータを全量読み込む（重い）。
 // 成功時は getID3 の $info 配列を返す。失敗時は false を返す。
 function _getid3_analyze($filename, $with_atom_data = false) {
+    // 別プロセスが同じファイルの I/O で停滞中なら解析しない (情報なし扱い)
+    if (!_fileguard_enter($filename)) return false;
     $getID3 = new getID3();
     if ($with_atom_data) {
         $getID3->options_audiovideo_quicktime_ReturnAtomData = true;
@@ -146,6 +181,11 @@ function _getid3_analyze($filename, $with_atom_data = false) {
 // 結果はファイル更新日時ベースでディスクキャッシュされる（2回目以降は getID3 解析不要）。
 // 戻り値: ['audiotracklist' => array, 'videodetails' => array]
 function getfileinfo($filename, $need_tracklist = false) {
+    // 別プロセスが同じファイルの I/O で停滞中なら待たずに「情報なし」で返す
+    // (filemtime も NAS アクセスのためブロックし得る)
+    if (!_fileguard_enter($filename)) {
+        return array('audiotracklist' => array(), 'videodetails' => array());
+    }
     $cache_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . '_getid3_cache';
 
     // ファイル更新日時取得（Windows パスのエンコーディング対応）
@@ -234,6 +274,13 @@ function get_fullfilename($l_fullpath,$word,&$filepath_utf8,$lister_dbpath=''){
     $filepath_utf8 = "";
     // ファイル名のチェック
     if(empty($l_fullpath) && empty($word) ) return "";
+    // 別プロセスが同じファイルの I/O で停滞中なら触らない
+    // (存在チェックの fopen 自体が NAS 停滞でブロックするため)。
+    // 空を返すと呼び出し元は「情報なし」のまま予約フローを継続できる
+    if (!_fileguard_enter($l_fullpath)) {
+        logtocmd("fileguard: busy file skipped: $l_fullpath");
+        return "";
+    }
     // ファイル名のチェック
     // logtocmd ("Debug l_fullpath: $l_fullpath\r\n");
     $winfillpath = mb_convert_encoding($l_fullpath,"SJIS-win");

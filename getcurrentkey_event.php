@@ -13,7 +13,8 @@
    $firstflg = true;
 
    if($cfg["usekeychange"] == 1) {
-       set_time_limit(300);
+       set_time_limit(120); /* 下の自発的な接続終了 (90秒) が効かない異常時の保険 */
+       $sse_started = time();
        $kc = new EasyKeychanger();
        while (1) {
 
@@ -38,9 +39,13 @@
            ob_flush();
            flush();
            if (connection_aborted()) break;
+           /* 接続は90秒で自発的に閉じる (クライアントの EventSource は自動で再接続する)。
+              長時間の接続保持がブラウザの同一サーバー接続枠 (HTTP/1.1 は最大6本) を
+              占有し続け、他ページの表示や予約送信が止まる不具合の対策 */
+           if (time() - $sse_started >= 90) break;
            /* 不達時は確認間隔を5秒に広げて接続試行を抑える */
            usleep($status === false ? 5000000 : 500000); /* サーバー側では0.5秒おきにチェック */
        }
-       set_time_limit(300);
+       set_time_limit(30);
    }
 ?>

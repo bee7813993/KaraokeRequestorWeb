@@ -25,3 +25,9 @@ list/
 # デバッグ用スクリプト（本番環境に含めない）
 mypage_google_debug.php
 .claude/settings.local.json
+
+# getID3 解析キャッシュとファイルガードのロック（実行時に生成）
+_getid3_cache/
+
+# デバッグログ（実行時に生成）
+ykrdebug.log
