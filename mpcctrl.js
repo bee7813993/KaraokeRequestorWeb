@@ -5,13 +5,21 @@ var playerurl2 = playerurlbase + "/mpcctrl.php";
 
 var EventSource = window.EventSource || window.MozEventSource;
 
+// ページが見えていない間は SSE を切断して接続枠を手放す。
+// バックグラウンドタブの持続接続がブラウザの同一サーバー接続枠
+// (HTTP/1.1 は最大6本) を占有し続けると、他ページの表示や予約送信が
+// ブラウザ内で送信待ちのまま止まる (特に Android は接続を保持し続ける)
+var source_key = null;
+var source_player = null;
+
     function event_initial(){
         if (!EventSource){
             // alert("EventSourceが利用できません。");
             return;
         }
-        var source = new EventSource('getcurrentkey_event.php');
-        source.onmessage = function(event){
+        if (source_key) return;
+        source_key = new EventSource('getcurrentkey_event.php');
+        source_key.onmessage = function(event){
             if (event.data == "Bye"){
                 event.target.close();
                 // alert('終了しました。');
@@ -37,7 +45,8 @@ var EventSource = window.EventSource || window.MozEventSource;
             // alert("EventSourceが利用できません。");
             return;
         }
-        var source_player = new EventSource('player_event.php');
+        if (source_player) return;
+        source_player = new EventSource('player_event.php');
         source_player.onmessage = function(event){
             if (event.data == "Bye"){
                 event.target.close();
@@ -55,6 +64,23 @@ var EventSource = window.EventSource || window.MozEventSource;
             }
         };
     }
+
+    function event_close_all(){
+        if (source_key){ source_key.close(); source_key = null; }
+        if (source_player){ source_player.close(); source_player = null; }
+    }
+
+document.addEventListener('visibilitychange', function(){
+    if (document.hidden){
+        event_close_all();
+    } else {
+        event_initial();
+        event_initial_player();
+        // 非表示中の変化を取り込む
+        if (typeof progresstime_init === 'function') progresstime_init();
+    }
+});
+window.addEventListener('pagehide', event_close_all);
 
 window.onload = function () {
 //    document.body.onclick  = setiframe();
