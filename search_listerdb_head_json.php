@@ -36,7 +36,8 @@ if( !$listerdb ) {
 
 if(!empty($list)) {
 
-  $sql = 'select DISTINCT program_category from t_found ;';
+  // 年齢制限タイアップ曲の絞り込み (既定は除外、含める設定の利用者のみ表示)
+  $sql = 'select DISTINCT program_category from t_found'. listerdb_apply_agelimit_clause('') .' ;';
   $alldbdata =  $lister->select($sql);
   if($alldbdata === false){
        echo json_encode(['error' => 'db_query_failed']);
@@ -47,15 +48,18 @@ if(!empty($list)) {
   $json = json_encode($returnarray,JSON_PRETTY_PRINT);
 
 }else {
-  // 検索条件
+  // 検索条件 (絞り込みを後から足せるよう WHERE と ORDER BY を分けて組み立てる)
   $select_where = "";
   if( !empty($program_category )  ) {
       if($program_category === 'ISNULL' ) {
-          $select_where = $select_where . ' WHERE program_category IS NULL ORDER BY found_head ASC';
+          $select_where = ' WHERE program_category IS NULL';
       }else{
-          $select_where = $select_where . ' WHERE program_category ='. $listerdb->quote($program_category) .'ORDER BY found_head ASC';
+          $select_where = ' WHERE program_category ='. $listerdb->quote($program_category);
       }
   }
+  // 年齢制限タイアップ曲の絞り込み (既定は除外、include_agelimit=1 の利用者のみ含める)
+  $select_where = listerdb_apply_agelimit_clause($select_where);
+  $select_where = $select_where . ' ORDER BY found_head ASC';
 
   $sql = 'select DISTINCT found_head from t_found '. $select_where.';';
   $alldbdata =  $lister->select($sql);

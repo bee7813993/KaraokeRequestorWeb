@@ -390,7 +390,10 @@ if( !empty($anyword ) ) {
   }
 } //else なんでも検索
 
-//add groupby 
+// 年齢制限タイアップ曲の絞り込み (既定は除外、include_agelimit=1 の利用者のみ含める)
+$select_where = listerdb_apply_agelimit($select_where);
+
+//add groupby
 $select_where = $select_where . ' GROUP BY song_name,found_file_size ';
 
 

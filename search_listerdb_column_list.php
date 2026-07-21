@@ -125,7 +125,7 @@ $getqueries['tie_up_group_name'] = $tie_up_group_name;
 }
 
 buildgetquery($getqueries);
-$url = 'http://localhost/search_listerdb_column_json.php?'.buildgetquery($getqueries);
+$url = listerdb_forward_agelimit('http://localhost/search_listerdb_column_json.php?'.buildgetquery($getqueries));
 //print $url;
 ?>
 

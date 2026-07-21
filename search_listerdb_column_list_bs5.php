@@ -62,6 +62,8 @@ if (!empty($header))            $getqueries['header']            = $header;
 if (!empty($rubycolumn))        $getqueries['headercolumn']      = $rubycolumn;
 if (!empty($maker_name))        $getqueries['maker_name']        = $maker_name;
 if (!empty($tie_up_group_name)) $getqueries['tie_up_group_name'] = $tie_up_group_name;
+// 年齢制限曲を含める設定 (Cookie) をサーバー内の JSON 呼び出しへ転送する
+if (listerdb_include_agelimit()) $getqueries['include_agelimit'] = 1;
 
 $url = 'http://localhost/search_listerdb_column_json.php?' . buildgetquery($getqueries);
 

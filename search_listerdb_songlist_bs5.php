@@ -73,6 +73,9 @@ foreach ($fields as $f) {
         . '<input type="' . $type . '" name="' . $f['name'] . '" class="form-control-themed" value="' . htmlspecialchars($f['val'], ENT_QUOTES, 'UTF-8') . '"></div>';
 }
 if (!empty($match)) { $url = _sq_add($url, 'match=' . urlencode($match)); $myrequestarray['match'] = $match; }
+// 年齢制限曲を含める設定 (Cookie) をサーバー内の JSON 呼び出しへ転送する
+// (ブラウザの Cookie はサーバー内 HTTP には乗らないため)
+if (listerdb_include_agelimit()) { $url = _sq_add($url, 'include_agelimit=1'); }
 if (!empty($select_orderby_str)) $url = _sq_add($url, 'orderby=' . urlencode($select_orderby_str));
 if (!empty($url)) {
     $url = _sq_add($url, 'start=' . $displayfrom . '&length=' . $displaynum . $linkoption);

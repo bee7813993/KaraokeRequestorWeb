@@ -103,6 +103,9 @@ print <<<EOM
   </div>
   <button type="submit" class="btn btn-default">検索</button>
 </form>
+EOM;
+print_agelimit_optin_check();
+print <<<EOM
 
 </div>
 </div>

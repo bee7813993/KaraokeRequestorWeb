@@ -175,7 +175,9 @@ function print_index_grid($headlist, $lists, $lister_dbpath)
 // --- カテゴリリスト取得 ---
 $errmsg     = '';
 $categorylist = [];
-$geturl = 'http://localhost/search_listerdb_head_json.php?list=1';
+// 年齢制限曲を含める設定 (Cookie) は listerdb_forward_agelimit でサーバー内の
+// JSON 呼び出しへ転送する (ブラウザの Cookie は内部 HTTP に乗らないため)
+$geturl = listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?list=1');
 $categorylist_json = @file_get_contents($geturl);
 if ($categorylist_json === false || $categorylist_json === '') {
     $errmsg = 'カテゴリーリストの取得に失敗しました。';
@@ -272,7 +274,7 @@ showuppermenu('program_name', $linkoption);
           $url = 'http://localhost/search_listerdb_head_json.php?program_category=' . urlencode($cur_category);
       }
 
-      $headlist_json = @file_get_contents($url);
+      $headlist_json = @file_get_contents(listerdb_forward_agelimit($url));
       if (!$headlist_json) continue;
       $headlist = json_decode($headlist_json, true);
       if (empty($headlist['data'])) continue;
@@ -287,7 +289,7 @@ showuppermenu('program_name', $linkoption);
 
   <?php if ($nullcategory_exists == 0 && !is_hidden_category('その他')): ?>
     <?php
-    $headlist_json = @file_get_contents('http://localhost/search_listerdb_head_json.php?program_category=ISNULL');
+    $headlist_json = @file_get_contents(listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?program_category=ISNULL'));
     if ($headlist_json):
         $headlist = json_decode($headlist_json, true);
         if (!empty($headlist['data'])):
@@ -303,7 +305,7 @@ showuppermenu('program_name', $linkoption);
 
   <?php if ($allcategory_exists == 0 && !is_hidden_category('全部')): ?>
     <?php
-    $headlist_json = @file_get_contents('http://localhost/search_listerdb_head_json.php?' . $linkoption);
+    $headlist_json = @file_get_contents(listerdb_forward_agelimit('http://localhost/search_listerdb_head_json.php?' . $linkoption));
     if ($headlist_json):
         $headlist = json_decode($headlist_json, true);
         if ($headlist):

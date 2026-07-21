@@ -89,6 +89,8 @@ if ( $match === 'full' ) {
         $select_where = $select_where . ' WHERE song_artist LIKE ' . $listerdb->quote('%'.$artist.'%');
     }
 }
+// 年齢制限タイアップ曲の絞り込み (既定は除外、include_agelimit=1 の利用者のみ含める)
+$select_where = listerdb_apply_agelimit_clause($select_where);
 if (!empty($select_orderby) ){
     $select_where = $select_where .  ' ORDER BY '. $select_orderby . ' ' . $select_scending ;
 }

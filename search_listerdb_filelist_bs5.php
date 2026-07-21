@@ -93,6 +93,9 @@ foreach ($ffields as $f) {
     $myformvalue_shown .= '<div class="col-md-4"><label class="form-label-sm">' . $f['label'] . '</label>'
         . '<input type="' . $type . '" name="' . $f['name'] . '" class="form-control-themed" value="' . htmlspecialchars($f['val'], ENT_QUOTES, 'UTF-8') . '"></div>';
 }
+// 年齢制限曲を含める設定 (Cookie) をサーバー内の JSON 呼び出しへ転送する
+// (ブラウザの Cookie はサーバー内 HTTP には乗らないため)
+if (listerdb_include_agelimit()) { $url = _fl_add($url, 'include_agelimit=1'); }
 if (!empty($match)) { $url = _fl_add($url, 'match=' . urlencode($match)); }
 if (!empty($select_orderby_str)) $url = _fl_add($url, 'orderby=' . urlencode($select_orderby_str));
 if (!empty($url)) {

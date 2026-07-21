@@ -225,6 +225,8 @@ if(!empty($select_orderby_str) ){
 
 
 if(!empty($url)){
+    // 年齢制限曲を含める設定 (Cookie) をサーバー内の JSON 呼び出しへ転送する
+    if (listerdb_include_agelimit()) { $url = add_get_query($url, 'include_agelimit=1'); }
     $url = add_get_query($url , 'start='.$displayfrom.'&length='.$displaynum.'&'.$linkoption);
     $url = 'http://localhost/search_listerdb_songlist_json.php'.$url;
 }
