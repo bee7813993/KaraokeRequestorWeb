@@ -33,11 +33,13 @@
  *   quarters: { "ok":true, "data":{ "year":2026, "quarters":[{"q":2,"label":"4月〜6月：春","songs":196,"programs":45},...] } }
  *   programs: { "ok":true, "data":{ "year":2026, "quarter":2, "label":"4月〜6月：春",
  *               "programs":[{"program":"...","group":"シリーズ名 or null","songs":5},...] } }
- *   songs:    { "ok":true, "data":{ "total":2, "files_total":3, "items":[
+ *   songs:    { "ok":true, "data":{ "total":2, "files_total":3, "agelimit_hidden":0, "items":[
  *               { "song_name":"...", "song_artist":"...", "program_name":"...",
  *                 "tie_up_group_name":"...", "song_op_ed":"3rdシングル",
  *                 "files":[{ "found_path":"...", "found_comment":"リリックビデオ",
  *                            "found_worker":"...", "found_file_size":123 },...] },...] } }
+ *   songs の agelimit_hidden: 年齢制限フィルタで隠れた曲数 (include_agelimit=1 のときは常に 0)。
+ *   まだ有効化していない利用者へ「年齢制限の曲が N 曲あります」の案内を出すのに使う。
  */
 require_once __DIR__ . '/_common.php';
 
@@ -401,6 +403,20 @@ if ($mode === 'songs') {
     }
     $whereSql = implode(' AND ', $where);
 
+    // 年齢制限フィルタで隠れた曲数 (曲単位)。まだ有効化していない利用者の検索結果に
+    // 「年齢制限の曲が N 曲あります」の案内を出すために返す (フィルタ適用時のみ計算)
+    $agelimitHidden = 0;
+    if (api_param('include_agelimit', '') != 1) {
+        $hiddenWhere = $where;
+        $hiddenWhere[0] = 'tie_up_age_limit >= 18'; // 先頭要素 ($base_where) を反転
+        $stmt = $ldb->prepare(
+            'SELECT COUNT(*) FROM (SELECT 1 FROM t_found WHERE ' . implode(' AND ', $hiddenWhere)
+            . ' GROUP BY song_name, program_name, song_artist)'
+        );
+        $stmt->execute($params);
+        $agelimitHidden = (int)$stmt->fetchColumn();
+    }
+
     // 並び順 (曲の順序はファイル行の出現順で決まる)
     switch (api_param('order', 'date_desc')) {
         case 'date_asc':
@@ -462,7 +478,12 @@ if ($mode === 'songs') {
         ];
         $filesTotal++;
     }
-    api_ok(['total' => count($items), 'files_total' => $filesTotal, 'items' => $items]);
+    api_ok([
+        'total' => count($items),
+        'files_total' => $filesTotal,
+        'agelimit_hidden' => $agelimitHidden,
+        'items' => $items,
+    ]);
 }
 
 api_error('mode が不正です (years / quarters / programs / songs)');
