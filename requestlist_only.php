@@ -3,6 +3,11 @@ require_once 'commonfunc.php';
 require_once 'easyauth_class.php';
 $easyauth = new EasyAuth();
 $easyauth -> do_eashauthcheck();
+if (!empty($config_ini['usenewrequestlist']) && $config_ini['usenewrequestlist'] == 1) {
+    $qs = !empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '';
+    header('Location: search_bs5.php' . $qs);
+    exit;
+}
 if(array_key_exists("showid", $_REQUEST)) {
     $showid = $_REQUEST["showid"];
 }
@@ -301,5 +306,4 @@ if($user === "admin"){
 </div>
 </body>
 </html>
-
 

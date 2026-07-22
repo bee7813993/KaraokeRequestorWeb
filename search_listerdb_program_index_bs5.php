@@ -260,6 +260,7 @@ showuppermenu('program_name', $linkoption);
 
   $nullcategory_exists = 0;
   $allcategory_exists  = 0;
+  $category_index      = 0;
 
   foreach ($categorylist as $category):
       $cur_category = $category["program_category"];
@@ -278,11 +279,23 @@ showuppermenu('program_name', $linkoption);
       if (!$headlist_json) continue;
       $headlist = json_decode($headlist_json, true);
       if (empty($headlist['data'])) continue;
+      $collapse_id = 'program-index-category-' . $category_index++;
   ?>
   <div class="search-section mb-3">
-    <div class="search-section-body">
-      <h3 class="h6 mb-2"><?php echo htmlspecialchars($cur_category, ENT_QUOTES, 'UTF-8'); ?></h3>
+    <div class="search-section-body py-2">
+      <button class="btn btn-link text-decoration-none p-0 w-100 text-start collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#<?php echo $collapse_id; ?>"
+              aria-expanded="false"
+              aria-controls="<?php echo $collapse_id; ?>">
+        <h3 class="h6 mb-0"><?php echo htmlspecialchars($cur_category, ENT_QUOTES, 'UTF-8'); ?></h3>
+      </button>
+    </div>
+    <div id="<?php echo $collapse_id; ?>" class="collapse">
+      <div class="search-section-body pt-0">
       <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
+      </div>
     </div>
   </div>
   <?php endforeach; ?>
@@ -293,11 +306,23 @@ showuppermenu('program_name', $linkoption);
     if ($headlist_json):
         $headlist = json_decode($headlist_json, true);
         if (!empty($headlist['data'])):
+        $collapse_id = 'program-index-category-' . $category_index++;
     ?>
     <div class="search-section mb-3">
-      <div class="search-section-body">
-        <h3 class="h6 mb-2">その他</h3>
+      <div class="search-section-body py-2">
+        <button class="btn btn-link text-decoration-none p-0 w-100 text-start collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#<?php echo $collapse_id; ?>"
+                aria-expanded="false"
+                aria-controls="<?php echo $collapse_id; ?>">
+          <h3 class="h6 mb-0">その他</h3>
+        </button>
+      </div>
+      <div id="<?php echo $collapse_id; ?>" class="collapse">
+        <div class="search-section-body pt-0">
         <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
+        </div>
       </div>
     </div>
     <?php endif; endif; ?>
@@ -309,11 +334,23 @@ showuppermenu('program_name', $linkoption);
     if ($headlist_json):
         $headlist = json_decode($headlist_json, true);
         if ($headlist):
+        $collapse_id = 'program-index-category-' . $category_index++;
     ?>
     <div class="search-section mb-3">
-      <div class="search-section-body">
-        <h3 class="h6 mb-2">全部</h3>
+      <div class="search-section-body py-2">
+        <button class="btn btn-link text-decoration-none p-0 w-100 text-start collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#<?php echo $collapse_id; ?>"
+                aria-expanded="false"
+                aria-controls="<?php echo $collapse_id; ?>">
+          <h3 class="h6 mb-0">全部</h3>
+        </button>
+      </div>
+      <div id="<?php echo $collapse_id; ?>" class="collapse">
+        <div class="search-section-body pt-0">
         <?php print_index_grid($headlist, $char_groups, $lister_dbpath); ?>
+        </div>
       </div>
     </div>
     <?php endif; endif; ?>

@@ -8,6 +8,7 @@ gitcmd/*
 cms/comment.db
 prioritydb.db
 request.db
+cache/
 updatenotice.db
 
 # プレイヤー画面の永続化設定（TV依存のため環境ごと）
