@@ -25,7 +25,9 @@
  *       "easyauth":       bool,   // 簡易認証の有効/無効
  *       "new_request_list": bool, // スワイプ版リクエストリスト
  *       "new_search_ui":  bool,   // BS5 検索UI
- *       "metadata_edit":  bool    // 曲情報の修正 (/api/song_metadata.php)
+ *       "metadata_edit":  bool,   // 曲情報の修正 (/api/song_metadata.php)
+ *       "preview":        bool    // 検索結果の動画プレビュー (preview_video_stream.php)。
+ *                                 // ローカル接続=常に可 / オンライン=online_preview 設定次第
  *     },
  *     "player": {
  *       "mode":   int,    // 1=MPC-BE, 2=foobar2000, 3=自動, 4=その他
@@ -68,6 +70,10 @@ $features = [
     'everything_search' => everything_available(),
     // インターネット接続系 (URL 指定リクエスト等) の可否
     'internet'          => configbool('connectinternet', true),
+    // 検索結果の動画プレビュー可否 (Web 版 search_bs5.php の表示条件と同じ式)。
+    // ローカル接続なら常に可、インターネット経由は online_preview 設定が有効なときのみ。
+    // 旧サーバーではキー欠落 = アプリ側は非表示 (preview_video_stream.php 自体が無いため)
+    'preview'           => !check_access_from_online() || configbool('online_preview', false),
     'mypage'           => configbool('usemypage',           true),
     'bingo'            => configbool('usebingo',            false),
     'keychange'        => configbool('usekeychange',        false),
