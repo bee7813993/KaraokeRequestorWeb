@@ -28,6 +28,13 @@ if (empty($relay_secret)) {
     redirect_error('not_configured');
 }
 
+// ---- 中継サーバーからのエラー持ち帰り (キャンセル・スコープ拒否等) ----
+// payload 検証より先に処理する (以前はすべて no_payload に潰れていた)。
+// コードは表示側 (mypage_google_sync.php の $error_map) で文言に変換される
+if (!empty($_GET['error'])) {
+    redirect_error($_GET['error']);
+}
+
 // ---- payload を検証 ----
 $raw_payload = $_GET['payload'] ?? '';
 if (empty($raw_payload)) {

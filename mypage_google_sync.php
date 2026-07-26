@@ -33,6 +33,11 @@ if (configbool("usemypage", true)) {
         'missing_token'  => 'Googleからトークンを取得できませんでした。',
         'sync_failed'    => '同期に失敗しました。しばらく経ってから再度お試しください。',
         'unlinked'       => 'Google連携を解除しました。',
+        // 中継サーバーから持ち帰るコード (mypage_google_relay_server.php)
+        'access_denied'  => 'Googleのログインがキャンセルされたか、アクセスが許可されませんでした。再度お試しください。',
+        'drive_scope_denied' => 'Googleドライブへのアクセスが許可されませんでした。同意画面で「Googleドライブでのアプリ独自の設定データの参照、作成、削除」にチェックを入れて「続行」を押してください。',
+        'state_expired'  => '認証の有効期限が切れました。再度お試しください。',
+        'token_exchange_failed' => 'Googleからトークンを取得できませんでした。再度お試しください。',
     ];
     if (!empty($_GET['error'])) {
         $msg      = $error_map[$_GET['error']] ?? ('エラーが発生しました: ' . htmlspecialchars($_GET['error'], ENT_QUOTES, 'UTF-8'));

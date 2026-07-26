@@ -6,6 +6,7 @@
  * 担当する処理:
  *   GET  ?action=auth&client_id=XXX&state=YYY  → Google OAuth へリダイレクト
  *   GET  ?code=XXX&state=YYY                   → コード交換 → ローカルサーバーへリダイレクト
+ *   GET  ?error=XXX&state=YYY                  → キャンセル・拒否の案内表示 (Web版はエラーコードを持ち帰り)
  *   POST ?action=refresh  (JSON body)           → トークンリフレッシュ API
  *
  * アプリ (ゆかナビ) 用の直接認証フロー:
@@ -13,6 +14,10 @@
  *   GET  ?code=XXX&state=<app用state>           → トークンを一時保存し「認証完了」を表示
  *   GET  ?action=app_poll&session=<64hex>       → 保存済みトークンを返して削除 (ワンタイム)
  *   POST ?action=app_refresh (JSON body)        → アプリ用トークンリフレッシュ (HMAC 不要)
+ *
+ * どちらのフローも、きめ細かい同意 (granular consent) で Google ドライブの
+ * チェックが外されたまま「続行」された場合は成功にせず、再試行を案内する
+ * (そのまま通すとログイン成功後の Drive 同期が 403 になるため)。
  *
  * 設定: mypage_google_relay_config.php を同ディレクトリに置く
  */
@@ -30,7 +35,9 @@ require $config_file;
 
 define('GOOGLE_AUTH_URL',   'https://accounts.google.com/o/oauth2/v2/auth');
 define('GOOGLE_TOKEN_URL',  'https://oauth2.googleapis.com/token');
+define('GOOGLE_REVOKE_URL', 'https://oauth2.googleapis.com/revoke');
 define('RELAY_REDIRECT_URI', 'https://ykr.moe/mypage_google_callback.php');
+define('DRIVE_APPDATA_SCOPE', 'https://www.googleapis.com/auth/drive.appdata');
 
 $action = $_GET['action'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
@@ -205,6 +212,28 @@ if ($method === 'GET' && $action === 'auth') {
 }
 
 // ============================================================
+// GET ?error=XXX — Google からのコールバック (キャンセル・拒否)
+// 同意画面で「キャンセル」を押す等でここに来る。以前はどのハンドラにも
+// 当たらず素の 400「不正なリクエストです。」が表示されていた
+// (App Store 審査 2026-07-24 で「ログイン時にエラーが表示される」と指摘された画面)
+// ============================================================
+if ($method === 'GET' && !empty($_GET['error']) && empty($_GET['code'])) {
+    $state_json = decode_signed($_GET['state'] ?? '', $RELAY_SECRET);
+    $state_data = $state_json !== false ? json_decode($state_json, true) : null;
+
+    // Web 版のフロー: エラーコードをローカルサーバーへ持ち帰って画面に表示させる
+    if (!empty($state_data['return_url'])
+        && preg_match('#^https?://#i', $state_data['return_url'])) {
+        redirect_error($state_data['return_url'], 'access_denied');
+    }
+
+    // アプリのフロー (state が無い・不正な場合も同じ)。セッションを ok にしない
+    // だけで充分 — アプリはシートを閉じた時点で「中止」扱いになるため、
+    // ここではエラー画面ではなく案内だけを表示する
+    exit_cancel_page();
+}
+
+// ============================================================
 // GET ?code=XXX&state=YYY  — Google からのコールバック
 // ============================================================
 if ($method === 'GET' && !empty($_GET['code']) && !empty($_GET['state'])) {
@@ -227,6 +256,13 @@ if ($method === 'GET' && !empty($_GET['code']) && !empty($_GET['state'])) {
         $token_json = app_exchange_code($code, $RELAY_CLIENT_ID, $RELAY_CLIENT_SECRET);
         if ($token_json === null) {
             exit_no_redirect('Google からトークンを取得できませんでした。アプリからやり直してください。');
+        }
+        // きめ細かい同意で Drive のチェックが外されたまま「続行」された場合は
+        // 成功にしない (このまま通すとアプリはログイン成功後の同期で 403 になる)
+        $token_data = json_decode($token_json, true);
+        if (strpos($token_data['scope'] ?? '', DRIVE_APPDATA_SCOPE) === false) {
+            relay_revoke_token($token_data['access_token'] ?? ''); // 使えない権限は残さない
+            exit_drive_scope_page();
         }
         file_put_contents(app_session_file($state_data['app_session']), $token_json);
         header('Content-Type: text/html; charset=utf-8');
@@ -271,6 +307,12 @@ if ($method === 'GET' && !empty($_GET['code']) && !empty($_GET['state'])) {
     $token = json_decode($resp, true);
     if (empty($token['access_token'])) {
         redirect_error($return_url, 'token_exchange_failed');
+    }
+
+    // きめ細かい同意で Drive のチェックが外されたまま「続行」された場合 (アプリのフローと同じ)
+    if (strpos($token['scope'] ?? '', DRIVE_APPDATA_SCOPE) === false) {
+        relay_revoke_token($token['access_token']); // 使えない権限は残さない
+        redirect_error($return_url, 'drive_scope_denied');
     }
 
     // id_token からユーザー情報を取得（署名検証は省略、sub/email のみ使用）
@@ -359,6 +401,64 @@ function exit_no_redirect($msg) {
 }
 
 /**
+ * 案内ページの共通レイアウト (認証完了ページと同じ見た目)
+ */
+function exit_info_page($title, $heading, $lines) {
+    header('Content-Type: text/html; charset=utf-8');
+    $body = '';
+    foreach ($lines as $line) {
+        $body .= '<p>' . $line . '</p>';
+    }
+    echo '<!doctype html><html lang="ja"><head><meta charset="utf-8">'
+       . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+       . '<title>' . $title . '</title></head>'
+       . '<body style="font-family:sans-serif; text-align:center; padding-top:4em;">'
+       . '<h2>' . $heading . '</h2>' . $body
+       . '</body></html>';
+    exit;
+}
+
+/**
+ * キャンセル・拒否時の案内 (エラー画面にはしない。アプリはシートを
+ * 閉じた時点で「中止」扱いになる)
+ */
+function exit_cancel_page() {
+    exit_info_page('ゆかナビ - ログイン中止',
+        'ログインは完了しませんでした',
+        [
+            'Google のログインがキャンセルされたか、アクセスが許可されませんでした。',
+            'このページを閉じて、ゆかナビ (または Web 版マイページ) から'
+                . 'もう一度お試しください。',
+        ]);
+}
+
+/**
+ * Drive スコープのチェックが外されたまま「続行」された場合の案内
+ */
+function exit_drive_scope_page() {
+    exit_info_page('ゆかナビ - 許可が必要です',
+        'Google ドライブへのアクセス許可が必要です',
+        [
+            'マイページのバックアップには「Google ドライブでのアプリ独自の設定データの'
+                . '参照、作成、削除」の許可が必要です。',
+            'このページを閉じてもう一度ログインし、同意画面のチェックボックスを'
+                . 'オンにしてから「続行」を押してください。',
+        ]);
+}
+
+/**
+ * 使わないトークンの失効 (ベストエフォート。失敗しても続行)
+ */
+function relay_revoke_token($access_token) {
+    if (empty($access_token)) {
+        return;
+    }
+    relay_http_post(GOOGLE_REVOKE_URL,
+        http_build_query(['token' => $access_token]),
+        ['Content-Type: application/x-www-form-urlencoded']);
+}
+
+/**
  * アプリセッション ID の形式チェック (32〜64桁の16進のみ。ファイル名に使うため)
  */
 function app_session_valid($session) {
@@ -407,6 +507,9 @@ function app_exchange_code($code, $client_id, $client_secret) {
         'access_token'  => $token['access_token'],
         'refresh_token' => $token['refresh_token'] ?? '',
         'expires_at'    => time() + (int)($token['expires_in'] ?? 3600),
+        // 実際に付与されたスコープ (スペース区切り)。呼び出し側の検証用で、
+        // アプリはこのフィールドを無視する
+        'scope'         => $token['scope'] ?? '',
     ]);
 }
 
