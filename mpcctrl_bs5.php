@@ -355,7 +355,7 @@ $playpause_cls  = ($state_num == 2) ? 'player-btn-playpause' : 'btn-outline-prim
         <button class="btn btn-outline-primary player-btn w-100"
                 onclick="song_changeaudio()" aria-label="音声トラック変更">
           <?= _svg('<path d="M6 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM3.5 6.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 1 0v1a.5.5 0 0 1-.5.5zM16 3a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm-2.5 3.5a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 1 0v1a.5.5 0 0 1-.5.5z"/><path d="M0 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V9zm2-1a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H2z"/><path d="M3 10.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>') ?>
-          <span class="small">音声切替</span>
+          <span class="small">音声トラック変更</span>
         </button>
       </div>
       <div class="col-4">

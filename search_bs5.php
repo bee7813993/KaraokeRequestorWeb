@@ -533,8 +533,8 @@ else:
                     break;
                 case 1:
                     if (checkbox_check($config_ini['searchitem'], "listerDB")) {
-                        // 作品名インデックス検索は常時開いた状態にする
-                        _section_open('sec-listerdb', '作品名インデックス検索', true);
+                        $listerdb_default_open = !configbool("listerdb_index_default_collapsed", false);
+                        _section_open('sec-listerdb', '作品名インデックス検索', $listerdb_default_open ? $first : false);
                         print_listerdb_search();
                         _section_close();
                         $first = false;

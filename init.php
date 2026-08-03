@@ -427,6 +427,29 @@ print '</pre>';
   <p>
     <a href ="online_update.php" class="btn btn-secondary" > オンラインアップデート画面 </a>
   </p>
+  <h3>クール一覧データ同期</h3>
+  <?php
+    $setlist_search_backend = urldecode($config_ini['setlist_search_backend'] ?? 'listerdb');
+    if ($setlist_search_backend !== 'everything') {
+        $setlist_search_backend = 'listerdb';
+    }
+    $setlist_search_backend_label = ($setlist_search_backend === 'everything') ? 'Everything' : 'ゆかりすたー';
+  ?>
+  <p>
+    <button type="button" class="btn btn-secondary" id="setlistSyncBtn" onclick="sync_setlist_stats()">クール一覧を最新情報に同期</button>
+    <span class="small text-muted ms-2">検索先: <?php echo htmlspecialchars($setlist_search_backend_label, ENT_QUOTES, 'UTF-8'); ?></span>
+    <span id="setlistSyncStatus" class="small text-muted ms-2"></span>
+  </p>
+  <form method="post" action="init.php" class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <span class="small text-muted">クール一覧から開く検索先</span>
+    <label class="radio-inline mb-0">
+      <input type="radio" name="setlist_search_backend" value="listerdb" <?php print ($setlist_search_backend === 'listerdb') ? 'checked' : ' '; ?> /> ゆかりすたー
+    </label>
+    <label class="radio-inline mb-0">
+      <input type="radio" name="setlist_search_backend" value="everything" <?php print ($setlist_search_backend === 'everything') ? 'checked' : ' '; ?> /> Everything
+    </label>
+    <button type="submit" class="btn btn-outline-secondary btn-sm">検索先を保存</button>
+  </form>
 <script type="text/javascript">
 function start_yklistercmd(){
 var request = new XMLHttpRequest();
@@ -462,6 +485,32 @@ function storeAppLaunch(url, btnId, label) {
         }
     };
     request.send("");
+}
+
+function sync_setlist_stats(){
+    var btn = document.getElementById('setlistSyncBtn');
+    var status = document.getElementById('setlistSyncStatus');
+    if (btn) { btn.disabled = true; btn.textContent = '同期中...'; }
+    if (status) { status.textContent = '最新HTMLから取得しています...'; }
+
+    fetch('setlist_stats_sync.php', {method: 'POST', credentials: 'same-origin'})
+      .then(function(res) { return res.json().then(function(body) { return {ok: res.ok, body: body}; }); })
+      .then(function(result) {
+        var body = result.body || {};
+        if (!result.ok || !body.ok) {
+          throw new Error(body.error || body.warning || 'sync_failed');
+        }
+        if (status) {
+          var backend = body.search_backend === 'everything' ? 'Everything' : 'ゆかりすたー';
+          status.textContent = '同期しました: ' + (body.updated_at || '-') + ' / 検索先: ' + backend;
+        }
+      })
+      .catch(function(err) {
+        if (status) { status.textContent = '同期に失敗しました: ' + err.message; }
+      })
+      .finally(function() {
+        if (btn) { btn.disabled = false; btn.textContent = 'クール一覧を最新情報に同期'; }
+      });
 }
 
 function start_yklisterstore_cmd(){
@@ -1476,6 +1525,7 @@ foreach ($searchitem_defs as $idx => $def) {
 }
 asort($si_order_map);
 $si_sorted_indices = array_keys($si_order_map);
+$listerdb_index_default_collapsed = configbool("listerdb_index_default_collapsed", false);
 
 ?>
 
@@ -1492,6 +1542,17 @@ $si_sorted_indices = array_keys($si_order_map);
       <span class="searchitem-drag-handle" style="cursor:grab; color:var(--color-text-muted); font-size:20px; padding:0 10px 0 0; line-height:1; user-select:none; touch-action:none;">&#8942;</span>
       <input type="checkbox" name="searchitem[]" value="<?php echo $def['id']; ?>" <?php echo $checked; ?> style="margin-right:8px;">
       <span><?php echo $def['label']; ?></span>
+      <?php if ($def['id'] === 'listerDB'): ?>
+      <span style="margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-size:0.9rem;">
+        <span class="text-muted">初期状態で閉じる</span>
+        <label class="radio-inline" style="margin-right:0;">
+          <input type="radio" name="listerdb_index_default_collapsed" value="1" <?php echo $listerdb_index_default_collapsed ? 'checked' : ''; ?>> オン
+        </label>
+        <label class="radio-inline" style="margin-right:0;">
+          <input type="radio" name="listerdb_index_default_collapsed" value="2" <?php echo !$listerdb_index_default_collapsed ? 'checked' : ''; ?>> オフ
+        </label>
+      </span>
+      <?php endif; ?>
       <input type="hidden" name="searchitem_o[<?php echo $idx; ?>]" value="<?php echo $si_sorted_pos + 1; ?>" class="searchitem-order-input">
     </div>
 <?php } ?>
@@ -1500,7 +1561,7 @@ $si_sorted_indices = array_keys($si_order_map);
 
   <div class="mb-3">
     <h4  > りすたーDBファイルパス  </h4>
-    <?php 
+    <?php
         $listerDBPATH = 'list\List.sqlite3';
         if(array_key_exists("listerDBPATH",$config_ini)) {
            $listerDBPATH = urldecode($config_ini["listerDBPATH"]);
