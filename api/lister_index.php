@@ -25,7 +25,8 @@
  *   names&target=...&initial=あ   → 頭文字が一致する名前一覧 (作品名 / 歌手名 / シリーズ名)
  *   names&target=...&keyword=...  → 名前の部分一致一覧 (読み仮名対応)
  *   rules                        → ゆかりすたーのフォルダー設定 (YukaLister.json 等) のファイル命名規則を
- *                                  設定フォルダーごとに (クライアントの検索精度向上用。フォルダーが読めない環境では空)
+ *                                  設定フォルダーごとに (クライアントの検索精度向上用。フォルダーが読めない環境では空)。
+ *                                  結果は 10 分キャッシュ (nocache=1 で作り直す)
  *
  * songs の応答は曲単位にグルーピングされ、同じ曲の複数ファイル (別動画) が files に並ぶ。
  * songs&flat=1 でグルーピングせずファイル単位 (1アイテム=1ファイル) で返す (応答構造は同じ)。
@@ -560,7 +561,12 @@ if ($mode === 'songs') {
 }
 
 if ($mode === 'rules') {
-    api_ok(lister_rules_collect($ldb));
+    // フォルダーを全部たどるので初回は時間がかかりうる。クライアントが待ちきれず切っても
+    // 最後まで走らせてキャッシュ (10 分) を作り、次の要求をすぐ返せるようにする
+    ignore_user_abort(true);
+    @set_time_limit(300);
+    $cacheKey = api_param('nocache', '') == 1 ? '' : $lister_dbpath;
+    api_ok(lister_rules_collect($ldb, $cacheKey));
 }
 
 api_error('mode が不正です (years / quarters / programs / songs / initials / names / rules)');

@@ -124,10 +124,23 @@ function lister_rules_strings($values)
 
 /**
  * リスト DB に登録されている全フォルダーについてフォルダー設定を探し、設定フォルダーごとに規則を集める。
+ * フォルダーを全部たどるので、結果は一時フォルダーに $ttl 秒キャッシュする ($cacheKey が空ならしない)。
+ * @param string $cacheKey キャッシュの識別子 (リスト DB のパスなど)
+ * @param int    $ttl      キャッシュの有効秒数
  * @return array [ 'count' => N, 'folders' => [ {folder, file_name_rules, folder_name_rules, source}, ... ] ]
  */
-function lister_rules_collect(PDO $ldb)
+function lister_rules_collect(PDO $ldb, $cacheKey = '', $ttl = 600)
 {
+    $cacheFile = '';
+    if ($cacheKey !== '') {
+        $cacheFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'yukari_lister_rules_' . md5($cacheKey) . '.json';
+        if (is_file($cacheFile) && filemtime($cacheFile) >= time() - $ttl) {
+            $cached = json_decode((string)@file_get_contents($cacheFile), true);
+            if (is_array($cached) && isset($cached['folders']) && is_array($cached['folders'])) {
+                return $cached;
+            }
+        }
+    }
     $cache = [];
     $folders = [];
     $stmt = $ldb->query("SELECT DISTINCT found_folder FROM t_found WHERE found_folder IS NOT NULL AND found_folder != ''");
@@ -142,5 +155,9 @@ function lister_rules_collect(PDO $ldb)
         }
     }
     ksort($folders, SORT_STRING);
-    return ['count' => count($folders), 'folders' => array_values($folders)];
+    $result = ['count' => count($folders), 'folders' => array_values($folders)];
+    if ($cacheFile !== '') {
+        @file_put_contents($cacheFile, json_encode($result, JSON_UNESCAPED_UNICODE), LOCK_EX);
+    }
+    return $result;
 }
