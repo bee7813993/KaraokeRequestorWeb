@@ -1752,6 +1752,18 @@ $listerdb_index_default_collapsed = configbool("listerdb_index_default_collapsed
     </label>
   </div>
 
+  <div class="mb-3">
+    <?php $show_yukanavi_link = configbool("show_yukanavi_link", true); ?>
+    <h3 class="radio form-label"> 接続情報ページのスマホアプリ案内 </h3>
+    <label class="form-label"><small>接続情報ページに、スマホアプリ「ゆかナビ」の入手用QRコードとリンクを表示します</small></label>
+    <label class="radio-inline">
+      <input type="radio" name="show_yukanavi_link" value="1" <?php print ($show_yukanavi_link) ? 'checked' : ' '; ?> /> 表示する
+    </label>
+    <label class="radio-inline">
+      <input type="radio" name="show_yukanavi_link" value="2" <?php print (!$show_yukanavi_link) ? 'checked' : ' '; ?> /> 表示しない
+    </label>
+  </div>
+
 </div></div>
 
 <div class="card cfg-card mb-4"><div class="card-body">
