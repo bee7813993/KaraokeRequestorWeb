@@ -2533,18 +2533,28 @@ function update_fromgit($version_str, &$errmsg){
               return false;
           }
 
-          // version ファイルはこの関数が git describe の結果で書き換えるため、リポジトリの
-          // 内容と食い違ったままになる。そのままブランチを切り替えると、切替先で version が
-          // 違うとき git が「local changes would be overwritten」で拒否するので、先に
-          // リポジトリの内容へ戻しておく (切替後に改めて書き込む)
-          exec($gitcmd . ' checkout -- version 2>&1');
+          // ZIP 方式と同じく、追跡ファイルのローカル変更は捨てて切替先の内容にそろえる
+          // (checkout --force / reset --hard)。この関数が書き換える version や、ZIP 方式で
+          // 上書きした後の作業ツリーが「local changes would be overwritten」で切替を
+          // 止めないようにするため。利用者データ (config.ini・request.db 等) は追跡外なので
+          // 影響しないが、画面から書き換える追跡ファイルだけは退避して戻す
+          // (ZIP 方式の除外リストと同じ趣旨)
+          $app_root = realpath(__DIR__);
+          $protect_files = ['listerdb_config.ini', 'search_sort_priority.json', 'search_sort_priority_auth.json'];
+          $saved_files = [];
+          foreach ($protect_files as $rel) {
+              $abs = $app_root . DIRECTORY_SEPARATOR . $rel;
+              if (file_exists($abs)) {
+                  $saved_files[$rel] = file_get_contents($abs);
+              }
+          }
 
-          // origin/ プレフィックスあり → ブランチ切り替え (checkout -B)
+          // origin/ プレフィックスあり → ブランチ切り替え (checkout -f -B)
           // タグ / ハッシュ → 現在ブランチのまま reset --hard
           $result_str = [];
           if (strpos($version_str, 'origin/') === 0) {
               $branch_name = substr($version_str, strlen('origin/'));
-              $execcmd = $gitcmd . ' checkout -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str) . ' 2>&1';
+              $execcmd = $gitcmd . ' checkout -f -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str) . ' 2>&1';
           } else {
               $execcmd = $gitcmd . ' reset --hard ' . escapeshellarg($version_str) . ' 2>&1';
           }
@@ -2559,13 +2569,15 @@ function update_fromgit($version_str, &$errmsg){
               }
               $errorcnt ++;
           }
+          foreach ($saved_files as $rel => $content) {
+              file_put_contents($app_root . DIRECTORY_SEPARATOR . $rel, $content);
+          }
 
           if ($errorcnt === 0) {
               // タグを最新化してから version ファイルに書き込む
               // shallow clone では git describe が失敗する場合があるため GitHub API でフォールバック
               exec($gitcmd . ' fetch --tags origin 2>&1');
               $desc = trim(exec($gitcmd . ' describe --tags 2>&1'));
-              $app_root = realpath(__DIR__);
               if ($desc !== '' && mb_substr($desc, 0, 1) === 'v' && is_numeric(mb_substr($desc, 1, 1))) {
                   file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $desc);
               } else {
