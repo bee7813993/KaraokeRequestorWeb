@@ -290,6 +290,7 @@ function qr_img(string $data, int $size): string {
 
   </div><!-- /row -->
 
+<?php if (configbool('show_yukanavi_link', true)): // 設定画面「接続情報ページのスマホアプリ案内」 ?>
   <!-- スマホアプリ「ゆかナビ」の案内 -->
   <div class="card mb-3">
     <div class="card-header fw-bold">スマホアプリ「ゆかナビ」</div>
@@ -308,6 +309,7 @@ function qr_img(string $data, int $size): string {
       </div>
     </div>
   </div>
+<?php endif; ?>
 
   <!-- QRサイズ切り替え -->
   <div class="d-flex gap-2 justify-content-center mb-4">
