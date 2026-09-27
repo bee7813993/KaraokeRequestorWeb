@@ -136,6 +136,17 @@ ListerDB 未設定時は 503。
 | `programs` | `year`, `quarter` (1〜4) | `{ "year","quarter","label", "programs":[{"program":"作品名","group":"シリーズ名 or null","songs":5},...] }` |
 | `songs` | `program` / `artist` / `group` / `worker` のいずれか（複数は AND、完全一致） | `{ "total":N, "items":[{ song_name, song_ruby, song_artist, program_name, tie_up_group_name, song_op_ed, found_worker, found_path, found_file_size, found_comment },...] }` (最大300件) |
 
+`songs` の各項目には、上記に加えて次も付く（クライアント (ゆかナビ) の検索精度向上・表示用。旧クライアントは無視してよい）。
+
+- 曲ごと: `song_ruby` / `artist_ruby` / `tie_up_ruby` / `tie_up_group_ruby`（ゆかりすたーの検索用フリガナ。
+  全角カタカナ・濁点なし・小書きなし・長音なし。設定により `,長音あり版` が付く。複数歌手は `,` 区切り。
+  読みの無い項目は表記そのまま）、`program_category`（アニメ / ゲーム など）、`song_release_date`（`YYYY-MM-DD`、無ければ null）
+- ファイルごと: `found_keyword`（文字列の配列。ゆかりすたーが `found_comment` の `,//` 以降に書き込む検索ワード =
+  作品・シリーズ・曲に登録された別名・略称とその読み。表示用の `found_comment` からは除いてある）、
+  `song_id` / `tie_up_id`（`!` で始まる `song_id` は楽曲情報 DB 未ヒットで、ファイル名・フォルダー設定から登録された行）、
+  `found_last_write_time`（`YYYY-MM-DDTHH:MM:SS`、ゆかりすたーの PC の現地時刻）、
+  `found_track`、`found_smart_track_on` / `found_smart_track_off`（オン / オフボーカルのトラックがあるか）
+
 ### /api/song_metadata.php — 曲メタデータの取得と修正
 
 アプリの「曲の情報を修正する」画面が使う。修正内容は予約行の `song_name` / `lister_*`

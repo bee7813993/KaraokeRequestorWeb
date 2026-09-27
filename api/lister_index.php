@@ -36,8 +36,23 @@
  *   songs:    { "ok":true, "data":{ "total":2, "files_total":3, "agelimit_hidden":0, "items":[
  *               { "song_name":"...", "song_artist":"...", "program_name":"...",
  *                 "tie_up_group_name":"...", "song_op_ed":"3rdシングル",
+ *                 "song_ruby":"...", "artist_ruby":"...", "tie_up_ruby":"...", "tie_up_group_ruby":"...",
+ *                 "program_category":"アニメ", "song_release_date":"2024-04-01",
  *                 "files":[{ "found_path":"...", "found_comment":"リリックビデオ",
- *                            "found_worker":"...", "found_file_size":123 },...] },...] } }
+ *                            "found_keyword":["ハガレン","ハカレン"],
+ *                            "found_worker":"...", "found_file_size":123,
+ *                            "song_id":"...", "tie_up_id":"...",
+ *                            "found_last_write_time":"2026-08-12T20:48:00",
+ *                            "found_track":"On-Off", "found_smart_track_on":true, "found_smart_track_off":true },...] },...] } }
+ *   items の読み仮名 4 つ (song_ruby / artist_ruby / tie_up_ruby / tie_up_group_ruby) はゆかりすたーの
+ *   検索用フリガナ (全角カタカナ・濁点なし・小書きなし・長音なし。設定により ",長音あり版" が付く。
+ *   複数歌手は "," 区切り。読みの無い項目は表記そのまま)。song_release_date はリリース日 (無ければ null)。
+ *   files の found_keyword: ゆかりすたーが found_comment の ",//" 以降に付ける検索ワード
+ *   (作品・シリーズ・曲に登録された別名や略称) を分けたもの。表示用の found_comment には含めない。
+ *   files の song_id が "!" で始まる行は楽曲情報 DB にヒットせず、ファイル名・フォルダー設定から
+ *   登録された行 (tie_up_id も同様)。found_last_write_time はファイルの更新日時 (ゆかりすたーの
+ *   PC の現地時刻)。found_smart_track_on/off はオン/オフボーカルのトラックがあるか。
+ *   これらはクライアント (ゆかナビ) が検索精度の向上と表示に使う。
  *   songs の agelimit_hidden: 年齢制限フィルタで隠れた曲数 (include_agelimit=1 のときは常に 0)。
  *   まだ有効化していない利用者へ「年齢制限の曲が N 曲あります」の案内を出すのに使う。
  */
@@ -87,6 +102,18 @@ function quarter_label($q)
 {
     static $labels = [1 => '1月〜3月：冬', 2 => '4月〜6月：春', 3 => '7月〜9月：夏', 4 => '10月〜12月：秋'];
     return $labels[$q] ?? '';
+}
+
+/**
+ * 修正ユリウス日 → 日付/日時文字列 (0 以下・未設定は null)。
+ * ゆかりすたーは現地時刻をそのまま日数に換算して書き込むため、UTC として戻せば現地の日時になる。
+ */
+function lister_mjd_to_string($mjd, $format)
+{
+    if ($mjd === null || (float)$mjd <= 0) {
+        return null;
+    }
+    return gmdate($format, (int)floor(((float)$mjd - 40587) * 86400));
 }
 
 // ---- あいまい検索 (search_listerdb_songlist_json.php の anyword と同じ規則) ----
@@ -433,7 +460,10 @@ if ($mode === 'songs') {
     // ファイル単位で引いて (重複行は found_path でまとめる)、PHP 側で曲単位にグルーピングする
     $stmt = $ldb->prepare(
         'SELECT song_name, song_ruby, song_artist, program_name, tie_up_group_name,'
-        . ' song_op_ed, found_worker, found_path, found_file_size, found_comment'
+        . ' song_op_ed, found_worker, found_path, found_file_size, found_comment,'
+        . ' song_id, tie_up_id, found_artist_ruby, tie_up_ruby, tie_up_group_ruby,'
+        . ' program_category, song_release_date, found_last_write_time,'
+        . ' found_track, found_smart_track_on, found_smart_track_off'
         . " FROM t_found WHERE $whereSql"
         . " GROUP BY found_path ORDER BY $orderSql LIMIT 600"
     );
@@ -462,19 +492,47 @@ if ($mode === 'songs') {
                 'program_name'      => $row['program_name'],
                 'tie_up_group_name' => $row['tie_up_group_name'],
                 'song_op_ed'        => $row['song_op_ed'],
+                // 読み仮名 (ゆかりすたーの検索用フリガナ) とリリース日・カテゴリー
+                // (クライアントの検索精度向上・表示用)
+                'song_ruby'         => $row['song_ruby'],
+                'artist_ruby'       => $row['found_artist_ruby'],
+                'tie_up_ruby'       => $row['tie_up_ruby'],
+                'tie_up_group_ruby' => $row['tie_up_group_ruby'],
+                'program_category'  => $row['program_category'],
+                'song_release_date' => lister_mjd_to_string($row['song_release_date'], 'Y-m-d'),
                 'files'             => [],
             ];
         }
-        // コメントの ",//" 以降は内部メモのため除去 (listerdb_lookup_songinfo と同じ)
+        // コメントの ",//" 以降は内部メモのため表示用からは除去 (listerdb_lookup_songinfo と同じ)。
+        // 内部メモの実体はゆかりすたーの検索ワード (作品・シリーズ・曲の別名・略称とその読み。
+        // ",//語,読み,,//語,..." の形) なので、分解して found_keyword として別に返す
         $comment = '';
+        $keywords = [];
         if (!empty($row['found_comment'])) {
-            $comment = trim(preg_replace('/\,\/\/.*/', '', $row['found_comment']));
+            $parts = explode(',//', $row['found_comment'], 2);
+            $comment = trim($parts[0]);
+            if (count($parts) > 1) {
+                foreach (preg_split('/,(?:\/\/)?/', $parts[1]) as $keyword) {
+                    $keyword = trim($keyword);
+                    if ($keyword !== '' && !in_array($keyword, $keywords, true)) {
+                        $keywords[] = $keyword;
+                    }
+                }
+            }
         }
         $items[$index[$key]]['files'][] = [
             'found_path'      => $row['found_path'],
             'found_comment'   => $comment,
+            'found_keyword'   => $keywords,
             'found_worker'    => $row['found_worker'],
             'found_file_size' => (int)$row['found_file_size'],
+            // "!" で始まる song_id は楽曲情報 DB 未ヒット (ファイル名・フォルダー設定からの登録)
+            'song_id'         => $row['song_id'],
+            'tie_up_id'       => $row['tie_up_id'],
+            'found_last_write_time' => lister_mjd_to_string($row['found_last_write_time'], 'Y-m-d\TH:i:s'),
+            'found_track'     => $row['found_track'],
+            'found_smart_track_on'  => (bool)$row['found_smart_track_on'],
+            'found_smart_track_off' => (bool)$row['found_smart_track_off'],
         ];
         $filesTotal++;
     }
