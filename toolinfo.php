@@ -315,7 +315,8 @@ function ykStoreBadgeFallback(img, label) {
       <div class="row g-3 align-items-center">
         <div class="col">
           <p class="mb-2">スマホからは専用アプリ「ゆかナビ」でも曲の検索・予約ができます。</p>
-          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <!-- 狭い画面 (縦並び) ではバッジを左右中央に、横並びのときは左寄せ -->
+          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-2">
             <a class="store-badge-link" href="<?= htmlspecialchars($yukanavi_appstore_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">
               <img class="store-badge" src="images/Download_on_the_App_Store_Badge_JP_RGB_blk_100317.svg"
                    width="150" height="55" alt="App Storeからダウンロード">
