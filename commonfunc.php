@@ -2512,42 +2512,65 @@ function update_fromgit($version_str, &$errmsg){
           $execcmd = $gitcmd.' config --global core.autoCRLF false';
           exec($execcmd);
           
-          $execcmd = $gitcmd.' fetch --prune origin';
+          // git のエラーは標準エラー出力に出るため 2>&1 で拾い、終了コードでも判定する
+          // (標準出力しか見ていなかったころは、失敗しても「成功しました」と表示されていた)
+          $execcmd = $gitcmd.' fetch --prune origin 2>&1';
           set_time_limit (900);
-          exec($execcmd,$result_str);
+          $exitcode = 0;
+          exec($execcmd, $result_str, $exitcode);
           foreach($result_str as $line){
-              $err_str_pos = mb_strpos($line, "unable to access");
-              if( $err_str_pos !== false ) {
+              if (mb_strpos($line, "unable to access") !== false) {
                   $errmsg .= "network access failed";
                   $errorcnt ++;
-              }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg .= "fetch unknown error: $line";
-                  $errorcnt ++;
+                  break;
               }
           }
-          if($errorcnt > 1){
+          if ($errorcnt === 0 && $exitcode !== 0) {
+              $errmsg .= "fetch に失敗しました: " . implode(" ", $result_str);
+              $errorcnt ++;
+          }
+          if($errorcnt > 0){
               return false;
           }
 
-          // origin/ プレフィックスあり → ブランチ切り替え (checkout -B)
+          // ZIP 方式と同じく、追跡ファイルのローカル変更は捨てて切替先の内容にそろえる
+          // (checkout --force / reset --hard)。この関数が書き換える version や、ZIP 方式で
+          // 上書きした後の作業ツリーが「local changes would be overwritten」で切替を
+          // 止めないようにするため。利用者データ (config.ini・request.db 等) は追跡外なので
+          // 影響しないが、画面から書き換える追跡ファイルだけは退避して戻す
+          // (ZIP 方式の除外リストと同じ趣旨)
+          $app_root = realpath(__DIR__);
+          $protect_files = ['listerdb_config.ini', 'search_sort_priority.json', 'search_sort_priority_auth.json'];
+          $saved_files = [];
+          foreach ($protect_files as $rel) {
+              $abs = $app_root . DIRECTORY_SEPARATOR . $rel;
+              if (file_exists($abs)) {
+                  $saved_files[$rel] = file_get_contents($abs);
+              }
+          }
+
+          // origin/ プレフィックスあり → ブランチ切り替え (checkout -f -B)
           // タグ / ハッシュ → 現在ブランチのまま reset --hard
           $result_str = [];
           if (strpos($version_str, 'origin/') === 0) {
               $branch_name = substr($version_str, strlen('origin/'));
-              $execcmd = $gitcmd . ' checkout -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str);
+              $execcmd = $gitcmd . ' checkout -f -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str) . ' 2>&1';
           } else {
-              $execcmd = $gitcmd . ' reset --hard ' . $version_str;
+              $execcmd = $gitcmd . ' reset --hard ' . escapeshellarg($version_str) . ' 2>&1';
           }
-          exec($execcmd, $result_str);
-          foreach($result_str as $line){
-              $err_str_pos = mb_strpos($line, "unknown revision");
-              if( $err_str_pos  !== false) {
+          $exitcode = 0;
+          exec($execcmd, $result_str, $exitcode);
+          if ($exitcode !== 0) {
+              $output = implode(" ", $result_str);
+              if (mb_strpos($output, "unknown revision") !== false || mb_strpos($output, "invalid reference") !== false) {
                   $errmsg .= "no version : $version_str";
-                  $errorcnt ++;
-              }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg .= "checkout/reset unknown error: $line";
-                  $errorcnt ++;
+              } else {
+                  $errmsg .= "checkout/reset に失敗しました: " . $output;
               }
+              $errorcnt ++;
+          }
+          foreach ($saved_files as $rel => $content) {
+              file_put_contents($app_root . DIRECTORY_SEPARATOR . $rel, $content);
           }
 
           if ($errorcnt === 0) {
@@ -2555,7 +2578,6 @@ function update_fromgit($version_str, &$errmsg){
               // shallow clone では git describe が失敗する場合があるため GitHub API でフォールバック
               exec($gitcmd . ' fetch --tags origin 2>&1');
               $desc = trim(exec($gitcmd . ' describe --tags 2>&1'));
-              $app_root = realpath(__DIR__);
               if ($desc !== '' && mb_substr($desc, 0, 1) === 'v' && is_numeric(mb_substr($desc, 1, 1))) {
                   file_put_contents($app_root . DIRECTORY_SEPARATOR . 'version', $desc);
               } else {
@@ -2922,6 +2944,11 @@ function update_fromarchive($version_str, &$errmsg) {
     $exclude_list[] = 'images/bg';
     $exclude_list[] = 'search_sort_priority.json';
     $exclude_list[] = 'search_sort_priority_auth.json';
+    // りすたーDB設定 (listerdb_config.ini) は利用者が編集する設定ファイル (backup_restore.php でも
+    // 利用者データ扱い) なので、既にあれば上書きしない。無ければ既定値として配置する
+    if (file_exists($app_root . DIRECTORY_SEPARATOR . 'listerdb_config.ini')) {
+        $exclude_list[] = 'listerdb_config.ini';
+    }
 
     _kara_update_copy_recursive($source_dir, $app_root, $exclude_list);
 
