@@ -80,9 +80,14 @@ $wifi_qr_data = 'WIFI:T:WPA;S:' . wifi_qr_escape($wifi_ssid)
               . ';P:'            . wifi_qr_escape($wifi_pass) . ';;';
 
 // --- スマホアプリ「ゆかナビ」の案内 ---
-// get.html は読み取った端末を判定して App Store / Google Play へ振り分ける中立ページ (ykr.moe)
-$yukanavi_site_url = 'https://ykr.moe/apps/yukanavi/';
-$yukanavi_get_url  = 'https://ykr.moe/apps/yukanavi/get.html';
+// get.html は読み取った端末を判定して App Store / Google Play へ振り分ける中立ページ (ykr.moe)。QR の宛先に使う
+$yukanavi_site_url     = 'https://ykr.moe/apps/yukanavi/';
+$yukanavi_get_url      = 'https://ykr.moe/apps/yukanavi/get.html';
+$yukanavi_appstore_url = 'https://apps.apple.com/jp/app/id6792447073';
+$yukanavi_play_url     = 'https://play.google.com/store/apps/details?id=com.yfrteam.yukanavi';
+// Google Play のバッジは公式の埋め込み方式 (Google の CDN を直接参照)。会場がオフラインで読めないときは
+// テキストのボタンに置き換える (ykStoreBadgeFallback)。App Store のバッジは同梱の SVG
+$yukanavi_play_badge_url = 'https://play.google.com/intl/en_us/badges/static/images/badges/ja_badge_web_generic.png';
 
 // --- QR img タグ出力ヘルパー ---
 function qr_img(string $data, int $size): string {
@@ -102,8 +107,9 @@ function qr_img(string $data, int $size): string {
 <style>
 .qr-wrap { background:#fff; display:inline-block; padding:4px; border-radius:4px; }
 .url-display { font-family: monospace; font-size:.85rem; word-break:break-all; }
-.app-icon { transition: transform .15s; }
-a:hover .app-icon { transform: scale(1.05); }
+.store-badge-link { display: inline-block; line-height: 0; }
+.store-badge-link:hover, .store-badge-link:focus { filter: brightness(1.06); }
+.store-badge { height: 55px; width: auto; max-width: 100%; }
 .card-header .hd-short { display: none; }
 .card-vtab { cursor: pointer; }
 @media (min-width: 992px) {
@@ -120,6 +126,15 @@ a:hover .app-icon { transform: scale(1.05); }
   .card-vtab .card-header .hd-short { display: block; }
 }
 </style>
+<script>
+// ストアバッジの画像が読めないとき (オフラインの会場など) にテキストのボタンへ置き換える
+function ykStoreBadgeFallback(img, label) {
+  var link = img.parentElement;
+  if (!link) return;
+  link.className = 'btn btn-outline-secondary btn-sm';
+  link.textContent = label;
+}
+</script>
 </head>
 <body>
 <?php shownavigatioinbar_bs5('toolinfo.php'); ?>
@@ -293,27 +308,30 @@ a:hover .app-icon { transform: scale(1.05); }
   </div><!-- /row -->
 
 <?php if (configbool('show_yukanavi_link', true)): // 設定画面「接続情報ページのスマホアプリ案内」 ?>
-  <!-- スマホアプリ「ゆかナビ」の案内: アイコンがストアへのリンク、右に入手用 QR -->
+  <!-- スマホアプリ「ゆかナビ」の案内: ストアの公式バッジ (App Store / Google Play) と、右に入手用 QR -->
   <div class="card mb-3">
     <div class="card-header fw-bold">スマホアプリ「ゆかナビ」</div>
     <div class="card-body">
       <div class="row g-3 align-items-center">
-        <div class="col-auto text-center">
-          <a href="<?= htmlspecialchars($yukanavi_get_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener"
-             class="d-inline-block text-decoration-none" title="ゆかナビを入手 (App Store / Google Play)">
-            <img src="images/yukanavi_icon.png" width="96" height="96" alt="ゆかナビ"
-                 class="app-icon rounded-4 shadow-sm d-block mx-auto">
-            <span class="small d-block mt-1">アプリを入手</span>
-          </a>
-        </div>
         <div class="col">
-          <p class="mb-2">スマホからは専用アプリ「ゆかナビ」でも曲の検索・予約ができます。アイコンをタップするか、QRコードを読み取るとストアへ移動します。</p>
+          <p class="mb-2">スマホからは専用アプリ「ゆかナビ」でも曲の検索・予約ができます。</p>
+          <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+            <a class="store-badge-link" href="<?= htmlspecialchars($yukanavi_appstore_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">
+              <img class="store-badge" src="images/Download_on_the_App_Store_Badge_JP_RGB_blk_100317.svg"
+                   width="150" height="55" alt="App Storeからダウンロード">
+            </a>
+            <a class="store-badge-link" href="<?= htmlspecialchars($yukanavi_play_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">
+              <img class="store-badge" src="<?= htmlspecialchars($yukanavi_play_badge_url, ENT_QUOTES, 'UTF-8') ?>"
+                   width="142" height="55" alt="Google Playで手に入れよう"
+                   onerror="ykStoreBadgeFallback(this, 'Google Playで手に入れよう')">
+            </a>
+          </div>
           <p class="small text-muted mb-2">アプリを入れたら、接続設定の「QRで読取」で上の接続URLのQRコードを読み取ると、この部屋につながります。</p>
           <a class="small" href="<?= htmlspecialchars($yukanavi_site_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">アプリの紹介ページ</a>
         </div>
         <div class="col-12 col-md-auto text-center">
           <div class="qr-wrap"><?= qr_img($yukanavi_get_url, $l_qrsize) ?></div>
-          <div class="small text-muted mt-1">スマホで読み取り</div>
+          <div class="small text-muted mt-1">スマホで読み取るとストアへ</div>
         </div>
       </div>
     </div>
