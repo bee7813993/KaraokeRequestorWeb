@@ -2512,42 +2512,52 @@ function update_fromgit($version_str, &$errmsg){
           $execcmd = $gitcmd.' config --global core.autoCRLF false';
           exec($execcmd);
           
-          $execcmd = $gitcmd.' fetch --prune origin';
+          // git のエラーは標準エラー出力に出るため 2>&1 で拾い、終了コードでも判定する
+          // (標準出力しか見ていなかったころは、失敗しても「成功しました」と表示されていた)
+          $execcmd = $gitcmd.' fetch --prune origin 2>&1';
           set_time_limit (900);
-          exec($execcmd,$result_str);
+          $exitcode = 0;
+          exec($execcmd, $result_str, $exitcode);
           foreach($result_str as $line){
-              $err_str_pos = mb_strpos($line, "unable to access");
-              if( $err_str_pos !== false ) {
+              if (mb_strpos($line, "unable to access") !== false) {
                   $errmsg .= "network access failed";
                   $errorcnt ++;
-              }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg .= "fetch unknown error: $line";
-                  $errorcnt ++;
+                  break;
               }
           }
-          if($errorcnt > 1){
+          if ($errorcnt === 0 && $exitcode !== 0) {
+              $errmsg .= "fetch に失敗しました: " . implode(" ", $result_str);
+              $errorcnt ++;
+          }
+          if($errorcnt > 0){
               return false;
           }
+
+          // version ファイルはこの関数が git describe の結果で書き換えるため、リポジトリの
+          // 内容と食い違ったままになる。そのままブランチを切り替えると、切替先で version が
+          // 違うとき git が「local changes would be overwritten」で拒否するので、先に
+          // リポジトリの内容へ戻しておく (切替後に改めて書き込む)
+          exec($gitcmd . ' checkout -- version 2>&1');
 
           // origin/ プレフィックスあり → ブランチ切り替え (checkout -B)
           // タグ / ハッシュ → 現在ブランチのまま reset --hard
           $result_str = [];
           if (strpos($version_str, 'origin/') === 0) {
               $branch_name = substr($version_str, strlen('origin/'));
-              $execcmd = $gitcmd . ' checkout -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str);
+              $execcmd = $gitcmd . ' checkout -B ' . escapeshellarg($branch_name) . ' ' . escapeshellarg($version_str) . ' 2>&1';
           } else {
-              $execcmd = $gitcmd . ' reset --hard ' . $version_str;
+              $execcmd = $gitcmd . ' reset --hard ' . escapeshellarg($version_str) . ' 2>&1';
           }
-          exec($execcmd, $result_str);
-          foreach($result_str as $line){
-              $err_str_pos = mb_strpos($line, "unknown revision");
-              if( $err_str_pos  !== false) {
+          $exitcode = 0;
+          exec($execcmd, $result_str, $exitcode);
+          if ($exitcode !== 0) {
+              $output = implode(" ", $result_str);
+              if (mb_strpos($output, "unknown revision") !== false || mb_strpos($output, "invalid reference") !== false) {
                   $errmsg .= "no version : $version_str";
-                  $errorcnt ++;
-              }else if (mb_strstr($line, "fatal") !== false) {
-                  $errmsg .= "checkout/reset unknown error: $line";
-                  $errorcnt ++;
+              } else {
+                  $errmsg .= "checkout/reset に失敗しました: " . $output;
               }
+              $errorcnt ++;
           }
 
           if ($errorcnt === 0) {
