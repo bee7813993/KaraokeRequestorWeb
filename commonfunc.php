@@ -2944,6 +2944,11 @@ function update_fromarchive($version_str, &$errmsg) {
     $exclude_list[] = 'images/bg';
     $exclude_list[] = 'search_sort_priority.json';
     $exclude_list[] = 'search_sort_priority_auth.json';
+    // りすたーDB設定 (listerdb_config.ini) は利用者が編集する設定ファイル (backup_restore.php でも
+    // 利用者データ扱い) なので、既にあれば上書きしない。無ければ既定値として配置する
+    if (file_exists($app_root . DIRECTORY_SEPARATOR . 'listerdb_config.ini')) {
+        $exclude_list[] = 'listerdb_config.ini';
+    }
 
     _kara_update_copy_recursive($source_dir, $app_root, $exclude_list);
 
