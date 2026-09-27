@@ -19,7 +19,8 @@
  *                                  quarter=0 で年全体 (年代別ビュー)
  *   programs&group=シリーズ名     → シリーズ内の作品一覧 (シリーズ再検索用)
  *   songs&program=|artist=|group=|worker= → 完全一致の曲一覧 (複数指定は AND)
- *   songs&anyword=キーワード      → あいまい検索 (スペース区切り AND、読み仮名対応)
+ *   songs&anyword=キーワード      → あいまい検索 (スペース区切り AND、読み仮名対応。ゆかりすたーの
+ *                                  検索ワード [found_comment の ",//" 以降の別名・略称] も対象)
  *   initials&target=program|artist|group  → 頭文字 (ひらがな清音 + その他) ごとの名前数
  *   names&target=...&initial=あ   → 頭文字が一致する名前一覧 (作品名 / 歌手名 / シリーズ名)
  *   names&target=...&keyword=...  → 名前の部分一致一覧 (読み仮名対応)
@@ -417,6 +418,11 @@ if ($mode === 'songs') {
             lister_like_cond($ldb, 'tie_up_group_name', 'tie_up_group_ruby', $anyword),
             lister_like_cond($ldb, 'maker_name', 'maker_ruby', $anyword),
             lister_like_cond($ldb, 'found_path', null, $anyword),
+            // ゆかりすたーの検索ワード (found_comment の ",//" 以降にある作品・シリーズ・曲の別名や略称と
+            // その読み)。Web 版のファイル検索 (search_listerdb_filelist_json.php) と同じく対象にする。
+            // 「ハガレン」で鋼の錬金術師の曲が出るのはこれによる。読み (濁点なしカタカナ) も並んでいるので、
+            // かな入力は kanabuild した形でも当てる
+            lister_like_cond($ldb, 'found_comment', 'found_comment', $anyword),
         ], function ($cond) { return $cond !== ''; });
         if (count($orConds) > 0) {
             $where[] = '(' . implode(' OR ', $orConds) . ')';

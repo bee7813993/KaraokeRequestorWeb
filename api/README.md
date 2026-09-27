@@ -136,6 +136,10 @@ ListerDB 未設定時は 503。
 | `programs` | `year`, `quarter` (1〜4) | `{ "year","quarter","label", "programs":[{"program":"作品名","group":"シリーズ名 or null","songs":5},...] }` |
 | `songs` | `program` / `artist` / `group` / `worker` のいずれか（複数は AND、完全一致） | `{ "total":N, "items":[{ song_name, song_ruby, song_artist, program_name, tie_up_group_name, song_op_ed, found_worker, found_path, found_file_size, found_comment },...] }` (最大300件) |
 
+`songs&anyword=キーワード` はあいまい検索（スペース区切り AND、読み仮名対応）。曲名・歌手名・作品名・
+シリーズ名・製作会社・ファイルパスに加えて、ゆかりすたーの検索ワード（`found_comment` の `,//` 以降に
+書かれる作品・シリーズ・曲の別名・略称とその読み）も対象。Web 版のファイル検索と同じ範囲。
+
 `songs` の各項目には、上記に加えて次も付く（クライアント (ゆかナビ) の検索精度向上・表示用。旧クライアントは無視してよい）。
 
 - 曲ごと: `song_ruby` / `artist_ruby` / `tie_up_ruby` / `tie_up_group_ruby`（ゆかりすたーの検索用フリガナ。
