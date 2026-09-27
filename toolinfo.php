@@ -79,6 +79,11 @@ function wifi_qr_escape(string $s): string {
 $wifi_qr_data = 'WIFI:T:WPA;S:' . wifi_qr_escape($wifi_ssid)
               . ';P:'            . wifi_qr_escape($wifi_pass) . ';;';
 
+// --- スマホアプリ「ゆかナビ」の案内 ---
+// get.html は読み取った端末を判定して App Store / Google Play へ振り分ける中立ページ (ykr.moe)
+$yukanavi_site_url = 'https://ykr.moe/apps/yukanavi/';
+$yukanavi_get_url  = 'https://ykr.moe/apps/yukanavi/get.html';
+
 // --- QR img タグ出力ヘルパー ---
 function qr_img(string $data, int $size): string {
     $src = 'qrcode_php/outputqrsvg.php?data=' . urlencode($data) . '&qrsize=' . $size;
@@ -284,6 +289,25 @@ function qr_img(string $data, int $size): string {
     </div>
 
   </div><!-- /row -->
+
+  <!-- スマホアプリ「ゆかナビ」の案内 -->
+  <div class="card mb-3">
+    <div class="card-header fw-bold">スマホアプリ「ゆかナビ」</div>
+    <div class="card-body">
+      <div class="row g-3 align-items-center">
+        <div class="col-12 col-md-auto text-center">
+          <div class="qr-wrap"><?= qr_img($yukanavi_get_url, $l_qrsize) ?></div>
+          <div class="small text-muted mt-1">アプリを入手</div>
+        </div>
+        <div class="col">
+          <p class="mb-2">スマホからは専用アプリ「ゆかナビ」でも曲の検索・予約ができます。QRコードを読み取るか、下のボタンからストアへ移動してください。</p>
+          <p class="small text-muted mb-3">アプリを入れたら、接続設定の「QRで読取」で上の接続URLのQRコードを読み取ると、この部屋につながります。</p>
+          <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($yukanavi_get_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">アプリを入手</a>
+          <a class="btn btn-outline-secondary btn-sm ms-1" href="<?= htmlspecialchars($yukanavi_site_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">アプリの紹介ページ</a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- QRサイズ切り替え -->
   <div class="d-flex gap-2 justify-content-center mb-4">
