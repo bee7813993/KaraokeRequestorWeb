@@ -102,6 +102,8 @@ function qr_img(string $data, int $size): string {
 <style>
 .qr-wrap { background:#fff; display:inline-block; padding:4px; border-radius:4px; }
 .url-display { font-family: monospace; font-size:.85rem; word-break:break-all; }
+.app-icon { transition: transform .15s; }
+a:hover .app-icon { transform: scale(1.05); }
 .card-header .hd-short { display: none; }
 .card-vtab { cursor: pointer; }
 @media (min-width: 992px) {
@@ -291,20 +293,27 @@ function qr_img(string $data, int $size): string {
   </div><!-- /row -->
 
 <?php if (configbool('show_yukanavi_link', true)): // 設定画面「接続情報ページのスマホアプリ案内」 ?>
-  <!-- スマホアプリ「ゆかナビ」の案内 -->
+  <!-- スマホアプリ「ゆかナビ」の案内: アイコンがストアへのリンク、右に入手用 QR -->
   <div class="card mb-3">
     <div class="card-header fw-bold">スマホアプリ「ゆかナビ」</div>
     <div class="card-body">
       <div class="row g-3 align-items-center">
-        <div class="col-12 col-md-auto text-center">
-          <div class="qr-wrap"><?= qr_img($yukanavi_get_url, $l_qrsize) ?></div>
-          <div class="small text-muted mt-1">アプリを入手</div>
+        <div class="col-auto text-center">
+          <a href="<?= htmlspecialchars($yukanavi_get_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener"
+             class="d-inline-block text-decoration-none" title="ゆかナビを入手 (App Store / Google Play)">
+            <img src="images/yukanavi_icon.png" width="96" height="96" alt="ゆかナビ"
+                 class="app-icon rounded-4 shadow-sm d-block mx-auto">
+            <span class="small d-block mt-1">アプリを入手</span>
+          </a>
         </div>
         <div class="col">
-          <p class="mb-2">スマホからは専用アプリ「ゆかナビ」でも曲の検索・予約ができます。QRコードを読み取るか、下のボタンからストアへ移動してください。</p>
-          <p class="small text-muted mb-3">アプリを入れたら、接続設定の「QRで読取」で上の接続URLのQRコードを読み取ると、この部屋につながります。</p>
-          <a class="btn btn-primary btn-sm" href="<?= htmlspecialchars($yukanavi_get_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">アプリを入手</a>
-          <a class="btn btn-outline-secondary btn-sm ms-1" href="<?= htmlspecialchars($yukanavi_site_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">アプリの紹介ページ</a>
+          <p class="mb-2">スマホからは専用アプリ「ゆかナビ」でも曲の検索・予約ができます。アイコンをタップするか、QRコードを読み取るとストアへ移動します。</p>
+          <p class="small text-muted mb-2">アプリを入れたら、接続設定の「QRで読取」で上の接続URLのQRコードを読み取ると、この部屋につながります。</p>
+          <a class="small" href="<?= htmlspecialchars($yukanavi_site_url, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">アプリの紹介ページ</a>
+        </div>
+        <div class="col-12 col-md-auto text-center">
+          <div class="qr-wrap"><?= qr_img($yukanavi_get_url, $l_qrsize) ?></div>
+          <div class="small text-muted mt-1">スマホで読み取り</div>
         </div>
       </div>
     </div>
