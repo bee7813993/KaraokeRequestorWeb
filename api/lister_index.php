@@ -24,6 +24,8 @@
  *   initials&target=program|artist|group  → 頭文字 (ひらがな清音 + その他) ごとの名前数
  *   names&target=...&initial=あ   → 頭文字が一致する名前一覧 (作品名 / 歌手名 / シリーズ名)
  *   names&target=...&keyword=...  → 名前の部分一致一覧 (読み仮名対応)
+ *   rules                        → ゆかりすたーのフォルダー設定 (YukaLister.json 等) のファイル命名規則を
+ *                                  設定フォルダーごとに (クライアントの検索精度向上用。フォルダーが読めない環境では空)
  *
  * songs の応答は曲単位にグルーピングされ、同じ曲の複数ファイル (別動画) が files に並ぶ。
  * songs&flat=1 でグルーピングせずファイル単位 (1アイテム=1ファイル) で返す (応答構造は同じ)。
@@ -56,8 +58,15 @@
  *   これらはクライアント (ゆかナビ) が検索精度の向上と表示に使う。
  *   songs の agelimit_hidden: 年齢制限フィルタで隠れた曲数 (include_agelimit=1 のときは常に 0)。
  *   まだ有効化していない利用者へ「年齢制限の曲が N 曲あります」の案内を出すのに使う。
+ *   rules:    { "ok":true, "data":{ "count":2, "folders":[
+ *               { "folder":"D:\動画\AAA", "file_name_rules":["[<Artist>]<Title>_<Program>"],
+ *                 "folder_name_rules":["<Worker>=AAA"], "source":"YukaLister.json" },...] } }
+ *   規則の書式はゆかりすたーのフォルダー設定そのまま (<Title> <Artist> <Program> <Oped> <Track> <Comment>
+ *   等の変数と、任意の文字列 *)。親フォルダーの設定が下にも効くので、クライアントは最も深い
+ *   一致フォルダーの規則を使う。
  */
 require_once __DIR__ . '/_common.php';
+require_once __DIR__ . '/_lister_rules.php';
 
 // ---- ListerDB を開く ----
 $lister_dbpath = 'list\List.sqlite3';
@@ -550,4 +559,8 @@ if ($mode === 'songs') {
     ]);
 }
 
-api_error('mode が不正です (years / quarters / programs / songs)');
+if ($mode === 'rules') {
+    api_ok(lister_rules_collect($ldb));
+}
+
+api_error('mode が不正です (years / quarters / programs / songs / initials / names / rules)');
