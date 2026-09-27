@@ -135,6 +135,7 @@ ListerDB 未設定時は 503。
 | `quarters` | `year` | `{ "year":2026, "quarters":[{"q":2,"label":"4月〜6月：春","songs":192,"programs":43},...] }` |
 | `programs` | `year`, `quarter` (1〜4) | `{ "year","quarter","label", "programs":[{"program":"作品名","group":"シリーズ名 or null","songs":5},...] }` |
 | `songs` | `program` / `artist` / `group` / `worker` のいずれか（複数は AND、完全一致） | `{ "total":N, "items":[{ song_name, song_ruby, song_artist, program_name, tie_up_group_name, song_op_ed, found_worker, found_path, found_file_size, found_comment },...] }` (最大300件) |
+| `rules` | - | `{ "count":N, "folders":[{ "folder":"設定フォルダー", "file_name_rules":["[<Artist>]<Title>_<Program>",...], "folder_name_rules":["<Worker>=AAA",...], "source":"YukaLister.json" },...] }` |
 
 `songs&anyword=キーワード` はあいまい検索（スペース区切り AND、読み仮名対応）。曲名・歌手名・作品名・
 シリーズ名・製作会社・ファイルパスに加えて、ゆかりすたーの検索ワード（`found_comment` の `,//` 以降に
@@ -150,6 +151,13 @@ ListerDB 未設定時は 503。
   `song_id` / `tie_up_id`（`!` で始まる `song_id` は楽曲情報 DB 未ヒットで、ファイル名・フォルダー設定から登録された行）、
   `found_last_write_time`（`YYYY-MM-DDTHH:MM:SS`、ゆかりすたーの PC の現地時刻）、
   `found_track`、`found_smart_track_on` / `found_smart_track_off`（オン / オフボーカルのトラックがあるか）
+
+`rules` は、ゆかりすたーのフォルダー設定（動画フォルダーに置かれた `YukaLister.json`。旧形式の
+`YukaLister.config` / `NicoKaraLister.config` も可）に書かれたファイル命名規則を、設定フォルダーごとに返す
+（クライアント (ゆかナビ) の検索精度向上用）。規則の書式はゆかりすたーのフォルダー設定そのまま。
+親フォルダーの設定は下のフォルダーにも効くため、クライアントは最も深く一致する設定フォルダーの規則を使う。
+リスト DB のフォルダーがこのサーバーから読めない環境（別 PC のリスト DB を参照している等）では `count` が 0。
+フォルダーを全部たどるため、結果は一時フォルダーに 10 分キャッシュする（`nocache=1` で作り直し）。
 
 ### /api/song_metadata.php — 曲メタデータの取得と修正
 
