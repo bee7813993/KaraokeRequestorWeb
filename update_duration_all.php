@@ -11,7 +11,7 @@ if ($_SERVER['PHP_AUTH_USER'] !== 'admin') {
     header('WWW-Authenticate: Basic realm="Configuration page authorization."');
     die('設定画面の表示にはログインが必要です');
 }
-if (!$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+if (!$configauth->check_auth($_SERVER['PHP_AUTH_PW'] ?? '')) {
     header('WWW-Authenticate: Basic realm="Configuration page authorization."');
     die('設定画面の表示にはログインが必要です');
 }

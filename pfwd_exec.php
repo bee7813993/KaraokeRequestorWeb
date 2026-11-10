@@ -5,7 +5,7 @@ require_once 'configauth_class.php';
 $configauth = new ConfigAuth();
 
 // pfwd (オンライン公開の転送) の起動・停止は、設定画面 (pfwd_settings.php) と同じ管理者認証を通す
-if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'] ?? '')) {
     header('WWW-Authenticate: Basic realm="pfwd Settings"');
     die('管理者ログインが必要です');
 }

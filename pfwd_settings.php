@@ -3,7 +3,7 @@ require_once 'commonfunc.php';
 require_once 'configauth_class.php';
 $configauth = new ConfigAuth();
 
-if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'] ?? '')) {
     header('WWW-Authenticate: Basic realm="pfwd Settings"');
     die('管理者ログインが必要です');
 }
