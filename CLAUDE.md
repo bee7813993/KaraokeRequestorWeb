@@ -160,6 +160,8 @@ lister_comment TEXT DEFAULT ''    -- ListerDB comment
 | `nonamerequest` | bool | `0` | Allow anonymous requests |
 | `nonameusername` | string | — | Default name for anonymous requests |
 | `connectinternet` | bool | `1` | Allow internet search integrations |
+| `globalhost` | string | — | Online access host as `host:port` (relay server or DDNS) |
+| `globalhttps` | bool | `0` | Use `https://` for the online URL, QR code and reachability check (enable when the relay server terminates TLS for the port) |
 | `historylog` | bool | `0` | Enable history logging |
 | `bgimage` | string | — | Active background image filename |
 | `bg_card_opacity` | int | — | Card background opacity 0–100 |

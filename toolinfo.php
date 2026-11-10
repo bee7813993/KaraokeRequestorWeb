@@ -6,8 +6,10 @@ $easyauth = new EasyAuth();
 $easyauth->do_eashauthcheck();
 
 // --- フォーム処理 ---
+// このページで保存できるのは WiFi 情報だけ。オンライン接続用ホスト (globalhost) は
+// 管理者認証のある設定画面 (pfwd_settings.php) で変更する
 $change_counter = 0;
-foreach (['SSID', 'wifipass', 'globalhost'] as $_key) {
+foreach (['SSID', 'wifipass'] as $_key) {
     if (isset($_REQUEST[$_key])) {
         $config_ini[$_key] = urlencode(trim($_REQUEST[$_key]));
         $change_counter++;
@@ -28,12 +30,12 @@ $globalhost       = isset($config_ini['globalhost']) ? urldecode($config_ini['gl
 $online_available = false;
 $globalurl        = '';
 if (!empty($globalhost) && $config_ini['connectinternet'] == 1) {
-    $checkurl = 'http://' . $globalhost;
+    $checkurl = globalhost_scheme() . $globalhost;
     $ret = file_get_html_with_retry($checkurl, 2, 3);
     if ($ret !== false) {
         $online_available = true;
     }
-    $globalurl = 'http://' . $globalhost . '/';
+    $globalurl = globalhost_scheme() . $globalhost . '/';
     if ($config_ini['useeasyauth'] == 1) {
         $globalurl .= '?easypass=' . urlencode($config_ini['useeasyauth_word']);
     }
@@ -44,11 +46,14 @@ $easypass_q = ($config_ini['useeasyauth'] == 1)
     ? '?easypass=' . urlencode($config_ini['useeasyauth_word'])
     : '';
 
-// ホスト名（localhost は除外）
+// ホスト名（localhost は除外）。スキームはアクセスしてきたものに合わせる
+// (中継サーバー経由の HTTPS で開いたときに http:// の URL を出さないため)
 $http_host      = $_SERVER['HTTP_HOST'];
 $host_only      = strtolower(explode(':', $http_host)[0]);
 $localname_valid = ($host_only !== 'localhost');
-$localhosturl   = $localname_valid ? 'http://' . $http_host . '/' . $easypass_q : '';
+$localhosturl   = $localname_valid
+    ? (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $http_host . '/' . $easypass_q
+    : '';
 
 // IPv6・ループバックを除外した IPv4 アドレスのみ表示
 $server_addr   = $_SERVER['SERVER_ADDR'];
