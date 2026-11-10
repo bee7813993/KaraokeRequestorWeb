@@ -2,6 +2,7 @@
    /* 現在のキー変更状態をリアルタイムで表示するための Server Sent Event 処理 */
    header('Content-Type: text/event-stream');
    header('Cache-Control: no-cache');
+   header('X-Accel-Buffering: no'); /* リバースプロキシ (nginx) に応答を溜め込ませず、イベントをすぐ流す */
    
    require_once 'func_keychange.php';
    require_once 'func_readconfig.php';

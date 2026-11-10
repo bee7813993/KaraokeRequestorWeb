@@ -30,8 +30,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
         ? urldecode($config_ini['globalhost']) : '';
     $host_parts = explode(':', $host_raw, 2);
     $h_host = $host_parts[0];
-    $h_port = isset($host_parts[1]) ? (int)$host_parts[1] : 80;
-    $http_url = 'http://' . $host_raw;
+    $h_port = isset($host_parts[1]) ? (int)$host_parts[1] : (configbool('globalhttps', false) ? 443 : 80);
+    $http_url = globalhost_scheme() . $host_raw;
     $timeout  = 8;
     $results  = [];
 
@@ -66,9 +66,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
         curl_exec($ch);
         $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $ip   = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
-        $en   = curl_errno($ch); $es2 = curl_strerror($en);
+        $en   = curl_errno($ch);
         curl_close($ch);
-        $val = $code > 0 ? "OK HTTP {$code} (接続先IP: {$ip})" : "NG curl({$en}): {$es2}";
+        $val = online_check_result_text($code, $ip, $en);
         if ($resolve === null)              $results['curl_auto'] = $val;
         elseif ($resolve === CURL_IPRESOLVE_V4) $results['curl_v4'] = $val;
         else                                $results['curl_v6'] = $val;
@@ -112,7 +112,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
         exit;
     }
     $host      = urldecode($config_ini['globalhost']);
-    $check_url = 'http://' . $host;
+    $check_url = globalhost_scheme() . $host;
     $timeout   = (int)(array_key_exists('onlinechecktimeout', $config_ini) ? $config_ini['onlinechecktimeout'] : 5);
     if ($timeout < 5) $timeout = 5;
     $ch = curl_init($check_url);
@@ -128,9 +128,13 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
     $http_code  = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $primary_ip = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
     curl_close($ch);
-    if ($http_code > 0) {
+    if ($http_code > 0 && !is_relay_error_code($http_code)) {
         $status = 'ok';
         $detail = "HTTP {$http_code} [{$primary_ip}] (timeout:{$timeout}s)";
+    } elseif ($http_code > 0) {
+        // 中継サーバーは応答したが、この PC まで届いていない
+        $status = 'ng';
+        $detail = "HTTP {$http_code} 中継サーバーからこの PC に接続できていません (timeout:{$timeout}s)";
     } else {
         $status = 'ng';
         $detail = "curl({$curl_errno}): " . curl_strerror($curl_errno) . " (timeout:{$timeout}s)";
@@ -142,7 +146,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online') {
 // --- 設定保存 ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_config'])) {
     $str_keys  = ['pfwdplace', 'onlinechecktimeout'];
-    $int_keys  = ['usepfwdcheck'];
+    $int_keys  = ['usepfwdcheck', 'globalhttps'];
     foreach ($str_keys as $k) {
         if (isset($_POST[$k])) $config_ini[$k] = urlencode($_POST[$k]);
     }
@@ -203,6 +207,7 @@ $pfwd_running = $pfwdavailable ? $pfwdinfo->statpfwdcmd() : false;
 $wg_running   = check_wireguard_running();
 
 $usepfwdcheck = array_key_exists('usepfwdcheck', $config_ini) && $config_ini['usepfwdcheck'] == 1;
+$globalhttps  = configbool('globalhttps', false);
 $onlinechecktimeout_val = array_key_exists('onlinechecktimeout', $config_ini)
     ? urldecode($config_ini['onlinechecktimeout']) : '2';
 $pfwdplace_val = array_key_exists('pfwdplace', $config_ini)
@@ -349,12 +354,30 @@ $local_ip_for_ddns = get_first_non_loopback_ip();
           <div class="form-text">グローバルIPまたはDDNSホスト名（ポートは除く）。</div>
         </div>
 
+        <!-- HTTPS で接続 -->
+        <div class="mb-3">
+          <label class="form-label fw-semibold">HTTPS で接続</label>
+          <div class="form-text mb-1">中継サーバーが HTTPS に対応したポートで有効にします。案内用の URL・QR コードと接続確認が https:// になります。</div>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="globalhttps" value="1" id="globalhttps_yes"
+                <?= $globalhttps ? 'checked' : '' ?> onchange="updateAddressDisplay()">
+              <label class="form-check-label" for="globalhttps_yes">使用する</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="globalhttps" value="0" id="globalhttps_no"
+                <?= !$globalhttps ? 'checked' : '' ?> onchange="updateAddressDisplay()">
+              <label class="form-check-label" for="globalhttps_no">使用しない</label>
+            </div>
+          </div>
+        </div>
+
         <!-- オンライン接続用アドレス（表示のみ）-->
         <div class="mb-3">
           <label class="form-label fw-semibold text-muted small">オンライン接続用アドレス（自動生成）</label>
           <input type="text" id="online-address-display" class="form-control font-monospace"
             readonly tabindex="-1"
-            value="<?= htmlspecialchars($globalhost_hostname . (!empty($pfwdopenport_display) ? ':' . $pfwdopenport_display : ''), ENT_QUOTES, 'UTF-8') ?>" />
+            value="<?= htmlspecialchars((!empty($globalhost_hostname) ? globalhost_scheme() : '') . $globalhost_hostname . (!empty($pfwdopenport_display) ? ':' . $pfwdopenport_display : ''), ENT_QUOTES, 'UTF-8') ?>" />
         </div>
 
         <!-- 接続確認タイムアウト -->
@@ -660,7 +683,9 @@ function updateAddressDisplay() {
     var openport = (document.getElementById('pfwdserveropenport-input').value || '').trim();
     var pfwdport = (document.getElementById('pfwdport-input').value || '').trim();
 
-    var onlineAddr = hostname + (openport ? ':' + openport : '');
+    var httpsOn    = document.getElementById('globalhttps_yes');
+    var scheme     = (httpsOn && httpsOn.checked) ? 'https://' : 'http://';
+    var onlineAddr = hostname ? scheme + hostname + (openport ? ':' + openport : '') : '';
     var pfwdAddr   = hostname + (pfwdport  ? ':' + pfwdport  : '');
 
     var onlineEl = document.getElementById('online-address-display');

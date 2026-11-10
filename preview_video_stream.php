@@ -39,6 +39,7 @@ $end      = $filesize - 1;
 header('Content-Type: ' . $mime);
 header('Accept-Ranges: bytes');
 header('Cache-Control: no-store');
+header('X-Accel-Buffering: no'); // リバースプロキシ (nginx) に動画を先読みさせない
 
 if (isset($_SERVER['HTTP_RANGE'])) {
     if (!preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $m)) {

@@ -291,10 +291,31 @@ function get_globalipv4(){
     return file_get_html_with_retry($checkglobakurl,1,1);
 }
 
+// オンライン接続用 URL のスキーム。中継サーバーが HTTPS に対応したポートでは設定 (globalhttps) で https にする
+function globalhost_scheme(){
+    return configbool('globalhttps', false) ? 'https://' : 'http://';
+}
+
+// 中継サーバー自身が返すエラー応答か。会場 PC まで届いていないので、到達確認では NG として扱う
+function is_relay_error_code($http_code){
+    return in_array((int)$http_code, array(502, 503, 504), true);
+}
+
+// 到達確認 (詳細診断) の 1 行分の結果表示を作る
+function online_check_result_text($http_code, $primary_ip, $curl_errno){
+    if ($http_code <= 0) {
+        return "NG curl({$curl_errno}): " . curl_strerror($curl_errno);
+    }
+    if (is_relay_error_code($http_code)) {
+        return "NG HTTP {$http_code} (中継サーバーからこの PC に接続できていません)";
+    }
+    return "OK HTTP {$http_code} (接続先IP: {$primary_ip})";
+}
+
 function check_online_available($host,$timeout = 2){
     global $config_ini;
     if($config_ini["connectinternet"] == 1){
-      $checkurl = 'http://'.urldecode($host);
+      $checkurl = globalhost_scheme().urldecode($host);
       $ret = file_get_html_with_retry($checkurl,2,4);
       if($ret === false)
         return 'NG';

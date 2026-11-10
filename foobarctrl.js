@@ -1,6 +1,5 @@
-var foobarctrlurl_old = "http://" + location.host + ":82/karaokectrl/"
-var nowplayingurl = "http://" + location.host + "/playingsong.php"
-var foobarctrlurl = "http://" + location.host + "/foobarctl.php"
+// 相対 URL にしておく (HTTPS のページから http:// へ通信するとブラウザにブロックされるため)
+var foobarctrlurl = "foobarctl.php"
 
 function sleep(time, callback){
   setTimeout(callback, time);

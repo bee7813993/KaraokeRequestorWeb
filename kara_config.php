@@ -1,4 +1,11 @@
 <?php
+// 中継サーバーが TLS を終端している場合、PHP には HTTP で届く。
+// X-Forwarded-Proto を見て HTTPS 扱いにし、既存の $_SERVER['HTTPS'] 分岐をそのまま活かす。
+// (偽装されても、変わるのはその要求元に返す URL のスキームだけ)
+if (empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') {
+    $_SERVER['HTTPS'] = 'on';
+}
+
 $configfile = 'config.ini';
 $config_ini = array ();
 
