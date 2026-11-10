@@ -4,7 +4,7 @@ require_once 'configauth_class.php';
 require_once 'function_setlist_stats.php';
 
 $configauth = new ConfigAuth();
-if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'] ?? '')) {
     header('WWW-Authenticate: Basic realm="Configuration page authorization."');
     header('Content-Type: application/json; charset=UTF-8');
     http_response_code(401);

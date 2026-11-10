@@ -16,7 +16,7 @@ if ($_SERVER['PHP_AUTH_USER'] !== 'admin') {
     header('WWW-Authenticate: Basic realm="Backup/Restore - admin only"');
     die('認証が必要です');
 }
-if (!$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+if (!$configauth->check_auth($_SERVER['PHP_AUTH_PW'] ?? '')) {
     header('WWW-Authenticate: Basic realm="Backup/Restore - admin only"');
     die('認証が必要です');
 }

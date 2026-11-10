@@ -23,7 +23,7 @@ if ($_SERVER['PHP_AUTH_USER'] !== 'admin'){
     die('修正ログのダウンロードにはログインが必要です');
 }
 
-if (! $configauth -> check_auth($_SERVER['PHP_AUTH_PW']) ){
+if (! $configauth -> check_auth($_SERVER['PHP_AUTH_PW'] ?? '') ){
     header('WWW-Authenticate: Basic realm="Configuration page authorization."');
     die('修正ログのダウンロードにはログインが必要です');
 }
