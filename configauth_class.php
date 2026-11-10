@@ -126,6 +126,9 @@ EOT;
     }
     public function check_configpassword($password) {
         global $config_ini;
+        // 設定が読み込まれていない場合は拒否する (PHP 7 では array_key_exists() が
+        // 配列以外に null を返し、下の else に進んで認証が素通りになるため)
+        if( !is_array($config_ini) ) return false;
         if( array_key_exists('configpass',$config_ini) ) {
           if( $password === $config_ini["configpass"] ) return true;
           if (empty($config_ini["configpass"] )) return true;

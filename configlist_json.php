@@ -3,13 +3,25 @@
 require_once 'configauth_class.php';
 $configauth = new ConfigAuth();
 
+// ConfigAuth::check_auth() は global $config_ini の configpass で照合するため、
+// 認証より先に config.ini を読み込んでおく。
+$configfile = 'config.ini';
+$config_ini = [];
+$config_exists = file_exists($configfile);
+if ($config_exists) {
+    $parsed = parse_ini_file($configfile);
+    if (is_array($parsed)) {
+        $config_ini = $parsed;
+    }
+}
+
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     header('WWW-Authenticate: Basic realm="Configuration"');
     header('HTTP/1.0 401 Unauthorized');
     die('Unauthorized');
 }
 
-if ($_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+if ($_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'] ?? '')) {
     header('WWW-Authenticate: Basic realm="Configuration"');
     header('HTTP/1.0 401 Unauthorized');
     die('Unauthorized');
@@ -22,12 +34,7 @@ $sensitive_keys = [
     'configpass',
 ];
 
-$configfile = 'config.ini';
-$config_ini = [];
-
-if (file_exists($configfile)) {
-    $config_ini = parse_ini_file($configfile);
-
+if ($config_exists) {
     foreach ($sensitive_keys as $key) {
         if (isset($config_ini[$key])) {
             $config_ini[$key] = '***';
