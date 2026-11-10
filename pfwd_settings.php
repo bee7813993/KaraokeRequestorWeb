@@ -76,12 +76,18 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
 
     $timeout_ms = $timeout * 1000;
     $ping_cmd = "cmd /c \"chcp 437 >nul && ping -n 4 -w {$timeout_ms} {$h_host}\"";
-    @exec($ping_cmd, $ping_output);
+    // ホスト部はそのままコマンドラインに入るので、IP アドレスかホスト名の形のときだけ実行する
+    $ping_host_ok = filter_var($h_host, FILTER_VALIDATE_IP) !== false
+        || filter_var($h_host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
+    $ping_output = [];
+    if ($ping_host_ok) @exec($ping_cmd, $ping_output);
     $ping_str = implode("\n", $ping_output);
     if (preg_match('/Sent\s*=\s*(\d+).*Received\s*=\s*(\d+)/', $ping_str, $m)) {
         $sent = (int)$m[1]; $recv = (int)$m[2];
         $loss = $sent > 0 ? (int)(($sent - $recv) / $sent * 100) : 100;
         $results['ping_loss'] = "Loss {$loss}% ({$sent}回送信)";
+    } elseif (!$ping_host_ok) {
+        $results['ping_loss'] = "スキップ(ホスト名の形式が不正)";
     } else {
         $results['ping_loss'] = "実行失敗";
     }
