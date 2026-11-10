@@ -142,21 +142,6 @@ EOD;
 <hr />
 EOD;
 
-if($dlpathinfo['extension'] === 'mp4'){
-  print '<form enctype="multipart/form-data" action="mp4mix_audio.php" method="POST";>';
-  print '<input type="hidden" name="MAX_FILE_SIZE" value="900000000" />';
-  print '<input type="hidden" name="basefilename" id="basefilename"  value='.urlencode($downfilename).'>';
-  print '<div class="form-group">';
-  print '  <label>音源差し替え<small>手元の端末内にあるm4aやmp3の音楽ファイルに音源を差し替えることが出来ます</small></label>';
-  print '  <input name="userfile" type="file" id="InputFile" class="form-control" />';
-  if(is_numeric($selectid)){
-      print '<input type="hidden" name="selectid" class="searchtextbox" value='.$selectid.' />';
-  }
-  print '  <input type="submit" class="btn btn-default" value="音源差替" />';
-  print '</div>';
-
-}
-
 }else{
   if(!empty($nicoid))
     echo $nicoid."のダウンロードに失敗しました\n";
