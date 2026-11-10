@@ -28,10 +28,10 @@ function save_delay_auth($file, $auth_data) {
     file_put_contents($file, json_encode($auth_data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
 }
 
+// Webサーバーと同じ機器からのアクセスか判定 (pfwd 経由などのトンネルは除く)
 function is_local_access_cd() {
-    $remote = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
-    $server = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '';
-    return in_array($remote, ['127.0.0.1', '::1', $server], true);
+    require_once 'configauth_class.php';
+    return ConfigAuth::is_local_console_access();
 }
 
 // りすたーDBから制作者一覧を取得
@@ -62,7 +62,7 @@ $password_set  = !empty($auth_data['password_hash']);
 $authenticated = false;
 $auth_error    = false;
 
-if (is_local_access_cd() || !$password_set) {
+if (!$password_set || is_local_access_cd()) {
     $authenticated = true;
 } else {
     $input_pass = '';
