@@ -1,5 +1,17 @@
 <?php
 require_once 'commonfunc.php';
+require_once 'configauth_class.php';
+$configauth = new ConfigAuth();
+
+// この画面はアプリのコードを書き換えるので、設定画面 (init.php) と同じ管理者認証を通す
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+    header('WWW-Authenticate: Basic realm="Configuration page authorization."');
+    die('オンラインアップデート画面の表示にはログインが必要です');
+}
+
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth->do_eashauthcheck();
 
 $res    = 2;
 $errmsg = '';
