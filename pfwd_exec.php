@@ -1,6 +1,19 @@
 <?php
 
 require_once 'commonfunc.php';
+require_once 'configauth_class.php';
+$configauth = new ConfigAuth();
+
+// pfwd (オンライン公開の転送) の起動・停止は、設定画面 (pfwd_settings.php) と同じ管理者認証を通す
+if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] !== 'admin' || !$configauth->check_auth($_SERVER['PHP_AUTH_PW'])) {
+    header('WWW-Authenticate: Basic realm="pfwd Settings"');
+    die('管理者ログインが必要です');
+}
+
+require_once 'easyauth_class.php';
+$easyauth = new EasyAuth();
+$easyauth->do_eashauthcheck();
+
 require_once 'pfwdctl.php';
 
 $pfwdinfo = new pfwd();
@@ -49,37 +62,7 @@ switch($runmode) {
         // check
         break;
 }
-$updateflag = false;
-if(array_key_exists("pfwdserverhost", $_REQUEST)) {
-    $pfwdserverhostport = $_REQUEST["pfwdserverhost"];
-    $hostport = explode(":",$pfwdserverhostport);
-    if($hostport !== FALSE){
-        if(!empty($hostport[0])){
-            $pfwdinfo->set_pfwdhost($hostport[0]);
-        }
-        $serverport = 22;
-        if(!empty($hostport[1])){
-            $serverport = $hostport[1];
-        }
-        $pfwdinfo->set_pfwdport($serverport);
-        $pfwdinfo->save_pfwdconfig($pfwdinfo->pfwdpath.'\\pfwd.ini');
-        $updateflag = true;
-    }
-}
-
-if(array_key_exists("pfwdserveropenport", $_REQUEST)) {
-    $pfwdserveropenport = $_REQUEST["pfwdserveropenport"];
-    if(!empty($pfwdserveropenport)){
-        $pfwdinfo->set_pfwdopenport($pfwdserveropenport);
-        $pfwdinfo->save_pfwdconfig($pfwdinfo->pfwdpath.'\\pfwd.ini');
-        $updateflag = true;
-    }
-}
-if( $updateflag ){
-    $pfwdhost = $pfwdinfo->get_pfwdhost().':'.$pfwdinfo->get_pfwdopenport();
-    $config_ini_new = array_merge($config_ini,array('globalhost' => urlencode($pfwdhost)));
-    writeconfig2ini($config_ini_new,$configfile);
-}
+// 接続先ホストやポートの変更は pfwd_settings.php で行う
 
 
 ?>

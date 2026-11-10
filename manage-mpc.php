@@ -67,6 +67,24 @@ function file_exist_check_japanese($filename){
  return FALSE;
 }
 
+// pfwd の起動・停止。pfwd_exec.php は管理者認証が必要なので、HTTP 経由ではなく直接操作する
+function pfwd_control_direct($start){
+   global $config_ini;
+   if(!array_key_exists("pfwdplace",$config_ini) || empty($config_ini["pfwdplace"])) return;
+   require_once 'pfwdctl.php';
+   $pfwdinfo = new pfwd();
+   $pfwdinfo->pfwdpath = urldecode($config_ini["pfwdplace"]);
+   ob_start();
+   $ok = $pfwdinfo->readpfwdcfg();
+   ob_end_clean();
+   if(!$ok) return;
+   if($start){
+       $pfwdinfo->startpfwdcmd();
+   }else{
+       $pfwdinfo->stoppfwdcmd();
+   }
+}
+
 function workcheck_pfwd(){
    global $config_ini;
    $usepfwdcheck = false;
@@ -99,16 +117,14 @@ function workcheck_pfwd(){
     logtocmd ('pfwdの通信断を検出。pfwdを再起動します:'.$checkresult) ;
     if($lpcnt > 10) 
      logtocmd ('おそらくネット接続先が変更になりました。再接続できるまでには時間がかかります:'.$lpcnt);
-    $url = 'http://localhost/pfwd_exec.php?pfwdstop=1';
     logtocmd("pwfd stopping..");
-    file_get_html_with_retry($url,1,5);
-    
+    pfwd_control_direct(false);
+
     logtocmd( "wait". $lpcnt ."sec");
     sleep($lpcnt);
 
-    $url = 'http://localhost/pfwd_exec.php?pfwdstart=1';
     logtocmd ("pwfd starting...");
-    file_get_html_with_retry($url,1,5);
+    pfwd_control_direct(true);
     sleep(2);
      $checkresult = check_online_available($config_ini['globalhost'], $config_ini["onlinechecktimeout"]);
      if( $checkresult === "OK" ){

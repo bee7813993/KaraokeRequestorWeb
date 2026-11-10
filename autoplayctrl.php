@@ -106,7 +106,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
     // ロケールを英語に設定して ping を実行（出力を統一）
     $timeout_ms = $timeout * 1000;
     $ping_cmd = "cmd /c \"chcp 437 >nul && ping -n 4 -w {$timeout_ms} {$h_host}\"";
-    @exec($ping_cmd, $ping_output);
+    // ホスト部はそのままコマンドラインに入るので、IP アドレスかホスト名の形のときだけ実行する
+    $ping_host_ok = filter_var($h_host, FILTER_VALIDATE_IP) !== false
+        || filter_var($h_host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) !== false;
+    $ping_output = [];
+    if ($ping_host_ok) @exec($ping_cmd, $ping_output);
     $ping_output_str = implode("\n", $ping_output);
     // 英語出力: "Packets: Sent = 4, Received = 3, Lost = 1 (25% loss)"
     if (preg_match('/Sent\s*=\s*(\d+).*Received\s*=\s*(\d+)/', $ping_output_str, $m)) {
@@ -114,6 +118,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'check_online_debug') {
         $recv = (int)$m[2];
         $loss = $sent > 0 ? (int)(($sent - $recv) / $sent * 100) : 100;
         $results['ping_loss'] = "Loss {$loss}% ({$sent}回送信)";
+    } elseif (!$ping_host_ok) {
+        $results['ping_loss'] = "スキップ(ホスト名の形式が不正)";
     } else {
         $results['ping_loss'] = "実行失敗";
     }
@@ -389,16 +395,25 @@ function updatePfwdStatus(data) {
     applyPfwdRestriction(pfwdRunning);
 }
 
+// pfwd の起動・停止は管理者ログインが必要。ログインできなかったときは知らせる
+function fetchPfwdStatAfterExec(r) {
+    if (r.status === 401) {
+        alert('pfwd の起動・停止には管理者ログインが必要です');
+        return null;
+    }
+    return r.ok ? fetch('pfwdstat.php') : null;
+}
+
 function start_pfwdcmd() {
     fetch('pfwd_exec.php?pfwdstart=1')
-        .then(function(r) { return r.ok ? fetch('pfwdstat.php') : null; })
+        .then(fetchPfwdStatAfterExec)
         .then(function(r) { return r ? r.json() : null; })
         .then(function(data) { if (data) updatePfwdStatus(data); });
 }
 
 function stop_pfwdcmd() {
     fetch('pfwd_exec.php?pfwdstop=1')
-        .then(function(r) { return r.ok ? fetch('pfwdstat.php') : null; })
+        .then(fetchPfwdStatAfterExec)
         .then(function(r) { return r ? r.json() : null; })
         .then(function(data) { if (data) updatePfwdStatus(data); });
 }
