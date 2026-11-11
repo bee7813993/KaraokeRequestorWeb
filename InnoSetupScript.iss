@@ -167,6 +167,30 @@ begin
   end;
 end;
 
+// Apache から PHP の拡張を読み込むために必要な DLL を apache\bin へ補完する
+// PHP の拡張（php\ext\*.dll）が依存する DLL は、php フォルダーではなく
+// httpd.exe のあるフォルダー（apache\bin）から検索されるため、
+// XAMPP 同梱の apache\bin に無いものは読み込みに失敗する。
+// 例: XAMPP 8.5.12 の php_curl.dll は brotlidec.dll を必要とするが、
+//     apache\bin には brotlicommon.dll と brotlienc.dll しか入っていないため、
+//     curl 拡張が読み込めず curl_init() が未定義になる。
+// すでに apache\bin にある場合は上書きしない（Apache 側のものを尊重する）。
+function EnsureApacheDll(DllName: string): Boolean;
+var
+  SrcPath, DestPath: string;
+begin
+  Result   := False;
+  SrcPath  := 'C:\xampp\php\' + DllName;
+  DestPath := 'C:\xampp\apache\bin\' + DllName;
+
+  if FileExists(DestPath) then
+    Exit;
+  if not FileExists(SrcPath) then
+    Exit;
+
+  Result := FileCopy(SrcPath, DestPath, True);
+end;
+
 function InitializeUninstall(): Boolean;
 begin
   Result := MsgBox(
@@ -189,6 +213,7 @@ var
   PhpIniPath: string;
   Msg: string;
   ConfigPath: string;
+  CopiedBrotli: Boolean;
 begin
   // ファイルコピー開始前に config.ini の有無を記録
   if CurStep = ssInstall then
@@ -206,13 +231,17 @@ begin
   begin
     MsgBox('php.ini が既定の場所に見つかりませんでした。' + #13#10 +
            PhpIniPath + #13#10#13#10 +
-           'XAMPPをインストール後、手動で php.ini の gd と zip の extension を有効化してください。',
+           'XAMPPをインストール後、手動で php.ini の gd・zip・curl の extension を有効化してください。',
            mbInformation, MB_OK);
     Exit;
   end;
 
   EnablePHPExtension(PhpIniPath, 'gd');
   EnablePHPExtension(PhpIniPath, 'zip');
+  EnablePHPExtension(PhpIniPath, 'curl');
+
+  // curl 拡張が必要とする DLL を apache\bin へ補完する
+  CopiedBrotli := EnsureApacheDll('brotlidec.dll');
 
   // 新規インストール時のみ UI v2 をデフォルト有効化
   if IsNewInstall then
@@ -223,8 +252,19 @@ begin
   end;
 
   Msg := 'php.ini の設定を確認しました。' + #13#10 + PhpIniPath + #13#10#13#10 +
-         '・extension=gd  → 有効' + #13#10 +
-         '・extension=zip → 有効' + #13#10#13#10 +
+         '・extension=gd   → 有効' + #13#10 +
+         '・extension=zip  → 有効' + #13#10 +
+         '・extension=curl → 有効' + #13#10#13#10 +
          '※ すでに有効だった場合は変更しません。';
+
+  if CopiedBrotli then
+    Msg := Msg + #13#10#13#10 +
+           'curl 拡張が必要とする brotlidec.dll を' + #13#10 +
+           'C:\xampp\apache\bin にコピーしました。';
+
+  Msg := Msg + #13#10#13#10 +
+         'php.ini と apache\bin の変更を反映するには、xamppのコントロールパネルで' + #13#10 +
+         'Apache を Stop してから Start してください。';
+
   MsgBox(Msg, mbInformation, MB_OK);
 end;
