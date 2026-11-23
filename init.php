@@ -2011,6 +2011,32 @@ if(array_key_exists("request_automove_midjoin_first",$config_ini)) {
   </div>
 
 
+  <div class="mb-3">
+    <h3 class="radio form-label"  > <span data-bs-toggle="tooltip" data-bs-placement="top" title="リクエスト一覧のドラッグ並べ替えで、再生済み・再生中の曲を動かせる人を選びます。「全員」では記録のために順番を直すこともできます。「管理者のみ」では、管理者以外は未再生の曲どうしだけを並べ替えられます" >並べ替え_再生済みの曲を動かせる人 </span ></h3>
+    <label class="checkbox-inline">
+      <input type="radio" name="reorder_played_adminonly" value="2"
+<?php
+if(array_key_exists("reorder_played_adminonly",$config_ini)) {
+  print ($config_ini["reorder_played_adminonly"]!=1)?'checked':' ' ;
+}else{
+  print 'checked';
+}
+?>
+ />
+      全員
+    </label>
+    <label class="checkbox-inline">
+      <input type="radio" name="reorder_played_adminonly" value="1"
+<?php
+if(array_key_exists("reorder_played_adminonly",$config_ini)) {
+  print ($config_ini["reorder_played_adminonly"]==1)?'checked':' ' ;
+}
+?>
+ />
+      管理者のみ
+    </label>
+  </div>
+
 <!---- 縛り曲リストの設定 ----->
   <h3> <span data-bs-toggle="tooltip" data-bs-placement="top" title="検索リクエストメニューの中に特定の曲をピックアップした一覧を表示させることができます" > ピックアップ曲リスト </span> </h3>
   <?php 
