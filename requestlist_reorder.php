@@ -22,8 +22,11 @@ if (empty($ids)) {
     exit;
 }
 
+// 再生済み・再生中の曲も含めて、誰でも並べ替えられる (記録として正しい順に直せるようにする)。
+// 設定 reorder_played_adminonly=1 のときだけ、管理者以外は未再生の曲どうしの並べ替えに限る。
+$restrict_played = configbool('reorder_played_adminonly', false) && $user !== 'admin';
+
 try {
-    // ⑭ fix: 未再生アイテムのみ並び替え対象とし、再生中・再生済みの順番は保持する
     $db->exec("BEGIN IMMEDIATE;");
 
     // DB上の現在の状態を取得
@@ -33,34 +36,45 @@ try {
         $state[(int)$row['id']] = $row;
     }
 
-    // 再生済み・再生中の最大reqorder（未再生アイテムはこれより大きい値を割り当てる）
-    $played_max = 0;
-    foreach ($state as $row) {
-        if ($row['nowplaying'] !== '未再生') {
-            $played_max = max($played_max, (int)$row['reqorder']);
-        }
-    }
-
-    // ユーザーが指定した順序から未再生のみ抽出
-    $unplayed_ids = [];
+    // 送られてきた順序 (画面の上から順) のうち、動かせる曲だけを取り出す
+    $sent_ids   = [];
+    $target_ids = [];
     foreach ($ids as $id) {
         $iid = (int)$id;
-        if (isset($state[$iid]) && $state[$iid]['nowplaying'] === '未再生') {
-            $unplayed_ids[] = $iid;
-        }
+        if (!isset($state[$iid]) || in_array($iid, $sent_ids, true)) continue;
+        $sent_ids[] = $iid;
+        if ($restrict_played && $state[$iid]['nowplaying'] !== '未再生') continue;
+        $target_ids[] = $iid;
     }
 
-    $count = count($unplayed_ids);
+    // 動かす曲が今使っている reqorder の枠を、送られてきた順に割り当て直す。
+    // 画面には一部の曲だけが表示されている (「もっと見る」で追加読み込み) ことがあり、
+    // 送られてこなかった曲や動かせない曲の位置は変えない。
+    // 一覧は reqorder の大きい順に表示されるので、先頭の曲に一番大きい枠を割り当てる。
+    $slots = [];
+    foreach ($target_ids as $iid) {
+        $slots[] = (int)$state[$iid]['reqorder'];
+    }
+    rsort($slots, SORT_NUMERIC);
+
+    $new_order = [];
+    foreach ($sent_ids as $iid) {
+        $new_order[$iid] = (int)$state[$iid]['reqorder'];
+    }
     $stmt = $db->prepare("UPDATE requesttable SET reqorder = :reqorder WHERE id = :id");
-    foreach ($unplayed_ids as $index => $id) {
-        // 先頭アイテム(index=0)が最大reqorder（ORDER BY reqorder DESC で先頭表示）
-        $reqorder = $played_max + ($count - $index);
-        $stmt->bindValue(':reqorder', $reqorder, PDO::PARAM_INT);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    foreach ($target_ids as $index => $iid) {
+        $new_order[$iid] = $slots[$index];
+        if ((int)$state[$iid]['reqorder'] === $slots[$index]) continue;
+        $stmt->bindValue(':reqorder', $slots[$index], PDO::PARAM_INT);
+        $stmt->bindValue(':id', $iid, PDO::PARAM_INT);
         $stmt->execute();
     }
 
-    // 全レコードを連番に正規化する（再生済みとの隙間も吸収）
+    // 管理者限定の設定で動かせない曲があり、送られてきた順序どおりにならなかったか
+    arsort($new_order, SORT_NUMERIC);
+    $adjusted = (array_keys($new_order) !== $sent_ids);
+
+    // 全レコードを連番に正規化する
     normalize_reqorder($db, true);
     $db->exec("COMMIT;");
 } catch (Exception $e) {
@@ -75,4 +89,5 @@ $un->initdb();
 $un->updaterequestlist();
 $un->closedb();
 
-echo json_encode(['status' => 'ok']);
+// adjusted: 管理者限定の設定で再生済み・再生中の曲を動かせず、指定どおりの順にならなかった (画面で理由を表示する)
+echo json_encode(['status' => 'ok', 'adjusted' => $adjusted]);

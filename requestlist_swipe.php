@@ -18,6 +18,8 @@ $useposttwitter  = configbool('useposttwitter', true);
 $playmode        = isset($config_ini['playmode']) ? (int)$config_ini['playmode'] : 3;
 $usebgv          = isset($config_ini['usebgv']) ? (int)$config_ini['usebgv'] : 2;
 $isAdmin         = ($user === 'admin');
+// 再生済み・再生中の曲を並べ替えられるか (requestlist_reorder.php と同じ条件)
+$canReorderPlayed = !configbool('reorder_played_adminonly', false) || $isAdmin;
 $requestlist_num = isset($config_ini['requestlist_num']) ? (int)$config_ini['requestlist_num'] : 10;
 ?>
 <!DOCTYPE html>
@@ -557,6 +559,7 @@ var USE_POST_TWITTER   = <?php echo $useposttwitter ? 'true' : 'false'; ?>;
 var PLAYMODE           = <?php echo $playmode; ?>;
 var USE_BGV            = <?php echo ($usebgv == 1) ? 'true' : 'false'; ?>;
 var IS_ADMIN           = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+var CAN_REORDER_PLAYED = <?php echo $canReorderPlayed ? 'true' : 'false'; ?>;
 var REQUESTLIST_NUM    = <?php echo $requestlist_num; ?>;
 
 // ---- 状態 ----
@@ -790,7 +793,10 @@ function createCardHTML(item, idx, displayMode) {
         '  <div class="card-main">',
         '    <div class="card-left">',
         '      ' + numHtml,
-        '      <span class="drag-handle">&#8942;</span>',
+        // 再生済み・再生中を管理者だけに限っているときは、未再生以外の曲につまみを出さない
+        (CAN_REORDER_PLAYED || isUnplayed(item.nowplaying)
+            ? '      <span class="drag-handle">&#8942;</span>'
+            : ''),
         '    </div>',
         '    <div class="card-info">',
         '      <div class="card-title" data-songname="' + esc(actualSongName) + '" data-filename="' + esc(item.songfile) + '" data-showing="' + displayMode + '">' + esc(displayName) + '</div>',
@@ -940,7 +946,14 @@ function initSortable() {
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ ids: ids })
             })
-            .then(function () {
+            .then(function (res) {
+                return res.ok ? res.json() : Promise.reject(res.status);
+            })
+            .then(function (data) {
+                // 管理者限定の設定で指定どおりに並ばなかったときは理由を伝える
+                if (data && data.adjusted) {
+                    alert('再生済み・再生中の曲は、管理者だけが並べ替えできる設定になっています。\n未再生の曲の順番だけを変更しました。');
+                }
                 // 成功時は lastOrderIds を保持（Undo 用）
                 updateUndoBtn();
                 loadList();
