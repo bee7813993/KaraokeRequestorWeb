@@ -37,15 +37,13 @@ try {
     }
 
     // 送られてきた順序 (画面の上から順) のうち、動かせる曲だけを取り出す
-    $target_ids  = [];
-    $skipped_ids = [];
+    $sent_ids   = [];
+    $target_ids = [];
     foreach ($ids as $id) {
         $iid = (int)$id;
-        if (!isset($state[$iid]) || in_array($iid, $target_ids, true)) continue;
-        if ($restrict_played && $state[$iid]['nowplaying'] !== '未再生') {
-            $skipped_ids[] = $iid;
-            continue;
-        }
+        if (!isset($state[$iid]) || in_array($iid, $sent_ids, true)) continue;
+        $sent_ids[] = $iid;
+        if ($restrict_played && $state[$iid]['nowplaying'] !== '未再生') continue;
         $target_ids[] = $iid;
     }
 
@@ -59,13 +57,22 @@ try {
     }
     rsort($slots, SORT_NUMERIC);
 
+    $new_order = [];
+    foreach ($sent_ids as $iid) {
+        $new_order[$iid] = (int)$state[$iid]['reqorder'];
+    }
     $stmt = $db->prepare("UPDATE requesttable SET reqorder = :reqorder WHERE id = :id");
     foreach ($target_ids as $index => $iid) {
+        $new_order[$iid] = $slots[$index];
         if ((int)$state[$iid]['reqorder'] === $slots[$index]) continue;
         $stmt->bindValue(':reqorder', $slots[$index], PDO::PARAM_INT);
         $stmt->bindValue(':id', $iid, PDO::PARAM_INT);
         $stmt->execute();
     }
+
+    // 管理者限定の設定で動かせない曲があり、送られてきた順序どおりにならなかったか
+    arsort($new_order, SORT_NUMERIC);
+    $adjusted = (array_keys($new_order) !== $sent_ids);
 
     // 全レコードを連番に正規化する
     normalize_reqorder($db, true);
@@ -82,5 +89,5 @@ $un->initdb();
 $un->updaterequestlist();
 $un->closedb();
 
-// skipped: 管理者限定の設定により動かさなかった曲 (画面で理由を表示する)
-echo json_encode(['status' => 'ok', 'skipped' => $skipped_ids]);
+// adjusted: 管理者限定の設定で再生済み・再生中の曲を動かせず、指定どおりの順にならなかった (画面で理由を表示する)
+echo json_encode(['status' => 'ok', 'adjusted' => $adjusted]);

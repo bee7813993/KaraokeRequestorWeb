@@ -950,8 +950,8 @@ function initSortable() {
                 return res.ok ? res.json() : Promise.reject(res.status);
             })
             .then(function (data) {
-                // 管理者限定の設定で動かせなかった曲があれば理由を伝える
-                if (data && data.skipped && data.skipped.length > 0) {
+                // 管理者限定の設定で指定どおりに並ばなかったときは理由を伝える
+                if (data && data.adjusted) {
                     alert('再生済み・再生中の曲は、管理者だけが並べ替えできる設定になっています。\n未再生の曲の順番だけを変更しました。');
                 }
                 // 成功時は lastOrderIds を保持（Undo 用）
